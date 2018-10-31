@@ -1,5 +1,7 @@
-#ifndef range_hpp
-#define range_hpp
+#ifndef top_hpp
+#define top_hpp
+
+// Topology toolset based on a reading of Munkres' book.
 
 #include <utility>
 #include <functional>
@@ -12,39 +14,47 @@ namespace stl
 		not_copyable &operator=(const not_copyable &) = delete;
 		not_copyable(const not_copyable &) = delete;
 	};
+}
 
+namespace top
+{
 	template <template <typename> typename Relation, template Value>
-	struct comparison : not_copyable
+	struct ray : stl::not_copyable
 	{
 		using relation_type = Relation<Value>;
 		using value_type = Value;
+		using ray_type = ray;
 
 		const value_type &value;
 		const relation_type relation;
 
-		explicit comparison(const value_type &ref)
+		explicit ray(const value_type &ref)
 		: value(ref)
 		{ }
 
+		// element relation
 		constexpr bool operator()(const value_type &x) const
 		{
 			return relation(value, x);
 		}
+
+		// subset relation
+		constexpr bool operator<(const ray_type &a) const
+		{
+			return a(value) and not relation(a.value);
+		}
 	};
 
-	template <typename Value> using equal_to = comparison<std::equal_to, Value>;
-	template <typename Value> using not_equal_to = comparison<std::not_equal_to, Value>;
-	template <typename Value> using greater_than =  comparison<std::greater, Value>;
-	template <typename Value> using not_greater_than = comparison<std::less_equal, Value>;
-	template <typename Value> using less_than = comparison<std::less, Value>;
-	template <typename Value> using not_less_than = comparison<std::greater_equal, Value>;
+	template <typename Value> using equal_to = ray<std::equal_to, Value>;
+	template <typename Value> using not_equal_to = ray<std::not_equal_to, Value>;
+	template <typename Value> using greater_than =  ray<std::greater, Value>;
+	template <typename Value> using not_greater_than = ray<std::less_equal, Value>;
+	template <typename Value> using less_than = ray<std::less, Value>;
+	template <typename Value> using not_less_than = ray<std::greater_equal, Value>;
 	// equivalent expressions
 	template <typename value> using equals = equal_to<Value>;
 	template <typename Value> using less_or_equal_to = std::not_greater_than<Value>;
 	template <typename Value> using greater_or_equal_to = std::not_less_than<Value>;
-
-
-	template <typename Value> using paired = std::pair<Value, Value>;
 
 	template
 	<
@@ -54,7 +64,7 @@ namespace stl
 	>
 	struct interval
 	: std::pair<RightBoundary<Value>, LeftBoundary<Value>>
-	, not_copyable 
+	, stl::not_copyable 
 	{
 		using right_boundary_type = pair::first_type;
 		using left_boundary_type = pair::second_type;
