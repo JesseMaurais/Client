@@ -1,8 +1,9 @@
 #ifndef top_hpp
 #define top_hpp
 
-// Topology toolset based on a reading of Munkres' book.
+// Topology toolset based on a reading of James Munkres' book.
 
+#include <limits>
 #include <utility>
 #include <functional>
 #include <type_traits>
@@ -21,40 +22,80 @@ namespace top
 	template <template <typename> typename Relation, template Value>
 	struct ray : stl::not_copyable
 	{
+		using limits = std::numeric_limits<Value>;
 		using relation_type = Relation<Value>;
 		using value_type = Value;
 		using ray_type = ray;
 
-		const value_type &value;
-		const relation_type relation;
+		const value_type &limit;
+		const relation_type compare;
 
 		explicit ray(const value_type &ref)
-		: value(ref)
-		{ }
-
-		// element relation
-		constexpr bool operator()(const value_type &x) const
-		{
-			return relation(value, x);
+		: limit(ref)
+		{ 
+			static_assert(limits::has_infinity, "Value numeric concept must have infinity");
 		}
 
-		// subset relation
-		constexpr bool operator<(const ray_type &a) const
+		constexpr bool contains(const value_type &x) const
 		{
-			return a(value) and not relation(a.value);
+			return compare(x, limit);
+		}
+		constexpr bool operator()(const value_type &x) const
+		{
+			return contains(x);
+		}
+
+		bool is_closed() const
+		{
+			return contains(limit);
+		}
+		bool is_open() const
+		{
+			return not is_closed();
+		}
+		operator bool() const
+		{
+			return is_closed();
+		}
+
+		constexpr bool is_bounded_above() const
+		{
+			return not contains(limits::infinity);
+		}
+		constexpr bool is_bounded_below() const
+		{
+			return contains(limits::infinity);
+		}
+
+		bool operator==(const ray_type &a) const
+		{
+			return limit == a.limit;
+		}
+
+		template <template <typename> typename R, typename V>
+		bool subset_of(const ray<R, V> &a) const
+		{
+			return a(limit) and not contains(a.limit);
+		}
+		template <template <typename> typename R, typename V>
+		bool operator<(const ray<R, V> &a) const
+		{
+			return subset_of(a);
 		}
 	};
 
-	template <typename Value> using equal_to = ray<std::equal_to, Value>;
-	template <typename Value> using not_equal_to = ray<std::not_equal_to, Value>;
 	template <typename Value> using greater_than =  ray<std::greater, Value>;
 	template <typename Value> using not_greater_than = ray<std::less_equal, Value>;
 	template <typename Value> using less_than = ray<std::less, Value>;
 	template <typename Value> using not_less_than = ray<std::greater_equal, Value>;
 	// equivalent expressions
-	template <typename value> using equals = equal_to<Value>;
 	template <typename Value> using less_or_equal_to = std::not_greater_than<Value>;
 	template <typename Value> using greater_or_equal_to = std::not_less_than<Value>;
+
+	template <template <typename> typename Relation, typename Value> using ray_complement = void;
+	template <typename Value> using ray_complement<greater_than, Value> = not_greater_than<Value>;
+	template <typename Value> using ray_complement<not_greater_than, Value> = greater_than<Value>;
+	template <typename Value> using ray_complement<less_than, Value> = not_less_than<Value>;
 
 	template
 	<
@@ -72,55 +113,61 @@ namespace top
 
 		explicit interval(const value_type& right, const value_type& left)
 		: pair(std::min(right, left), std::max(left, right)
-		{ }
+		{
+			static_assert
+			(
+			 right_boundary_type::bounded_below() == left_boundary_type::bounded_above(),
+			 "Not an interval. One ray will contain the other."
+			);
+		}
 
-		constexpr bool operator()(const value_type &x) const
+		constexpr bool is_closed() const
+		{
+			return first.is_closed() and second.is_closed();
+		}
+		constexpr bool is_open() const
+		{
+			return first.is_open() and second.is_open();
+		}
+		constexpr operator bool() const
+		{
+			return is_closed();
+		}
+
+		constexpr bool is_convex() const
+		{
+			return first(second.value) and second(first.value);
+		}
+
+		constexpr bool contains(const value_type &x) const
 		{
 			return first(x) and second(x);
 		}
+		constexpr bool operator()const value_type &x) const
+		{
+			return contains(x);
+		}
 
-		constexpr bool operator<(const interval &i) const
+		template
+		<
+		 template <typename> typename R,
+		 template <typename> typename L,
+		 typename V
+		>
+		constexpr bool contains(const interval<R, L, V> &i) const
 		{
 			return i.first(first.value) and i.second(second.value);
 		}
-
-	private:
-
-		template <typename A, typename B>
-		constexpr bool is_same()
+		template
+		<
+		 template <typename> typename R,
+		 template <typename> typename L,
+		 typename V
+		>
+		constexpr bool operator()(const interval<R, L, V> &i) const
 		{
-			return std::is_same<A, B>::value;
+			return contains(i);
 		}
-
-		template <typename A, typename B>
-		constexpr bool is_different()
-		{
-			return not is_same<A, B>();
-		}
-
-		static_assert
-		(
-		 is_different<right_boundary_type, greater_than>(),
-		 "right boundary must face left"
-		);
-
-		static_assert
-		(
-		 is_different<right_boundary_type, not_less_than>(),
-		 "right boundary must face left"
-		);
-
-		static_assert
-		(
-		 is_different<left_boundary_type, less_than>(),
-		 "left boundary must face right"
-		);
-
-		static_assert
-		(
-		 is_different<left_boundary_type, not_greater_than>(),
-		 "left boundary must face right"
-		);
 	};
 
 	template <typename Value> using closed_interval = interval<not_less_than, not_greater_than, Value>;

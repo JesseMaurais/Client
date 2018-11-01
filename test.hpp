@@ -14,20 +14,12 @@ namespace test
 		virtual ~interface();
 	};
 
-	void run(char const *pattern = nullptr);
-
-	template <bool Debug, typename Type = void> class enabled { };
-	template <typename Type> class enabled<true, Type> { static inline Type unit; };
-
-	template <typename Type> struct unit : interface, enabled<DEBUG, Type>
+	struct unit	: interface
 	{
 	protected:
 		unit(char const *name)
 		: interface(name)
 		{ }
-	private:
-		unit &operator = (unit const &) = delete;
-		void *operator new (std::size_t) = delete;
 	};
 }
 
