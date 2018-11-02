@@ -97,8 +97,8 @@ namespace top
 		using upper_bound_type = UpperBound<value_type>;
 		using base = std::pair<lower_bound_type, upper_bound_type>;
 
-		static constexpr bool is_closed = base::first::is_closed and base::second::is_closed;
-		static constexpr bool is_open = base::first::is_open and base::second::is_open;
+		static constexpr bool is_closed = lower_bound_type::is_closed and upper_bound_type::is_closed;
+		static constexpr bool is_open = lower_bound_type::is_open and upper_bound_type::is_open;
 
 		explicit interval(const value_type &lower, const value_type &upper)
 		: base(lower, upper)

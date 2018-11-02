@@ -19,8 +19,8 @@ namespace test
 
 	interface::interface(char const *name)
 	{
-		[[maybe_unused]] auto const [it, removed] = registry.emplace(this, name);
-		assert(not removed);
+		[[maybe_unused]] auto const [it, unique] = registry.emplace(this, name);
+		assert(unique);
 	}
 
 	interface::~interface()
