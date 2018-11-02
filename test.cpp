@@ -1,9 +1,12 @@
 #include "test.hpp"
 #include <cstdlib>
 #include <cassert>
-#include <stdexcept>
+#include <iostream>
+#include <exception>
 #include <algorithm>
 #include <string_view>
+#include <string>
+#include <vector>
 #include <regex>
 #include <map>
 
@@ -29,30 +32,39 @@ namespace test
 
 int main(int argc, char **argv)
 {
-	std::queue<std::string> errors;
+	std::vector<std::string> errors;
 
-	for (auto const [ptr, name] : registry) try
+	std::cout << test::registry.size() << " tests to run.\n";
+
+	for (auto const [ptr, name] : test::registry) try
 	{
+		std::cout << "Running test '" << name << "' ... ";
 		ptr->run();
+		std::cout << "Success\n";
 	}
 	catch (std::exception const &except)
 	{
-		auto const message = except.what();
-		errors.emplace(message);
+		std::cout << "Failure\n";
+		errors.emplace_back(name);
+		auto message = except.what();
+		errors.emplace_back(message);
 	}
 	catch (...)
 	{
-		errors.emplace("?");
+		std::cerr << "Unknown exception\n";
 	}
 
+	std::cout << "Done running tests.\n";
+
+	if (not errors.empty())
 	{
-		auto const begin = errors.begin();
-		auto const end = errors.end();
-		std::sort(begin, end);
-		auto const cut = std::unique(begin, end);
-		errors.erase(cut, end);
-		std::ostream_iterator<std::string> out(std::out, "\n");
-		std::copy(begin, cut, out); 
+		std::cout << errors.size() << " errors recorded:\n";
+		std::ostream_iterator<std::string> out(std::cout, "\n");
+		std::copy(errors.begin(), errors.end(), out); 
+	}
+	else
+	{
+		std::cout << "No errors.\n";
 	}
 
 	return errors.empty() ? EXIT_SUCCESS : EXIT_FAILURE;
