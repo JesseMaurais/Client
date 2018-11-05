@@ -14,11 +14,11 @@
 
 namespace top
 {
-	template <template <typename> typename Bound, typename Value>
-	struct order : stl::not_copyable
+	template <template <typename> typename Relation, typename Value>
+	struct predicate : stl::not_copyable
 	{
 		using value_type = Value;
-		using boundary_type = Bound<value_type>;
+		using relation_type = Relation<value_type>;
 
 	private:
 
@@ -32,7 +32,7 @@ namespace top
 		using greater_than_or_equal_to = not_less_than;
 
 		template <class C>
-		static constexpr bool is_base_of = std::is_base_of_v<C, boundary_type>;
+		static constexpr bool is_base_of = std::is_base_of_v<C, relation_type>;
 
 		template <class A, class B, class C>
 		static constexpr bool is_base_one_of = is_base_of<A> or is_base_of<B> or is_base_of<C>;
@@ -41,18 +41,21 @@ namespace top
 
 		static constexpr bool is_open = is_base_one_of<less_than, greater_than, not_equal_to>;
 		static constexpr bool is_closed = is_base_one_of<not_less_than, not_greater_than, equal_to>;
-		static constexpr bool is_bounded_above = is_base_one_of<less_than, not_greater_than, equal_to>;
-		static constexpr bool is_bounded_below = is_base_one_of<greater_than, not_less_than, equal_to>;
+		static constexpr bool is_upper_bound = is_base_one_of<less_than, not_greater_than, equal_to>;
+		static constexpr bool is_lower_bound = is_base_one_of<greater_than, not_less_than, equal_to>;
+		static constexpr bool is_point = is_base_of<equal_to>;
+		static constexpr bool is_puncture = is_base_of<not_equal_to>;
+		static constexpr bool is_pointed = is_point or is_puncture;
 
 		const value_type &limit;
-		const boundary_type compare;
+		const relation_type compare;
 
-		explicit order(const value_type &ref) : limit(ref), compare()
+		explicit predicate(const value_type &ref) : limit(ref), compare()
 		{
 			if (std::isinf(limit)) throw std::out_of_range("infinity");
 		}
 
-		bool operator==(const order &that) const
+		bool operator==(const predicate &that) const
 		{
 			return limit == that.limit;
 		}
@@ -68,32 +71,33 @@ namespace top
 		}
 
 		template <template <typename> typename R, typename V>
-		bool is_subset_of(const order<R, V> &that) const
+		bool is_subset_of(const predicate<R, V> &that) const
 		{
 			using other = decltype(that);
 
-			if constexpr (other::is_bounded_above != is_bounded_above)
+			if constexpr (other::is_puncture)
 			{
-				return false;
-			}
-			else
-			if constexpr (other::is_bounded_below != is_bounded_below)
-			{
-				return false;
-			}
-			else
-			if constexpr (other::is_bounded_above and other::is_bounded_below)
-			{
-				return *this == that;
+				return not contains(that.limit);
 			}
 			else
 			{
-				return that.contains(limit);
+				constexpr bool both_upper = is_upper_bound and not other::is_lower_bound;
+				constexpr bool both_lower = is_lower_bound and not other::is_upper_bound;
+				constexpr bool same_bound = both_upper or both_lower;
+	
+				if constexpr (is_point or same_bound)
+				{
+					return that.contains(limit);
+				}
+				else
+				{
+					return false;
+				}
 			}
 		}
 
 		template <template <typename> typename R, typename V>
-		bool operator<(const order<R, V> &that) const
+		bool operator<(const predicate<R, V> &that) const
 		{
 			return is_subset_of(that);
 		}
@@ -103,12 +107,12 @@ namespace top
 	// Alias Types
 	//
 
-	template <typename Value> using greater_than = order<std::greater, Value>;
-	template <typename Value> using not_greater_than = order<std::less_equal, Value>;
-	template <typename Value> using less_than = order<std::less, Value>;
-	template <typename Value> using not_less_than = order<std::greater_equal, Value>;
-	template <typename Value> using equal_to = order<std::equal_to, Value>;
-	template <typename Value> using not_equal_to = order<std::not_equal_to, Value>;
+	template <typename Value> using greater_than = predicate<std::greater, Value>;
+	template <typename Value> using not_greater_than = predicate<std::less_equal, Value>;
+	template <typename Value> using less_than = predicate<std::less, Value>;
+	template <typename Value> using not_less_than = predicate<std::greater_equal, Value>;
+	template <typename Value> using equal_to = predicate<std::equal_to, Value>;
+	template <typename Value> using not_equal_to = predicate<std::not_equal_to, Value>;
 
 	// equivalents
 
@@ -160,10 +164,10 @@ namespace top
 
 		static constexpr bool is_closed = lower_bound_type::is_closed and upper_bound_type::is_closed;
 		static constexpr bool is_open = lower_bound_type::is_open and upper_bound_type::is_open;
-		static constexpr bool is_convex = lower_bound_type::is_bounded_below and upper_bound_type::is_bounded_above;
+		static constexpr bool is_convex = lower_bound_type::is_lower_bound and upper_bound_type::is_upper_bound;
 
-		static_assert(lower_bound_type::is_bounded_below == upper_bound_type::is_bounded_above);
-		static_assert(lower_bound_type::is_bounded_above == upper_bound_type::is_bounded_below);
+		static_assert(lower_bound_type::is_lower_bound == upper_bound_type::is_upper_bound);
+		static_assert(lower_bound_type::is_upper_bound == upper_bound_type::is_lower_bound);
 
 		explicit pair(const value_type &lower, const value_type &upper) : base(lower, upper)
 		{
