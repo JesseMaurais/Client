@@ -16,12 +16,12 @@ namespace sig
 		using container = std::map<Slot, observer>;
 		using count = typename container::size_type;
 
-		void connect(Slot id, observer fn)
+		void connect(Slot const& id, observer fn)
 		{
 			slots.emplace(id, fn);
 		}
 
-		count disconnect(Slot id)
+		count disconnect(Slot const &id)
 		{
 			return slots.erase(id);
 		}
@@ -31,14 +31,14 @@ namespace sig
 			slots.clear();
 		}
 
-		bool find(Slot id) const
+		bool find(Slot const &id) const
 		{
 			return slots.find(id) != slots.end();
 		}
 
 		void send(Args... args) const
 		{
-			send([&](auto pair){ pair.second(args...); });
+			send([&](auto const &pair){ pair.second(args...); });
 		}
 
 		template <typename Filter>
@@ -48,7 +48,7 @@ namespace sig
 		}
 
 		template <typename Filter>
-		void send(Slot id, Filter &&filter) const
+		void send(Slot const &id, Filter &&filter) const
 		{
 			const auto pair = slots.equal_range(id);
 			std::for_each(pair.first, pair.second, filter);
@@ -93,8 +93,10 @@ namespace sys::sig
 
 	private:
 
-		signature *old;
-		int signo;
+		struct {
+			signature *fn;
+			int no;
+		} old;
 	};
 
 	using subject = handle::subject;

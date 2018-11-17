@@ -27,25 +27,25 @@ namespace sys::sig
 	handle::handle(int no, sys::sig::observer fn)
 	: slot(&::event(no), fn)
 	{
-		old = std::signal(no, ::send);
+		old.fn = std::signal(no, ::send);
 		if (SIG_ERR == old)
 		{
-			sys::ferror("signal", no);
+			sys::perror("signal", no);
 		}
 		else
 		{
-			signo = no;
+			old.no = no;
 		}
 	}
 
 	handle::~handle()
 	{
-		verify(::send == std::signal(signo, old));
+		verify(::send == std::signal(old.no, old.fn));
 	}
 
 	handle::operator bool()
 	{
-		return SIG_ERR != old;
+		return SIG_ERR != old.fn;
 	}
 }
 

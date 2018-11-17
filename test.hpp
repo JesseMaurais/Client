@@ -1,10 +1,10 @@
 #ifndef test_hpp
 #define test_hpp
 
-#include "dbg.hpp"
-
 namespace test
 {
+	int run(char **argv, int argc);
+
 	class interface
 	{
 	public:
