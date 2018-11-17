@@ -87,7 +87,7 @@ namespace ansi
 		overline_off = 55,
 	};
 
-	constexpr mode cycle(mode op)
+	constexpr mode toggle(mode op)
 	{
 		switch (op)
 		{
