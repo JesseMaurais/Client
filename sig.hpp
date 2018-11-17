@@ -54,7 +54,7 @@ namespace sig
 			std::for_each(pair.first, pair.second, filter);
 		}
 
-	private:
+	protected:
 
 		container slots;
 	};
