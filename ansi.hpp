@@ -1,7 +1,7 @@
 #ifndef ANSI_hpp
 #define ANSI_hpp
 
-namespace ansi
+namespace ecma
 {
 	enum class code : char
 	{
@@ -14,7 +14,7 @@ namespace ansi
 		ACK = '\x06', // acknowledge
 		BEL = '\x07', // bell
 		BS  = '\x08', // backspace
-		TAB = '\x09', // horizontal tab
+		HT  = '\x09', // horizontal tab
 		LF  = '\x0A', // line feed/new line
 		VT  = '\x0B', // vertical tab
 		FF  = '\x0C', // form feed/new page
@@ -40,35 +40,129 @@ namespace ansi
 		SPC = '\x20', // space
 		DEL = '\x7F', // delete
 
-		SS2 = '\x8E', // N single shift two
-		SS3 = '\x8F', // O single shift three
-		DCS = '\x90', // P device control string
-		CSI = '\x9B', // [ control sequence introducer
-		ST  = '\x9C', // \ string terminator
-		OSC = '\x9D', // ] operating system command
-		SOS = '\x98', // X start of string
-		PM  = '\x9E', // ^ private message
-		APC = '\x9F', // _ application program command
-		RIS = '\x63', // c reset to initial state
+		// ESC sequences
+
+		BPH = '\x42', // B break permitted here
+		NBH = '\x43', // C no break here
+		NEL = '\x45', // E next line
+		SSA = '\x46', // F start of selected area
+		ESA = '\x47', // G end of selected area
+		HTS = '\x48', // H horizontal tab set
+		HTJ = '\x49', // I horizontal tab justified
+		VTS = '\x4A', // J vertical tab set
+		PLD = '\x4B', // K partial line down
+		PLU = '\x4C', // L partial line up
+		RI  = '\x4D', // M reverse line feed
+		SS2 = '\x4E', // N single shift two
+		SS3 = '\x4F', // O single shift three
+		DCS = '\x50', // P device control string
+		PU1 = '\x51', // Q private use one
+		PU2 = '\x52', // R private use two
+		STS = '\x53', // S set transmit state
+		CCH = '\x54', // T cancel char
+		MW  = '\x55', // U message waiting
+		SPA = '\x56', // V start of guarded area
+		EPA = '\x57', // W end of guarded area
+		SOS = '\x58', // X start of string
+		SCI = '\x5A', // Z single character introducer
+		CSI = '\x5B', // [ control sequence introducer
+		ST  = '\x5C', // \ string terminator
+		OSC = '\x5D', // ] operating system command
+		PM  = '\x5E', // ^ private message
+		APC = '\x5F', // _ application program command
 
 		// CSI sequences
 
-		CUU = '\x41', // A cursor up
-		CUD = '\x42', // B cursor down
-		CUF = '\x43', // C cursor forward
-		CUB = '\x44', // D cursor back
-		CNL = '\x45', // E cursor next line
-		CPL = '\x46', // F cursor previous line
-		CHA = '\x47', // G cursor horizontal absolute
-		CUP = '\x48', // H cursor position
-		ED  = '\x49', // J erase in display
-		EL  = '\x4A', // K erase in line
-		SU  = '\x53', // S scroll up
-		SD  = '\x54', // T scroll down
-		HVP = '\x66', // f horizontal vertical position
-		SGR = '\x6D', // m select graphic rendition
-		SCP = '\x73', // s save cursor position
-		RCP = '\x75', // u restore cursor position
+		ICH  = '\x40', // @ insert char
+		CUU  = '\x41', // A cursor up
+		CUD  = '\x42', // B cursor down
+		CUF  = '\x43', // C cursor forward
+		CUB  = '\x44', // D cursor back
+		CNL  = '\x45', // E cursor next line
+		CPL  = '\x46', // F cursor previous line
+		CHA  = '\x47', // G cursor horizontal absolute
+		CUP  = '\x48', // H cursor position
+		CHT  = '\x49', // I cursor horizontal tab
+		ED   = '\x4A', // J erase in display
+		EL   = '\x4B', // K erase in line
+		IL   = '\x4C', // L inert line
+		DL   = '\x4D', // M delete line
+		EF   = '\x4E', // N erase in field
+		EA   = '\x4F', // O erase in area
+		DCH  = '\x50', // P delete char
+		SSE  = '\x51', // Q
+		CPR  = '\x52', // R current position report
+		SU   = '\x53', // S scroll up
+		SD   = '\x54', // T scroll down
+		NP   = '\x55', // U next page
+		PP   = '\x56', // V previous page
+		CTC  = '\x57', // W cursor tab control
+		ECH  = '\x58', // X erase char
+		CVT  = '\x59', // Y cursor vertical tab
+		CBT  = '\x5A', // Z cursor backward tab
+		SRS  = '\x5B', // [ start reversed string
+		PTX  = '\x5C', // \ parallel texts
+		SDS  = '\x5D', // ] start directed string
+		SIMD = '\x5E', // ^ select implicit move direction
+		HPA  = '\x60', // ` horizontal position absolute
+		HPR  = '\x61', // a horizontal position forward
+		REP  = '\x62', // b repeat
+		DA   = '\x63', // c device attributes
+		VPA  = '\x64', // d vertical position absolute
+		VPR  = '\x65', // e vertical position forward
+		HVP  = '\x66', // f horizontal vertical position
+		TBC  = '\x67', // g tabulation clear
+		SM   = '\x68', // h set mode
+		MC   = '\x69', // i media copy
+		HPB  = '\x6A', // j horizontal position backward
+		VPB  = '\x6B', // k vertical position backward
+		RM   = '\x6C', // l reset mode
+		SGR  = '\x6D', // m select graphic rendition
+		DSR  = '\x6E', // n device status report
+		DAQ  = '\x6F', // o define area qualification
+
+		SL   = '\x40', // @ scroll left
+		SR   = '\x41', // A scroll right
+		GSM  = '\x42', // B graphic size modification
+		GSS  = '\x43', // C graphic size selection
+		FNT  = '\x44', // D font selection
+		TSS  = '\x45', // E thin space specification
+		JFY  = '\x46', // F justify
+		SPI  = '\x47', // G spacing increment
+		QUAD = '\x48', // H quad
+		SSU  = '\x49', // I select size unit
+		PFS  = '\x4A', // J page format selection
+		SHS  = '\x4B', // K select horizontal spacing
+		SVS  = '\x4C', // L select vertical spacing
+		IGS  = '\x4D', // M identify graphic subrepretoire
+		               // N
+		IDCS = '\x4F', // O identify device control string
+		PPA  = '\x50', // P page position absolute
+		PPR  = '\x51', // Q page position forward
+		PPB  = '\x52', // R page position backward
+		SPD  = '\x53', // S select presentation direction
+		DTA  = '\x54', // T dimension text area
+		SLH  = '\x55', // U set line home
+		SLL  = '\x56', // V set line limit
+		FNK  = '\x57', // W function key
+		SPQR = '\x58', // X select print quality & rapidity
+		SEF  = '\x59', // Y sheet eject & feed
+		PEC  = '\x5A', // Z presentation expand or contract
+		SSW  = '\x5B', // [ select space width
+		SACS = '\x5C', // \ set added char separation
+		SAPV = '\x5D', // ] select alternative presentation variants
+		STAB = '\x5E', // ^ selective tab
+		GCC  = '\x5F', // _ graphic character combination
+		TATE = '\x60', // ` tab aligned trailing edge
+		TALE = '\x61', // a tab aligned leading edge
+		TAC  = '\x62', // b tab aligned centred
+		TCC  = '\x63', // c tab centered on char
+		TSR  = '\x64', // d tab stop remove
+		SCO  = '\x65', // e set char orientation
+		SRCS = '\x66', // f set reduced char separation
+		SCS  = '\x67', // g set char spacing
+		SLS  = '\x68', // h set line spacing
+		SCP  = '\x6B', // k select char path
 	};
 
 	enum class mode : int
