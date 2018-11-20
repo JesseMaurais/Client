@@ -1,9 +1,9 @@
 #ifndef ANSI_hpp
 #define ANSI_hpp
 
-namespace ecma
+namespace ansi
 {
-	enum class code : char
+	enum class C0 : char
 	{
 		NUL = '\x00', // terminal character
 		SOH = '\x01', // start of heading
@@ -39,9 +39,12 @@ namespace ecma
 		US  = '\x1F', // unit separator
 		SPC = '\x20', // space
 		DEL = '\x7F', // delete
+	};
 
-		// ESC sequences
-
+	enum class C1 : char
+	{
+		PAD = '\x40', // @ padding char
+		HOP = '\x41', // A high octet preset
 		BPH = '\x42', // B break permitted here
 		NBH = '\x43', // C no break here
 		NEL = '\x45', // E next line
@@ -70,9 +73,10 @@ namespace ecma
 		OSC = '\x5D', // ] operating system command
 		PM  = '\x5E', // ^ private message
 		APC = '\x5F', // _ application program command
+	};
 
-		// CSI sequences
-
+	enum class CSI : char
+	{
 		ICH  = '\x40', // @ insert char
 		CUU  = '\x41', // A cursor up
 		CUD  = '\x42', // B cursor down
@@ -85,7 +89,7 @@ namespace ecma
 		CHT  = '\x49', // I cursor horizontal tab
 		ED   = '\x4A', // J erase in display
 		EL   = '\x4B', // K erase in line
-		IL   = '\x4C', // L inert line
+		IL   = '\x4C', // L insert line
 		DL   = '\x4D', // M delete line
 		EF   = '\x4E', // N erase in field
 		EA   = '\x4F', // O erase in area
@@ -104,6 +108,7 @@ namespace ecma
 		PTX  = '\x5C', // \ parallel texts
 		SDS  = '\x5D', // ] start directed string
 		SIMD = '\x5E', // ^ select implicit move direction
+		               // _
 		HPA  = '\x60', // ` horizontal position absolute
 		HPR  = '\x61', // a horizontal position forward
 		REP  = '\x62', // b repeat
@@ -120,6 +125,8 @@ namespace ecma
 		SGR  = '\x6D', // m select graphic rendition
 		DSR  = '\x6E', // n device status report
 		DAQ  = '\x6F', // o define area qualification
+
+		// SPC intermediate
 
 		SL   = '\x40', // @ scroll left
 		SR   = '\x41', // A scroll right
@@ -162,10 +169,50 @@ namespace ecma
 		SRCS = '\x66', // f set reduced char separation
 		SCS  = '\x67', // g set char spacing
 		SLS  = '\x68', // h set line spacing
+		               // i
+		               // j
 		SCP  = '\x6B', // k select char path
+		               // l
+		               // m
+		               // n
+		               // o
 	};
 
-	enum class mode : int
+	enum class ICF : char
+	{
+		DMI  = '\x60', // ` disable manual input
+		INT  = '\x61', // a interrupt
+		EMI  = '\x62', // b enable manual input
+		RIS  = '\x63', // c reset to initial state
+		CMD  = '\x64', // d coding method delimiter
+		LS2  = '\x6E', // n locking-shift two
+		LS3  = '\x6F', // o locking-shift three
+		LS3R = '\x7C', // | locking-shift three right
+		LS2R = '\x7D', // } locking-shift two right
+		LS1R = '\x7E', // ~ locking-shift one right
+	};
+
+	constexpr bool isinter(char byte)
+	{
+		return '\x20' <= byte and byte <= '\x2F';
+	}
+
+	constexpr bool isparam(char byte)
+	{
+		return '\x30' <= byte and byte <= '\x3F';
+	}
+
+	constexpr bool isfinal(char byte)
+	{
+		return '\x40' <= byte and byte <= '\x7E';
+	}
+
+	constexpr bool isprivy(char byte)
+	{
+		return '\x70' <= byte and byte <= '\x7E';
+	}
+
+	enum class SGR : int
 	{
 		reset         =  0, // attributes off
 		intense       =  1, // bold or increased intensity
