@@ -37,11 +37,11 @@ namespace ansi
 		GS  = '\x1D', // group separator
 		RS  = '\x1E', // record separator
 		US  = '\x1F', // unit separator
-		SPC = '\x20', // space
+		SP  = '\x20', // space
 		DEL = '\x7F', // delete
 	};
 
-	enum class C1 : char
+	enum class G0 : char
 	{
 		PAD = '\x40', // @ padding char
 		HOP = '\x41', // A high octet preset
@@ -73,6 +73,40 @@ namespace ansi
 		OSC = '\x5D', // ] operating system command
 		PM  = '\x5E', // ^ private message
 		APC = '\x5F', // _ application program command
+	};
+
+	enum class C1 : char
+	{
+		PAD = '\x80', // @ padding char
+		HOP = '\x81', // A high octet preset
+		BPH = '\x82', // B break permitted here
+		NBH = '\x83', // C no break here
+		NEL = '\x85', // E next line
+		SSA = '\x86', // F start of selected area
+		ESA = '\x87', // G end of selected area
+		HTS = '\x88', // H horizontal tab set
+		HTJ = '\x89', // I horizontal tab justified
+		VTS = '\x8A', // J vertical tab set
+		PLD = '\x8B', // K partial line down
+		PLU = '\x8C', // L partial line up
+		RI  = '\x8D', // M reverse line feed
+		SS2 = '\x8E', // N single shift two
+		SS3 = '\x8F', // O single shift three
+		DCS = '\x90', // P device control string
+		PU1 = '\x91', // Q private use one
+		PU2 = '\x92', // R private use two
+		STS = '\x93', // S set transmit state
+		CCH = '\x94', // T cancel char
+		MW  = '\x95', // U message waiting
+		SPA = '\x96', // V start of guarded area
+		EPA = '\x97', // W end of guarded area
+		SOS = '\x98', // X start of string
+		SCI = '\x9A', // Z single character introducer
+		CSI = '\x9B', // [ control sequence introducer
+		ST  = '\x9C', // \ string terminator
+		OSC = '\x9D', // ] operating system command
+		PM  = '\x9E', // ^ private message
+		APC = '\x9F', // _ application program command
 	};
 
 	enum class CSI : char
