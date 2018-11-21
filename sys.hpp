@@ -109,7 +109,7 @@ constexpr auto close = ::_close;
 
 using pid_t = int;
 // WIN32 does not have a fork
-constexpr auto fork = [] { return -1; };
+constexpr auto fork = [] { ::_set_errno(ENOSYS); return -1; };
 
 // UWP does not support the console
 #ifndef _WINRT_DLL
