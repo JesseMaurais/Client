@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 //
 // POSIX
@@ -11,6 +12,14 @@
 
 #if __has_include(<unistd.h>)
 #include <unistd.h>
+#include <poll.h>
+#if __has_include(<sys/select.h>)
+#include <sys/select.h>
+#endif
+
+using HANDLE = int;
+using SOCKET = HANDLE;
+constexpr SOCKET INVALID_SOCKET = -1;
 
 namespace sys
 {
@@ -67,6 +76,10 @@ constexpr auto execv = ::execv;
 #else
 #if __has_include(<io.h>)
 #include <io.h>
+#include <process.h>
+#include <winsock2.h>
+
+constexpr auto poll = ::WSAPoll;
 
 namespace sys
 {
@@ -104,11 +117,13 @@ constexpr bool WINRT = false;
 constexpr auto popen = ::_popen;
 constexpr auto pclose = ::_pclose;
 constexpr auto pipe = [](int fd[2]) { return ::_pipe(fd, BUFSIZ, 0); };
+constexpr auto execv = ::_execv;
 #else
 constexpr bool WINRT = true;
-constexpr auto popen = [](char const *path, int mode) { return -1; };
-constexpr auto pclose = [](int fd) { return -1; };
-constexpr auto pipe = [](int fd[2]) { return -1; };
+constexpr auto popen = [](char const *path, int mode) { ::_set_errno(ENOSYS); return -1; };
+constexpr auto pclose = [](int fd) { ::_set_errno(ENOSYS); return -1; };
+constexpr auto pipe = [](int fd[2]) { ::_set_errno(ENOSYS); return -1; };
+constexpr auto execv = [](const char *cmd, const char *const argv[]) { ::_set_errno(ENOSYS); return -1; }
 #endif // _WINRT_DLL
 
 } // namespace sys
