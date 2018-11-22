@@ -12,14 +12,6 @@
 
 #if __has_include(<unistd.h>)
 #include <unistd.h>
-#include <poll.h>
-#if __has_include(<sys/select.h>)
-#include <sys/select.h>
-#endif
-
-using HANDLE = int;
-using SOCKET = HANDLE;
-constexpr SOCKET INVALID_SOCKET = -1;
 
 namespace sys
 {
@@ -69,17 +61,15 @@ constexpr auto execv = ::execv;
 
 } // namespace sys
 
+#else
+
 //
 // MSVCRT
 //
 
-#else
-#if __has_include(<io.h>)
+#if __has_include(<io.h>) && __has_include(<process.h>)
 #include <io.h>
 #include <process.h>
-#include <winsock2.h>
-
-constexpr auto poll = ::WSAPoll;
 
 namespace sys
 {
@@ -109,7 +99,8 @@ constexpr auto close = ::_close;
 
 using pid_t = int;
 // WIN32 does not have a fork
-constexpr auto fork = [] { ::_set_errno(ENOSYS); return -1; };
+constexpr int _nosys = [] { ::_set_errno(ENOSYS); return -1; };
+constexpr auto fork = [] { return _nosys() };
 
 // UWP does not support the console
 #ifndef _WINRT_DLL
@@ -120,20 +111,21 @@ constexpr auto pipe = [](int fd[2]) { return ::_pipe(fd, BUFSIZ, 0); };
 constexpr auto execv = ::_execv;
 #else
 constexpr bool WINRT = true;
-constexpr auto popen = [](char const *path, int mode) { ::_set_errno(ENOSYS); return -1; };
-constexpr auto pclose = [](int fd) { ::_set_errno(ENOSYS); return -1; };
-constexpr auto pipe = [](int fd[2]) { ::_set_errno(ENOSYS); return -1; };
-constexpr auto execv = [](const char *cmd, const char *const argv[]) { ::_set_errno(ENOSYS); return -1; }
+constexpr auto popen = [](char const *path, int mode) { return _nosys(); };
+constexpr auto pclose = [](int fd) { return _nosys(); };
+constexpr auto pipe = [](int fd[2]) { return _nosys(); };
+constexpr auto execv = [](const char *cmd, const char *const argv[]) { return _nosys(); }
 #endif // _WINRT_DLL
 
 } // namespace sys
+
+#else
 
 //
 // Unknown
 //
 
-#else
-#error Cannot find system header
+#error Cannot find system headers
 #endif // io.h
 #endif // unistd.h
 #endif // file
