@@ -3,6 +3,10 @@
 
 #include <sys.hpp>
 
+//
+// POSIX
+//
+
 #if __has_include(<sys/socket.h>)
 #include <sys/socket.h>
 #if __has_include(<sys/select.h>)
@@ -16,13 +20,17 @@
 #define SD_SEND    SHUT_WR
 #define SD_BOTH    SHUT_RDWR
 #define SOCKET_ERRNO std::errno
-using SOCKET_PTR = void*;
+using SOCKOPTPTR = void*;
 using SOCKET = int;
 constexpr SOCKET INVALID_SOCKET = -1;
 constexpr int SOCKET_ERROR = -1;
 constexpr auto closesocket = sys::close;
 
 #else
+
+//
+// MSVCRT
+//
 
 #if __has_include(<winsock2.h>)
 #include <winsock2.h>
@@ -31,7 +39,7 @@ constexpr auto closesocket = sys::close;
 #define SHUT_WR   SD_SEND
 #define SHUT_RDWR SD_BOTH
 #define SOCKET_ERRNO WSAGetLastError()
-using SOCKET_PTR = char*;
+using SOCKOPTPTR = char*;
 using socklen_t = int;
 constexpr auto poll = ::WSAPoll;
 
@@ -40,9 +48,17 @@ constexpr auto poll = ::WSAPoll;
 #endif // winsock2.h
 #endif // poll.h
 
+//
+// Common
+//
+
 namespace sys::sock
 {
-	using addr = ::sockaddr;
+	inline bool issocket(SOCKET s) { return INVALID_SOCKET != s; };
+
+	using sockaddr = ::sockaddr;
+	using pollfd = ::pollfd;
+
 	constexpr auto accept = ::accept;
 	constexpr auto bind = ::bind;
 	constexpr auto close = ::closesocket;
