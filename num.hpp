@@ -6,7 +6,7 @@
 #include <cassert>
 #include <limits>
 #include <string>
-#include "io.hpp"
+#include <io.hpp>
 
 namespace
 {

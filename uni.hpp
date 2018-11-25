@@ -4,12 +4,15 @@
 namespace uni
 {
 	using codepoint = unsigned;
-	using bitmask = unsigned;
 
-	template <codepoint Min, codepoint Max>	struct range
+	namespace
 	{
-		static constexpr codepoint min = Min, max = Max;
-	};
+		template <codepoint Min, codepoint Max> struct range
+		{
+			static_assert(Min <= Max, "Invalid range");
+			static constexpr codepoint min = Min, max = Max;
+		};
+	}
 
 	// special chars
 

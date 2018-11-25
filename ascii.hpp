@@ -3,10 +3,19 @@
 
 namespace ascii
 {
-	template <char Min, char Max> struct range
+	namespace
 	{
-		static constexpr char min = Min, max = Max;
-	};
+		template <char Min, char Max> struct range
+		{
+			static_assert(Min <= Max, "Invalid range");
+			static constexpr char min = Min, max = Max;
+		};
+
+		template <class Range> constexpr bool in(char byte)
+		{
+			return Range::min <= byte and byte <= Range::max;
+		}
+	}
 
 	struct C0 : range<'\x00', '\x1F'>
 	{
@@ -254,7 +263,7 @@ namespace ascii
 		italic        =  3, // sometimes treated as inverse
 		underline     =  4,
 		blink_slow    =  5, // less than 150 per minute
-		blink_rapid   =  6, // more than 150 per minute
+		blink_fast    =  6, // more than 150 per minute
 		reverse       =  7, // swap fg and bg colors
 		conceal       =  8,
 		strike        =  9, // characters crossed out
@@ -265,7 +274,7 @@ namespace ascii
 		intense_off   = 22, // neither intense nor faint
 		italic_off    = 23,
 		underline_off = 24, // neither single nor double
-		blink_off     = 25,
+		blink_off     = 25, // neither slow nor rapid
 		inverse_off   = 27,
 		reveal        = 28, // conceal off
 		strike_off    = 29,
@@ -302,6 +311,18 @@ namespace ascii
 		ideogram_off  = 65,
 	};
 
+	using inter = range<'\x20', '\x2F'>;
+	constexpr auto isinter = in<inter>;
+
+	using param = range<'\x30', '\x3F'>;
+	constexpr auto isparam = in<param>;
+
+	using final = range<'\x40', '\x7E'>;
+	constexpr auto isfinal = in<final>;
+
+	using privy = range<'\x70', '\x7E'>;
+	constexpr auto isprivy = in<privy>;
+
 	constexpr unsigned column_width = 4;
 
 	constexpr char pos(char x, char y)
@@ -319,24 +340,61 @@ namespace ascii
 		return byte & 0xFF;
 	}
 
-	constexpr int isinter(int byte)
+	constexpr SGR off(SGR code)
 	{
-		return '\x20' <= byte and byte <= '\x2F';
-	}
-
-	constexpr int isparam(int byte)
-	{
-		return '\x30' <= byte and byte <= '\x3F';
-	}
-
-	constexpr int isfinal(int byte)
-	{
-		return '\x40' <= byte and byte <= '\x7E';
-	}
-
-	constexpr int isprivy(int byte)
-	{
-		return '\x70' <= byte and byte <= '\x7E';
+		switch (code)
+		{
+		default:
+			return reset;
+		case intense:
+		case faint:
+			return intense_off;
+		case italic:
+			return italic_off;
+		case underline:
+		case underline2:
+			return underline_off;
+		case blink_slow:
+		case blink_fast:
+			return blink_off;
+		case reverse:
+			return reverse;
+		case conceal:
+			return reveal;
+		case strike:
+			return strike_off;
+		case frame:
+		case encircle:
+			return frame_off;
+		case overline:
+			return overline_off;
+		case fg_black:
+		case fg_red:
+		case fg_green:
+		case fg_yellow:
+		case fg_blue:
+		case fg_magenta:
+		case fg_cyan:
+		case fg_white:
+		case fg:
+			return fg_off;
+		case bg_black:
+		case bg_red:
+		case bg_green:
+		case bg_yellow:
+		case bg_blue:
+		case bg_magenta:
+		case bg_cyan:
+		case bg_white:
+		case bg:
+			return bg_off;
+		case rightline:
+		case rightline2:
+		case leftline:
+		case leftline2:
+		case stress:
+			return ideogram_off;
+		}
 	}
 }
 

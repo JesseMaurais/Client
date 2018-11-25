@@ -1,7 +1,7 @@
 #ifndef pipebuf_hpp
 #define pipebuf_hpp
 
-#include "fdbuf.hpp"
+#include <fdbuf.hpp>
 
 namespace sys::io
 {
@@ -19,15 +19,15 @@ namespace sys::io
 
 	public:
 
-		basic_pipbuf(int fds[2])
+		basic_pipebuf(int fds[2])
 		{
 			setfds(fds);
 		}
 
 		void setfds(int fds[2])
 		{
-			this->fds[0].setfd(fd[0]);
-			this->fds[1].setfd(fd[1]); 
+			this->fds[0].setfd(fds[0]);
+			this->fds[1].setfd(fds[1]);
 		}
 
 	private:

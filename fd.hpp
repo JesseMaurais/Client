@@ -2,6 +2,7 @@
 #define fd_hpp
 
 #include <iostream>
+#include <string_view>
 #include "file.hpp"
 #include "fdbuf.hpp"
 #include "membuf.hpp"

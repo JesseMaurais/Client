@@ -13,7 +13,7 @@ namespace sys::io
 	 template <class> class Alloc,
 	 template <class, class> class basic_stream,
 	 sys::file::openmode default_mode
-	>cmd
+	>
 	impl_pstream::impl_pstream()
 	{ }
 

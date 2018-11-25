@@ -214,7 +214,8 @@ namespace fmt
 		{
 			auto &key = pair.front();
 			auto &value = pair.back();
-			return std::pair(trim(key), trim(value));
+			trim(key), trim(value);
+			return std::pair(key, value);
 		}
 		return std::pair("", "");
 	}

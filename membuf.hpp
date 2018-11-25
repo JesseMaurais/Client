@@ -2,7 +2,9 @@
 #define membuf_hpp
 
 #include <streambuf>
+#include <string_view>
 #include <string>
+#include <iobuf.hpp>
 
 namespace sys::io
 {
