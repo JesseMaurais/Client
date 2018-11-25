@@ -1,15 +1,15 @@
 #ifndef unicode_hpp
 #define unicode_hpp
 
-#include <tool.hpp>
-
 namespace uni
 {
 	using codepoint = unsigned;
 	using bitmask = unsigned;
 
-	template <codepoint Min, codepoint Max>
-	using range = stl::range<codepoint, Min, Max>;
+	template <codepoint Min, codepoint Max>	struct range
+	{
+		static constexpr codepoint min = Min, max = Max;
+	};
 
 	// special chars
 

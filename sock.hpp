@@ -12,6 +12,9 @@
 #if __has_include(<sys/select.h>)
 #include <sys/select.h>
 #endif
+#if __has_include(<arpa/inet.h>)
+#include <arpa/inet.h>
+#endif
 #if __has_include(<poll.h>)
 #include <poll.h>
 #endif

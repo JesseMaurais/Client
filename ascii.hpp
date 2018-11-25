@@ -1,9 +1,14 @@
-#ifndef asc_hpp
-#define asc_hpp
+#ifndef ascii_hpp
+#define ascii_hpp
 
-namespace asc
+namespace ascii
 {
-	namespace C0
+	template <char Min, char Max> struct range
+	{
+		static constexpr char min = Min, max = Max;
+	};
+
+	struct C0 : range<'\x00', '\x1F'>
 	{
 		enum code : char
 		{
@@ -21,8 +26,8 @@ namespace asc
 			VT  = '\x0B', // vertical tab
 			FF  = '\x0C', // form feed/new page
 			CR  = '\x0D', // carriage return
-			LS1 = '\x0E', // locking shift one
-			LS0 = '\x0F', // locking shift zero
+			SI  = '\x0E', // shift in
+			SO  = '\x0F', // shift out
 			DLE = '\x10', // data link escape
 			DC1 = '\x11', // device control 1
 			DC2 = '\x12', // device control 2
@@ -44,7 +49,7 @@ namespace asc
 		};
 	};
 
-	namespace G0
+	struct G0 : range<'\x21', '\x7E'>
 	{
 		enum code : char
 		{
@@ -81,7 +86,7 @@ namespace asc
 		};
 	};
 
-	namespace C1
+	struct C1 : range<'\x80', '\x9F'>
 	{
 		enum code : char
 		{
@@ -118,7 +123,15 @@ namespace asc
 		};
 	};
 
-	namespace CSI
+	struct G1 : range<'\xA0', '\xFF'>
+	{
+		enum code : char
+		{
+			SHY = '\xAD', // soft hyphen
+		};
+	};
+
+	struct CSI
 	{
 		enum code : char
 		{
@@ -216,7 +229,7 @@ namespace asc
 		};
 	};
 
-	namespace ICF
+	struct ICF
 	{
 		enum code : char
 		{
