@@ -1,7 +1,7 @@
-#ifndef ANSI_hpp
-#define ANSI_hpp
+#ifndef asc_hpp
+#define asc_hpp
 
-namespace ansi
+namespace asc
 {
 	namespace C0
 	{
@@ -21,8 +21,8 @@ namespace ansi
 			VT  = '\x0B', // vertical tab
 			FF  = '\x0C', // form feed/new page
 			CR  = '\x0D', // carriage return
-			SO  = '\x0E', // shift out
-			SI  = '\x0F', // shift in
+			LS1 = '\x0E', // locking shift one
+			LS0 = '\x0F', // locking shift zero
 			DLE = '\x10', // data link escape
 			DC1 = '\x11', // device control 1
 			DC2 = '\x12', // device control 2
@@ -289,28 +289,42 @@ namespace ansi
 		ideogram_off  = 65,
 	};
 
-	constexpr bool isinter(char byte)
+	constexpr unsigned column_width = 4;
+
+	constexpr char pos(char x, char y)
+	{
+		return y | x << column_width;
+	}
+
+	constexpr char column(char byte)
+	{
+		return byte >> column_width;
+	}
+
+	constexpr char row(char byte)
+	{
+		return byte & 0xFF;
+	}
+
+	constexpr int isinter(int byte)
 	{
 		return '\x20' <= byte and byte <= '\x2F';
 	}
 
-	constexpr bool isparam(char byte)
+	constexpr int isparam(int byte)
 	{
 		return '\x30' <= byte and byte <= '\x3F';
 	}
 
-	constexpr bool isfinal(char byte)
+	constexpr int isfinal(int byte)
 	{
 		return '\x40' <= byte and byte <= '\x7E';
 	}
 
-	constexpr bool isprivy(char byte)
+	constexpr int isprivy(int byte)
 	{
 		return '\x70' <= byte and byte <= '\x7E';
 	}
-
-	template <char... Codes> constexpr auto str = { Codes..., C0::NUL };
-	template <char... Codes> constexpr auto esc = str<C0::ESC, Codes...>;
 }
 
 #endif // file
