@@ -2,23 +2,24 @@
 #define file_hpp
 
 #include <ios>
+#include <string_view>
 
 namespace sys::file
 {
 	using openmode = std::ios_base::openmode;
-	enum
-	{
-		app   = std::ios_base::app,
-		bin   = std::ios_base::binary,
-		in    = std::ios_base::in,
-		out   = std::ios_base::out,
-		trunc = std::ios_base::trunc,
-		ate   = std::ios_base::ate,
-	};
+
+	constexpr auto app   = std::ios_base::app;
+	constexpr auto bin   = std::ios_base::binary;
+	constexpr auto in    = std::ios_base::in;
+	constexpr auto out   = std::ios_base::out;
+	constexpr auto trunc = std::ios_base::trunc;
+	constexpr auto ate   = std::ios_base::ate;
 
 	class descriptor
 	{
 	public:
+
+		void open(std::string_view view, openmode mode);
 
 		~descriptor();
 		descriptor(int fd = -1)
