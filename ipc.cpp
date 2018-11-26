@@ -1,8 +1,12 @@
 #include "ipc.hpp"
 #include "sys.hpp"
 #include "err.hpp"
-#include "os.hpp"
 #include "fmt.hpp"
+#include "os.hpp"
+
+#if __has_include(<processthreadapi.h>)
+#include <processthreadapi.h>
+#endif
 
 namespace sys::io
 {
@@ -29,7 +33,103 @@ namespace sys::io
 	{
 		if constexpr (sys::WIN32)
 		{
-			// do first because of Cygwin's slow fork
+			auto const cmds = fmt::join(args, " ");
+
+			struct Handle
+			{
+				HANDLE h = nullptr;
+
+				~Handle()
+				{
+					if (h) CloseHandle(h);
+				}
+
+				int release()
+				{
+					int fd = _open_osfhandle(h, 0);
+					h = nullptr;
+					return fd;
+				}
+
+				operator bool()
+				{
+					return h;
+				}
+			};
+
+			struct Pipe
+			{
+				Handle read;
+				Handle write;
+				BOOL ok;
+
+				Pipe()
+				{
+					SECURITY_ATTRIBUTES sa;
+					ZeroMemory(&sa, sizeof sa);
+					sa.nLength = sizeof sa;
+					sa.bInheritHandle = TRUE;
+					ok = CreatePipe
+					(
+						&read.h,
+						&write.h,
+						&sa,
+						BUFSIZ
+					);
+				}
+
+				operator bool()
+				{
+					return ok;
+				}
+
+			} in, out;
+
+			if (not in or not out)
+			{
+				return;
+			}
+
+			for (HANDLE h : { in.write.h, out.read.h })
+			{
+				if (not SetHandleInformation(&h, HANDLE_FLAG_INHERIT, 0))
+				{
+					return;
+				}
+			}
+
+			PROCESS_INFORMATION pi;
+			ZeroMemory(&pi, sizeof pi);
+
+			STARTUPINFO si;
+			ZeroMemory(&si, sizeof si);
+
+			si.cb = sizeof sa;
+			si.dwFlags = STARTF_USESTDHANDLES;
+			si.hStdIn = in.read.h;
+			si.hStdOut = out.write.h;
+
+			BOOL const ok = CreateProcess
+			(
+				args.front(), // application
+				cmds.data(),  // command line
+				NULL,         // process attributes
+				NULL,         // thread attributes
+				TRUE,         // inherit handles
+				0,            // creation flags
+				NULL,         // environment
+				NULL,         // current directory
+				&si,          // start-up info
+				&pi           // process info
+			);
+
+			if (not ok)
+			{
+				return;
+			}
+
+			pipe[STDIN_FILENO] = out.read.release();
+			pipe[STDOUT_FILENO] = in.write.release();
 		}
 		else
 		if constexpr (sys::POSIX)

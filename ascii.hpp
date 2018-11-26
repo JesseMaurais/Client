@@ -11,9 +11,9 @@ namespace ascii
 			static constexpr char min = Min, max = Max;
 		};
 
-		template <class Range> constexpr bool in(char byte)
+		template <class Range> constexpr bool in(char code)
 		{
-			return Range::min <= byte and byte <= Range::max;
+			return Range::min <= code and code <= Range::max;
 		}
 	}
 
@@ -311,6 +311,16 @@ namespace ascii
 		ideogram_off  = 65,
 	};
 
+	constexpr bool isgraph(char code)
+	{
+		return in<G0>(code) or in<G1>(code);
+	}
+
+	constexpr bool iscntrl(char code)
+	{
+		return in<C0>(code) or in<C1>(code);
+	}
+
 	using inter = range<'\x20', '\x2F'>;
 	constexpr auto isinter = in<inter>;
 
@@ -330,7 +340,7 @@ namespace ascii
 		return y | x << column_width;
 	}
 
-	constexpr char column(char byte)
+	constexpr char col(char byte)
 	{
 		return byte >> column_width;
 	}

@@ -14,6 +14,8 @@ namespace uni
 		};
 	}
 
+	using codespace = range<0x000000, 0x10FFFF>;
+
 	// special chars
 
 	constexpr codepoint BOM = 0x00FEFF; // byte order mark

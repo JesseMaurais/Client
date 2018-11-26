@@ -1,7 +1,7 @@
 #ifndef sock_hpp
 #define sock_hpp
 
-#include <sys.hpp>
+#include "sys.hpp"
 
 //
 // POSIX

@@ -14,6 +14,9 @@ namespace sys::io
 	class basic_iobuf : public virtual std::basic_streambuf<Char, Traits<Char>>
 	{
 		using base = std::basic_streambuf<Char, Traits<Char>>;
+
+	public:
+
 		using char_type = typename base::char_type;
 		using traits_type = typename base::traits_type;
 		using int_type = typename base::int_type;

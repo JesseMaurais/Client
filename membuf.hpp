@@ -4,7 +4,7 @@
 #include <streambuf>
 #include <string_view>
 #include <string>
-#include <iobuf.hpp>
+#include "iobuf.hpp"
 
 namespace sys::io
 {
@@ -61,7 +61,7 @@ namespace sys::io
 		string_view pview() const
 		{
 			auto const sz = base::pptr() - base::pbase();
-			return string_view(pbase(), sz);
+			return string_view(base::pbase(), sz);
 		}
 
 		string_view gview() const

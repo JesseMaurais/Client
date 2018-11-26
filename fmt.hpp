@@ -95,7 +95,7 @@ namespace fmt
 	{
 		using size_type = std::string_view::size_type;
 		constexpr size_type end = std::string::npos;
-		for (auto at = buf.find(s.data(), 0, s.size()); at != end; at = buf.find(s.data(), at + r.size(), s.size())
+		for (auto at = buf.find(s.data(), 0, s.size()); at != end; at = buf.find(s.data(), at + r.size(), s.size()))
 		{
 			buf.replace(at, s.size(), r.data(), r.size());
 		}
@@ -214,7 +214,6 @@ namespace fmt
 		{
 			auto &key = pair.front();
 			auto &value = pair.back();
-			trim(key), trim(value);
 			return std::pair(key, value);
 		}
 		return std::pair("", "");
