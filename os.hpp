@@ -233,4 +233,3 @@ constexpr bool UNIX =
 }
 
 #endif // file
-

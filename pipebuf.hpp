@@ -13,7 +13,7 @@ namespace sys::io
 	class basic_pipebuf : public basic_iobuf<Char, Traits>
 	{
 		using base = basic_iobuf<Char, Traits>;
-		using size_type = typename base::streamsize;
+		using size_type = typename std::streamsize;
 		using char_type = typename base::char_type;
 		using fdbuf = basic_fdbuf<Char, Traits>;
 
@@ -36,7 +36,7 @@ namespace sys::io
 
 	protected:
 
-		size_type xsputn(char_type *s, size_type n) override
+		size_type xsputn(char_type const *s, size_type n) override
 		{
 			return fds[1].xsputn(s, n);
 		}

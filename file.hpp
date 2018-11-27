@@ -2,7 +2,8 @@
 #define file_hpp
 
 #include <ios>
-#include <string_view>
+#include <string>
+#include <initializer_list>
 
 namespace sys::file
 {
@@ -19,9 +20,9 @@ namespace sys::file
 	{
 	public:
 
-		void open(std::string_view view, openmode mode);
-
+		void open(std::string const& path, openmode mode);
 		~descriptor();
+
 		descriptor(int fd = -1)
 		{
 			this->fd = fd;
@@ -30,11 +31,6 @@ namespace sys::file
 		operator int() const
 		{
 			return fd;
-		}
-
-		operator bool() const
-		{
-			return -1 != fd;
 		}
 
 		int release()
@@ -53,26 +49,33 @@ namespace sys::file
 	{
 	public:
 
+		void open(std::initializer_list<char*> args, openmode mode);
 		pipe();
 
-		int operator[](std::size_t id) const
+		pipe(int fd0, int fd1)
 		{
-			return id < 2 ? (int) fds[id] : -1;
+			this->fd[0] = fd0;
+			this->fd[1] = fd1;
 		}
 
 		operator bool() const
 		{
-			return fds[0] or fds[1];
+			return -1 != fd[0] or -1 != fd[1];
+		}
+
+		int operator[](std::size_t id) const
+		{
+			return id < 2 ? (int) fd[id] : -1;
 		}
 
 		int release(std::size_t id)
 		{
-			return id < 2 ? fds[id].release() : -1;
+			return id < 2 ? fd[id].release() : -1;
 		}
 
 	private:
 
-		descriptor fds[2];
+		descriptor fd[2];
 	};
 }
 

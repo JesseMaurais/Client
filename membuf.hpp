@@ -19,7 +19,7 @@ namespace sys::io
 		using base = basic_iobuf<Char, Traits>;
 		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 		using string_view = std::basic_string_view<Char, Traits<Char>>;
-		using size_type = typename base::streamsize;
+		using size_type = typename std::streamsize;
 		using char_type = typename base::char_type;
 
 	public:
@@ -77,4 +77,3 @@ namespace sys::io
 }
 
 #endif // file
-

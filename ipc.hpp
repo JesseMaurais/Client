@@ -10,44 +10,50 @@
 
 namespace sys::io
 {
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator,
-	 template <class, class> class basic_stream,
-	 sys::file::openmode default_mode
-	>
-	class impl_pstream
-	: basic_stream<Char, Traits<Char>>
-	, basic_membuf<Char, Traits, Alloc>
-	, basic_pipebuf<Char, Traits>
+	namespace
 	{
-		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-		using string_view = std::basic_string_view<Char, Traits<Char>>;
-		using initializer_list = std::initializer_list<Char*>;
-		using openmode = sys::file::openmode;
-
-	public:
-
-		basic_pstream();
-		basic_pstream(initializer_list args, openmode mode = default_mode)
-		: basic_pstream()
+		template
+		<
+		 class Char,
+		 template <class> class Traits,
+		 template <class> class Alloc,
+		 template <class, class> class basic_stream,
+		 sys::file::openmode default_mode
+		>
+		class impl_pstream
+		: basic_stream<Char, Traits<Char>>
+		, basic_membuf<Char, Traits, Alloc>
+		, basic_pipebuf<Char, Traits>
 		{
-			open(args, mode | default_mode);
-		}
-		
-		bool is_open() const;
-		virtual void open(initializer_list args, openmode mode = default_mode);
-		void close();
+			using base = basic_stream<Char, Traits<Char>>;
+			using membuf = basic_membuf<Char, Traits, Alloc>;
+			using pipebuf = basic_fdbuf<Char, Traits>;
 
-	private:
+		public:
 
-		sys::file::pipe pipe;
-	};
+			impl_pstream()
+			: pipebuf()
+			, membuf()
+			, base(this)
+			{ }
 
-	extern template impl_pstream<char>;
-	extern template impl_pstream<wchar_t>;
+			impl_pstream(std::initializer_list<char*> args, sys::file::openmode mode = default_mode)
+			: impl_pstream()
+			{
+				open(args, mode);
+			}
+
+			bool is_open() const { return pipe; }
+			void open(std::initializer_list<char*> args, sys::file::openmode mode = default_mode)
+			{
+				pipe.open(args, mode | default_mode);
+			}
+
+		private:
+
+			sys::file::pipe pipe;
+		};
+	}
 
 	template
 	<
@@ -58,8 +64,9 @@ namespace sys::io
 	class basic_pstream
 	: public impl_pstream<Char, Traits, Alloc, std::basic_iostream, sys::file::in|sys::file::out>
 	{
+		using base =  impl_pstream<Char, Traits, Alloc, std::basic_iostream, sys::file::in|sys::file::out>;
 	public:
-		using impl_pstream::impl_pstream;
+		using base::base;
 	};
 	
 	using pstream = basic_pstream<char>;
@@ -74,8 +81,9 @@ namespace sys::io
 	class basic_ipstream
 	: public impl_pstream<Char, Traits, Alloc, std::basic_istream, sys::file::in>
 	{
+		using base =  impl_pstream<Char, Traits, Alloc, std::basic_istream, sys::file::in>;
 	public:
-		using impl_pstream::impl_pstream;
+		using base::base;
 	};
 
 	using ipstream = basic_ipstream<char>;
@@ -90,8 +98,9 @@ namespace sys::io
 	class basic_opstream
 	: public impl_pstream<Char, Traits, Alloc, std::basic_ostream, sys::file::out>
 	{
+		using base =  impl_pstream<Char, Traits, Alloc, std::basic_ostream, sys::file::out>;
 	public:
-		using impl_pstream::impl_pstream;
+		using base::base;
 	};
 
 	using opstream = basic_opstream<char>;
@@ -99,4 +108,3 @@ namespace sys::io
 }
 
 #endif // file
-

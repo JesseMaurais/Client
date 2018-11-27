@@ -1,8 +1,8 @@
 #ifndef fd_hpp
 #define fd_hpp
 
+#include <string>
 #include <iostream>
-#include <string_view>
 #include "file.hpp"
 #include "fdbuf.hpp"
 #include "membuf.hpp"
@@ -36,7 +36,7 @@ namespace sys::io
 			, base(this)
 			{ }
 
-			impl_fdstream(std::string_view path, sys::file::openmode mode)
+			impl_fdstream(std::string const& path, sys::file::openmode mode)
 			: impl_fdstream()
 			{
 				open(path, mode);
@@ -44,7 +44,7 @@ namespace sys::io
 
 			void close() { fd = -1; };
 			bool is_open() const { return fd; }
-			void open(std::string_view path, sys::file::openmode mode)
+			void open(std::string const& path, sys::file::openmode mode)
 			{
 				using namespace sys::file;
 				if (mode & out and mode & in)
@@ -121,4 +121,3 @@ namespace sys::io
 }
 
 #endif // file
-
