@@ -79,7 +79,7 @@ namespace sys::file
 		this->fd[1] = fd[1];
 	}
 
-	void pipe::open(std::initializer_list<char*> args, openmode mode)
+	void process::open(arguments args, openmode mode)
 	{
 		#ifdef __WIN32__
 		if constexpr (sys::WIN32)
@@ -179,6 +179,7 @@ namespace sys::file
 				return;
 			}
 
+			id = static_cast<std::intptr_t>(pi.hProcess);
 			fd[STDIN_FILENO] = out.read.release();
 			fd[STDOUT_FILENO] = in.write.release();
 		}
@@ -221,6 +222,7 @@ namespace sys::file
 			}
 			else
 			{
+				id = static_cast<std::intptr_t>(pid);
 				fd[STDIN_FILENO] = out.release(STDOUT_FILENO);
 				fd[STDOUT_FILENO] = in.release(STDIN_FILENO);
 			}

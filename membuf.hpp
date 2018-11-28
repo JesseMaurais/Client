@@ -4,7 +4,6 @@
 #include <streambuf>
 #include <string_view>
 #include <string>
-#include "iobuf.hpp"
 
 namespace sys::io
 {
@@ -16,11 +15,11 @@ namespace sys::io
 	>
 	class basic_membuf : public virtual std::basic_streambuf<Char, Traits<Char>>
 	{
-		using base = basic_iobuf<Char, Traits>;
+		using base = std::basic_streambuf<Char, Traits>;
 		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 		using string_view = std::basic_string_view<Char, Traits<Char>>;
-		using size_type = typename std::streamsize;
 		using char_type = typename base::char_type;
+		using size_type = std::streamsize;
 
 	public:
 
@@ -74,6 +73,9 @@ namespace sys::io
 
 		string buf;
 	};
+
+	using membuf = basic_membuf<char>;
+	using wmembuf = basic_membuf<wchar_t>;
 }
 
 #endif // file

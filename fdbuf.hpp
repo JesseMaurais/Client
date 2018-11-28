@@ -21,7 +21,7 @@ namespace sys::io
 
 	public:
 
-		basic_fdbuf(int fd)
+		basic_fdbuf(int fd = -1)
 		{
 			setfd(fd);
 		}

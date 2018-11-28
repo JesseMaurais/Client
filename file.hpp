@@ -16,10 +16,8 @@ namespace sys::file
 	constexpr auto trunc = std::ios_base::trunc;
 	constexpr auto ate   = std::ios_base::ate;
 
-	class descriptor
+	struct descriptor
 	{
-	public:
-
 		void open(std::string const& path, openmode mode);
 		~descriptor();
 
@@ -40,23 +38,14 @@ namespace sys::file
 			return fd;
 		}
 
-	private:
+	protected:
 
 		int fd;
 	};
 
-	class pipe
+	struct pipe
 	{
-	public:
-
-		void open(std::initializer_list<char*> args, openmode mode);
 		pipe();
-
-		pipe(int fd0, int fd1)
-		{
-			this->fd[0] = fd0;
-			this->fd[1] = fd1;
-		}
 
 		operator bool() const
 		{
@@ -73,9 +62,20 @@ namespace sys::file
 			return id < 2 ? fd[id].release() : -1;
 		}
 
-	private:
+	protected:
 
 		descriptor fd[2];
+	};
+
+	struct process : pipe
+	{
+		using arguments = std::initializer_list<char*>;
+
+		void open(arguments args, openmode mode);
+
+	protected:
+
+		std::intptr_t id;
 	};
 }
 

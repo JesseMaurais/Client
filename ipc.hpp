@@ -37,21 +37,22 @@ namespace sys::io
 			, base(this)
 			{ }
 
-			impl_pstream(std::initializer_list<char*> args, sys::file::openmode mode = default_mode)
+			impl_pstream(sys::file::process::arguments args, sys::file::openmode mode = default_mode)
 			: impl_pstream()
 			{
 				open(args, mode);
 			}
 
 			bool is_open() const { return pipe; }
-			void open(std::initializer_list<char*> args, sys::file::openmode mode = default_mode)
+			void open(sys::file::process::arguments args, sys::file::openmode mode = default_mode)
 			{
-				pipe.open(args, mode | default_mode);
+				process.open(args, mode | default_mode);
+				pipbuf::setfds({process[0], process[1]);
 			}
 
 		private:
 
-			sys::file::pipe pipe;
+			sys::file::process process;
 		};
 	}
 

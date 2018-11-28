@@ -1,7 +1,6 @@
 #include "fdbuf.hpp"
 #include "sys.hpp"
 #include "err.hpp"
-#include <cstdio>
 
 namespace sys::io
 {

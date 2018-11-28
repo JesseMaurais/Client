@@ -49,9 +49,6 @@ namespace sys::io
 
 	using pipebuf = basic_pipebuf<char>;
 	using wpipebuf = basic_pipebuf<wchar_t>;
-
-	extern template class basic_pipebuf<char>;
-	extern template class basic_pipebuf<wchar_t>;
 }
 
 #endif // file
