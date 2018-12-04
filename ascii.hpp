@@ -17,6 +17,10 @@ namespace ascii
 		}
 	}
 
+	//
+	// Character Codes
+	//
+
 	struct C0 : range<'\x00', '\x1F'>
 	{
 		enum code : char
@@ -103,6 +107,7 @@ namespace ascii
 			HOP = '\x81', // A high octet preset
 			BPH = '\x82', // B break permitted here
 			NBH = '\x83', // C no break here
+			IND = '\x84', // D index (deprecated)
 			NEL = '\x85', // E next line
 			SSA = '\x86', // F start of selected area
 			ESA = '\x87', // G end of selected area
@@ -208,6 +213,7 @@ namespace ascii
 			SHS  = '\x4B', // K select horizontal spacing
 			SVS  = '\x4C', // L select vertical spacing
 			IGS  = '\x4D', // M identify graphic subrepretoire
+			HTSA = '\x4E', // N horizontal tab set absolute (deprecated)
 			IDCS = '\x4F', // O identify device control string
 			PPA  = '\x50', // P page position absolute
 			PPR  = '\x51', // Q page position forward
@@ -255,7 +261,41 @@ namespace ascii
 		};
 	};
 
-	enum SGR : int
+	//
+	// Device Modes
+	//
+
+	enum
+	{
+		GATM =  1, // guarded area transfer mode
+		KAM  =  2, // keyboard action mode
+		CRM  =  3, // control representation mode
+		IRM  =  4, // insertion replacement mode
+		SRTM =  5, // status report transfer mode
+		ERM  =  6, // erasure mode
+		VEM  =  7, // vertical/line editing mode
+		BDSM =  8, // bi-directional support mode
+		DCSM =  9, // device component select mode
+		HEM  = 10, // horizontal/char editing mode
+		PUM  = 11, // positioning unit mode
+		SRM  = 12, // send/receive mode
+		FEAM = 13, // format effector action mode
+		FETM = 14, // format effector transfer mode
+		MATM = 15, // multiple area transfer mode
+		TTM  = 16, // transfer termination mode
+		SATM = 17, // select area transfer mode
+		TSM  = 18, // tab stop mode
+		EBM  = 19, // editing boundary mode (deprecated)
+		LFNL = 20, // line feed/new line mode (deprecated)
+		GRCM = 21, // graphic rendition combination mode
+		ZDM  = 22, // zero default mode
+	};
+
+	//
+	// Parameter Codes
+	//
+
+	enum SGR
 	{
 		reset         =  0, // attributes off
 		intense       =  1, // bold or increased intensity
@@ -310,6 +350,149 @@ namespace ascii
 		stress        = 64,
 		ideogram_off  = 65,
 	};
+
+	enum CTC
+	{
+		set_char        = 0, // char tab stop set at active position
+		set_line        = 1, // line tab stop set at active line
+		clear_char      = 2, // clear char tab stop at active position
+		clear_line      = 3, // clear line tab stop at active line
+		clear_all_chars = 4, // clear all char tab stops on line
+		clear_all       = 5, // clear all tab stops
+		clear_all_lines = 6, // clear all line tab stops
+	};
+
+	enum DAQ
+	{
+		unprotected_and_unguarded =  0, 
+		protected_and_guarded     =  1,
+		graphic_char_input        =  2,
+		numeric_input             =  3,
+		alphabetic_input          =  4,
+		input_aligned_on_last     =  5,
+		fill_with_zero            =  6,
+		set_tab_stop              =  7,
+		protected_and_unguarded   =  8,
+		fill_with_space           =  9,
+		input_aligned_on_first    = 10,
+		reverse_input_order       = 11,
+	};
+
+	enum DSR
+	{
+		ready         = 0, // no malfunction
+		busy_request  = 1, // must request later
+		busy_reply    = 2, // will send later
+		error_request = 3, // malfunction, must request later
+		error_reply   = 4, // malfunction, must reply later
+		request       = 5, // request a DSR
+		report        = 6, // request a CPR
+	};
+
+	enum EA
+	{
+		erase_to_area_end     = 0, // erase from active to end of area
+		erase_from_area_begin = 1, // erase from beginning of area to active
+		erase_area            = 2, // erase all in area
+	};
+
+	enum ED
+	{
+		erase_to_page_end     = 0, // erase from active to end of page
+		erase_from_page_begin = 1, // erase form beginning of page to active
+		erase_page            = 2, // erase all in page
+	};
+
+	enum EF
+	{
+		erase_to_field_end     = 0, // erase from active to end of field
+		erase_from_field_begin = 1, // erase form beginning of field to active
+		erase_field            = 2, // erase all in field
+	};
+
+	enum EL
+	{
+		erase_to_line_end     = 0, // erase from active to end of line
+		erase_from_line_begin = 1, // erase form beginning of line to active
+		erase_line            = 2, // erase all in line
+	};
+
+	enum JFY
+	{
+		none                = 0,
+		word_fill           = 1, 
+		word_space          = 2,
+		letter_space        = 3,
+		hyphenation         = 4,
+		flush_to_home       = 5,
+		center              = 6,
+		flush_to_limit      = 7,
+		italian_hyphenation = 8,
+	};
+
+	enum MC
+	{
+		to_primary               = 0,
+		from_primary             = 1,
+		to_secondary             = 2,
+		from_seconary            = 3,
+		stop_relay_to_primary    = 4,
+		start_relay_to_primary   = 5,
+		stop_relay_to_secondary  = 6,
+		start_relay_to_secondary = 7,
+	};
+
+	enum PEC
+	{
+		normal    = 0, // as specified by SCS, SHS, or SPI
+		expanded  = 1, // multiplied by a factor not greater than 2
+		condensed = 2, // multiplied by a factor not less than 1/2
+	};
+
+	enum PFS
+	{
+		tall_basic_text  =  0,
+		wide_basic_text  =  1,
+		tall_basic_A4    =  2,
+		wide_basic_A4    =  3,
+		tall_letter      =  4,
+		wide_letter      =  5,
+		tall_extended_A4 =  6,
+		wide_extended_A4 =  7,
+		tall_legal       =  8,
+		wide_legal       =  9,
+		A4_short_lines   = 10,
+		A4_long_lines    = 11,
+		B5_short_lines   = 12,
+		B5_long_lines    = 13,
+		B4_short_lines   = 14,
+		B4_long_lines    = 15,
+	};
+
+	enum PTX
+	{
+		end_parallel_text            = 0,
+		begin_principal              = 1,
+		begin_supplementary          = 2,
+		Japanese_phonetic_annotation = 3,
+		Chinese_phonetic_annotation  = 4,
+		end_phonetic_annotations     = 5,
+	};
+
+	enum QUAD
+	{
+		flush_to_home            = 0,
+		flush_to_home_with_fill  = 1,
+		center                   = 2,
+		center_with_fill         = 3,
+		flush_to_limit           = 4,
+		flush_to_limit_with_fill = 5,
+		flush_to_both            = 6,
+	};
+
+	//
+	// Utility Functions
+	//
 
 	constexpr bool isgraph(char code)
 	{
