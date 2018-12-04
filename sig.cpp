@@ -28,7 +28,7 @@ namespace sys::sig
 	: slot(&::event(no), fn)
 	{
 		old.fn = std::signal(no, ::send);
-		if (SIG_ERR == old)
+		if (SIG_ERR == old.fn)
 		{
 			sys::perror("signal", no);
 		}

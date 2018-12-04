@@ -1,6 +1,7 @@
 #ifndef fdbuf_hpp
 #define fdbuf_hpp
 
+#include "file.hpp"
 #include "iobuf.hpp"
 
 namespace sys::io
@@ -16,10 +17,8 @@ namespace sys::io
 
 	public:
 
-		using size_type = typename std::streamsize;
+		using size_type = typename base::size_type;
 		using char_type = typename base::char_type;
-
-	public:
 
 		basic_fdbuf(int fd = -1)
 		{
@@ -31,22 +30,25 @@ namespace sys::io
 			this->fd = fd;
 		}
 
+		size_type xsputn(char_type const *s, size_type n) override
+		{
+			size_type const size = n * sizeof (char_type);
+			return fd.write(static_cast<const void*>(s), size);
+		}
+
+		size_type xsgetn(char_type *s, size_type n) override
+		{
+			size_type const size = n * sizeof (char_type);
+			return fd.read(static_cast<void*>(s), size);
+		}
+
 	private:
 
-		int fd;
-
-	protected:
-
-		size_type xsputn(char_type const *s, size_type n) override;
-		size_type xsgetn(char_type *s, size_type n) override;
+		sys::file::descriptor fd;
 	};
 
 	using fdbuf = basic_fdbuf<char>;
 	using wfdbuf = basic_fdbuf<wchar_t>;
-
-	extern template class basic_fdbuf<char>;
-	extern template class basic_fdbuf<wchar_t>;
 }
 
 #endif // file
-

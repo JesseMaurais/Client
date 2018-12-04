@@ -56,6 +56,26 @@ namespace sys::file
 		}
 	}
 
+	ssize_t descriptor::write(const void* buffer, size_t size)
+	{
+		ssize_t const n = sys::write(fd, buffer, size);
+		if (-1 == n)
+		{
+			sys::perror("write", size);
+		}
+		return n;
+	}
+
+	ssize_t descriptor::read(void* buffer, size_t size)
+	{
+		ssize_t const n = sys::read(fd, buffer, size);
+		if (-1 == n)
+		{
+			sys::perror("read", size);
+		}
+		return n;
+	}
+
 	descriptor::~descriptor()
 	{
 		if (-1 != fd)
@@ -69,14 +89,16 @@ namespace sys::file
 
 	pipe::pipe()
 	{
-		int fd[2];
-		if (sys::pipe(fd))
+		int pair[2];
+		if (sys::pipe(pair))
 		{
 			sys::perror("pipe");
 			return;
 		}
-		this->fd[0] = fd[0];
-		this->fd[1] = fd[1];
+		for (size_t i : { 0, 1 })
+		{
+			fd[i] = pair[i];
+		}
 	}
 
 	void process::open(arguments args, openmode mode)
@@ -187,12 +209,12 @@ namespace sys::file
 		#endif // WIN32
 		if constexpr (sys::POSIX)
 		{
-			sys::file::pipe in, out;
-			if (not in or not out)
+			sys::file::pipe pair[2];
+			if (not pair[0] or not pair[1])
 			{
 				return;
 			}
-			sys::pid_t const pid = sys::fork();
+			pid = sys::fork();
 			if (-1 == pid)
 			{
 				sys::perror("fork");
@@ -200,18 +222,32 @@ namespace sys::file
 			else
 			if (0 == pid)
 			{
-				if (-1 == sys::dup2(in[STDIN_FILENO], STDIN_FILENO))
+				for (int fd : { 0, 1 })
 				{
-					sys::perror("dup2", in[STDIN_FILENO], STDIN_FILENO);
-					return;
-				}
-				if (-1 == sys::dup2(out[STDOUT_FILENO], STDOUT_FILENO))
-				{
-					sys::perror("dup2", out[STDOUT_FILENO], STDOUT_FILENO);
-					return;
+					if (int f = pair[fd].release(fd ? 1 : 0); sys::close(f))
+					{
+						sys::perror("close", f);
+						std::exit(EXIT_FAILURE);
+					}
+
+					if (-1 == sys::dup2(pair[fd], fd))
+					{
+						sys::perror("dup2", pair[fd], fd);
+						std::exit(EXIT_FAILURE);
+					}
+
+					if (int f = pair[fd].release(fd ? 0 : 1); sys::close(f))
+					{
+						sys::perror("close", f);
+						std::exit(EXIT_FAILURE);
+					}
 				}
 
-				std::vector<char*> cmds(args);
+				std::vector<char*> cmds;
+				for (auto const& it : args)
+				{
+					cmds.emplace_back(const_cast<char*>(it.data()));
+				}
 				cmds.push_back(nullptr);
 
 				if (-1 == sys::execv(cmds.front(), cmds.data()))
@@ -222,9 +258,8 @@ namespace sys::file
 			}
 			else
 			{
-				id = static_cast<std::intptr_t>(pid);
-				fd[STDIN_FILENO] = out.release(STDOUT_FILENO);
-				fd[STDOUT_FILENO] = in.release(STDIN_FILENO);
+				fd[0] = pair[0].release(1);
+				fd[1] = pair[1].release(0);
 			}
 		}
 	}

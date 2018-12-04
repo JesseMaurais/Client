@@ -3,9 +3,7 @@
 
 #include <string>
 #include <iostream>
-#include <initializer_list>
 #include "file.hpp"
-#include "membuf.hpp"
 #include "pipebuf.hpp"
 
 namespace sys::io
@@ -21,19 +19,16 @@ namespace sys::io
 		 sys::file::openmode default_mode
 		>
 		class impl_pstream
-		: basic_stream<Char, Traits<Char>>
-		, basic_membuf<Char, Traits, Alloc>
-		, basic_pipebuf<Char, Traits>
+		: public basic_stream<Char, Traits<Char>>
+		, public basic_pipebuf<Char, Traits>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
-			using membuf = basic_membuf<Char, Traits, Alloc>;
-			using pipebuf = basic_fdbuf<Char, Traits>;
+			using pipebuf = basic_pipebuf<Char, Traits>;
 
 		public:
 
 			impl_pstream()
 			: pipebuf()
-			, membuf()
 			, base(this)
 			{ }
 
@@ -43,11 +38,11 @@ namespace sys::io
 				open(args, mode);
 			}
 
-			bool is_open() const { return pipe; }
 			void open(sys::file::process::arguments args, sys::file::openmode mode = default_mode)
 			{
 				process.open(args, mode | default_mode);
-				pipbuf::setfds({process[0], process[1]);
+				int fd[2] = { process[0], process[1] };
+				pipebuf::setfd(fd);
 			}
 
 		private:

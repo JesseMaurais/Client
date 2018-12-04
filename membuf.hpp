@@ -1,9 +1,9 @@
 #ifndef membuf_hpp
 #define membuf_hpp
 
-#include <streambuf>
-#include <string_view>
 #include <string>
+#include <string_view>
+#include <streambuf>
 
 namespace sys::io
 {
@@ -13,21 +13,22 @@ namespace sys::io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_membuf : public virtual std::basic_streambuf<Char, Traits<Char>>
+	class basic_membuf : public std::basic_streambuf<Char, Traits<Char>>
 	{
-		using base = std::basic_streambuf<Char, Traits>;
+		using base = std::basic_streambuf<Char, Traits<Char>>;
 		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 		using string_view = std::basic_string_view<Char, Traits<Char>>;
-		using char_type = typename base::char_type;
-		using size_type = std::streamsize;
 
 	public:
+
+		using char_type = typename base::char_type;
+		using size_type = std::streamsize;
 
 		basic_membuf() = default;
 
 		basic_membuf(size_type n)
 		{
-			setbufsiz(n);
+			setbufsz(n);
 		}
 
 		base *setbuf(char_type *s, size_type n) override
@@ -40,8 +41,8 @@ namespace sys::io
 		{
 			auto t = s + n;
 			auto u = t + m;
-			setg(s, t, t);
-			setp(t, u);
+			base::setg(s, t, t);
+			base::setp(t, u);
 			return this;
 		}
 

@@ -1,6 +1,7 @@
 #ifndef pipebuf_hpp
 #define pipebuf_hpp
 
+#include "iobuf.hpp"
 #include "fdbuf.hpp"
 
 namespace sys::io
@@ -13,37 +14,39 @@ namespace sys::io
 	class basic_pipebuf : public basic_iobuf<Char, Traits>
 	{
 		using base = basic_iobuf<Char, Traits>;
-		using size_type = typename std::streamsize;
-		using char_type = typename base::char_type;
 		using fdbuf = basic_fdbuf<Char, Traits>;
 
 	public:
 
-		basic_pipebuf(int fds[2])
+		using char_type = typename base::char_type;
+		using size_type = typename base::size_type;
+
+		basic_pipebuf() = default;
+		basic_pipebuf(int fd[2])
 		{
-			setfds(fds);
+			setfd(fd);
 		}
 
-		void setfds(int fds[2])
+		void setfd(int fd[2])
 		{
-			this->fds[0].setfd(fds[0]);
-			this->fds[1].setfd(fds[1]);
+			this->fd[0].setfd(fd[0]);
+			this->fd[1].setfd(fd[1]);
 		}
 
 	private:
 
-		fdbuf fds[2];
+		fdbuf fd[2];
 
 	protected:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
-			return fds[1].xsputn(s, n);
+			return fd[1].xsputn(s, n);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
-			return fds[0].xsgetn(s, n);
+			return fd[0].xsgetn(s, n);
 		}
 	};
 

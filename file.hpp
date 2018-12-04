@@ -3,10 +3,14 @@
 
 #include <ios>
 #include <string>
+#include <string_view>
 #include <initializer_list>
+#include <type_traits>
 
 namespace sys::file
 {
+	using size_t = std::size_t;
+	using ssize_t = std::make_signed<size_t>::type;
 	using openmode = std::ios_base::openmode;
 
 	constexpr auto app   = std::ios_base::app;
@@ -19,6 +23,8 @@ namespace sys::file
 	struct descriptor
 	{
 		void open(std::string const& path, openmode mode);
+		ssize_t write(const void* buffer, size_t size);
+		ssize_t read(void* buffer, size_t size);
 		~descriptor();
 
 		descriptor(int fd = -1)
@@ -47,19 +53,29 @@ namespace sys::file
 	{
 		pipe();
 
+		ssize_t write(const void* buffer, size_t size)
+		{
+			return fd[1].write(buffer, size);
+		}
+
+		ssize_t read(void* buffer, size_t size)
+		{
+			return fd[0].read(buffer, size);
+		}
+
+		int operator[](size_t index) const
+		{
+			return index < 2 ? (int) fd[index] : -1;
+		}
+
+		int release(size_t index)
+		{
+			return index < 2 ? fd[index].release() : -1;
+		}
+
 		operator bool() const
 		{
-			return -1 != fd[0] or -1 != fd[1];
-		}
-
-		int operator[](std::size_t id) const
-		{
-			return id < 2 ? (int) fd[id] : -1;
-		}
-
-		int release(std::size_t id)
-		{
-			return id < 2 ? fd[id].release() : -1;
+			return fd[0] or fd[1];
 		}
 
 	protected:
@@ -69,13 +85,13 @@ namespace sys::file
 
 	struct process : pipe
 	{
-		using arguments = std::initializer_list<char*>;
+		using arguments = std::initializer_list<std::string_view>;
 
 		void open(arguments args, openmode mode);
 
 	protected:
 
-		std::intptr_t id;
+		std::intptr_t pid;
 	};
 }
 
