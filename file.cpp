@@ -222,26 +222,27 @@ namespace sys::file
 			else
 			if (0 == pid)
 			{
-				for (int fd : { 0, 1 })
+				for (int i : { 0, 1 })
 				{
-					if (int f = pair[fd].release(fd ? 1 : 0); sys::close(f))
+					if (-1 == sys::dup2(pair[i], i))
 					{
-						sys::perror("close", f);
-						std::exit(EXIT_FAILURE);
-					}
-
-					if (-1 == sys::dup2(pair[fd], fd))
-					{
-						sys::perror("dup2", pair[fd], fd);
-						std::exit(EXIT_FAILURE);
-					}
-
-					if (int f = pair[fd].release(fd ? 0 : 1); sys::close(f))
-					{
-						sys::perror("close", f);
+						sys::perror("dup2", pair[i], i);
 						std::exit(EXIT_FAILURE);
 					}
 				}
+
+				for (int i : { 0, 1 })
+				{
+					for (int j : { 0, 1 })
+					{
+						int k = pair[i].release(j);
+						if (-1 == sys::close(k))
+						{
+							sys::perror("close", k);
+							std::exit(EXIT_FAILURE);
+						}
+					}
+				 }
 
 				std::vector<char*> cmds;
 				for (auto const& it : args)
@@ -252,9 +253,9 @@ namespace sys::file
 
 				if (-1 == sys::execv(cmds.front(), cmds.data()))
 				{
-					sys::perror("execv");
+					sys::perror("execv", cmds.front());
+					std::exit(EXIT_FAILURE);
 				}
-				std::exit(EXIT_FAILURE);
 			}
 			else
 			{

@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv)
 {
-	sys::io::pstream ls{"ls"};
+	sys::io::pstream ls{"/bin/ls", "-l"};
 	std::string res;
 	while (ls)
 	{

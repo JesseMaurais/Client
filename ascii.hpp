@@ -382,9 +382,9 @@ namespace ascii
 	{
 		ready         = 0, // no malfunction
 		busy_request  = 1, // must request later
-		busy_reply    = 2, // will send later
+		busy_reply    = 2, // will reply later
 		error_request = 3, // malfunction, must request later
-		error_reply   = 4, // malfunction, must reply later
+		error_reply   = 4, // malfunction, will reply later
 		request       = 5, // request a DSR
 		report        = 6, // request a CPR
 	};
