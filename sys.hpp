@@ -61,6 +61,7 @@ constexpr auto popen = ::popen;
 constexpr auto pclose = ::pclose;
 constexpr auto pipe = ::pipe;
 constexpr auto execv = ::execv;
+constexpr auto execvp = ::execvp;
 
 } // namespace sys
 
@@ -113,12 +114,14 @@ constexpr auto popen = ::_popen;
 constexpr auto pclose = ::_pclose;
 constexpr auto pipe = [](int fd[2]) { return ::_pipe(fd, BUFSIZ, 0); };
 constexpr auto execv = ::_execv;
+constexpr auto execvp = ::_execvp;
 #else
 constexpr bool WINRT = true;
 constexpr auto popen = [](char const *path, int mode) { return _nosys(); };
 constexpr auto pclose = [](int fd) { return _nosys(); };
 constexpr auto pipe = [](int fd[2]) { return _nosys(); };
-constexpr auto execv = [](const char *cmd, const char *const argv[]) { return _nosys(); }
+constexpr auto execv = [](const char *cmd, const char *const *argv) { return _nosys(); }
+constexpr auto execvp = [](const char *cmd, const char *const *argv) { return _nosys(); }
 #endif // _WINRT_DLL
 
 } // namespace sys

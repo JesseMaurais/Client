@@ -22,29 +22,29 @@ namespace sys::io
 
 		basic_fdbuf(int fd = -1)
 		{
-			setfd(fd);
+			set(fd);
 		}
 
-		void setfd(int fd)
+		void set(int fd)
 		{
-			this->fd = fd;
+			file.set(fd);
 		}
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
 			size_type const size = n * sizeof (char_type);
-			return fd.write(static_cast<const void*>(s), size);
+			return file.write(static_cast<const void*>(s), size);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
 			size_type const size = n * sizeof (char_type);
-			return fd.read(static_cast<void*>(s), size);
+			return file.read(static_cast<void*>(s), size);
 		}
 
 	private:
 
-		sys::file::descriptor fd;
+		sys::file::descriptor file;
 	};
 
 	using fdbuf = basic_fdbuf<char>;

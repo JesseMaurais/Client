@@ -61,7 +61,7 @@ namespace sys::file
 		ssize_t const n = sys::write(fd, buffer, size);
 		if (-1 == n)
 		{
-			sys::perror("write", size);
+			sys::perror("write", fd, size);
 		}
 		return n;
 	}
@@ -71,7 +71,7 @@ namespace sys::file
 		ssize_t const n = sys::read(fd, buffer, size);
 		if (-1 == n)
 		{
-			sys::perror("read", size);
+			sys::perror("read", fd, size);
 		}
 		return n;
 	}
@@ -90,14 +90,14 @@ namespace sys::file
 	pipe::pipe()
 	{
 		int pair[2];
-		if (sys::pipe(pair))
+		if (-1 == sys::pipe(pair))
 		{
 			sys::perror("pipe");
 			return;
 		}
-		for (size_t i : { 0, 1 })
+		for (int i : { 0, 1 })
 		{
-			fd[i] = pair[i];
+			fd[i].set(pair[i]);
 		}
 	}
 
@@ -177,7 +177,7 @@ namespace sys::file
 			STARTUPINFO si;
 			ZeroMemory(&si, sizeof si);
 
-			si.cb = sizeof sa;
+			si.cb = sizeof si;
 			si.dwFlags = STARTF_USESTDHANDLES;
 			si.hStdIn = in.read.h;
 			si.hStdOut = out.write.h;
@@ -238,7 +238,7 @@ namespace sys::file
 				{
 					for (int j : no)
 					{
-						int k = pair[i][j].get();
+						int k = pair[i][j].set();
 						if (-1 == sys::close(k))
 						{
 							sys::perror("close", k);
@@ -248,20 +248,17 @@ namespace sys::file
 				}
 
 				std::vector<char*> cmds;
-				for (auto const& it : args)
-				{
-					cmds.emplace_back(const_cast<char*>(it.data()));
-				}
+				for (auto s : args) cmds.push_back(const_cast<char*>(s));
 				cmds.push_back(nullptr);
 
-				int const result = sys::execv(cmds.front(), cmds.data());
+				int const result = sys::execvp(cmds.front(), cmds.data());
 				sys::perror("execv", cmds.front());
 				std::exit(result);
 			}
 			else
 			{
-				fd[0] = pair[0][1];
-				fd[1] = pair[1][0];
+				fd[0].set(pair[0][1].set());
+				fd[1].set(pair[1][0].set());
 			}
 		}
 	}

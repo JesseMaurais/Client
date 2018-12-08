@@ -24,29 +24,31 @@ namespace sys::io
 		basic_pipebuf() = default;
 		basic_pipebuf(int fd[2])
 		{
-			setfd(fd);
+			set(fd);
 		}
 
-		void setfd(int fd[2])
+		void set(int fd[2])
 		{
-			this->fd[0].setfd(fd[0]);
-			this->fd[1].setfd(fd[1]);
+			for (int i : { 0, 1 })
+			{
+				buf[i].set(fd[i]);
+			}
 		}
 
 	private:
 
-		fdbuf fd[2];
+		fdbuf buf[2];
 
 	protected:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
-			return fd[1].xsputn(s, n);
+			return buf[1].xsputn(s, n);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
-			return fd[0].xsgetn(s, n);
+			return buf[0].xsgetn(s, n);
 		}
 	};
 

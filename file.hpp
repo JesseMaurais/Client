@@ -1,11 +1,9 @@
 #ifndef file_hpp
 #define file_hpp
 
-#include <ios>
 #include <utility>
 #include <string>
-#include <string_view>
-#include <initializer_list>
+#include <ios>
 
 namespace sys::file
 {
@@ -27,7 +25,7 @@ namespace sys::file
 		ssize_t read(void* buffer, size_t size);
 		~descriptor();
 
-		descriptor(int fd = -1)
+		explicit descriptor(int fd = -1)
 		{
 			this->fd = fd;
 		}
@@ -37,7 +35,7 @@ namespace sys::file
 			return fd;
 		}
 
-		int set(int fd)
+		int set(int fd = -1)
 		{
 			std::swap(fd, this->fd);
 			return fd;
@@ -79,7 +77,7 @@ namespace sys::file
 
 	struct process : pipe
 	{
-		using arguments = std::initializer_list<std::string_view>;
+		using arguments = std::initializer_list<char const *>;
 
 		void open(arguments args, openmode mode);
 

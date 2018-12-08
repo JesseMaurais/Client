@@ -48,7 +48,7 @@ namespace sys
 				strings(LPCH p = NULL) { this->p = p; }
 				~strings()
 				{
-					if (p and not ::FreeEnvironmentStringsA(p))
+					if (p and not FreeEnvironmentStringsA(p))
 					{
 						// GetLastError
 					}
@@ -56,7 +56,7 @@ namespace sys
 
 			} environ;
 
-			environ = ::GetEnvironmentStringsA();
+			environ = GetEnvironmentStringsA();
 			if (environ)
 			{
 				for (auto var = environ; *var; ++var)

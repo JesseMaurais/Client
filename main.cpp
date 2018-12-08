@@ -4,12 +4,11 @@
 
 int main(int argc, char **argv)
 {
-	sys::io::pstream ls{"/bin/ls", "-l"};
-	std::string res;
-	while (ls)
+	sys::io::pstream ls { "ls" };
+	std::string s;
+	while (std::getline(ls, s))
 	{
-			ls >> res;
-			std::cout << res << std::endl;
+			std::cout << s << std::endl;
 	}
 	return EXIT_SUCCESS;
 }
