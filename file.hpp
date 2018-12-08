@@ -2,10 +2,10 @@
 #define file_hpp
 
 #include <ios>
+#include <utility>
 #include <string>
 #include <string_view>
 #include <initializer_list>
-#include <type_traits>
 
 namespace sys::file
 {
@@ -32,15 +32,14 @@ namespace sys::file
 			this->fd = fd;
 		}
 
-		operator int() const
+		int get() const
 		{
 			return fd;
 		}
 
-		int release()
+		int set(int fd)
 		{
-			int fd = this->fd;
-			this->fd = -1;
+			std::swap(fd, this->fd);
 			return fd;
 		}
 
@@ -63,19 +62,14 @@ namespace sys::file
 			return fd[0].read(buffer, size);
 		}
 
-		int operator[](size_t index) const
+		descriptor& operator[](size_t index)
 		{
-			return index < 2 ? (int) fd[index] : -1;
-		}
-
-		int release(size_t index)
-		{
-			return index < 2 ? fd[index].release() : -1;
+			return fd[index];
 		}
 
 		operator bool() const
 		{
-			return fd[0] or fd[1];
+			return fd[0].get() == -1 and fd[1].get() == -1;
 		}
 
 	protected:

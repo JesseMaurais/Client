@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -47,6 +48,7 @@ constexpr bool WINRT = false;
 #define O_TEXT 0L
 #endif
 
+constexpr auto putenv = ::putenv;
 constexpr auto dup2 = ::dup2;
 constexpr auto open = ::open;
 using ssize_t = ::ssize_t;
@@ -91,6 +93,7 @@ constexpr bool POSIX = false;
 #define O_TRUNC  _O_TRUNC
 #define O_WRONLY _O_WRONLY
 
+constexpr auto putenv = ::_putenv;
 constexpr auto dup2 = ::_dup2;
 constexpr auto open = ::_open;
 using ssize_t = int;

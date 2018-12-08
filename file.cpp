@@ -80,7 +80,7 @@ namespace sys::file
 	{
 		if (-1 != fd)
 		{
-			if (sys::close(fd))
+			if (-1 == sys::close(fd))
 			{
 				sys::perror("close", fd);
 			}
@@ -210,7 +210,7 @@ namespace sys::file
 		if constexpr (sys::POSIX)
 		{
 			sys::file::pipe pair[2];
-			if (not pair[0] or not pair[1])
+			if (pair[0] or pair[1])
 			{
 				return;
 			}
@@ -222,27 +222,30 @@ namespace sys::file
 			else
 			if (0 == pid)
 			{
-				for (int i : { 0, 1 })
+				auto const no = { STDIN_FILENO, STDOUT_FILENO };
+
+				for (int i : no)
 				{
-					if (-1 == sys::dup2(pair[i], i))
+					int j = pair[i][i].get();
+					if (-1 == sys::dup2(j, i))
 					{
-						sys::perror("dup2", pair[i], i);
+						sys::perror("dup2", j, i);
 						std::exit(EXIT_FAILURE);
 					}
 				}
 
-				for (int i : { 0, 1 })
+				for (int i : no)
 				{
-					for (int j : { 0, 1 })
+					for (int j : no)
 					{
-						int k = pair[i].release(j);
+						int k = pair[i][j].get();
 						if (-1 == sys::close(k))
 						{
 							sys::perror("close", k);
 							std::exit(EXIT_FAILURE);
 						}
 					}
-				 }
+				}
 
 				std::vector<char*> cmds;
 				for (auto const& it : args)
@@ -251,16 +254,14 @@ namespace sys::file
 				}
 				cmds.push_back(nullptr);
 
-				if (-1 == sys::execv(cmds.front(), cmds.data()))
-				{
-					sys::perror("execv", cmds.front());
-					std::exit(EXIT_FAILURE);
-				}
+				int const result = sys::execv(cmds.front(), cmds.data());
+				sys::perror("execv", cmds.front());
+				std::exit(result);
 			}
 			else
 			{
-				fd[0] = pair[0].release(1);
-				fd[1] = pair[1].release(0);
+				fd[0] = pair[0][1];
+				fd[1] = pair[1][0];
 			}
 		}
 	}

@@ -41,7 +41,7 @@ namespace sys::io
 			void open(sys::file::process::arguments args, sys::file::openmode mode = default_mode)
 			{
 				process.open(args, mode | default_mode);
-				int fd[2] = { process[0], process[1] };
+				int fd[2] = { process[0].get(), process[1].get() };
 				pipebuf::setfd(fd);
 			}
 
