@@ -32,7 +32,7 @@ constexpr bool DOS =
 constexpr bool GNU =
 #if defined(__GNU__) || defined(__gnu_hurd__) || defined(__gnu_linux__)
 # undef __GNU__
-# define __GNU__
+# define __GNU_ 1
 	true
 #else
 	false
@@ -54,7 +54,7 @@ constexpr bool LINUX =
 constexpr bool ANDROID =
 #if defined(__ANDROID__)
 # undef __ANDROID__
-# define __ANDROID__
+# define __ANDROID__ 1
 	true
 #else
 	false
@@ -120,7 +120,7 @@ constexpr bool DRAGONFLY =
 constexpr bool VMS =
 #if defined(VMS) || defined(__VMS)
 # undef __VMS__
-# define __VMS__
+# define __VMS__ 1
 	true
 #else
 	false
@@ -142,7 +142,7 @@ constexpr bool OPENSERVER =
 constexpr bool UNIXWARE =
 #if defined(sco) || defined(_UNIXWARE7)
 # undef __UNIXWARE__
-# define __UNIXWARE__
+# define __UNIXWARE__ 1
 	true
 #else
 	false
@@ -180,7 +180,7 @@ constexpr bool SUNOS = false;
 constexpr bool HPUX =
 #if defined(hpux) || defined(_hpux) || defined(__hpux)
 # undef __HPUX__
-# define __HPUX__
+# define __HPUX__ 1
 	true
 #else
 	false

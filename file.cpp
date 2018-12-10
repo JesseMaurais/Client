@@ -272,12 +272,5 @@ namespace sys::file
 			std::exit(res);
 		}
 	}
-
-	int process::wait()
-	{
-		int wstatus = 0;
-		pid_t const wid = waitpid(pid, &wstatus, 0);
-		return WEXITSTATUS(wstatus);
-	}
 }
 

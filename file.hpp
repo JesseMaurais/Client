@@ -5,6 +5,19 @@
 #include <string>
 #include <ios>
 
+namespace sys
+{
+	template <typename I> constexpr bool valid(I const value)
+	{
+		constexpr I invalid { -1 };
+		return invalid != value;
+	}
+	template <typename I> constexpr bool invalid(I const value)
+	{
+		return not valid(value);
+	}
+}
+
 namespace sys::file
 {
 	using size_t = std::size_t;
@@ -82,7 +95,6 @@ namespace sys::file
 		using arguments = std::initializer_list<char const *>;
 
 		void open(arguments args, openmode mode);
-		int wait();
 
 	protected:
 
