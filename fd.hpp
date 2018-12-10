@@ -30,8 +30,9 @@ namespace sys::io
 
 		public:
 
-			impl_fdstream(int fd = -1)
-			: fdbuf(fd)
+			impl_fdstream(int fd = -1, sys::size_t sz)
+			: bufsiz(sz)
+			, fdbuf(fd)
 			, membuf()
 			, base(this)
 			{ }
@@ -49,15 +50,15 @@ namespace sys::io
 				using namespace sys::file;
 				if (mode & out and mode & in)
 				{
-					membuf::setbufsz(BUFSIZ, BUFSIZ);
+					membuf::setbufsz(bufsiz, bufsiz);
 				}
 				else if (mode & out)
 				{
-					membuf::setbufsz(0, BUFSIZ);
+					membuf::setbufsz(0, bufsiz);
 				}
 				else if (mode & in)
 				{
-					membuf::setbufsz(BUFSIZ, 0);
+					membuf::setbufsz(bufsiz, 0);
 				}
 				fd.open(path, mode | default_mode);
 			}
@@ -65,6 +66,7 @@ namespace sys::io
 		private:
 
 			sys::file::descriptor fd;
+			sys::size_t const bufsiz;
 		};
 	}
 

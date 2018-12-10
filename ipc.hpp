@@ -45,6 +45,11 @@ namespace sys::io
 				pipebuf::set(fd);
 			}
 
+			int wait()
+			{
+				return process.wait();
+			}
+
 		private:
 
 			sys::file::process process;

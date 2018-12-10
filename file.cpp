@@ -47,6 +47,8 @@ namespace
 
 namespace sys::file
 {
+	size_t bufsiz = BUFSIZ;
+
 	void descriptor::open(std::string const& path, openmode mode)
 	{
 		fd = sys::open(path.c_str(), convert(mode));
@@ -202,8 +204,8 @@ namespace sys::file
 			}
 
 			id = static_cast<std::intptr_t>(pi.hProcess);
-			fd[STDIN_FILENO] = out.read.release();
-			fd[STDOUT_FILENO] = in.write.release();
+			fd[0] = out.read.release();
+			fd[1] = in.write.release();
 		}
 		else
 		#endif // WIN32
@@ -214,53 +216,68 @@ namespace sys::file
 			{
 				return;
 			}
-			pid = sys::fork();
+
+			pid = 0;//sys::fork();
 			if (-1 == pid)
 			{
 				sys::perror("fork");
+				return;
 			}
-			else
-			if (0 == pid)
-			{
-				auto const no = { STDIN_FILENO, STDOUT_FILENO };
 
-				for (int i : no)
+			if (pid)
+			{
+				for (int i : { 0, 1 })
 				{
-					int j = pair[i][i].get();
-					if (-1 == sys::dup2(j, i))
+					fd[i].set(pair[i][1 - i].set());
+				}
+				return;
+			}
+
+			auto const no = { STDIN_FILENO, STDOUT_FILENO };
+
+			for (int i : no)
+			{
+				int const j = pair[i][1-i].get();
+				if (-1 == sys::close(i))
+				{
+					sys::perror("close", i);
+					std::exit(EXIT_FAILURE);
+				}
+				if (-1 == sys::dup2(j, i))
+				{
+					sys::perror("dup2", j, i);
+					std::exit(EXIT_FAILURE);
+				}
+			}
+
+			for (int i : no)
+			{
+				for (int j : no)
+				{
+					int const k = pair[i][j].set();
+					if (-1 == sys::close(k))
 					{
-						sys::perror("dup2", j, i);
+						sys::perror("close", k);
 						std::exit(EXIT_FAILURE);
 					}
 				}
-
-				for (int i : no)
-				{
-					for (int j : no)
-					{
-						int k = pair[i][j].set();
-						if (-1 == sys::close(k))
-						{
-							sys::perror("close", k);
-							std::exit(EXIT_FAILURE);
-						}
-					}
-				}
-
-				std::vector<char*> cmds;
-				for (auto s : args) cmds.push_back(const_cast<char*>(s));
-				cmds.push_back(nullptr);
-
-				int const result = sys::execvp(cmds.front(), cmds.data());
-				sys::perror("execv", cmds.front());
-				std::exit(result);
 			}
-			else
-			{
-				fd[0].set(pair[0][1].set());
-				fd[1].set(pair[1][0].set());
-			}
+
+			std::vector<char*> cmds;
+			for (auto s : args) cmds.push_back(const_cast<char*>(s));
+			cmds.push_back(nullptr);
+
+			int const res = sys::execvp(cmds.front(), cmds.data());
+			sys::perror("execvp", cmds.front());
+			std::exit(res);
 		}
+	}
+
+	int process::wait()
+	{
+		int wstatus = 0;
+		pid_t const wid = waitpid(pid, &wstatus, 0);
+		return WEXITSTATUS(wstatus);
 	}
 }
 

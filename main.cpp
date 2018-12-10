@@ -5,6 +5,7 @@
 int main(int argc, char **argv)
 {
 	sys::io::pstream ls { "ls" };
+	int const status = ls.wait();
 	std::string s;
 	while (std::getline(ls, s))
 	{
