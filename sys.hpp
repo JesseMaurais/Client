@@ -5,24 +5,70 @@
 // Common
 //
 
+namespace sys
+{
+
+// Portable Operating System Interface
+
+constexpr bool POSIX = 
+#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
+# undef __POSIX__
+# define __POSIX__ 1
+	true
+#else
+	false
+#endif
+	;
+
+// Single UNIX Specification
+
+constexpr long XOPEN = 
+#if defined(_XOPEN_SOURCE)
+# undef __XOPEN__
+# define __XOPEN__ 1
+	_XOPEN_SOURCE
+#else
+	0L
+#endif
+	;
+
+// Windows Runtime / Universal Windows Platform
+
+constexpr bool WINRT =
+#if defined(_WINRTDLL)
+# undef __WINRT__
+# define __WINRT__ 1
+	true
+#else
+	false
+#endif
+	;
+
+// Microsoft C Runtime
+
+constexpr long MSCRT =
+#if defined(_MSC_VER)
+# undef __MSCRT__
+# define __MSCRT__ 1
+	_MSC_VER
+#else
+	0L
+#endif
+	;
+
+}
+
+
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <search.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-//
-// POSIX
-//
-
-#if __has_include(<unistd.h>)
-#include <unistd.h>
-#include <fcntl.h>
 
 namespace sys
 {
 
 // Portable Operating System Interface
+
 constexpr long POSIX_VERSION =
 #if defined(_POSIX_VERSION)
 	_POSIX_VERSION
@@ -31,7 +77,24 @@ constexpr long POSIX_VERSION =
 #endif
 	;
 
+constexpr long POSIX2_VERSION =
+#if defined(_POSIX2_VERSION)
+	_POSIX2_VERSION
+#else
+	0L
+#endif
+	;
+
+constexpr long POSIX2_C_VERSION =
+#if defined(_POSIX2_C_VERSION)
+	_POSIX2_C_VERSION
+#else
+	0L
+#endif
+	;
+
 // Single UNIX Specification
+
 constexpr long XOPEN_VERSION =
 #if defined(_XOPEN_VERSION)
 	_XOPEN_VERSION
@@ -40,9 +103,58 @@ constexpr long XOPEN_VERSION =
 #endif
 	;
 
-constexpr bool XSI = XOPEN_VERSION > 0;
-constexpr bool POSIX = POSIX_VERSION > 0;
-constexpr bool WINRT = false;
+constexpr long XOPEN_XCU_VERSION =
+#if defined(_XOPEN_XCU_VERSION)
+	_XOPEN_XCU_VERSION
+#else
+	0L
+#endif
+	;
+
+constexpr bool XOPEN_XPG2 =
+#if defined(_XOPEN_XPG2)
+	true
+#else
+	false
+#endif
+	;
+
+constexpr bool XOPEN_XPG3 =
+#if defined(_XOPEN_XPG3)
+	true
+#else
+	false
+#endif
+	;
+
+constexpr bool XOPEN_XPG4 =
+#if defined(_XOPEN_XPG4)
+	true
+#else
+	false
+#endif
+	;
+
+constexpr bool XOPEN_UNIX =
+#if defined(_XOPEN_UNIX)
+	true
+#else
+	false
+#endif
+	;
+
+}
+
+//
+// POSIX / XOPEN
+//
+
+#if defined(__POSIX__) || defined(__XOPEN__)
+#include <unistd.h>
+#include <fcntl.h>
+
+namespace sys
+{
 
 #ifndef O_BINARY
 #define O_BINARY 0L
@@ -79,8 +191,6 @@ constexpr auto fstat = ::fstat;
 constexpr auto getcwd = ::getcwd;
 constexpr auto getpid = ::getpid;
 constexpr auto isatty = ::isatty;
-constexpr auto lfind = ::lfind;
-constexpr auto lsearch = ::lsearch;
 constexpr auto lseek = ::lseek;
 constexpr auto mkdir = ::mkdir;
 constexpr auto mktemp = ::mktemp;
@@ -92,7 +202,7 @@ constexpr auto putenv = ::putenv;
 constexpr auto read = ::read;
 constexpr auto rmdir = ::rmdir;
 constexpr auto stat = ::stat;
-constexpr auto swap = ::swab;
+constexpr auto swab = ::swab;
 constexpr auto umask = ::umask;
 constexpr auto unlink = ::unlink;
 constexpr auto vfork = ::vfork;
@@ -101,33 +211,19 @@ constexpr auto write = ::write;
 
 } // namespace sys
 
-#else
 
 //
-// MSVCRT
+// MSCRT
 //
 
-#if __has_include(<io.h>)
+#elif defined(__MSCRT__) && !defined(__WINRT__)
 #include <io.h>
+#include <process.h>
 #include <errno.h>
 #include <direct.h>
-#include <process.h>
 
 namespace sys
 {
-
-constexpr bool WINRT =
-#ifdef _WINRT_DLL
-	false
-#else
-	true
-#endif
-	;
-
-constexpr bool XSI = false;
-constexpr long XOPEN_VERSION = 0;
-constexpr bool POSIX = false;
-constexpr long POSIX_VERSION = 0;
 
 constexpr int _nosys = [] { ::_set_errno(ENOSYS); return -1; };
 
@@ -142,7 +238,7 @@ constexpr int _nosys = [] { ::_set_errno(ENOSYS); return -1; };
 #define O_APPEND _O_APPEND
 #define O_BINARY _O_BINARY
 #define O_CREAT  _O_CREAT
-#define O_EXCL   _O_NOINHERIT
+#define O_EXCL   _O_EXCL
 #define O_RDONLY _O_RDONLY
 #define O_RDWR   _O_RDWR
 #define O_TEXT   _O_TEXT
@@ -152,7 +248,7 @@ constexpr int _nosys = [] { ::_set_errno(ENOSYS); return -1; };
 using size_t = unsigned int;
 using ssize_t = signed int;
 using off_t = long;
-using pid_t = int;
+using pid_t = intptr_t;
 using mode_t = int;
 using statbuf = struct ::_stat;
 
@@ -177,8 +273,6 @@ constexpr auto fstat = ::_fstat;
 constexpr auto getcwd = ::_getcwd;
 constexpr auto getpid = ::_getpid;
 constexpr auto isatty = ::_isatty;
-constexpr auto lfind = ::_lfind;
-constexpr auto lsearch = ::_lsearch;
 constexpr auto lseek = ::_lseek;
 constexpr auto mkdir = [](const char *dir, mode_t) { return ::_mkdir(dir); };
 constexpr auto mktemp = ::_mktemp;
@@ -198,15 +292,13 @@ constexpr auto write = ::_write;
 
 } // namespace sys
 
-#else
-
 //
 // Unknown
 //
 
-#error Cannot find system headers
-#endif // MSVC
-#endif // POSIX
+#else
+#error Cannot find common system interfaces.
+#endif
 
 //
 // Common
@@ -214,7 +306,8 @@ constexpr auto write = ::_write;
 
 namespace sys
 {
-	pid_t pexec(int fd[3], char **argv);
+	pid_t pexec(int fd[3], const char **argv, int rw = O_RDWR);
 };
 
 #endif // file
+

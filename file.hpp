@@ -7,14 +7,10 @@
 
 namespace sys
 {
-	template <typename I> constexpr bool valid(I const value)
+	template <typename I> constexpr bool fail(I const value)
 	{
 		constexpr I invalid { -1 };
-		return invalid != value;
-	}
-	template <typename I> constexpr bool invalid(I const value)
-	{
-		return not valid(value);
+		return invalid == value;
 	}
 }
 
@@ -99,6 +95,7 @@ namespace sys::file
 	protected:
 
 		std::intptr_t pid;
+		descriptor error;
 	};
 }
 
