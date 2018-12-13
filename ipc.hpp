@@ -42,18 +42,34 @@ namespace sys::io
 			{
 				process.open(args, mode | default_mode);
 				int fd[2] = { process[0].get(), process[1].get() };
+				pipebuf::setbufsz(sys::file::bufsiz);
 				pipebuf::set(fd);
 			}
 
-			int wait()
+			void eof()
 			{
-				return process.wait();
+				process[0].close();
 			}
 
 		private:
 
 			sys::file::process process;
 		};
+	}
+
+	template
+	<
+	 class Char,
+	 template <class> class Traits,
+	 template <class> class Alloc,
+	 template <class, class> class basic_stream,
+	 sys::file::openmode default_mode
+	>
+	impl_pstream<Char, Traits, Alloc, basic_stream, default_mode>&
+	 eof(impl_pstream<Char, Traits, Alloc, basic_stream, default_mode>& s)
+	{
+		s.eof();
+		return s;
 	}
 
 	template

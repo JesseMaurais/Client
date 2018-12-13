@@ -9,13 +9,14 @@ namespace sys
 {
 	template <typename I> constexpr bool fail(I const value)
 	{
-		constexpr I invalid { -1 };
+		constexpr I invalid = -1;
 		return invalid == value;
 	}
 }
 
 namespace sys::file
 {
+	using sys::fail;
 	using size_t = std::size_t;
 	using ssize_t = std::make_signed<size_t>::type;
 	using openmode = std::ios_base::openmode;
@@ -34,11 +35,16 @@ namespace sys::file
 		void open(std::string const& path, openmode mode);
 		ssize_t write(const void* buffer, size_t size);
 		ssize_t read(void* buffer, size_t size);
-		~descriptor();
+		bool close();
 
 		explicit descriptor(int fd = -1)
 		{
 			this->fd = fd;
+		}
+
+		~descriptor()
+		{
+			(void) close();
 		}
 
 		int get() const
@@ -78,7 +84,7 @@ namespace sys::file
 
 		operator bool() const
 		{
-			return fd[0].get() == -1 and fd[1].get() == -1;
+			return fail(fd[0].get()) and fail(fd[1].get());
 		}
 
 	protected:
@@ -94,8 +100,8 @@ namespace sys::file
 
 	protected:
 
-		std::intptr_t pid;
 		descriptor error;
+		std::intptr_t pid;
 	};
 }
 

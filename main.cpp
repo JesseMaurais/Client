@@ -4,8 +4,9 @@
 
 int main(int argc, char **argv)
 {
-	sys::io::pstream ls { "ls" };
-	int const status = ls.wait();
+	sys::io::pstream ls { "tr", "a-z", "A-Z" };
+	ls << "Hello, World!";
+	ls.eof();
 	std::string s;
 	while (std::getline(ls, s))
 	{

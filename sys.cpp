@@ -8,9 +8,9 @@
 
 namespace sys
 {
-	pid_t pexec(int fd[3], const char **argv)
+	pid_t pexec(int fd[3], char **argv)
 	{
-		auto const stdno = { STDIN_FILENO, STDOUT_FILENO, STDOUT_FILENO };
+		auto const stdno = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
 
 		#ifdef __WIN32__
 		if constexpr (WIN32)
@@ -55,7 +55,7 @@ namespace sys
 
 			} pair[3];
 
-			for (int i : no)
+			for (int i : stdno)
 			{
 				if (not pair[i].ok)
 				{
@@ -70,10 +70,10 @@ namespace sys
 				}
 			}
 
-			char cmdline[MAX_PATH];
+			char cmd[MAX_PATH];
 			for (size_t i = 0, j = 0; argv[i]; ++i, ++j)
 			{
-				int const n = std::snprintf(cmdline + j, sizeof cmdline - j, "%s ", argv[i]);
+				int n = std::snprintf(cmd + j, sizeof cmd - j, "%s ", argv[i]);
 				if (0 < n) j += n;
 				else return -1;
 			}
@@ -93,11 +93,11 @@ namespace sys
 			BOOL const ok = CreateProcessA
 			(
 				argv[0], // application
-				cmdline, // command line
+				cmd,     // command line
 				NULL,    // process attributes
 				NULL,    // thread attributes
 				TRUE,    // inherit handles
-				0,       // creation flags
+				NULL,    // creation flags
 				NULL,    // environment
 				NULL,    // current directory
 				&si,     // start-up info
@@ -106,10 +106,10 @@ namespace sys
 
 			if (not ok)
 			{
-				return;
+				return -1;
 			}
 
-			for (int i : no)
+			for (int i : stdno)
 			{
 				fd[i] = i ? pair[i].read.set() : pair[i].write.set();
 			}
@@ -123,24 +123,24 @@ namespace sys
 			sys::file::pipe pair[3];
 			if (pair[0] or pair[1] or pair[2])
 			{
-				return;
+				return -1;
 			}
 
-			pid_t const pid = vfork();
+			pid_t const pid = fork();
 			if (pid)
 			{
 				if (fail(pid))
 				{
 					perror("fork");
 				}
-				else for (int i : no)
+				else for (int i : stdno)
 				{
 					fd[i] = pair[i][0 == i].set();
 				}
 				return pid;
 			}
 
-			for (int i : no)
+			for (int i : stdno)
 			{
 				int k = pair[i][0 != i].get();
 
@@ -161,7 +161,7 @@ namespace sys
 			}
 
 			int const res = execvp(argv[0], argv);
-			perror("execvp", argv[0]);
+			perror("execvp");
 			std::exit(res);
 		}
 	}

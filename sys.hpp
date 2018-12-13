@@ -306,8 +306,7 @@ constexpr auto write = ::_write;
 
 namespace sys
 {
-	pid_t pexec(int fd[3], const char **argv, int rw = O_RDWR);
+	pid_t pexec(int fd[3], char **argv);
 };
 
 #endif // file
-

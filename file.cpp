@@ -1,5 +1,6 @@
 #include "file.hpp"
 #include "sys.hpp"
+#include "os.hpp"
 #include "err.hpp"
 
 namespace
@@ -47,7 +48,7 @@ namespace sys::file
 	void descriptor::open(std::string const& path, openmode mode)
 	{
 		fd = sys::open(path.c_str(), convert(mode));
-		if (-1 == fd)
+		if (fail(fd))
 		{
 			sys::perror("open");
 		}
@@ -56,7 +57,7 @@ namespace sys::file
 	ssize_t descriptor::write(const void* buffer, size_t size)
 	{
 		ssize_t const n = sys::write(fd, buffer, size);
-		if (-1 == n)
+		if (fail(n))
 		{
 			sys::perror("write", fd, size);
 		}
@@ -66,33 +67,34 @@ namespace sys::file
 	ssize_t descriptor::read(void* buffer, size_t size)
 	{
 		ssize_t const n = sys::read(fd, buffer, size);
-		if (-1 == n)
+		if (fail(n))
 		{
 			sys::perror("read", fd, size);
 		}
 		return n;
 	}
 
-	descriptor::~descriptor()
+	bool descriptor::close()
 	{
-		if (-1 != fd)
+		if (not fail(fd))
 		{
-			if (-1 == sys::close(fd))
+			if (fail(sys::close(fd)))
 			{
 				sys::perror("close", fd);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	pipe::pipe()
 	{
 		int pair[2];
-		if (-1 == sys::pipe(pair))
+		if (fail(sys::pipe(pair)))
 		{
 			sys::perror("pipe");
-			return;
 		}
-		for (int i : { 0, 1 })
+		else for (int i : { 0, 1 })
 		{
 			fd[i].set(pair[i]);
 		}
@@ -104,11 +106,13 @@ namespace sys::file
 		for (auto s : args) cmds.push_back(const_cast<char*>(s));
 		cmds.push_back(nullptr);
 
-		int fd[3];
-		pid = sys::pexec(fd, cmds.data(), convert(mode));
-		if (valid(pid))
+		int desc[3];
+		pid = sys::pexec(desc, cmds.data());
+		if (not fail(pid))
 		{
-			
+			fd[0].set(desc[1]);
+			fd[1].set(desc[0]);
+			error.set(desc[2]);
 		}		
 	}
 }
