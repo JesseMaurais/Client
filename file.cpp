@@ -83,6 +83,7 @@ namespace sys::file
 				sys::perror("close", fd);
 				return true;
 			}
+			fd = -1;
 		}
 		return false;
 	}
@@ -110,8 +111,8 @@ namespace sys::file
 		pid = sys::pexec(desc, cmds.data());
 		if (not fail(pid))
 		{
-			fd[0].set(desc[1]);
-			fd[1].set(desc[0]);
+			fd[0].set(desc[0]);
+			fd[1].set(desc[1]);
 			error.set(desc[2]);
 		}		
 	}
