@@ -21,14 +21,14 @@ namespace sys::file
 	using ssize_t = std::make_signed<size_t>::type;
 	using openmode = std::ios_base::openmode;
 
-	extern size_t bufsiz;
-
 	constexpr auto app  = std::ios_base::app;
 	constexpr auto bin  = std::ios_base::binary;
 	constexpr auto in   = std::ios_base::in;
 	constexpr auto out  = std::ios_base::out;
 	constexpr auto trun = std::ios_base::trunc;
 	constexpr auto ate  = std::ios_base::ate;
+
+	extern size_t bufsiz;
 
 	struct descriptor
 	{
