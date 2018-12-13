@@ -1,6 +1,9 @@
 #ifndef sys_hpp
 #define sys_hpp
 
+#include "os.hpp"
+#include "cc.hpp"
+
 //
 // Common
 //
@@ -44,18 +47,6 @@ constexpr bool WINRT =
 #endif
 	;
 
-// Microsoft C Runtime
-
-constexpr long MSCRT =
-#if defined(_MSC_VER)
-# undef __MSCRT__
-# define __MSCRT__ 1
-	_MSC_VER
-#else
-	0L
-#endif
-	;
-
 }
 
 
@@ -63,6 +54,8 @@ constexpr long MSCRT =
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
 
 namespace sys
 {
@@ -146,12 +139,11 @@ constexpr bool XOPEN_UNIX =
 }
 
 //
-// POSIX / XOPEN
+// POSIX / XOPEN / UNIX
 //
 
-#if defined(__POSIX__) || defined(__XOPEN__)
+#if defined(__POSIX__) || defined(__XOPEN__) || defined(__UNIX__)
 #include <unistd.h>
-#include <fcntl.h>
 
 namespace sys
 {
@@ -213,19 +205,18 @@ constexpr auto write = ::write;
 
 
 //
-// MSCRT
+// WIN32
 //
 
-#elif defined(__MSCRT__) && !defined(__WINRT__)
+#elif defined(__WIN32__)
 #include <io.h>
 #include <process.h>
-#include <errno.h>
 #include <direct.h>
 
 namespace sys
 {
 
-constexpr int _nosys = [] { ::_set_errno(ENOSYS); return -1; };
+constexpr auto _nosys = [] { ::_set_errno(ENOSYS); return -1; };
 
 #define STDIN_FILENO  0
 #define STDOUT_FILENO 1
@@ -268,7 +259,7 @@ constexpr auto execvp = ::_execvp;
 constexpr auto execvpe = ::_execvpe;
 constexpr auto fdopen = ::_fdopen;
 constexpr auto fileno = ::_fileno;
-constexpr auto fork = [] { return _nosys() };
+constexpr auto fork = [] { return _nosys(); };
 constexpr auto fstat = ::_fstat;
 constexpr auto getcwd = ::_getcwd;
 constexpr auto getpid = ::_getpid;

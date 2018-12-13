@@ -1,6 +1,9 @@
 #include "sys.hpp"
 #include "file.hpp"
-#include "os.hpp"
+
+#if __has_include(<windows.h>)
+#include <windows.h>
+#endif
 
 #if __has_include(<processthreadapi.h>)
 #include <processthreadapi.h>
@@ -12,8 +15,7 @@ namespace sys
 	{
 		auto const stdno = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
 
-		#ifdef __WIN32__
-		if constexpr (WIN32)
+		#if defined(__WIN32__)
 		{
 			struct Handle
 			{
@@ -26,7 +28,8 @@ namespace sys
 
 				int set()
 				{
-					int fd = _open_osfhandle(h, 0);
+					auto ptr = std::intptr_t(h);
+					int fd = _open_osfhandle(ptr, 0);
 					h = nullptr;
 					return fd;
 				}
@@ -114,11 +117,9 @@ namespace sys
 				fd[i] = i ? pair[i].read.set() : pair[i].write.set();
 			}
 
-			return static_cast<std::intptr_t>(pi.hProcess);
+			return std::intptr_t(pi.hProcess);
 		}
-		else
-		#endif // WIN32
-		if constexpr (POSIX)
+		#elif defined(__POSIX__)
 		{
 			sys::file::pipe pair[3];
 			if (pair[0] or pair[1] or pair[2])
@@ -164,6 +165,7 @@ namespace sys
 			perror("execvp");
 			std::exit(res);
 		}
+		#endif
 	}
 }
 

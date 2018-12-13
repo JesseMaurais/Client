@@ -29,14 +29,15 @@ namespace
 		{
 			flags |= O_APPEND;
 		}
-		if (mode & trunc)
+		if (mode & trun)
 		{
 			flags |= O_TRUNC;
 		}
-		if constexpr (sys::LINUX)
+		#if defined(__LINUX__)
 		{
 			flags |= O_DIRECT;
 		}
+		#endif
 		return flags;
 	}
 }
@@ -47,7 +48,7 @@ namespace sys::file
 
 	void descriptor::open(std::string const& path, openmode mode)
 	{
-		fd = sys::open(path.c_str(), convert(mode));
+		fd = sys::open(path.c_str(), convert(mode), 0);
 		if (fail(fd))
 		{
 			sys::perror("open");

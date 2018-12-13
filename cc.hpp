@@ -18,6 +18,8 @@ constexpr bool GNU =
 // Minimalist GNU for Windows
 constexpr bool MINGW =
 #if defined(__MINGW32__) || defined(__MINGW64__)
+# undef __MINGW__
+# define __MINGW__ 1
 	true
 #else
 	false
