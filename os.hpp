@@ -18,10 +18,10 @@ constexpr bool WIN32 =
 	;
 
 // Microsoft DOS
-constexpr bool DOS =
+constexpr bool MSDOS =
 #if defined(MSDOS) || defined(_MSDOS) || defined(__MSDOS__) || defined(__DOS__)
-# undef __DOS__
-# define __DOS__ 1
+# undef __MSDOS__
+# define __MSDOS__ 1
 	true
 #else
 	false

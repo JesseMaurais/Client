@@ -29,6 +29,8 @@ constexpr bool MINGW =
 // DJ's GNU Programming Platform
 constexpr bool DJGPP =
 #if defined(__DJGPP__) || defined(__GO32__)
+# undef __DJGPP__
+# define __DJGPP__ 1
 	true
 #else
 	false
@@ -65,6 +67,8 @@ constexpr bool DMC =
 // Microsoft Visual C++
 constexpr bool MSVC =
 #if defined(_MSC_VER)
+# undef __MSVC__
+# define __MSVC__
 	true
 #else
 	false

@@ -54,7 +54,6 @@ constexpr bool WINRT =
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <errno.h>
 #include <fcntl.h>
 
 namespace sys
@@ -142,7 +141,7 @@ constexpr bool XOPEN_UNIX =
 // POSIX / XOPEN / UNIX
 //
 
-#if defined(__POSIX__) || defined(__XOPEN__) || defined(__UNIX__)
+#if defined(__POSIX__) || defined(__XOPEN__) || __has_include(<unistd.h>)
 #include <unistd.h>
 
 namespace sys
@@ -178,7 +177,6 @@ constexpr auto execle = ::execle;
 constexpr auto execlp = ::execlp;
 constexpr auto fdopen = ::fdopen;
 constexpr auto fileno = ::fileno;
-constexpr auto fork = ::fork;
 constexpr auto fstat = ::fstat;
 constexpr auto getcwd = ::getcwd;
 constexpr auto getpid = ::getpid;
@@ -197,7 +195,6 @@ constexpr auto stat = ::stat;
 constexpr auto swab = ::swab;
 constexpr auto umask = ::umask;
 constexpr auto unlink = ::unlink;
-constexpr auto vfork = ::vfork;
 constexpr auto write = ::write;
 
 
@@ -208,15 +205,13 @@ constexpr auto write = ::write;
 // WIN32
 //
 
-#elif defined(__WIN32__)
+#elif defined(__WIN32__) || __has_include(<io.h>)
 #include <io.h>
 #include <process.h>
 #include <direct.h>
 
 namespace sys
 {
-
-constexpr auto _nosys = [] { ::_set_errno(ENOSYS); return -1; };
 
 #define STDIN_FILENO  0
 #define STDOUT_FILENO 1
@@ -259,7 +254,6 @@ constexpr auto execvp = ::_execvp;
 constexpr auto execvpe = ::_execvpe;
 constexpr auto fdopen = ::_fdopen;
 constexpr auto fileno = ::_fileno;
-constexpr auto fork = [] { return _nosys(); };
 constexpr auto fstat = ::_fstat;
 constexpr auto getcwd = ::_getcwd;
 constexpr auto getpid = ::_getpid;
@@ -278,8 +272,9 @@ constexpr auto stat = ::_stat;
 constexpr auto swab = ::_swab;
 constexpr auto umask = ::_umask;
 constexpr auto unlink = ::_unlink;
-constexpr auto vfork = [] { return _nosys(); };
 constexpr auto write = ::_write;
+
+DWORD winerr(char const *prefix); // like perror for GetLastError
 
 } // namespace sys
 

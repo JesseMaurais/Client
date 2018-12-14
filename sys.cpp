@@ -1,5 +1,6 @@
 #include "sys.hpp"
 #include "file.hpp"
+#include <iostream>
 
 #if __has_include(<windows.h>)
 #define WIN32_LEAN_AND_MEAN
@@ -12,6 +13,32 @@
 
 namespace sys
 {
+	#if defined(__WIN32__)
+	DWORD winerr(char const *prefix)
+	{
+		LPSTR data = nullptr;
+		constexpr DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+		DWORD const code = GetLastError();
+		DWORD const size = FormatMessageA
+		(
+		 FORMAT_MESSAGE_ALLOCATE_BUFFER	| FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTERS,
+		 nullptr, // source
+		 code,    // message
+		 lang,    // language
+		 &data,   // buffer
+		 0,       // size
+		 nullptr  // arguments
+		);
+		if (data)
+		{
+			std::string_view msg(data, size);
+			std::cerr << prefix << ": " << msg << std::endl;
+			LocalFree(data);
+		}
+		return code;
+	}
+	#endif
+
 	pid_t pexec(int fd[3], char **argv)
 	{
 		auto const stdno = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
@@ -55,6 +82,11 @@ namespace sys
 						&sa,
 						BUFSIZ
 					);
+
+					if (not ok)
+					{
+						winerr("CreatePipe");
+					}
 				}
 
 			} pair[3];
@@ -70,6 +102,8 @@ namespace sys
 
 				if (not SetHandleInformation(h, HANDLE_FLAG_INHERIT, 0))
 				{
+					winerr("SetHandleInformation");
+					_set_errno(EPERM);
 					return -1;
 				}
 			}
@@ -79,7 +113,11 @@ namespace sys
 			{
 				int n = std::snprintf(cmd + j, sizeof cmd - j, "%s ", argv[i]);
 				if (0 < n) j += n;
-				else return -1;
+				else
+				{
+					_set_errno(E2BIG);
+					return -1;
+				}
 			}
 
 			PROCESS_INFORMATION pi;
@@ -96,20 +134,22 @@ namespace sys
 
 			BOOL const ok = CreateProcessA
 			(
-				argv[0], // application
-				cmd,     // command line
-				NULL,    // process attributes
-				NULL,    // thread attributes
-				TRUE,    // inherit handles
-				NULL,    // creation flags
-				NULL,    // environment
-				NULL,    // current directory
-				&si,     // start-up info
-				&pi      // process info
+				*argv, // application
+				cmd,   // command line
+				NULL,  // process attributes
+				NULL,  // thread attributes
+				TRUE,  // inherit handles
+				NULL,  // creation flags
+				NULL,  // environment
+				NULL,  // current directory
+				&si,   // start-up info
+				&pi    // process info
 			);
 
 			if (not ok)
 			{
+				winerr("CreateProcess");
+				_set_errno(ECHILD);
 				return -1;
 			}
 

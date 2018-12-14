@@ -16,17 +16,17 @@ namespace sig
 		using container = std::map<Slot, observer>;
 		using count = typename container::size_type;
 
-		void connect(Slot const& id, observer fn)
+		virtual void connect(Slot const& id, observer fn)
 		{
 			slots.emplace(id, fn);
 		}
 
-		count disconnect(Slot const &id)
+		virtual count disconnect(Slot const &id)
 		{
 			return slots.erase(id);
 		}
 
-		void disconnect()
+		virtual void disconnect()
 		{
 			slots.clear();
 		}
@@ -85,11 +85,11 @@ namespace sig
 
 namespace sys::sig
 {
-	struct handle : ::sig::slot<int>
+	struct slot : ::sig::slot<int>
 	{
 		operator bool();
-		handle(int no, observer fn);
-		~handle();
+		slot(int no, observer fn);
+		~slot();
 
 	private:
 
@@ -99,9 +99,9 @@ namespace sys::sig
 		} old;
 	};
 
-	using subject = handle::subject;
-	using signature = handle::signature;
-	using observer = handle::observer;
+	using subject = slot::subject;
+	using signature = slot::signature;
+	using observer = slot::observer;
 }
 
 #endif // file
