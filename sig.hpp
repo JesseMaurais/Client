@@ -7,7 +7,7 @@
 
 namespace sig
 {
-	template <typename Slot, typename... Args> class event
+	template <typename Slot, typename... Args> class subject
 	{
 	public:
 
@@ -16,17 +16,17 @@ namespace sig
 		using container = std::map<Slot, observer>;
 		using count = typename container::size_type;
 
-		virtual void connect(Slot const& id, observer fn)
+		void connect(Slot const& id, observer fn)
 		{
 			slots.emplace(id, fn);
 		}
 
-		virtual count disconnect(Slot const &id)
+		count disconnect(Slot const &id)
 		{
 			return slots.erase(id);
 		}
 
-		virtual void disconnect()
+		void disconnect()
 		{
 			slots.clear();
 		}
@@ -92,6 +92,8 @@ namespace sys::sig
 		~slot();
 
 	private:
+
+		using base = ::sig::slot<int>;
 
 		struct {
 			signature *fn;

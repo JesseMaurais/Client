@@ -25,9 +25,14 @@ namespace sys::io
 			set(fd);
 		}
 
-		void set(int fd)
+		void set(int fd = -1)
 		{
 			file.set(fd);
+		}
+
+		void eof()
+		{
+			file.close();
 		}
 
 		size_type xsputn(char_type const *s, size_type n) override

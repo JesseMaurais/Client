@@ -207,8 +207,8 @@ constexpr auto write = ::write;
 
 #elif defined(__WIN32__) || __has_include(<io.h>)
 #include <io.h>
-#include <process.h>
 #include <direct.h>
+#include <process.h>
 
 namespace sys
 {
@@ -274,7 +274,7 @@ constexpr auto umask = ::_umask;
 constexpr auto unlink = ::_unlink;
 constexpr auto write = ::_write;
 
-DWORD winerr(char const *prefix); // like perror for GetLastError
+DWORD winerr(char const *prefix); // perror for GetLastError
 
 } // namespace sys
 

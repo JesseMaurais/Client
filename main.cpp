@@ -5,8 +5,7 @@
 int main(int argc, char **argv)
 {
 	sys::io::pstream ls { "tr", "a-z", "A-Z" };
-	ls << "Hello, World!";
-	ls.eof();
+	ls << "Hello, World!" << sys::io::eof;
 	std::string s;
 	while (std::getline(ls, s))
 	{

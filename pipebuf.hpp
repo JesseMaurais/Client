@@ -21,18 +21,22 @@ namespace sys::io
 		using char_type = typename base::char_type;
 		using size_type = typename base::size_type;
 
-		basic_pipebuf() = default;
-		basic_pipebuf(int fd[2])
+		basic_pipebuf(int fd[2] = nullptr)
 		{
 			set(fd);
 		}
 
-		void set(int fd[2])
+		void set(int fd[2] = nullptr)
 		{
 			for (int i : { 0, 1 })
 			{
-				buf[i].set(fd[i]);
+				buf[i].set(fd ? fd[i] : -1);
 			}
+		}
+
+		void eof()
+		{
+			fbuf[0].eof();
 		}
 
 	private:

@@ -1,7 +1,9 @@
 #ifndef file_hpp
 #define file_hpp
 
+#include <memory>
 #include <utility>
+#include <functional>
 #include <string>
 #include <ios>
 
@@ -21,14 +23,14 @@ namespace sys::file
 	using ssize_t = std::make_signed<size_t>::type;
 	using openmode = std::ios_base::openmode;
 
-	constexpr auto app  = std::ios_base::app;
-	constexpr auto bin  = std::ios_base::binary;
-	constexpr auto in   = std::ios_base::in;
-	constexpr auto out  = std::ios_base::out;
-	constexpr auto trun = std::ios_base::trunc;
-	constexpr auto ate  = std::ios_base::ate;
-
 	extern size_t bufsiz;
+
+	constexpr auto append   = std::ios_base::app;
+	constexpr auto binary   = std::ios_base::binary;
+	constexpr auto in       = std::ios_base::in;
+	constexpr auto out      = std::ios_base::out;
+	constexpr auto truncate = std::ios_base::trunc;
+	constexpr auto end      = std::ios_base::ate;
 
 	struct descriptor
 	{
@@ -44,7 +46,12 @@ namespace sys::file
 
 		~descriptor()
 		{
-			(void) close();
+			close();
+		}
+
+		operator bool() const
+		{
+			return fail(fd);
 		}
 
 		int get() const
@@ -67,36 +74,39 @@ namespace sys::file
 	{
 		pipe();
 
+		operator bool() const
+		{
+			return !!file[0] and !!file[1];
+		}
+
+		void set(int fd[2] = nullptr)
+		{
+			for (int i : { 0, 1 })
+			{
+				file[i].set(fd ? fd[i] : -1);
+			}
+		}
+
 		ssize_t write(const void* buffer, size_t size)
 		{
-			return fd[1].write(buffer, size);
+			return file[1].write(buffer, size);
 		}
 
 		ssize_t read(void* buffer, size_t size)
 		{
-			return fd[0].read(buffer, size);
-		}
-
-		descriptor& operator[](size_t index)
-		{
-			return fd[index];
-		}
-
-		operator bool() const
-		{
-			return fail(fd[0].get()) and fail(fd[1].get());
+			return file[0].read(buffer, size);
 		}
 
 	protected:
 
-		descriptor fd[2];
+		descriptor file[2];
 	};
 
 	struct process : pipe
 	{
 		using arguments = std::initializer_list<char const *>;
 
-		void open(arguments args, openmode mode);
+		bool open(arguments, openmode);
 
 	protected:
 

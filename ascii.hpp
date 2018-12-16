@@ -494,27 +494,10 @@ namespace ascii
 	// Utility Functions
 	//
 
-	constexpr bool isgraph(char code)
-	{
-		return in<G0>(code) or in<G1>(code);
-	}
-
-	constexpr bool iscntrl(char code)
-	{
-		return in<C0>(code) or in<C1>(code);
-	}
-
 	using inter = range<'\x20', '\x2F'>;
-	constexpr auto isinter = in<inter>;
-
 	using param = range<'\x30', '\x3F'>;
-	constexpr auto isparam = in<param>;
-
 	using final = range<'\x40', '\x7E'>;
-	constexpr auto isfinal = in<final>;
-
 	using privy = range<'\x70', '\x7E'>;
-	constexpr auto isprivy = in<privy>;
 
 	constexpr unsigned column_width = 4;
 

@@ -91,31 +91,30 @@ namespace sys::file
 
 	pipe::pipe()
 	{
-		int pair[2];
-		if (fail(sys::pipe(pair)))
+		int fd[2];
+		if (fail(sys::pipe(fd)))
 		{
 			sys::perror("pipe");
 		}
-		else for (int i : { 0, 1 })
-		{
-			fd[i].set(pair[i]);
-		}
+		else set(fd);
 	}
 
-	void process::open(arguments args, openmode mode)
+	bool process::open(arguments args, openmode mode)
 	{
 		std::vector<char*> cmds;
 		for (auto s : args) cmds.push_back(const_cast<char*>(s));
 		cmds.push_back(nullptr);
 
-		int desc[3];
-		pid = sys::pexec(desc, cmds.data());
-		if (not fail(pid))
+		int fd[3];
+		pid = sys::pexec(fd, cmds.data());
+		if (fail(pid))
 		{
-			fd[0].set(desc[0]);
-			fd[1].set(desc[1]);
-			error.set(desc[2]);
-		}		
+			sys::perror("pexec");
+			return true;
+		}
+		pipe::set(fd);
+		error.set(fd[2]);
+		return false;
 	}
 }
 

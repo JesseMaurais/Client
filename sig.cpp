@@ -22,10 +22,10 @@ namespace
 	}
 }
 
-namespace sys::sig
+namespace sig::sys
 {
-	handle::handle(int no, sys::sig::observer fn)
-	: slot(&::event(no), fn)
+	slot::slot(int no, sys::sig::observer fn)
+	: base(&::event(no), fn)
 	{
 		old.fn = std::signal(no, ::send);
 		if (SIG_ERR == old.fn)
@@ -38,12 +38,12 @@ namespace sys::sig
 		}
 	}
 
-	handle::~handle()
+	slot::~slot()
 	{
 		verify(::send == std::signal(old.no, old.fn));
 	}
 
-	handle::operator bool()
+	slot::operator bool()
 	{
 		return SIG_ERR != old.fn;
 	}

@@ -21,7 +21,7 @@ namespace sys
 		DWORD const code = GetLastError();
 		DWORD const size = FormatMessageA
 		(
-		 FORMAT_MESSAGE_ALLOCATE_BUFFER	| FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTERS,
+		 FORMAT_MESSAGE_ALLOCATE_BUFFER	| FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		 nullptr, // source
 		 code,    // message
 		 lang,    // language
@@ -207,6 +207,7 @@ namespace sys
 			std::exit(res);
 		}
 		#endif
+		return -1;
 	}
 }
 
