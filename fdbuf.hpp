@@ -2,7 +2,7 @@
 #define fdbuf_hpp
 
 #include "file.hpp"
-#include "iobuf.hpp"
+#include "membuf.hpp"
 
 namespace sys::io
 {
@@ -10,10 +10,11 @@ namespace sys::io
 	<
 	 class Char,
 	 template <class> class Traits = std::char_traits
+	 template <class> class Alloc = std::allocator
 	>
-	class basic_fdbuf : public basic_iobuf<Char, Traits>
+	class basic_fdbuf : public basic_membuf<Char, Traits, Alloc>
 	{
-		using base = basic_iobuf<Char, Traits>;
+		using base = basic_membuf<Char, Traits, Alloc>;
 
 	public:
 
@@ -25,14 +26,9 @@ namespace sys::io
 			set(fd);
 		}
 
-		void set(int fd = -1)
+		int set(int fd = -1)
 		{
-			file.set(fd);
-		}
-
-		void eof()
-		{
-			file.close();
+			return file.set(fd);
 		}
 
 		size_type xsputn(char_type const *s, size_type n) override

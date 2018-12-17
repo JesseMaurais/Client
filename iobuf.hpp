@@ -2,7 +2,7 @@
 #define iobuf_hpp
 
 #include <cstring>
-#include "membuf.hpp"
+#include <streambuf>
 
 namespace sys::io
 {
@@ -11,15 +11,16 @@ namespace sys::io
 	 class Char,
 	 template <class> class Traits = std::char_traits
 	>
-	class basic_iobuf : public basic_membuf<Char, Traits>
+	class basic_iobuf : public std::basic_streambuf<Char, Traits>
 	{
-		using base = basic_membuf<Char, Traits>;
+		using base = std::basic_streambuf<Char, Traits<Char>>;
 
 	public:
 
+		using streambuf = typename base;
 		using char_type = typename base::char_type;
 		using traits_type = typename base::traits_type;
-		using size_type = typename base::size_type;
+		using size_type = typename std::streamsize;
 		using int_type = typename base::int_type;
 
 	protected:

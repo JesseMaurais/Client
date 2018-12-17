@@ -1,7 +1,7 @@
 #ifndef pipebuf_hpp
 #define pipebuf_hpp
 
-#include "iobuf.hpp"
+#include "membuf.hpp"
 #include "fdbuf.hpp"
 
 namespace sys::io
@@ -10,11 +10,12 @@ namespace sys::io
 	<
 	 class Char,
 	 template <class> class Traits = std::char_traits
+	 template <class> class Alloc = std::allocator
 	>
-	class basic_pipebuf : public basic_iobuf<Char, Traits>
+	class basic_pipebuf : public basic_membuf<Char, Traits, Alloc>
 	{
-		using base = basic_iobuf<Char, Traits>;
-		using fdbuf = basic_fdbuf<Char, Traits>;
+		using base = basic_membuf<Char, Traits, Alloc>;
+		using fdbuf = basic_fdbuf<Char, Traits, Alloc>;
 
 	public:
 
@@ -32,11 +33,6 @@ namespace sys::io
 			{
 				buf[i].set(fd ? fd[i] : -1);
 			}
-		}
-
-		void eof()
-		{
-			fbuf[0].eof();
 		}
 
 	private:

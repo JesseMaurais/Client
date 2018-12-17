@@ -5,68 +5,73 @@
 #include <iostream>
 #include "file.hpp"
 #include "fdbuf.hpp"
-#include "membuf.hpp"
 
 namespace sys::io
 {
-	namespace
+	namespace impl
 	{
 		template
 		<
 		 class Char,
 		 template <class> class Traits,
 		 template <class> class Alloc,
-		 template <class, class> class basic_stream,
+		 template <class, class> basic_stream,
 		 sys::file::openmode default_mode
 		>
-		class impl_fdstream
-		: public basic_stream<Char, Traits<Char>>
-		, public basic_membuf<Char, Traits, Alloc>
-		, public basic_fdbuf<Char, Traits>
+		class basic_fdstream
+		: public basic_fdbuf<Char, Traits, Alloc>
+		, public basic_stream<Char, Traits<Char>>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
-			using membuf = basic_membuf<Char, Traits, Alloc>;
-			using fdbuf = basic_fdbuf<Char, Traits>;
+			using fdbuf = basic_fdbuf<Char, Traits, Alloc>;
+			using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
+			using openmode = sys::file::openmode;
 
 		public:
 
-			impl_fdstream(int fd = -1, sys::size_t sz)
-			: bufsiz(sz)
+			basic_fdstream(std::size_t sz = sys::file::bufsiz, int fd = -1)
+			: size(sz)
 			, fdbuf(fd)
-			, membuf()
 			, base(this)
 			{ }
 
-			impl_fdstream(std::string const& path, sys::file::openmode mode)
-			: impl_fdstream()
+			basic_fdstream(string const& path, openmode mode = default_mode)
+			: basic_fdstream()
 			{
 				open(path, mode);
 			}
 
-			void close() { fd = -1; };
-			bool is_open() const { return fd; }
-			void open(std::string const& path, sys::file::openmode mode)
+			void open(string const& path, openmode mode = default_mode)
 			{
-				using namespace sys::file;
-				if (mode & out and mode & in)
+				if (mode & sys::file::out and mode & sys::file::in)
 				{
-					membuf::setbufsz(bufsiz, bufsiz);
+					fdbuf::setbufsiz(size, size);
 				}
-				else if (mode & out)
+				else if (mode & sys::file::out)
 				{
-					membuf::setbufsz(0, bufsiz);
+					fdbuf::setbufsiz(0, size);
 				}
-				else if (mode & in)
+				else if (mode & sys::file::in)
 				{
-					membuf::setbufsz(bufsiz, 0);
+					fdbuf::setbufsiz(size, 0);
 				}
-				fd.open(path, mode | default_mode);
+				file.open(path, mode | default_mode);
+			}
+
+			bool close()
+			{
+				return file.close();
+			}
+
+			bool is_open() const
+			{
+				return !!file;
 			}
 
 		private:
 
-			sys::file::descriptor fd;
-			sys::size_t const bufsiz;
+			sys::file::descriptor file;
+			std::size_t const size;
 		};
 	}
 
@@ -76,13 +81,12 @@ namespace sys::io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_fdstream
-	: public impl_fdstream<Char, Traits, Alloc, std::basic_iostream, sys::file::in|sys::file::out>
-	{
-		using base = impl_fdstream<Char, Traits, Alloc, std::basic_iostream, sys::file::in|sys::file::out>;
-	public:
-		using base::base;
-	};
+	using basic_fdstream = impl::basic_fdstream
+	<
+	 Char, Traits, Alloc,
+	 std::basic_iostream,
+	 sys::file::in|sys::file::out
+	>;
 
 	using fdstream = basic_fdstream<char>;
 	using wfdstream = basic_fdstream<wchar_t>;
@@ -93,13 +97,12 @@ namespace sys::io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_ifdstream
-	: public impl_fdstream<Char, Traits, Alloc, std::basic_istream, sys::file::in>
-	{
-		using base = impl_fdstream<Char, Traits, Alloc, std::basic_istream, sys::file::in>;
-	public:
-		using base::base;
-	};
+	using basic_ifdstream = impl::basic_fdstream
+	<
+	 Char, Traits, Alloc,
+	 std::basic_istream,
+	 sys::file::in
+	>;
 
 	using ifdstream = basic_ifdstream<char>;
 	using wifdstream = basic_ifdstream<wchar_t>;
@@ -110,13 +113,12 @@ namespace sys::io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_ofdstream
-	: public impl_fdstream<Char, Traits, Alloc, std::basic_ostream, sys::file::out>
-	{
-		using base = impl_fdstream<Char, Traits, Alloc, std::basic_istream, sys::file::in>;
-	public:
-		using base::base;
-	};
+	using basic_ofdstream = impl::basic_fdstream
+	<
+	 Char, Traits, Alloc,
+	 std::basic_ostream,
+	 sys::file::out
+	>;
 
 	using ofdstream = basic_ofdstream<char>;
 	using wofdstream = basic_ofdstream<wchar_t>;

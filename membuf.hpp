@@ -3,7 +3,7 @@
 
 #include <string>
 #include <string_view>
-#include <streambuf>
+#include "iobuf.hpp"
 
 namespace sys::io
 {
@@ -13,19 +13,18 @@ namespace sys::io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_membuf : public std::basic_streambuf<Char, Traits<Char>>
+	class basic_membuf : public basic_iobuf<Char, Traits>
 	{
-		using base = std::basic_streambuf<Char, Traits<Char>>;
+		using base = basic_iobuf<Char, Traits>;
 		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 		using string_view = std::basic_string_view<Char, Traits<Char>>;
 
 	public:
 
 		using char_type = typename base::char_type;
-		using size_type = std::streamsize;
+		using size_type = typename base::size_type;
 
 		basic_membuf() = default;
-
 		basic_membuf(size_type n)
 		{
 			setbufsz(n);
@@ -46,13 +45,13 @@ namespace sys::io
 			return this;
 		}
 
-		base *setbufsz(size_type n)
+		base *setbufsiz(size_type n)
 		{
 			buf.resize(n);
 			return setbuf(buf.data(), n);
 		}
 
-		base *setbufsz(size_type n, size_type m)
+		base *setbufsiz(size_type n, size_type m)
 		{
 			buf.resize(n + m);
 			return setbuf(buf.data(), n, m);
