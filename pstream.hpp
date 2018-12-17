@@ -1,9 +1,10 @@
-#ifndef ipc_hpp
-#define ipc_hpp
+#ifndef pstream_hpp
+#define pstream_hpp
 
 #include <string>
 #include <iostream>
-#include "pipebuf.hpp"
+#include "pbuf.hpp"
+#include "file.hpp"
 
 namespace sys::io
 {
@@ -19,34 +20,39 @@ namespace sys::io
 		>
 		class basic_pstream
 		: public basic_stream<Char, Traits<Char>>
-		, public basic_pipebuf<Char, Traits, Alloc>
+		, public basic_pbuf<Char, Traits, Alloc>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
-			using pipebuf = basic_pipebuf<Char, Traits, Alloc>;
-			using arguments = sys::file::process::arguments;
+			using pbuf = basic_pipebuf<Char, Traits, Alloc>;
+			using arguments = sys::file::arguments;
 			using openmode = sys::file::openmode;
 
 		public:
 
 			impl_pstream(std::size_t sz = sys::file::bufsiz)
 			: size(sz)
-			, pipebuf()
+			, pbuf()
 			, base(this)
 			{ }
 
 			impl_pstream(arguments args, openmode mode = default_mode)
 			: impl_pstream()
 			{
-				open(args, mode);
+				execute(args, mode);
 			}
 
-			void open(arguments args, openmode mode = default_mode)
+			bool execute(arguments args, openmode mode = default_mode)
 			{
-				file.open(args, mode | default_mode);
-				int fd[2] = { file[1].get(), file[0].get() };
-				pipebuf::setbufsiz(size);
-				pipebuf::set(fd);
-				file.set();
+				bool err = file.execute(args, mode | default_mode);
+				if (not err)
+				{
+					pbuf::setbufsiz(size);
+					int fd[3];
+					file.get(fd);
+					pbuf::set(fd);
+					file.set();
+				}
+				return err;
 			}
 
 		private:

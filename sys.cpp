@@ -1,9 +1,22 @@
 #include "sys.hpp"
 #include "file.hpp"
+#include "err.hpp"
 #include <iostream>
+#include <signal.h>
+
+#if defined(__POSIX__) || defined(__XOPEN__)
+extern char **environ;
+char **sys::environ = environ;
+#elif defined(__WIN32__)
+extern char **_environ;
+char **sys::environ = _environ;
+#endif
+
+#if __has_include(<io.h>)
+#include <io.h>
+#endif
 
 #if __has_include(<windows.h>)
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
@@ -19,13 +32,13 @@ namespace sys
 		LPSTR data = nullptr;
 		constexpr DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 		DWORD const code = GetLastError();
-		DWORD const size = FormatMessageA
+		DWORD const size = FormatMessage
 		(
 		 FORMAT_MESSAGE_ALLOCATE_BUFFER	| FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		 nullptr, // source
 		 code,    // message
 		 lang,    // language
-		 &data,   // buffer
+		 (LPSTR)&data,   // buffer
 		 0,       // size
 		 nullptr  // arguments
 		);
@@ -139,7 +152,7 @@ namespace sys
 				NULL,  // process attributes
 				NULL,  // thread attributes
 				TRUE,  // inherit handles
-				NULL,  // creation flags
+				0,     // creation flags
 				NULL,  // environment
 				NULL,  // current directory
 				&si,   // start-up info
@@ -208,6 +221,26 @@ namespace sys
 		}
 		#endif
 		return -1;
+	}
+
+	void terminate(pid_t pid)
+	{
+		#if defined(__POSIX__) || defined(__XOPEN__)
+		{
+			if (fail(kill(pid, SIGTERM)))
+			{
+				sys::perror("kill", pid);
+			}
+		}
+		#elif defined(__WIN32__)
+		{
+			auto const h = static_cast<HANDLE>(pid);
+			if (not TerminateProcess(h, 0))
+			{
+				sys::winerr("TerminateProcess");
+			}
+		}
+		#endif
 	}
 }
 

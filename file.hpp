@@ -1,9 +1,7 @@
 #ifndef file_hpp
 #define file_hpp
 
-#include <memory>
 #include <utility>
-#include <functional>
 #include <string>
 #include <ios>
 
@@ -22,23 +20,19 @@ namespace sys::file
 	using size_t = std::size_t;
 	using ssize_t = std::make_signed<size_t>::type;
 	using openmode = std::ios_base::openmode;
+	using arguments = std::initializer_list<char const *>;
 
 	extern size_t bufsiz;
 
-	constexpr auto append   = std::ios_base::app;
-	constexpr auto binary   = std::ios_base::binary;
-	constexpr auto in       = std::ios_base::in;
-	constexpr auto out      = std::ios_base::out;
-	constexpr auto truncate = std::ios_base::trunc;
-	constexpr auto end      = std::ios_base::ate;
+	constexpr auto app   = std::ios_base::app;
+	constexpr auto bin   = std::ios_base::binary;
+	constexpr auto in    = std::ios_base::in;
+	constexpr auto out   = std::ios_base::out;
+	constexpr auto trunc = std::ios_base::trunc;
+	constexpr auto ate   = std::ios_base::ate;
 
 	struct descriptor
 	{
-		void open(std::string const& path, openmode mode);
-		ssize_t write(const void* buffer, size_t size);
-		ssize_t read(void* buffer, size_t size);
-		bool close();
-
 		explicit descriptor(int fd = -1)
 		{
 			this->fd = fd;
@@ -49,9 +43,10 @@ namespace sys::file
 			close();
 		}
 
-		operator bool() const
+		int set(int fd = -1)
 		{
-			return fail(fd);
+			std::swap(fd, this->fd);
+			return fd;
 		}
 
 		int get() const
@@ -59,11 +54,30 @@ namespace sys::file
 			return fd;
 		}
 
-		int set(int fd = -1)
+		operator bool() const
 		{
-			std::swap(fd, this->fd);
-			return fd;
+			return fail(fd);
 		}
+
+		template <class C>
+		ssize_t write(const C* buffer, size_t size) const
+		{
+			return write(static_cast<const void*>(buffer), size);
+		}
+
+		template <class C>
+		ssize_t read(C* buffer, size_t size) const
+		{
+			return read(static_cast<void*>(buffer), size);
+		}
+
+		void open(std::string const& path, openmode mode);
+		void close();
+
+	private:
+
+		ssize_t write(const void* buffer, size_t size) const;
+		ssize_t read(void* buffer, size_t size) const;
 
 	protected:
 
@@ -74,27 +88,39 @@ namespace sys::file
 	{
 		pipe();
 
-		operator bool() const
+		explicit pipe(int fd[2])
 		{
-			return !!file[0] and !!file[1];
+			set(fd);
 		}
 
 		void set(int fd[2] = nullptr)
 		{
-			for (int i : { 0, 1 })
+			for (int n : { 0, 1 })
 			{
-				file[i].set(fd ? fd[i] : -1);
+				file[n].set(fd ? fd[n] : -1);
 			}
 		}
 
-		ssize_t write(const void* buffer, size_t size)
+		void get(int fd[2]) const
 		{
-			return file[1].write(buffer, size);
+			for (int n : { 0, 1 })
+			{
+				fd[n] = file[n].get();
+			}
 		}
 
-		ssize_t read(void* buffer, size_t size)
+		operator bool() const
 		{
-			return file[0].read(buffer, size);
+			for (int n : { 0, 1 })
+			{
+				if (file[n]) return true;
+			}
+			return false;
+		}
+
+		descriptor const& operator[](size_t index) const
+		{
+			return file[index];
 		}
 
 	protected:
@@ -102,15 +128,49 @@ namespace sys::file
 		descriptor file[2];
 	};
 
-	struct process : pipe
+	struct process
 	{
-		using arguments = std::initializer_list<char const *>;
+		explicit process(int fd[3])
+		{
+			set(fd);
+		}
 
-		bool open(arguments, openmode);
+		void set(int fd[3] = nullptr)
+		{
+			for (int n : { 0, 1, 2 })
+			{
+				file[n].set(fd ? fd[n] : -1);
+			}
+		}
+
+		void get(int fd[3]) const
+		{
+			for (int n : { 0, 1, 2 })
+			{
+				fd[n] = file[n].get();
+			}
+		}
+
+		operator bool() const
+		{
+			for (int n : { 0, 1, 2 })
+			{
+				if (file[n]) return true;
+			}
+			return false;
+		}
+
+		descriptor const& operator[](size_t index) const
+		{
+			return file[index];
+		}
+
+		bool execute(arguments, openmode);
+		void terminate();
 
 	protected:
 
-		descriptor error;
+		descriptor file[3];
 		std::intptr_t pid;
 	};
 }

@@ -13,7 +13,7 @@ namespace sys::env
 
 namespace sys
 {
-	std::span<std::string_view> environ();
+	std::span<std::string_view> environment();
 };
 
 namespace env

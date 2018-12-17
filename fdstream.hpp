@@ -1,10 +1,10 @@
-#ifndef fd_hpp
-#define fd_hpp
+#ifndef fdstream_hpp
+#define fdstream_hpp
 
 #include <string>
 #include <iostream>
-#include "file.hpp"
 #include "fdbuf.hpp"
+#include "file.hpp"
 
 namespace sys::io
 {

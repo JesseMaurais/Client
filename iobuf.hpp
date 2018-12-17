@@ -11,17 +11,19 @@ namespace sys::io
 	 class Char,
 	 template <class> class Traits = std::char_traits
 	>
-	class basic_iobuf : public std::basic_streambuf<Char, Traits>
+	class basic_iobuf : public std::basic_streambuf<Char, Traits<Char>>
 	{
 		using base = std::basic_streambuf<Char, Traits<Char>>;
+		using ios = std::basic_ios<Char, Traits<Char>>;
 
 	public:
 
-		using streambuf = typename base;
 		using char_type = typename base::char_type;
 		using traits_type = typename base::traits_type;
 		using size_type = typename std::streamsize;
 		using int_type = typename base::int_type;
+
+		virtual void eof(int) { }
 
 	protected:
 
@@ -83,7 +85,38 @@ namespace sys::io
 			return base::pptr() != base::epptr() ? 0 : -1;
 		}
 	};
-	
+
+	namespace
+	{
+		class eof_type { } eof;
+	}
+
+	template
+	<
+	 class Char,
+	 template <class> class Traits = std::char_traits
+	>
+	std::basic_ios<Char, Traits<Char>>& operator<<(std::basic_ios<Char, Traits<Char>>& ios, eof_type)
+	{
+		auto buf = ios.rdbuf();
+		auto io = dynamic_cast<basic_iobuf<Char, Traits>*>(buf);
+		if (io) io->eof(0);
+		return ios;
+	}
+
+	template
+	<
+	 class Char,
+	 template <class> class Traits = std::char_traits
+	>
+	std::basic_ios<Char, Traits<Char>>& operator>>(std::basic_ios<Char, Traits<Char>>& ios, eof_type)
+	{
+		auto buf = ios.rdbuf();
+		auto io = dynamic_cast<basic_iobuf<Char, Traits>*>(buf);
+		if (io) io->eof(1);
+		return ios;
+	}
+
 	using buf = basic_iobuf<char>;
 	using wbuf = basic_iobuf<wchar_t>;
 }

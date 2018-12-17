@@ -29,7 +29,7 @@ namespace
 		{
 			flags |= O_APPEND;
 		}
-		if (mode & trun)
+		if (mode & trunc)
 		{
 			flags |= O_TRUNC;
 		}
@@ -55,7 +55,7 @@ namespace sys::file
 		}
 	}
 
-	ssize_t descriptor::write(const void* buffer, size_t size)
+	ssize_t descriptor::write(const void* buffer, size_t size) const
 	{
 		ssize_t const n = sys::write(fd, buffer, size);
 		if (fail(n))
@@ -65,7 +65,7 @@ namespace sys::file
 		return n;
 	}
 
-	ssize_t descriptor::read(void* buffer, size_t size)
+	ssize_t descriptor::read(void* buffer, size_t size) const
 	{
 		ssize_t const n = sys::read(fd, buffer, size);
 		if (fail(n))
@@ -75,18 +75,16 @@ namespace sys::file
 		return n;
 	}
 
-	bool descriptor::close()
+	void descriptor::close()
 	{
 		if (not fail(fd))
 		{
 			if (fail(sys::close(fd)))
 			{
 				sys::perror("close", fd);
-				return true;
 			}
-			fd = -1;
+			else fd = -1;
 		}
-		return false;
 	}
 
 	pipe::pipe()
@@ -99,7 +97,7 @@ namespace sys::file
 		else set(fd);
 	}
 
-	bool process::open(arguments args, openmode mode)
+	bool process::execute(arguments args, openmode mode)
 	{
 		std::vector<char*> cmds;
 		for (auto s : args) cmds.push_back(const_cast<char*>(s));
@@ -107,14 +105,19 @@ namespace sys::file
 
 		int fd[3];
 		pid = sys::pexec(fd, cmds.data());
-		if (fail(pid))
+		bool const ok = not fail(pid);
+		if (ok) set(fd);
+		return ok;
+	}
+
+	void process::terminate()
+	{
+		sys::terminate(pid);
+		for (int n : { 0, 1, 3 })
 		{
-			sys::perror("pexec");
-			return true;
+			if (file[n]) file[n].close();
 		}
-		pipe::set(fd);
-		error.set(fd[2]);
-		return false;
+		pid = -1;
 	}
 }
 

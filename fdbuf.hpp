@@ -1,8 +1,8 @@
 #ifndef fdbuf_hpp
 #define fdbuf_hpp
 
-#include "file.hpp"
 #include "membuf.hpp"
+#include "file.hpp"
 
 namespace sys::io
 {
@@ -31,21 +31,26 @@ namespace sys::io
 			return file.set(fd);
 		}
 
+	private:
+
+		sys::file::descriptor file;
+
+	protected:
+
 		size_type xsputn(char_type const *s, size_type n) override
 		{
-			size_type const size = n * sizeof (char_type);
-			return file.write(static_cast<const void*>(s), size);
+			return file.write(s, sizeof (char_type) * n);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
-			size_type const size = n * sizeof (char_type);
-			return file.read(static_cast<void*>(s), size);
+			return file.read(s, sizeof (char_type) * n);
 		}
 
-	private:
-
-		sys::file::descriptor file;
+		void eof(int) override
+		{
+			file.close();
+		}
 	};
 
 	using fdbuf = basic_fdbuf<char>;

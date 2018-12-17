@@ -3,10 +3,6 @@
 #include "sys.hpp"
 #include "os.hpp"
 
-#if __has_include(<winbase.h>)
-#include <winbase.h>
-#endif
-
 namespace sys::env
 {
 	std::string_view get(std::string_view s)
@@ -16,58 +12,23 @@ namespace sys::env
 
 	bool put(std::string_view s)
 	{
-		return sys::putenv(s.data());
+		return sys::putenv(s.data()) != 0;
 	}
 }
 
 namespace sys
 {
-	std::span<std::string_view> environ()
+	std::span<std::string_view> environment()
 	{
 		static std::vector<std::string_view> span;
 		span.clear();
-
-		if constexpr (sys::POSIX)
+		if (sys::environ)
 		{
-			extern char **environ;
-			if (environ)
+			for (auto var = sys::environ; *var; ++var)
 			{
-				for (auto var = environ; *var; ++var)
-				{
-					span.push_back(*var);
-				}
+				span.push_back(*var);
 			}
 		}
-		else
-		if constexpr (sys::WIN32)
-		{
-			static struct strings
-			{
-				LPCH p;
-				operator LPCH() { return p; }
-				strings(LPCH p = NULL) { this->p = p; }
-				~strings()
-				{
-					if (p and not FreeEnvironmentStringsA(p))
-					{
-						// GetLastError
-					}
-				}
-
-			} environ;
-
-			environ = GetEnvironmentStringsA();
-			if (environ)
-			{
-				for (auto var = environ; *var; ++var)
-				{
-					std::string_view view(var);
-					span.push_back(view);
-					var += view.size();
-				}
-			}
-		}
-
 		return span;
 	}
 }

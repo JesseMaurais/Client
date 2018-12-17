@@ -13,13 +13,17 @@ namespace sys
 
 // Portable Operating System Interface
 
-constexpr bool POSIX = 
+constexpr long POSIX = 
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
 # undef __POSIX__
 # define __POSIX__ 1
-	true
+# if defined(_POSIX_C_SOURCE)
+	_POSIX_C_SOURCE
+# elif defined(_POSIX_SOURCE)
+	1L
+# endif
 #else
-	false
+	0L
 #endif
 	;
 
@@ -168,7 +172,6 @@ constexpr auto close = ::close;
 constexpr auto creat = ::creat;
 constexpr auto dup = ::dup;
 constexpr auto dup2 = ::dup2;
-constexpr auto ecvt = ::ecvt;
 constexpr auto execv = ::execv;
 constexpr auto execve = ::execve;
 constexpr auto execvp = ::execvp;
@@ -176,17 +179,14 @@ constexpr auto execvpe = ::execvpe;
 constexpr auto execl = ::execl;
 constexpr auto execle = ::execle;
 constexpr auto execlp = ::execlp;
-constexpr auto fcvt = ::fcvt;
 constexpr auto fdopen = ::fdopen;
 constexpr auto fileno = ::fileno;
 constexpr auto fstat = ::fstat;
-constexpr auto gcvt = ::gcvt;
 constexpr auto getcwd = ::getcwd;
 constexpr auto getpid = ::getpid;
 constexpr auto isatty = ::isatty;
 constexpr auto lseek = ::lseek;
 constexpr auto mkdir = ::mkdir;
-constexpr auto mktemp = ::mktemp;
 constexpr auto open = ::open;
 constexpr auto pclose = ::pclose;
 constexpr auto pipe = ::pipe;
@@ -248,7 +248,6 @@ constexpr auto close = ::_close;
 constexpr auto creat = ::_creat;
 constexpr auto dup = ::_dup;
 constexpr auto dup2 = ::_dup2;
-constexpr auto ecvt = ::_ecvt;
 constexpr auto execl = ::_execl;
 constexpr auto execle = ::_execle;
 constexpr auto execlp = ::_execlp;
@@ -256,17 +255,14 @@ constexpr auto execv = ::_execv;
 constexpr auto execve = ::_execve;
 constexpr auto execvp = ::_execvp;
 constexpr auto execvpe = ::_execvpe;
-constexpr auto fcvt = ::_fcvt;
 constexpr auto fdopen = ::_fdopen;
 constexpr auto fileno = ::_fileno;
 constexpr auto fstat = ::_fstat;
-constexpr auto gcvt = ::_gcvt;
 constexpr auto getcwd = ::_getcwd;
 constexpr auto getpid = ::_getpid;
 constexpr auto isatty = ::_isatty;
 constexpr auto lseek = ::_lseek;
 constexpr auto mkdir = [](const char *dir, mode_t) { return ::_mkdir(dir); };
-constexpr auto mktemp = ::_mktemp;
 constexpr auto open = ::_open;
 constexpr auto pclose = ::_pclose;
 constexpr auto pipe = [](int fd[2]) { return ::_pipe(fd, BUFSIZ, 0); };
@@ -298,7 +294,9 @@ DWORD winerr(char const *prefix); // perror for GetLastError
 
 namespace sys
 {
+	extern char **environ;
 	pid_t pexec(int fd[3], char **argv);
+	void terminate(pid_t);
 };
 
 #endif // file
