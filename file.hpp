@@ -35,7 +35,7 @@ namespace sys::file
 	{
 		explicit descriptor(int fd = -1)
 		{
-			this->fd = fd;
+			set(fd);
 		}
 
 		~descriptor()
@@ -118,9 +118,14 @@ namespace sys::file
 			return false;
 		}
 
-		descriptor const& operator[](size_t index) const
+		const descriptor& operator[](size_t n) const
 		{
-			return file[index];
+			return file[n];
+		}
+
+		descriptor& operator[](size_t n)
+		{
+			return file[n];
 		}
 
 	protected:
@@ -130,7 +135,7 @@ namespace sys::file
 
 	struct process
 	{
-		explicit process(int fd[3])
+		explicit process(int fd[3] = nullptr)
 		{
 			set(fd);
 		}
@@ -160,9 +165,14 @@ namespace sys::file
 			return false;
 		}
 
-		descriptor const& operator[](size_t index) const
+		const descriptor& operator[](size_t n) const
 		{
-			return file[index];
+			return file[n];
+		}
+
+		descriptor& operator[](size_t n)
+		{
+			return file[n];
 		}
 
 		bool execute(arguments, openmode);

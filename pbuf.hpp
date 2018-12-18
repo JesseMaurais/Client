@@ -9,7 +9,7 @@ namespace sys::io
 	template
 	<
 	 class Char,
-	 template <class> class Traits = std::char_traits
+	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
 	class basic_pbuf : public basic_membuf<Char, Traits, Alloc>
@@ -44,11 +44,6 @@ namespace sys::io
 		size_type xsgetn(char_type *s, size_type n) override
 		{
 			return file[1].read(s, sizeof (char_type) * n);
-		}
-
-		void eof(int n) override
-		{
-			file[n].close();
 		}
 	};
 

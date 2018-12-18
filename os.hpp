@@ -8,7 +8,7 @@ namespace sys
 
 // Microsoft Windows
 constexpr bool WIN32 =
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__) || defined(__CYGWIN__)
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 # undef __WIN32__
 # define __WIN32__ 1
 	true

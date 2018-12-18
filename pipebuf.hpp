@@ -45,11 +45,6 @@ namespace sys::io
 		{
 			return file[0].read(s, sizeof (char_type) * n);
 		}
-
-		void eof(int n) override
-		{
-			file[n].close();
-		}
 	};
 
 	using pipebuf = basic_pipebuf<char>;

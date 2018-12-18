@@ -23,20 +23,20 @@ namespace sys::io
 		, public basic_pbuf<Char, Traits, Alloc>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
-			using pbuf = basic_pipebuf<Char, Traits, Alloc>;
+			using pbuf = basic_pbuf<Char, Traits, Alloc>;
 			using arguments = sys::file::arguments;
 			using openmode = sys::file::openmode;
 
 		public:
 
-			impl_pstream(std::size_t sz = sys::file::bufsiz)
+			basic_pstream(std::size_t sz = sys::file::bufsiz)
 			: size(sz)
 			, pbuf()
 			, base(this)
 			{ }
 
-			impl_pstream(arguments args, openmode mode = default_mode)
-			: impl_pstream()
+			basic_pstream(arguments args, openmode mode = default_mode)
+			: basic_pstream()
 			{
 				execute(args, mode);
 			}
@@ -54,6 +54,8 @@ namespace sys::io
 				}
 				return err;
 			}
+
+			void close() { file[0].close(); }
 
 		private:
 

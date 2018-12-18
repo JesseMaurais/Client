@@ -23,8 +23,6 @@ namespace sys::io
 		using size_type = typename std::streamsize;
 		using int_type = typename base::int_type;
 
-		virtual void eof(int) { }
-
 	protected:
 
 		int_type overflow(int_type c) override
@@ -85,37 +83,6 @@ namespace sys::io
 			return base::pptr() != base::epptr() ? 0 : -1;
 		}
 	};
-
-	namespace
-	{
-		class eof_type { } eof;
-	}
-
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits
-	>
-	std::basic_ios<Char, Traits<Char>>& operator<<(std::basic_ios<Char, Traits<Char>>& ios, eof_type)
-	{
-		auto buf = ios.rdbuf();
-		auto io = dynamic_cast<basic_iobuf<Char, Traits>*>(buf);
-		if (io) io->eof(0);
-		return ios;
-	}
-
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits
-	>
-	std::basic_ios<Char, Traits<Char>>& operator>>(std::basic_ios<Char, Traits<Char>>& ios, eof_type)
-	{
-		auto buf = ios.rdbuf();
-		auto io = dynamic_cast<basic_iobuf<Char, Traits>*>(buf);
-		if (io) io->eof(1);
-		return ios;
-	}
 
 	using buf = basic_iobuf<char>;
 	using wbuf = basic_iobuf<wchar_t>;
