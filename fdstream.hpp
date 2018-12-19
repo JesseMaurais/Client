@@ -55,22 +55,21 @@ namespace sys::io
 				{
 					fdbuf::setbufsiz(size, 0);
 				}
-				file.open(path, mode | default_mode);
+				fdbuf::file.open(path, mode | default_mode);
 			}
 
 			bool close()
 			{
-				return file.close();
+				return fdbuf::file.close();
 			}
 
 			bool is_open() const
 			{
-				return !!file;
+				return fdbuf::file;
 			}
 
 		private:
 
-			sys::file::descriptor file;
 			std::size_t const size;
 		};
 	}

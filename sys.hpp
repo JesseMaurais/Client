@@ -13,29 +13,25 @@ namespace sys
 
 // Portable Operating System Interface
 
-constexpr long POSIX = 
+constexpr bool POSIX = 
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
 # undef __POSIX__
 # define __POSIX__ 1
-# if defined(_POSIX_C_SOURCE)
-	_POSIX_C_SOURCE
-# elif defined(_POSIX_SOURCE)
-	1L
-# endif
+	true
 #else
-	0L
+	false
 #endif
 	;
 
 // Single UNIX Specification
 
-constexpr long XOPEN = 
+constexpr bool XOPEN = 
 #if defined(_XOPEN_SOURCE)
 # undef __XOPEN__
 # define __XOPEN__ 1
-	_XOPEN_SOURCE
+	true
 #else
-	0L
+	false
 #endif
 	;
 
@@ -151,6 +147,9 @@ constexpr bool XOPEN_UNIX =
 namespace sys
 {
 
+constexpr char dir = '/';
+constexpr char sep = ':';
+
 #ifndef O_BINARY
 #define O_BINARY 0L
 #endif
@@ -216,9 +215,8 @@ constexpr auto write = ::write;
 namespace sys
 {
 
-#define STDIN_FILENO  0
-#define STDOUT_FILENO 1
-#define STDERR_FILENO 2
+constexpr char dir = '\\';
+constexpr char sep = ';';
 
 #define F_OK 0
 #define W_OK 2

@@ -43,23 +43,15 @@ namespace sys::io
 
 			bool execute(arguments args, openmode mode = default_mode)
 			{
-				bool err = file.execute(args, mode | default_mode);
-				if (not err)
-				{
-					pbuf::setbufsiz(size);
-					int fd[3];
-					file.get(fd);
-					pbuf::set(fd);
-					file.set();
-				}
+				bool const err = pbuf::file.execute(args, mode | default_mode);
+				if (not err) pbuf::setbufsiz(size);
 				return err;
 			}
 
-			void close() { file[0].close(); }
+			void close() { pbuf::file[0].close(); }
 
 		private:
 
-			sys::file::process file;
 			std::size_t const size;
 		};
 	}
