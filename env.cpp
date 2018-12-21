@@ -19,20 +19,18 @@ namespace sys::env
 
 namespace
 {
-	static_assert(sys::POSIX or sys::WIN32);
-
 	struct PATH : env::list
 	{
-		operator std::vector<std::string_view>() const override
+		operator std::vector<std::string_view>() const final
 		{
-			std::string_view s = sys::env::get("PATH");
-			return fmt::split(s, sys::sep);
+			std::string_view view = sys::env::get("PATH");
+			return fmt::split(view, sys::sep::path);
 		}
 	}
 
 	struct PWD : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -48,7 +46,7 @@ namespace
 
 	struct USER : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -64,7 +62,7 @@ namespace
 
 	struct HOME : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -80,9 +78,9 @@ namespace
 
 	struct TMPDIR : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
-			for (auto var : { "TMP", "TEMP", "TMPDIR" })
+			for (auto var : { "TMPDIR", "TEMP", "TMP" })
 			{
 				auto view = sys::env::get(var);
 				if (not view.empty())
@@ -96,7 +94,7 @@ namespace
 
 	struct SHELL : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -112,7 +110,7 @@ namespace
 
 	struct TERM : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			return sys::env::get("TERM");
 		}
@@ -120,7 +118,7 @@ namespace
 
 	struct PAGER : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			return sys::env::get("PAGER");
 		}
@@ -128,7 +126,7 @@ namespace
 
 	struct EDITOR : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			return sys::env::get("EDITOR");
 		}
@@ -136,7 +134,7 @@ namespace
 
 	struct VISUAL : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			return sys::env::get("VISUAL");
 		}
@@ -144,7 +142,7 @@ namespace
 
 	struct RANDOM : env::view
 	{
-		operator std::string_view() const override
+		operator std::string_view() const final
 		{
 			return sys::env::get("RANDOM");
 		}
@@ -170,7 +168,7 @@ namespace
 {
 	struct ENVIRON : env::list
 	{
-		operator std::vector<std::string_view>() const override
+		operator std::vector<std::string_view>() const final
 		{
 			static std::vector<std::string_view> span;
 			span.clear();

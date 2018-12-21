@@ -5,6 +5,7 @@
 
 namespace xdg
 {
+	extern env::view const& current_desktop;
 	extern env::view const& data_home;
 	extern env::view const& config_home;
 	extern env::list const& data_dirs;

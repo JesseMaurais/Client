@@ -147,8 +147,11 @@ constexpr bool XOPEN_UNIX =
 namespace sys
 {
 
-constexpr char dir = '/';
-constexpr char sep = ':';
+namespace sep
+{
+	constexpr char dir = '/';
+	constexpr char path = ':';
+}
 
 #ifndef O_BINARY
 #define O_BINARY 0L
@@ -215,8 +218,11 @@ constexpr auto write = ::write;
 namespace sys
 {
 
-constexpr char dir = '\\';
-constexpr char sep = ';';
+namespace sep
+{
+	constexpr char dir = '\\';
+	constexpr char path = ';';
+}
 
 #define F_OK 0
 #define W_OK 2
