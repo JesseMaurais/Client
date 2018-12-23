@@ -30,10 +30,11 @@ namespace sys::io
 		public:
 
 			basic_pstream(std::size_t sz = sys::file::bufsiz)
-			: size(sz)
-			, pbuf()
+			: pbuf()
 			, base(this)
-			{ }
+			{
+				pbuf::setbufsiz(sz);
+			}
 
 			basic_pstream(arguments args, openmode mode = default_mode)
 			: basic_pstream()
@@ -43,16 +44,10 @@ namespace sys::io
 
 			bool execute(arguments args, openmode mode = default_mode)
 			{
-				bool const err = pbuf::file.execute(args, mode | default_mode);
-				if (not err) pbuf::setbufsiz(size);
-				return err;
+				return pbuf::file.execute(args, mode | default_mode);
 			}
 
 			void close() { pbuf::file[0].close(); }
-
-		private:
-
-			std::size_t const size;
 		};
 	}
 

@@ -2,6 +2,7 @@
 #include "fmt.hpp"
 #include "sys.hpp"
 #include "os.hpp"
+#include <regex>
 
 namespace sys::env
 {
@@ -108,6 +109,22 @@ namespace
 		}
 	};
 
+	struct PROMPT : env::view
+	{
+		operator std::string_view() const final
+		{
+			if constexpr (sys::POSIX)
+			{
+				return sys::env::get("PS1");
+			}
+			else
+			if constexpr (sys::WIN32)
+			{
+				return sys::env::get("PROMPT");
+			}
+		}
+	};
+
 	struct TERM : env::view
 	{
 		operator std::string_view() const final
@@ -140,28 +157,55 @@ namespace
 		}
 	};
 
+	struct BROWSER : env::view
+	{
+		operator std::string_view() const final
+		{
+			return sys::env::get("BROWSER");
+		}
+	};
+
 	struct RANDOM : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("RANDOM");
 		}
-	}
+	};
+
+	struct DESKTOP : env::view
+	{
+		operator std::string_view() const final
+		{
+			if constexpr (sys::POSIX)
+			{
+				return sys::env::get("DESKTOP_SESSION");
+			}
+			else
+			if constexpr (sys::WIN32)
+			{
+				return sys::env::get("OS");
+			}
+		}
+	};
 }
 
 namespace env
 {
-	list const& path   = PATH();
-	view const& pwd    = PWD();
-	view const& user   = USER();
-	view const& home   = HOME();
+	list const& path = PATH();
+	view const& pwd = PWD();
+	view const& user = USER();
+	view const& home = HOME();
 	view const& tmpdir = TMPDIR();
-	view const& shell  = SHELL();
-	view const& term   = TERM();
-	view const& pager  = PAGER();
+	view const& shell = SHELL();
+	view const& prompt = PROMPT();
+	view const& term = TERM();
+	view const& pager = PAGER();
 	view const& editor = EDITOR();
 	view const& visual = VISUAL();
+	view const& browser = BROWSER();
 	view const& random = RANDOM();
+	view const& desktop = DESKTOP();
 }
 
 namespace

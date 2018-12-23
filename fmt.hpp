@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iterator>
+#include <cassert>
 #include "alg.hpp"
 #include "fs.hpp"
 
@@ -86,26 +87,54 @@ namespace fmt
 	template <>
 	inline std::string to_string(sys::file::path const &p)
 	{
-		return p.string();
+		return to_string(p.string());
+	}
+
+	// Custom terminal string view types
+
+	struct string_view : std::string_view
+	{
+		string_view(std::string_view const& view)
+		{
+			assert('\0' == view[view.size()]);
+		}
+	};
+
+	using string_span = std::vector<string_view>;
+	using string = std::string;
+
+	inline bool empty(string const& s)
+	{
+		return s.empty();
+	}
+
+	inline bool empty(string_view s)
+	{
+		return s.empty();
+	}
+
+	inline bool empty(string_span s)
+	{
+		return s.empty() or stl::all_of(s, empty);
 	}
 
 	// Basic string formatting tools
 
-	inline void replace(std::string &buf, std::string_view s, std::string_view r)
+	inline void replace(string &buf, string_view s, string_view r)
 	{
-		using size_type = std::string_view::size_type;
-		constexpr size_type end = std::string::npos;
+		using size_type = string_view::size_type;
+		constexpr size_type end = string::npos;
 		for (auto at = buf.find(s.data(), 0, s.size()); at != end; at = buf.find(s.data(), at + r.size(), s.size()))
 		{
 			buf.replace(at, s.size(), r.data(), r.size());
 		}
 	}
 
-	inline std::vector<std::string_view> split(std::string_view s, std::string_view del)
+	inline string_span split(string_view s, string_view del)
 	{
-		std::vector<std::string_view> tok;
-		using size_type = std::string_view::size_type;
-		constexpr size_type end = std::string_view::npos;
+		string_span tok;
+		using size_type = string_view::size_type;
+		constexpr size_type end = string_view::npos;
 		for (size_type at = 0, to = s.find_first_of(del); at != end; to = s.find_first_of(del, at))
 		{
 			if (to != at)
@@ -118,7 +147,7 @@ namespace fmt
 	}
 
 	template <typename Container>
-	inline std::string join(Container const &tok, std::string const &del)
+	inline string join(Container const& tok, string const& del)
 	{
 		std::stringstream stream;
 		auto it = std::ostream_iterator<std::string>(stream, del.c_str());
@@ -126,31 +155,31 @@ namespace fmt
 		return stream.str();
 	}
 
-	inline std::string to_upper(std::string s)
+	inline string to_upper(string_view s)
 	{
 		stl::transform(s, [](char c) { return std::toupper(c, std::locale()); });
 		return s;
 	}
 
-	inline std::string to_lower(std::string s)
+	inline string to_lower(string_view s)
 	{
 		stl::transform(s, [](char c) { return std::tolower(c, std::locale()); });
 		return s;
 	}
 
-	inline std::string::iterator trim_begin(std::string &s)
+	inline string::iterator trim_begin(string &s)
 	{
 		constexpr auto isblank = [](char c) { return std::isblank(c, std::locale()); };
 		return s.erase(begin(s), stl::find_if(s, isblank));
 	}
 
-	inline std::string::iterator trim_end(std::string &s)
+	inline string::iterator trim_end(string &s)
 	{
 		constexpr auto isblank = [](char c) { return std::isblank(c, std::locale()); };
 		return s.erase(stl::find_if_not(s, isblank), end(s));
 	}
 
-	inline bool trim(std::string &s)
+	inline bool trim(string &s)
 	{
 		return trim_begin(s) != trim_end(s);
 	}
@@ -197,12 +226,12 @@ namespace fmt
 		}
 	};
 
-	inline std::string quote(std::string_view string)
+	inline string quote(string_view string)
 	{
 		return format("\"{1}\"") % string;
 	}
 
-	inline std::string key_value(std::string_view key, std::string_view value)
+	inline string key_value(string_view key, string_view value)
 	{
 		return format("{1}={2}") % key % value;
 	}

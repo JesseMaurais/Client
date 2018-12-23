@@ -8,6 +8,24 @@ namespace stl
 	// Non-modifying sequence operations
 
 	template <typename Container, typename Operation>
+	inline bool all_of(Container&& c, Operation&& op)
+	{
+		return std::all_of(begin(c), end(c), op);
+	}
+
+	template <typename Container, typename Operation>
+	inline bool any_of(Container&& c, Operation&& op)
+	{
+		return std::any_of(begin(c), end(c), op);
+	}
+
+	template <typename Container, typename Operation>
+	inline bool none_of(Container&& c, Operation&& op)
+	{
+		return std::none_of(begin(c), end(c), op);
+	}
+
+	template <typename Container, typename Operation>
 	inline void for_each(Container &&c, Operation &&op)
 	{
 		std::for_each(begin(c), end(c), op);

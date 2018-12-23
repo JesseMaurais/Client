@@ -30,6 +30,7 @@ namespace sys
 	DWORD winerr(char const *prefix)
 	{
 		LPSTR data = nullptr;
+		LPSTR addr = static_cast<LPSTR>(&data);
 		constexpr DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 		DWORD const code = GetLastError();
 		DWORD const size = FormatMessage
@@ -38,7 +39,7 @@ namespace sys
 		 nullptr, // source
 		 code,    // message
 		 lang,    // language
-		 (LPSTR)&data,   // buffer
+		 addr,    // buffer
 		 0,       // size
 		 nullptr  // arguments
 		);
@@ -54,8 +55,6 @@ namespace sys
 
 	pid_t pexec(int fd[3], char **argv)
 	{
-		auto const stdno = { STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO };
-
 		#if defined(__WIN32__)
 		{
 			struct Handle
@@ -69,8 +68,8 @@ namespace sys
 
 				int set()
 				{
-					auto ptr = std::intptr_t(h);
-					int fd = _open_osfhandle(ptr, 0);
+					auto const ptr = std::intptr_t(h);
+					int const fd = _open_osfhandle(ptr, 0);
 					h = nullptr;
 					return fd;
 				}
@@ -104,14 +103,14 @@ namespace sys
 
 			} pair[3];
 
-			for (int i : stdno)
+			for (int n : { 0, 1, 2 })
 			{
-				if (not pair[i].ok)
+				if (not pair[n].ok)
 				{
 					return -1;
 				}
 
-				HANDLE h = i ? pair[i].read.h : pair[i].write.h;
+				HANDLE h = 0 == n ? pair[n].read.h : pair[n].write.h;
 
 				if (not SetHandleInformation(h, HANDLE_FLAG_INHERIT, 0))
 				{
@@ -166,12 +165,12 @@ namespace sys
 				return -1;
 			}
 
-			for (int i : stdno)
+			for (int n : { 0, 1, 2 })
 			{
-				fd[i] = i ? pair[i].read.set() : pair[i].write.set();
+				fd[i] = 0 == n ? pair[n].read.set() : pair[n].write.set();
 			}
 
-			return std::intptr_t(pi.hProcess);
+			return pid_t(pi.hProcess);
 		}
 		#elif defined(__POSIX__)
 		{
@@ -188,14 +187,14 @@ namespace sys
 				{
 					perror("fork");
 				}
-				else for (int i : stdno)
+				else for (int i : { 0, 1, 2 })
 				{
 					fd[i] = pair[i][0 == i].set();
 				}
 				return pid;
 			}
 
-			for (int i : stdno)
+			for (int i : { 0, 1, 2 })
 			{
 				int k = pair[i][0 != i].get();
 

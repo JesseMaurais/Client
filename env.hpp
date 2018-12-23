@@ -7,8 +7,8 @@
 namespace sys::env
 {
 	std::string_view get(std::string_view s);
-	bool set(std::string_view s, std::string_view v);
-};
+	bool set(std::string_view k, std::string_view v);
+}
 
 namespace env
 {
@@ -22,22 +22,25 @@ namespace env
 		virtual operator std::vector<std::string_view>() const = 0;
 	};
 
-	extern list const& path;
-	extern view const& pwd;
-	extern view const& home;
-	extern view const& user;
-	extern view const& tmpdir;
-	extern view const& shell;
-	extern view const& term;
-	extern view const& pager;
-	extern view const& editor;
-	extern view const& visual;
-	extern view const& random;
-};
+	list const& path;
+	view const& pwd;
+	view const& user;
+	view const& home;
+	view const& tmpdir;
+	view const& shell;
+	view const& prompt;
+	view const& term;
+	view const& editor;
+	view const& visual;
+	view const& browser;
+	view const& pager;
+	view const& random;
+	view const& desktop;
+}
 
 namespace sys
 {
-	extern ::env::list const& environment;
-};
+	::env::list const& environment;
+}
 
 #endif // file

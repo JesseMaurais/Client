@@ -12,7 +12,7 @@ namespace sys
 	void ferror(std::string_view format, Args... args)
 	{
 		std::string string;
-		if (::io::sprintf(string, format, args...) > 0)
+		if (io::sprintf(string, format, args...) > 0)
 		{
 			std::perror(string.c_str());
 		}
