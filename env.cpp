@@ -2,19 +2,43 @@
 #include "fmt.hpp"
 #include "sys.hpp"
 #include "os.hpp"
+#include <map>
 #include <regex>
 
 namespace sys::env
 {
-	std::string_view get(std::string_view s)
+	std::string_view get(std::string_view u)
 	{
-		return std::getenv(s.data());
+		auto const p = u.data();
+		return std::getenv(p);
 	}
 
-	bool set(std::string_view k, std::string_view v)
+	bool put(std::string_view u)
 	{
-		std::string s = fmt::key_value(k, v);
-		return sys::putenv(s.data()) != 0;
+		auto const p = u.data();
+		return 0 != sys::putenv(p);
+	}
+
+	bool set(std::string_view u, std::string_view v)
+	{
+		std::string const s = fmt::key_value(u, v);
+		return putenv(s);
+	}
+
+	std::string format(std::string u)
+	{
+		static std::regex x { "$[A-Z_][A-Z_0-9]*" };
+		std::smatch m;
+		std::string s;
+		while (std::regex_search(u, m, x))
+		{
+			s += m.prefix();
+			auto t = m.str();
+			s += get(t);
+			u = m.suffix();
+		}
+		s.shrink_to_fit();
+		return s;
 	}
 }
 
@@ -77,6 +101,22 @@ namespace
 		}
 	};
 
+	struct LANG : env::view
+	{
+		operator std::string_view() const final
+		{
+			for (auto var : { "LC_ALL", "LANG" })
+			{
+				auto view = sys::env::get(var);
+				if (empty(view))
+				{
+					return view;
+				}
+			}
+			return "";
+		}
+	};
+
 	struct TMPDIR : env::view
 	{
 		operator std::string_view() const final
@@ -84,7 +124,7 @@ namespace
 			for (auto var : { "TMPDIR", "TEMP", "TMP" })
 			{
 				auto view = sys::env::get(var);
-				if (not view.empty())
+				if (not empty(view))
 				{
 					return view;
 				}
@@ -196,6 +236,7 @@ namespace env
 	view const& pwd = PWD();
 	view const& user = USER();
 	view const& home = HOME();
+	view const& lang = LANG();
 	view const& tmpdir = TMPDIR();
 	view const& shell = SHELL();
 	view const& prompt = PROMPT();

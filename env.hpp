@@ -6,8 +6,10 @@
 
 namespace sys::env
 {
-	std::string_view get(std::string_view s);
-	bool set(std::string_view k, std::string_view v);
+	std::string_view get(std::string_view u);
+	bool put(std::string_view u);
+	bool set(std::string_view u, std::string_view v);
+	std::string format(std::string s);
 }
 
 namespace env
@@ -26,6 +28,7 @@ namespace env
 	view const& pwd;
 	view const& user;
 	view const& home;
+	view const& lang;
 	view const& tmpdir;
 	view const& shell;
 	view const& prompt;

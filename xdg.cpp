@@ -1,5 +1,6 @@
 #include "xdg.hpp"
 #include "fmt.hpp"
+#include "ini.hpp"
 #include "sys.hpp"
 
 namespace
@@ -16,17 +17,17 @@ namespace
 	{
 		operator std::string_view() const final
 		{
-			std::string_view view = sys::env::get("XDG_MENU_PREFIX");
-			if (empty(view))
+			std::string_view u = sys::env::get("XDG_MENU_PREFIX");
+			if (empty(u))
 			{
 				static std::string prefix;
 				if (empty(prefix))
 				{
 					prefix = to_lower(xdg::current_desktop) + '-';
 				}
-				view = prefix;
+				u = prefix;
 			}
-			return view;
+			return u;
 		}
 	};
 
@@ -42,18 +43,18 @@ namespace
 	{
 		operator std::string_view() const final
 		{
-			std::string_view view = sys::env::get("XDG_DATA_HOME");
-			if (empty(view))
+			std::string_view u = sys::env::get("XDG_DATA_HOME");
+			if (empty(u))
 			{
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::string_span folders { env::home, ".local", "share" };
-					dir = fmt::join(folders, sys::sep::dir);
+					fmt::string_span const p { env::home, ".local", "share" };
+					u = fmt::join(p, sys::sep::dir);
 				}
-				view = dir;
+				u = dir;
 			}
-			return view;
+			return u;
 		}
 	};
 
@@ -61,18 +62,18 @@ namespace
 	{
 		operator std::string_view() const final
 		{
-			std::string_view view = sys::env::get("XDG_CONFIG_HOME");
-			if (empty(view))
+			std::string_view u = sys::env::get("XDG_CONFIG_HOME");
+			if (empty(u))
 			{
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::string_span folders { env::home, ".config" };
-					dir = fmt::join(folders, sys::sep::dir);
+					fmt::string_span const p { env::home, ".config" };
+					dir = fmt::join(p, sys::sep::dir);
 				}
-				view = dir;
+				u= dir;
 			}
-			return view;
+			return u;
 		}
 	};
 
@@ -80,16 +81,16 @@ namespace
 	{
 		operator std::string_view() const final
 		{
-			std::string_view view = sys::env::get("XDG_CACHE_HOME");
-			if (empty(view))
+			std::string_view u = sys::env::get("XDG_CACHE_HOME");
+			if (empty(u))
 			{
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::string_span folders { env::home, ".cache" };
-					dir = fmt::join(folders, sys::sep::dir);
+					fmt::string_span const span { env::home, ".cache" };
+					dir = fmt::join(span, sys::sep::dir);
 				}
-				view = dir;
+				u = dir;
 			}
 			return view;
 		}
@@ -99,13 +100,12 @@ namespace
 	{
 		operator std::vector<std::string_view>() const final
 		{
-			std::string_view view = sys::env::get("XDG_DATA_DIRS");
-			if (empty(view))
+			std::string_view u = sys::env::get("XDG_DATA_DIRS");
+			if (empty(u))
 			{
 				if constexpr (sys::POSIX)
 				{
-					static auto const dir = "/usr/local/share/:/usr/share/";
-					view = dir;
+					u = "/usr/local/share/:/usr/share/";
 				}
 				else
 				if constexpr (sys::WIN32)
@@ -117,7 +117,7 @@ namespace
 						std::string const local = sys::env::get("LOCALAPPDATA");
 						dir = fmt::join({ data, local }, sys::sep::dir);
 					}
-					view = dir;
+					u = dir;
 				}
 			}
 			return fmt::split(view, sys::sep::dir);
@@ -128,22 +128,48 @@ namespace
 	{
 		operator std::vector<std::string_view>() const final
 		{
-			std::string_view view = sys::env::get("XDG_CONFIG_DIRS");
-			if (empty(view))
+			std::string_view u = sys::env::get("XDG_CONFIG_DIRS");
+			if (empty(u))
 			{
 				if constexpr (sys::POSIX)
 				{
-					static auto const dir = "/etc/xdg";
-					view = dir;
+					u = "/etc/xdg";
 				}
 				else
 				if constexpr (sys::WIN32)
 				{
-					static std::string dir = sys::env::get("ALLUSERSPROFILE");
-					view = dir;
+					u = sys::env::get("ALLUSERSPROFILE");
 				}
 			}
-			return fmt::split(view, sys::sep::dir);
+			return fmt::split(u, sys::sep::dir);
+		}
+	};
+
+	std::string_view cached_dirs(std::string_view u)
+	{
+		static ini data;
+		if (empty(data))
+		{
+			fmt::string_span const span { xdg::config_home, "user-dirs.dirs" };
+			auto const path = fmt::join(span, sys::sep::dir);
+			std::istream in(path);
+			while (data.feed(in));
+		}
+		return data(u);
+	}
+
+	struct DESKTOP_DIR : env::view
+	{
+		constexpr auto var = "XDG_DESKTOP_DIR";
+
+		operator std::string_view() const final
+		{
+			std::string_view u = sys::env::get(var);
+			if (empty(u))
+			{
+				 u = cached_dirs()
+			}
+			return u;
 		}
 	};
 }
@@ -158,5 +184,6 @@ namespace xdg
 	env::view const& cache_home = CACHE_HOME();
 	env::list const& data_dirs = DATA_DIRS();
 	env::list const& config_dirs = CONFIG_DIRS();
+	env::view const& desktop_dir = DESKTOP_DIR();
 }
 

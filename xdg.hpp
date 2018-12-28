@@ -13,6 +13,7 @@ namespace xdg
 	extern env::view const& cache_home;
 	extern env::list const& data_dirs;
 	extern env::list const& config_dirs;
+	extern env::view const& desktop_dir;
 }
 
 #endif // file

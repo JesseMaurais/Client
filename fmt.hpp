@@ -4,11 +4,9 @@
 #include <locale>
 #include <codecvt>
 #include <string>
+#include <string_view>
 #include <sstream>
-#include <iterator>
-#include <cassert>
 #include "alg.hpp"
-#include "fs.hpp"
 
 namespace fmt
 {
@@ -84,64 +82,54 @@ namespace fmt
 		return to_string(std::wstring(1, c));
 	}
 
-	template <>
-	inline std::string to_string(sys::file::path const &p)
-	{
-		return to_string(p.string());
-	}
+	using pair = std::pair<std::string, std::string>;
+	using span = std::vector<std::string_view>;
 
-	// Custom terminal string view types
-
-	struct string_view : std::string_view
-	{
-		string_view(std::string_view const& view)
-		{
-			assert('\0' == view[view.size()]);
-		}
-	};
-
-	using string_span = std::vector<string_view>;
-	using string = std::string;
-
-	inline bool empty(string const& s)
+	inline bool empty(std::string const& s)
 	{
 		return s.empty();
 	}
 
-	inline bool empty(string_view s)
+	inline bool empty(std::string_view s)
 	{
 		return s.empty();
 	}
 
-	inline bool empty(string_span s)
+	inline bool empty(pair const& p)
+	{
+		return empty(p.first) and empty(p.second);
+	}
+
+	inline bool empty(span const& s)
 	{
 		return s.empty() or stl::all_of(s, empty);
 	}
 
 	// Basic string formatting tools
 
-	inline void replace(string &buf, string_view s, string_view r)
+	inline void replace(std::string &buf, std::string_view s, std::string_view r)
 	{
-		using size_type = string_view::size_type;
-		constexpr size_type end = string::npos;
+		using size_type = std::string_view::size_type;
+		constexpr size_type end = std::string::npos;
 		for (auto at = buf.find(s.data(), 0, s.size()); at != end; at = buf.find(s.data(), at + r.size(), s.size()))
 		{
 			buf.replace(at, s.size(), r.data(), r.size());
 		}
 	}
 
-	inline string_span split(string_view s, string_view del)
+	inline span split(std::string_view u, std::string_view del)
 	{
-		string_span tok;
-		using size_type = string_view::size_type;
-		constexpr size_type end = string_view::npos;
-		for (size_type at = 0, to = s.find_first_of(del); at != end; to = s.find_first_of(del, at))
+		span tok;
+		using size_type = std::string_view::size_type;
+		constexpr size_type end = std::string_view::npos;
+		for (size_type at = 0, to = u.find_first_of(del); at != end; to = u.find_first_of(del, at))
 		{
 			if (to != at)
 			{
-				tok.emplace_back(s.substr(at, to - at));
+				auto t = u.substr(at, to - at);
+				tok.emplace_back(t);
 			}
-			at = s.find_first_not_of(del, to);
+			at = u.find_first_not_of(del, to);
 		}
 		return tok;
 	}
@@ -182,6 +170,25 @@ namespace fmt
 	inline bool trim(string &s)
 	{
 		return trim_begin(s) != trim_end(s);
+	}
+
+	static istream& getline(istream& in, string& s)
+	{
+		while (std::getline(in, s))
+		{
+			constexpr auto c = '#';
+			constexpr auto ws = " \t";
+
+			auto const n = s.find_first_not_of(ws);
+			if (npos != n and c != s[n])
+			{
+				auto const t = s.find(c);
+				s = s.substr(0, t);
+				trim(s);
+				break;
+			}
+		}
+		return is;
 	}
 
 	// String formatting with inline tags
@@ -226,26 +233,22 @@ namespace fmt
 		}
 	};
 
-	inline string quote(string_view string)
+	inline std::string quote(std::string_view u)
 	{
-		return format("\"{1}\"") % string;
+		return format("\"{1}\"") % u;
 	}
 
-	inline string key_value(string_view key, string_view value)
+	inline std::string key_value(std::string_view u, std::string_view v)
 	{
-		return format("{1}={2}") % key % value;
+		return format("{1}={2}") % u % v;
 	}
 
-	inline std::pair<std::string_view, std::string_view> key_value(std::string_view s)
+	inline pair key_value(std::string_view u)
 	{
-		auto const pair = split(s, "=");
-		if (not pair.empty())
-		{
-			auto &key = pair.front();
-			auto &value = pair.back();
-			return std::pair(key, value);
-		}
-		return std::pair("", "");
+		auto const part = split(u, "=");
+		auto const key = part.front();
+		auto const value = part.back();
+		return pair(key, value);
 	}
 }
 
