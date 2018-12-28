@@ -49,7 +49,7 @@ namespace
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::string_span const p { env::home, ".local", "share" };
+					fmt::view const p { env::home, ".local", "share" };
 					u = fmt::join(p, sys::sep::dir);
 				}
 				u = dir;
@@ -68,7 +68,7 @@ namespace
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::string_span const p { env::home, ".config" };
+					fmt::view const p { env::home, ".config" };
 					dir = fmt::join(p, sys::sep::dir);
 				}
 				u= dir;
@@ -87,7 +87,7 @@ namespace
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::string_span const span { env::home, ".cache" };
+					fmt::span const span { env::home, ".cache" };
 					dir = fmt::join(span, sys::sep::dir);
 				}
 				u = dir;
@@ -147,13 +147,19 @@ namespace
 
 	std::string_view cached_dirs(std::string_view u)
 	{
-		static ini data;
+		static fmt::map data;
 		if (empty(data))
 		{
-			fmt::span const span { xdg::config_home, "user-dirs.dirs" };
-			auto const path = fmt::join(span, sys::sep::dir);
+			fmt::view const p { xdg::config_home, "user-dirs.dirs" };
+			auto const path = fmt::join(p, sys::sep::dir);
 			std::istream in(path);
-			while (data.feed(in));
+			std::string s;
+			while (fmt::getline(in, s))
+			{
+				fmt::pair p = fmt::key_value(s);
+				p.second = sys::env::format(p.second);
+				data.emplace(p);
+			}
 		}
 		return data(u);
 	}
