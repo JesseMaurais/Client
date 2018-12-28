@@ -87,8 +87,8 @@ namespace
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::span const span { env::home, ".cache" };
-					dir = fmt::join(span, sys::sep::dir);
+					fmt::view const p { env::home, ".cache" };
+					dir = fmt::join(p, sys::sep::dir);
 				}
 				u = dir;
 			}

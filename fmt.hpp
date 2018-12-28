@@ -57,7 +57,7 @@ namespace fmt
 	template <>
 	inline std::wstring to_wstring(wchar_t const * const &w)
 	{
-		return to_string(std::wstring_view(w));
+		return to_wstring(std::wstring_view(w));
 	}
 
 	template <>
@@ -69,7 +69,7 @@ namespace fmt
 	template <>
 	inline std::wstring to_wstring(wchar_t * const &w)
 	{
-		return to_string(std::wstring_view(w));
+		return to_wstring(std::wstring_view(w));
 	}
 
 	template <>
@@ -83,6 +83,8 @@ namespace fmt
 	{
 		return std::wstring(1, c);
 	}
+
+	// Wide & narrow conversions
 
 	template <>
 	inline std::string to_string(std::wstring const &w)
@@ -125,7 +127,7 @@ namespace fmt
 	template <>
 	inline std::wstring to_wstring(char const * const &s)
 	{
-		return to_string(std::string_view(s));
+		return to_wstring(std::string_view(s));
 	}
 
 	template <>
@@ -137,7 +139,7 @@ namespace fmt
 	template <>
 	inline std::wstring to_wstring(char * const &s)
 	{
-		return to_string(std::string_view(s));
+		return to_wstring(std::string_view(s));
 	}
 
 	template <>
@@ -147,9 +149,9 @@ namespace fmt
 	}
 
 	template <>
-	inline std::string to_wstring(char const &c)
+	inline std::wstring to_wstring(char const &c)
 	{
-		return to_string(std::string(1, c));
+		return to_wstring(std::string(1, c));
 	}
 
 	inline bool empty(std::string const &s)
@@ -195,19 +197,85 @@ namespace fmt
 
 	// Basic string formatting tools
 
-	inline void replace(std::string &buf, std::string_view u, std::string_view v)
+	enum char_type : std::ctype_base::mask
 	{
-		using size_type = std::string_view::size_type;
-		constexpr size_type n = std::string::npos;
-		for (auto i = buf.find(u.data(), 0, u.size()); i != n; i = buf.find(u.data(), i + v.size(), u.size()))
-		{
-			buf.replace(i, u.size(), v.data(), v.size());
-		}
+		space = std::ctype_base::space,
+		print = std::ctype_base::print,
+		cntrl = std::ctype_base::cntrl,
+		upper = std::ctype_base::upper,
+		lower = std::ctype_base::lower,
+		alpha = std::ctype_base::alpha,
+		digit = std::ctype_base::digit,
+		punct = std::ctype_base::punct,
+		blank = std::ctype_base::blank,
+		graph = std::ctype_base::graph,
+	};
+
+	inline std::string to_upper(std::string_view u)
+	{
+		std::ctype<wchar_t> cc;
+		std::wstring w = to_wstring(u);
+		for (wchar_t &c : w) c = cc.toupper(c);
+		return to_string(w);
 	}
 
-	inline span split(std::string_view u, std::string_view w)
+	inline std::string to_lower(std::string_view u)
 	{
-		span tok;
+		std::ctype<wchar_t> cc;
+		std::wstring w = to_wstring(u);
+		for (wchar_t &c : w) c = cc.tolower(c);
+		return to_string(w);
+	}
+
+	template <typename Iterator>
+	Iterator skip(char_type type, Iterator begin, Iterator end)
+	{
+		Iterator it;
+		std::ctype<char> cc;
+		for (it = begin; it != end; ++it) if (not cc.is(type, *it)) break;
+		return it;
+	}
+
+	inline std::string::iterator trim_begin(std::string &s)
+	{
+		auto it = skip(space, s.begin(), s.end());
+		return s.erase(s.begin(), it);
+	}
+
+	inline std::string::iterator trim_end(std::string &s)
+	{
+		auto it = skip(space, s.rbegin(), s.rend());
+		return s.erase(std::next(it).base(), s.end());
+	}
+
+	inline bool trim(std::string &s)
+	{
+		return trim_begin(s) != trim_end(s);
+	}
+
+	static std::istream& getline(std::istream& in, std::string& s)
+	{
+		while (std::getline(in, s))
+		{
+			constexpr auto c = '#';
+
+			auto const it = skip(space, s.begin(), s.end());
+			if (it != s.end() and c != *it)
+			{
+				auto const t = s.find(c);
+				s = s.substr(0, t);
+				if (trim(s))
+				{
+					break;
+				}
+			}
+		}
+		return is;
+	}
+
+	inline view split(std::string_view u, std::string_view w)
+	{
+		view tok;
 		using size_type = std::string_view::size_type;
 		constexpr size_type n = std::string_view::npos;
 		for (size_type i = 0, j = u.find_first_of(w); i != n; j = u.find_first_of(w, i))
@@ -230,59 +298,14 @@ namespace fmt
 		return stream.str();
 	}
 
-	inline std::string to_upper(std::string_view u)
+	inline void replace(std::string &buf, std::string_view u, std::string_view v)
 	{
-		std::wstring w = to_wstring(u);
-		for (wchar_t &c : w) c = std::to_upper(c);
-		return to_string(w);
-	}
-
-	inline std::string to_lower(std::string_view u)
-	{
-		std::wstring w = to_wstring(u);
-		for (wchar_t &c : w) c = std::to_lower(c);
-		return to_string(w);
-	}
-
-	inline std::string::iterator trim_begin(std::string &s)
-	{
-		auto it = s.begin();
-		while (it != s.end() and std::isblank(*it)) ++it;
-		return s.erase(s.begin(), it);
-	}
-
-	inline std::string::iterator trim_end(std::string &s)
-	{
-		auto it = s.rbegin();
-		while (it != s.rend() and std::isblank(*it)) ++it;
-		return s.erase(s.rbegin(), it);
-	}
-
-	inline bool trim(std::string &s)
-	{
-		return trim_begin(s) != trim_end(s);
-	}
-
-	static std::istream& getline(std::istream& in, std::string& s)
-	{
-		constexpr auto npos = std::string::npos;
-		while (std::getline(in, s))
+		using size_type = std::string_view::size_type;
+		constexpr size_type n = std::string::npos;
+		for (auto i = buf.find(u.data(), 0, u.size()); i != n; i = buf.find(u.data(), i + v.size(), u.size()))
 		{
-			constexpr auto c = '#';
-			constexpr auto ws = " \t";
-
-			auto const n = s.find_first_not_of(ws);
-			if (npos != n and c != s[n])
-			{
-				auto const t = s.find(c);
-				s = s.substr(0, t);
-				if (trim(s))
-				{
-					break;
-				}
-			}
+			buf.replace(i, u.size(), v.data(), v.size());
 		}
-		return is;
 	}
 
 	// String formatting with inline tags
