@@ -8,56 +8,38 @@
 #include <string>
 #include <map>
 
-struct ini
+struct ini : std::map<std::string, fmt::map>
 {
-	using istream = std::istream;
-	using string = std::string;
-	using view = std::string_view;
-	using entry = std::pair<string, string>;
-	using keys = std::vector<entry>;
-	using group = std::pair<string, keys>;
-	using map = std::map<string, group>;
+	std::string head;
 
-	constexpr auto npos = string::npos;
-
-	static bool is_header(string_view s)
+	std::istream& feed(std::istream& in)
 	{
-		auto const begin = s.find_first_of('[');
-		auto const end = s.find_last_of(']');
-
-		if (begin < end and npos != end)
-		{
-			if (s.find_first_of(']'), begin) == end)
-			{
-				if (s.find_last_of('[', end) == begin)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	istream& feed(istream& in)
-	{
-		string s;
+		std::string s;
 		if (fmt::getline(in, s))
 		{
-			if (not is_header(s))
+			if (is_head(s))
 			{
-				string [key, value] = fmt::key_value(s);
-				fmt::trim(key);
-				fmt::trim(value);
-				data[head].insert(key, value);
+				head = s.substr(1, s.size() - 1);
 			}
-			else head = s;
+			else
+			{
+				auto [key, value] = fmt::key_value(s);
+				at(head).insert(key, value);
+			}
 		}
+	}
+
+	std::string_view operator()(std::string_view u) const
+	{
+		return at(head)[u];
 	}
 
 private:
 
-	map data;
-	string head;
+	static bool is_head(std::string_view s)
+	{
+		return not empty(s) and s.front() == '[' and s.back() == ']';
+	}
 };
 
 #endif file

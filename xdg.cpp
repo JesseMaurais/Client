@@ -150,7 +150,7 @@ namespace
 		static ini data;
 		if (empty(data))
 		{
-			fmt::string_span const span { xdg::config_home, "user-dirs.dirs" };
+			fmt::span const span { xdg::config_home, "user-dirs.dirs" };
 			auto const path = fmt::join(span, sys::sep::dir);
 			std::istream in(path);
 			while (data.feed(in));
@@ -167,7 +167,7 @@ namespace
 			std::string_view u = sys::env::get(var);
 			if (empty(u))
 			{
-				 u = cached_dirs()
+				 u = cached_dirs(var)
 			}
 			return u;
 		}

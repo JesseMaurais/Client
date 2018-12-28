@@ -83,9 +83,10 @@ namespace fmt
 	}
 
 	using pair = std::pair<std::string, std::string>;
+	using map = std::map<std::string, std::string>;
 	using span = std::vector<std::string_view>;
 
-	inline bool empty(std::string const& s)
+	inline bool empty(std::string const &s)
 	{
 		return s.empty();
 	}
@@ -95,47 +96,46 @@ namespace fmt
 		return s.empty();
 	}
 
-	inline bool empty(pair const& p)
+	inline bool empty(pair const &p)
 	{
 		return empty(p.first) and empty(p.second);
 	}
 
-	inline bool empty(span const& s)
+	inline bool empty(span const &s)
 	{
 		return s.empty() or stl::all_of(s, empty);
 	}
 
 	// Basic string formatting tools
 
-	inline void replace(std::string &buf, std::string_view s, std::string_view r)
+	inline void replace(std::string &buf, std::string_view u, std::string_view v)
 	{
 		using size_type = std::string_view::size_type;
-		constexpr size_type end = std::string::npos;
-		for (auto at = buf.find(s.data(), 0, s.size()); at != end; at = buf.find(s.data(), at + r.size(), s.size()))
+		constexpr size_type n = std::string::npos;
+		for (auto i = buf.find(s.data(), 0, u.size()); i != n; i = buf.find(u.data(), i + v.size(), u.size()))
 		{
-			buf.replace(at, s.size(), r.data(), r.size());
+			buf.replace(i, u.size(), v.data(), v.size());
 		}
 	}
 
-	inline span split(std::string_view u, std::string_view del)
+	inline span split(std::string_view u, std::string_view w)
 	{
 		span tok;
 		using size_type = std::string_view::size_type;
-		constexpr size_type end = std::string_view::npos;
-		for (size_type at = 0, to = u.find_first_of(del); at != end; to = u.find_first_of(del, at))
+		constexpr size_type n = std::string_view::npos;
+		for (size_type i = 0, j = u.find_first_of(w); i != n; j = u.find_first_of(w, i))
 		{
-			if (to != at)
+			if (i != j)
 			{
-				auto t = u.substr(at, to - at);
+				auto t = u.substr(i, j - i);
 				tok.emplace_back(t);
 			}
-			at = u.find_first_not_of(del, to);
+			i = u.find_first_not_of(w, j);
 		}
 		return tok;
 	}
 
-	template <typename Container>
-	inline string join(Container const& tok, string const& del)
+	inline std::string join(span const& tok, std::string const& del)
 	{
 		std::stringstream stream;
 		auto it = std::ostream_iterator<std::string>(stream, del.c_str());
@@ -143,36 +143,38 @@ namespace fmt
 		return stream.str();
 	}
 
-	inline string to_upper(string_view s)
+	inline std::string to_upper(std::string s)
 	{
-		stl::transform(s, [](char c) { return std::toupper(c, std::locale()); });
+		for (char &c : s) c = std::toupper(c);
 		return s;
 	}
 
-	inline string to_lower(string_view s)
+	inline std::string to_lower(std::string s)
 	{
-		stl::transform(s, [](char c) { return std::tolower(c, std::locale()); });
+		for (char &c : s) c = std::tolower(c);
 		return s;
 	}
 
-	inline string::iterator trim_begin(string &s)
+	inline std::string::iterator trim_begin(std::string &s)
 	{
-		constexpr auto isblank = [](char c) { return std::isblank(c, std::locale()); };
-		return s.erase(begin(s), stl::find_if(s, isblank));
+		auto it = s.begin();
+		while (it != s.end() and std::isblank(*it)) ++it;
+		return s.erase(s.begin(), it);
 	}
 
-	inline string::iterator trim_end(string &s)
+	inline std::string::iterator trim_end(std::string &s)
 	{
-		constexpr auto isblank = [](char c) { return std::isblank(c, std::locale()); };
-		return s.erase(stl::find_if_not(s, isblank), end(s));
+		auto it = s.rbegin();
+		while (it != s.rend() and std::isblank(*it)) ++it;
+		return s.erase(s.rbegin(), it);
 	}
 
-	inline bool trim(string &s)
+	inline bool trim(std::string &s)
 	{
 		return trim_begin(s) != trim_end(s);
 	}
 
-	static istream& getline(istream& in, string& s)
+	static std::istream& getline(std::istream& in, std::string& s)
 	{
 		while (std::getline(in, s))
 		{
