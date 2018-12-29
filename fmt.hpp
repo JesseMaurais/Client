@@ -1,14 +1,12 @@
 #ifndef fmt_hpp
 #define fmt_hpp
 
-#include <locale>
+#include <vector>
 #include <codecvt>
+#include <locale>
 #include <string>
 #include <string_view>
-#include <iterator>
 #include <sstream>
-#include <vector>
-#include <map>
 #include "alg.hpp"
 
 namespace fmt
@@ -16,73 +14,73 @@ namespace fmt
 	// String converters for generic programming
 
 	template <typename T>
-	inline std::string to_string(T const &x)
+	inline std::string to_string(T const& x)
 	{
 		return std::to_string(x);
 	}
 
 	template <typename T>
-	inline std::wstring to_wstring(T const &x)
+	inline std::wstring to_wstring(T const& x)
 	{
 		return std::to_wstring(x);
 	}
 
 	template <>
-	inline std::string to_string(std::string const &s)
+	inline std::string to_string(std::string const& s)
 	{
 		return s;
 	}
 
 	template <>
-	inline std::wstring to_wstring(std::wstring const &w)
+	inline std::wstring to_wstring(std::wstring const& w)
 	{
 		return w;
 	}
 
 	template <>
-	inline std::string to_string(std::string_view const &s)
+	inline std::string to_string(std::string_view const& s)
 	{
 		return std::string(s.data(), s.size());
 	}
 
 	template <>
-	inline std::wstring to_wstring(std::wstring_view const &w)
+	inline std::wstring to_wstring(std::wstring_view const& w)
 	{
 		return std::wstring(w.data(), w.size());
 	}
 
 	template <>
-	inline std::string to_string(char const * const &s)
+	inline std::string to_string(char const*const& s)
 	{
 		return to_string(std::string_view(s));
 	}
 
 	template <>
-	inline std::wstring to_wstring(wchar_t const * const &w)
+	inline std::wstring to_wstring(wchar_t const*const& w)
 	{
 		return to_wstring(std::wstring_view(w));
 	}
 
 	template <>
-	inline std::string to_string(char * const &s)
+	inline std::string to_string(char *const& s)
 	{
 		return to_string(std::string_view(s));
 	}
 
 	template <>
-	inline std::wstring to_wstring(wchar_t * const &w)
+	inline std::wstring to_wstring(wchar_t *const& w)
 	{
 		return to_wstring(std::wstring_view(w));
 	}
 
 	template <>
-	inline std::string to_string(char const &c)
+	inline std::string to_string(char const& c)
 	{
 		return std::string(1, c);
 	}
 
 	template <>
-	inline std::wstring to_wstring(wchar_t const &c)
+	inline std::wstring to_wstring(wchar_t const& c)
 	{
 		return std::wstring(1, c);
 	}
@@ -90,7 +88,7 @@ namespace fmt
 	// Wide & narrow conversions
 
 	template <>
-	inline std::string to_string(std::wstring const &w)
+	inline std::string to_string(std::wstring const& w)
 	{
 		using utf8 = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<utf8> convert;
@@ -98,7 +96,7 @@ namespace fmt
 	}
 
 	template <>
-	inline std::wstring to_wstring(std::string const &s)
+	inline std::wstring to_wstring(std::string const& s)
 	{
 		using utf8 = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<utf8> convert;
@@ -106,7 +104,7 @@ namespace fmt
 	}
 
 	template <>
-	inline std::string to_string(std::wstring_view const &w)
+	inline std::string to_string(std::wstring_view const& w)
 	{
 		using utf8 = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<utf8> convert;
@@ -114,7 +112,7 @@ namespace fmt
 	}
 
 	template <>
-	inline std::wstring to_wstring(std::string_view const &s)
+	inline std::wstring to_wstring(std::string_view const& s)
 	{
 		using utf8 = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<utf8> convert;
@@ -122,47 +120,47 @@ namespace fmt
 	}
 
 	template <>
-	inline std::string to_string(wchar_t const * const &w)
+	inline std::string to_string(wchar_t const*const& w)
 	{
 		return to_string(std::wstring_view(w));
 	}
 
 	template <>
-	inline std::wstring to_wstring(char const * const &s)
+	inline std::wstring to_wstring(char const*const& s)
 	{
 		return to_wstring(std::string_view(s));
 	}
 
 	template <>
-	inline std::string to_string(wchar_t * const &w)
+	inline std::string to_string(wchar_t *const& w)
 	{
 		return to_string(std::wstring_view(w));
 	}
 
 	template <>
-	inline std::wstring to_wstring(char * const &s)
+	inline std::wstring to_wstring(char *const& s)
 	{
 		return to_wstring(std::string_view(s));
 	}
 
 	template <>
-	inline std::string to_string(wchar_t const &c)
+	inline std::string to_string(wchar_t const& c)
 	{
 		return to_string(std::wstring(1, c));
 	}
 
 	template <>
-	inline std::wstring to_wstring(char const &c)
+	inline std::wstring to_wstring(char const& c)
 	{
 		return to_wstring(std::string(1, c));
 	}
 
-	inline bool empty(std::string const &s)
+	inline bool empty(std::string const& s)
 	{
 		return s.empty();
 	}
 
-	inline bool empty(std::wstring const &s)
+	inline bool empty(std::wstring const& s)
 	{
 		return s.empty();
 	}
@@ -180,25 +178,22 @@ namespace fmt
 	// Aggregate types
 
 	using pair = std::pair<std::string, std::string>;
-	using map = std::map<std::string, std::string>;
-	using view = std::vector<std::string_view>;
+	using span_view = std::vector<std::string_view>;
 
 	inline bool empty(pair const &p)
 	{
 		return empty(p.first) and empty(p.second);
 	}
 
-	inline bool empty(map const &m)
+	inline bool empty(span_view const &v)
 	{
-		return m.empty() or stl::all_of(m, empty);
-	}
-
-	inline bool empty(view const &s)
-	{
-		return s.empty() or stl::all_of(s, empty);
+		return v.empty() or stl::all_of(v, [](auto u) { return empty(u); });
 	}
 
 	// Basic string formatting tools
+
+	struct ctype : std::ctype<char> { };
+	struct wctype : std::ctype<wchar_t> { };
 
 	enum char_type : std::ctype_base::mask
 	{
@@ -216,7 +211,7 @@ namespace fmt
 
 	inline std::string to_upper(std::string_view u)
 	{
-		std::ctype<wchar_t> cc;
+		wctype cc;
 		std::wstring w = to_wstring(u);
 		for (wchar_t &c : w) c = cc.toupper(c);
 		return to_string(w);
@@ -224,31 +219,31 @@ namespace fmt
 
 	inline std::string to_lower(std::string_view u)
 	{
-		std::ctype<wchar_t> cc;
+		wctype cc;
 		std::wstring w = to_wstring(u);
 		for (wchar_t &c : w) c = cc.tolower(c);
 		return to_string(w);
 	}
 
 	template <typename Iterator>
-	Iterator skip(char_type type, Iterator begin, Iterator end)
+	Iterator skip(Iterator begin, Iterator end, char_type type = space)
 	{
+		ctype cc;
 		Iterator it;
-		std::ctype<char> cc;
-		for (it = begin; it != end; ++it) if (not cc.is(type, *it)) break;
+		for (it = begin; it != end and cc.is(type, *it); ++it);
 		return it;
 	}
 
 	inline std::string::iterator trim_begin(std::string &s)
 	{
-		auto it = skip(space, s.begin(), s.end());
-		return s.erase(s.begin(), it);
+		auto it = skip(begin(s), end(s));
+		return s.erase(begin(s), it);
 	}
 
 	inline std::string::iterator trim_end(std::string &s)
 	{
-		auto it = skip(space, s.rbegin(), s.rend());
-		return s.erase(std::next(it).base(), s.end());
+		auto it = skip(rbegin(s), rend(s));
+		return s.erase(it.base(), end(s));
 	}
 
 	inline bool trim(std::string &s)
@@ -256,59 +251,38 @@ namespace fmt
 		return trim_begin(s) != trim_end(s);
 	}
 
-	static std::istream& getline(std::istream& in, std::string& s)
+	inline std::string join(span_view const& tok, std::string const& del)
 	{
-		while (std::getline(in, s))
+		std::stringstream ss;
+		auto const first = tok.front().data();
+		for (auto const t : tok)
 		{
-			constexpr auto c = '#';
-
-			auto const it = skip(space, s.begin(), s.end());
-			if (it != s.end() and c != *it)
+			if (t.data() != first)
 			{
-				auto const t = s.find(c);
-				s = s.substr(0, t);
-				if (trim(s))
-				{
-					break;
-				}
+				ss << del;
 			}
+			ss << tok;
 		}
-		return in;
+		return ss.str();
 	}
 
-	inline view split(std::string_view u, std::string_view w)
+	inline span_view split(std::string_view u, std::string_view v)
 	{
-		view tok;
-		using size_type = std::string_view::size_type;
-		constexpr size_type n = std::string_view::npos;
-		for (size_type i = 0, j = u.find_first_of(w); i != n; j = u.find_first_of(w, i))
+		span_view tok;
+		auto const uz = u.size(), vz = v.size(), z = std::string_view::npos;
+		for (decltype(z) i = 0, j = u.find(v); i < uz; i += vz, j = u.find(v, i))
 		{
-			if (i != j)
-			{
-				auto t = u.substr(i, j - i);
-				tok.emplace_back(t);
-			}
-			i = u.find_first_not_of(w, j);
+			auto t = u.substr(i, z == j ? z : j - i);
+			tok.emplace_back(t);
 		}
 		return tok;
 	}
 
-	inline std::string join(view const& tok, std::string const& del)
+	inline void replace(std::string& s, std::string_view u, std::string_view v)
 	{
-		std::stringstream stream;
-		auto it = std::ostream_iterator<std::string>(stream, del.c_str());
-		std::copy(std::begin(tok), std::end(tok), it);
-		return stream.str();
-	}
-
-	inline void replace(std::string &buf, std::string_view u, std::string_view v)
-	{
-		using size_type = std::string_view::size_type;
-		constexpr size_type n = std::string::npos;
-		for (auto i = buf.find(u.data(), 0, u.size()); i != n; i = buf.find(u.data(), i + v.size(), u.size()))
-		{
-			buf.replace(i, u.size(), v.data(), v.size());
-		}
+		span_view const span = split(s, u);
+		std::string buf = join(span, v);
+		buf.swap(s);
 	}
 
 	// String formatting with inline tags
@@ -365,9 +339,10 @@ namespace fmt
 
 	inline pair key_value(std::string_view u)
 	{
-		auto const part = split(u, "=");
-		auto const key = part.front();
-		auto const value = part.back();
+		constexpr auto z = std::string_view::npos;
+		auto const n = u.find('=');
+		auto const key = u.substr(0, n);
+		auto const value = u.substr(n + 1);
 		return pair(key, value);
 	}
 }

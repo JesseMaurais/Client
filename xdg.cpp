@@ -5,15 +5,16 @@
 
 namespace
 {
-	struct CURRENT_DESKTOP : env::view
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("XDG_CURRENT_DESKTOP");
 		}
-	};
 
-	struct MENU_PREFIX : env::view
+	} XDG_CURRENT_DESKTOP;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -29,17 +30,19 @@ namespace
 			}
 			return u;
 		}
-	};
 
-	struct RUNTIME_DIR : env::view
+	} XDG_MENU_PREFIX;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("XDG_RUNTIME_DIR");
 		}
-	};
 
-	struct DATA_HOME : env::view
+	} XDG_RUNTIME_DIR;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -56,9 +59,10 @@ namespace
 			}
 			return u;
 		}
-	};
 
-	struct CONFIG_HOME : env::view
+	} XDG_DATA_HOME;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -75,9 +79,10 @@ namespace
 			}
 			return u;
 		}
-	};
 
-	struct CACHE_HOME : env::view
+	} XDG_CONFIG_HOME;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -94,9 +99,10 @@ namespace
 			}
 			return view;
 		}
-	};
 
-	struct DATA_DIRS : env::list
+	} XDG_CACHE_HOME;
+
+	struct : env::list
 	{
 		operator std::vector<std::string_view>() const final
 		{
@@ -122,9 +128,10 @@ namespace
 			}
 			return fmt::split(view, sys::sep::dir);
 		}
-	};
 
-	struct CONFIG_DIRS : env::list
+	} XDG_DATA_DIRS;
+
+	struct : env::list
 	{
 		operator std::vector<std::string_view>() const final
 		{
@@ -143,7 +150,8 @@ namespace
 			}
 			return fmt::split(u, sys::sep::dir);
 		}
-	};
+
+	} XDG_CONFIG_DIRS;
 
 	std::string_view cached_dirs(std::string_view u)
 	{
@@ -164,7 +172,7 @@ namespace
 		return data(u);
 	}
 
-	struct DESKTOP_DIR : env::view
+	struct : env::view
 	{
 		constexpr auto var = "XDG_DESKTOP_DIR";
 
@@ -177,19 +185,20 @@ namespace
 			}
 			return u;
 		}
-	};
+
+	} XDG_DESKTOP_DIR;
 }
 
 namespace xdg
 {
-	env::view const& current_desktop = CURRENT_DESKTOP();
-	env::view const& menu_prefix = MENU_PREFIX();
-	env::view const& runtime_dir = RUNTIME_DIR();
-	env::view const& data_home = DATA_HOME();
-	env::view const& config_home = CONFIG_HOME();
-	env::view const& cache_home = CACHE_HOME();
-	env::list const& data_dirs = DATA_DIRS();
-	env::list const& config_dirs = CONFIG_DIRS();
-	env::view const& desktop_dir = DESKTOP_DIR();
+	env::view const& current_desktop = XDG_CURRENT_DESKTOP;
+	env::view const& menu_prefix = XDG_MENU_PREFIX;
+	env::view const& runtime_dir = XDG_RUNTIME_DIR;
+	env::view const& data_home = XDG_DATA_HOME;
+	env::view const& config_home = XDG_CONFIG_HOME;
+	env::view const& cache_home = XDG_CACHE_HOME;
+	env::list const& data_dirs = XDG_DATA_DIRS;
+	env::list const& config_dirs = XDG_CONFIG_DIRS;
+	env::view const& desktop_dir = XDG_DESKTOP_DIR;
 }
 

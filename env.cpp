@@ -15,14 +15,14 @@ namespace sys::env
 
 	bool put(std::string_view u)
 	{
-		auto const p = u.data();
+		auto p = const_cast<char*>(u.data());
 		return 0 != sys::putenv(p);
 	}
 
 	bool set(std::string_view u, std::string_view v)
 	{
-		std::string const s = fmt::key_value(u, v);
-		return putenv(s);
+		auto const s = fmt::key_value(u, v);
+		return put(s);
 	}
 
 	std::string format(std::string u)
@@ -44,16 +44,17 @@ namespace sys::env
 
 namespace
 {
-	struct PATH : env::list
+	struct : env::list
 	{
 		operator std::vector<std::string_view>() const final
 		{
-			std::string_view view = sys::env::get("PATH");
-			return fmt::split(view, sys::sep::path);
+			std::string_view u = sys::env::get("PATH");
+			return fmt::split(u, sys::sep::path);
 		}
-	}
 
-	struct PWD : env::view
+	} PATH;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -67,9 +68,10 @@ namespace
 				return sys::env::get("CD");
 			}
 		}
-	}
 
-	struct USER : env::view
+	} PWD;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -83,9 +85,10 @@ namespace
 				return sys::env::get("USERNAME");
 			}
 		}
-	};
 
-	struct HOME : env::view
+	} USER;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -99,9 +102,10 @@ namespace
 				return sys::env::get("USERPROFILE");
 			}
 		}
-	};
 
-	struct LANG : env::view
+	} HOME;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -115,9 +119,10 @@ namespace
 			}
 			return "";
 		}
-	};
 
-	struct TMPDIR : env::view
+	} LANG;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -131,9 +136,10 @@ namespace
 			}
 			return "";
 		}
-	};
 
-	struct SHELL : env::view
+	} TMPDIR;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -147,9 +153,10 @@ namespace
 				return sys::env::get("COMSPEC");
 			}
 		}
-	};
 
-	struct PROMPT : env::view
+	} SHELL;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -163,57 +170,64 @@ namespace
 				return sys::env::get("PROMPT");
 			}
 		}
-	};
 
-	struct TERM : env::view
+	} PROMPT;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("TERM");
 		}
-	};
 
-	struct PAGER : env::view
+	} TERM;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("PAGER");
 		}
-	};
 
-	struct EDITOR : env::view
+	} PAGER;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("EDITOR");
 		}
-	};
 
-	struct VISUAL : env::view
+	} EDITOR;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("VISUAL");
 		}
-	};
 
-	struct BROWSER : env::view
+	} VISUAL;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("BROWSER");
 		}
-	};
 
-	struct RANDOM : env::view
+	} BROWSER;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
 			return sys::env::get("RANDOM");
 		}
-	};
 
-	struct DESKTOP : env::view
+	} RANDOM;
+
+	struct : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -227,31 +241,32 @@ namespace
 				return sys::env::get("OS");
 			}
 		}
-	};
+
+	} DESKTOP;
 }
 
 namespace env
 {
-	list const& path = PATH();
-	view const& pwd = PWD();
-	view const& user = USER();
-	view const& home = HOME();
-	view const& lang = LANG();
-	view const& tmpdir = TMPDIR();
-	view const& shell = SHELL();
-	view const& prompt = PROMPT();
-	view const& term = TERM();
-	view const& pager = PAGER();
-	view const& editor = EDITOR();
-	view const& visual = VISUAL();
-	view const& browser = BROWSER();
-	view const& random = RANDOM();
-	view const& desktop = DESKTOP();
+	list const& path = PATH;
+	view const& pwd = PWD;
+	view const& user = USER;
+	view const& home = HOME;
+	view const& lang = LANG;
+	view const& tmpdir = TMPDIR;
+	view const& shell = SHELL;
+	view const& prompt = PROMPT;
+	view const& term = TERM;
+	view const& pager = PAGER;
+	view const& editor = EDITOR;
+	view const& visual = VISUAL;
+	view const& browser = BROWSER;
+	view const& random = RANDOM;
+	view const& desktop = DESKTOP;
 }
 
 namespace
 {
-	struct ENVIRON : env::list
+	struct : env::list
 	{
 		operator std::vector<std::string_view>() const final
 		{
@@ -266,8 +281,9 @@ namespace
 			}
 			return span;
 		}
-	};
+
+	} ENVIRON;
 }
 
-env::list const& sys::environment = ENVIRON();
+env::list const& sys::environment = ENVIRON;
 

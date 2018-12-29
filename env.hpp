@@ -24,26 +24,26 @@ namespace env
 		virtual operator std::vector<std::string_view>() const = 0;
 	};
 
-	list const& path;
-	view const& pwd;
-	view const& user;
-	view const& home;
-	view const& lang;
-	view const& tmpdir;
-	view const& shell;
-	view const& prompt;
-	view const& term;
-	view const& editor;
-	view const& visual;
-	view const& browser;
-	view const& pager;
-	view const& random;
-	view const& desktop;
+	extern list const& path;
+	extern view const& pwd;
+	extern view const& user;
+	extern view const& home;
+	extern view const& lang;
+	extern view const& tmpdir;
+	extern view const& shell;
+	extern view const& prompt;
+	extern view const& term;
+	extern view const& editor;
+	extern view const& visual;
+	extern view const& browser;
+	extern view const& pager;
+	extern view const& random;
+	extern view const& desktop;
 }
 
 namespace sys
 {
-	::env::list const& environment;
+	extern ::env::list const& environment;
 }
 
 #endif // file
