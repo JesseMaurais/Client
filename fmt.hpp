@@ -5,7 +5,10 @@
 #include <codecvt>
 #include <string>
 #include <string_view>
+#include <iterator>
 #include <sstream>
+#include <vector>
+#include <map>
 #include "alg.hpp"
 
 namespace fmt
@@ -31,7 +34,7 @@ namespace fmt
 	}
 
 	template <>
-	inline std::wstring to_string(std::wstring const &w)
+	inline std::wstring to_wstring(std::wstring const &w)
 	{
 		return w;
 	}
@@ -115,7 +118,7 @@ namespace fmt
 	{
 		using utf8 = std::codecvt_utf8<wchar_t>;
 		std::wstring_convert<utf8> convert;
-		return convert.from_bytes(s.data(), s.data() + s.size();
+		return convert.from_bytes(s.data(), s.data() + s.size());
 	}
 
 	template <>
@@ -270,7 +273,7 @@ namespace fmt
 				}
 			}
 		}
-		return is;
+		return in;
 	}
 
 	inline view split(std::string_view u, std::string_view w)
