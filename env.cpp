@@ -25,7 +25,7 @@ namespace sys::env
 		return put(s);
 	}
 
-	std::string format(std::string u)
+	std::string eval(std::string u)
 	{
 		static std::regex x { "$[A-Z_][A-Z_0-9]*" };
 		std::smatch m;
@@ -112,7 +112,7 @@ namespace
 			for (auto var : { "LC_ALL", "LANG" })
 			{
 				auto view = sys::env::get(var);
-				if (empty(view))
+				if (not empty(view))
 				{
 					return view;
 				}

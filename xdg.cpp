@@ -21,11 +21,7 @@ namespace
 			std::string_view u = sys::env::get("XDG_MENU_PREFIX");
 			if (empty(u))
 			{
-				static std::string prefix;
-				if (empty(prefix))
-				{
-					prefix = to_lower(xdg::current_desktop) + '-';
-				}
+				static auto prefix = fmt::to_lower(xdg::current_desktop) + '-';
 				u = prefix;
 			}
 			return u;
@@ -52,7 +48,7 @@ namespace
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::view const p { env::home, ".local", "share" };
+					fmt::span_view const p { env::home, ".local", "share" };
 					u = fmt::join(p, sys::sep::dir);
 				}
 				u = dir;
@@ -72,7 +68,7 @@ namespace
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::view const p { env::home, ".config" };
+					fmt::span_view const p { env::home, ".config" };
 					dir = fmt::join(p, sys::sep::dir);
 				}
 				u= dir;
@@ -92,7 +88,7 @@ namespace
 				static std::string dir;
 				if (empty(dir))
 				{
-					fmt::view const p { env::home, ".cache" };
+					fmt::span_view const p { env::home, ".cache" };
 					dir = fmt::join(p, sys::sep::dir);
 				}
 				u = dir;
@@ -158,14 +154,14 @@ namespace
 		static ini::map data;
 		if (empty(data))
 		{
-			fmt::view const p { xdg::config_home, "user-dirs.dirs" };
+			fmt::span_view const p { xdg::config_home, "user-dirs.dirs" };
 			auto const path = fmt::join(p, sys::sep::dir);
 			std::istream in(path);
 			std::string s;
 			while (ini::getline(in, s))
 			{
 				fmt::pair p = fmt::key_value(s);
-				p.second = sys::env::format(p.second);
+				p.second = sys::env::eval(p.second);
 				data.emplace(p);
 			}
 		}

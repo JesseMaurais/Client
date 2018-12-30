@@ -194,7 +194,6 @@ namespace fmt
 
 	struct ctype : std::ctype<char> { };
 	struct wctype : std::ctype<wchar_t> { };
-
 	enum char_type : std::ctype_base::mask
 	{
 		space = std::ctype_base::space,
@@ -332,7 +331,6 @@ namespace fmt
 
 	inline pair key_value(std::string_view u)
 	{
-		constexpr auto z = std::string_view::npos;
 		auto const n = u.find('=');
 		auto const key = u.substr(0, n);
 		auto const value = u.substr(n + 1);

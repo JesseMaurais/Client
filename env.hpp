@@ -9,7 +9,7 @@ namespace sys::env
 	std::string_view get(std::string_view u);
 	bool put(std::string_view u);
 	bool set(std::string_view u, std::string_view v);
-	std::string format(std::string s);
+	std::string eval(std::string s);
 }
 
 namespace env
