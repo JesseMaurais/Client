@@ -254,35 +254,28 @@ namespace fmt
 	inline std::string join(span_view const& tok, std::string const& del)
 	{
 		std::stringstream ss;
-		auto const first = tok.front().data();
-		for (auto const t : tok)
-		{
-			if (t.data() != first)
-			{
-				ss << del;
-			}
-			ss << tok;
-		}
+		constexpr auto null = '\0';
+		auto const last = tok.last().data();
+		for (auto const t : tok) ss << t << t.data() != last ? del : null;
 		return ss.str();
 	}
 
 	inline span_view split(std::string_view u, std::string_view v)
 	{
 		span_view tok;
-		auto const uz = u.size(), vz = v.size(), z = std::string_view::npos;
-		for (decltype(z) i = 0, j = u.find(v); i < uz; i += vz, j = u.find(v, i))
+		auto const z = u.size();
+		for (decltype(z) i = 0, j = u.find(v); i < z; j = u.find(v, i))
 		{
-			auto t = u.substr(i, z == j ? z : j - i);
-			tok.emplace_back(t);
+			auto n = j < z ? j - i : z - i;
+			tok.emplace_back(u.substr(i, n));
+			i += n;
 		}
 		return tok;
 	}
 
 	inline void replace(std::string& s, std::string_view u, std::string_view v)
 	{
-		span_view const span = split(s, u);
-		std::string buf = join(span, v);
-		buf.swap(s);
+		s = join(split(s, u), v);
 	}
 
 	// String formatting with inline tags
