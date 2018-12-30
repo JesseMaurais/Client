@@ -155,14 +155,14 @@ namespace
 
 	std::string_view cached_dirs(std::string_view u)
 	{
-		static fmt::map data;
+		static ini::map data;
 		if (empty(data))
 		{
 			fmt::view const p { xdg::config_home, "user-dirs.dirs" };
 			auto const path = fmt::join(p, sys::sep::dir);
 			std::istream in(path);
 			std::string s;
-			while (fmt::getline(in, s))
+			while (ini::getline(in, s))
 			{
 				fmt::pair p = fmt::key_value(s);
 				p.second = sys::env::format(p.second);
