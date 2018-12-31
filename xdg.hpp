@@ -14,6 +14,13 @@ namespace xdg
 	extern env::list const& data_dirs;
 	extern env::list const& config_dirs;
 	extern env::view const& desktop_dir;
+	extern env::view const& documents_dir;
+	extern env::view const& download_dir;
+	extern env::view const& music_dir;
+	extern env::view const& pictures_dir;
+	extern env::view const& publicshare_dir;
+	extern env::view const& templates_dir;
+	extern env::view const& videos_dir;
 }
 
 #endif // file

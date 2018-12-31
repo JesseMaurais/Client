@@ -1,7 +1,7 @@
 #ifndef env_hpp
 #define env_hpp
 
-#include <string_view>
+#include "str.hpp"
 #include <vector>
 
 namespace sys::env

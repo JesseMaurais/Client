@@ -168,21 +168,24 @@ namespace
 		return data(u);
 	}
 
+	template <char const *Var>
 	struct : env::view
 	{
-		constexpr auto var = "XDG_DESKTOP_DIR";
-
 		operator std::string_view() const final
 		{
-			std::string_view u = sys::env::get(var);
+			std::string_view u = sys::env::get(Var);
 			if (empty(u))
 			{
-				 u = cached_dirs(var)
+				u = cached_dirs(Var)
+			}
+			if (empty(u))
+			{
+				u = env::home;
 			}
 			return u;
 		}
 
-	} XDG_DESKTOP_DIR;
+	} USER_DIR;
 }
 
 namespace xdg
@@ -195,6 +198,13 @@ namespace xdg
 	env::view const& cache_home = XDG_CACHE_HOME;
 	env::list const& data_dirs = XDG_DATA_DIRS;
 	env::list const& config_dirs = XDG_CONFIG_DIRS;
-	env::view const& desktop_dir = XDG_DESKTOP_DIR;
+	env::view const& desktop_dir = USER_DIR<"XDG_DESKTOP_DIR">;
+	env::view const& documents_dir = USER_DIR<"XDG_DOCUMENTS_DIR">;
+	env::view const& download_dir = USER_DIR<"XDG_DOWNLOAD_DIR">;
+	env::view const& music_dir = USER_DIR<"XDG_MUSIC_DIR">;
+	env::view const& pictures_dir = USER_DIR<"XDG_PICTURES_DIR">;
+	env::view const& publicshare_dir = USER_DIR<"XDG_PUBLICSHARE_DIR">;
+	env::view const& templates_dir = USER_DIR<"XDG_TEMPLATES_DIR">;
+	env::view const& videos_dir = USER_DIR<"XDG_VIDEOS_DIR">;
 }
 

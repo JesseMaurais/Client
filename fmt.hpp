@@ -5,9 +5,9 @@
 #include <codecvt>
 #include <locale>
 #include <string>
-#include <string_view>
 #include <sstream>
 #include "alg.hpp"
+#include "str.hpp"
 
 namespace fmt
 {
@@ -155,6 +155,11 @@ namespace fmt
 		return to_wstring(std::string(1, c));
 	}
 
+	inline bool terminated(std::string_view s)
+	{
+		return s.data()[s.size()] == '\0';
+	}
+
 	inline bool empty(std::string const& s)
 	{
 		return s.empty();
@@ -194,7 +199,7 @@ namespace fmt
 
 	struct ctype : std::ctype<char> { };
 	struct wctype : std::ctype<wchar_t> { };
-	enum char_type : std::ctype_base::mask
+	enum char_mask : std::ctype_base::mask
 	{
 		space = std::ctype_base::space,
 		print = std::ctype_base::print,
@@ -225,7 +230,7 @@ namespace fmt
 	}
 
 	template <typename Iterator>
-	Iterator skip(Iterator begin, Iterator end, char_type type = space)
+	Iterator skip(Iterator begin, Iterator end, char_mask type = space)
 	{
 		ctype cc;
 		Iterator it;
@@ -253,11 +258,12 @@ namespace fmt
 	inline std::string join(span_view const& tok, std::string const& del)
 	{
 		std::stringstream ss;
-		auto const n = tok.size();
-		for (decltype(n) i = 0; i < n; ++i)
+		using size = span_view::size_type;
+		size const z = tok.size();
+		for (size i = 0; i < z; ++i)
 		{
 			if (i) ss << del;
-			ss << t[i];
+			ss << tok[i];
 		}
 		return ss.str();
 	}
@@ -265,19 +271,30 @@ namespace fmt
 	inline span_view split(std::string_view u, std::string_view v)
 	{
 		span_view tok;
-		auto const uz = u.size(), vz = v.size();
-		for (decltype(z) i = 0, j = u.find(v); i < uz; j = u.find(v, i))
+		using size = std::string_view::size_type;
+		size const uz = u.size(), vz = v.size();
+		for (size i = 0, j = u.find(v); i < uz; j = u.find(v, i))
 		{
-			auto n = j < z ? j - i : z - i;
-			tok.emplace_back(u.substr(i, n));
+			size const n = std::min(uz, j) - i;
+			if (n) tok.emplace_back(u.substr(i, n));
 			i += n + vz;
 		}
 		return tok;
 	}
 
-	inline void replace(std::string& s, std::string_view u, std::string_view v)
+	inline std::string replace(std::string_view u, std::string_view v, std::string_view w)
 	{
-		s = join(split(s, u), v);
+		std::stringstream ss;
+		using size = std::string_view::size_type;
+		size const uz = u.size(), vz = v.size();
+		for (size i = 0, j = u.find(v); i < uz; j = u.find(v, i))
+		{
+			size const n = std::min(uz, j) - i;
+			ss << u.substr(i, n);
+			if (j < uz) ss << w;
+			i += n + vz;
+		}
+		return ss.str();
 	}
 
 	// String formatting with inline tags

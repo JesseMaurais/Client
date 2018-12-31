@@ -4,6 +4,7 @@
 #include "os.hpp"
 #include <map>
 #include <regex>
+#include <cassert>
 
 namespace sys::env
 {
@@ -15,6 +16,7 @@ namespace sys::env
 
 	bool put(std::string_view u)
 	{
+		assert(fmt::terminated(u));
 		auto p = const_cast<char*>(u.data());
 		return 0 != sys::putenv(p);
 	}
@@ -34,7 +36,8 @@ namespace sys::env
 		{
 			s += m.prefix();
 			auto t = m.str();
-			s += get(t);
+			auto v = get(t);
+			s.append(v.data(), v.size());
 			u = m.suffix();
 		}
 		s.shrink_to_fit();
@@ -242,7 +245,7 @@ namespace
 			}
 		}
 
-	} DESKTOP;
+	} DESKTOP_SESSION;
 }
 
 namespace env
@@ -261,7 +264,7 @@ namespace env
 	view const& visual = VISUAL;
 	view const& browser = BROWSER;
 	view const& random = RANDOM;
-	view const& desktop = DESKTOP;
+	view const& desktop = DESKTOP_SESSION;
 }
 
 namespace
