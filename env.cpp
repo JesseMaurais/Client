@@ -2,12 +2,8 @@
 #include "fmt.hpp"
 #include "sys.hpp"
 #include "os.hpp"
-#include "test.hpp"
-#include <map>
 #include <regex>
 #include <cassert>
-
-TEST(test_of_test, { ASSERT(false); });
 
 namespace sys::env
 {
@@ -67,23 +63,6 @@ namespace
 		{
 			if constexpr (sys::POSIX)
 			{
-				return sys::env::get("PWD");
-			}
-			else
-			if constexpr (sys::WIN32)
-			{
-				return sys::env::get("CD");
-			}
-		}
-
-	} PWD;
-
-	struct : env::view
-	{
-		operator std::string_view() const final
-		{
-			if constexpr (sys::POSIX)
-			{
 				return sys::env::get("USER");
 			}
 			else
@@ -116,7 +95,24 @@ namespace
 	{
 		operator std::string_view() const final
 		{
-			for (auto var : { "LC_ALL", "LANG" })
+			if constexpr (sys::POSIX)
+			{
+				return sys::env::get("PWD");
+			}
+			else
+			if constexpr (sys::WIN32)
+			{
+				return sys::env::get("CD");
+			}
+		}
+
+	} PWD;
+
+	struct : env::view
+	{
+		operator std::string_view() const final
+		{
+			for (auto var : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
 				auto view = sys::env::get(var);
 				if (not empty(view))
@@ -184,60 +180,6 @@ namespace
 	{
 		operator std::string_view() const final
 		{
-			return sys::env::get("TERM");
-		}
-
-	} TERM;
-
-	struct : env::view
-	{
-		operator std::string_view() const final
-		{
-			return sys::env::get("PAGER");
-		}
-
-	} PAGER;
-
-	struct : env::view
-	{
-		operator std::string_view() const final
-		{
-			return sys::env::get("EDITOR");
-		}
-
-	} EDITOR;
-
-	struct : env::view
-	{
-		operator std::string_view() const final
-		{
-			return sys::env::get("VISUAL");
-		}
-
-	} VISUAL;
-
-	struct : env::view
-	{
-		operator std::string_view() const final
-		{
-			return sys::env::get("BROWSER");
-		}
-
-	} BROWSER;
-
-	struct : env::view
-	{
-		operator std::string_view() const final
-		{
-			return sys::env::get("RANDOM");
-		}
-
-	} RANDOM;
-
-	struct : env::view
-	{
-		operator std::string_view() const final
-		{
 			if constexpr (sys::POSIX)
 			{
 				return sys::env::get("DESKTOP_SESSION");
@@ -249,25 +191,19 @@ namespace
 			}
 		}
 
-	} DESKTOP_SESSION;
+	} DESKTOP;
 }
 
 namespace env
 {
-	list const& path = PATH;
-	view const& pwd = PWD;
-	view const& user = USER;
-	view const& home = HOME;
-	view const& lang = LANG;
-	view const& tmpdir = TMPDIR;
-	view const& shell = SHELL;
-	view const& prompt = PROMPT;
-	view const& term = TERM;
-	view const& pager = PAGER;
-	view const& editor = EDITOR;
-	view const& visual = VISUAL;
-	view const& browser = BROWSER;
-	view const& random = RANDOM;
-	view const& desktop = DESKTOP_SESSION;
+	list const& PATH = path;
+	view const& USER = user;
+	view const& HOME = home;
+	view const& PWD = pwd;
+	view const& LANG = lang;
+	view const& TMPDIR = tmpdir;
+	view const& SHELL = shell;
+	view const& PROMPT = prompt;
+	view const& DESKTOP = desktop;
 }
 

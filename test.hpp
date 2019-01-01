@@ -1,6 +1,8 @@
 #ifndef test_hpp
 #define test_hpp
 
+#include <cassert> 
+
 #ifndef NDEBUG
 namespace test
 {
@@ -13,12 +15,18 @@ namespace test
 		virtual ~unit();
 	};
 }
-#define TEST(name, code) struct : test::unit { using unit::unit; void run() final code } name(#name)
-#define ASSERT(condition) if (not(condition)) throw #condition
+#	define TEST(name, code) struct : test::unit { using unit::unit; void run() final code } name(#name)
+#	define ASSERT(condition) if (not(condition)) throw #condition
+#	define VERIFY(condition) ASSERT((#file + line) and (code))
+#	define verify(condition) assert(code)
+#else
+#	define TEST(name, code)
+#	define ASSERT(condition)
+#	define VERIFY(condition) (condition)
+#	define verify(condition) (condition)
+#endif
+
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))
 #define ASSERT_NOT_EQ(a, b) ASSERT((a) != (b))
-#else
-#define TEST(name, code)
-#endif
 
 #endif // file

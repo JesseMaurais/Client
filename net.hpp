@@ -7,6 +7,8 @@
 // POSIX
 //
 
+#if defined(__POSIX__) || defined(__UNIX__) || defined(__LINUX__)
+
 #if __has_include(<sys/socket.h>)
 #include <sys/socket.h>
 #if __has_include(<sys/select.h>)
@@ -29,13 +31,12 @@ constexpr SOCKET INVALID_SOCKET = -1;
 constexpr int SOCKET_ERROR = -1;
 constexpr auto closesocket = sys::close;
 
-#else
-
 //
-// MSVCRT
+// WIN32
 //
 
-#if __has_include(<winsock2.h>)
+#elif defined(__WIN32__) || defined(__OS2__)
+
 #include <winsock2.h>
 
 #define SHUT_RD   SD_RECEIVE
@@ -48,14 +49,13 @@ constexpr auto poll = ::WSAPoll;
 
 #else
 #error Cannot find system socket header
-#endif // winsock2.h
-#endif // poll.h
+#endif
 
 //
 // Common
 //
 
-namespace sys::sock
+namespace sys::net
 {
 	inline bool issocket(SOCKET s) { return INVALID_SOCKET != s; };
 

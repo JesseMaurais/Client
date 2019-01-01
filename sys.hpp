@@ -11,24 +11,24 @@
 namespace sys
 {
 
-// Portable Operating System Interface
-
-constexpr bool POSIX = 
-#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
-# undef __POSIX__
-# define __POSIX__ 1
-	true
-#else
-	false
-#endif
-	;
-
 // Single UNIX Specification
 
 constexpr bool XOPEN = 
 #if defined(_XOPEN_SOURCE)
 # undef __XOPEN__
 # define __XOPEN__ 1
+	true
+#else
+	false
+#endif
+	;
+
+// Portable Operating System Interface
+
+constexpr bool POSIX = 
+#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) || defined(_XOPEN_SOURCE)
+# undef __POSIX__
+# define __POSIX__ 1
 	true
 #else
 	false
@@ -137,10 +137,10 @@ constexpr bool XOPEN_UNIX =
 }
 
 //
-// POSIX / XOPEN / UNIX
+// POSIX / UNIX / LINUX
 //
 
-#if defined(__POSIX__) || defined(__XOPEN__) || defined(__UNIX__)
+#if defined(__POSIX__) || defined(__UNIX__) || defined(__LINUX__)
 #include <unistd.h>
 
 #ifndef O_BINARY
@@ -162,8 +162,8 @@ namespace sys
 	{
 		namespace sh
 		{
-			constexpr auto first = "$";
-			constexpr auto second = "";
+			constexpr auto first = "$", second = "";
+			constexpr auto regex = "$[A-Z_][A-Z_0-9]*";
 		}
 	}
 
@@ -172,7 +172,7 @@ namespace sys
 	using off_t = ::off_t;
 	using pid_t = ::pid_t;
 	using mode_t = ::mode_t;
-	using statbuf = struct ::stat;
+	using stat = struct ::stat;
 
 	constexpr auto access = ::access;
 	constexpr auto chdir = ::chdir;
@@ -215,7 +215,7 @@ namespace sys
 // WIN32
 //
 
-#elif defined(__WIN32__) || __has_include(<io.h>)
+#elif defined(__WIN32__) || defined(__OS2__)
 #include <io.h>
 #include <process.h>
 #include <direct.h>
@@ -246,8 +246,8 @@ namespace sys
 	{
 		namespace sh
 		{
-			constexpr auto first = "%";
-			constexpr auto second = "%";
+			constexpr auto first = "%", second = "%";
+			constexpr auto regex = "%[A-Z_a-z][A-Z_a-z0-9]*%";
 		}
 	}
 
@@ -256,7 +256,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using statbuf = struct ::_stat;
+	using stat = struct ::_stat;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;
@@ -279,7 +279,7 @@ namespace sys
 	constexpr auto getpid = ::_getpid;
 	constexpr auto isatty = ::_isatty;
 	constexpr auto lseek = ::_lseek;
-	constexpr auto mkdir = [](const char *dir, mode_t) { return ::_mkdir(dir); };
+	constexpr auto mkdir = [](char const *dir, mode_t) { return ::_mkdir(dir); };
 	constexpr auto open = ::_open;
 	constexpr auto pclose = ::_pclose;
 	constexpr auto pipe = [](int fd[2]) { return ::_pipe(fd, BUFSIZ, 0); };

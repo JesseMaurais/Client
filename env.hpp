@@ -24,21 +24,15 @@ namespace env
 		virtual operator std::vector<std::string_view>() const = 0;
 	};
 
-	extern list const& path;
-	extern view const& pwd;
-	extern view const& user;
-	extern view const& home;
-	extern view const& lang;
-	extern view const& tmpdir;
-	extern view const& shell;
-	extern view const& prompt;
-	extern view const& term;
-	extern view const& editor;
-	extern view const& visual;
-	extern view const& browser;
-	extern view const& pager;
-	extern view const& random;
-	extern view const& desktop;
+	extern list const& PATH;
+	extern view const& USER;
+	extern view const& HOME;
+	extern view const& PWD;
+	extern view const& LANG;
+	extern view const& SHELL;
+	extern view const& TMPDIR;
+	extern view const& DESKTOP;
+	extern view const& PROMPT;
 }
 
 #endif // file

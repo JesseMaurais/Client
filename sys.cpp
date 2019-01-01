@@ -4,7 +4,7 @@
 #include <iostream>
 #include <signal.h>
 
-#if defined(__POSIX__) || defined(__XOPEN__)
+#if defined(__POSIX__)
 extern char **environ;
 char **sys::environ = environ;
 #elif defined(__WIN32__)
