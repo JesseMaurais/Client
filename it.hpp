@@ -13,7 +13,7 @@ namespace fmt
 		struct iterator
 		{
 			iterator(std::string_view u = "")
-			: view(u)
+			: view(u), size(0), wide(WEOF)
 			{
 				std::memset(&state, 0, sizeof state);
 				convert();
@@ -30,17 +30,22 @@ namespace fmt
 				return wide;
 			}
 
+			bool operator==(iterator const& it) const
+			{
+				return it.view.empty() ? view.empty() : it.view == view and it.wide == wide;
+			}
+
 			bool operator!=(iterator const& it) const
 			{
-				return it.view.data() == view.data();
+				return not this->operator==(it);
 			}
 
 		private:
 
 			void convert()
 			{
-				size = std::mbrtowc(&wide, view.data(), view.size(), &state); 
 				if (0 < size) view = view.substr(size);
+				size = std::mbrtowc(&wide, view.data(), view.size(), &state); 
 			}
 
 			std::string_view view;

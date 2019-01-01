@@ -1,9 +1,7 @@
 #include "test.hpp"
 #include <exception>
 #include <iostream>
-#include <cstring>
 #include <string>
-#include <set>
 #include <map>
 
 namespace
@@ -23,7 +21,7 @@ namespace debug
 	test::test(char const *name)
 	{
 		registry().emplace(this, name);
-		auto const length = std::strlen(name);
+		auto const length = std::string(name).length();
 		max_length = std::max(max_length, length);
 	}
 
@@ -34,11 +32,11 @@ namespace debug
 
 	int run(int argc, char **argv)
 	{
-		std::set<std::string> errors;
-
 		map const& tests = registry();
 
 		std::cout << tests.size() << " tests to run...\n";
+
+		int errors = 0;
 
 		for (auto const& [that, name] : tests) try
 		{
@@ -49,27 +47,21 @@ namespace debug
 		}
 		catch (std::exception const& except)
 		{
-			std::cout << "\tTHROWN\n";
-			errors.emplace(except.what());
+			std::cout << "\tthrown: " << except.what() << '\n';
+			++errors;
 		}
 		catch (char const* message)
 		{
-			std::cout << "\tFAILURE\n";
-			errors.emplace(message);
+			std::cout << '\t' << message << '\n';
+			++errors;
 		}
 		catch (...)
 		{
 			std::cerr << "\tUnknown exception\n";
 		}
 
-		auto const n = errors.size();
-		std::cout << n << " errors recorded" << (n ? ":" : ".") << "\n";
-		for (auto const& message : errors)
-		{
-			std::cout << message << '\n';
-		}
-		std::cout << std::endl;
-		return n;
+		std::cout << errors << " errors detected." << std::endl;
+		return errors;
 	}
 }
 
