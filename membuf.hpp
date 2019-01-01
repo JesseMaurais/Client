@@ -47,7 +47,8 @@ namespace sys::io
 		base *setbufsiz(size_type n)
 		{
 			buf.resize(n);
-			return setbuf(buf.data(), n);
+			auto p = buf.data();
+			return setbuf(const_cast<char*>(p), n);
 		}
 
 		base *setbufsiz(size_type n, size_type m)

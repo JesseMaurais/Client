@@ -1,72 +1,75 @@
 #include "test.hpp"
-#include "str.hpp"
-#include <cstdlib>
-#include <cassert>
-#include <iostream>
 #include <exception>
-#include <algorithm>
+#include <iostream>
+#include <cstring>
 #include <string>
-#include <vector>
-#include <regex>
+#include <set>
 #include <map>
 
-namespace test
+namespace
 {
-	namespace
+	using map = std::map<debug::test*, std::string>;
+	std::string::size_type max_length = 0;
+
+	map& registry()
 	{
-		std::map<unit *, std::string_view> registry;
+		static map instance;
+		return instance;
+	}
+}
+
+namespace debug
+{
+	test::test(char const *name)
+	{
+		registry().emplace(this, name);
+		auto const length = std::strlen(name);
+		max_length = std::max(max_length, length);
 	}
 
-	unit::unit(char const *name)
+	test::~test()
 	{
-		[[maybe_unused]] auto const [it, unique] = registry.emplace(this, name);
-		assert(unique);
-	}
-
-	unit::~unit()
-	{
-		[[maybe_unused]] auto const count = registry.erase(this);
-		assert(1 == count);
+		registry().erase(this);
 	}
 
 	int run(int argc, char **argv)
 	{
-		std::vector<std::string> errors;
+		std::set<std::string> errors;
 
-		std::cout << test::registry.size() << " tests to run.\n";
+		map const& tests = registry();
 
-		for (auto const [ptr, name] : test::registry) try
+		std::cout << tests.size() << " tests to run...\n";
+
+		for (auto const& [that, name] : tests) try
 		{
-			std::cout << "Running test '" << name << "' ... ";
-			ptr->run();
-			std::cout << "Success\n";
+			auto const indent = max_length - name.length();
+			std::cout << name << std::string(indent, ' ');
+			that->run();
+			std::cout << "\tok\n";
 		}
 		catch (std::exception const& except)
 		{
-			std::cout << "Failure\n";
-			errors.emplace_back(name);
-			auto message = except.what();
-			errors.emplace_back(message);
+			std::cout << "\tTHROWN\n";
+			errors.emplace(except.what());
+		}
+		catch (char const* message)
+		{
+			std::cout << "\tFAILURE\n";
+			errors.emplace(message);
 		}
 		catch (...)
 		{
-			std::cerr << "Unknown exception\n";
+			std::cerr << "\tUnknown exception\n";
 		}
 
-		std::cout << "Done running tests.\n";
-
-		if (not errors.empty())
+		auto const n = errors.size();
+		std::cout << n << " errors recorded" << (n ? ":" : ".") << "\n";
+		for (auto const& message : errors)
 		{
-			std::cout << errors.size() << " errors recorded:\n";
-			std::ostream_iterator<std::string> out(std::cout, "\n");
-			std::copy(errors.begin(), errors.end(), out);
+			std::cout << message << '\n';
 		}
-		else
-		{
-			std::cout << "No errors.\n";
-		}
-
-		return errors.empty() ? EXIT_SUCCESS : EXIT_FAILURE;
+		std::cout << std::endl;
+		return n;
 	}
 }
 

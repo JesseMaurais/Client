@@ -172,7 +172,7 @@ namespace sys
 	using off_t = ::off_t;
 	using pid_t = ::pid_t;
 	using mode_t = ::mode_t;
-	using stat = struct ::stat;
+	using stat_info = struct ::stat;
 
 	constexpr auto access = ::access;
 	constexpr auto chdir = ::chdir;
@@ -256,7 +256,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using stat = struct ::_stat;
+	using stat_info = struct ::_stat;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;

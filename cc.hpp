@@ -9,6 +9,8 @@ namespace cc
 // GNU Compiler Collection
 constexpr bool GNU =
 #if defined(__GNUC__)
+# undef __GCC__
+# define __GCC__ 1
 	true
 #else
 	false
@@ -40,6 +42,8 @@ constexpr bool DJGPP =
 // Clang
 constexpr bool CLANG =
 #if defined(__clang__)
+# undef __CLANG__
+# define __CLANG__ 1
 	true
 #else
 	false
@@ -49,6 +53,8 @@ constexpr bool CLANG =
 // LLVM
 constexpr bool LLVM =
 #if defined(__llvm__)
+# undef __LLVM__
+# define __LLVM__ 1
 	true
 #else
 	false
@@ -68,7 +74,7 @@ constexpr bool DMC =
 constexpr bool MSVC =
 #if defined(_MSC_VER)
 # undef __MSVC__
-# define __MSVC__
+# define __MSVC__ 1
 	true
 #else
 	false
@@ -78,6 +84,8 @@ constexpr bool MSVC =
 // IBM
 constexpr bool IBM =
 #if defined(__IBMC__) || defined(__IBMCPP__) || defined(__xlc__) || defined(__xlC__)
+# undef __IBM__
+# define __IBM__ 1
 	true
 #else
 	false
@@ -87,6 +95,8 @@ constexpr bool IBM =
 // Intel
 constexpr bool INTEL =
 #if defined(__INTEL_COMPILER) || defined(__ICC) || defined(__ECC) || defined(__ICL)
+# undef __ICC__
+# define __ICC__ 1
 	true
 #else
 	false

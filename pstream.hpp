@@ -23,7 +23,6 @@ namespace sys::io
 		, public basic_pbuf<Char, Traits, Alloc>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
-			using pbuf = basic_pbuf<Char, Traits, Alloc>;
 			using arguments = sys::file::arguments;
 			using openmode = sys::file::openmode;
 
@@ -33,7 +32,7 @@ namespace sys::io
 			: pbuf()
 			, base(this)
 			{
-				pbuf::setbufsiz(sz);
+				this->setbufsiz(sz);
 			}
 
 			basic_pstream(arguments args, openmode mode = default_mode)
@@ -44,10 +43,10 @@ namespace sys::io
 
 			bool execute(arguments args, openmode mode = default_mode)
 			{
-				return pbuf::file.execute(args, mode | default_mode);
+				return this->file.execute(args, mode | default_mode);
 			}
 
-			void close() { pbuf::file[0].close(); }
+			void close() { this->file[0].close(); }
 		};
 	}
 

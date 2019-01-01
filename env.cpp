@@ -29,7 +29,7 @@ namespace sys::env
 
 	std::string eval(std::string u)
 	{
-		static std::regex x { "$[A-Z_][A-Z_0-9]*" };
+		static std::regex x { sys::sh::esc::regex };
 		std::smatch m;
 		std::string s;
 		while (std::regex_search(u, m, x))

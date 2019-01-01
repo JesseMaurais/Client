@@ -1,5 +1,5 @@
-#ifndef unicode_hpp
-#define unicode_hpp
+#ifndef uni_hpp
+#define uni_hpp
 
 namespace uni
 {

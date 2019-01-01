@@ -1,26 +1,29 @@
 #ifndef test_hpp
 #define test_hpp
 
-#include <cassert> 
+#include <cassert>
+
+#define ASSTRING(s) #s
+#define STRING(n) ASSTRING(n)
 
 #ifndef NDEBUG
-namespace test
+namespace debug
 {
 	int run(int argc, char **argv);
 
-	struct unit
+	struct test
 	{
 		virtual void run() = 0;
-		unit(char const *name);
-		virtual ~unit();
+		test(char const *name);
+		~test();
 	};
 }
-#	define TEST(name, code) struct : test::unit { using unit::unit; void run() final code } name(#name)
-#	define ASSERT(condition) if (not(condition)) throw #condition
-#	define VERIFY(condition) ASSERT((#file + line) and (code))
-#	define verify(condition) assert(code)
+#	define TEST(name, ...) static struct : debug::test { void run() final { __VA_ARGS__; } using test::test; } name(#name)
+#	define ASSERT(condition) if (not(condition)) throw __FILE__ ":" STRING(__LINE__) ": " #condition
+#	define VERIFY(condition) ASSERT(condition)
+#	define verify(condition) assert(condition)
 #else
-#	define TEST(name, code)
+#	define TEST(name, ...)
 #	define ASSERT(condition)
 #	define VERIFY(condition) (condition)
 #	define verify(condition) (condition)
