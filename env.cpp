@@ -2,14 +2,18 @@
 #include "fmt.hpp"
 #include "sys.hpp"
 #include "os.hpp"
+#include "test.hpp"
 #include <map>
 #include <regex>
 #include <cassert>
+
+TEST(test_of_test, { ASSERT(false); });
 
 namespace sys::env
 {
 	std::string_view get(std::string_view u)
 	{
+		assert(fmt::terminated(u));
 		auto const p = u.data();
 		return std::getenv(p);
 	}
@@ -266,27 +270,4 @@ namespace env
 	view const& random = RANDOM;
 	view const& desktop = DESKTOP_SESSION;
 }
-
-namespace
-{
-	struct : env::list
-	{
-		operator std::vector<std::string_view>() const final
-		{
-			static std::vector<std::string_view> span;
-			span.clear();
-			if (sys::environ)
-			{
-				for (auto var = sys::environ; *var; ++var)
-				{
-					span.push_back(*var);
-				}
-			}
-			return span;
-		}
-
-	} ENVIRON;
-}
-
-env::list const& sys::environment = ENVIRON;
 

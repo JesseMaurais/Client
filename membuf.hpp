@@ -1,8 +1,7 @@
 #ifndef membuf_hpp
 #define membuf_hpp
 
-#include <string>
-#include <string_view>
+#include "str.hpp"
 #include "iobuf.hpp"
 
 namespace sys::io

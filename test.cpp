@@ -1,10 +1,10 @@
 #include "test.hpp"
+#include "str.hpp"
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
 #include <exception>
 #include <algorithm>
-#include <string_view>
 #include <string>
 #include <vector>
 #include <regex>
@@ -14,16 +14,16 @@ namespace test
 {
 	namespace
 	{
-		std::map<interface *, std::string_view> registry;
+		std::map<unit *, std::string_view> registry;
 	}
 
-	interface::interface(char const *name)
+	unit::unit(char const *name)
 	{
 		[[maybe_unused]] auto const [it, unique] = registry.emplace(this, name);
 		assert(unique);
 	}
 
-	interface::~interface()
+	unit::~unit()
 	{
 		[[maybe_unused]] auto const count = registry.erase(this);
 		assert(1 == count);
@@ -41,7 +41,7 @@ namespace test
 			ptr->run();
 			std::cout << "Success\n";
 		}
-		catch (std::exception const &except)
+		catch (std::exception const& except)
 		{
 			std::cout << "Failure\n";
 			errors.emplace_back(name);

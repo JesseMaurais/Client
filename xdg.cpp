@@ -2,6 +2,7 @@
 #include "fmt.hpp"
 #include "ini.hpp"
 #include "sys.hpp"
+#include <fstream>
 
 namespace
 {
@@ -71,7 +72,7 @@ namespace
 					fmt::span_view const p { env::home, ".config" };
 					dir = fmt::join(p, sys::sep::dir);
 				}
-				u= dir;
+				u = dir;
 			}
 			return u;
 		}
@@ -117,12 +118,12 @@ namespace
 					{
 						std::string const data = sys::env::get("APPDATA");
 						std::string const local = sys::env::get("LOCALAPPDATA");
-						dir = fmt::join({ data, local }, sys::sep::dir);
+						dir = fmt::join({ data, local }, sys::sep::path);
 					}
 					u = dir;
 				}
 			}
-			return fmt::split(view, sys::sep::dir);
+			return fmt::split(view, sys::sep::path);
 		}
 
 	} XDG_DATA_DIRS;
@@ -144,19 +145,19 @@ namespace
 					u = sys::env::get("ALLUSERSPROFILE");
 				}
 			}
-			return fmt::split(u, sys::sep::dir);
+			return fmt::split(u, sys::sep::path);
 		}
 
 	} XDG_CONFIG_DIRS;
 
 	std::string_view cached_dirs(std::string_view u)
 	{
-		static ini::map data;
+		static ini::entry data;
 		if (empty(data))
 		{
 			fmt::span_view const p { xdg::config_home, "user-dirs.dirs" };
 			auto const path = fmt::join(p, sys::sep::dir);
-			std::istream in(path);
+			std::ifstream in(path);
 			std::string s;
 			while (ini::getline(in, s))
 			{

@@ -41,9 +41,4 @@ namespace env
 	extern view const& desktop;
 }
 
-namespace sys
-{
-	extern ::env::list const& environment;
-}
-
 #endif // file

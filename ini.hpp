@@ -8,7 +8,8 @@
 
 namespace ini
 {
-	using map = std::map<std::string, std::string>;
+	using entry = std::map<std::string, std::string>;
+	using group = std::map<std::string, entry>;
 
 	static std::istream& getline(std::istream& in, std::string& s)
 	{
@@ -27,6 +28,11 @@ namespace ini
 			}
 		}
 		return in;
+	}
+
+	inline bool header(std::string_view u)
+	{
+		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}
 }
 

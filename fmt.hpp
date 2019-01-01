@@ -8,6 +8,7 @@
 #include <sstream>
 #include "alg.hpp"
 #include "str.hpp"
+#include "it.hpp"
 
 namespace fmt
 {
@@ -216,17 +217,19 @@ namespace fmt
 	inline std::string to_upper(std::string_view u)
 	{
 		wctype cc;
-		std::wstring w = to_wstring(u);
-		for (wchar_t &c : w) c = cc.toupper(c);
-		return to_string(w);
+		std::string s;
+		for (wchar_t w : widen(u)) s += to_string(cc.toupper(w));
+		s.shrink_to_fit();
+		return s;
 	}
 
 	inline std::string to_lower(std::string_view u)
 	{
 		wctype cc;
-		std::wstring w = to_wstring(u);
-		for (wchar_t &c : w) c = cc.tolower(c);
-		return to_string(w);
+		std::string s;
+		for (wchar_t w : widen(u)) s += to_string(cc.tolower(w));
+		s.shrink_to_fit();
+		return s;
 	}
 
 	template <typename Iterator>

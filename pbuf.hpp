@@ -30,11 +30,9 @@ namespace sys::io
 			file.set(fd);
 		}
 
-	private:
+	protected:
 
 		sys::file::process file;
-
-	protected:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
