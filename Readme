@@ -9,3 +9,12 @@ Regularly tested on
 * Android
 * Cygwin
 Should work a wide variety of operating environments.
+
+The name arose out of my mistaken belief in the existence of a phonetically
+similar word, that I later discovered was "unison". That is, I believed that
+"unisis" was a word meaning something like 'a coordination between many agents
+without their prior spoken agreement to do so.' By replacing the later half
+with 'sys' for the 'system' abbreviation I came up with the name of this code,
+which is motivated in some sense by the philosophical equivalent of my
+imaginary word's meaning.
+
