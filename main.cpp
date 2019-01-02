@@ -1,6 +1,5 @@
 #include "test.hpp"
 #include "fmt.hpp"
-#include <stdexcept>
 
 int main(int argc, char **argv)
 {

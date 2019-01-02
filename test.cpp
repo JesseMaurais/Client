@@ -1,4 +1,5 @@
 #include "test.hpp"
+#include "sh.hpp"
 #include <exception>
 #include <iostream>
 #include <string>
@@ -43,16 +44,16 @@ namespace debug
 			auto const indent = max_length - name.length();
 			std::cout << name << std::string(indent, ' ');
 			that->run();
-			std::cout << "\tok\n";
+			std::cout << sh::fg_green << "\tok\n" << sh::fg_off;
 		}
 		catch (std::exception const& except)
 		{
-			std::cout << "\tthrown: " << except.what() << '\n';
+			std::cout << sh::fg_yellow << "\tthrown: " << sh::fg_off << except.what() << '\n';
 			++errors;
 		}
 		catch (char const* message)
 		{
-			std::cout << '\t' << message << '\n';
+			std::cout << sh::fg_red << '\t' << message << sh::fg_off << '\n';
 			++errors;
 		}
 		catch (...)
