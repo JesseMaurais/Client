@@ -1,0 +1,11 @@
+Unisys
+======
+jessemaurais@gmail.com
+
+Systems level programming interfaces for modern C++ with portability.
+
+Regularly tested on
+* Linux
+* Android
+* Cygwin
+Should work a wide variety of operating environments.
