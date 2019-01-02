@@ -13,7 +13,7 @@ namespace
 			std::string_view u = sys::env::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
 			{
-				u = env::DESKTOP;
+				u = env::desktop;
 			}
 			return u;
 		}
@@ -27,7 +27,7 @@ namespace
 			std::string_view u = sys::env::get("XDG_MENU_PREFIX");
 			if (empty(u))
 			{
-				static auto prefix = fmt::to_lower(XDG_CURRENT_DESKTOP) + '-';
+				static auto prefix = fmt::to_lower(xdg::current_desktop) + '-';
 				u = prefix;
 			}
 			return u;
@@ -54,7 +54,7 @@ namespace
 				static std::string s;
 				if (empty(s))
 				{
-					fmt::span_view const p { env::HOME, ".local", "share" };
+					fmt::span_view const p { env::home, ".local", "share" };
 					s = fmt::join(p, sys::sep::dir);
 				}
 				u = s;
@@ -74,7 +74,7 @@ namespace
 				static std::string s;
 				if (empty(s))
 				{
-					fmt::span_view const p { env::HOME, ".config" };
+					fmt::span_view const p { env::home, ".config" };
 					s = fmt::join(p, sys::sep::dir);
 				}
 				u = s;
@@ -94,7 +94,7 @@ namespace
 				static std::string s;
 				if (empty(s))
 				{
-					fmt::span_view const p { env::HOME, ".cache" };
+					fmt::span_view const p { env::home, ".cache" };
 					s = fmt::join(p, sys::sep::dir);
 				}
 				u = s;
@@ -159,42 +159,59 @@ namespace
 
 	} XDG_CONFIG_DIRS;
 
-	std::string_view cached_dirs(std::string_view u)
-	{
-		static ini::entry data;
-		if (empty(data))
-		{
-			fmt::span_view const p { xdg::config_home, "user-dirs.dirs" };
-			auto const path = fmt::join(p, sys::sep::dir);
-			std::ifstream in(path);
-			std::string s;
-			while (ini::getline(in, s))
-			{
-				fmt::pair p = fmt::key_value(s);
-				p.second = sys::env::eval(p.second);
-				data.emplace(p);
-			}
-		}
-		return data[u];
-	}
-
-	template <char const *V> struct : env::view
+	struct cached_dir : env::view
 	{
 		operator std::string_view() const final
 		{
-			std::string_view u = sys::env::get(V);
+			std::string_view u = sys::env::get(var);
 			if (empty(u))
 			{
-				u = cached_dirs(V);
+				u = cached();
 			}
 			if (empty(u))
 			{
-				u = env::HOME;
+				u = env::home;
 			}
 			return u;
 		}
 
-	} USER_DIR;
+		cached_dir(char const *xdgvar)
+		: var(xdgvar)
+		{ }
+
+	private:
+
+		char const *var;
+
+		std::string_view cached() const
+		{
+			static ini::entry data;
+			if (empty(data))
+			{
+				fmt::span_view const p { xdg::config_home, "user-dirs.dirs" };
+				auto const path = fmt::join(p, sys::sep::dir);
+				std::ifstream in(path);
+				std::string s;
+				while (ini::getline(in, s))
+				{
+					fmt::pair p = fmt::key_value(s);
+					p.second = sys::env::eval(p.second);
+					data.emplace(p);
+				}
+			}
+			std::string const s(var);
+			return data.at(s);
+		}
+	};
+
+	cached_dir const XDG_DESKTOP_DIR("XDG_DESKTOP_DIR");
+	cached_dir const XDG_DOCUMENTS_DIR("XDG_DOCUMENTS_DIR");
+	cached_dir const XDG_DOWNLOAD_DIR("XDG_DOWNLOAD_DIR");
+	cached_dir const XDG_MUSIC_DIR("XDG_MUSIC_DIR");
+	cached_dir const XDG_PICTURES_DIR("XDG_PICTURES_DIR");
+	cached_dir const XDG_PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR");
+	cached_dir const XDG_TEMPLATES_DIR("XDG_TEMPLATES_DIR");
+	cached_dir const XDG_VIDEOS_DIR("XDG_VIDEOS_DIR");
 }
 
 namespace xdg
@@ -207,13 +224,13 @@ namespace xdg
 	env::view const& cache_home = XDG_CACHE_HOME;
 	env::list const& data_dirs = XDG_DATA_DIRS;
 	env::list const& config_dirs = XDG_CONFIG_DIRS;
-	env::view const& desktop_dir = USER_DIR<"XDG_DESKTOP_DIR">;
-	env::view const& documents_dir = USER_DIR<"XDG_DOCUMENTS_DIR">;
-	env::view const& download_dir = USER_DIR<"XDG_DOWNLOAD_DIR">;
-	env::view const& music_dir = USER_DIR<"XDG_MUSIC_DIR">;
-	env::view const& pictures_dir = USER_DIR<"XDG_PICTURES_DIR">;
-	env::view const& publicshare_dir = USER_DIR<"XDG_PUBLICSHARE_DIR">;
-	env::view const& templates_dir = USER_DIR<"XDG_TEMPLATES_DIR">;
-	env::view const& videos_dir = USER_DIR<"XDG_VIDEOS_DIR">;
+	env::view const& desktop_dir = XDG_DESKTOP_DIR;
+	env::view const& documents_dir = XDG_DOCUMENTS_DIR;
+	env::view const& download_dir = XDG_DOWNLOAD_DIR;
+	env::view const& music_dir = XDG_MUSIC_DIR;
+	env::view const& pictures_dir = XDG_PICTURES_DIR;
+	env::view const& publicshare_dir = XDG_PUBLICSHARE_DIR;
+	env::view const& templates_dir = XDG_TEMPLATES_DIR;
+	env::view const& videos_dir = XDG_VIDEOS_DIR;
 }
 

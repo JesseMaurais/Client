@@ -97,7 +97,7 @@ namespace sys::file
 		else set(fd);
 	}
 
-	bool process::execute(arguments args, openmode mode)
+	bool process::execute(arguments args)
 	{
 		std::vector<char*> cmds;
 		for (auto s : args) cmds.push_back(const_cast<char*>(s));

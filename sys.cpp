@@ -55,7 +55,7 @@ namespace sys
 
 	pid_t pexec(int fd[3], char **argv)
 	{
-		#if defined(__WIN32__)
+		#if defined(__WIN32__) || defined(__CYGWIN__)
 		{
 			struct Handle
 			{
@@ -224,7 +224,7 @@ namespace sys
 
 	void terminate(pid_t pid)
 	{
-		#if defined(__POSIX__) || defined(__XOPEN__)
+		#if defined(__POSIX__)
 		{
 			if (fail(kill(pid, SIGTERM)))
 			{

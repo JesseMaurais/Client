@@ -1,6 +1,6 @@
-#include "test.hpp"
-#include "sh.hpp"
-#include <exception>
+#include "dbg.hpp"
+#include "ios.hpp"
+#include <stdexcept>
 #include <iostream>
 #include <string>
 #include <map>
@@ -16,7 +16,8 @@ namespace
 		return instance;
 	}
 
-	//TEST(dumb, ASSERT(false));
+	//TEST(dumb_assert, ASSERT(false));
+	//TEST(dumb_except, throw std::runtime_error("Holy Cow!"));
 }
 
 namespace debug
@@ -37,35 +38,34 @@ namespace debug
 	{
 		map const& tests = registry();
 
-		std::cout << sh::intense << tests.size() << " tests to run..." << sh::intense_off << '\n';
+		std::cout << io::intense << tests.size() << " tests to run..." << io::intense_off << '\n';
 
 		int errors = 0;
 
 		for (auto const& [that, name] : tests) try
 		{
 			auto const indent = max_length - name.length();
-			std::cout << name << std::string(indent, ' ');
+			std::cout << io::faint << name << io::intense_off << std::string(indent, ' ');
 			that->run();
-			std::cout << sh::fg_green << "\tok" << sh::fg_off << '\n';
+			std::cout << io::fg_green << "\tok" << io::fg_off << '\n';
 		}
 		catch (std::exception const& except)
 		{
 			++errors;
-			std::cout << sh::fg_red << "\tthrown: " << except.what() << sh::fg_off << '\n';
+			std::cout << io::fg_red << "\tthrown: " << except.what() << io::fg_off << '\n';
 		}
 		catch (char const* message)
 		{
 			++errors;
-			std::cout << sh::fg_red << '\t' << message << sh::fg_off << '\n';
+			std::cout << io::fg_red << '\t' << message << io::fg_off << '\n';
 		}
 		catch (...)
 		{
-			std::cerr << "\tUnknown exception\n";
+			std::cerr << io::fg_red << "\tUnknown exception" << io::fg_off << '\n';
 		}
 
-		auto fg = errors ? sh::fg_yellow : sh::fg_cyan;
-		auto tense = errors ? sh::intense : sh::faint;
-		std::cout << fg << tense << errors << " errors detected." << sh::reset << std::endl;
+		auto fg = errors ? io::fg_yellow : io::fg_blue;
+		std::cout << fg << errors << " errors detected.\n" << io::reset << std::endl;
 		return errors;
 	}
 }

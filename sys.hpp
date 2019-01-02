@@ -158,13 +158,10 @@ namespace sys
 		constexpr auto path = ":";
 	}
 
-	namespace esc
+	namespace esc::sh
 	{
-		namespace sh
-		{
-			constexpr auto first = "$", second = "";
-			constexpr auto regex = "$[A-Z_][A-Z_0-9]*";
-		}
+		constexpr auto first = "$", second = "";
+		constexpr auto regex = "$[A-Z_][A-Z_0-9]*";
 	}
 
 	using size_t = ::size_t;
@@ -172,7 +169,7 @@ namespace sys
 	using off_t = ::off_t;
 	using pid_t = ::pid_t;
 	using mode_t = ::mode_t;
-	using stat_info = struct ::stat;
+	using stat_info = struct stat;
 
 	constexpr auto access = ::access;
 	constexpr auto chdir = ::chdir;
@@ -242,13 +239,10 @@ namespace sys
 		constexpr char path = ';';
 	}
 
-	namespace esc
+	namespace esc::sh
 	{
-		namespace sh
-		{
-			constexpr auto first = "%", second = "%";
-			constexpr auto regex = "%[A-Z_a-z][A-Z_a-z0-9]*%";
-		}
+		constexpr auto first = "%", second = "%";
+		constexpr auto regex = "%[A-Z_a-z][A-Z_a-z0-9]*%";
 	}
 
 	using size_t = unsigned int;
@@ -256,7 +250,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using stat_info = struct ::_stat;
+	using stat_info = struct _stat;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;

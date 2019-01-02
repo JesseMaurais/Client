@@ -29,7 +29,7 @@ namespace sys::env
 
 	std::string eval(std::string u)
 	{
-		static std::regex x { sys::sh::esc::regex };
+		static std::regex x { sys::esc::sh::regex };
 		std::smatch m;
 		std::string s;
 		while (std::regex_search(u, m, x))
@@ -196,14 +196,14 @@ namespace
 
 namespace env
 {
-	list const& PATH = path;
-	view const& USER = user;
-	view const& HOME = home;
-	view const& PWD = pwd;
-	view const& LANG = lang;
-	view const& TMPDIR = tmpdir;
-	view const& SHELL = shell;
-	view const& PROMPT = prompt;
-	view const& DESKTOP = desktop;
+	list const& path = PATH;
+	view const& user = USER;
+	view const& home = HOME;
+	view const& pwd = PWD;
+	view const& lang = LANG;
+	view const& shell = SHELL;
+	view const& tmpdir = TMPDIR;
+	view const& desktop = DESKTOP;
+	view const& prompt = PROMPT;
 }
 

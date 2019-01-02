@@ -4,18 +4,15 @@
 #include <sstream>
 #include <string>
 #include <cstdio>
-#include "io.hpp"
+#include "fmt.hpp"
 
 namespace sys
 {
 	template <typename... Args>
 	void ferror(std::string_view format, Args... args)
 	{
-		std::string string;
-		if (io::sprintf(string, format, args...) > 0)
-		{
-			std::perror(string.c_str());
-		}
+		auto const s = (fmt::format(format) % ... % args);
+		std::perror(s.c_str());
 	}
 
 	template <typename... Args>

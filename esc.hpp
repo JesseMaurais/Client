@@ -5,18 +5,15 @@
 
 namespace ascii
 {
-	namespace
+	template <char Min, char Max> struct range
 	{
-		template <char Min, char Max> struct range
-		{
-			static_assert(Min <= Max, "Invalid range");
-			static constexpr char min = Min, max = Max;
-		};
+		static_assert(Min <= Max, "Invalid range");
+		static constexpr char min = Min, max = Max;
+	};
 
-		template <class Range> constexpr bool in(char code)
-		{
-			return Range::min <= code and code <= Range::max;
-		}
+	template <class Range> constexpr bool in(char code)
+	{
+		return Range::min <= code and code <= Range::max;
 	}
 
 	//
@@ -267,7 +264,7 @@ namespace ascii
 	// Device Modes
 	//
 
-	enum
+	enum : int
 	{
 		GATM =  1, // guarded area transfer mode
 		KAM  =  2, // keyboard action mode
@@ -297,7 +294,7 @@ namespace ascii
 	// Parameter Codes
 	//
 
-	enum SGR
+	enum SGR : int
 	{
 		reset         =  0, // attributes off
 		intense       =  1, // bold or increased intensity

@@ -175,7 +175,7 @@ namespace sys::file
 			return file[n];
 		}
 
-		bool execute(arguments, openmode);
+		bool execute(arguments);
 		void terminate();
 
 	protected:

@@ -1,7 +1,9 @@
-all: test
 
-clean:
-	rm test
+# Designed to work with both NMake and GNU make.
+# You may need to specify CXX on the command line.
 
-test: sys.cpp file.cpp test.cpp main.cpp
-	$(CXX) -std=c++17 -g sys.cpp file.cpp test.cpp main.cpp -o test
+SRC=sys.cpp file.cpp env.cpp main.cpp dbg.cpp xdg.cpp
+
+all: $(SRC)
+	$(CXX) -std=c++17 -Wall $(CFLAGS) $(SRC)
+
