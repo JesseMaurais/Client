@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "fmt.hpp"
+#include "sh.hpp"
 
 int main(int argc, char **argv)
 {
@@ -66,13 +67,33 @@ TEST(fmt_case,
 	ASSERT_EQ(to_lower(HELLO_WORLD), HELLO_LOWER);
 });
 
-//TEST(fmt_join, ASSERT_EQ(join({ "Hello,", "World!" }, " "), HELLO_WORLD));
-
-//TEST(fmt_split, ASSERT_EQ((split(HELLO_WORLD, " "), span_view { "Hello,", "World!" })));
-
-//TEST(fmt_replace, ASSERT_EQ((replace("Hello, user!", "user", "World"), HELLO_WORLD)));
-
 } // fmt
+
+//
+// ANSI escape sequence
+//
+
+#include <sstream>
+
+namespace sh
+{
+	TEST(ansi_params,
+	{
+		std::ostringstream ss;
+		ss << params<1, 2, 3, 4>;
+		std::string const s = ss.str();
+		ASSERT_EQ(s, "1;2;3;4");
+	});
+
+	TEST(ansi_fg, 
+	{
+		std::ostringstream ss;
+		ss << fg_green << "GREEN" << fg_off;
+		std::string const s = ss.str();
+		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
+	});
+
+} //sh
 
 //
 // Inter-process communications

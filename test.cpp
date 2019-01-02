@@ -15,6 +15,8 @@ namespace
 		static map instance;
 		return instance;
 	}
+
+	//TEST(dumb, ASSERT(false));
 }
 
 namespace debug
@@ -35,7 +37,7 @@ namespace debug
 	{
 		map const& tests = registry();
 
-		std::cout << tests.size() << " tests to run...\n";
+		std::cout << sh::intense << tests.size() << " tests to run..." << sh::intense_off << '\n';
 
 		int errors = 0;
 
@@ -44,24 +46,26 @@ namespace debug
 			auto const indent = max_length - name.length();
 			std::cout << name << std::string(indent, ' ');
 			that->run();
-			std::cout << sh::fg_green << "\tok\n" << sh::fg_off;
+			std::cout << sh::fg_green << "\tok" << sh::fg_off << '\n';
 		}
 		catch (std::exception const& except)
 		{
-			std::cout << sh::fg_yellow << "\tthrown: " << sh::fg_off << except.what() << '\n';
 			++errors;
+			std::cout << sh::fg_red << "\tthrown: " << except.what() << sh::fg_off << '\n';
 		}
 		catch (char const* message)
 		{
-			std::cout << sh::fg_red << '\t' << message << sh::fg_off << '\n';
 			++errors;
+			std::cout << sh::fg_red << '\t' << message << sh::fg_off << '\n';
 		}
 		catch (...)
 		{
 			std::cerr << "\tUnknown exception\n";
 		}
 
-		std::cout << errors << " errors detected." << std::endl;
+		auto fg = errors ? sh::fg_yellow : sh::fg_cyan;
+		auto tense = errors ? sh::intense : sh::faint;
+		std::cout << fg << tense << errors << " errors detected." << sh::reset << std::endl;
 		return errors;
 	}
 }

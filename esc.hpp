@@ -1,6 +1,8 @@
 #ifndef esc_hpp
 #define esc_hpp
 
+// https://www.ecma-international.org/publications/standards/Ecma-048.htm
+
 namespace ascii
 {
 	namespace
