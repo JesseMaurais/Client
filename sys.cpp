@@ -6,10 +6,16 @@
 
 #if defined(__POSIX__)
 extern char **environ;
-char **sys::environ = environ;
+namespace sys
+{
+	char **environment = ::environ;
+}
 #elif defined(__WIN32__)
 extern char **_environ;
-char **sys::environ = _environ;
+namespace sys
+{
+	char **environment = _environ;
+}
 #endif
 
 #if __has_include(<io.h>)
@@ -30,7 +36,7 @@ namespace sys
 	DWORD winerr(char const *prefix)
 	{
 		LPSTR data = nullptr;
-		LPSTR addr = static_cast<LPSTR>(&data);
+		LPSTR addr = reinterpret_cast<LPSTR>(&data);
 		constexpr DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 		DWORD const code = GetLastError();
 		DWORD const size = FormatMessage
@@ -167,7 +173,7 @@ namespace sys
 
 			for (int n : { 0, 1, 2 })
 			{
-				fd[i] = 0 == n ? pair[n].read.set() : pair[n].write.set();
+				fd[n] = 0 == n ? pair[n].read.set() : pair[n].write.set();
 			}
 
 			return pid_t(pi.hProcess);
@@ -233,7 +239,7 @@ namespace sys
 		}
 		#elif defined(__WIN32__)
 		{
-			auto const h = static_cast<HANDLE>(pid);
+			auto const h = reinterpret_cast<HANDLE>(pid);
 			if (not TerminateProcess(h, 0))
 			{
 				sys::winerr("TerminateProcess");

@@ -1,5 +1,6 @@
 #include "dbg.hpp"
 #include "ios.hpp"
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <string>

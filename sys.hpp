@@ -235,8 +235,8 @@ namespace sys
 {
 	namespace sep
 	{
-		constexpr char dir = '\\';
-		constexpr char path = ';';
+		constexpr auto dir = "\\";
+		constexpr auto path = ";";
 	}
 
 	namespace esc::sh
@@ -287,7 +287,7 @@ namespace sys
 	constexpr auto unlink = ::_unlink;
 	constexpr auto write = ::_write;
 
-	DWORD winerr(char const *prefix); // perror for GetLastError
+	unsigned long winerr(char const *prefix); // perror for GetLastError
 
 } // namespace sys
 
@@ -305,7 +305,7 @@ namespace sys
 
 namespace sys
 {
-	extern char **environ;
+	extern char **environment;
 	pid_t pexec(int fd[3], char **argv);
 	void terminate(pid_t);
 };

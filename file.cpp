@@ -29,7 +29,7 @@ namespace
 		{
 			flags |= O_APPEND;
 		}
-		if (mode & trunc)
+		if (mode & sys::file::trunc)
 		{
 			flags |= O_TRUNC;
 		}

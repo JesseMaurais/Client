@@ -7,3 +7,6 @@ SRC=sys.cpp file.cpp env.cpp main.cpp dbg.cpp xdg.cpp
 all: $(SRC)
 	$(CXX) -std=c++17 -Wall $(CFLAGS) $(SRC)
 
+cl: $(SRC)
+	$(CXX) /std:c++17 /EHsc /permissive- $(CFLAGS) $(SRC)
+
