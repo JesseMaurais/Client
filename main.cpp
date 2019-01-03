@@ -1,6 +1,9 @@
 #include "dbg.hpp"
 #include "fmt.hpp"
 #include "ios.hpp"
+#include "xdg.hpp"
+#include "sys.hpp"
+#include <fstream>
 
 static_assert(DEBUG, "Compiling unit tests with debugging off.");
 
@@ -73,6 +76,49 @@ namespace fmt
 	});
 
 } // fmt
+
+//
+// Operating system environment
+//
+
+namespace env
+{
+	TEST(env_environment,
+	{
+		auto print = [](std::string_view u, std::string_view v)
+		{
+			return fmt::key_value(u, v) + '\n';
+		};
+
+		std::ofstream f { "sys.ini" };
+		f << "[Environment Entry]" << std::endl;
+		f << print("HOME", env::home);
+		f << print("USER", env::user);
+		f << print("PWD", env::pwd);
+		f << print("LANG", env::lang);
+		f << print("SHELL", env::shell);
+		f << print("TMPDIR", env::tmpdir);
+		f << print("DESKTOP", env::desktop);
+		f << print("PROMPT", env::prompt);
+		f << "[Freedesktop Entry]" << std::endl;
+		f << print("XDG_CURRENT_DESKTOP", xdg::current_desktop);
+		f << print("XDG_MENU_PREFIX", xdg::menu_prefix);
+		f << print("XDG_RUNDTIME_DIR", xdg::runtime_dir);
+		f << print("XDG_DATA_HOME", xdg::data_home);
+		f << print("XDG_CONFIG_HOME", xdg::config_home);
+		f << print("XDG_CACHE_HOME", xdg::cache_home);
+		//f << print("XDG_DATA_DIRS", fmt::join(xdg::data_dirs, sys::sep::path));
+		//f << print("XDG_CONFIG_DIRS", fmt::join(xdg::config_dirs, sys::sep::path));
+		f << print("XDG_DESKTOP_DIR", xdg::desktop_dir);
+		f << print("XDG_DOCUMENTS_DIR", xdg::documents_dir);
+		f << print("XDG_DOWNLOAD_DIR", xdg::download_dir);
+		f << print("XDG_MUSIC_DIR", xdg::music_dir);
+		f << print("XDG_PICTURES_DIR", xdg::pictures_dir);
+		f << print("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir);
+		f << print("XDG_TEMPLATES_DIR", xdg::templates_dir);
+		f << print("XDG_VIDEOS_DIR", xdg::videos_dir);
+	});
+}
 
 //
 // ANSI escape sequence

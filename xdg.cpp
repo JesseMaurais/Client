@@ -159,7 +159,7 @@ namespace
 
 	} XDG_CONFIG_DIRS;
 
-	struct cached_dir : env::view
+	struct user_dir : env::view
 	{
 		operator std::string_view() const final
 		{
@@ -168,20 +168,17 @@ namespace
 			{
 				u = cached();
 			}
-			if (empty(u))
-			{
-				u = env::home;
-			}
 			return u;
 		}
 
-		cached_dir(char const *xdgvar)
-		: var(xdgvar)
+		user_dir(char const *variable, char const *value)
+		: var(variable)
+		, val(value)
 		{ }
 
 	private:
 
-		char const *var;
+		char const *var, *val;
 
 		std::string_view cached() const
 		{
@@ -199,19 +196,26 @@ namespace
 					data.emplace(p);
 				}
 			}
-			std::string const s(var);
-			return data.at(s);
+			std::string const name(var);
+			auto it = data.find(name);
+			if (data.end() == it)
+			{
+				fmt::span_view const p { env::home, val };
+				std::string const dir = fmt::join(p, sys::sep::dir);
+				it = data.emplace(name, dir).first;
+			}
+			return it->second;
 		}
 	};
 
-	cached_dir const XDG_DESKTOP_DIR("XDG_DESKTOP_DIR");
-	cached_dir const XDG_DOCUMENTS_DIR("XDG_DOCUMENTS_DIR");
-	cached_dir const XDG_DOWNLOAD_DIR("XDG_DOWNLOAD_DIR");
-	cached_dir const XDG_MUSIC_DIR("XDG_MUSIC_DIR");
-	cached_dir const XDG_PICTURES_DIR("XDG_PICTURES_DIR");
-	cached_dir const XDG_PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR");
-	cached_dir const XDG_TEMPLATES_DIR("XDG_TEMPLATES_DIR");
-	cached_dir const XDG_VIDEOS_DIR("XDG_VIDEOS_DIR");
+	user_dir const XDG_DESKTOP_DIR("XDG_DESKTOP_DIR", "Desktop");
+	user_dir const XDG_DOCUMENTS_DIR("XDG_DOCUMENTS_DIR", "Documents");
+	user_dir const XDG_DOWNLOAD_DIR("XDG_DOWNLOAD_DIR", "Download");
+	user_dir const XDG_MUSIC_DIR("XDG_MUSIC_DIR", "Music");
+	user_dir const XDG_PICTURES_DIR("XDG_PICTURES_DIR", "Pictures");
+	user_dir const XDG_PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR", "Public");
+	user_dir const XDG_TEMPLATES_DIR("XDG_TEMPLATES_DIR", "Templates");
+	user_dir const XDG_VIDEOS_DIR("XDG_VIDEOS_DIR", "Video");
 }
 
 namespace xdg
