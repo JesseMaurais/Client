@@ -1,7 +1,7 @@
 # Designed to work with both NMake and GNU make.
 
 # \
-!ifndef 0 # 
+!ifndef 0 
 include Tools.gnu
 # \
 !endif
