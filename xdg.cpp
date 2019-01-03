@@ -210,12 +210,12 @@ namespace
 
 	user_dir const XDG_DESKTOP_DIR("XDG_DESKTOP_DIR", "Desktop");
 	user_dir const XDG_DOCUMENTS_DIR("XDG_DOCUMENTS_DIR", "Documents");
-	user_dir const XDG_DOWNLOAD_DIR("XDG_DOWNLOAD_DIR", "Download");
+	user_dir const XDG_DOWNLOAD_DIR("XDG_DOWNLOAD_DIR", "Downloads");
 	user_dir const XDG_MUSIC_DIR("XDG_MUSIC_DIR", "Music");
 	user_dir const XDG_PICTURES_DIR("XDG_PICTURES_DIR", "Pictures");
 	user_dir const XDG_PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR", "Public");
 	user_dir const XDG_TEMPLATES_DIR("XDG_TEMPLATES_DIR", "Templates");
-	user_dir const XDG_VIDEOS_DIR("XDG_VIDEOS_DIR", "Video");
+	user_dir const XDG_VIDEOS_DIR("XDG_VIDEOS_DIR", "Videos");
 }
 
 namespace xdg
