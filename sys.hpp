@@ -13,7 +13,7 @@ namespace sys
 
 // Single UNIX Specification
 
-constexpr bool XOPEN = 
+constexpr bool xopen = 
 #if defined(_XOPEN_SOURCE)
 # undef __XOPEN__
 # define __XOPEN__ 1
@@ -25,7 +25,7 @@ constexpr bool XOPEN =
 
 // Portable Operating System Interface
 
-constexpr bool POSIX = 
+constexpr bool posix = 
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) || defined(_XOPEN_SOURCE)
 # undef __POSIX__
 # define __POSIX__ 1
@@ -37,7 +37,7 @@ constexpr bool POSIX =
 
 // Windows Runtime / Universal Windows Platform
 
-constexpr bool WINRT =
+constexpr bool winrt =
 #if defined(_WINRTDLL)
 # undef __WINRT__
 # define __WINRT__ 1
@@ -60,7 +60,7 @@ namespace sys
 
 // Portable Operating System Interface
 
-constexpr long POSIX_VERSION =
+constexpr long posix_version =
 #if defined(_POSIX_VERSION)
 	_POSIX_VERSION
 #else
@@ -68,7 +68,7 @@ constexpr long POSIX_VERSION =
 #endif
 	;
 
-constexpr long POSIX2_VERSION =
+constexpr long posix2_version =
 #if defined(_POSIX2_VERSION)
 	_POSIX2_VERSION
 #else
@@ -76,7 +76,7 @@ constexpr long POSIX2_VERSION =
 #endif
 	;
 /*
-constexpr long POSIX2_C_VERSION =
+constexpr long posix2_c_version =
 #if defined(_POSIX2_C_VERSION)
 	_POSIX2_C_VERSION
 #else
@@ -86,7 +86,7 @@ constexpr long POSIX2_C_VERSION =
 */
 // Single UNIX Specification
 
-constexpr long XOPEN_VERSION =
+constexpr long xopen_version =
 #if defined(_XOPEN_VERSION)
 	_XOPEN_VERSION
 #else
@@ -94,7 +94,7 @@ constexpr long XOPEN_VERSION =
 #endif
 	;
 
-constexpr long XOPEN_XCU_VERSION =
+constexpr long xopen_xcu_version =
 #if defined(_XOPEN_XCU_VERSION)
 	_XOPEN_XCU_VERSION
 #else
@@ -102,7 +102,7 @@ constexpr long XOPEN_XCU_VERSION =
 #endif
 	;
 
-constexpr bool XOPEN_XPG2 =
+constexpr bool xopen_xpg2 =
 #if defined(_XOPEN_XPG2)
 	true
 #else
@@ -110,7 +110,7 @@ constexpr bool XOPEN_XPG2 =
 #endif
 	;
 
-constexpr bool XOPEN_XPG3 =
+constexpr bool xopen_xpg3 =
 #if defined(_XOPEN_XPG3)
 	true
 #else
@@ -118,7 +118,7 @@ constexpr bool XOPEN_XPG3 =
 #endif
 	;
 
-constexpr bool XOPEN_XPG4 =
+constexpr bool xopen_xpg4 =
 #if defined(_XOPEN_XPG4)
 	true
 #else
@@ -126,7 +126,7 @@ constexpr bool XOPEN_XPG4 =
 #endif
 	;
 
-constexpr bool XOPEN_UNIX =
+constexpr bool xopen_unix =
 #if defined(_XOPEN_UNIX)
 	true
 #else

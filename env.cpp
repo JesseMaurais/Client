@@ -61,12 +61,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::POSIX)
+			if constexpr (sys::posix)
 			{
 				return sys::env::get("USER");
 			}
 			else
-			if constexpr (sys::WIN32)
+			if constexpr (sys::win32)
 			{
 				return sys::env::get("USERNAME");
 			}
@@ -78,12 +78,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::POSIX)
+			if constexpr (sys::posix)
 			{
 				return sys::env::get("HOME");
 			}
 			else
-			if constexpr (sys::WIN32)
+			if constexpr (sys::win32)
 			{
 				return sys::env::get("USERPROFILE");
 			}
@@ -95,12 +95,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::POSIX)
+			if constexpr (sys::posix)
 			{
 				return sys::env::get("PWD");
 			}
 			else
-			if constexpr (sys::WIN32)
+			if constexpr (sys::win32)
 			{
 				return sys::env::get("CD");
 			}
@@ -146,12 +146,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::POSIX)
+			if constexpr (sys::posix)
 			{
 				return sys::env::get("SHELL");
 			}
 			else
-			if constexpr (sys::WIN32)
+			if constexpr (sys::win32)
 			{
 				return sys::env::get("COMSPEC");
 			}
@@ -163,12 +163,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::POSIX)
+			if constexpr (sys::posix)
 			{
 				return sys::env::get("PS1");
 			}
 			else
-			if constexpr (sys::WIN32)
+			if constexpr (sys::win32)
 			{
 				return sys::env::get("PROMPT");
 			}
@@ -180,12 +180,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::POSIX)
+			if constexpr (sys::posix)
 			{
 				return sys::env::get("DESKTOP_SESSION");
 			}
 			else
-			if constexpr (sys::WIN32)
+			if constexpr (sys::win32)
 			{
 				return sys::env::get("OS");
 			}

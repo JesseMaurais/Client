@@ -4,6 +4,14 @@
 #include "sys.hpp"
 #include <fstream>
 
+#if defined(__WIN32__)
+# if __has_include(<shlobj.h>)
+#  include <shlobj.h>
+#  pragma comment(lib, "shell32.lib")
+#  pragma comment(lib, "ole32.lib")
+# endif
+#endif
+
 namespace
 {
 	struct : env::view
@@ -111,12 +119,12 @@ namespace
 			fmt::string_view u = sys::env::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
-				if constexpr (sys::POSIX)
+				if constexpr (sys::posix)
 				{
 					u = "/usr/local/share/:/usr/share/";
 				}
 				else
-				if constexpr (sys::WIN32)
+				if constexpr (sys::win32)
 				{
 					u = sys::env::get("ALLUSERSPROFILE");
 				}
@@ -133,12 +141,12 @@ namespace
 			fmt::string_view u = sys::env::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
-				if constexpr (sys::POSIX)
+				if constexpr (sys::posix)
 				{
 					u = "/etc/xdg";
 				}
 				else
-				if constexpr (sys::WIN32)
+				if constexpr (sys::win32)
 				{
 					static fmt::string s;
 					if (empty(s))
@@ -159,6 +167,15 @@ namespace
 
 	} XDG_CONFIG_DIRS;
 
+	constexpr auto Desktop = "Desktop";
+	constexpr auto Documents = "Documents";
+	constexpr auto Downloads = "Downloads";
+	constexpr auto Music = "Music";
+	constexpr auto Pictures = "Pictures";
+	constexpr auto PublicShare = "Public";
+	constexpr auto Templates = "Templates";
+	constexpr auto Videos = "Videos";
+
 	struct user_dir : env::view
 	{
 		operator fmt::string_view() const final
@@ -167,6 +184,42 @@ namespace
 			if (empty(u))
 			{
 				u = cached();
+			}
+			#if __has_include(<shlobj.h>)
+			if constexpr (sys::win32)
+			{
+				if (empty(u))
+				{
+					std::map<char const*, KNOWNFOLDERID> folders =
+					{
+						{ Desktop, FOLDERID_Desktop },
+						{ Documents, FOLDERID_Documents },
+						{ Downloads, FOLDERID_Downloads },
+						{ Music, FOLDERID_Music },
+						{ Pictures, FOLDERID_Pictures },
+						{ PublicShare, FOLDERID_Public },
+						{ Templates, FOLDERID_Templates },
+						{ Videos, FOLDERID_Videos },
+					};
+					PWSTR pwstring;
+					HRESULT const ok = SHGetKnownFolderPath
+					(
+						folders.at(var),
+						0,
+						nullptr,
+						&pwstring
+					);
+					static auto s = fmt::to_string(pwstring);
+					CoTaskMemFree(pwstring);
+					u = s;
+				}
+			}
+			#endif
+			if (empty(u))
+			{
+				fmt::span_view const p { env::home, val };
+				static auto s = fmt::join(p, sys::sep::dir);
+				u = s;
 			}
 			return u;
 		}
@@ -208,14 +261,14 @@ namespace
 		}
 	};
 
-	user_dir const XDG_DESKTOP_DIR("XDG_DESKTOP_DIR", "Desktop");
-	user_dir const XDG_DOCUMENTS_DIR("XDG_DOCUMENTS_DIR", "Documents");
-	user_dir const XDG_DOWNLOAD_DIR("XDG_DOWNLOAD_DIR", "Downloads");
-	user_dir const XDG_MUSIC_DIR("XDG_MUSIC_DIR", "Music");
-	user_dir const XDG_PICTURES_DIR("XDG_PICTURES_DIR", "Pictures");
-	user_dir const XDG_PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR", "Public");
-	user_dir const XDG_TEMPLATES_DIR("XDG_TEMPLATES_DIR", "Templates");
-	user_dir const XDG_VIDEOS_DIR("XDG_VIDEOS_DIR", "Videos");
+	user_dir const XDG_DESKTOP_DIR("XDG_DESKTOP_DIR", Desktop);
+	user_dir const XDG_DOCUMENTS_DIR("XDG_DOCUMENTS_DIR", Documents);
+	user_dir const XDG_DOWNLOAD_DIR("XDG_DOWNLOAD_DIR", Downloads);
+	user_dir const XDG_MUSIC_DIR("XDG_MUSIC_DIR", Music);
+	user_dir const XDG_PICTURES_DIR("XDG_PICTURES_DIR", Pictures);
+	user_dir const XDG_PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR", PublicShare);
+	user_dir const XDG_TEMPLATES_DIR("XDG_TEMPLATES_DIR", Templates);
+	user_dir const XDG_VIDEOS_DIR("XDG_VIDEOS_DIR", Videos);
 }
 
 namespace xdg
