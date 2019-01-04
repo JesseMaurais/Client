@@ -49,7 +49,7 @@ namespace
 {
 	struct : env::list
 	{
-		operator std::vector<fmt::string_view>() const final
+		operator fmt::span_view() const final
 		{
 			fmt::string_view u = sys::env::get("PATH");
 			return fmt::split(u, sys::sep::path);
