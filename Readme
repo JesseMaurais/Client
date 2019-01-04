@@ -16,10 +16,9 @@ Using the compilers
 
 Build
 =====
-There is no library but to build the unit tests you can simply type 'make'
+There is no library, but to build the unit tests you can simply type 'make'
 or 'nmake' depending on your environment. The authored Makefile has been
-written to work for both without change. To alter configurations for nmake
-edit the standard Tools.ini file. For GNU make edit the Tools.gnu file.
+written to work for both without change.
 
 Name
 ====

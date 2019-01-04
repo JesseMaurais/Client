@@ -4,8 +4,9 @@
 #include "xdg.hpp"
 #include "sys.hpp"
 #include <fstream>
+#include <sstream>
 
-static_assert(DEBUG, "Compiling unit tests with debugging off.");
+static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
 int main(int argc, char **argv)
 {
@@ -115,8 +116,6 @@ namespace env
 //
 // ANSI escape sequence
 //
-
-#include <sstream>
 
 namespace io
 {

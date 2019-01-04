@@ -1,4 +1,3 @@
-[NMAKE]
 CFLAGS = /std:c++17 /permissive- /EHsc
 OUT = /Fe
 EXE = .exe

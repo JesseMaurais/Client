@@ -11,9 +11,8 @@ namespace ini
 	using entry = std::map<std::string, std::string>;
 	using group = std::map<std::string, entry>;
 
-	static std::istream& getline(std::istream& in, std::string& s)
+	static std::istream& getline(std::istream& in, std::string& s, char const c = '#')
 	{
-		constexpr auto c = '#';
 		while (std::getline(in, s))
 		{
 			auto const it = fmt::skip(s.begin(), s.end());

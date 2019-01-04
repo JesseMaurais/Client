@@ -23,6 +23,7 @@ namespace sys
 #endif
 
 #if __has_include(<windows.h>)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
@@ -33,7 +34,7 @@ namespace sys
 namespace sys
 {
 	#if defined(__WIN32__)
-	DWORD winerr(char const *prefix)
+	unsigned long winerr(char const *prefix)
 	{
 		LPSTR data = nullptr;
 		LPSTR addr = reinterpret_cast<LPSTR>(&data);
@@ -61,7 +62,7 @@ namespace sys
 
 	pid_t pexec(int fd[3], char **argv)
 	{
-		#if defined(__WIN32__) || defined(__CYGWIN__)
+		#if defined(__WIN32__)
 		{
 			struct Handle
 			{
