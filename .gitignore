@@ -1,5 +1,5 @@
-a.out
+sys.ini
+test
 *.exe
 *.o
 *.obj
-sys.ini

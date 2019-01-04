@@ -37,36 +37,40 @@ namespace debug
 
 	int run(int argc, char **argv)
 	{
+		using namespace io;
+		auto& out = std::cout;
+		constexpr auto eol = '\n';
+
 		map const& tests = registry();
+		out << intense << tests.size() << " tests to run..." << intense_off << eol;
 
-		std::cout << io::intense << tests.size() << " tests to run..." << io::intense_off << '\n';
-
-		int errors = 0;
-
+		unsigned int errors = 0;
 		for (auto const& [that, name] : tests) try
 		{
 			auto const indent = max_length - name.length();
-			std::cout << io::faint << name << io::intense_off << std::string(indent, ' ');
+			out << faint << name << intense_off << std::string(indent, ' ');
 			that->run();
-			std::cout << io::fg_green << "\tok" << io::fg_off << '\n';
+			out << fg_green << "\tok" << fg_off << eol;
 		}
 		catch (std::exception const& except)
 		{
 			++errors;
-			std::cout << io::fg_red << "\tthrown: " << except.what() << io::fg_off << '\n';
+			out << fg_red << "\tthrown: " << except.what() << fg_off << eol;
 		}
 		catch (char const* message)
 		{
 			++errors;
-			std::cout << io::fg_red << '\t' << message << io::fg_off << '\n';
+			out << fg_red << '\t' << message << fg_off << eol;
 		}
 		catch (...)
 		{
-			std::cerr << io::fg_red << "\tUnknown exception" << io::fg_off << '\n';
+			out << fg_red << "\tUnknown exception" << fg_off << eol;
 		}
 
-		auto fg = errors ? io::fg_yellow : io::fg_blue;
-		std::cout << fg << errors << " errors detected.\n" << io::reset << std::endl;
+		auto fg = errors ? fg_yellow : fg_blue;
+		out << fg << errors << " errors detected." << fg_off << eol;
+
+		out << reset << eol;
 		return errors;
 	}
 }
