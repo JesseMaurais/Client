@@ -209,9 +209,12 @@ namespace
 						nullptr,
 						&pwstring
 					);
-					static auto s = fmt::to_string(pwstring);
-					CoTaskMemFree(pwstring);
-					u = s;
+					if (S_OK == ok)
+					{
+						static auto s = fmt::to_string(pwstring);
+						CoTaskMemFree(pwstring);
+						u = s;
+					}
 				}
 			}
 			#endif
