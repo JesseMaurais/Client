@@ -1,6 +1,6 @@
 
 !ifdef STD
-	CFLAGS = $(CFLAGS) /std:$(STD)
+CFLAGS = $(CFLAGS) /std:$(STD)
 !endif
 
 CFLAGS = $(CFLAGS) /permissive- /EHsc
