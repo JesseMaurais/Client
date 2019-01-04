@@ -1,6 +1,6 @@
 
 ifdef STD
-	CFLAGS += -std=$(STD)
+	override CFLAGS += -std=$(STD)
 endif
 
 OUT = -o 
