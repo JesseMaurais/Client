@@ -12,8 +12,8 @@ namespace fmt
 	{
 		struct iterator
 		{
-			iterator(std::string_view u = "")
-			: view(u), size(0), wide(WEOF)
+			iterator(fmt::string_view u = "")
+			: view(u), size(0), wide(L'\0')
 			{
 				std::memset(&state, 0, sizeof state);
 				convert();
@@ -48,13 +48,13 @@ namespace fmt
 				size = std::mbrtowc(&wide, view.data(), view.size(), &state); 
 			}
 
-			std::string_view view;
+			fmt::string_view view;
 			std::mbstate_t state;
 			std::ptrdiff_t size;
 			wchar_t wide;
 		};
 
-		widen(std::string_view u)
+		widen(fmt::string_view u)
 		: view(u)
 		{ }
 
@@ -70,7 +70,7 @@ namespace fmt
 
 	private:
 
-		std::string_view view;
+		fmt::string_view view;
 	};
 }
 

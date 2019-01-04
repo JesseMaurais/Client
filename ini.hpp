@@ -29,7 +29,7 @@ namespace ini
 		return in;
 	}
 
-	inline bool header(std::string_view u)
+	inline bool header(fmt::string_view u)
 	{
 		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}

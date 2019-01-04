@@ -52,7 +52,7 @@ namespace sys
 		);
 		if (data)
 		{
-			std::string_view msg(data, size);
+			fmt::string_view msg(data, size);
 			std::cerr << prefix << ": " << msg << std::endl;
 			LocalFree(data);
 		}

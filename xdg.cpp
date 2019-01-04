@@ -8,9 +8,9 @@ namespace
 {
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
-			std::string_view u = sys::env::get("XDG_CURRENT_DESKTOP");
+			fmt::string_view u = sys::env::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
 			{
 				u = env::desktop;
@@ -22,9 +22,9 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
-			std::string_view u = sys::env::get("XDG_MENU_PREFIX");
+			fmt::string_view u = sys::env::get("XDG_MENU_PREFIX");
 			if (empty(u))
 			{
 				static auto prefix = fmt::to_lower(xdg::current_desktop) + '-';
@@ -37,7 +37,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			return sys::env::get("XDG_RUNTIME_DIR");
 		}
@@ -46,12 +46,12 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
-			std::string_view u = sys::env::get("XDG_DATA_HOME");
+			fmt::string_view u = sys::env::get("XDG_DATA_HOME");
 			if (empty(u))
 			{
-				static std::string s;
+				static fmt::string s;
 				if (empty(s))
 				{
 					fmt::span_view const p { env::home, ".local", "share" };
@@ -66,12 +66,12 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
-			std::string_view u = sys::env::get("XDG_CONFIG_HOME");
+			fmt::string_view u = sys::env::get("XDG_CONFIG_HOME");
 			if (empty(u))
 			{
-				static std::string s;
+				static fmt::string s;
 				if (empty(s))
 				{
 					fmt::span_view const p { env::home, ".config" };
@@ -86,12 +86,12 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
-			std::string_view u = sys::env::get("XDG_CACHE_HOME");
+			fmt::string_view u = sys::env::get("XDG_CACHE_HOME");
 			if (empty(u))
 			{
-				static std::string s;
+				static fmt::string s;
 				if (empty(s))
 				{
 					fmt::span_view const p { env::home, ".cache" };
@@ -106,9 +106,9 @@ namespace
 
 	struct : env::list
 	{
-		operator std::vector<std::string_view>() const final
+		operator fmt::span_view() const final
 		{
-			std::string_view u = sys::env::get("XDG_DATA_DIRS");
+			fmt::string_view u = sys::env::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
 				if constexpr (sys::POSIX)
@@ -128,9 +128,9 @@ namespace
 
 	struct : env::list
 	{
-		operator std::vector<std::string_view>() const final
+		operator fmt::span_view() const final
 		{
-			std::string_view u = sys::env::get("XDG_CONFIG_DIRS");
+			fmt::string_view u = sys::env::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
 				if constexpr (sys::POSIX)
@@ -140,7 +140,7 @@ namespace
 				else
 				if constexpr (sys::WIN32)
 				{
-					static std::string s;
+					static fmt::string s;
 					if (empty(s))
 					{
 						u = sys::env::get("APPDATA");
@@ -161,9 +161,9 @@ namespace
 
 	struct user_dir : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
-			std::string_view u = sys::env::get(var);
+			fmt::string_view u = sys::env::get(var);
 			if (empty(u))
 			{
 				u = cached();
@@ -180,7 +180,7 @@ namespace
 
 		char const *var, *val;
 
-		std::string_view cached() const
+		fmt::string_view cached() const
 		{
 			static ini::entry data;
 			if (empty(data))
@@ -188,7 +188,7 @@ namespace
 				fmt::span_view const p { xdg::config_home, "user-dirs.dirs" };
 				auto const path = fmt::join(p, sys::sep::dir);
 				std::ifstream in(path);
-				std::string s;
+				fmt::string s;
 				while (ini::getline(in, s))
 				{
 					fmt::pair p = fmt::key_value(s);
@@ -196,12 +196,12 @@ namespace
 					data.emplace(p);
 				}
 			}
-			std::string const name(var);
+			fmt::string const name(var);
 			auto it = data.find(name);
 			if (data.end() == it)
 			{
 				fmt::span_view const p { env::home, val };
-				std::string const dir = fmt::join(p, sys::sep::dir);
+				fmt::string const dir = fmt::join(p, sys::sep::dir);
 				it = data.emplace(name, dir).first;
 			}
 			return it->second;

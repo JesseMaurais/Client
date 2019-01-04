@@ -7,31 +7,31 @@
 
 namespace sys::env
 {
-	std::string_view get(std::string_view u)
+	fmt::string_view get(fmt::string_view u)
 	{
 		assert(fmt::terminated(u));
 		auto const p = u.data();
 		return std::getenv(p);
 	}
 
-	bool put(std::string_view u)
+	bool put(fmt::string_view u)
 	{
 		assert(fmt::terminated(u));
 		auto p = const_cast<char*>(u.data());
 		return 0 != sys::putenv(p);
 	}
 
-	bool set(std::string_view u, std::string_view v)
+	bool set(fmt::string_view u, fmt::string_view v)
 	{
 		auto const s = fmt::key_value(u, v);
 		return put(s);
 	}
 
-	std::string eval(std::string u)
+	fmt::string eval(fmt::string u)
 	{
 		static std::regex x { sys::esc::sh::regex };
 		std::smatch m;
-		std::string s;
+		fmt::string s;
 		while (std::regex_search(u, m, x))
 		{
 			s += m.prefix();
@@ -49,9 +49,9 @@ namespace
 {
 	struct : env::list
 	{
-		operator std::vector<std::string_view>() const final
+		operator std::vector<fmt::string_view>() const final
 		{
-			std::string_view u = sys::env::get("PATH");
+			fmt::string_view u = sys::env::get("PATH");
 			return fmt::split(u, sys::sep::path);
 		}
 
@@ -59,7 +59,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -76,7 +76,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -93,7 +93,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -110,7 +110,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			for (auto var : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
@@ -127,7 +127,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			for (auto var : { "TMPDIR", "TEMP", "TMP" })
 			{
@@ -144,7 +144,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -161,7 +161,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{
@@ -178,7 +178,7 @@ namespace
 
 	struct : env::view
 	{
-		operator std::string_view() const final
+		operator fmt::string_view() const final
 		{
 			if constexpr (sys::POSIX)
 			{

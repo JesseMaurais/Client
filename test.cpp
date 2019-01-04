@@ -86,7 +86,7 @@ namespace env
 {
 	TEST(env_variables,
 	{
-		auto print = [](std::string_view u, std::string_view v) -> std::string
+		auto print = [](fmt::string_view u, fmt::string_view v) -> std::string
 		{
 			return empty(v) ? to_string(u) : fmt::key_value(u, v);
 		};

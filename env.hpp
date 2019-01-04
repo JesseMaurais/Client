@@ -2,26 +2,25 @@
 #define env_hpp
 
 #include "str.hpp"
-#include <vector>
 
 namespace sys::env
 {
-	std::string_view get(std::string_view u);
-	bool put(std::string_view u);
-	bool set(std::string_view u, std::string_view v);
-	std::string eval(std::string s);
+	fmt::string_view get(fmt::string_view u);
+	bool put(fmt::string_view u);
+	bool set(fmt::string_view u, fmt::string_view v);
+	fmt::string eval(fmt::string s);
 }
 
 namespace env
 {
 	struct view
 	{
-		virtual operator std::string_view() const = 0;
+		virtual operator fmt::string_view() const = 0;
 	};
 
 	struct list
 	{
-		virtual operator std::vector<std::string_view>() const = 0;
+		virtual operator fmt::span_view() const = 0;
 	};
 
 	extern list const& path;

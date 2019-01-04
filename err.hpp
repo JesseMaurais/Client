@@ -9,7 +9,7 @@
 namespace sys
 {
 	template <typename... Args>
-	void ferror(std::string_view format, Args... args)
+	void ferror(fmt::string_view format, Args... args)
 	{
 		auto const s = (fmt::format(format) % ... % args);
 		std::perror(s.c_str());

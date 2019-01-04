@@ -75,7 +75,7 @@ constexpr long POSIX2_VERSION =
 	0L
 #endif
 	;
-
+/*
 constexpr long POSIX2_C_VERSION =
 #if defined(_POSIX2_C_VERSION)
 	_POSIX2_C_VERSION
@@ -83,7 +83,7 @@ constexpr long POSIX2_C_VERSION =
 	0L
 #endif
 	;
-
+*/
 // Single UNIX Specification
 
 constexpr long XOPEN_VERSION =
@@ -181,7 +181,6 @@ namespace sys
 	constexpr auto execv = ::execv;
 	constexpr auto execve = ::execve;
 	constexpr auto execvp = ::execvp;
-	constexpr auto execvpe = ::execvpe;
 	constexpr auto execl = ::execl;
 	constexpr auto execle = ::execle;
 	constexpr auto execlp = ::execlp;
@@ -265,7 +264,6 @@ namespace sys
 	constexpr auto execv = ::_execv;
 	constexpr auto execve = ::_execve;
 	constexpr auto execvp = ::_execvp;
-	constexpr auto execvpe = ::_execvpe;
 	constexpr auto fdopen = ::_fdopen;
 	constexpr auto fileno = ::_fileno;
 	constexpr auto fstat = ::_fstat;
