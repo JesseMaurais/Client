@@ -4,7 +4,10 @@ CFLAGS = $(CFLAGS) /std:$(STD)
 !endif
 
 CFLAGS = $(CFLAGS) /permissive- /EHsc
-OUT = /Fe
+
+DEP = $**
+OUT = /Fe$@
 EXE = .exe
 OBJ = .obj
+
 RM = del /f

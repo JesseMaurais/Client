@@ -303,6 +303,8 @@ namespace sys
 
 namespace sys
 {
+	template <typename T> constexpr bool fail(T const t) { return -1 == t; }
+
 	extern char **environment;
 	pid_t pexec(int fd[3], char **argv);
 	void terminate(pid_t);

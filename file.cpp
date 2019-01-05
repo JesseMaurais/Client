@@ -1,6 +1,6 @@
 #include "file.hpp"
 #include "sys.hpp"
-#include "os.hpp"
+#include "net.hpp"
 #include "err.hpp"
 
 namespace
@@ -118,6 +118,84 @@ namespace sys::file
 			if (file[n]) file[n].close();
 		}
 		pid = -1;
+	}
+
+	socket::socket()
+	{
+		s = sys::socket::invalid;
+	}
+
+	socket::socket(std::intptr_t s)
+	{
+		this->s = s;
+	}
+
+	socket::socket(int family, int type, int proto)
+	{
+		s = sys::socket::socket(family, type, proto);
+		if (sys::socket::fail(s))
+		{
+			sys::perror("socket");
+		}
+	}
+
+	socket::~socket()
+	{
+		if (not sys::socket::fail(s) and sys::socket::close(s))
+		{
+			sys::perror("closesocket");
+		}
+	}
+
+	socket::operator bool()
+	{
+		return not sys::socket::fail(s);
+	}
+
+	socket socket::accept(address& name, size_t* size)
+	{
+		sys::socket::size length;
+		socket t = sys::socket::accept(s, &name.address, &length);
+		if (not t)
+		{
+			sys::perror("accept");
+		}
+		else 
+		if (size)
+		{
+			*size = length;
+		}
+		return t;
+	}
+
+	bool socket::connect(address const& name, size_t size)
+	{
+		if (not sys::socket::fail(s) and sys::socket::connect(s, &name.address, size))
+		{
+			sys::socket::perror("connect");
+			return false;
+		}
+		return true;
+	}
+
+	bool socket::bind(address const& name, size_t size)
+	{
+		if (not sys::socket::fail(s) and sys::socket::bind(s, &name.address, size))
+		{
+			sys::socket::perror("bind");
+			return false;
+		}
+		return true;
+	}
+
+	bool socket::listen(int backlog)
+	{
+		if (not sys::socket::fail(s) and sys::socket::listen(s, backlog))
+		{
+			sys::socket::perror("listen");
+			return false;
+		}
+		return true;
 	}
 }
 

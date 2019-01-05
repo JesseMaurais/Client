@@ -5,18 +5,13 @@
 #include <string>
 #include <ios>
 
-namespace sys
+namespace sys::socket
 {
-	template <typename I> constexpr bool fail(I const value)
-	{
-		constexpr I invalid = -1;
-		return invalid == value;
-	}
+	union address;
 }
 
 namespace sys::file
 {
-	using sys::fail;
 	using size_t = std::size_t;
 	using ssize_t = std::make_signed<size_t>::type;
 	using openmode = std::ios_base::openmode;
@@ -30,6 +25,12 @@ namespace sys::file
 	constexpr auto out   = std::ios_base::out;
 	constexpr auto trunc = std::ios_base::trunc;
 	constexpr auto ate   = std::ios_base::ate;
+
+	template <typename T> constexpr bool fail(T const value)
+	{
+		constexpr T invalid = -1;
+		return invalid == value;
+	}
 
 	struct descriptor
 	{
@@ -86,7 +87,7 @@ namespace sys::file
 
 	struct pipe
 	{
-		pipe();
+		explicit pipe();
 
 		explicit pipe(int fd[2])
 		{
@@ -182,6 +183,32 @@ namespace sys::file
 
 		descriptor file[3];
 		std::intptr_t pid;
+	};
+
+	struct socket
+	{
+		using address = sys::socket::address;
+
+		socket();
+		socket(int family, int type, int proto);
+		~socket();
+
+		operator bool();
+		socket accept(address& name, size_t *length = nullptr);
+		bool connect(address const& name, size_t length);
+		bool bind(address const& name, size_t length);
+		bool listen(int backlog);
+
+		ssize_t send(char const *data, size_t size, int flags);
+		ssize_t send(char const *data, size_t size, int flags, address const& name, size_t length);
+
+		ssize_t receive(char *data, size_t size, int flags);
+		ssize_t receive(char *data, size_t size, int flags, address const& name, size_t length);
+
+	private:
+
+		socket(std::intptr_t s);
+		std::intptr_t s;
 	};
 }
 

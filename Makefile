@@ -12,5 +12,5 @@ clean:
 	$(RM) *$(OBJ) $(BIN)
 
 $(BIN): $(SRC)
-	$(CXX) $(CFLAGS) $(OUT)$@ $?
+	$(CXX) $(CFLAGS) $(OUT) $(DEP)
 

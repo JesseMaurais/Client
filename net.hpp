@@ -1,5 +1,5 @@
-#ifndef sock_hpp
-#define sock_hpp
+#ifndef net_hpp
+#define net_hpp
 
 #include "sys.hpp"
 
@@ -9,65 +9,29 @@
 
 #if defined(__POSIX__) || defined(__UNIX__) || defined(__LINUX__)
 
-#if __has_include(<sys/socket.h>)
 #include <sys/socket.h>
-#if __has_include(<sys/select.h>)
 #include <sys/select.h>
-#endif
-#if __has_include(<arpa/inet.h>)
-#include <arpa/inet.h>
-#endif
-#if __has_include(<poll.h>)
+#include <netinet/in.h>
 #include <poll.h>
-#endif
 
-#define SD_RECEIVE SHUT_RD
-#define SD_SEND    SHUT_WR
-#define SD_BOTH    SHUT_RDWR
-#define SOCKET_ERRNO std::errno
-using SOCKOPTPTR = void*;
-using SOCKET = int;
-constexpr SOCKET INVALID_SOCKET = -1;
-constexpr int SOCKET_ERROR = -1;
-constexpr auto closesocket = sys::close;
-
-//
-// WIN32
-//
-
-#elif defined(__WIN32__) || defined(__OS2__)
-
-#include <winsock2.h>
-
-#define SHUT_RD   SD_RECEIVE
-#define SHUT_WR   SD_SEND
-#define SHUT_RDWR SD_BOTH
-#define SOCKET_ERRNO WSAGetLastError()
-using SOCKOPTPTR = char*;
-using socklen_t = int;
-constexpr auto poll = ::WSAPoll;
-
-#else
-#error Cannot find system socket header
-#endif
-
-//
-// Common
-//
-
-namespace sys::net
+namespace sys::socket
 {
-	inline bool issocket(SOCKET s) { return INVALID_SOCKET != s; };
+	typedef void *pointer;
+	typedef int descriptor;
+	typedef ::socklen_t size;
 
-	using sockaddr = ::sockaddr;
-	using pollfd = ::pollfd;
+	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
 
+	constexpr descriptor invalid = -1;
+	constexpr bool fail(descriptor fd) { return invalid == fd; }
+	inline auto perror(char const *prefix) { return std::perror(prefix); }
+
+	constexpr auto close = ::sys::close;
 	constexpr auto accept = ::accept;
 	constexpr auto bind = ::bind;
-	constexpr auto close = ::closesocket;
 	constexpr auto connect = ::connect;
 	constexpr auto getsockname = ::getsockname;
-	constexpr auto getsockpt = ::getsockopt;
+	constexpr auto getsockopt = ::getsockopt;
 	constexpr auto listen = ::listen;
 	constexpr auto poll = ::poll;
 	constexpr auto select = ::select;
@@ -78,10 +42,72 @@ namespace sys::net
 	constexpr auto sendto = ::sendto;
 	constexpr auto recv = ::recv;
 	constexpr auto recvfrom = ::recvfrom;
-	constexpr auto htonl = ::htonl;
-	constexpr auto ntohl = ::ntohl;
-	constexpr auto htons = ::htons;
-	constexpr auto ntohs = ::ntohs;
+
+} // sys::socket
+
+//
+// WIN32
+//
+
+#elif defined(__WIN32__) || defined(__OS2__)
+
+#include <winsock2.h>
+
+#define FD_ISSET(s, set) _WSAFDIsSet(s, set)
+
+namespace sys::socket
+{
+	typedef char *pointer;
+	typedef ::SOCKET descriptor;
+	typedef int size;
+
+	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
+
+	union address
+	{
+		struct ::sockaddr address;
+	};
+
+	constexpr descriptor invalid = ::INVALID_SOCKET;
+	constexpr bool fail(descriptor h) { return invalid == h; }	
+	inline auto perror(char const *prefix) { return sys::winerr(prefix); }	
+
+	constexpr auto close = ::closesocket;
+	constexpr auto accept = ::accept;
+	constexpr auto bind = ::bind;
+	constexpr auto connect = ::connect;
+	constexpr auto getsockname = ::getsockname;
+	constexpr auto getsockopt = ::getsockopt;
+	constexpr auto listen = ::listen;
+	constexpr auto poll = ::WSAPoll;
+	constexpr auto select = ::select;
+	constexpr auto setsockopt = ::setsockopt;
+	constexpr auto shutdown = ::shutdown;
+	constexpr auto socket = ::socket;
+	constexpr auto send = ::send;
+	constexpr auto sendto = ::sendto;
+	constexpr auto recv = ::recv;
+	constexpr auto recvfrom = ::recvfrom;
+
+} // sys::socket
+
+#else
+#error Cannot find system socket header
+#endif
+
+//
+// Common
+//
+
+static_assert(sys::socket::fail(sys::socket::invalid));
+
+namespace sys::socket
+{
+	union address
+	{
+		struct ::sockaddr address;
+		struct ::sockaddr_in in;
+	};
 }
 
 #endif // file
