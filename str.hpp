@@ -18,7 +18,7 @@ namespace fmt
 	template <typename... Args> using basic_string_view = std::experimental::basic_string_view<Args...>;
 }
 #else
-#error You do not have a string view implementation.
+#error Cannot find an implementation of std::string_view.
 #endif
 
 #include <utility>

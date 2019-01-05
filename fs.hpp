@@ -1,12 +1,8 @@
 #ifndef fs_hpp
 #define fs_hpp
 
-// Try to find an file system library, either standard, experimental or boost
-
 #if __has_include(<filesystem>)
-
 #include <filesystem>
-
 namespace sys::file
 {
 	using namespace std::filesystem;
@@ -16,11 +12,8 @@ namespace sys::file
 		return perms::none != (status(exe).permissions() & perms::group_exec);
 	}
 }
-
 #elif __has_include(<experimental/filesystem>)
-
 #include <experimental/filesystem>
-
 namespace sys::file
 {
 	using namespace std::experimental::filesystem;
@@ -30,16 +23,8 @@ namespace sys::file
 		return perms::none != (status(exe).permissions() & perms::group_exec);
 	}
 }
-
-#else
-
-#if ! __has_include(<boost/filesystem.hpp>)
-// Do over boost rather than in else so Eclipse does not show spurious errors
-#error "Could not find file system library."
-#endif // boost
-
+#elif __has_include(<boost/filesystem.hpp>)
 #include <boost/filesystem.hpp>
-
 namespace sys::file
 {
 	using namespace boost::filesystem;
@@ -49,7 +34,8 @@ namespace sys::file
 		return perms::no_perms != (status(exe).permissions() & perms::group_exe);
 	}
 }
-
+#else
+#error Cannot find an implementation of std::filesystem.
 #endif // file system
 
 #include <fstream>
