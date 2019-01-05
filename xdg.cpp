@@ -185,36 +185,36 @@ namespace
 			{
 				u = cached();
 			}
-			#if __has_include(<shlobj.h>)
-			if constexpr (sys::win32)
+			#if defined(__WIN32__) && __has_include(<shlobj.h>)
+			if (empty(u))
 			{
-				if (empty(u))
+				std::map<fmt::string_view, KNOWNFOLDERID> map =
 				{
-					std::map<char const*, KNOWNFOLDERID> folders =
-					{
-						{ Desktop, FOLDERID_Desktop },
-						{ Documents, FOLDERID_Documents },
-						{ Downloads, FOLDERID_Downloads },
-						{ Music, FOLDERID_Music },
-						{ Pictures, FOLDERID_Pictures },
-						{ PublicShare, FOLDERID_Public },
-						{ Templates, FOLDERID_Templates },
-						{ Videos, FOLDERID_Videos },
-					};
-					PWSTR pwstring;
-					HRESULT const ok = SHGetKnownFolderPath
-					(
-						folders.at(var),
-						0,
-						nullptr,
-						&pwstring
-					);
-					if (S_OK == ok)
-					{
-						static auto s = fmt::to_string(pwstring);
-						CoTaskMemFree(pwstring);
-						u = s;
-					}
+					{ Desktop, FOLDERID_Desktop },
+					{ Documents, FOLDERID_Documents },
+					{ Downloads, FOLDERID_Downloads },
+					{ Music, FOLDERID_Music },
+					{ Pictures, FOLDERID_Pictures },
+					{ PublicShare, FOLDERID_Public },
+					{ Templates, FOLDERID_Templates },
+					{ Videos, FOLDERID_Videos },
+				};
+				struct scoped
+				{
+					~scoped() { if (p) CoTaskMemFree(p); }
+					PWSTR p = nullptr;
+				} ws;
+				HRESULT const ok = SHGetKnownFolderPath
+				(
+					map.at(var),
+					0,
+					nullptr,
+					&ws.p
+				);
+				if (S_OK == ok)
+				{
+					static auto s = fmt::to_string(ws.p);
+					u = s;
 				}
 			}
 			#endif
