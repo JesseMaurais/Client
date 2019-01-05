@@ -253,14 +253,8 @@ namespace
 				}
 			}
 			fmt::string const name(var);
-			auto it = data.find(name);
-			if (data.end() == it)
-			{
-				fmt::span_view const p { env::home, val };
-				fmt::string const dir = fmt::join(p, sys::sep::dir);
-				it = data.emplace(name, dir).first;
-			}
-			return it->second;
+			auto const it = data.find(name);
+			return data.end() == it ? "" : it->second;
 		}
 	};
 
