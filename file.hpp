@@ -190,7 +190,7 @@ namespace sys::file
 	{
 		using address = sys::socket::address;
 
-		operator bool();
+		operator bool() const;
 		virtual ~socket();
 		socket(int family, int type, int proto);
 		socket accept(address& name, size_t *length = nullptr) const;
@@ -227,7 +227,7 @@ namespace sys::file
 		ssize_t send(const void *data, size_t size, int flags, address const& name, size_t length) const;
 
 		ssize_t receive(void *data, size_t size, int flags) const;
-		ssize_t receive(void *data, size_t size, int flags, address& name, size_t* length) const;
+		ssize_t receive(void *data, size_t size, int flags, address& name, size_t& length) const;
 
 	protected:
 

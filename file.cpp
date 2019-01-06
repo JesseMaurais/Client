@@ -49,9 +49,9 @@ namespace sys::file
 {
 	size_t bufsiz = BUFSIZ;
 
-	void descriptor::open(std::string const& path, openmode mode)
+	void descriptor::open(char const* path, openmode mode)
 	{
-		fd = sys::open(path.c_str(), convert(mode), 0);
+		fd = sys::open(path, convert(mode), 0);
 		if (fail(fd))
 		{
 			sys::perror("open");
@@ -204,8 +204,8 @@ namespace sys::file
 
 	ssize_t socket::send(const void *data, size_t size, int flags) const
 	{
-		auto const p = static_cast<sys::socket::pointer>(data);
-		ssize_t const n = sys::socket::send(p, size, flags);
+		auto p = static_cast<sys::socket::const_pointer>(data);
+		ssize_t const n = sys::socket::send(s, p, size, flags);
 		if (n < 0)
 		{
 			sys::socket::perror("send");
@@ -215,8 +215,8 @@ namespace sys::file
 
 	ssize_t socket::send(const void *data, size_t size, int flags, address const& name, size_t length) const
 	{
-		auto const p = static_cast<sys::socket::pointer>(data);
-		ssize_t const n = sys::socket::sendto(p, size, flags, &name.address, sz);
+		auto p = static_cast<sys::socket::const_pointer>(data);
+		ssize_t const n = sys::socket::sendto(s, p, size, flags, &name.address, length);
 		if (n < 0)
 		{
 			sys::socket::perror("sendto");
@@ -226,8 +226,8 @@ namespace sys::file
 
 	ssize_t socket::receive(void *data, size_t size, int flags) const
 	{
-		auto const p = static_cast<sys::socket::pointer>(data);
-		ssize_t const n = sys::socket::recv(p, size, flags);
+		auto p = static_cast<sys::socket::pointer>(data);
+		ssize_t const n = sys::socket::recv(s, p, size, flags);
 		if (n < 0)
 		{
 			sys::socket::perror("recv");
@@ -238,8 +238,8 @@ namespace sys::file
 	ssize_t socket::receive(void *data, size_t size, int flags, address& name, size_t& length) const
 	{
 		sys::socket::size m = length;
-		auto const p = static_cast<sys::socket::pointer>(data);
-		ssize_t const n = sys::socket::recvfrom(p, size, flags, &name.address, m);
+		auto p = static_cast<sys::socket::pointer>(data);
+		ssize_t const n = sys::socket::recvfrom(s, p, size, flags, &name.address, &m);
 		if (n < 0)
 		{
 			sys::socket::perror("recvfrom");

@@ -11,13 +11,13 @@
 
 #include <sys/socket.h>
 #include <sys/select.h>
-#include <netinet/in.h>
 #include <sys/un.h>
 #include <poll.h>
 
 namespace sys::socket
 {
 	typedef void *pointer;
+	typedef void const *const_pointer;
 	typedef int descriptor;
 	typedef ::socklen_t size;
 	typedef ::pollfd pollfd;
@@ -59,6 +59,7 @@ namespace sys::socket
 namespace sys::socket
 {
 	typedef char *pointer;
+	typedef char const *pointer;
 	typedef ::SOCKET descriptor;
 	typedef int size;
 	typedef ::WSAPOLLFD pollfd;
@@ -123,7 +124,6 @@ namespace sys::socket
 	union address
 	{
 		struct ::sockaddr address;
-		struct ::sockaddr_in in;
 		struct ::sockaddr_un un;
 	};
 }
