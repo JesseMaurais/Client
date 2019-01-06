@@ -122,11 +122,6 @@ namespace sys::file
 		}
 	}
 
-	socket::socket()
-	{
-		s = sys::socket::invalid;
-	}
-
 	socket::socket(std::intptr_t s)
 	{
 		this->s = s;
@@ -208,13 +203,13 @@ namespace sig
 
 	int socket::poll(int timeout)
 	{
-		int const count = sys::socket::poll(fds.data(), fds.size(), timeout);
-		if (sys::socket::fail(count))
+		int const n = sys::socket::poll(fds.data(), fds.size(), timeout);
+		if (n < 0)
 		{
 			sys::socket::perror("poll");
 		}
 		else
-		for (int i = 0, j = 0; j < count; ++i)
+		for (int i = 0, j = 0; j < n; ++i)
 		{
 			assert(fds.size() > i);
 			auto const& p = fds[i];
@@ -230,7 +225,7 @@ namespace sig
 				});
 			}
 		}
-		return count;
+		return n;
 	}
 
 	socket::socket(int family, int type, int proto, int events)

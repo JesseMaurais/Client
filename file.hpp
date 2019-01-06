@@ -189,11 +189,9 @@ namespace sys::file
 	{
 		using address = sys::socket::address;
 
-		socket();
-		socket(int family, int type, int proto);
-		virtual ~socket();
-
 		operator bool();
+		virtual ~socket();
+		socket(int family, int type, int proto);
 		socket accept(address& name, size_t *length = nullptr);
 		bool connect(address const& name, size_t length);
 		bool bind(address const& name, size_t length);
