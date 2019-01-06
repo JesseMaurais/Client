@@ -26,7 +26,7 @@ namespace sys::socket
 
 	constexpr descriptor invalid = -1;
 	constexpr bool fail(descriptor fd) { return invalid == fd; }
-	inline auto perror(char const *prefix) { return std::perror(prefix); }
+	inline void perror(char const *prefix) { std::perror(prefix); }
 
 	constexpr auto close = ::sys::close;
 	constexpr auto accept = ::accept;
@@ -69,7 +69,7 @@ namespace sys::socket
 	constexpr descriptor invalid = ::INVALID_SOCKET;
 	constexpr bool fail(descriptor h) { return invalid == h; }
 	constexpr bool fail(int result) { return ::SOCKET_ERROR == result; }
-	inline auto perror(char const *prefix) { return sys::winerr(prefix); }	
+	inline void perror(char const *prefix) { sys::winerr(prefix); }	
 
 	constexpr auto close = ::closesocket;
 	constexpr auto accept = ::accept;
