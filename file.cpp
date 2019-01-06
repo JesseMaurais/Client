@@ -144,30 +144,30 @@ namespace sys::file
 		}
 	}
 
-	socket::operator bool()
+	socket::operator bool() const
 	{
 		return not sys::socket::fail(s);
 	}
 
-	socket socket::accept(address& name, size_t* size)
+	socket socket::accept(address& name, size_t* length) const
 	{
-		sys::socket::size length;
-		socket t = sys::socket::accept(s, &name.address, &length);
+		sys::socket::size m;
+		socket t = sys::socket::accept(s, &name.address, &m);
 		if (not t)
 		{
 			sys::perror("accept");
 		}
 		else 
-		if (size)
+		if (length)
 		{
-			*size = length;
+			*length = m;
 		}
 		return t;
 	}
 
-	bool socket::connect(address const& name, size_t size)
+	bool socket::connect(address const& name, size_t length) const
 	{
-		if (not sys::socket::fail(s) and sys::socket::connect(s, &name.address, size))
+		if (sys::socket::connect(s, &name.address, length))
 		{
 			sys::socket::perror("connect");
 			return false;
@@ -175,9 +175,9 @@ namespace sys::file
 		return true;
 	}
 
-	bool socket::bind(address const& name, size_t size)
+	bool socket::bind(address const& name, size_t length) const
 	{
-		if (not sys::socket::fail(s) and sys::socket::bind(s, &name.address, size))
+		if (sys::socket::bind(s, &name.address, length))
 		{
 			sys::socket::perror("bind");
 			return false;
@@ -185,14 +185,60 @@ namespace sys::file
 		return true;
 	}
 
-	bool socket::listen(int backlog)
+	bool socket::listen(int backlog) const
 	{
-		if (not sys::socket::fail(s) and sys::socket::listen(s, backlog))
+		if (sys::socket::listen(s, backlog))
 		{
 			sys::socket::perror("listen");
 			return false;
 		}
 		return true;
+	}
+
+	ssize_t socket::send(const void *data, size_t size, int flags) const
+	{
+		auto const p = static_cast<sys::socket::pointer>(data);
+		ssize_t const n = sys::socket::send(p, size, flags);
+		if (n < 0)
+		{
+			sys::socket::perror("send");
+		}
+		return n;
+	}
+
+	ssize_t socket::send(const void *data, size_t size, int flags, address const& name, size_t length) const
+	{
+		auto const p = static_cast<sys::socket::pointer>(data);
+		ssize_t const n = sys::socket::sendto(p, size, flags, &name.address, sz);
+		if (n < 0)
+		{
+			sys::socket::perror("sendto");
+		}
+		return n;
+	}
+
+	ssize_t socket::receive(void *data, size_t size, int flags) const
+	{
+		auto const p = static_cast<sys::socket::pointer>(data);
+		ssize_t const n = sys::socket::recv(p, size, flags);
+		if (n < 0)
+		{
+			sys::socket::perror("recv");
+		}
+		return n;
+	}
+
+	ssize_t socket::receive(void *data, size_t size, int flags, address& name, size_t& length) const
+	{
+		sys::socket::size m = length;
+		auto const p = static_cast<sys::socket::pointer>(data);
+		ssize_t const n = sys::socket::recvfrom(p, size, flags, &name.address, m);
+		if (n < 0)
+		{
+			sys::socket::perror("recvfrom");
+		}
+		else length = m;
+		return n;
 	}
 }
 
@@ -216,13 +262,18 @@ namespace sig
 
 			if (p.revents)
 			{
-				++j;
-
 				set.send(p.fd, [&p](auto& it)
 				{
 					assert(p.fd == it.first);
 					it.second(p.revents);
 				});
+
+				if (j < i)
+				{
+					std::swap(fds[i], fds[j]);
+				}
+
+				++j;
 			}
 		}
 		return n;

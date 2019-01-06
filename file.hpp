@@ -1,8 +1,8 @@
 #ifndef file_hpp
 #define file_hpp
 
-#include <utility>
-#include <string>
+#include <initializer_list>
+#include <cstdint>
 #include <ios>
 
 namespace sys::socket
@@ -13,10 +13,10 @@ namespace sys::socket
 namespace sys::file
 {
 	using size_t = std::size_t;
-	using ssize_t = std::make_signed<size_t>::type;
+	using ssize_t = std::ptrdiff_t;
 	using openmode = std::ios_base::openmode;
-	using arguments = std::initializer_list<char const *>;
-		
+	using arguments = std::initializer_list<char const*>;
+	
 	extern size_t bufsiz;
 
 	constexpr auto app   = std::ios_base::app;
@@ -46,8 +46,9 @@ namespace sys::file
 
 		int set(int fd = -1)
 		{
-			std::swap(fd, this->fd);
-			return fd;
+			int const tmp = this->fd;
+			this->fd = fd;
+			return tmp;
 		}
 
 		int get() const
@@ -72,7 +73,7 @@ namespace sys::file
 			return read(static_cast<void*>(buffer), size);
 		}
 
-		void open(std::string const& path, openmode mode);
+		void open(char const* path, openmode mode);
 		void close();
 
 	private:
@@ -192,16 +193,41 @@ namespace sys::file
 		operator bool();
 		virtual ~socket();
 		socket(int family, int type, int proto);
-		socket accept(address& name, size_t *length = nullptr);
-		bool connect(address const& name, size_t length);
-		bool bind(address const& name, size_t length);
-		bool listen(int backlog);
+		socket accept(address& name, size_t *length = nullptr) const;
+		bool connect(address const& name, size_t length) const;
+		bool bind(address const& name, size_t length) const;
+		bool listen(int backlog) const;
 
-		ssize_t send(char const *data, size_t size, int flags);
-		ssize_t send(char const *data, size_t size, int flags, address const& name, size_t length);
 
-		ssize_t receive(char *data, size_t size, int flags);
-		ssize_t receive(char *data, size_t size, int flags, address const& name, size_t length);
+		template <typename T>
+		inline ssize_t send(T const* data, size_t size, int flags) const
+		{
+			return send(static_cast<const void*>(data), size, flags);
+		}
+		template <typename T>
+		inline ssize_t send(T const* data, size_t size, int flags, address const& name, size_t length) const
+		{
+			return send(static_cast<const void*>(data), size, flags, name, length);
+		}
+
+		template <typename T>
+		inline ssize_t receive(T* data, size_t size, int flags) const
+		{
+			return receive(static_cast<T*>(data), size, flags);
+		}
+		template <typename T>
+		inline ssize_t receive(T* data, size_t size, int flags, address& name, size_t& length) const
+		{
+			return receive(static_cast<T*>(data), size, flags, name, length);
+		}
+
+	private:
+
+		ssize_t send(const void *data, size_t size, int flags) const;
+		ssize_t send(const void *data, size_t size, int flags, address const& name, size_t length) const;
+
+		ssize_t receive(void *data, size_t size, int flags) const;
+		ssize_t receive(void *data, size_t size, int flags, address& name, size_t* length) const;
 
 	protected:
 
