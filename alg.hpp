@@ -88,6 +88,12 @@ namespace stl
 		to.insert(end(to), begin(from), end(from));
 	}
 
+	template <typename Container, typename Predicate>
+	inline void erase_if(Container&& c, Predicate&& p)
+	{
+		c.erase(std::remove_if(c.begin(), c.end(), p), c.end());
+	}
+
 	// Sorting operations
 	
 	template <typename Container, typename Compare>

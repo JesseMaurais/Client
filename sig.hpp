@@ -16,12 +16,12 @@ namespace sig
 		using container = std::map<Slot, observer>;
 		using count = typename container::size_type;
 
-		void connect(Slot const& id, observer fn)
+		virtual void connect(Slot const& id, observer fn)
 		{
 			slots.emplace(id, fn);
 		}
 
-		count disconnect(Slot const &id)
+		virtual count disconnect(Slot const &id)
 		{
 			return slots.erase(id);
 		}
@@ -63,7 +63,7 @@ namespace sig
 	{
 	public:
 
-		using subject = event<slot*, Args...>;
+		using subject = subject<slot*, Args...>;
 		using signature = typename subject::signature;
 		using observer = typename subject::observer;
 

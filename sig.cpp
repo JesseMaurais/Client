@@ -22,7 +22,7 @@ namespace
 	}
 }
 
-namespace sig::sys
+namespace sys::sig
 {
 	slot::slot(int no, sys::sig::observer fn)
 	: base(&::event(no), fn)

@@ -4,7 +4,6 @@
 #include <utility>
 #include <string>
 #include <ios>
-#include "any.hpp"
 
 namespace sys::socket
 {
@@ -17,7 +16,7 @@ namespace sys::file
 	using ssize_t = std::make_signed<size_t>::type;
 	using openmode = std::ios_base::openmode;
 	using arguments = std::initializer_list<char const *>;
-
+		
 	extern size_t bufsiz;
 
 	constexpr auto app   = std::ios_base::app;
@@ -192,7 +191,7 @@ namespace sys::file
 
 		socket();
 		socket(int family, int type, int proto);
-		~socket();
+		virtual ~socket();
 
 		operator bool();
 		socket accept(address& name, size_t *length = nullptr);
@@ -206,10 +205,22 @@ namespace sys::file
 		ssize_t receive(char *data, size_t size, int flags);
 		ssize_t receive(char *data, size_t size, int flags, address const& name, size_t length);
 
-	private:
+	protected:
 
 		socket(std::intptr_t s);
 		std::intptr_t s;
+	};
+}
+
+namespace sig
+{
+	struct socket : sys::file::socket
+	{	
+		socket(int family, int type, int proto, int events);
+		~socket();
+
+		virtual void notify(int event) = 0;
+		static int poll(int timeout = -1);
 	};
 }
 

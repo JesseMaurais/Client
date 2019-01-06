@@ -1,7 +1,10 @@
 #include "file.hpp"
 #include "sys.hpp"
 #include "net.hpp"
+#include "sig.hpp"
 #include "err.hpp"
+#include "dbg.hpp"
+#include "alg.hpp"
 
 namespace
 {
@@ -112,12 +115,11 @@ namespace sys::file
 
 	void process::terminate()
 	{
-		sys::terminate(pid);
+		pid = sys::terminate(pid);
 		for (int n : { 0, 1, 2 })
 		{
 			if (file[n]) file[n].close();
 		}
-		pid = -1;
 	}
 
 	socket::socket()
@@ -196,6 +198,57 @@ namespace sys::file
 			return false;
 		}
 		return true;
+	}
+}
+
+namespace sig
+{
+	subject<sys::socket::descriptor, int> set;
+	std::vector<sys::socket::pollfd> fds;
+
+	int socket::poll(int timeout)
+	{
+		int const count = sys::socket::poll(fds.data(), fds.size(), timeout);
+		if (sys::socket::fail(count))
+		{
+			sys::socket::perror("poll");
+		}
+		else
+		for (int i = 0, j = 0; j < count; ++i)
+		{
+			assert(fds.size() > i);
+			auto const& p = fds[i];
+
+			if (p.revents)
+			{
+				++j;
+
+				set.send(p.fd, [&p](auto& it)
+				{
+					assert(p.fd == it.first);
+					it.second(p.revents);
+				});
+			}
+		}
+		return count;
+	}
+
+	socket::socket(int family, int type, int proto, int events)
+	: sys::file::socket(family, type, proto)
+	{
+		sys::socket::pollfd p;
+		p.fd = sys::socket::descriptor(sys::file::socket::s);
+		p.events = events;
+
+		set.connect(p.fd, [this](int event) { notify(event); });
+		fds.push_back(p);
+	}
+
+	socket::~socket()
+	{
+		auto const fd = sys::socket::descriptor(sys::file::socket::s);
+		stl::erase_if(fds, [fd](auto const& p) { return p.fd == fd; });
+		verify(1 == set.disconnect(fd));
 	}
 }
 

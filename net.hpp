@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <netinet/in.h>
+#include <sys/un.h>
 #include <poll.h>
 
 namespace sys::socket
@@ -19,6 +20,7 @@ namespace sys::socket
 	typedef void *pointer;
 	typedef int descriptor;
 	typedef ::socklen_t size;
+	typedef ::pollfd pollfd;
 
 	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
 
@@ -60,16 +62,13 @@ namespace sys::socket
 	typedef char *pointer;
 	typedef ::SOCKET descriptor;
 	typedef int size;
+	typedef ::WSAPOLLFD pollfd;
 
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
 
-	union address
-	{
-		struct ::sockaddr address;
-	};
-
 	constexpr descriptor invalid = ::INVALID_SOCKET;
-	constexpr bool fail(descriptor h) { return invalid == h; }	
+	constexpr bool fail(descriptor h) { return invalid == h; }
+	constexpr bool fail(int result) { return ::SOCKET_ERROR == result; }
 	inline auto perror(char const *prefix) { return sys::winerr(prefix); }	
 
 	constexpr auto close = ::closesocket;
@@ -107,6 +106,7 @@ namespace sys::socket
 	{
 		struct ::sockaddr address;
 		struct ::sockaddr_in in;
+		struct ::sockaddr_un un;
 	};
 }
 

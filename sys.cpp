@@ -225,27 +225,32 @@ namespace sys
 			perror("execvp");
 			std::exit(res);
 		}
-		#endif
+		#else
 		return -1;
+		#endif
 	}
 
-	void terminate(pid_t pid)
+	pid_t terminate(pid_t pid)
 	{
 		#if defined(__POSIX__)
 		{
-			if (fail(kill(pid, SIGTERM)))
+			if (not fail(pid) and fail(kill(pid, SIGTERM)))
 			{
 				sys::perror("kill", pid);
 			}
+			return -1;
 		}
 		#elif defined(__WIN32__)
 		{
 			auto const h = reinterpret_cast<HANDLE>(pid);
-			if (not TerminateProcess(h, 0))
+			if (h and not TerminateProcess(h, 0))
 			{
 				sys::winerr("TerminateProcess");
 			}
+			return 0;
 		}
+		#else
+		return -1;
 		#endif
 	}
 }

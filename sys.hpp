@@ -307,7 +307,7 @@ namespace sys
 
 	extern char **environment;
 	pid_t pexec(int fd[3], char **argv);
-	void terminate(pid_t);
+	pid_t terminate(pid_t pid);
 };
 
 #endif // file
