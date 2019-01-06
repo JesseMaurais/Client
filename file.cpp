@@ -209,11 +209,10 @@ namespace sig
 	int socket::poll(int timeout)
 	{
 		int const count = sys::socket::poll(fds.data(), fds.size(), timeout);
-		if (sys::socket::fail(count))
+		if (count < 0)
 		{
 			sys::socket::perror("poll");
 		}
-		else
 		for (int i = 0, j = 0; j < count; ++i)
 		{
 			assert(fds.size() > i);
