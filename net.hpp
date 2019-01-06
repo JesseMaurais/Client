@@ -85,6 +85,30 @@ namespace sys::socket
 	constexpr auto recv = ::recv;
 	constexpr auto recvfrom = ::recvfrom;
 
+	struct wsadata : ::WSADATA
+	{
+		wsadata(WORD version)
+		{
+			error = ::WSAStartup(version, this);
+			if (error)
+			{
+				sys::winerr("WSAStartup");
+			}
+		}
+		~wsadata()
+		{
+			if (not error and ::WSACleanup())
+			{
+				sys::winerr("WSACleanup");
+			}
+		}
+		operator bool() const
+		{
+			return not error;
+		}
+		int error;
+	};
+
 } // sys::socket
 
 #else
