@@ -241,15 +241,15 @@ namespace
 			static ini::entry data;
 			if (empty(data))
 			{
-				fmt::span_view const p { xdg::config_home, "user-dirs.dirs" };
-				auto const path = fmt::join(p, sys::sep::dir);
+				fmt::span_view const dirs { xdg::config_home, "user-dirs.dirs" };
+				auto const path = fmt::join(dirs, sys::sep::dir);
 				std::ifstream in(path);
-				fmt::string s;
-				while (ini::getline(in, s))
+				fmt::string line;
+				while (ini::getline(in, line))
 				{
-					fmt::pair p = fmt::key_value(s);
-					p.second = sys::env::eval(p.second);
-					data.emplace(p);
+					fmt::pair pair = fmt::key_value(line);
+					pair.second = sys::env::eval(pair.second);
+					data.emplace(pair);
 				}
 			}
 			fmt::string const name(var);

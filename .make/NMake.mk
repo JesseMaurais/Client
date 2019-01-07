@@ -3,7 +3,7 @@
 CFLAGS = $(CFLAGS) /std:$(STD)
 !endif
 
-CFLAGS = $(CFLAGS) /permissive- /EHsc
+CFLAGS = $(CFLAGS) /permissive- /EHsc /analyze
 
 DEP = $**
 OUT = /Fe$@

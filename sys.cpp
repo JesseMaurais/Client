@@ -128,6 +128,7 @@ namespace sys
 			}
 
 			char cmd[MAX_PATH];
+			ZeroMemory(cmd, sizeof cmd);
 			for (size_t i = 0, j = 0; argv[i]; ++i, ++j)
 			{
 				int n = std::snprintf(cmd + j, sizeof cmd - j, "%s ", argv[i]);
@@ -169,7 +170,12 @@ namespace sys
 			{
 				winerr("CreateProcess");
 				_set_errno(ECHILD);
-				return -1;
+				return 0;
+			}
+
+			if (CloseHandle(pi.hThread))
+			{
+				winerr("CloseHandle(hThread)");
 			}
 
 			for (int n : { 0, 1, 2 })
