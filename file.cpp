@@ -262,7 +262,7 @@ namespace sig
 			sys::socket::perror("poll");
 		}
 		else
-		for (int i = 0, j = 0; j < n; ++i)
+		for (unsigned i = 0, j = 0, k = n; j < k; ++i)
 		{
 			assert(fds.size() > i);
 			auto const& p = fds[i];
@@ -293,7 +293,7 @@ namespace sig
 		p.fd = sys::socket::descriptor(sys::file::socket::s);
 		p.events = events;
 
-		set.connect(p.fd, [this](int event) { notify(event); });
+		set.connect(p.fd, [this](int events) { notify(events); });
 		fds.push_back(p);
 	}
 
