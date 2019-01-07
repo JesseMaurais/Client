@@ -202,6 +202,16 @@ namespace sys::file
 		return true;
 	}
 
+	bool socket::shutdown(int how) const
+	{
+		if (sys::socket::shutdown(s, how))
+		{
+			sys::socket::perror("shutdown");
+			return false;
+		}
+		return true;
+	}
+
 	ssize_t socket::send(const void *data, size_t size, int flags) const
 	{
 		auto p = static_cast<sys::socket::const_pointer>(data);

@@ -24,7 +24,7 @@ namespace sys::socket
 
 	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
 
-	constexpr bool fail(descriptor fd) { return -1 == fd; }
+	constexpr bool fail(descriptor fd) { return ::sys::fail(fd); }
 	inline void perror(char const *prefix) { std::perror(prefix); }
 
 	constexpr auto close = ::sys::close;
@@ -59,7 +59,7 @@ namespace sys::socket
 namespace sys::socket
 {
 	typedef char *pointer;
-	typedef char const *pointer;
+	typedef char const *const_pointer;
 	typedef ::SOCKET descriptor;
 	typedef int size;
 	typedef ::WSAPOLLFD pollfd;
@@ -67,7 +67,7 @@ namespace sys::socket
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
 
 	constexpr bool fail(descriptor h) { return ::INVALID_SOCKET == h; }
-	inline void perror(char const *prefix) { sys::winerr(prefix); }	
+	inline void perror(char const *prefix) { ::_set_errno(::sys::winerr(prefix); }
 
 	constexpr auto close = ::closesocket;
 	constexpr auto accept = ::accept;

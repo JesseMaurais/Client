@@ -197,6 +197,7 @@ namespace sys::file
 		bool connect(address const& name, size_t length) const;
 		bool bind(address const& name, size_t length) const;
 		bool listen(int backlog) const;
+		bool shutdown(int how) const;
 
 
 		template <typename T>
