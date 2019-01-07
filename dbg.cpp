@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <string>
+#include <regex>
 #include <map>
 
 namespace
@@ -37,6 +38,8 @@ namespace debug
 
 	int run(int argc, char **argv)
 	{
+		std::regex pattern(1 < argc and argv[1] ? argv[1] : "(.*?)");
+
 		using namespace io;
 		auto& out = std::cout;
 		constexpr auto eol = '\n';
@@ -47,10 +50,13 @@ namespace debug
 		unsigned int errors = 0;
 		for (auto const& [that, name] : tests) try
 		{
-			auto const indent = max_length - name.length();
-			out << faint << name << intense_off << std::string(indent, ' ');
-			that->run();
-			out << fg_green << "\tok" << fg_off << eol;
+			if (std::regex_match(name, pattern))
+			{
+				std::string const indent(max_length - name.length(), ' ');
+				out << faint << name << intense_off << indent;
+				that->run();
+				out << fg_green << "\tok" << fg_off << eol;
+			}
 		}
 		catch (std::exception const& except)
 		{
