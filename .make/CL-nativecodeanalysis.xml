@@ -80,4 +80,84 @@
       </SFA>
     </PATH>
   </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+      <FILENAME>winioctl.h</FILENAME>
+      <LINE>4600</LINE>
+      <COLUMN>35</COLUMN>
+    </SFA>
+    <DEFECTCODE>6001</DEFECTCODE>
+    <DESCRIPTION>Using uninitialized memory '*Input'.</DESCRIPTION>
+    <FUNCTION>DeviceDsmAddDataSetRange</FUNCTION>
+    <DECORATED>DeviceDsmAddDataSetRange</DECORATED>
+    <FUNCLINE>4584</FUNCLINE>
+    <PROBABILITY>1</PROBABILITY>
+    <RANK>3</RANK>
+    <CATEGORY>
+      <RULECATEGORY>mspft</RULECATEGORY>
+    </CATEGORY>
+    <PATH>
+      <SFA>
+        <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+        <FILENAME>winioctl.h</FILENAME>
+        <LINE>4584</LINE>
+        <COLUMN>0</COLUMN>
+        <KEYEVENT>
+          <ID>1</ID>
+          <KIND>declaration</KIND>
+          <IMPORTANCE>Essential</IMPORTANCE>
+          <MESSAGE>'*Input' is not initialized</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+      <SFA>
+        <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+        <FILENAME>winioctl.h</FILENAME>
+        <LINE>4591</LINE>
+        <COLUMN>22</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+        <FILENAME>winioctl.h</FILENAME>
+        <LINE>4592</LINE>
+        <COLUMN>22</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+        <FILENAME>winioctl.h</FILENAME>
+        <LINE>4593</LINE>
+        <COLUMN>22</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+        <FILENAME>winioctl.h</FILENAME>
+        <LINE>4594</LINE>
+        <COLUMN>22</COLUMN>
+      </SFA>
+      <SFA>
+        <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+        <FILENAME>winioctl.h</FILENAME>
+        <LINE>4596</LINE>
+        <COLUMN>21</COLUMN>
+        <KEYEVENT>
+          <ID>2</ID>
+          <KIND>branch</KIND>
+          <IMPORTANCE>Full</IMPORTANCE>
+          <MESSAGE>Skip this branch, (assume 'Input-&gt;Flags' is false)</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+      <SFA>
+        <FILEPATH>c:\program files (x86)\windows kits\10\include\10.0.17134.0\um\</FILEPATH>
+        <FILENAME>winioctl.h</FILENAME>
+        <LINE>4600</LINE>
+        <COLUMN>35</COLUMN>
+        <KEYEVENT>
+          <ID>3</ID>
+          <KIND>usage</KIND>
+          <IMPORTANCE>Essential</IMPORTANCE>
+          <MESSAGE>'*Input' is used, but may not have been initialized</MESSAGE>
+        </KEYEVENT>
+      </SFA>
+    </PATH>
+  </DEFECT>
 </DEFECTS>

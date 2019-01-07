@@ -3,7 +3,7 @@
 CFLAGS = $(CFLAGS) /std:$(STD)
 !endif
 
-CFLAGS = $(CFLAGS) /permissive- /EHsc /analyze
+CFLAGS = $(CFLAGS) /permissive- /EHsc /analyze:log .make/CL-nativecodeanalysis.xml
 
 DEP = $**
 OUT = /Fe$@
