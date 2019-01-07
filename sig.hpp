@@ -63,7 +63,7 @@ namespace sig
 	{
 	public:
 
-		using subject = subject<slot*, Args...>;
+		using subject = ::sig::subject<slot*, Args...>;
 		using signature = typename subject::signature;
 		using observer = typename subject::observer;
 
@@ -81,7 +81,7 @@ namespace sig
 
 		subject *that;
 	};
-};
+}
 
 namespace sys::sig
 {
