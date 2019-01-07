@@ -271,7 +271,7 @@ namespace fmt
 		size const uz = u.size(), vz = v.size();
 		for (size i = 0, j = u.find(v); i < uz; j = u.find(v, i))
 		{
-			size const n = std::min(uz, j) - i;
+			size const n = (uz < j ? uz : j) - i;
 			if (n) tok.emplace_back(u.substr(i, n));
 			i += n + vz;
 		}
@@ -285,7 +285,7 @@ namespace fmt
 		size const uz = u.size(), vz = v.size();
 		for (size i = 0, j = u.find(v); i < uz; j = u.find(v, i))
 		{
-			size const n = std::min(uz, j) - i;
+			size const n = (uz < j ? uz : j) - i;
 			ss << u.substr(i, n);
 			if (j < uz) ss << w;
 			i += n + vz;

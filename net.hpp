@@ -11,6 +11,7 @@
 
 #include <sys/socket.h>
 #include <sys/select.h>
+#include <netinet/in.h>
 #include <sys/un.h>
 #include <poll.h>
 
@@ -21,6 +22,14 @@ namespace sys::socket
 	typedef int descriptor;
 	typedef ::socklen_t size;
 	typedef ::pollfd pollfd;
+
+	union address
+	{
+		::sockaddr_storage pad;
+		::sockaddr address;
+		::sockaddr_un un;
+		::sockaddr_in in;
+	};
 
 	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
 
@@ -53,8 +62,9 @@ namespace sys::socket
 #elif defined(__WIN32__) || defined(__OS2__)
 
 #include <winsock2.h>
+#include <afunix.h>
 
-#define FD_ISSET(s, set) _WSAFDIsSet(s, set)
+#pragma comment(lib, "Ws2_32.lib")
 
 namespace sys::socket
 {
@@ -64,10 +74,18 @@ namespace sys::socket
 	typedef int size;
 	typedef ::WSAPOLLFD pollfd;
 
+	union address
+	{
+		::SOCKADDR_STORAGE_LH pad;
+		::SOCKADDR address;
+		::SOCKADDR_IN in;
+		::SOCKADDR_UN un;
+	};
+
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
 
-	constexpr bool fail(descriptor h) { return ::INVALID_SOCKET == h; }
-	inline void perror(char const *prefix) { ::_set_errno(::sys::winerr(prefix); }
+	constexpr bool fail(descriptor h) { return INVALID_SOCKET == h; }
+	inline void perror(char const *prefix) { ::_set_errno(::sys::winerr(prefix)); }
 
 	constexpr auto close = ::closesocket;
 	constexpr auto accept = ::accept;
@@ -114,19 +132,6 @@ namespace sys::socket
 #else
 #error Cannot find system socket header
 #endif
-
-//
-// Common
-//
-
-namespace sys::socket
-{
-	union address
-	{
-		struct ::sockaddr address;
-		struct ::sockaddr_un un;
-	};
-}
 
 #endif // file
 
