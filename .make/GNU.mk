@@ -11,7 +11,7 @@ ifdef STD
 override CFLAGS += -std=$(STD)
 endif
 
-DEP = $^
-OUT = -o $@
-EXE =
-OBJ = .o
+EXEEXT =
+OBJEXT = .o
+
+RM = rm -f

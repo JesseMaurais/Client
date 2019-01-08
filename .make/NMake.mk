@@ -3,11 +3,9 @@
 CFLAGS = $(CFLAGS) /std:$(STD)
 !endif
 
-CFLAGS = $(CFLAGS) /permissive- /EHsc /analyze:log .make/CL-nativecodeanalysis.xml
+CFLAGS = $(CFLAGS) /permissive- /EHsc
 
-DEP = $**
-OUT = /Fe$@
-EXE = .exe
-OBJ = .obj
+EXEEXT = .exe
+OBJEXT = .obj
 
 RM = del /f
