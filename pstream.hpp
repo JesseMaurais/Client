@@ -15,8 +15,7 @@ namespace sys::io
 		 class Char,
 		 template <class> class Traits,
 		 template <class> class Alloc,
-		 template <class, class> class basic_stream,
-		 sys::file::openmode default_mode
+		 template <class, class> class basic_stream
 		>
 		class basic_pstream
 		: public basic_stream<Char, Traits<Char>>
@@ -24,7 +23,6 @@ namespace sys::io
 		{
 			using base = basic_stream<Char, Traits<Char>>;
 			using arguments = sys::file::arguments;
-			using openmode = sys::file::openmode;
 
 		public:
 
@@ -35,18 +33,16 @@ namespace sys::io
 				this->setbufsiz(sz);
 			}
 
-			basic_pstream(arguments args, openmode mode = default_mode)
+			basic_pstream(arguments args)
 			: basic_pstream()
 			{
-				execute(args, mode);
+				execute(args);
 			}
 
-			bool execute(arguments args, openmode mode = default_mode)
+			bool execute(arguments args)
 			{
-				return this->file.execute(args, mode | default_mode);
+				return this->file.execute(args);
 			}
-
-			void close() { this->file[0].close(); }
 		};
 	}
 
@@ -59,8 +55,7 @@ namespace sys::io
 	using basic_pstream = impl::basic_pstream
 	<
 	 Char, Traits, Alloc,
-	 std::basic_iostream,
-	 sys::file::in|sys::file::out
+	 std::basic_iostream
 	>;
 	
 	using pstream = basic_pstream<char>;
@@ -75,8 +70,7 @@ namespace sys::io
 	using basic_ipstream = impl::basic_pstream
 	<
 	 Char, Traits, Alloc,
-	 std::basic_istream,
-	 sys::file::in
+	 std::basic_istream
 	>;
 
 	using ipstream = basic_ipstream<char>;
@@ -91,8 +85,7 @@ namespace sys::io
 	using basic_opstream = impl::basic_pstream
 	<
 	 Char, Traits, Alloc,
-	 std::basic_ostream,
-	 sys::file::out
+	 std::basic_ostream
 	>;
 
 	using opstream = basic_opstream<char>;

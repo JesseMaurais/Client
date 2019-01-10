@@ -1,14 +1,9 @@
 
-CFLAGS = $(CFLAGS) /nologo
-
 !ifdef STD
 CFLAGS = $(CFLAGS) /std:$(STD)
 !endif
 
-CFLAGS = $(CFLAGS) /permissive- /EHsc
+CFLAGS = /nologo $(CFLAGS) /permissive- /EHsc
 COUT = /Fe
-
-EXEEXT = .exe
-OBJEXT = .obj
-
-DEL = del /f
+EXE = .exe
+RM = del /f

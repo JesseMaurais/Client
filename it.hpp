@@ -12,12 +12,7 @@ namespace fmt
 	{
 		struct iterator
 		{
-			iterator(fmt::string_view u = "")
-			: view(u), size(0), wide(L'\0')
-			{
-				std::memset(&state, 0, sizeof state);
-				convert();
-			}
+			friend class widen;
 
 			iterator operator++()
 			{
@@ -41,6 +36,13 @@ namespace fmt
 			}
 
 		private:
+
+			iterator(fmt::string_view u = "")
+			: view(u), size(0), wide(L'\0')
+			{
+				std::memset(&state, 0, sizeof state);
+				convert();
+			}
 
 			void convert()
 			{

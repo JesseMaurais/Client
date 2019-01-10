@@ -251,7 +251,7 @@ namespace fmt
 		return trim_begin(s) != trim_end(s);
 	}
 
-	inline string join(span_view const& tok, string const& del)
+	inline string join(span_view const& tok, string const& del = "")
 	{
 		std::stringstream ss;
 		using size = span_view::size_type;

@@ -2,4 +2,4 @@ sys.ini
 test
 *.exe
 *.o
-*.obj
+*.d

@@ -26,12 +26,12 @@ constexpr bool xopen =
 // Portable Operating System Interface
 
 constexpr bool posix = 
-#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) || defined(_XOPEN_SOURCE)
+#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
 # undef __POSIX__
 # define __POSIX__ 1
 	true
 #else
-	false
+	xopen
 #endif
 	;
 
@@ -211,7 +211,7 @@ namespace sys
 // WIN32
 //
 
-#elif defined(__WIN32__) || defined(__OS2__)
+#elif defined(__WIN32__)
 #include <io.h>
 #include <process.h>
 #include <direct.h>

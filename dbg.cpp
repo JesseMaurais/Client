@@ -3,6 +3,7 @@
 
 #include "dbg.hpp"
 #include "ios.hpp"
+#include <chrono>
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
@@ -12,6 +13,9 @@
 
 namespace
 {
+	//TEST(dumb_assert, ASSERT(false));
+	//TEST(dumb_except, throw std::runtime_error("Holy Cow!"));
+
 	using map = std::map<debug::test*, std::string>;
 	std::string::size_type max_length = 0;
 
@@ -20,9 +24,6 @@ namespace
 		static map instance;
 		return instance;
 	}
-
-	//TEST(dumb_assert, ASSERT(false));
-	//TEST(dumb_except, throw std::runtime_error("Holy Cow!"));
 }
 
 namespace debug

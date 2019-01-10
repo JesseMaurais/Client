@@ -2,20 +2,21 @@ STD = c++17
 
 include .make/Configure.mk
 
-.SUFFIXES: .cpp .hpp .obj
-
 SRC = test.cpp file.cpp env.cpp sys.cpp sig.cpp dbg.cpp xdg.cpp
-OBJ = $(SRC:.cpp=.obj)
-BIN = test$(EXEEXT)
+OBJ = $(SRC:.cpp=.o)
+DEP = $(SRC:.cpp=.d)
+BIN = test$(EXE)
 
 all: $(BIN)
 
 clean:
-	$(DEL) $(OBJ) $(BIN)
+	$(RM) $(BIN) $(OBJ) $(DEP)
 
 $(BIN): $(OBJ) 
 	$(CXX) $(CFLAGS) $(COUT)$(BIN) $(OBJ)
 
-.cpp.obj:
+.cpp.o:
 	$(CXX) $(CFLAGS) $(COUT)$@ -c $<
+
+-include $(DEP)
 

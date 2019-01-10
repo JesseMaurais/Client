@@ -26,7 +26,8 @@ namespace sys::file
 	constexpr auto trunc = std::ios_base::trunc;
 	constexpr auto ate   = std::ios_base::ate;
 
-	template <typename T> constexpr bool fail(T const value)
+	template <typename T>
+	constexpr bool fail(T const value)
 	{
 		constexpr T invalid = -1;
 		return invalid == value;

@@ -6,9 +6,10 @@
 #include "ios.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
+#include "file.hpp"
 #include <fstream>
 #include <sstream>
-
+#include <iostream>
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
 int main(int argc, char **argv)
@@ -78,23 +79,36 @@ namespace fmt
 		ASSERT_EQ(to_upper(HELLO_WORLD), HELLO_UPPER);
 		ASSERT_EQ(to_lower(HELLO_WORLD), HELLO_LOWER);
 	});
-
-} // fmt
+}
 
 //
 // Operating system environment
 //
-/*
+
 namespace env
 {
-	TEST(env_variables,
+	TEST(env_eval,
 	{
-		auto print = [](fmt::string_view u, fmt::string_view v) -> std::string
-		{
-			return empty(v) ? to_string(u) : fmt::key_value(u, v);
-		};
+		std::string const var = fmt::join({sys::esc::sh::first, "PATH", sys::esc::sh::second});
+		std::string const val = fmt::join(path, sys::sep::path);
+		std::cout << sys::env::eval(var) << " = " << val << std::endl;
+		ASSERT_EQ(sys::env::eval(var), val);
+	});
 
-		std::ofstream f { "sys.ini" };
+	static std::string print(fmt::string_view u, fmt::string_view v)
+	{
+		return fmt::empty(v) ? fmt::to_string(u) + '=' : fmt::key_value(u, v);
+	}
+
+	static std::ofstream& outfile()
+	{
+		static std::ofstream f { "sys.ini" };
+		return f;
+	}
+
+	TEST(env_vars,
+	{
+		auto& f = outfile();
 		f << "[Environment Entry]" << std::endl;
 		f << print("HOME", env::home) << std::endl;
 		f << print("USER", env::user) << std::endl;
@@ -104,6 +118,11 @@ namespace env
 		f << print("TMPDIR", env::tmpdir) << std::endl;
 		f << print("DESKTOP", env::desktop) << std::endl;
 		f << print("PROMPT", env::prompt) << std::endl;
+	});
+
+	TEST(env_xdg,
+	{
+		auto& f = outfile();
 		f << "[Freedesktop Entry]" << std::endl;
 		f << print("XDG_CURRENT_DESKTOP", xdg::current_desktop) << std::endl;
 		f << print("XDG_MENU_PREFIX", xdg::menu_prefix) << std::endl;
@@ -111,11 +130,11 @@ namespace env
 		f << print("XDG_DATA_HOME", xdg::data_home) << std::endl;
 		f << print("XDG_CONFIG_HOME", xdg::config_home) << std::endl;
 		f << print("XDG_CACHE_HOME", xdg::cache_home) << std::endl;
-		//f << print("XDG_DATA_DIRS", fmt::join(xdg::data_dirs, sys::sep::path));
-		//f << print("XDG_CONFIG_DIRS", fmt::join(xdg::config_dirs, sys::sep::path));
+		f << print("XDG_DATA_DIRS", fmt::join(xdg::data_dirs, sys::sep::path)) << std::endl;
+		f << print("XDG_CONFIG_DIRS", fmt::join(xdg::config_dirs, sys::sep::path)) << std::endl;
 	});
 }
-*/
+
 //
 // ANSI escape sequence
 //
@@ -138,7 +157,7 @@ namespace io
 		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
 	});
 
-} //sh
+}
 
 //
 // Inter-process communications
@@ -146,16 +165,6 @@ namespace io
 
 namespace ipc
 {
-/*
-	TEST(ipc_pstream, 
-	{
-		sys::io::pstream tr { "tr", "a-z", "A-Z" };
-		tr << HELLO_WORLD;
-		tr.close();
-		std::string s;
-		ASSERT(std::getline(tr, s));
-		ASSERT_EQ(s, HELLO_UPPER);
-	});
-*/
+
 }
 
