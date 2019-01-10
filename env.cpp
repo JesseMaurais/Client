@@ -4,9 +4,19 @@
 #include "env.hpp"
 #include "fmt.hpp"
 #include "sys.hpp"
-#include "os.hpp"
+#include "dbg.hpp"
 #include <regex>
-#include <cassert>
+
+namespace
+{
+	fmt::string_view eval(std::string_view u)
+	{
+		auto const i = u.find_first_not_of(sys::esc::sh::first);
+		auto const j = u.find_last_of(sys::esc::sh::second);
+		auto const v = u.substr(i, j - i);
+		return sys::env::get(v);
+	}
+}
 
 namespace sys::env
 {
@@ -39,7 +49,7 @@ namespace sys::env
 		{
 			s += m.prefix();
 			auto t = m.str();
-			auto v = get(t);
+			auto v = ::eval(t);
 			s.append(v.data(), v.size());
 			u = m.suffix();
 		}

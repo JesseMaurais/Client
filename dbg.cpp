@@ -40,9 +40,10 @@ namespace debug
 		registry().erase(this);
 	}
 
-	int run(int argc, char **argv)
+	int run(int argc, char** argv)
 	{
-		std::regex pattern(1 < argc and argv[1] ? argv[1] : "(.*?)");
+		char const* expression = 1 < argc and argv[1] ? argv[1] : "(.*?)";
+		std::regex pattern(expression);
 
 		using namespace io;
 		auto& out = std::cout;

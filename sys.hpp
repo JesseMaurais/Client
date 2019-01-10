@@ -161,7 +161,7 @@ namespace sys
 	namespace esc::sh
 	{
 		constexpr auto first = "$", second = "";
-		constexpr auto regex = "$[A-Z_][A-Z_0-9]*";
+		constexpr auto regex = "\\$[A-Z_][A-Z_0-9]*";
 	}
 
 	using size_t = ::size_t;

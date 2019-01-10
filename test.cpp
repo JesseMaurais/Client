@@ -91,7 +91,6 @@ namespace env
 	{
 		std::string const var = fmt::join({sys::esc::sh::first, "PATH", sys::esc::sh::second});
 		std::string const val = fmt::join(path, sys::sep::path);
-		std::cout << sys::env::eval(var) << " = " << val << std::endl;
 		ASSERT_EQ(sys::env::eval(var), val);
 	});
 
