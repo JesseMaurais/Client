@@ -1,3 +1,3 @@
 # Configurations for the Microsoft CL compiler usually used in Visual C++
-CFLAGS = /nologo /permissive- /EHsc /std:$(STD) $(CFLAGS)
-COUT = /Fe
+CFLAGS = -nologo -permissive- -EHsc -Z7 -std:$(STD)
+COUT = -Fe

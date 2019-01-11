@@ -14,7 +14,7 @@ namespace
 		auto const i = u.find_first_not_of(sys::esc::sh::first);
 		auto const j = u.find_last_of(sys::esc::sh::second);
 		auto const v = u.substr(i, j - i);
-		return sys::env::get(v);
+		return sys::env::get(fmt::to_string(v));
 	}
 }
 
@@ -23,8 +23,9 @@ namespace sys::env
 	fmt::string_view get(fmt::string_view u)
 	{
 		assert(fmt::terminated(u));
-		auto const p = u.data();
-		return std::getenv(p);
+		auto const var = u.data();
+		auto const val = std::getenv(var);
+		return val ? val : "";
 	}
 
 	bool put(fmt::string_view u)
@@ -60,6 +61,21 @@ namespace sys::env
 
 namespace
 {
+	struct : env::list
+	{
+		operator fmt::span_view() const final
+		{
+			static std::vector<fmt::string_view> v;
+			v.clear();
+			for (unsigned it = 0; sys::environment[it]; ++it)
+			{
+				v.push_back(sys::environment[it]);
+			}
+			return v;
+		}
+
+	} VARIABLES;
+
 	struct : env::list
 	{
 		operator fmt::span_view() const final
@@ -209,6 +225,7 @@ namespace
 
 namespace env
 {
+	list const& variables = VARIABLES;
 	list const& path = PATH;
 	view const& user = USER;
 	view const& home = HOME;

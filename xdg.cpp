@@ -7,7 +7,6 @@
 #include "sys.hpp"
 #include "dbg.hpp"
 #include <fstream>
-#include <iostream>
 
 #if defined(__WIN32__)
 # if __has_include(<shlobj.h>)
@@ -226,6 +225,7 @@ namespace
 			{
 				u = cached();
 			}
+			
 			#if defined(__WIN32__) && __has_include(<shlobj.h>)
 			if (empty(u))
 			{
@@ -247,18 +247,20 @@ namespace
 				} ws;
 				HRESULT const ok = SHGetKnownFolderPath
 				(
-					map.at(var),
+					map.at(val),
 					0,
 					nullptr,
 					&ws.p
 				);
 				if (S_OK == ok)
 				{
-					static auto s = fmt::to_string(ws.p);
+					static std::string s;
+					s = fmt::to_string(ws.p);
 					u = s;
 				}
 			}
 			#endif
+			
 			if (empty(u))
 			{
 				static fmt::string s;

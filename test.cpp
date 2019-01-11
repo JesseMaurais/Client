@@ -103,7 +103,17 @@ namespace env
 	TEST(env_vars,
 	{
 		auto& f = outfile();
-		f << "[Pseudo Environment]" << std::endl;
+		f << "[Environment]" << std::endl;
+		for (auto const v : (fmt::span_view) env::variables)
+		{
+			f << v << std::endl;
+		}
+	});
+
+	TEST(env_fake,
+	{
+		auto& f = outfile();
+		f << "[Fake Environment]" << std::endl;
 		f << fmt::key_value("HOME", env::home) << std::endl;
 		f << fmt::key_value("USER", env::user) << std::endl;
 		f << fmt::key_value("PWD", env::pwd) << std::endl;

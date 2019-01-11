@@ -306,21 +306,8 @@ namespace sys
 	template <typename T>
 	constexpr bool fail(T const t) { return -1 == t; }
 
-	struct stat_info : stat_struct
-	{
-		stat_info(char const *path)
-		{
-			ok = sys::stat(path, this);
-		}
-
-		operator int() const { return ok; }
-
-	private:
-
-		int ok;
-	};
-
 	extern char **environment;
+
 	pid_t pexec(int fd[3], char **argv);
 	pid_t terminate(pid_t pid);
 }

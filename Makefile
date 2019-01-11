@@ -1,15 +1,16 @@
 include .make/NMake.mk
 
 OBJ = $(SRC:.cpp=.obj)
+EXE = $(BIN).exe
 
-all: $(BIN).exe
+all: $(EXE)
 
 clean:
-	$(RM) $(BIN) $(OBJ)
+	$(RM) $(EXE) $(OBJ)
 
-$(BIN).exe: $(OBJ) 
-	$(CXX) $(CFLAGS) $(COUT)$@ $<
+$(EXE): $(OBJ)
+	$(CXX) $(CFLAGS) $(COUT)$@ $**
 
 .cpp.obj:
-	$(CXX) $(CFLAGS) $(COUT)$@ -c $<
+	$(CXX) $(CFLAGS) -c $<
 
