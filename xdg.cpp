@@ -23,8 +23,8 @@ namespace
 	{
 		assert(fmt::terminated(u));
 		char const* path = u.data();
-		int const stat = sys::access(path, F_OK);
-		return sys::fail(stat);
+		int check = sys::access(path, F_OK);
+		return not sys::fail(check);
 	}
 
 	struct : env::view
