@@ -5,7 +5,9 @@
 #include "fmt.hpp"
 #include "ini.hpp"
 #include "sys.hpp"
+#include "dbg.hpp"
 #include <fstream>
+#include <iostream>
 
 #if defined(__WIN32__)
 # if __has_include(<shlobj.h>)
@@ -17,6 +19,14 @@
 
 namespace
 {
+	bool exists(fmt::string_view u)
+	{
+		assert(fmt::terminated(u));
+		char const* path = u.data();
+		int const stat = sys::access(path, F_OK);
+		return sys::fail(stat);
+	}
+
 	struct : env::view
 	{
 		operator fmt::string_view() const final
@@ -38,13 +48,41 @@ namespace
 			fmt::string_view u = sys::env::get("XDG_MENU_PREFIX");
 			if (empty(u))
 			{
-				static auto prefix = fmt::to_lower(xdg::current_desktop) + '-';
-				u = prefix;
+				u = xdg::current_desktop;
+				if (not empty(u))
+				{
+					static auto prefix = fmt::to_lower(u) + '-';
+					u = prefix;
+				}
 			}
 			return u;
 		}
 
 	} XDG_MENU_PREFIX;
+
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			static fmt::string path;
+			if (empty(path))
+			{
+				fmt::string const menu = fmt::join({xdg::menu_prefix, "applications.menu"});
+				path = fmt::join({xdg::config_home, "menus", menu}, sys::sep::dir);
+				if (not exists(path))
+				{
+					for (auto const dir : (fmt::span_view) xdg::config_dirs)
+					{
+						path = fmt::join({dir, menu}, sys::sep::dir);
+						if (exists(path)) break;
+						path.clear();
+					}
+				}
+			}
+			return path;
+		}
+
+	} XDG_APPLICATIONS_MENU;
 
 	struct : env::view
 	{
@@ -223,8 +261,9 @@ namespace
 			#endif
 			if (empty(u))
 			{
+				static fmt::string s;
 				fmt::span_view const p { env::home, val };
-				static auto s = fmt::join(p, sys::sep::dir);
+				s = fmt::join(p, sys::sep::dir);
 				u = s;
 			}
 			return u;
@@ -275,6 +314,7 @@ namespace xdg
 {
 	env::view const& current_desktop = XDG_CURRENT_DESKTOP;
 	env::view const& menu_prefix = XDG_MENU_PREFIX;
+	env::view const& applications_menu = XDG_APPLICATIONS_MENU;
 	env::view const& runtime_dir = XDG_RUNTIME_DIR;
 	env::view const& data_home = XDG_DATA_HOME;
 	env::view const& config_home = XDG_CONFIG_HOME;

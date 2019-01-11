@@ -9,7 +9,7 @@
 #include "file.hpp"
 #include <fstream>
 #include <sstream>
-#include <iostream>
+
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
 int main(int argc, char **argv)
@@ -94,11 +94,6 @@ namespace env
 		ASSERT_EQ(sys::env::eval(var), val);
 	});
 
-	static std::string print(fmt::string_view u, fmt::string_view v)
-	{
-		return fmt::empty(v) ? fmt::to_string(u) + '=' : fmt::key_value(u, v);
-	}
-
 	static std::ofstream& outfile()
 	{
 		static std::ofstream f { "sys.ini" };
@@ -108,29 +103,50 @@ namespace env
 	TEST(env_vars,
 	{
 		auto& f = outfile();
-		f << "[Environment Entry]" << std::endl;
-		f << print("HOME", env::home) << std::endl;
-		f << print("USER", env::user) << std::endl;
-		f << print("PWD", env::pwd) << std::endl;
-		f << print("LANG", env::lang) << std::endl;
-		f << print("SHELL", env::shell) << std::endl;
-		f << print("TMPDIR", env::tmpdir) << std::endl;
-		f << print("DESKTOP", env::desktop) << std::endl;
-		f << print("PROMPT", env::prompt) << std::endl;
+		f << "[Pseudo Environment]" << std::endl;
+		f << fmt::key_value("HOME", env::home) << std::endl;
+		f << fmt::key_value("USER", env::user) << std::endl;
+		f << fmt::key_value("PWD", env::pwd) << std::endl;
+		f << fmt::key_value("LANG", env::lang) << std::endl;
+		f << fmt::key_value("SHELL", env::shell) << std::endl;
+		f << fmt::key_value("TMPDIR", env::tmpdir) << std::endl;
+		f << fmt::key_value("DESKTOP", env::desktop) << std::endl;
+		f << fmt::key_value("PROMPT", env::prompt) << std::endl;
 	});
 
-	TEST(env_xdg,
+	TEST(xdg_desktop,
 	{
 		auto& f = outfile();
-		f << "[Freedesktop Entry]" << std::endl;
-		f << print("XDG_CURRENT_DESKTOP", xdg::current_desktop) << std::endl;
-		f << print("XDG_MENU_PREFIX", xdg::menu_prefix) << std::endl;
-		f << print("XDG_RUNDTIME_DIR", xdg::runtime_dir) << std::endl;
-		f << print("XDG_DATA_HOME", xdg::data_home) << std::endl;
-		f << print("XDG_CONFIG_HOME", xdg::config_home) << std::endl;
-		f << print("XDG_CACHE_HOME", xdg::cache_home) << std::endl;
-		f << print("XDG_DATA_DIRS", fmt::join(xdg::data_dirs, sys::sep::path)) << std::endl;
-		f << print("XDG_CONFIG_DIRS", fmt::join(xdg::config_dirs, sys::sep::path)) << std::endl;
+		f << "[Desktop]" << std::endl;
+		f << fmt::key_value("XDG_CURRENT_DESKTOP", xdg::current_desktop) << std::endl;
+		f << fmt::key_value("XDG_MENU_PREFIX", xdg::menu_prefix) << std::endl;
+		f << fmt::key_value("XDG_APPLICATIONS_MENU", xdg::applications_menu) << std::endl;
+	});
+
+	TEST(xdg_data,
+	{
+		auto& f = outfile();
+		f << "[Data Directories]" << std::endl;
+		f << fmt::key_value("XDG_RUNDTIME_DIR", xdg::runtime_dir) << std::endl;
+		f << fmt::key_value("XDG_DATA_HOME", xdg::data_home) << std::endl;
+		f << fmt::key_value("XDG_CONFIG_HOME", xdg::config_home) << std::endl;
+		f << fmt::key_value("XDG_CACHE_HOME", xdg::cache_home) << std::endl;
+		f << fmt::key_value("XDG_DATA_DIRS", fmt::join(xdg::data_dirs, sys::sep::path)) << std::endl;
+		f << fmt::key_value("XDG_CONFIG_DIRS", fmt::join(xdg::config_dirs, sys::sep::path)) << std::endl;
+	});
+
+	TEST(xdg_user,
+	{
+		auto& f = outfile();
+		f << "[User Directories]" << std::endl;
+		f << fmt::key_value("XDG_DESKTOP_DIR", xdg::desktop_dir) << std::endl;
+		f << fmt::key_value("XDG_DOCUMENTS_DIR", xdg::documents_dir) << std::endl;
+		f << fmt::key_value("XDG_DOWNLOAD_DIR", xdg::download_dir) << std::endl;
+		f << fmt::key_value("XDG_MUSIC_DIR", xdg::music_dir) << std::endl;
+		f << fmt::key_value("XDG_PICTURES_DIR", xdg::pictures_dir) << std::endl;
+		f << fmt::key_value("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir) << std::endl;
+		f << fmt::key_value("XDG_TEMPLATES_DIR", xdg::templates_dir) << std::endl;
+		f << fmt::key_value("XDG_VIDEOS_DIR", xdg::videos_dir) << std::endl;
 	});
 }
 

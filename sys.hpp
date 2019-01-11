@@ -169,7 +169,7 @@ namespace sys
 	using off_t = ::off_t;
 	using pid_t = ::pid_t;
 	using mode_t = ::mode_t;
-	using stat_info = struct stat;
+	using stat_struct = struct stat;
 
 	constexpr auto access = ::access;
 	constexpr auto chdir = ::chdir;
@@ -249,7 +249,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using stat_info = struct _stat;
+	using stat_struct = struct _stat;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;
@@ -303,7 +303,22 @@ namespace sys
 
 namespace sys
 {
-	template <typename T> constexpr bool fail(T const t) { return -1 == t; }
+	template <typename T>
+	constexpr bool fail(T const t) { return -1 == t; }
+
+	struct stat_info : stat_struct
+	{
+		stat_info(char const *path)
+		{
+			ok = sys::stat(path, this);
+		}
+
+		operator int() const { return ok; }
+
+	private:
+
+		int ok;
+	};
 
 	extern char **environment;
 	pid_t pexec(int fd[3], char **argv);

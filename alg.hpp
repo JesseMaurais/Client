@@ -82,7 +82,7 @@ namespace stl
 	}
 
 	template <typename ToContainer, typename FromContainer>
-	inline void append(ToContainer& to, FromContainer const &from)
+	inline void append(ToContainer& to, FromContainer const& from)
 	{
 		to.reserve(to.size() + from.size());
 		to.insert(end(to), begin(from), end(from));

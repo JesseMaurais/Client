@@ -347,9 +347,10 @@ namespace fmt
 
 	inline pair key_value(string_view u)
 	{
-		auto n = u.find('=');
-		auto key = u.substr(0, n);
-		auto value = u.substr(n + 1);
+		auto const m = u.size();
+		auto const n = u.find('=');
+		auto const key = u.substr(0, n);
+		auto const value = u.substr(n < m ? n + 1 : m);
 		return pair(key, value);
 	}
 }
