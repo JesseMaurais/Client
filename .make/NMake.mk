@@ -1,9 +1,6 @@
-
-!ifdef STD
-CFLAGS = $(CFLAGS) /std:$(STD)
-!endif
-
-CFLAGS = /nologo $(CFLAGS) /permissive- /EHsc
-COUT = /Fe
-EXE = .exe
-RM = del /f
+# Load project configurations
+include .make/Configure.mk
+# Assume the environment
+include .make/CMD.mk
+# Assume the compiler
+include .make/CL.mk

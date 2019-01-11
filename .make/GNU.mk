@@ -1,8 +1,31 @@
+# Load the project configurations
+include .make/Configure.mk
 
-ifdef STD
-override CFLAGS += -std=$(STD)
+# Guess the environment
+ifdef COMSPEC
+# Probably WIN32
+include .make/CMD.mk
+else
+ifdef SHELL
+# Probably POSIX
+include .make/SH.mk
+else
+# Bad way
+$(error Cannot determine the operating environment)
+endif
 endif
 
-override CFLAGS += -g -MP -MMD
-COUT = -o 
-RM = rm -f
+# Guess the compiler used
+ifneq ($(findstring clang, $(CXX)),)
+include .make/Clang.mk
+else
+ifneq ($(findstring g++, $(CXX)),)
+include .make/GCC.mk
+else
+ifneq ($(findstring cl, $(CXX)),)
+include .make/CL.mk
+else
+$(warning Cannot determine your compiler flags)
+endif # CL
+endif # GCC
+endif # Clang

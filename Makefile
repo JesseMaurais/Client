@@ -1,22 +1,15 @@
-STD = c++17
+include .make/NMake.mk
 
-include .make/Configure.mk
+OBJ = $(SRC:.cpp=.obj)
 
-SRC = test.cpp file.cpp env.cpp sys.cpp sig.cpp dbg.cpp xdg.cpp
-OBJ = $(SRC:.cpp=.o)
-DEP = $(SRC:.cpp=.d)
-BIN = test$(EXE)
-
-all: $(BIN)
+all: $(BIN).exe
 
 clean:
-	$(RM) $(BIN) $(OBJ) $(DEP)
+	$(RM) $(BIN) $(OBJ)
 
-$(BIN): $(OBJ) 
-	$(CXX) $(CFLAGS) $(COUT)$(BIN) $(OBJ)
+$(BIN).exe: $(OBJ) 
+	$(CXX) $(CFLAGS) $(COUT)$@ $<
 
-.cpp.o:
+.cpp.obj:
 	$(CXX) $(CFLAGS) $(COUT)$@ -c $<
-
--include $(DEP)
 
