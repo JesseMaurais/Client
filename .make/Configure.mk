@@ -1,4 +1,8 @@
-# Common configuration variables for the project
-STD = c++17
-SRC = test.cpp file.cpp env.cpp sys.cpp sig.cpp dbg.cpp xdg.cpp
-BIN = test
+# Use line continuation to distinguish NMake from GNU
+# \
+include .make/NMake.mk
+# \
+!ifdef 0
+include .make/GNU.mk
+# \
+!endif

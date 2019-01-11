@@ -1,5 +1,3 @@
-# Load the project configurations
-include .make/Configure.mk
 
 # Guess the environment
 ifdef COMSPEC
@@ -29,3 +27,6 @@ $(warning Cannot determine your compiler flags)
 endif # CL
 endif # GCC
 endif # Clang
+
+-include $(DEP)
+

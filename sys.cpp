@@ -7,17 +7,17 @@
 #include <iostream>
 #include <signal.h>
 
-#if defined(__POSIX__)
-extern char **environ;
-namespace sys
-{
-	char **environment = ::environ;
-}
-#elif defined(__WIN32__)
+#if defined(__WIN32__)
 extern char **_environ;
 namespace sys
 {
 	char **environment = _environ;
+}
+#else
+extern char **environ;
+namespace sys
+{
+	char **environment = ::environ;
 }
 #endif
 

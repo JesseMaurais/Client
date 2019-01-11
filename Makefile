@@ -1,16 +1,26 @@
-include .make/NMake.mk
+# Common configuration variables for the project
+STD = c++17
+SRC = test.cpp file.cpp env.cpp sys.cpp sig.cpp dbg.cpp xdg.cpp
+BIN = test
 
-OBJ = $(SRC:.cpp=.obj)
-EXE = $(BIN).exe
+# Configurations for system, compiler, and make
+include .make/Configure.mk
+
+EXE = $(BIN)$(EXEEXT)
 
 all: $(EXE)
 
 clean:
-	$(RM) $(EXE) $(OBJ)
+	$(RM) $(EXE) $(OBJ) $(DEP)
 
 $(EXE): $(OBJ)
-	$(CXX) $(CFLAGS) $(COUT)$@ $**
+	$(CXX) $(CFLAGS) $(COUT)$@ $(OBJ)
+
+.cpp.o:
+	$(CXX) $(CFLAGS) -c $<
 
 .cpp.obj:
 	$(CXX) $(CFLAGS) -c $<
 
+# Generated dependencies
+include .make/Depends.mk
