@@ -1,28 +1,24 @@
 #ifndef err_hpp
 #define err_hpp
 
+#include "fmt.hpp"
+#include "dbg.hpp"
 #include <sstream>
 #include <string>
 #include <cstdio>
-#include "fmt.hpp"
 
 namespace sys
 {
-	template <typename... Args>
-	void ferror(fmt::string_view format, Args... args)
+	template <typename... Args> void perror(Args... args)
 	{
-		auto const s = (fmt::format(format) % ... % args);
-		std::perror(s.c_str());
-	}
-
-	template <typename... Args>
-	void perror(Args... args)
-	{
-		std::stringstream stream;
-		((stream << args << " "), ...);
-		if (stream)
+		if constexpr (DEBUG)
 		{
-			std::perror(stream.str().c_str());
+			std::stringstream stream;
+			((stream << args << " "), ...);
+			if (stream)
+			{
+				std::perror(stream.str().c_str());
+			}
 		}
 	}
 }

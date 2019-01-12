@@ -93,8 +93,6 @@ namespace stl
 	{
 		c.erase(std::remove_if(c.begin(), c.end(), p), c.end());
 	}
-
-	// Sorting operations
 	
 	template <typename Container, typename Compare>
 	inline void sort(Container &&c, Compare &&cmp)
