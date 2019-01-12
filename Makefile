@@ -14,7 +14,7 @@ clean:
 	$(RM) $(EXE) $(OBJ) $(DEP)
 
 $(EXE): $(OBJ)
-	$(CXX) $(CFLAGS) $(COUT)$@ $(OBJ)
+	$(CXX) $(CFLAGS) $(COUT)$(EXE) $(OBJ)
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -c $<

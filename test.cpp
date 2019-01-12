@@ -6,9 +6,11 @@
 #include "ios.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
+#include "sig.hpp"
 #include "file.hpp"
 #include <fstream>
 #include <sstream>
+#include <csignal>
 
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
@@ -157,6 +159,28 @@ namespace env
 		f << fmt::key_value("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir) << std::endl;
 		f << fmt::key_value("XDG_TEMPLATES_DIR", xdg::templates_dir) << std::endl;
 		f << fmt::key_value("XDG_VIDEOS_DIR", xdg::videos_dir) << std::endl;
+	});
+}
+
+//
+// Signal handlers
+//
+
+namespace sig
+{
+	TEST(sig_handler,
+	{
+		std::vector<int> caught;
+		for (int const n : { SIGINT, SIGFPE })
+		{
+			sys::sig::slot handle(n, [&](int signo)
+			{
+				caught.push_back(signo);
+			});
+			std::raise(n);
+		}
+		ASSERT_NOT_EQ(stl::find(caught, SIGINT), caught.end());
+		ASSERT_NOT_EQ(stl::find(caught, SIGFPE), caught.end());
 	});
 }
 

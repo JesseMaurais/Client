@@ -28,5 +28,3 @@ endif # CL
 endif # GCC
 endif # Clang
 
--include $(DEP)
-
