@@ -10,7 +10,7 @@
 
 namespace fmt
 {
-	// String converters for generic programming
+	// Generic string converters
 
 	template <typename T>
 	inline string to_string(T const& x)
@@ -154,6 +154,8 @@ namespace fmt
 		return to_wstring(string(1, c));
 	}
 
+	// Basic predicates
+
 	inline bool empty(string const& s)
 	{
 		return s.empty();
@@ -186,7 +188,7 @@ namespace fmt
 
 	inline bool terminated(string_view s)
 	{
-		return s.data()[s.size()] == '\0';
+		return not empty(s) and s.data()[s.size()] == '\0';
 	}
 
 	// Basic string formatting tools
@@ -293,56 +295,11 @@ namespace fmt
 		return ss.str();
 	}
 
-	// String formatting with inline tags
-
-	class format
-	{
-	public:
-
-		format(string_view s, string_view begin_tag = "{", string_view end_tag = "}")
-			: buffer(to_string(s))
-			, begin(begin_tag)
-			, end(end_tag)
-			, index(0)
-		{}
-
-		template <typename T> format& operator % (T&& arg)
-		{
-			buffer = replace(buffer, next_tag(), to_string(arg));
-			return *this;
-		}
-
-		operator string_view() const
-		{
-			return buffer;
-		}
-
-		operator string()
-		{
-			return buffer;
-		}
-
-	private:
-
-		string buffer, begin, end;
-		string::size_type index;
-
-		string next_tag()
-		{
-			std::stringstream tag;
-			tag << begin << ++index << end;
-			return tag.str();
-		}
-	};
-
-	inline string quote(string_view u)
-	{
-		return format("\"{1}\"") % u;
-	}
+	// Common parsing of key/value pairs
 
 	inline string key_value(string_view u, string_view v)
 	{
-		return format("{1}={2}") % u % v;
+		return join({u, v}, "=");
 	}
 
 	inline pair key_value(string_view u)
