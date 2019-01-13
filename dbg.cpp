@@ -41,17 +41,15 @@ namespace debug
 		registry().erase(this);
 	}
 
-	int run(int argc, char** argv)
+	int run(char const *expression)
 	{
-		char const* expression = 1 < argc and argv[1] ? argv[1] : "^[^_](.*?)";
+		if (not expression) expression = "^[^_](.*?)";
 		std::regex pattern(expression);
 
 		using namespace io;
-		auto& out = std::cout;
+		auto& out = std::cerr;
 		constexpr auto eol = '\n';
-
 		map const& tests = registry();
-		out << intense << tests.size() << " tests registered." << intense_off << eol;
 
 		unsigned int errors = 0;
 		for (auto const& [that, name] : tests) try

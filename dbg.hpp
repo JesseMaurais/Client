@@ -9,7 +9,7 @@
 #ifndef NDEBUG
 namespace debug
 {
-	int run(int argc, char **argv);
+	int run(char const *pattern);
 
 	struct test
 	{

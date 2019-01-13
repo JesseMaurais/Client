@@ -17,12 +17,12 @@
 
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
-static char const* image;
+static char const* program_image;
 
 int main(int argc, char **argv)
 {
-	image = argv[0];
-	return debug::run(argc, argv);
+	program_image = argv[0];
+	return debug::run(argv[1]);
 }
 
 //
@@ -268,12 +268,19 @@ namespace io
 
 namespace ipc
 {
+	TEST(_child_process,
+	{
+		std::string s;
+		ASSERT(std::getline(std::cin, s));
+		s = fmt::to_upper(s);
+		std::cout << s;
+	});
+
 	TEST(ipc_stream,
 	{
-		sys::io::pstream ps { "tr", "a-z", "A-Z" };
-		ps << HELLO_WORLD;
-		ps.close(0);
-		fmt::string s;
+		sys::io::pstream ps { program_image, "_child_process" };
+		ps << HELLO_WORLD << std::endl;
+		std::string s;
 		ASSERT(std::getline(ps, s)); 
 		ASSERT_EQ(s, HELLO_UPPER);
 	});
