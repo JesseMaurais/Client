@@ -9,14 +9,19 @@
 #include "sys.hpp"
 #include "sig.hpp"
 #include "file.hpp"
+#include "pstream.hpp"
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <csignal>
 
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
+static char const* image;
+
 int main(int argc, char **argv)
 {
+	image = argv[0];
 	return debug::run(argc, argv);
 }
 
@@ -263,6 +268,14 @@ namespace io
 
 namespace ipc
 {
-
+	TEST(ipc_stream,
+	{
+		sys::io::pstream ps { "tr", "a-z", "A-Z" };
+		ps << HELLO_WORLD;
+		ps.close(0);
+		fmt::string s;
+		ASSERT(std::getline(ps, s)); 
+		ASSERT_EQ(s, HELLO_UPPER);
+	});
 }
 

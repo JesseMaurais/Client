@@ -13,7 +13,7 @@ namespace sys
 {
 	char **environment = _environ;
 }
-#else
+#else // defined(__POSIX__)
 extern char **environ;
 namespace sys
 {
@@ -188,7 +188,7 @@ namespace sys
 
 			return pid_t(pi.hProcess);
 		}
-		#elif defined(__POSIX__)
+		#else // defined(__POSIX__)
 		{
 			sys::file::pipe pair[3];
 			if (pair[0] or pair[1] or pair[2])
@@ -234,22 +234,12 @@ namespace sys
 			perror("execvp");
 			std::exit(res);
 		}
-		#else
-		return -1;
 		#endif
 	}
 
 	pid_t terminate(pid_t pid)
 	{
-		#if defined(__POSIX__)
-		{
-			if (not fail(pid) and fail(kill(pid, SIGTERM)))
-			{
-				sys::perror("kill", pid);
-			}
-			return -1;
-		}
-		#elif defined(__WIN32__)
+		#if defined(__WIN32__)
 		{
 			auto const h = reinterpret_cast<HANDLE>(pid);
 			if (h and not TerminateProcess(h, 0))
@@ -258,8 +248,14 @@ namespace sys
 			}
 			return 0;
 		}
-		#else
-		return -1;
+		#else // defined(__POSIX__)
+		{
+			if (not fail(pid) and fail(kill(pid, SIGTERM)))
+			{
+				sys::perror("kill", pid);
+			}
+			return -1;
+		}
 		#endif
 	}
 }

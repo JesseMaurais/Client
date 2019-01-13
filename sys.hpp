@@ -26,12 +26,12 @@ constexpr bool xopen =
 // Portable Operating System Interface
 
 constexpr bool posix = 
-#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
+#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) || defined(__XOPEN__)
 # undef __POSIX__
 # define __POSIX__ 1
 	true
 #else
-	xopen
+	false
 #endif
 	;
 

@@ -43,6 +43,16 @@ namespace sys::io
 			{
 				return this->file.execute(args);
 			}
+
+			void terminate()
+			{
+				this->file.terminate();
+			}
+
+			void close(int n)
+			{
+				this->file.close(n);
+			}
 		};
 	}
 

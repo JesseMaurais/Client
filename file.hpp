@@ -181,6 +181,11 @@ namespace sys::file
 		bool execute(arguments);
 		void terminate();
 
+		void close(int n)
+		{
+			file[n].close();
+		}
+
 	protected:
 
 		descriptor file[3];

@@ -17,7 +17,7 @@ $(EXE): $(OBJ)
 	$(CXX) $(CFLAGS) $(COUT)$(EXE) $(OBJ)
 
 .cpp.o:
-	$(CXX) $(CFLAGS) -c $<
+	$(CXX) $(CFLAGS) -D_XOPEN_SOURCE -c $<
 
 .cpp.obj:
 	$(CXX) $(CFLAGS) -c $<

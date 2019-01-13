@@ -15,6 +15,7 @@ namespace
 {
 	//TEST(dumb_assert, ASSERT(false));
 	//TEST(dumb_except, throw std::runtime_error("Holy Cow!"));
+	TEST(_dumb, throw "You should not run hidden unit tests."); 
 
 	using map = std::map<debug::test*, std::string>;
 	std::string::size_type max_length = 0;
@@ -42,7 +43,7 @@ namespace debug
 
 	int run(int argc, char** argv)
 	{
-		char const* expression = 1 < argc and argv[1] ? argv[1] : "(.*?)";
+		char const* expression = 1 < argc and argv[1] ? argv[1] : "^[^_](.*?)";
 		std::regex pattern(expression);
 
 		using namespace io;
@@ -50,7 +51,7 @@ namespace debug
 		constexpr auto eol = '\n';
 
 		map const& tests = registry();
-		out << intense << tests.size() << " tests to run..." << intense_off << eol;
+		out << intense << tests.size() << " tests registered." << intense_off << eol;
 
 		unsigned int errors = 0;
 		for (auto const& [that, name] : tests) try
