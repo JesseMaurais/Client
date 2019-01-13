@@ -6,6 +6,10 @@
 
 namespace sys::io
 {
+	//
+	// Abstract buffer class
+	//
+
 	template
 	<
 	 class Char,
@@ -73,6 +77,8 @@ namespace sys::io
 
 		string buf;
 	};
+
+	// Common alias types
 
 	using membuf = basic_membuf<char>;
 	using wmembuf = basic_membuf<wchar_t>;

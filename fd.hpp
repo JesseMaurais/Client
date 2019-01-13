@@ -4,6 +4,7 @@
 #include <iostream>
 #include "file.hpp"
 #include "mem.hpp"
+#include "fmt.hpp"
 
 namespace sys::io
 {
@@ -34,6 +35,16 @@ namespace sys::io
 		int set(int fd = -1)
 		{
 			return file.set(fd);
+		}
+
+		bool close()
+		{
+			return file.close();
+		}
+
+		bool is_open() const
+		{
+			return !!file;
 		}
 
 	protected:
@@ -77,6 +88,7 @@ namespace sys::io
 			using base = basic_stream<Char, Traits<Char>>;
 			using fdbuf = basic_fdbuf<Char, Traits, Alloc>;
 			using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
+			using string_view = fmt::basic_string_view<Char, Traits<Char>>;
 			using openmode = sys::file::openmode;
 
 		public:
@@ -87,13 +99,13 @@ namespace sys::io
 			, base(this)
 			{ }
 
-			basic_fdstream(string const& path, openmode mode = default_mode)
+			basic_fdstream(string_view path, openmode mode = default_mode)
 			: basic_fdstream()
 			{
 				open(path, mode);
 			}
 
-			void open(string const& path, openmode mode = default_mode)
+			void open(string_view path, openmode mode = default_mode)
 			{
 				if (mode & sys::file::out and mode & sys::file::in)
 				{
@@ -107,17 +119,9 @@ namespace sys::io
 				{
 					fdbuf::setbufsiz(size, 0);
 				}
-				file.open(path, mode | default_mode);
-			}
 
-			bool close()
-			{
-				return file.close();
-			}
-
-			bool is_open() const
-			{
-				return !!file;
+				fmt::string const s = fmt::to_string(path);
+				this->file.open(s, mode | default_mode);
 			}
 
 		private:
