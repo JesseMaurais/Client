@@ -291,6 +291,10 @@ namespace
 				fmt::string line;
 				while (ini::getline(in, line))
 				{
+					constexpr char quote = '"';
+					auto const first = line.find_first_not_of(quote);
+					auto const second = line.find_first_of(quote, first);
+					line = line.substr(first, second);
 					fmt::pair pair = fmt::key_value(line);
 					pair.second = sys::env::eval(pair.second);
 					data.emplace(pair);
