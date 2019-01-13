@@ -110,7 +110,7 @@ namespace sys::file
 		cmds.push_back(nullptr);
 
 		int fd[3];
-		pid = sys::pexec(fd, cmds.data());
+		pid = sys::exec(fd, cmds.data());
 		bool const ok = not fail(pid);
 		if (ok) set(fd);
 		return ok;
@@ -118,7 +118,7 @@ namespace sys::file
 
 	void process::terminate()
 	{
-		pid = sys::terminate(pid);
+		pid = sys::term(pid);
 		for (int n : { 0, 1, 2 })
 		{
 			if (file[n]) file[n].close();

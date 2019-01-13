@@ -303,13 +303,32 @@ namespace sys
 
 namespace sys
 {
+	extern char** environment;
+
 	template <typename T>
-	constexpr bool fail(T const t) { return -1 == t; }
+	constexpr bool fail(T const value) 
+	{
+		constexpr T invalid = -1;
+		return invalid == value;
+	}
 
-	extern char **environment;
+	pid_t exec(int fd[3], char **argv);
+	pid_t term(pid_t pid);
 
-	pid_t pexec(int fd[3], char **argv);
-	pid_t terminate(pid_t pid);
+	struct mem
+	{
+		enum { none = 0, read = 1, write = 2, execute = 4 };
+		enum { share = 1, privy = 2, fixed = 4 };
+
+		void* map(int fd, size_t size, off_t off = 0, int perm = read | write, int type = share);
+		void unmap(void* address, size_t size);
+
+	private:
+
+		#if defined(__WIN32__)
+		std::intptr_t ptr = 0;
+		#endif
+	};
 }
 
 #endif // file

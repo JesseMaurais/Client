@@ -34,9 +34,14 @@ namespace sys
 #include <processthreadapi.h>
 #endif
 
+#if __has_include(<sys/mman.h>)
+#include <sys/mman.h>
+#endif
+
 namespace sys
 {
 	#if defined(__WIN32__)
+
 	unsigned long winerr(char const *prefix)
 	{
 		LPSTR data = nullptr;
@@ -61,57 +66,67 @@ namespace sys
 		}
 		return code;
 	}
-	#endif
 
-	pid_t pexec(int fd[3], char **argv)
+	struct Handle
+	{
+		HANDLE h = nullptr;
+
+		Handle(HANDLE h)
+		{
+			this->h = h;
+		}
+
+		~Handle()
+		{
+			if (h and not CloseHandle(h))
+			{
+				winerr("CloseHandle");
+			}
+		}
+
+		int set()
+		{
+			auto const ptr = std::intptr_t(h);
+			int const fd = _open_osfhandle(ptr, 0);
+			h = nullptr;
+			return fd;
+		}
+	};
+
+	struct Pipe
+	{
+		Handle read;
+		Handle write;
+		BOOL ok;
+
+		Pipe()
+		{
+			SECURITY_ATTRIBUTES sa;
+			ZeroMemory(&sa, sizeof sa);
+			sa.nLength = sizeof sa;
+			sa.bInheritHandle = TRUE;
+			ok = CreatePipe
+			(
+				&read.h,
+				&write.h,
+				&sa,
+				BUFSIZ
+			);
+
+			if (not ok)
+			{
+				winerr("CreatePipe");
+			}
+		}
+	};
+	
+	#endif // __WIN32__
+
+	pid_t exec(int fd[3], char **argv)
 	{
 		#if defined(__WIN32__)
 		{
-			struct Handle
-			{
-				HANDLE h = nullptr;
-
-				~Handle()
-				{
-					if (h) CloseHandle(h);
-				}
-
-				int set()
-				{
-					auto const ptr = std::intptr_t(h);
-					int const fd = _open_osfhandle(ptr, 0);
-					h = nullptr;
-					return fd;
-				}
-			};
-
-			struct Pipe
-			{
-				Handle read;
-				Handle write;
-				BOOL ok;
-
-				Pipe()
-				{
-					SECURITY_ATTRIBUTES sa;
-					ZeroMemory(&sa, sizeof sa);
-					sa.nLength = sizeof sa;
-					sa.bInheritHandle = TRUE;
-					ok = CreatePipe
-					(
-						&read.h,
-						&write.h,
-						&sa,
-						BUFSIZ
-					);
-
-					if (not ok)
-					{
-						winerr("CreatePipe");
-					}
-				}
-
-			} pair[3];
+			Pipe pair[3];
 
 			for (int n : { 0, 1, 2 })
 			{
@@ -237,7 +252,7 @@ namespace sys
 		#endif
 	}
 
-	pid_t terminate(pid_t pid)
+	pid_t term(pid_t pid)
 	{
 		#if defined(__WIN32__)
 		{
@@ -255,6 +270,139 @@ namespace sys
 				sys::perror("kill", pid);
 			}
 			return -1;
+		}
+		#endif
+	}
+
+	void* mem::map(int fd, size_t size, off_t off, int perm, int type)
+	{
+		#if defined(__WIN32__)
+		{
+			DWORD protect = 0;
+			if (perm & write)
+			{
+				if (perm & execute)
+				{
+					protect = PAGE_EXECUTE_READWRITE;
+				}
+				else
+				{
+					protect = PAGE_READWRITE;
+				}	
+			}
+			else
+			if (perm & execute)
+			{
+				if (perm & read)
+				{
+					protect = PAGE_EXECUTE_READ;
+				}
+				else
+				{
+					protect = PAGE_EXECUTE;
+				}
+			}
+			else // (perm & read)
+			{
+				protect = PAGE_READONLY;
+			}
+
+			off_t const end = size + offset;
+			HANDLE const h = CreateFileMapping
+			(
+				(HANDLE) _get_osfhandle(fd),
+				nullptr, // security attributes
+				protect,
+				DWORD_HI(end),
+				DWORD_LO(end),
+				nullptr // name
+			);
+			if (not h)
+			{
+				winerr("CreateFileMapping");
+				return nullptr;
+			}
+
+			DWORD desired = 0;
+			if (perm & write)
+			{
+				desired |= FILE_MAP_WRITE;
+			}
+			else // (perm & read)
+			{
+				desired |= FILE_MAP_READ;
+			}
+			if (perm & execute)
+			{
+				desired |= FILE_MAP_EXECUTE;
+			}
+			if (type & privy)
+			{
+				desired |= FILE_MAP_COPY;
+			}
+
+			auto address = MapViewOfFile
+			(
+				h,
+				desired,
+				DWORD_HI(off),
+				DWORD_LO(off),
+				size
+			);
+			if (address)
+			{
+				ptr = static_cast<std::intptr_t>(h);
+			}
+			else
+			{
+				sys::winerr("MapViewOfFile");
+				Handle(h); // close
+			}
+			return address;
+		}
+		#else // defined(__POSIX__)
+		{
+			int prot = 0;
+			if (perm & read) prot |= PROT_READ;
+			if (perm & write) prot |= PROT_WRITE;
+			if (perm & execute) prot |= PROT_EXEC;
+
+			int flags = 0;
+			if (type & share) flags |= MAP_SHARED;
+			if (type & privy) flags |= MAP_PRIVATE;
+			if (type & fixed) flags |= MAP_FIXED;
+
+			auto address = mmap(nullptr, size, prot, flags, fd, off);
+			if (MAP_FAILED == address)
+			{
+				sys::perror("mmap");
+				return nullptr;
+			}
+			return address;
+		}
+		#endif
+	}
+
+	void mem::unmap(void* address, size_t size)
+	{
+		#if defined(__WIN32__)
+		{
+			if (not UnmapViewOfFile(address))
+			{
+				sys::winerr("UnmapViewOfFile");
+			}
+			else
+			if (not CloseHandle(static_cast<HANDLE>(ptr)))
+			{
+				sys::winerr("CloseHandle");
+			}
+		}
+		#else // defined(__POSIX__)
+		{
+			if (fail(munmap(address, size)))
+			{
+				sys::perror("munmap");
+			}
 		}
 		#endif
 	}
