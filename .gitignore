@@ -1,5 +1,8 @@
 sys.ini
 test
 *.exe
+*.obj
 *.o
 *.d
+*.i
+*.log

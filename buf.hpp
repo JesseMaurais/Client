@@ -20,7 +20,7 @@ namespace sys::io
 
 		using char_type = typename base::char_type;
 		using traits_type = typename base::traits_type;
-		using size_type = typename std::streamsize;
+		using size_type = std::streamsize;
 		using int_type = typename base::int_type;
 
 	protected:
