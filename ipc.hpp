@@ -1,13 +1,80 @@
-#ifndef pstream_hpp
-#define pstream_hpp
+#ifndef ipc_hpp
+#define ipc_hpp
 
-#include <string>
 #include <iostream>
-#include "pbuf.hpp"
 #include "file.hpp"
+#include "mem.hpp"
 
 namespace sys::io
 {
+	//
+	// Abstract buffer class
+	//
+
+	template
+	<
+	 class Char,
+	 template <class> class Traits = std::char_traits,
+	 template <class> class Alloc = std::allocator
+	>
+	class basic_procbuf : public basic_membuf<Char, Traits, Alloc>
+	{
+		using base = basic_membuf<Char, Traits, Alloc>;
+
+	public:
+
+		using char_type = typename base::char_type;
+		using size_type = typename base::size_type;
+		using arguments = sys::file::arguments;
+
+		basic_procbuf(int fd[3] = nullptr)
+		: file(fd)
+		{ }
+
+		void set(int fd[3] = nullptr)
+		{
+			file.set(fd);
+		}
+
+		bool execute(arguments args)
+		{
+			return file.execute(args);
+		}
+
+		void terminate()
+		{
+			file.terminate();
+		}
+
+		void close(int n)
+		{
+			file.close(n);
+		}
+
+	protected:
+
+		sys::file::process file;
+
+		size_type xsputn(char_type const *s, size_type n) override
+		{
+			return file[0].write(s, sizeof (char_type) * n);
+		}
+
+		size_type xsgetn(char_type *s, size_type n) override
+		{
+			return file[1].read(s, sizeof (char_type) * n);
+		}
+	};
+
+	// Common alias types
+
+	using procbuf = basic_procbuf<char>;
+	using wprocbuf = basic_procbuf<wchar_t>;
+
+	//
+	// Abstract stream class
+	//
+
 	namespace impl
 	{
 		template
@@ -19,15 +86,16 @@ namespace sys::io
 		>
 		class basic_pstream
 		: public basic_stream<Char, Traits<Char>>
-		, public basic_pbuf<Char, Traits, Alloc>
+		, public basic_procbuf<Char, Traits, Alloc>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
-			using arguments = sys::file::arguments;
+			using procbuf = basic_procbuf<Char, Traits, Alloc>;
+			using arguments = typename procbuf::arguments;
 
 		public:
 
 			basic_pstream(std::size_t sz = sys::file::bufsiz)
-			: pbuf()
+			: procbuf()
 			, base(this)
 			{
 				this->setbufsiz(sz);
@@ -36,25 +104,12 @@ namespace sys::io
 			basic_pstream(arguments args)
 			: basic_pstream()
 			{
-				execute(args);
-			}
-
-			bool execute(arguments args)
-			{
-				return this->file.execute(args);
-			}
-
-			void terminate()
-			{
-				this->file.terminate();
-			}
-
-			void close(int n)
-			{
-				this->file.close(n);
+				this->execute(args);
 			}
 		};
 	}
+
+	// Common alias types
 
 	template
 	<

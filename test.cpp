@@ -8,8 +8,7 @@
 #include "xdg.hpp"
 #include "sys.hpp"
 #include "sig.hpp"
-#include "file.hpp"
-#include "pstream.hpp"
+#include "ipc.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>

@@ -1,13 +1,65 @@
 #ifndef fd_hpp
 #define fd_hpp
 
-#include <string>
 #include <iostream>
 #include "file.hpp"
-#include "fdbuf.hpp"
+#include "mem.hpp"
 
 namespace sys::io
 {
+	//
+	// Abstract buffer class
+	//
+
+	template
+	<
+	 class Char,
+	 template <class> class Traits = std::char_traits
+	 template <class> class Alloc = std::allocator
+	>
+	class basic_fdbuf : public basic_membuf<Char, Traits, Alloc>
+	{
+		using base = basic_membuf<Char, Traits, Alloc>;
+
+	public:
+
+		using size_type = typename base::size_type;
+		using char_type = typename base::char_type;
+
+		basic_fdbuf(int fd = -1)
+		{
+			set(fd);
+		}
+
+		int set(int fd = -1)
+		{
+			return file.set(fd);
+		}
+
+	protected:
+
+		sys::file::descriptor file;
+
+		size_type xsputn(char_type const *s, size_type n) override
+		{
+			return file.write(s, sizeof (char_type) * n);
+		}
+
+		size_type xsgetn(char_type *s, size_type n) override
+		{
+			return file.read(s, sizeof (char_type) * n);
+		}
+	};
+
+	// Common alias types
+
+	using fdbuf = basic_fdbuf<char>;
+	using wfdbuf = basic_fdbuf<wchar_t>;
+
+	//
+	// Abstract stream class
+	//
+
 	namespace impl
 	{
 		template
@@ -70,10 +122,11 @@ namespace sys::io
 
 		private:
 
-			sys::file::descriptor file;
 			std::size_t const size;
 		};
 	}
+
+	// Common alias types
 
 	template
 	<

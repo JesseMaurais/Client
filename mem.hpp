@@ -1,8 +1,8 @@
-#ifndef membuf_hpp
-#define membuf_hpp
+#ifndef mem_hpp
+#define mem_hpp
 
 #include "str.hpp"
-#include "iobuf.hpp"
+#include "buf.hpp"
 
 namespace sys::io
 {
@@ -16,7 +16,7 @@ namespace sys::io
 	{
 		using base = basic_iobuf<Char, Traits>;
 		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-		using string_view = std::basic_string_view<Char, Traits<Char>>;
+		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
 
 	public:
 
