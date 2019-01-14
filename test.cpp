@@ -287,14 +287,17 @@ namespace ipc
 
 	TEST(ipc_mem,
 	{
+		constexpr auto later = HELLO_WORLD;
+
 		sys::file::descriptor file;
 		file.open(__FILE__, sys::file::in);
 		sys::file::memory map(file.get());
-		fmt::string_view view = map;
 
-		constexpr auto npos = fmt::string_view::npos;
+		fmt::string_view const view = map;
 		auto pos = view.find("Self referencing find.");
-		ASSERT_NOT_EQ(pos, npos);
+		ASSERT_NOT_EQ(pos, fmt::string_view::npos);
+		pos = view.find(later, pos);
+		ASSERT_EQ(pos, fmt::string_view::npos);
 	});
 }
 
