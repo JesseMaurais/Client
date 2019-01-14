@@ -169,7 +169,7 @@ namespace sys
 	using off_t = ::off_t;
 	using pid_t = ::pid_t;
 	using mode_t = ::mode_t;
-	using stat_struct = struct stat;
+	using stat_t = struct stat;
 
 	constexpr auto access = ::access;
 	constexpr auto chdir = ::chdir;
@@ -249,7 +249,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using stat_struct = struct _stat;
+	using stat_t = struct _stat;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;
@@ -320,7 +320,7 @@ namespace sys
 		enum { none = 0, read = 1, write = 2, execute = 4 };
 		enum { share = 1, privy = 2, fixed = 4 };
 
-		void* map(int fd, size_t size, off_t off = 0, int perm = read | write, int type = share);
+		void* map(int fd, size_t size, off_t off = 0, int mode = read, int type = share);
 		void unmap(void* address, size_t size);
 
 	private:

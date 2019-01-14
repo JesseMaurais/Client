@@ -1,87 +1,40 @@
 #ifndef mem_hpp
 #define mem_hpp
 
+#include "file.hpp"
 #include "str.hpp"
-#include "buf.hpp"
+#include <memory>
 
-namespace sys::io
+namespace sys
 {
-	//
-	// Abstract buffer class
-	//
+	struct mem;
+}
 
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
-	>
-	class basic_membuf : public basic_iobuf<Char, Traits>
+namespace sys::file
+{
+	struct memory
 	{
-		using base = basic_iobuf<Char, Traits>;
-		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
+		memory(int fd, ssize_t size = -1, size_t offset = 0);
+		~memory();
 
-	public:
-
-		using char_type = typename base::char_type;
-		using size_type = typename base::size_type;
-
-		basic_membuf() = default;
-		basic_membuf(size_type n)
+		operator fmt::string_view() const
 		{
-			setbufsz(n);
+			auto data = static_cast<char*>(address);
+			return fmt::string_view(data, size);
 		}
 
-		base *setbuf(char_type *s, size_type n) override
+		operator fmt::wstring_view() const
 		{
-			size_type const m = n / 2;
-			return setbuf(s, n - m, m);
-		}
-
-		base *setbuf(char_type *s, size_type n, size_type m)
-		{
-			auto t = s + n;
-			auto u = t + m;
-			base::setg(s, t, t);
-			base::setp(t, u);
-			return this;
-		}
-
-		base *setbufsiz(size_type n)
-		{
-			buf.resize(n);
-			auto p = buf.data();
-			return setbuf(const_cast<char*>(p), n);
-		}
-
-		base *setbufsiz(size_type n, size_type m)
-		{
-			buf.resize(n + m);
-			return setbuf(buf.data(), n, m);
-		}
-
-		string_view pview() const
-		{
-			auto const sz = base::pptr() - base::pbase();
-			return string_view(base::pbase(), sz);
-		}
-
-		string_view gview() const
-		{
-			auto const sz = base::egptr() - base::gptr();
-			return string_view(base::gptr(), sz);
+			auto data = static_cast<wchar_t*>(address);
+			return fmt::wstring_view(data, size);
 		}
 
 	private:
-
-		string buf;
+		
+		std::unique_ptr<sys::mem> mem;
+		void* address =  nullptr;
+		size_t size = 0;
 	};
-
-	// Common alias types
-
-	using membuf = basic_membuf<char>;
-	using wmembuf = basic_membuf<wchar_t>;
 }
 
 #endif // file

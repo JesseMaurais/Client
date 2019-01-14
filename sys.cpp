@@ -274,14 +274,14 @@ namespace sys
 		#endif
 	}
 
-	void* mem::map(int fd, size_t size, off_t off, int perm, int type)
+	void* mem::map(int fd, size_t size, off_t off, int mode, int type)
 	{
 		#if defined(__WIN32__)
 		{
 			DWORD protect = 0;
-			if (perm & write)
+			if (mode & write)
 			{
-				if (perm & execute)
+				if (mode & execute)
 				{
 					protect = PAGE_EXECUTE_READWRITE;
 				}
@@ -291,9 +291,9 @@ namespace sys
 				}	
 			}
 			else
-			if (perm & execute)
+			if (mode & execute)
 			{
-				if (perm & read)
+				if (mode & read)
 				{
 					protect = PAGE_EXECUTE_READ;
 				}
@@ -302,7 +302,7 @@ namespace sys
 					protect = PAGE_EXECUTE;
 				}
 			}
-			else // (perm & read)
+			else // (mode & read)
 			{
 				protect = PAGE_READONLY;
 			}
@@ -324,15 +324,15 @@ namespace sys
 			}
 
 			DWORD desired = 0;
-			if (perm & write)
+			if (mode & write)
 			{
 				desired |= FILE_MAP_WRITE;
 			}
-			else // (perm & read)
+			else // (mode & read)
 			{
 				desired |= FILE_MAP_READ;
 			}
-			if (perm & execute)
+			if (mode & execute)
 			{
 				desired |= FILE_MAP_EXECUTE;
 			}
@@ -363,9 +363,9 @@ namespace sys
 		#else // defined(__POSIX__)
 		{
 			int prot = 0;
-			if (perm & read) prot |= PROT_READ;
-			if (perm & write) prot |= PROT_WRITE;
-			if (perm & execute) prot |= PROT_EXEC;
+			if (mode & read) prot |= PROT_READ;
+			if (mode & write) prot |= PROT_WRITE;
+			if (mode & execute) prot |= PROT_EXEC;
 
 			int flags = 0;
 			if (type & share) flags |= MAP_SHARED;

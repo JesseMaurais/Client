@@ -9,6 +9,7 @@
 #include "sys.hpp"
 #include "sig.hpp"
 #include "ipc.hpp"
+#include "mem.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -282,6 +283,18 @@ namespace ipc
 		std::string s;
 		ASSERT(std::getline(ps, s)); 
 		ASSERT_EQ(s, HELLO_UPPER);
+	});
+
+	TEST(ipc_mem,
+	{
+		sys::file::descriptor file;
+		file.open(__FILE__, sys::file::in);
+		sys::file::memory map(file.get());
+		fmt::string_view view = map;
+
+		constexpr auto npos = fmt::string_view::npos;
+		auto pos = view.find("Self referencing find.");
+		ASSERT_NOT_EQ(pos, npos);
 	});
 }
 
