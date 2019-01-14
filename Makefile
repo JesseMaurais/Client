@@ -13,7 +13,7 @@ include .make/Configure.mk
 
 # Common make rules for the project
 
-.SUFFIXES: .cpp .hpp .obj .o .d .i .log
+.SUFFIXES: .cpp .hpp .obj .o .d .i .log .ilk .pdb
 
 EXE = $(BIN)$(EXEEXT)
 
@@ -22,7 +22,7 @@ all: $(EXE)
 task: $(TSK)
 
 clean:
-	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG)
+	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb
 
 $(EXE): $(OBJ)
 	$(CXX) $(CFLAGS) $(OUT)$(EXE) $(OBJ)

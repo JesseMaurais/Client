@@ -35,7 +35,7 @@ endif # Clang
 CFLAGS += $(FLAGS)
 
 ifdef STD
-CFLAGS += $(STDFLAG)$(STD)
+CFLAGS += $(USESTD)$(STD)
 endif 
 
 ifndef NDEBUG
