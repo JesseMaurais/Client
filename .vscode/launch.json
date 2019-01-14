@@ -9,7 +9,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/test.exe",
-            "args": [],
+            "args": ["ipc_stream"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

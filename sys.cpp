@@ -2,8 +2,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "sys.hpp"
-#include "file.hpp"
+#include "str.hpp"
 #include "err.hpp"
+#include "file.hpp"
 #include <iostream>
 #include <signal.h>
 
@@ -48,7 +49,7 @@ namespace sys
 		LPSTR addr = reinterpret_cast<LPSTR>(&data);
 		constexpr DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 		DWORD const code = GetLastError();
-		DWORD const size = FormatMessage
+		DWORD const size = FormatMessageA
 		(
 		 FORMAT_MESSAGE_ALLOCATE_BUFFER	| FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		 nullptr, // source
@@ -84,10 +85,10 @@ namespace sys
 			}
 		}
 
-		int set()
+		int set(int flags)
 		{
-			auto const ptr = std::intptr_t(h);
-			int const fd = _open_osfhandle(ptr, 0);
+			auto const ptr = reinterpret_cast<std::intptr_t>(h);
+			int const fd = _open_osfhandle(ptr, flags);
 			h = nullptr;
 			return fd;
 		}
@@ -135,9 +136,10 @@ namespace sys
 					return -1;
 				}
 
-				HANDLE h = 0 == n ? pair[n].read.h : pair[n].write.h;
+				HANDLE h = n ? pair[n].write.h : pair[n].read.h;
 
-				if (not SetHandleInformation(h, HANDLE_FLAG_INHERIT, 0))
+				constexpr DWORD flag = HANDLE_FLAG_INHERIT;
+				if (not SetHandleInformation(h, flag, flag))
 				{
 					winerr("SetHandleInformation");
 					_set_errno(EPERM);
@@ -170,7 +172,7 @@ namespace sys
 			si.hStdOutput = pair[1].write.h;
 			si.hStdError = pair[2].write.h;
 
-			std::cerr << *argv << std::endl << cmd << std::endl;
+			constexpr DWORD flag = CREATE_NO_WINDOW;
 			BOOL const ok = CreateProcessA
 			(
 				*argv, // application
@@ -178,7 +180,7 @@ namespace sys
 				NULL,  // process attributes
 				NULL,  // thread attributes
 				TRUE,  // inherit handles
-				0,     // creation flags
+				flag,  // creation flags
 				NULL,  // environment
 				NULL,  // current directory
 				&si,   // start-up info
@@ -189,20 +191,17 @@ namespace sys
 			{
 				winerr("CreateProcess");
 				_set_errno(ECHILD);
-				return 0;
+				return -1;
 			}
 
-			if (CloseHandle(pi.hThread))
-			{
-				winerr("CloseHandle(hThread)");
-			}
+			Handle(pi.hThread); // close
 
 			for (int n : { 0, 1, 2 })
 			{
-				fd[n] = 0 == n ? pair[n].read.set() : pair[n].write.set();
+				fd[n] = n ? pair[n].read.set(_O_RDONLY) : pair[n].write.set(_O_WRONLY);
 			}
 
-			return pid_t(pi.hProcess);
+			return pi.dwProcessId;
 		}
 		#else // defined(__POSIX__)
 		{
@@ -257,12 +256,17 @@ namespace sys
 	{
 		#if defined(__WIN32__)
 		{
-			auto const h = reinterpret_cast<HANDLE>(pid);
-			if (h and not TerminateProcess(h, 0))
+			HANDLE const h = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+			if (not h)
+			{
+				sys::winerr("OpenProcess");
+			}
+			else
+			if (not TerminateProcess(h, 0))
 			{
 				sys::winerr("TerminateProcess");
 			}
-			return 0;
+			return -1;
 		}
 		#else // defined(__POSIX__)
 		{
@@ -393,9 +397,8 @@ namespace sys
 				sys::winerr("UnmapViewOfFile");
 			}
 			else
-			if (not CloseHandle(static_cast<HANDLE>(ptr)))
 			{
-				sys::winerr("CloseHandle");
+				Handle(static_cast<HANDLE>(ptr));
 			}
 		}
 		#else // defined(__POSIX__)

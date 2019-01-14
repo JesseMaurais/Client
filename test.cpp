@@ -213,7 +213,7 @@ namespace env
 //
 // Signal handlers
 //
-
+/*
 namespace sig
 {
 	TEST(sig_handler,
@@ -237,7 +237,7 @@ namespace sig
 		ASSERT_EQ(stl::find(caught, SIGABRT), caught.end());
 	});
 }
-
+*/
 //
 // ANSI escape sequence
 //
