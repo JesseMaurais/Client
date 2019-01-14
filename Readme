@@ -13,6 +13,8 @@ Using the compilers
 * GCC
 * Clang
 * CL
+Checked with analyzers
+* PVS-Studio
 
 Build
 =====
@@ -25,7 +27,7 @@ Name
 The name arose out of my mistaken belief in the existence of a phonetically
 similar word, which I later discovered was "unison". That is, I believed that
 "unisis" was word meaning something like 'a coordination between parts so that
-they fulfill a purpose together which they could not have done alone.' The way
-I feel when this happens with software is the reason I enjoy programming and
-why I choose to follow the UNIX philosophy. It also describes how I feel about
+they fulfill a purpose together which they could not have done alone.' The joy
+I feel when this happens with software is the reason that I code and also why
+I choose to follow the UNIX philosophy. It also describes how I feel about
 successful relationships, and in particular romantic ones.
