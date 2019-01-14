@@ -1,4 +1,6 @@
 # Configurations for the Microsoft CL compiler usually used in Visual C++
-CFLAGS = -nologo -permissive- -EHsc -Z7 -std:$(STD)
-COUT = -Fe
-OBJ = $(SRC=.cpp=.obj)
+FLAGS = -nologo -permissive- -EHsc
+USESTD = -std:
+DEBUG = -Z7
+OUT = -Fe
+OBJ = $(SRC:.cpp=.obj)

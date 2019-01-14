@@ -25,7 +25,7 @@ clean:
 	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG)
 
 $(EXE): $(OBJ)
-	$(CXX) $(CFLAGS) $(COUT)$(EXE) $(OBJ)
+	$(CXX) $(CFLAGS) $(OUT)$(EXE) $(OBJ)
 
 $(TSK): $(LOG)
 	plog-converter -a 'GA:1,2' -t html $(LOG) -o $@

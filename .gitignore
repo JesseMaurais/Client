@@ -2,6 +2,8 @@ sys.ini
 test
 *.exe
 *.obj
+*.ilk
+*.pdb
 *.o
 *.d
 *.i

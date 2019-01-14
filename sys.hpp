@@ -230,6 +230,8 @@ namespace sys
 #define O_TRUNC  _O_TRUNC
 #define O_WRONLY _O_WRONLY
 
+using STAT_STRUCT = struct _stat;
+
 namespace sys
 {
 	namespace sep
@@ -249,7 +251,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using stat_t = struct _stat;
+	using stat_t = ::STAT_STRUCT;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;
@@ -326,7 +328,7 @@ namespace sys
 	private:
 
 		#if defined(__WIN32__)
-		std::intptr_t ptr = 0;
+		void* ptr = nullptr;
 		#endif
 	};
 }

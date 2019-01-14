@@ -113,7 +113,7 @@ namespace sys::io
 		basic_membuf() = default;
 		basic_membuf(size_type n)
 		{
-			setbufsz(n);
+			this->setbufsz(n);
 		}
 
 		base *setbuf(char_type *s, size_type n) override

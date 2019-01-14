@@ -69,9 +69,9 @@ namespace sys
 
 	struct Handle
 	{
-		HANDLE h = nullptr;
+		HANDLE h;
 
-		Handle(HANDLE h)
+		Handle(HANDLE h = nullptr)
 		{
 			this->h = h;
 		}
@@ -170,6 +170,7 @@ namespace sys
 			si.hStdOutput = pair[1].write.h;
 			si.hStdError = pair[2].write.h;
 
+			std::cerr << *argv << std::endl << cmd << std::endl;
 			BOOL const ok = CreateProcessA
 			(
 				*argv, // application
@@ -307,14 +308,14 @@ namespace sys
 				protect = PAGE_READONLY;
 			}
 
-			off_t const end = size + offset;
+			off_t const end = size + off;
 			HANDLE const h = CreateFileMapping
 			(
 				(HANDLE) _get_osfhandle(fd),
 				nullptr, // security attributes
 				protect,
-				DWORD_HI(end),
-				DWORD_LO(end),
+				HIWORD(end),
+				LOWORD(end),
 				nullptr // name
 			);
 			if (not h)
@@ -345,13 +346,13 @@ namespace sys
 			(
 				h,
 				desired,
-				DWORD_HI(off),
-				DWORD_LO(off),
+				HIWORD(off),
+				LOWORD(off),
 				size
 			);
 			if (address)
 			{
-				ptr = static_cast<std::intptr_t>(h);
+				ptr = static_cast<LPVOID>(h);
 			}
 			else
 			{
