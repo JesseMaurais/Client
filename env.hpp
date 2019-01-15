@@ -30,10 +30,12 @@ namespace env
 	extern list const& path;
 	extern view const& user;
 	extern view const& home;
+	extern view const& root;
 	extern view const& pwd;
 	extern view const& lang;
 	extern view const& shell;
 	extern view const& tmpdir;
+	extern view const& rootdir;
 	extern view const& desktop;
 	extern view const& prompt;
 }

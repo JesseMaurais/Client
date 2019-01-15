@@ -166,10 +166,12 @@ namespace env
 		f << "[Fake Environment]" << std::endl;
 		f << fmt::key_value("HOME", env::home) << std::endl;
 		f << fmt::key_value("USER", env::user) << std::endl;
+		f << fmt::key_value("ROOT", env::root) << std::endl;
 		f << fmt::key_value("PWD", env::pwd) << std::endl;
 		f << fmt::key_value("LANG", env::lang) << std::endl;
 		f << fmt::key_value("SHELL", env::shell) << std::endl;
 		f << fmt::key_value("TMPDIR", env::tmpdir) << std::endl;
+		f << fmt::key_value("ROOTDIR", env::rootdir) << std::endl;
 		f << fmt::key_value("DESKTOP", env::desktop) << std::endl;
 		f << fmt::key_value("PROMPT", env::prompt) << std::endl;
 	});

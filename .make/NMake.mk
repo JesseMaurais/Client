@@ -16,9 +16,9 @@ include .make/SH.mk
 
 !if "$(CXX)" != "$(CXX:clang=)"
 include .make/Clang.mk
-!elseifdef "$(CXX)" != "$(CXX:g++=)"
+!elseif "$(CXX)" != "$(CXX:g++=)"
 include .make/GCC.mk
-!elseifdef "$(CXX)" != "$(CXX:cl=)"
+!elseif "$(CXX)" != "$(CXX:cl=)"
 include .make/CL.mk
 !else
 !message Cannot determine your compiler

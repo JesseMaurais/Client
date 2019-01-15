@@ -46,7 +46,7 @@ namespace sys
 	unsigned long winerr(char const *prefix)
 	{
 		LPSTR data = nullptr;
-		LPSTR addr = reinterpret_cast<LPSTR>(&data);
+		LPSTR address = reinterpret_cast<LPSTR>(&data);
 		constexpr DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 		DWORD const code = GetLastError();
 		DWORD const size = FormatMessageA
@@ -55,7 +55,7 @@ namespace sys
 		 nullptr, // source
 		 code,    // message
 		 lang,    // language
-		 addr,    // buffer
+		 address, // buffer
 		 0,       // size
 		 nullptr  // arguments
 		);
@@ -104,8 +104,10 @@ namespace sys
 		{
 			SECURITY_ATTRIBUTES sa;
 			ZeroMemory(&sa, sizeof sa);
+
 			sa.nLength = sizeof sa;
 			sa.bInheritHandle = TRUE;
+
 			ok = CreatePipe
 			(
 				&read.h,
@@ -172,19 +174,19 @@ namespace sys
 			si.hStdOutput = pair[1].write.h;
 			si.hStdError = pair[2].write.h;
 
-			constexpr DWORD flag = CREATE_NO_WINDOW;
+			constexpr DWORD flag = DETACHED_PROCESS;
 			BOOL const ok = CreateProcessA
 			(
-				*argv, // application
-				cmd,   // command line
-				NULL,  // process attributes
-				NULL,  // thread attributes
-				TRUE,  // inherit handles
-				flag,  // creation flags
-				NULL,  // environment
-				NULL,  // current directory
-				&si,   // start-up info
-				&pi    // process info
+				argv[0], // application
+				cmd,     // command line
+				NULL,    // process attributes
+				NULL,    // thread attributes
+				TRUE,    // inherit handles
+				flag,    // creation flags
+				NULL,    // environment
+				NULL,    // current directory
+				&si,     // start-up info
+				&pi      // process info
 			);
 
 			if (not ok)

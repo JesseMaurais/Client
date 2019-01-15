@@ -126,12 +126,47 @@ namespace
 		{
 			if constexpr (sys::posix)
 			{
+				return ""; // omit "/" for join operations
+			}
+			else
+			if constexpr (sys::win32)
+			{
+				return sys::env::get("SYSTEMDRIVE");
+			}
+		}
+
+	} ROOT;
+
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			if constexpr (sys::posix)
+			{
+				return "/root";
+			}
+			else
+			if constexpr (sys::win32)
+			{
+				return sys::env::get("SYSTEMROOT");
+			}
+		}
+
+	} ROOTDIR;
+
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			if constexpr (sys::posix)
+			{
 				return sys::env::get("PWD");
 			}
 			else
 			if constexpr (sys::win32)
 			{
-				return sys::env::get("CD");
+				static char buf[FILENAME_MAX];
+				return sys::getcwd(buf, sizeof buf);
 			}
 		}
 
@@ -160,13 +195,26 @@ namespace
 		{
 			for (auto var : { "TMPDIR", "TEMP", "TMP" })
 			{
-				auto view = sys::env::get(var);
-				if (not empty(view))
+				auto u = sys::env::get(var);
+				if (not empty(u))
 				{
-					return view;
+					return u;
 				}
 			}
-			return "";
+			static fmt::string s;
+			if (empty(s))
+			{
+				if constexpr (sys::posix)
+				{
+					s = fmt::join({env::root, "tmp"}, sys::sep::dir);
+				}
+				else
+				if constexpr (sys::win32)
+				{
+					s = fmt::join({env::rootdir, "Temp"}, sys::sep::dir);
+				}
+			}
+			return s;
 		}
 
 	} TMPDIR;
@@ -229,10 +277,12 @@ namespace env
 	list const& path = PATH;
 	view const& user = USER;
 	view const& home = HOME;
+	view const& root = ROOT;
 	view const& pwd = PWD;
 	view const& lang = LANG;
 	view const& shell = SHELL;
 	view const& tmpdir = TMPDIR;
+	view const& rootdir = ROOTDIR;
 	view const& desktop = DESKTOP;
 	view const& prompt = PROMPT;
 }
