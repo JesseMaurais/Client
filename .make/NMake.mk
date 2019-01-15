@@ -1,19 +1,36 @@
 
-# Assume the environment
+# Guess the environment
 
+!ifdef COMSPEC
+# Probably WIN32
 include .make/CMD.mk
+!elseifdef SHELL
+# Probably POSIX
+include .make/SH.mk
+!else
+# Bad way
+!error Cannot determine the operating environment 
+!endif
 
-# Assume the compiler
+# Guess the compiler
 
+!if "$(CXX)" != "$(CXX:clang=)"
+include .make/Clang.mk
+!elseifdef "$(CXX)" != "$(CXX:g++=)"
+include .make/GCC.mk
+!elseifdef "$(CXX)" != "$(CXX:cl=)"
 include .make/CL.mk
+!else
+!message Cannot determine your compiler
+!endif
 
 # Custom configurations
-
-CFLAGS = $(FLAGS)
 
 !ifndef NDEBUG
 CFLAGS = $(CFLAGS) $(DEBUG)
 !endif
+
+CFLAGS = $(CFLAGS) $(FLAGS)
 
 !ifdef STD
 CFLAGS = $(CFLAGS) $(USESTD)$(STD)

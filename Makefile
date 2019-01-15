@@ -3,9 +3,11 @@
 STD = c++17
 SRC = test.cpp file.cpp mem.cpp dbg.cpp env.cpp sig.cpp sys.cpp xdg.cpp
 BIN = test
+
 LOG = $(SRC:.cpp=.log)
 INL = $(SRC:.cpp=.i)
-TSK = .make/Task.htm
+CHK = .make/CppCheck.xml
+PVS = .make/PVS.htm
 
 # Configurations for system, compiler, and make
 
@@ -19,7 +21,9 @@ EXE = $(BIN)$(EXEEXT)
 
 all: $(EXE)
 
-task: $(TSK)
+check: $(CHK)
+
+verify: $(PVS)
 
 clean:
 	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb
@@ -27,11 +31,14 @@ clean:
 $(EXE): $(OBJ)
 	$(CXX) $(CFLAGS) $(OUT)$(EXE) $(OBJ)
 
-$(TSK): $(LOG)
-	plog-converter -a 'GA:1,2' -t html $(LOG) -o $@
+$(CHK): $(SRC)
+	cppcheck --enable=all $(SRC) 2>$@
+
+$(PVS): $(LOG)
+	plog-converter -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2' -t html $(LOG) -o $@
 
 .cpp.log:
-	$(CXX) $< -E -o $*.i
+	$(CXX) $< -E > $*.i
 	pvs-studio --cfg .make/PVS.cfg --i-file $*.i --output-file $@ --source-file $<
 
 .cpp.o:

@@ -25,18 +25,18 @@ else
 ifneq ($(findstring cl, $(CXX)),)
 include .make/CL.mk
 else
-$(warning Cannot determine your compiler flags)
+$(warning Cannot determine your compiler)
 endif # CL
 endif # GCC
 endif # Clang
 
 # Compiler commands
 
-CFLAGS += $(FLAGS)
-
 ifdef STD
 CFLAGS += $(USESTD)$(STD)
 endif 
+
+CFLAGS += $(FLAGS)
 
 ifndef NDEBUG
 CFLAGS += $(DEBUG)
