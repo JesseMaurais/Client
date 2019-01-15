@@ -22,7 +22,8 @@ static char const* program_image;
 int main(int argc, char **argv)
 {
 	program_image = argv[0];
-	return debug::run(argv[1]);
+	auto const pattern = 1 < argc ? argv[1] : nullptr;
+	return debug::run(pattern);
 }
 
 //

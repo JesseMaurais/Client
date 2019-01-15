@@ -18,7 +18,7 @@ namespace sys::file
 		}
 
 		mem = std::make_unique<sys::mem>();
-		address = mem->map(fd, size);
+		address = mem->map(fd, size, offset);
 		length = size;
 	}
 

@@ -1,5 +1,7 @@
 # Common configuration variables for the project
 
+BUGMSG = Known GCC bug up to version 8.2 causes internal compiler error
+
 STD = c++17
 SRC = test.cpp file.cpp mem.cpp dbg.cpp env.cpp sig.cpp sys.cpp xdg.cpp
 BIN = test

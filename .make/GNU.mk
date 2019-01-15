@@ -20,6 +20,7 @@ ifneq ($(findstring clang, $(CXX)),)
 include .make/Clang.mk
 else
 ifneq ($(findstring g++, $(CXX)),)
+$(warning $(BUGMSG))
 include .make/GCC.mk
 else
 ifneq ($(findstring cl, $(CXX)),)
@@ -32,16 +33,13 @@ endif # Clang
 
 # Compiler commands
 
-CFLAGS += $(DEF)
+CFLAGS += $(DEF) $(FLAGS) $(WARN)
 
 ifdef STD
 CFLAGS += $(USESTD)$(STD)
 endif 
 
-CFLAGS += $(FLAGS)
-
 ifndef NDEBUG
 CFLAGS += $(DEBUG)
 endif
-
 

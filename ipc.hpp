@@ -85,8 +85,8 @@ namespace sys::io
 		 template <class, class> class basic_stream
 		>
 		class basic_pstream
-		: public basic_stream<Char, Traits<Char>>
-		, public basic_procbuf<Char, Traits, Alloc>
+		: public basic_procbuf<Char, Traits, Alloc>
+		, public basic_stream<Char, Traits<Char>>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
 			using procbuf = basic_procbuf<Char, Traits, Alloc>;

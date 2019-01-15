@@ -12,7 +12,7 @@ namespace fmt
 	{
 		struct iterator
 		{
-			friend class widen;
+			friend struct widen;
 
 			iterator operator++()
 			{

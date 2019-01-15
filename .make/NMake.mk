@@ -17,6 +17,7 @@ include .make/CMD.mk
 !if "$(CXX)" != "$(CXX:clang=)"
 include .make/Clang.mk
 !elseif "$(CXX)" != "$(CXX:g++=)"
+!message $(BUGMSG)
 include .make/GCC.mk
 !elseif "$(CXX)" != "$(CXX:cl=)"
 include .make/CL.mk
@@ -26,13 +27,11 @@ include .make/CL.mk
 
 # Custom configurations
 
-CFLAGS = $(CFLAGS) $(DEF)
+CFLAGS = $(CFLAGS) $(DEF) $(FLAGS) $(WARN)
 
 !ifdef STD
 CFLAGS = $(CFLAGS) $(USESTD)$(STD)
 !endif
-
-CFLAGS = $(CFLAGS) $(FLAGS)
 
 !ifndef NDEBUG
 CFLAGS = $(CFLAGS) $(DEBUG)
