@@ -19,11 +19,14 @@ namespace sys::file
 
 		mem = std::make_unique<sys::mem>();
 		address = mem->map(fd, size);
-		this->size = size;
+		length = size;
 	}
 
 	memory::~memory()
 	{
-		mem->unmap(address, size);
+		if (mem and address)
+		{
+			mem->unmap(address, length);
+		}
 	}
 }

@@ -291,7 +291,7 @@ namespace ipc
 
 		sys::file::descriptor file;
 		file.open(__FILE__, sys::file::in);
-		sys::file::memory map(file.get());
+		sys::file::view map(file.get());
 
 		fmt::string_view const view = map;
 		auto pos = view.find("Self referencing find.");

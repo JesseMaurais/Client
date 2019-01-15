@@ -21,9 +21,9 @@ EXE = $(BIN)$(EXEEXT)
 
 all: $(EXE)
 
-check: $(CHK)
+cppcheck: $(CHK)
 
-verify: $(PVS)
+pvscheck: $(PVS)
 
 clean:
 	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb
@@ -32,7 +32,7 @@ $(EXE): $(OBJ)
 	$(CXX) $(CFLAGS) $(OUT)$(EXE) $(OBJ)
 
 $(CHK): $(SRC)
-	cppcheck --enable=all $(SRC) 2>$@
+	cppcheck --force --quiet --enable=all $(SRC)
 
 $(PVS): $(LOG)
 	plog-converter -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2' -t html $(LOG) -o $@

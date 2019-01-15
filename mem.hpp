@@ -17,24 +17,47 @@ namespace sys::file
 		memory(int fd, ssize_t size = -1, size_t offset = 0);
 		~memory();
 
-		operator fmt::string_view() const
+		void* data()
 		{
-			auto data = static_cast<char*>(address);
-			return fmt::string_view(data, size);
+			return address;
 		}
 
-		operator fmt::wstring_view() const
+		const void* data() const
 		{
-			auto data = static_cast<wchar_t*>(address);
-			return fmt::wstring_view(data, size);
+			return address;
+		}
+
+		size_t size() const
+		{
+			return length;
 		}
 
 	private:
 		
 		std::unique_ptr<sys::mem> mem;
-		void* address =  nullptr;
-		size_t size = 0;
+		void* address = nullptr;
+		size_t length = 0;
 	};
+
+	template <typename Char, template <typename> class Traits = std::char_traits>
+	class basic_view : memory
+	{
+		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
+
+	public:
+
+		operator string_view() const
+		{
+			auto const string = reinterpret_cast<Char const*>(data());
+			auto const length = size() / sizeof (Char);
+			return string_view(string, length);
+		}
+
+		using memory::memory;
+	};
+
+	using view = basic_view<char>;
+	using wview = basic_view<wchar_t>;
 }
 
 #endif // file
