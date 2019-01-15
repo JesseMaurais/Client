@@ -1,12 +1,12 @@
 
 # Guess the environment
 
-!ifdef COMSPEC
-# Probably WIN32
-include .make/CMD.mk
-!elseifdef SHELL
+!ifdef SHELL
 # Probably POSIX
 include .make/SH.mk
+!elseifdef COMSPEC
+# Probably WIN32
+include .make/CMD.mk
 !else
 # Bad way
 !error Cannot determine the operating environment 
@@ -26,13 +26,15 @@ include .make/CL.mk
 
 # Custom configurations
 
-!ifndef NDEBUG
-CFLAGS = $(CFLAGS) $(DEBUG)
+CFLAGS = $(CFLAGS) $(DEF)
+
+!ifdef STD
+CFLAGS = $(CFLAGS) $(USESTD)$(STD)
 !endif
 
 CFLAGS = $(CFLAGS) $(FLAGS)
 
-!ifdef STD
-CFLAGS = $(CFLAGS) $(USESTD)$(STD)
+!ifndef NDEBUG
+CFLAGS = $(CFLAGS) $(DEBUG)
 !endif
 

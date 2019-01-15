@@ -1,13 +1,13 @@
 
 # Guess the environment
 
-ifdef COMSPEC
-# Probably WIN32
-include .make/CMD.mk
-else
 ifdef SHELL
 # Probably POSIX
 include .make/SH.mk
+else
+ifdef COMSPEC
+# Probably WIN32
+include .make/CMD.mk
 else
 # Bad way
 $(error Cannot determine the operating environment)
@@ -31,6 +31,8 @@ endif # GCC
 endif # Clang
 
 # Compiler commands
+
+CFLAGS += $(DEF)
 
 ifdef STD
 CFLAGS += $(USESTD)$(STD)
