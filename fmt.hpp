@@ -202,7 +202,7 @@ namespace fmt
 	{
 		string s;
 		wchar_type cc;
-		for (wchar_t w : widen(u)) s += to_string(cc.toupper(w));
+		for (wchar_t const w : widen(u)) s += to_string(cc.toupper(w));
 		return s;
 	}
 
@@ -210,7 +210,7 @@ namespace fmt
 	{
 		string s;
 		wchar_type cc;
-		for (wchar_t w : widen(u)) s += to_string(cc.tolower(w));
+		for (wchar_t const w : widen(u)) s += to_string(cc.tolower(w));
 		return s;
 	}
 
@@ -240,7 +240,7 @@ namespace fmt
 		return trim_begin(s) != trim_end(s);
 	}
 
-	inline string join(span_view const& tok, string const& del = "")
+	inline string join(span_view const& tok, string_view del = "")
 	{
 		string s;
 		using size = span_view::size_type;

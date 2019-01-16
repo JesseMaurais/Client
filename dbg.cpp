@@ -18,7 +18,7 @@ namespace
 	TEST(_dumb, throw "You should not run hidden unit tests."); 
 
 	using map = std::map<debug::test*, std::string>;
-	std::string::size_type max_length = 0;
+	std::string::size_type max_size = 0;
 
 	map& registry()
 	{
@@ -31,9 +31,10 @@ namespace debug
 {
 	test::test(char const *name)
 	{
-		registry().emplace(this, name);
-		auto const length = std::string(name).length();
-		max_length = std::max(max_length, length);
+		auto [it, unique] = registry().emplace(this, name);
+		assert(unique);
+		auto const size = it->second.size();
+		max_size = std::max(max_size, size);
 	}
 
 	test::~test()
@@ -43,7 +44,10 @@ namespace debug
 
 	int run(char const *expression)
 	{
-		if (not expression) expression = "^[^_](.*?)";
+		if (not expression)
+		{
+			expression = "^[^_](.*?)";
+		}
 		std::regex pattern(expression);
 
 		using namespace io;
@@ -56,7 +60,7 @@ namespace debug
 		{
 			if (std::regex_match(name, pattern))
 			{
-				std::string const indent(max_length - name.length(), ' ');
+				std::string const indent(max_size - name.size(), ' ');
 				out << faint << name << intense_off << indent;
 				that->run();
 				out << fg_green << "\tok" << fg_off << eol;
