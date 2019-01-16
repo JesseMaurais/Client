@@ -38,7 +38,7 @@ namespace fmt
 {
 	using span_view = std::experimental::span<fmt::string_view>;
 	using wspan_view = std::experimental::span<fmt::wstring_view>;
-	`template <typename... Args> using basic_span_view = std::span<basic_string_view<Args...>>;
+	template <typename... Args> using basic_span_view = std::span<basic_string_view<Args...>>;
 }
 #else
 //#warning Cannot find an implementation of std::span. Using std::vector instead.

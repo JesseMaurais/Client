@@ -138,8 +138,9 @@ namespace sys::file
 
 	struct process
 	{
-		explicit process(int fd[3] = nullptr)
+		explicit process(int fd[3] = nullptr, pid_t id = -1)
 		{
+			pid = id;
 			set(fd);
 		}
 

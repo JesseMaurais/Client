@@ -36,7 +36,7 @@ $(EXE): $(OBJ)
 $(CHK): $(SRC)
 	cppcheck --force --quiet --enable=all $(SRC)
 
-$(PVS): $(LOG)
+$(PVS): $(SRC) $(LOG)
 	plog-converter -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2' -t html $(LOG) -o $@
 
 .cpp.log:
