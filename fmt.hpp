@@ -2,10 +2,8 @@
 #define fmt_hpp
 
 #include <locale>
-#include <sstream>
 #include "str.hpp"
 #include "wcs.hpp"
-#include "alg.hpp"
 
 namespace fmt
 {
@@ -50,25 +48,25 @@ namespace fmt
 	template <>
 	inline string to_string(char const*const& s)
 	{
-		return to_string(string_view(s));
+		return s ? string(s) : string();
 	}
 
 	template <>
 	inline wstring to_wstring(wchar_t const*const& w)
 	{
-		return to_wstring(wstring_view(w));
+		return w ? wstring(w) : wstring();
 	}
 
 	template <>
 	inline string to_string(char *const& s)
 	{
-		return to_string(string_view(s));
+		return s ? string(s) : string();
 	}
 
 	template <>
 	inline wstring to_wstring(wchar_t *const& w)
 	{
-		return to_wstring(wstring_view(w));
+		return w ? wstring(w) : wstring();
 	}
 
 	template <>
@@ -178,7 +176,14 @@ namespace fmt
 
 	inline bool empty(span_view const &v)
 	{
-		return v.empty() or stl::all_of(v, [](auto u) { return empty(u); });
+		for (auto const& u : v)
+		{
+			if (not empty(u))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	inline bool terminated(string_view s)
@@ -198,7 +203,6 @@ namespace fmt
 		string s;
 		wchar_type cc;
 		for (wchar_t w : widen(u)) s += to_string(cc.toupper(w));
-		s.shrink_to_fit();
 		return s;
 	}
 
@@ -207,7 +211,6 @@ namespace fmt
 		string s;
 		wchar_type cc;
 		for (wchar_t w : widen(u)) s += to_string(cc.tolower(w));
-		s.shrink_to_fit();
 		return s;
 	}
 
@@ -239,15 +242,15 @@ namespace fmt
 
 	inline string join(span_view const& tok, string const& del = "")
 	{
-		std::stringstream ss;
+		string s;
 		using size = span_view::size_type;
 		size const z = tok.size();
 		for (size i = 0; i < z; ++i)
 		{
-			if (i) ss << del;
-			ss << tok[i];
+			if (i) s += del;
+			s += tok[i];
 		}
-		return ss.str();
+		return s;
 	}
 
 	inline span_view split(string_view u, string_view v)
@@ -257,26 +260,26 @@ namespace fmt
 		size const uz = u.size(), vz = v.size();
 		for (size i = 0, j = u.find(v); i < uz; j = u.find(v, i))
 		{
-			size const n = (uz < j ? uz : j) - i;
-			if (n) tok.emplace_back(u.substr(i, n));
-			i += n + vz;
+			size const k = uz < j ? uz : j;
+			if (i < k) tok.emplace_back(u.substr(i, k - i));
+			i = k + vz;
 		}
 		return tok;
 	}
 
 	inline string replace(string_view u, string_view v, string_view w)
 	{
-		std::stringstream ss;
+		string s;
 		using size = string_view::size_type;
 		size const uz = u.size(), vz = v.size();
 		for (size i = 0, j = u.find(v); i < uz; j = u.find(v, i))
 		{
-			size const n = (uz < j ? uz : j) - i;
-			ss << u.substr(i, n);
-			if (j < uz) ss << w;
-			i += n + vz;
+			size const k = uz < j ? uz : j;
+			s += u.substr(i, k - i);
+			if (j < uz) s += w;
+			i = k + vz;
 		}
-		return ss.str();
+		return s;
 	}
 
 	// Common parsing of key/value pairs

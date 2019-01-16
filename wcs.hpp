@@ -13,14 +13,9 @@ namespace fmt
 		{
 			friend struct widen;
 
-			bool operator==(iterator const& it) const
-			{
-				return it.view.empty() ? view.empty() : it.view == view;
-			}
-
 			bool operator!=(iterator const& it) const
 			{
-				return not this->operator==(it);
+				return it.view != view;
 			}
 
 			wchar_t operator*() const
@@ -80,32 +75,27 @@ namespace fmt
 		{
 			friend struct narrow;
 
-			bool operator==(iterator const& it) const
-			{
-				return it.view.empty() ? view.empty() : it.view == view;
-			}
-
 			bool operator!=(iterator const& it) const
 			{
-				return not this->operator==(it);
+				return it.view != view;
 			}
 
 			char operator*() const
 			{
-				return mbs[size - off];
+				return bytes[size - off];
 			}
 
 			iterator operator++()
 			{
-				if (--off <= 0) convert();
+				if (--off < 1) convert();
 				return *this;
 			}
 
 		private:
 
 			iterator(fmt::wstring_view w = L"")
-			: view(w), size(0), mbs(MB_CUR_MAX, '\0')
-			{ 
+			: view(w), size(0), bytes(MB_CUR_MAX, '\0')
+			{
 				std::memset(&state, 0, sizeof state);
 				convert();
 			}
@@ -113,14 +103,14 @@ namespace fmt
 			void convert()
 			{
 				if (0 < size) view = view.substr(1);
-				off = size = std::wcrtomb(mbs.data(), view.front(), &state);
+				off = size = std::wcrtomb(bytes.data(), view.front(), &state);
 			}
 
 			fmt::wstring_view view;
 			std::mbstate_t state;
 			std::ptrdiff_t size;
 			std::ptrdiff_t off;
-			std::string mbs;
+			std::string bytes;
 		};
 
 		narrow(fmt::wstring_view w)
