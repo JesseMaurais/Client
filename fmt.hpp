@@ -1,11 +1,10 @@
 #ifndef fmt_hpp
 #define fmt_hpp
 
-#include <codecvt>
 #include <locale>
 #include <sstream>
 #include "str.hpp"
-#include "it.hpp"
+#include "wcs.hpp"
 #include "alg.hpp"
 
 namespace fmt
@@ -87,35 +86,33 @@ namespace fmt
 	// Wide & narrow conversions
 
 	template <>
-	inline string to_string(wstring const& w)
-	{
-		using utf8 = std::codecvt_utf8<wchar_t>;
-		std::wstring_convert<utf8> convert;
-		return convert.to_bytes(w);
-	}
-
-	template <>
-	inline wstring to_wstring(string const& s)
-	{
-		using utf8 = std::codecvt_utf8<wchar_t>;
-		std::wstring_convert<utf8> convert;
-		return convert.from_bytes(s);
-	}
-
-	template <>
 	inline string to_string(wstring_view const& w)
 	{
-		using utf8 = std::codecvt_utf8<wchar_t>;
-		std::wstring_convert<utf8> convert;
-		return convert.to_bytes(w.data(), w.data() + w.size());
+		string s;
+		for (char const c : narrow(w)) s.push_back(c);
+		s.shrink_to_fit();
+		return s;
 	}
 
 	template <>
 	inline wstring to_wstring(string_view const& s)
 	{
-		using utf8 = std::codecvt_utf8<wchar_t>;
-		std::wstring_convert<utf8> convert;
-		return convert.from_bytes(s.data(), s.data() + s.size());
+		wstring w;
+		for (wchar_t const c : widen(s)) w.push_back(c);
+		w.shrink_to_fit();
+		return w;
+	}
+
+	template <>
+	inline string to_string(wstring const& w)
+	{
+		return to_string(wstring_view(w));
+	}
+
+	template <>
+	inline wstring to_wstring(string const& s)
+	{
+		return to_wstring(string_view(s));
 	}
 
 	template <>
@@ -193,26 +190,15 @@ namespace fmt
 
 	// Basic string formatting tools
 
-	struct ctype : std::ctype<char> { };
-	struct wctype : std::ctype<wchar_t> { };
-	enum char_mask : std::ctype_base::mask
-	{
-		space = std::ctype_base::space,
-		print = std::ctype_base::print,
-		cntrl = std::ctype_base::cntrl,
-		upper = std::ctype_base::upper,
-		lower = std::ctype_base::lower,
-		alpha = std::ctype_base::alpha,
-		digit = std::ctype_base::digit,
-		punct = std::ctype_base::punct,
-		blank = std::ctype_base::blank,
-		graph = std::ctype_base::graph,
-	};
+	struct char_type : std::ctype<char> { };
+	struct wchar_type : std::ctype<wchar_t> { };
+
+	using char_mask = std::ctype_base::mask;
 
 	inline string to_upper(string_view u)
 	{
-		wctype cc;
 		string s;
+		char_type cc;
 		for (wchar_t w : widen(u)) s += to_string(cc.toupper(w));
 		s.shrink_to_fit();
 		return s;
@@ -220,19 +206,19 @@ namespace fmt
 
 	inline string to_lower(string_view u)
 	{
-		wctype cc;
 		string s;
+		wchar_type cc;
 		for (wchar_t w : widen(u)) s += to_string(cc.tolower(w));
 		s.shrink_to_fit();
 		return s;
 	}
 
 	template <typename Iterator>
-	Iterator skip(Iterator begin, Iterator end, char_mask type = space)
+	Iterator skip(Iterator begin, Iterator end, char_mask mask = char_type::space)
 	{
-		ctype cc;
+		char_type cc;
 		Iterator it;
-		for (it = begin; it != end and cc.is(type, *it); ++it);
+		for (it = begin; it != end and cc.is(mask, *it); ++it);
 		return it;
 	}
 

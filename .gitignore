@@ -1,5 +1,6 @@
 sys.ini
 test
+*.swp
 *.exe
 *.obj
 *.ilk

@@ -39,7 +39,11 @@ namespace sys::file
 		size_t length = 0;
 	};
 
-	template <typename Char, template <typename> class Traits = std::char_traits>
+	template
+	<
+	 typename Char,
+	 template <typename> class Traits = std::char_traits
+	>
 	class basic_view : memory
 	{
 		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
@@ -48,9 +52,9 @@ namespace sys::file
 
 		operator string_view() const
 		{
-			auto const string = reinterpret_cast<Char const*>(data());
+			auto const address = reinterpret_cast<Char const*>(data());
 			auto const length = size() / sizeof (Char);
-			return string_view(string, length);
+			return string_view(address, length);
 		}
 
 		using memory::memory;
