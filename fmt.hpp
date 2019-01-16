@@ -90,7 +90,6 @@ namespace fmt
 	{
 		string s;
 		for (char const c : narrow(w)) s.push_back(c);
-		s.shrink_to_fit();
 		return s;
 	}
 
@@ -99,7 +98,6 @@ namespace fmt
 	{
 		wstring w;
 		for (wchar_t const c : widen(s)) w.push_back(c);
-		w.shrink_to_fit();
 		return w;
 	}
 
@@ -198,7 +196,7 @@ namespace fmt
 	inline string to_upper(string_view u)
 	{
 		string s;
-		char_type cc;
+		wchar_type cc;
 		for (wchar_t w : widen(u)) s += to_string(cc.toupper(w));
 		s.shrink_to_fit();
 		return s;

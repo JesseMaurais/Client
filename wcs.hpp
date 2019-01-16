@@ -97,7 +97,7 @@ namespace fmt
 
 			iterator operator++()
 			{
-				if (--off < 0) convert();
+				if (--off <= 0) convert();
 				return *this;
 			}
 
