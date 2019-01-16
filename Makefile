@@ -8,7 +8,7 @@ BIN = test
 
 LOG = $(SRC:.cpp=.log)
 INL = $(SRC:.cpp=.i)
-CHK = .make/CppCheck.xml
+CHK = .make/CppCheck.htm
 PVS = .make/PVS.htm
 
 # Configurations for system, compiler, and make
@@ -35,6 +35,7 @@ $(EXE): $(OBJ)
 
 $(CHK): $(SRC)
 	cppcheck --force --quiet --enable=all $(SRC)
+	#cppcheck-htmlreport --report-dir=.make --source-dir=. --file=$*.xml 
 
 $(PVS): $(SRC) $(LOG)
 	plog-converter -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2' -t html $(LOG) -o $@
