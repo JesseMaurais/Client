@@ -138,10 +138,10 @@ namespace sys
 					return -1;
 				}
 
-				HANDLE h = n ? pair[n].write.h : pair[n].read.h;
+				HANDLE h = n ? pair[n].read.h : pair[n].write.h;
 
 				constexpr DWORD flag = HANDLE_FLAG_INHERIT;
-				if (not SetHandleInformation(h, flag, flag))
+				if (not SetHandleInformation(h, flag, 0))
 				{
 					winerr("SetHandleInformation");
 					_set_errno(EPERM);
@@ -177,14 +177,14 @@ namespace sys
 			constexpr DWORD flag = DETACHED_PROCESS;
 			BOOL const ok = CreateProcessA
 			(
-				argv[0], // application
+				nullptr, // application
 				cmd,     // command line
-				NULL,    // process attributes
-				NULL,    // thread attributes
+				nullptr, // process attributes
+				nullptr, // thread attributes
 				TRUE,    // inherit handles
 				flag,    // creation flags
-				NULL,    // environment
-				NULL,    // current directory
+				nullptr, // environment
+				nullptr, // current directory
 				&si,     // start-up info
 				&pi      // process info
 			);
@@ -196,7 +196,7 @@ namespace sys
 				return -1;
 			}
 
-			Handle(pi.hThread); // close
+			Handle scoped(pi.hThread); // close
 
 			for (int n : { 0, 1, 2 })
 			{
@@ -363,7 +363,7 @@ namespace sys
 			else
 			{
 				sys::winerr("MapViewOfFile");
-				Handle(h); // close
+				Handle scoped(h); // close
 			}
 			return address;
 		}
@@ -400,8 +400,9 @@ namespace sys
 			}
 			else
 			{
-				Handle(static_cast<HANDLE>(ptr));
+				Handle scoped(static_cast<HANDLE>(ptr));
 			}
+			(void) size;
 		}
 		#else // defined(__POSIX__)
 		{

@@ -82,12 +82,12 @@ namespace fmt
 
 			char operator*() const
 			{
-				return bytes[size - off];
+				return bytes[off];
 			}
 
 			iterator operator++()
 			{
-				if (--off < 1) convert();
+				if (++off >= size) convert();
 				return *this;
 			}
 
@@ -102,8 +102,9 @@ namespace fmt
 
 			void convert()
 			{
+				off = 0;
 				if (0 < size) view = view.substr(1);
-				off = size = std::wcrtomb(bytes.data(), view.front(), &state);
+				size = std::wcrtomb(bytes.data(), view.front(), &state);
 			}
 
 			fmt::wstring_view view;

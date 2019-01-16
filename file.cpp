@@ -304,7 +304,7 @@ namespace sig
 	{
 		sys::socket::pollfd p;
 		p.fd = sys::socket::descriptor(sys::file::socket::s);
-		p.events = events;
+		p.events = (short) events;
 
 		set.connect(p.fd, [this](int events) { notify(events); });
 		fds.push_back(p);

@@ -1,6 +1,7 @@
 #include "mem.hpp"
 #include "err.hpp"
 #include "sys.hpp"
+#include "int.hpp"
 
 namespace sys::file
 {
@@ -18,8 +19,8 @@ namespace sys::file
 		}
 
 		mem = std::make_unique<sys::mem>();
-		address = mem->map(fd, size, offset);
-		length = size;
+		length = to_size(size);
+		address = mem->map(fd, length, offset);
 	}
 
 	memory::~memory()

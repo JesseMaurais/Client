@@ -29,6 +29,10 @@ include .make/CL.mk
 
 CFLAGS = $(CFLAGS) $(DEF) $(FLAGS) $(WARN)
 
+!ifdef CA
+CFLAGS = $(CFLAGS) $(ANALYZE)
+!endif
+
 !ifdef STD
 CFLAGS = $(CFLAGS) $(USESTD)$(STD)
 !endif

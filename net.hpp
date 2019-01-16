@@ -108,7 +108,7 @@ namespace sys::socket
 	{
 		wsadata(WORD version)
 		{
-			if (error = ::WSAStartup(version, this))
+			if (error = ::WSAStartup(version, this); error)
 			{
 				sys::winerr("WSAStartup");
 			}

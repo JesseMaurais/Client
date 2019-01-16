@@ -13,7 +13,7 @@ namespace sys::socket
 namespace sys::file
 {
 	using size_t = std::size_t;
-	using ssize_t = std::ptrdiff_t;
+	using ssize_t = std::streamsize;
 	using openmode = std::ios_base::openmode;
 	using arguments = std::initializer_list<char const*>;
 	
@@ -45,10 +45,10 @@ namespace sys::file
 			close();
 		}
 
-		int set(int fd = -1)
+		int set(int fd_in = -1)
 		{
-			int const tmp = this->fd;
-			this->fd = fd;
+			int const tmp = fd;
+			fd = fd_in;
 			return tmp;
 		}
 
@@ -138,7 +138,7 @@ namespace sys::file
 
 	struct process
 	{
-		explicit process(int fd[3] = nullptr, pid_t id = -1)
+		explicit process(int fd[3] = nullptr, int id = -1)
 		{
 			pid = id;
 			set(fd);
@@ -190,7 +190,7 @@ namespace sys::file
 	protected:
 
 		descriptor file[3];
-		std::intptr_t pid;
+		int pid;
 	};
 
 	struct socket

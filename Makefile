@@ -17,7 +17,7 @@ include .make/Configure.mk
 
 # Common make rules for the project
 
-.SUFFIXES: .cpp .hpp .obj .o .d .i .log .ilk .pdb
+.SUFFIXES: .cpp .hpp .obj .o .d .i .log .xml .htm .ilk .pdb
 
 EXE = $(BIN)$(EXEEXT)
 

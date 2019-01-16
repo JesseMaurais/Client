@@ -32,9 +32,9 @@ int main(int argc, char **argv)
 
 namespace dbg
 {
-	TEST(sane, ASSERT(true and not false));
-	TEST(sane_equality, ASSERT_EQ(true, true));
-	TEST(sane_inequality, ASSERT_NOT_EQ(true, false));
+	//TEST(sane, ASSERT(true and not false));
+	//TEST(sane_equality, ASSERT_EQ(true, true));
+	//TEST(sane_inequality, ASSERT_NOT_EQ(true, false));
 }
 
 //

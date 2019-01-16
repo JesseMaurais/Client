@@ -35,6 +35,10 @@ endif # Clang
 
 CFLAGS += $(DEF) $(FLAGS) $(WARN)
 
+ifdef CA
+CFLAGS += $(ANALYZE)
+endif
+
 ifdef STD
 CFLAGS += $(USESTD)$(STD)
 endif 

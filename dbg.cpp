@@ -81,8 +81,8 @@ namespace debug
 			out << fg_red << "\tUnknown exception" << fg_off << eol;
 		}
 
-		auto fg = errors ? fg_yellow : fg_blue;
-		out << fg << errors << " errors detected." << fg_off << eol;
+		auto fg_color = errors ? fg_yellow : fg_blue;
+		out << fg_color << errors << " errors detected." << fg_off << eol;
 
 		out << reset << eol;
 		return errors;
