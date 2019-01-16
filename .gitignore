@@ -10,3 +10,4 @@ test
 *.i
 *.log
 *.xml
+*.plist

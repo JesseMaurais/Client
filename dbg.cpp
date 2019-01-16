@@ -31,7 +31,7 @@ namespace debug
 {
 	test::test(char const *name)
 	{
-		auto [it, unique] = registry().emplace(this, name);
+		auto const [it, unique] = registry().emplace(this, name);
 		assert(unique);
 		auto const size = it->second.size();
 		max_size = std::max(max_size, size);

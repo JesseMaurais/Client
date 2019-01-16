@@ -84,7 +84,7 @@ namespace sys::file
 
 	protected:
 
-		int fd;
+		int fd = -1;
 	};
 
 	struct pipe
