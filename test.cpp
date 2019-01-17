@@ -277,9 +277,9 @@ namespace ipc
 	{
 		sys::io::pstream ps { "rev" };
 		ps << HELLO_WORLD << std::endl;
+		ps.close(0);
 		std::string s;
 		ASSERT(std::getline(ps, s));
-		std::cerr << s << std::endl;
 	});
 
 	TEST(ipc_mem,

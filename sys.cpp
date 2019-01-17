@@ -145,15 +145,6 @@ namespace sys
 					winerr("SetHandleInformation");
 					return -1;
 				}
-
-				DWORD mode = PIPE_READMODE_BYTE | PIPE_NOWAIT;
-				h = n ? pair[n].write.h : pair[n].read.h;
-
-				if (not SetNamedPipeHandleState(h, &mode, nullptr, nullptr))
-				{
-					winerr("SetNamedPipeHandleState");
-					return -1;
-				}
 			}
 
 			char cmd[MAX_PATH];
