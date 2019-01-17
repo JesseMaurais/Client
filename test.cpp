@@ -7,9 +7,11 @@
 #include "ios.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
+#include "net.hpp"
 #include "sig.hpp"
 #include "ipc.hpp"
 #include "mem.hpp"
+#include "file.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -271,7 +273,7 @@ namespace io
 
 namespace ipc
 {
-	TEST(_child_process,
+	TEST(_ipc_stream_child,
 	{
 		std::string s;
 		ASSERT(std::getline(std::cin, s));
@@ -281,7 +283,7 @@ namespace ipc
 
 	TEST(ipc_stream,
 	{
-		sys::io::pstream ps { program_image, "_child_process" };
+		sys::io::pstream ps { program_image, "_ipc_stream_child" };
 		ps << HELLO_WORLD << std::endl;
 		std::string s;
 		ASSERT(std::getline(ps, s)); 

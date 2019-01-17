@@ -104,10 +104,10 @@ namespace fmt
 			{
 				off = 0;
 				if (0 < size) view = view.substr(1);
-				//size = std::wcrtomb(bytes.data(), view.front(), &state);
-				std::size_t value;
-				::wcrtomb_s(&value, bytes.data(), bytes.size(), view.front(), &state);
-				size = value;
+				size = std::wcrtomb(bytes.data(), view.front(), &state);
+				//std::size_t value;
+				//::wcrtomb_s(&value, bytes.data(), bytes.size(), view.front(), &state);
+				//size = value;
 			}
 
 			fmt::wstring_view view;

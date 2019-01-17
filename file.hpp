@@ -199,7 +199,7 @@ namespace sys::file
 
 		operator bool() const;
 		virtual ~socket();
-		socket(int family, int type, int proto);
+		socket(int family, int type, int proto = 0);
 		socket accept(address& name, size_t *length = nullptr) const;
 		bool connect(address const& name, size_t length) const;
 		bool bind(address const& name, size_t length) const;
