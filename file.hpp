@@ -59,7 +59,7 @@ namespace sys::file
 
 		operator bool() const
 		{
-			return fail(fd);
+			return not fail(fd);
 		}
 
 		template <class C>
@@ -116,9 +116,9 @@ namespace sys::file
 		{
 			for (int n : { 0, 1 })
 			{
-				if (file[n]) return true;
+				if (file[n]) return false;
 			}
-			return false;
+			return true;
 		}
 
 		const descriptor& operator[](size_t n) const
@@ -138,10 +138,9 @@ namespace sys::file
 
 	struct process
 	{
-		explicit process(int fd[3] = nullptr, int id = -1)
+		process() : pid(-1)
 		{
-			pid = id;
-			set(fd);
+			set();
 		}
 
 		void set(int fd[3] = nullptr)
@@ -160,13 +159,18 @@ namespace sys::file
 			}
 		}
 
+		auto get() const
+		{
+			return pid;
+		}
+
 		operator bool() const
 		{
 			for (int n : { 0, 1, 2 })
 			{
-				if (file[n]) return true;
+				if (file[n]) return false;
 			}
-			return false;
+			return not fail(pid);
 		}
 
 		const descriptor& operator[](size_t n) const
@@ -190,7 +194,7 @@ namespace sys::file
 	protected:
 
 		descriptor file[3];
-		int pid;
+		std::intptr_t pid;
 	};
 
 	struct socket

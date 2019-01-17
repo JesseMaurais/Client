@@ -118,7 +118,7 @@ namespace sys::file
 
 	void process::terminate()
 	{
-		pid = sys::term(pid);
+		sys::term(pid);
 		for (int n : { 0, 1, 2 })
 		{
 			if (file[n]) file[n].close();

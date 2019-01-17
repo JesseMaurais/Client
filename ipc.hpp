@@ -27,10 +27,6 @@ namespace sys::io
 		using size_type = typename base::size_type;
 		using arguments = sys::file::arguments;
 
-		basic_procbuf(int fd[3] = nullptr)
-		: file(fd)
-		{ }
-
 		void set(int fd[3] = nullptr)
 		{
 			file.set(fd);

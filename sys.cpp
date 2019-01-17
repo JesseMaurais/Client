@@ -140,11 +140,18 @@ namespace sys
 
 				HANDLE h = n ? pair[n].read.h : pair[n].write.h;
 
-				constexpr DWORD flag = HANDLE_FLAG_INHERIT;
-				if (not SetHandleInformation(h, flag, 0))
+				if (not SetHandleInformation(h, HANDLE_FLAG_INHERIT, false))
 				{
 					winerr("SetHandleInformation");
-					_set_errno(EPERM);
+					return -1;
+				}
+
+				DWORD mode = PIPE_READMODE_BYTE | PIPE_NOWAIT;
+				h = n ? pair[n].write.h : pair[n].read.h;
+
+				if (not SetNamedPipeHandleState(h, &mode, nullptr, nullptr))
+				{
+					winerr("SetNamedPipeHandleState");
 					return -1;
 				}
 			}
@@ -155,11 +162,7 @@ namespace sys
 			{
 				int n = std::snprintf(cmd + j, sizeof cmd - j, "%s ", argv[i]);
 				if (0 < n) j += n;
-				else
-				{
-					_set_errno(E2BIG);
-					return -1;
-				}
+				else return -1;
 			}
 
 			PROCESS_INFORMATION pi;
@@ -192,7 +195,6 @@ namespace sys
 			if (not ok)
 			{
 				winerr("CreateProcess");
-				_set_errno(ECHILD);
 				return -1;
 			}
 
@@ -208,9 +210,10 @@ namespace sys
 		#else // defined(__POSIX__)
 		{
 			sys::file::pipe pair[3];
-			if (pair[0] or pair[1] or pair[2])
+
+			for (auto const& p : pair)
 			{
-				return -1;
+				if (not p) return -1;
 			}
 
 			pid_t const pid = fork();
@@ -254,7 +257,7 @@ namespace sys
 		#endif
 	}
 
-	pid_t term(pid_t pid)
+	void term(pid_t pid)
 	{
 		#if defined(__WIN32__)
 		{
@@ -268,7 +271,6 @@ namespace sys
 			{
 				sys::winerr("TerminateProcess");
 			}
-			return -1;
 		}
 		#else // defined(__POSIX__)
 		{
@@ -276,7 +278,6 @@ namespace sys
 			{
 				sys::perror("kill", pid);
 			}
-			return -1;
 		}
 		#endif
 	}

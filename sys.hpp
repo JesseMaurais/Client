@@ -315,7 +315,8 @@ namespace sys
 	}
 
 	pid_t exec(int fd[3], char **argv);
-	pid_t term(pid_t pid);
+	void term(pid_t pid);
+	int wait(pid_t pid);
 
 	struct mem
 	{

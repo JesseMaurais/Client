@@ -1,6 +1,6 @@
 # Configurations for the Microsoft CL compiler usually used in Visual C++
 ANALYZE = -analyze
-WARN = -W4 # -Wall gives too many warnings in system headers
+WARN = -W4 -D_CRT_SECURE_NO_WARNINGS # -Wall gives too many warnings in system headers
 FLAGS = -nologo -permissive- -EHsc
 USESTD = -std:
 DEBUG = -Z7
