@@ -116,7 +116,7 @@ namespace sys::file
 		{
 			for (int n : { 0, 1 })
 			{
-				if (file[n]) return false;
+				if (not file[n]) return false;
 			}
 			return true;
 		}
@@ -168,7 +168,7 @@ namespace sys::file
 		{
 			for (int n : { 0, 1, 2 })
 			{
-				if (file[n]) return false;
+				if (not file[n]) return false;
 			}
 			return not fail(pid);
 		}
