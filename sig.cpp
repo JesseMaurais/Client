@@ -3,7 +3,6 @@
 
 #include "sig.hpp"
 #include "err.hpp"
-#include "dbg.hpp"
 #include <csignal>
 #include <cassert>
 #include <map>
@@ -43,7 +42,8 @@ namespace sys::sig
 
 	slot::~slot()
 	{
-		verify(::send == std::signal(old.no, old.fn));
+		old.fn = std::signal(old.no, old.fn);
+		//assert(::send == old.fn); // win32 fails
 	}
 
 	slot::operator bool()

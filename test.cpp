@@ -19,9 +19,12 @@
 
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
+char const* program_image;
+
 int main(int argc, char **argv)
 {
 	(void) argc;
+	program_image = argv[0];
 	return debug::run(argv[1]);
 }
 
@@ -86,6 +89,7 @@ namespace stl
 #define HELLO_WIDE L"Hello, World!"
 #define HELLO_UPPER "HELLO, WORLD!"
 #define HELLO_LOWER "hello, world!"
+#define DLROW_OLLEH "!dlroW ,olleH"
 
 namespace fmt
 {
@@ -270,12 +274,14 @@ namespace io
 
 namespace ipc
 {
-	TEST(ipc_echo,
+	TEST(ipc_rev,
 	{
-		sys::io::pstream ps { "echo", HELLO_WORLD };
+		sys::io::pstream ps { "rev" };
+		ps << HELLO_WORLD;
+		ps.close(0);
 		std::string s;
 		ASSERT(std::getline(ps, s));
-		ASSERT_EQ(s, HELLO_WORLD);
+		ASSERT_EQ(s, DLROW_OLLEH);
 	});
 
 	TEST(ipc_mem,

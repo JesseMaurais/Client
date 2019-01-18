@@ -39,10 +39,10 @@ namespace sys::file
 			close();
 		}
 
-		int set(int fd = -1)
+		int set(int fd_ = -1)
 		{
 			int const tmp = fd;
-			this->fd = fd;
+			fd = fd_;
 			return tmp;
 		}
 
