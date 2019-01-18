@@ -314,7 +314,7 @@ namespace sys
 		return invalid == value;
 	}
 
-	pid_t exec(int fd[3], char **argv);
+	pid_t exec(int fd[3], char const** argv);
 	void term(pid_t pid);
 	int wait(pid_t pid);
 

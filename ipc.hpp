@@ -1,6 +1,8 @@
 #ifndef ipc_hpp
 #define ipc_hpp
 
+#include <vector>
+#include <initializer_list>
 #include <iostream>
 #include "file.hpp"
 #include "buf.hpp"
@@ -25,7 +27,7 @@ namespace sys::io
 
 		using char_type = typename base::char_type;
 		using size_type = typename base::size_type;
-		using arguments = sys::file::arguments;
+		using arguments = std::initializer_list<char const*>;
 
 		void set(int fd[3] = nullptr)
 		{
@@ -34,7 +36,9 @@ namespace sys::io
 
 		bool execute(arguments args)
 		{
-			return file.execute(args);
+			std::vector<char const*> argv(args);
+			argv.push_back(nullptr); // terminator
+			return file.execute(argv.data());
 		}
 
 		void terminate()

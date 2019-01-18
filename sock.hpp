@@ -1,7 +1,7 @@
 #ifndef sock_hpp
 #define sock_hpp
 
-#include "file.hpp"
+#include <cstddef>
 
 namespace sys::socket
 {
@@ -13,6 +13,8 @@ namespace sys::file
 	struct socket
 	{
 		using address = sys::socket::address;
+		using ssize_t = std::ptrdiff_t;
+		using size_t = std::size_t;
 
 		operator bool() const;
 		virtual ~socket();
@@ -64,10 +66,10 @@ namespace sig
 {
 	struct socket : sys::file::socket
 	{	
-		socket(int family, int type, int proto, int events);
+		socket(int family, int type, int proto, short events);
 		~socket();
 
-		virtual void notify(int event) = 0;
+		virtual void notify(short events) = 0;
 		static int poll(int timeout = -1);
 	};
 }

@@ -8,20 +8,6 @@
 #include <iostream>
 #include <signal.h>
 
-#if defined(__WIN32__)
-extern char **_environ;
-namespace sys
-{
-	char **environment = _environ;
-}
-#else // defined(__POSIX__)
-extern char **environ;
-namespace sys
-{
-	char **environment = ::environ;
-}
-#endif
-
 #if __has_include(<io.h>)
 #include <io.h>
 #endif
@@ -41,6 +27,20 @@ namespace sys
 
 #if __has_include(<sys/wait.h>)
 #include <sys/wait.h>
+#endif
+
+#if defined(__WIN32__)
+extern char **_environ;
+namespace sys
+{
+	char **environment = _environ;
+}
+#else // defined(__POSIX__)
+extern char **environ;
+namespace sys
+{
+	char **environment = ::environ;
+}
 #endif
 
 namespace sys
@@ -75,7 +75,7 @@ namespace sys
 	HANDLE openprocess(pid_t pid)
 	{
 		HANDLE const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-		if (not h) sys::winerr("OpenProcess");
+		if (not h) winerr("OpenProcess");
 		return h;
 	}
 
@@ -136,7 +136,7 @@ namespace sys
 	
 	#endif // __WIN32__
 
-	pid_t exec(int fd[3], char **argv)
+	pid_t exec(int fd[3], char const**argv)
 	{
 		#if defined(__WIN32__)
 		{
@@ -251,7 +251,11 @@ namespace sys
 				}
 			}
 
-			int const res = execvp(argv[0], argv);
+			std::vector<char*> args;
+			for (int i = 0; argv[i]; ++i) args.push_back(const_cast<char*>(argv[i]));
+			args.push_back(nullptr);
+
+			int const res = execvp(args.front(), args.data());
 			perror("execvp");
 			std::exit(res);
 		}
@@ -373,7 +377,7 @@ namespace sys
 			 protect,     // page access
 			 HIWORD(end), // end position (hi)
 			 LOWORD(end), // end position (lo)
-			 nullptr      // name
+			 nullptr      // unique name
 			);
 			
 			if (not h)

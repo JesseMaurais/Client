@@ -1,25 +1,22 @@
 #ifndef file_hpp
 #define file_hpp
 
-#include <initializer_list>
-#include <cstdint>
+#include <cstddef>
 #include <ios>
 
 namespace sys::file
 {
 	using size_t = std::size_t;
-	using ssize_t = std::streamsize;
+	using ssize_t = std::ptrdiff_t;
 	using openmode = std::ios_base::openmode;
-	using arguments = std::initializer_list<char const*>;
-	
-	extern size_t bufsiz;
 
-	constexpr auto app   = std::ios_base::app;
-	constexpr auto bin   = std::ios_base::binary;
-	constexpr auto in    = std::ios_base::in;
-	constexpr auto out   = std::ios_base::out;
-	constexpr auto trunc = std::ios_base::trunc;
-	constexpr auto ate   = std::ios_base::ate;
+	constexpr openmode
+		app   = std::ios_base::app,
+		bin   = std::ios_base::binary,
+		in    = std::ios_base::in,
+		out   = std::ios_base::out,
+		trunc = std::ios_base::trunc,
+		ate   = std::ios_base::ate;
 
 	template <typename T>
 	constexpr bool fail(T const value)
@@ -27,6 +24,8 @@ namespace sys::file
 		constexpr T invalid = -1;
 		return invalid == value;
 	}
+	
+	extern size_t bufsiz;
 
 	struct descriptor
 	{
@@ -111,9 +110,9 @@ namespace sys::file
 		{
 			for (int n : { 0, 1 })
 			{
-				if (not file[n]) return false;
+				if (file[n]) return true;
 			}
-			return true;
+			return false;
 		}
 
 		const descriptor& operator[](size_t n) const
@@ -161,10 +160,6 @@ namespace sys::file
 
 		operator bool() const
 		{
-			for (int n : { 0, 1, 2 })
-			{
-				if (not file[n]) return false;
-			}
 			return not fail(pid);
 		}
 
@@ -178,8 +173,9 @@ namespace sys::file
 			return file[n];
 		}
 
-		bool execute(arguments);
+		bool execute(char const** argv);
 		void terminate();
+		int wait();
 
 		void close(int n)
 		{
