@@ -1,5 +1,5 @@
-#ifndef wcs_hpp
-#define wcs_hpp
+#ifndef its_hpp
+#define its_hpp
 
 #include <cwchar>
 #include <cstring>

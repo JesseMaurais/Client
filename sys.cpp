@@ -39,6 +39,10 @@ namespace sys
 #include <sys/mman.h>
 #endif
 
+#if __has_include(<sys/wait.h>)
+#include <sys/wait.h>
+#endif
+
 namespace sys
 {
 	#if defined(__WIN32__)
@@ -66,6 +70,13 @@ namespace sys
 			LocalFree(data);
 		}
 		return code;
+	}
+
+	HANDLE openprocess(pid_t pid)
+	{
+		HANDLE const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+		if (not h) sys::winerr("OpenProcess");
+		return h;
 	}
 
 	struct Handle
@@ -168,19 +179,18 @@ namespace sys
 			si.hStdOutput = pair[1].write.h;
 			si.hStdError = pair[2].write.h;
 
-			constexpr DWORD flag = DETACHED_PROCESS;
 			BOOL const ok = CreateProcessA
 			(
-				nullptr, // application
-				cmd,     // command line
-				nullptr, // process attributes
-				nullptr, // thread attributes
-				TRUE,    // inherit handles
-				flag,    // creation flags
-				nullptr, // environment
-				nullptr, // current directory
-				&si,     // start-up info
-				&pi      // process info
+			 nullptr,          // application
+			 cmd,              // command line
+			 nullptr,          // process attributes
+			 nullptr,          // thread attributes
+			 true,             // inherit handles
+			 DETACHED_PROCESS, // creation flags
+			 nullptr,          // environment
+			 nullptr,          // current directory
+			 &si,              // start-up info
+			 &pi               // process info
 			);
 
 			if (not ok)
@@ -252,13 +262,8 @@ namespace sys
 	{
 		#if defined(__WIN32__)
 		{
-			HANDLE const h = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
-			if (not h)
-			{
-				sys::winerr("OpenProcess");
-			}
-			else
-			if (not TerminateProcess(h, 0))
+			HANDLE const h = openprocess(pid);
+			if (h and not TerminateProcess(h, 0))
 			{
 				sys::winerr("TerminateProcess");
 			}
@@ -269,6 +274,60 @@ namespace sys
 			{
 				sys::perror("kill", pid);
 			}
+		}
+		#endif
+	}
+
+	int wait(pid_t pid)
+	{
+		#if defined(__WIN32__)
+		{
+			DWORD code = -1;
+			HANDLE const h = openprocess(pid);
+			if (h)
+			{
+				if (WaitForSingleObject(h, INFINITE) == WAIT_FAILED)
+				{
+					winerr("WaitForSingleObject");
+				}
+				else
+				if (not GetExitCodeProcess(h, &code))
+				{
+					winerr("GetExitCodeProcess");
+				}
+			}
+			return code;
+		}
+		#else // defined(__POSIX__)
+		{
+			int status = -1;
+			pid_t const parent = pid;
+			do
+			{
+				pid = waitpid(parent, &status, 0);
+				if (fail(pid))
+				{
+					perror("waitpid");
+				}
+			}
+			while (pid != parent);
+
+			if (WIFEXITED(status))
+			{
+				return WEXITSTATUS(status);
+			}
+			else
+			if (WIFSTOPPED(status))
+			{
+				return WSTOPSIG(status);
+			}
+			else
+			if (WIFSIGNALED(status))
+			{
+				return WTERMSIG(status);
+			}
+
+			return status; // unreachable?
 		}
 		#endif
 	}
@@ -309,13 +368,14 @@ namespace sys
 			off_t const end = size + off;
 			HANDLE const h = CreateFileMapping
 			(
-				(HANDLE) _get_osfhandle(fd),
-				nullptr, // security attributes
-				protect,
-				HIWORD(end),
-				LOWORD(end),
-				nullptr // name
+			 (HANDLE) _get_osfhandle(fd),
+			 nullptr,     // security attributes
+			 protect,     // page access
+			 HIWORD(end), // end position (hi)
+			 LOWORD(end), // end position (lo)
+			 nullptr      // name
 			);
+			
 			if (not h)
 			{
 				winerr("CreateFileMapping");
@@ -342,12 +402,13 @@ namespace sys
 
 			auto address = MapViewOfFile
 			(
-				h,
-				desired,
-				HIWORD(off),
-				LOWORD(off),
-				size
+			 h,           // file handle
+			 desired,     // desired access
+			 HIWORD(off), // begin position (hi)
+			 LOWORD(off), // begin position (lo)
+			 size         // size in bytes
 			);
+
 			if (address)
 			{
 				ptr = static_cast<LPVOID>(h);
@@ -357,6 +418,7 @@ namespace sys
 				sys::winerr("MapViewOfFile");
 				Handle scoped(h); // close
 			}
+
 			return address;
 		}
 		#else // defined(__POSIX__)
@@ -375,7 +437,7 @@ namespace sys
 			if (MAP_FAILED == address)
 			{
 				sys::perror("mmap");
-				return nullptr;
+				address = nullptr;
 			}
 			return address;
 		}

@@ -19,13 +19,10 @@
 
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
-static char const* program_image;
-
 int main(int argc, char **argv)
 {
-	program_image = argv[0];
-	auto const pattern = 1 < argc ? argv[1] : nullptr;
-	return debug::run(pattern);
+	(void) argc;
+	return debug::run(argv[1]);
 }
 
 //
@@ -218,7 +215,7 @@ namespace env
 //
 // Signal handlers
 //
-/*
+
 namespace sig
 {
 	TEST(sig_handler,
@@ -242,7 +239,7 @@ namespace sig
 		ASSERT_EQ(stl::find(caught, SIGABRT), caught.end());
 	});
 }
-*/
+
 //
 // ANSI escape sequence
 //
@@ -273,13 +270,12 @@ namespace io
 
 namespace ipc
 {
-	TEST(ipc_stream,
+	TEST(ipc_echo,
 	{
-		sys::io::pstream ps { "rev" };
-		ps << HELLO_WORLD << std::endl;
-		ps.close(0);
+		sys::io::pstream ps { "echo", HELLO_WORLD };
 		std::string s;
 		ASSERT(std::getline(ps, s));
+		ASSERT_EQ(s, HELLO_WORLD);
 	});
 
 	TEST(ipc_mem,

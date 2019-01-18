@@ -3,7 +3,7 @@
 
 #include <locale>
 #include "str.hpp"
-#include "wcs.hpp"
+#include "its.hpp"
 
 namespace fmt
 {
