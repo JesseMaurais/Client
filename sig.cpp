@@ -17,6 +17,9 @@ namespace
 
 	void send(int signo)
 	{
+		// Insecure but portable signal persistence
+		verify(SIG_ERR != std::signal(signo, send));
+
 		event(signo).send([signo](auto const &pair)
 		{
 			pair.second(signo);
@@ -27,9 +30,9 @@ namespace
 namespace sys::sig
 {
 	slot::slot(int no, sys::sig::observer fn)
-	: base(&::event(no), fn)
+	: base(&event(no), fn)
 	{
-		old.fn = std::signal(no, ::send);
+		old.fn = std::signal(no, send);
 		if (SIG_ERR == old.fn)
 		{
 			sys::perror("signal", no);
@@ -42,8 +45,7 @@ namespace sys::sig
 
 	slot::~slot()
 	{
-		old.fn = std::signal(old.no, old.fn);
-		//assert(::send == old.fn); // win32 fails
+		verify(send == std::signal(old.no, old.fn));
 	}
 
 	slot::operator bool()
