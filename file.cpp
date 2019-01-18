@@ -120,5 +120,10 @@ namespace sys::file
 			pid = -1;
 		}
 	}
+	
+	int process::wait()
+	{
+		return sys::wait(pid);
+	}
 }
 
