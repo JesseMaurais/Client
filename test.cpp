@@ -3,6 +3,7 @@
 
 #include "dbg.hpp"
 #include "alg.hpp"
+#include "int.hpp"
 #include "fmt.hpp"
 #include "ios.hpp"
 #include "xdg.hpp"
@@ -19,34 +20,58 @@
 
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
-char const* program_image;
-
 int main(int argc, char **argv)
 {
 	(void) argc;
-	program_image = argv[0];
 	return debug::run(argv[1]);
 }
+
+// Some strings to use in tests
+
+#define HELLO_WORLD "Hello, World!"
+#define HELLO_WIDE L"Hello, World!"
+#define HELLO_UPPER "HELLO, WORLD!"
+#define HELLO_LOWER "hello, world!"
+#define DLROW_OLLEH "!dlroW ,olleH"
 
 //
 // Sanity test the unit test code itself
 //
 
-namespace dbg
+namespace
 {
 	//TEST(sane, ASSERT(true and not false));
 	//TEST(sane_equality, ASSERT_EQ(true, true));
 	//TEST(sane_inequality, ASSERT_NOT_EQ(true, false));
+	//TEST_THROW(sane_negative, (void) 0);
+}
+
+//
+// Checked integer conversions
+//
+
+namespace
+{
+	TEST(int_narrow, ASSERT_EQ('*', to_narrow<char>(42)));
+	TEST(int_unsigned, ASSERT_EQ(5u, to_unsigned(5)));
+	TEST(int_signed, ASSERT_EQ(42, to_signed(42u)));
+
+	// negative tests
+
+	TEST_THROW(int_loss, (void) to_narrow<char>(257));
+	TEST_THROW(int_sign, (void) to_unsigned(-1));
 }
 
 //
 // Base template algorithms
 //
 
-namespace stl
+namespace
 {
 	TEST(alg_sort,
 	{
+		using namespace stl;
+
 		std::vector num { 5, 7, 3, 9, 6, 1, 2, 0, 4, 8 };
 		sort(num, [](int a, int b) { return a < b; });
 		ASSERT_EQ(num, (std::vector { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
@@ -54,6 +79,8 @@ namespace stl
 
 	TEST(alg_find,
 	{
+		using namespace stl;
+
 		std::vector const pow2 { 2, 4, 8, 16, 32, 64, 128, 256 };
 		ASSERT_EQ(find(pow2, 13), end(pow2));
 		ASSERT_NOT_EQ(find(pow2, 64), end(pow2));
@@ -68,6 +95,8 @@ namespace stl
 
 	TEST(alg_copy,
 	{
+		using namespace stl;
+
 		std::vector<int> u(9);
 		generate(u, [n = 0]() mutable { return ++n; });
 		ASSERT_EQ(u, (std::vector { 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
@@ -85,18 +114,13 @@ namespace stl
 // Text formatting routines
 //
 
-#define HELLO_WORLD "Hello, World!"
-#define HELLO_WIDE L"Hello, World!"
-#define HELLO_UPPER "HELLO, WORLD!"
-#define HELLO_LOWER "hello, world!"
-#define DLROW_OLLEH "!dlroW ,olleH"
-
-namespace fmt
+namespace
 {
 
 	TEST(fmt_empty,
 	{
-		ASSERT(empty(std::string { }));
+		using namespace fmt;
+		ASSERT(empty(string { }));
 		ASSERT(not empty(string { HELLO_WORLD }));
 		ASSERT(empty(string_view { }));
 		ASSERT(not empty(string_view { HELLO_WORLD }));
@@ -107,12 +131,14 @@ namespace fmt
 
 	TEST(fmt_terminated,
 	{
+		using namespace fmt;
 		ASSERT(terminated(string_view(HELLO_WORLD, 13)));
 		ASSERT(not terminated(string_view(HELLO_WORLD, 5)));
 	});
 
 	TEST(fmt_trim,
 	{
+		using namespace fmt;
 		string whitespace = " \t\n";
 		ASSERT(not trim(whitespace));
 		constexpr auto raw = " \t" HELLO_WORLD "\n";
@@ -124,12 +150,14 @@ namespace fmt
 
 	TEST(fmt_wide,
 	{
+		using namespace fmt;
 		ASSERT_EQ(to_wstring(string { HELLO_WORLD }), HELLO_WIDE);
 		ASSERT_EQ(to_string(wstring { HELLO_WIDE }), HELLO_WORLD);
 	});
 
 	TEST(fmt_case,
 	{
+		using namespace fmt;
 		ASSERT_EQ(to_upper(HELLO_WORLD), HELLO_UPPER);
 		ASSERT_EQ(to_lower(HELLO_WORLD), HELLO_LOWER);
 	});
@@ -139,12 +167,12 @@ namespace fmt
 // Operating system environment
 //
 
-namespace env
+namespace
 {
 	TEST(env_eval,
 	{
 		std::string const var = fmt::join({sys::esc::sh::first, "PATH", sys::esc::sh::second});
-		std::string const val = fmt::join(path, sys::sep::path);
+		std::string const val = fmt::join(env::path, sys::sep::path);
 		ASSERT_EQ(sys::env::eval(var), val);
 	});
 
@@ -220,7 +248,7 @@ namespace env
 // Signal handlers
 //
 
-namespace sig
+namespace
 {
 	TEST(sig_handler,
 	{
@@ -248,12 +276,12 @@ namespace sig
 // ANSI escape sequence
 //
 
-namespace io
+namespace
 {
 	TEST(ansi_params,
 	{
 		std::ostringstream ss;
-		ss << params<1, 2, 3, 4>;
+		ss << io::params<1, 2, 3, 4>;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "1;2;3;4");
 	});
@@ -261,7 +289,7 @@ namespace io
 	TEST(ansi_fg, 
 	{
 		std::ostringstream ss;
-		ss << fg_green << "GREEN" << fg_off;
+		ss << io::fg_green << "GREEN" << io::fg_off;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
 	});
@@ -272,7 +300,7 @@ namespace io
 // Inter-process communications
 //
 
-namespace ipc
+namespace
 {
 	TEST(ipc_rev,
 	{
