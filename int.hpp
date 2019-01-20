@@ -8,11 +8,15 @@
 namespace
 {
 	template <typename T> constexpr T zero { };
+	template <typename T> constexpr T maximum = std::numeric_limits<T>::max();
+	template <typename T> constexpr T minimum = std::numeric_limits<T>::lowest();
+
+	template <typename T> using as_signed = typename std::make_signed<T>::type;
+	template <typename T> using as_unsigned = typename std::make_unsigned<T>::type;
+
 	template <typename T> constexpr bool is_integral = std::is_integral<T>::value;
 	template <typename T> constexpr bool is_signed = std::is_signed<T>::value;
 	template <typename T> constexpr bool is_unsigned = std::is_unsigned<T>::value;
-	template <typename T> using as_signed = typename std::make_signed<T>::type;
-	template <typename T> using as_unsigned = typename std::make_unsigned<T>::type;
 
 	template <typename S> inline auto to_unsigned(S s)
 	{
@@ -55,9 +59,10 @@ namespace
 		static_assert(sizeof(T) < sizeof(S));
 		static_assert(is_integral<S> and is_integral<T>);
 		static_assert(is_signed<T> == is_signed<S>);
-		using L = std::numeric_limits<T>;
-		constexpr auto min = L::min();
-		constexpr auto max = L::max();
+		constexpr auto min = minimum<T>;
+		constexpr auto max = maximum<T>;
+		static_assert(S{min} <= zero<S>);
+		static_assert(zero<S> <= S{max});
 		assert(s <= S{max});
 		assert(S{min} <= s);
 		return static_cast<T>(s);

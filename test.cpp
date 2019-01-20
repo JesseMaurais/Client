@@ -36,6 +36,7 @@ int main(int argc, char **argv)
 
 //
 // Sanity test the unit test code itself
+// Disabled by default for code analyzers
 //
 
 namespace
@@ -43,7 +44,14 @@ namespace
 	//TEST(sane, ASSERT(true and not false));
 	//TEST(sane_equality, ASSERT_EQ(true, true));
 	//TEST(sane_inequality, ASSERT_NOT_EQ(true, false));
-	//TEST_THROW(sane_negative, throw "sane");
+	//TEST_FAIL(sane_throw, throw "sane");
+
+	// negatives
+	
+	//TEST(not_sane, ASSERT(false and not true));
+	//TEST(not_equal, ASSERT_EQ(true, false));
+	//TEST(not_unequal, ASSERT_NOT_EQ(true, true));
+	//TEST_FAIL(not_throw, (void) 0);
 }
 
 //
@@ -53,13 +61,13 @@ namespace
 namespace
 {
 	TEST(int_narrow, ASSERT_EQ('*', to_narrow<char>(42)));
-	TEST(int_unsigned, ASSERT_EQ(5u, to_unsigned(5)));
+	TEST(int_unsigned, ASSERT_EQ(42u, to_unsigned(42)));
 	TEST(int_signed, ASSERT_EQ(42, to_signed(42u)));
 
-	// negative tests
+	// negatives
 
-	TEST_THROW(int_loss, (void) to_narrow<char>(257));
-	TEST_THROW(int_sign, (void) to_unsigned(-1));
+	TEST_FAIL(int_loss, (void) to_narrow<char>(256));
+	TEST_FAIL(int_sign, (void) to_unsigned(-1));
 }
 
 //

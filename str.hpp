@@ -59,10 +59,13 @@ namespace fmt
 	using std::string;
 	using std::wstring;
 
-	using pair = std::pair<string, string>;
-	using wpair = std::pair<wstring, wstring>;
-	using pair_view = std::pair<string_view, string_view>;
-	using wpair_view = std::pair<wstring_view, wstring_view>;
+	template <class Char> using basic_pair = std::pair<std::basic_string<Char>, std::basic_string<Char>>;
+	template <class Char> using basic_pair_view = std::pair<basic_string_view<Char>, basic_string_view<Char>>;
+
+	using pair = basic_pair<char>;
+	using wpair = basic_pair<wchar_t>;
+	using pair_view = basic_pair_view<char>;
+	using wpair_view = basic_pair_view<wchar_t>;
 }
 
 #endif // file

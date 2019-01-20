@@ -31,7 +31,7 @@ constexpr bool DEBUG = false;
 
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))
 #define ASSERT_NOT_EQ(a, b) ASSERT((a) != (b))
-#define TEST_THROW(unit, ...) TEST(unit, try { __VA_ARGS__; } catch (...) { return; } throw "Did not throw";)
+#define TEST_FAIL(unit, ...) TEST(unit, try { __VA_ARGS__; } catch (...) { return; } throw "Did not throw";)
 
 #undef assert
 #define assert(...) ASSERT(__VA_ARGS__)
