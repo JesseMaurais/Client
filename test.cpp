@@ -43,7 +43,7 @@ namespace
 	//TEST(sane, ASSERT(true and not false));
 	//TEST(sane_equality, ASSERT_EQ(true, true));
 	//TEST(sane_inequality, ASSERT_NOT_EQ(true, false));
-	//TEST_THROW(sane_negative, (void) 0);
+	//TEST_THROW(sane_negative, throw "sane");
 }
 
 //
@@ -116,7 +116,6 @@ namespace
 
 namespace
 {
-
 	TEST(fmt_empty,
 	{
 		using namespace fmt;
@@ -293,7 +292,6 @@ namespace
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
 	});
-
 }
 
 //
