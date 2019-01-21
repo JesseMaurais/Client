@@ -15,7 +15,7 @@ namespace fmt
 
 			bool operator!=(iterator const& it) const
 			{
-				return not identical(it.view, view);
+				return not same(it.view, view);
 			}
 
 			wchar_t operator*() const
@@ -77,7 +77,7 @@ namespace fmt
 
 			bool operator!=(iterator const& it) const
 			{
-				return not identical(it.view, view);
+				return not same(it.view, view);
 			}
 
 			char operator*() const
@@ -87,7 +87,7 @@ namespace fmt
 
 			iterator operator++()
 			{
-				if (++off >= size) convert();
+				if (++off >= size) iterate();
 				return *this;
 			}
 
@@ -97,17 +97,14 @@ namespace fmt
 			: view(w), size(0), bytes(MB_CUR_MAX, '\0')
 			{
 				std::memset(&state, 0, sizeof state);
-				convert();
+				iterate();
 			}
 
-			void convert()
+			void iterate()
 			{
 				off = 0;
 				if (0 < size) view = view.substr(1);
 				size = std::wcrtomb(bytes.data(), view.front(), &state);
-				//std::size_t value;
-				//::wcrtomb_s(&value, bytes.data(), bytes.size(), view.front(), &state);
-				//size = value;
 			}
 
 			fmt::wstring_view view;
