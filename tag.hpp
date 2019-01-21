@@ -35,7 +35,7 @@ namespace tag
 
 		private:
 
-			parser(string_view input, string_view_pair marks, string_size_pair sizes)
+			iterator(string_view input, string_view_pair marks, string_size_pair sizes)
 			: view(input), mark(marks), pos(sizes)
 			{
 				iterate();
