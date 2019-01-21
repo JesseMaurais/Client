@@ -66,7 +66,7 @@ namespace fmt
 	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
 
 	template <class Char>
-	inline bool identical(basic_string_view<Char> u, basic_string_view<Char> v)
+	inline bool same(basic_string_view<Char> u, basic_string_view<Char> v)
 	{
 		return u.empty() ? v.empty() : u.size() == v.size() and u.data() == v.data();
 	}
