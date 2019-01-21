@@ -29,6 +29,7 @@ namespace sys::socket
 		::sockaddr address;
 		::sockaddr_un un;
 		::sockaddr_in in;
+		::sockaddr_in6 in6;
 	};
 
 	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
@@ -78,8 +79,8 @@ namespace sys::socket
 	{
 		::SOCKADDR_STORAGE_LH pad;
 		::SOCKADDR address;
-		::SOCKADDR_IN in;
 		::SOCKADDR_UN un;
+		::SOCKADDR_IN in;
 	};
 
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };

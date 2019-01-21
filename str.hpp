@@ -53,19 +53,44 @@ namespace fmt
 
 #include <utility>
 #include <string>
+#include <vector>
 
 namespace fmt
 {
+	template <class Type> using basic_pair = std::pair<Type, Type>;
+	template <class Char> using basic_string = std::basic_string<Char>;
+	template <class Char> using basic_string_pair = basic_pair<basic_string<Char>>;
+	template <class Char> using basic_string_view_pair = basic_pair<basic_string_view<Char>>;
+	template <class Char> using basic_string_size_pair = basic_pair<basic_string_view<Char>::size_type>;
+	template <class Char> using basic_string_vector = std::vector<basic_string<Char>>;
+	template <class Char> using basic_string_view_vector = std::vector<basic_string_view<Char>>;
+
+	template <class Char>
+	inline bool identical(basic_string_view<Char> u, basic_string_view<Char> v)
+	{
+		return u.empty() ? v.empty() : u.size() == v.size() and u.data() == v.data();
+	}
+
 	using std::string;
 	using std::wstring;
 
-	template <class Char> using basic_pair = std::pair<std::basic_string<Char>, std::basic_string<Char>>;
-	template <class Char> using basic_pair_view = std::pair<basic_string_view<Char>, basic_string_view<Char>>;
+	using string_pair = basic_string_pair<char>;
+	using wstring_pair = basic_string_pair<wchar_t>;
 
-	using pair = basic_pair<char>;
-	using wpair = basic_pair<wchar_t>;
-	using pair_view = basic_pair_view<char>;
-	using wpair_view = basic_pair_view<wchar_t>;
+	using string_view_pair = basic_string_view_pair<char>;
+	using wstring_view_pair = basic_string_view_pair<wchar_t>;
+
+	using string_size_pair = basic_string_size_pair<char>;
+	using wstring_size_pair = basic_string_size_pair<wchar_t>;
+
+	using string_vector = basic_string_vector<char>;
+	using wstring_vector = basic_string_vector<wchar_t>;
+
+	using string_view_vector = basic_string_view_vector<char>;
+	using wstring_view_vector = basic_string_view_vector<wchar_t>;
+
+	using span_view = basic_span_view<char>;
+	using wspan_view = basic_span_view<wchar_t>;
 }
 
 #endif // file

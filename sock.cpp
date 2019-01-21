@@ -6,9 +6,18 @@
 #include "net.hpp"
 #include "sig.hpp"
 #include "err.hpp"
+#include <cstring>
 
 namespace sys::file
 {
+	socket socket::domain(address& name, char const *path)
+	{
+		std::memset(&name.un, 0, sizeof name.un);
+		std::strncpy(name.un.sun_path, path, sizeof name.un.sun_path - 1);
+		name.un.sun_family = AF_LOCAL;
+		return socket(AF_LOCAL, SOCK_STREAM);
+	}
+
 	socket::socket(std::intptr_t s)
 	{
 		this->s = s;

@@ -16,6 +16,8 @@ namespace sys::file
 		using ssize_t = std::ptrdiff_t;
 		using size_t = std::size_t;
 
+		static socket domain(address& name);
+
 		operator bool() const;
 		virtual ~socket();
 		socket(int family, int type, int proto = 0);
