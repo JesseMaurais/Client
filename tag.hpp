@@ -19,7 +19,7 @@ namespace tag
 
 			bool operator!=(iterator const& it) const
 			{
-				return it.pos != pos or it.mark != mark or not identical(it.view, view);
+				return it.pos != pos or it.mark != mark or not same(it.view, view);
 			}
 
 			string_size_pair operator*() const
