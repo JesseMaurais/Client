@@ -286,7 +286,7 @@ namespace sys
 	{
 		#if defined(__WIN32__)
 		{
-			DWORD code = -1;
+			DWORD code = ~DWORD{0};
 			HANDLE const h = openprocess(pid);
 			if (h)
 			{

@@ -54,7 +54,7 @@ namespace sys::io
 				{
 					auto const diff =  max - n;
 					auto const sz = n * sizeof (char_type);
-					std::memmove(base::eback() + diff, base::eback(), to_size(sz));
+					std::memmove(base::eback() + diff, base::eback(), fmt::to_size(sz));
 					base::gbump((int) -n);
 				}
 				else
@@ -76,7 +76,7 @@ namespace sys::io
 				{
 					auto const diff = off - n;
 					auto const sz = diff * sizeof (char_type);
-					std::memmove(base::pbase(), base::pbase() + n, to_size(sz));
+					std::memmove(base::pbase(), base::pbase() + n, fmt::to_size(sz));
 					base::pbump((int) -n);
 				}
 				return n < 0 ? -1 : 0;
@@ -134,20 +134,20 @@ namespace sys::io
 
 		base *setbufsiz(size_type n)
 		{
-			buf.resize(to_size(n));
+			buf.resize(fmt::to_size(n));
 			return setbuf(buf.data(), n);
 		}
 
 		base *setbufsiz(size_type n, size_type m)
 		{
-			buf.resize(to_size(n + m));
+			buf.resize(fmt::to_size(n + m));
 			return setbuf(buf.data(), n, m);
 		}
 
 		string_view pview() const
 		{
 			auto const sz = base::pptr() - base::pbase();
-			return string_view(base::pbase(), to_size(sz));
+			return string_view(base::pbase(), fmt::to_size(sz));
 		}
 
 		string_view gview() const

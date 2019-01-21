@@ -19,7 +19,7 @@ namespace sys::file
 		}
 
 		mem = std::make_unique<sys::mem>();
-		length = to_size(size);
+		length = fmt::to_size(size);
 		address = mem->map(fd, length, offset);
 	}
 

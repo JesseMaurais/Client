@@ -169,7 +169,12 @@ namespace fmt
 		return s.empty();
 	}
 
-	inline bool empty(pair const &p)
+	inline bool empty(string_pair const& p)
+	{
+		return empty(p.first) and empty(p.second);
+	}
+
+	inline bool empty(string_view_pair const& p)
 	{
 		return empty(p.first) and empty(p.second);
 	}
@@ -289,13 +294,13 @@ namespace fmt
 		return join({u, v}, "=");
 	}
 
-	inline pair key_value(string_view u)
+	inline string_view_pair key_value(string_view u)
 	{
 		auto const m = u.size();
 		auto const n = u.find('=');
 		auto const key = u.substr(0, n);
 		auto const value = u.substr(n < m ? n + 1 : m);
-		return pair(key, value);
+		return string_view_pair(key, value);
 	}
 }
 

@@ -58,13 +58,13 @@ namespace sys::io
 		size_type xsputn(char_type const *s, size_type n) override
 		{
 			auto const sz = n * sizeof (char_type);
-			return file[0].write(s, to_size(sz));
+			return file[0].write(s, fmt::to_size(sz));
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
 			auto const sz = n * sizeof (char_type);
-			return file[1].read(s, to_size(sz));
+			return file[1].read(s, fmt::to_size(sz));
 		}
 	};
 

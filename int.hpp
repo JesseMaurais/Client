@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <limits>
 
-namespace
+namespace fmt
 {
 	template <typename T> constexpr T zero { };
 	template <typename T> constexpr T maximum = std::numeric_limits<T>::max();
@@ -59,12 +59,10 @@ namespace
 		static_assert(sizeof(T) < sizeof(S));
 		static_assert(is_integral<S> and is_integral<T>);
 		static_assert(is_signed<T> == is_signed<S>);
-		constexpr auto min = minimum<T>;
-		constexpr auto max = maximum<T>;
-		static_assert(S{min} <= zero<S>);
-		static_assert(zero<S> <= S{max});
-		assert(s <= S{max});
-		assert(S{min} <= s);
+		static_assert(S{minimum<T>} <= zero<S>);
+		static_assert(zero<S> <= S{maximum<T>});
+		assert(s <= S{maximum<T>});
+		assert(S{minimum<T>} <= s);
 		return static_cast<T>(s);
 	}
 
@@ -82,7 +80,7 @@ namespace
 
 	template <typename S> inline auto to_size(S s)
 	{
-		return to<std::size_t>(s);
+		return to<std::size_t, S>(s);
 	}
 
 	template <typename S> inline auto to_int(S s)

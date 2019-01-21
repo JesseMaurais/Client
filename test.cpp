@@ -60,14 +60,14 @@ namespace
 
 namespace
 {
-	TEST(int_narrow, ASSERT_EQ('*', to_narrow<char>(42)));
-	TEST(int_unsigned, ASSERT_EQ(42u, to_unsigned(42)));
-	TEST(int_signed, ASSERT_EQ(42, to_signed(42u)));
+	TEST(int_narrow, ASSERT_EQ('*', fmt::to_narrow<char>(42)));
+	TEST(int_unsigned, ASSERT_EQ(42u, fmt::to_unsigned(42)));
+	TEST(int_signed, ASSERT_EQ(42, fmt::to_signed(42u)));
 
 	// negatives
 
-	TEST_FAIL(int_loss, (void) to_narrow<char>(256));
-	TEST_FAIL(int_sign, (void) to_unsigned(-1));
+	TEST_FAIL(int_loss, (void) fmt::to_narrow<char>(256));
+	TEST_FAIL(int_sign, (void) fmt::to_unsigned(-1));
 }
 
 //
