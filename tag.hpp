@@ -56,7 +56,7 @@ namespace tag
 
 			size_type step(size_type n, string_view u)
 			{
-				return n < view.size() ? n + u.size() : npos;
+				return n < view.size() ? n + u.size() : view.size();
 			}
 		};
 
