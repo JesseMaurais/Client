@@ -1,7 +1,5 @@
-Synthesys
-=========
-jessemaurais@gmail.com
-
+About
+=====
 Portable systems programming interfaces for modern C++
 
 Regularly tested on
@@ -21,3 +19,7 @@ Build
 There is no library, but to build the unit tests you can simply type 'make'
 or 'nmake' depending on your environment. The authored Makefile has been
 written to work for both without change.
+
+Contact
+=======
+jessemaurais@gmail.com
