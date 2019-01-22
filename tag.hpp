@@ -19,54 +19,60 @@ namespace tag
 
 			bool operator!=(iterator const& it) const
 			{
-				return it.pos != pos or it.mark != mark or not same(it.view, view);
+				return it.next != next or it.mark != mark or not same(it.view, view);
 			}
 
 			string_size_pair operator*() const
 			{
-				return pos;
+				return step;
 			}
 
 			iterator operator++()
 			{
-				iterator(pos.second, mark.second);
-				iterator(pos.first, mark.first);
+				iterate();
 				return *this;
 			}
 
 		private:
 
-			iterator(string_view input, string_view_pair marks, string_size_pair sizes)
-			: view(input), mark(marks), pos(sizes)
-			{
-				iterate(pos.first, mark.first);
-			}
-
 			string_view const view;
 			string_view_pair const mark;
-			string_size_pair pos;
-			size_type next = 0;
+			string_size_pair step { 0, 0 };
+			size_type next;
 
-			void iterate(size_type& position, string_view marker)
+			iterator(string_view input, string_view_pair stops, string_size_pair start)
+			: view(input), mark(stops), next(start)
 			{
-				position = view.find(marker, next);
-				next = step(position, marker);
+				iterate();
 			}
 
-			size_type step(size_type n, string_view u)
+			void iterate()
 			{
-				return n < view.size() ? n + u.size() : view.size();
+				step.first = step_to(mark.first);
+				step.second = step_to(mark.second);
+			}
+
+			size_type step_to(string_view marker)
+			{
+				size_type const position = view.find(marker, next);
+				next = step_over(position, marker);
+				return position;
+			}
+
+			size_type step_over(size_type n, string_view u)
+			{
+				return n < view.size() ? n + u.size() : npos;
 			}
 		};
 
 		iterator begin() const
 		{
-			return iterator(view, mark, { 0, 0 });
+			return iterator(view, mark, 0);
 		}
 
 		iterator end() const
 		{
-			return iterator(view, mark, { npos, npos });
+			return iterator(view, mark, npos);
 		}
 
 		basic_parser(string_view input, string_view_pair marks)
