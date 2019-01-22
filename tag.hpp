@@ -29,7 +29,8 @@ namespace tag
 
 			iterator operator++()
 			{
-				iterate();
+				iterator(pos.second, mark.second);
+				iterator(pos.first, mark.first);
 				return *this;
 			}
 
@@ -38,7 +39,7 @@ namespace tag
 			iterator(string_view input, string_view_pair marks, string_size_pair sizes)
 			: view(input), mark(marks), pos(sizes)
 			{
-				iterate();
+				iterate(pos.first, mark.first);
 			}
 
 			string_view const view;
@@ -46,12 +47,10 @@ namespace tag
 			string_size_pair pos;
 			size_type next = 0;
 
-			void iterate()
+			void iterate(size_type& position, string_view marker)
 			{
-				pos.first = view.find(mark.first, next);
-				next = step(pos.first, mark.first);
-				pos.second = view.find(mark.second, next);
-				next = step(pos.second, mark.second);
+				position = view.find(marker, next);
+				next = step(position, marker);
 			}
 
 			size_type step(size_type n, string_view u)
