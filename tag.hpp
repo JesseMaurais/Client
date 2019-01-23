@@ -13,13 +13,13 @@ namespace tag
 		using string_size_pair = fmt::basic_string_size_pair<char_type>;
 		using size_type = string_view::size_type;
 
-		struct iterator
+		friend struct iterator
 		{
 			friend struct basic_parser;
 
 			bool operator!=(iterator const& it) const
 			{
-				return it.next != next or it.mark != mark or not same(it.view, view);
+				return it.next != next or it.that != that;
 			}
 
 			string_size_pair operator*() const
@@ -35,48 +35,47 @@ namespace tag
 
 		private:
 
-			string_view const view;
-			string_view_pair const mark;
+			basic_parser const* that;
 			string_size_pair step { 0, 0 };
 			size_type next;
 
-			iterator(string_view input, string_view_pair stops, string_size_pair start)
-			: view(input), mark(stops), next(start)
+			iterator(basic_parser const* parser, string_size_pair start)
+			: that(parser), next(start)
 			{
 				iterate();
 			}
 
 			void iterate()
 			{
-				step.first = step_to(mark.first);
-				step.second = step_to(mark.second);
+				step.first = step_to(that->mark.first);
+				step.second = step_to(that->mark.second);
 			}
 
-			size_type step_to(string_view marker)
+			size_type step_to(string_view mark)
 			{
-				size_type const position = view.find(marker, next);
-				next = step_over(position, marker);
-				return position;
+				size_type const pos = that->view.find(mark, next);
+				next = step_over(mark.size(), pos);
+				return pos;
 			}
 
-			size_type step_over(size_type n, string_view u)
+			size_type step_over(size_type m, size_type n) const
 			{
-				return n < view.size() ? n + u.size() : npos;
+				return n < that->view.size() ? n + m : npos;
 			}
 		};
 
 		iterator begin() const
 		{
-			return iterator(view, mark, 0);
+			return iterator(this, 0);
 		}
 
 		iterator end() const
 		{
-			return iterator(view, mark, npos);
+			return iterator(this, npos);
 		}
 
-		basic_parser(string_view input, string_view_pair marks)
-		: view(input), mark(marks)
+		basic_parser(string_view input, string_view_pair stops)
+		: view(input), mark(stops)
 		{ }
 
 	private:
