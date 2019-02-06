@@ -15,7 +15,7 @@
 #include <sys/un.h>
 #include <poll.h>
 
-namespace sys::socket
+namespace sys::net
 {
 	typedef void *pointer;
 	typedef void const *const_pointer;
@@ -54,7 +54,7 @@ namespace sys::socket
 	constexpr auto recv = ::recv;
 	constexpr auto recvfrom = ::recvfrom;
 
-} // sys::socket
+} // sys::net
 
 //
 // WIN32
@@ -67,7 +67,7 @@ namespace sys::socket
 
 #pragma comment(lib, "Ws2_32.lib")
 
-namespace sys::socket
+namespace sys::net
 {
 	typedef char *pointer;
 	typedef char const *const_pointer;
@@ -85,7 +85,7 @@ namespace sys::socket
 
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
 
-	constexpr bool fail(descriptor h) { return INVALID_SOCKET == h; }
+	constexpr bool fail(descriptor h) { return ::INVALID_SOCKET == h; }
 	inline void perror(char const *prefix) { ::_set_errno(::sys::winerr(prefix)); }
 
 	constexpr auto close = ::closesocket;
@@ -111,14 +111,14 @@ namespace sys::socket
 		{
 			if (error = ::WSAStartup(version, this); error)
 			{
-				sys::winerr("WSAStartup");
+				::sys::winerr("WSAStartup");
 			}
 		}
 		~wsadata()
 		{
 			if (not error and ::WSACleanup())
 			{
-				sys::winerr("WSACleanup");
+				::sys::winerr("WSACleanup");
 			}
 		}
 		operator bool() const
@@ -128,7 +128,7 @@ namespace sys::socket
 		int error;
 	};
 
-} // sys::socket
+} // sys::net
 
 #else
 #error Cannot find system socket header

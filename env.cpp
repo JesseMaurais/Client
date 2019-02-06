@@ -65,21 +65,6 @@ namespace
 	{
 		operator fmt::span_view() const final
 		{
-			static std::vector<fmt::string_view> v;
-			v.clear();
-			for (unsigned it = 0; sys::environment[it]; ++it)
-			{
-				v.push_back(sys::environment[it]);
-			}
-			return v;
-		}
-
-	} VARIABLES;
-
-	struct : env::list
-	{
-		operator fmt::span_view() const final
-		{
 			fmt::string_view u = sys::env::get("PATH");
 			return fmt::split(u, sys::sep::path);
 		}
@@ -273,7 +258,6 @@ namespace
 
 namespace env
 {
-	list const& variables = VARIABLES;
 	list const& path = PATH;
 	view const& user = USER;
 	view const& home = HOME;

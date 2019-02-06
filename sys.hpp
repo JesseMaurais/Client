@@ -1,12 +1,14 @@
 #ifndef sys_hpp
 #define sys_hpp
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+
 #include "os.hpp"
 #include "cc.hpp"
-
-//
-// Common
-//
 
 namespace sys
 {
@@ -47,17 +49,6 @@ constexpr bool winrt =
 #endif
 	;
 
-}
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-
-namespace sys
-{
-
 // Portable Operating System Interface
 
 constexpr long posix_version =
@@ -75,7 +66,7 @@ constexpr long posix2_version =
 	0L
 #endif
 	;
-/*
+
 constexpr long posix2_c_version =
 #if defined(_POSIX2_C_VERSION)
 	_POSIX2_C_VERSION
@@ -83,7 +74,7 @@ constexpr long posix2_c_version =
 	0L
 #endif
 	;
-*/
+
 // Single UNIX Specification
 
 constexpr long xopen_version =
@@ -305,8 +296,6 @@ namespace sys
 
 namespace sys
 {
-	extern char** environment;
-
 	template <typename T>
 	constexpr bool fail(T const value) 
 	{

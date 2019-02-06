@@ -26,7 +26,6 @@ namespace sys::env
 
 namespace env
 {
-	extern list const& variables;
 	extern list const& path;
 	extern view const& user;
 	extern view const& home;

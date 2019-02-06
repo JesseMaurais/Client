@@ -2,19 +2,19 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "sys.hpp"
-#include "str.hpp"
+#include "env.hpp"
 #include "err.hpp"
 #include "file.hpp"
 #include <iostream>
 #include <signal.h>
 
-#if __has_include(<io.h>)
-#include <io.h>
-#endif
-
 #if __has_include(<windows.h>)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#endif
+
+#if __has_include(<io.h>)
+#include <io.h>
 #endif
 
 #if __has_include(<processthreadapi.h>)
@@ -27,20 +27,6 @@
 
 #if __has_include(<sys/wait.h>)
 #include <sys/wait.h>
-#endif
-
-#if defined(__WIN32__)
-extern char **_environ;
-namespace sys
-{
-	char **environment = _environ;
-}
-#else // defined(__POSIX__)
-extern char **environ;
-namespace sys
-{
-	char **environment = ::environ;
-}
 #endif
 
 namespace sys

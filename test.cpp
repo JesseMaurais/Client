@@ -189,16 +189,6 @@ namespace
 		return f;
 	}
 
-	TEST(env_vars,
-	{
-		auto& f = outfile();
-		f << "[Environment]" << std::endl;
-		for (auto const v : (fmt::span_view) env::variables)
-		{
-			f << v << std::endl;
-		}
-	});
-
 	TEST(env_fake,
 	{
 		auto& f = outfile();
