@@ -84,7 +84,7 @@ namespace sys
 
 		int set(int flags)
 		{
-			auto const ptr = reinterpret_cast<std::intptr_t>(h);
+			auto const ptr = reinterpret_cast<intptr_t>(h);
 			int const fd = _open_osfhandle(ptr, flags);
 			h = nullptr;
 			return fd;

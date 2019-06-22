@@ -4,6 +4,7 @@
 #include <cstring>
 #include <streambuf>
 #include "int.hpp"
+#include "str.hpp"
 
 namespace sys::io
 {

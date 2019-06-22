@@ -5,6 +5,7 @@
 #include "alg.hpp"
 #include "int.hpp"
 #include "fmt.hpp"
+#include "tag.hpp"
 #include "ios.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
@@ -167,6 +168,37 @@ namespace
 		using namespace fmt;
 		ASSERT_EQ(to_upper(HELLO_WORLD), HELLO_UPPER);
 		ASSERT_EQ(to_lower(HELLO_WORLD), HELLO_LOWER);
+	});
+
+	TEST(fmt_delimiter,
+	{
+		using namespace fmt;
+		string_view u = "A,B,C,D";
+		delimiter del {u, ","};
+		for (auto const d : del)
+		{
+			auto const v = u.substr(d.first, d.second);
+			std::cout << v << std::endl;
+		}
+	});
+
+	TEST(fmt_parse,
+	{
+		using namespace fmt;
+		string_view u = "A<B>C<D>";
+		parser p(u, { "<", ">"});
+		string_vector t;
+		for (const auto r : p)
+		{
+			auto const s = u.substr(r.first, r.second);
+			t.emplace_back(s);
+		}
+		std::cout << t.size() << std::endl;
+		ASSERT_EQ(t.size(), 4);
+		ASSERT_EQ(t[0], "A");
+		ASSERT_EQ(t[1], "B");
+		ASSERT_EQ(t[2], "C");
+		ASSERT_EQ(t[3], "D");
 	});
 }
 

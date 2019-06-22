@@ -57,11 +57,11 @@ namespace fmt
 
 namespace fmt
 {
-	template <class Type> using basic_pair = std::pair<Type, Type>;
+	template <class Type> using pair = std::pair<Type, Type>;
 	template <class Char> using basic_string = std::basic_string<Char>;
-	template <class Char> using basic_string_pair = basic_pair<basic_string<Char>>;
-	template <class Char> using basic_string_view_pair = basic_pair<basic_string_view<Char>>;
-	template <class Char> using basic_string_size_pair = basic_pair<typename basic_string_view<Char>::size_type>;
+	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
+	template <class Char> using basic_string_view_pair = pair<basic_string_view<Char>>;
+	template <class Char> using basic_string_size_pair = pair<typename basic_string_view<Char>::size_type>;
 	template <class Char> using basic_string_vector = typename std::vector<basic_string<Char>>;
 	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
 
@@ -73,6 +73,9 @@ namespace fmt
 
 	using std::string;
 	using std::wstring;
+
+	using string_vector = basic_string_vector<char>;
+	using wstring_vector = basic_string_vector<wchar_t>;
 
 	using string_pair = basic_string_pair<char>;
 	using wstring_pair = basic_string_pair<wchar_t>;
