@@ -10,6 +10,7 @@
 #include "xdg.hpp"
 #include "sys.hpp"
 #include "net.hpp"
+#include "sym.hpp"
 #include "sig.hpp"
 #include "ipc.hpp"
 #include "mem.hpp"
@@ -270,6 +271,27 @@ namespace
 		f << fmt::key_value("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir) << std::endl;
 		f << fmt::key_value("XDG_TEMPLATES_DIR", xdg::templates_dir) << std::endl;
 		f << fmt::key_value("XDG_VIDEOS_DIR", xdg::videos_dir) << std::endl;
+	});
+}
+
+//
+// System utilities
+//
+
+int visible() { return 42; }
+
+namespace
+{
+	int hidden() { return 42; }
+
+	TEST(sym_mod,
+	{
+		(void) hidden();
+		sys::sym mod;
+		auto f = mod.link<int()>("visible");
+		auto g = mod.link<int()>("hidden");
+		ASSERT(f);
+		ASSERT(not g);
 	});
 }
 

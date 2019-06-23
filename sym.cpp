@@ -1,26 +1,26 @@
 #include "sym.hpp"
 #include "os.hpp"
+#include "fmt.hpp"
 #include "dbg.hpp"
 #include <iostream>
 
-#ifdef __POSIX__
+#if __has_include(<dlfcn.h>)
 #include <dlfcn.h>
 #else
-#ifdef __WIN32__
-namespace
-{
 #include "dlfcn.c"
-}
 #endif
-#endif
+
+using namespace fmt;
 
 namespace
 {
-	inline void err(fmt::string_view what, fmt::string_view who)
+	inline void error(string_view who, string_view with, string_view what)
 	{
 		if constexpr (DEBUG)
 		{
-			std::cerr << what << ": " << who << ": " << ::dlerror() << std::endl;
+			std::cerr << who << ": ";
+			std::cerr << with << ": ";
+			std::cerr << what << std::endl;
 		}
 	}
 }
@@ -32,14 +32,15 @@ namespace sys
 		return nullptr != dl;
 	}
 
-	sym::sym(fmt::string_view path)
+	sym::sym(string_view path)
 	: image(to_string(path))
 	{
 		auto const s = image.c_str();
-		dl = ::dlopen(s);
-		if (not dl)
+		dl = ::dlopen(s, 0);
+		if (nullptr == dl)
 		{
-			::err("dlopen", image);
+			string const e = dlerror();
+			::error("dlopen", image, e);
 		}
 	}
 
@@ -47,21 +48,24 @@ namespace sys
 	{
 		if (dl and ::dlclose(dl))
 		{
-			::err("dlclose", image);
+			string const e = dlerror();
+			::error("dlclose", image, e);
 		}
 	}
 
-	void *sym::find(fmt::string_view name)
+	void *sym::link(string_view name)
 	{
-		auto const index = to_string(name);
-		auto const s = index.c_str();
-		auto fn = ::dlsym(dl, s);
-		if (not fn)
-		{
-			::err("dlsym", index);
-		}
+		auto const buf = fmt::to_string(name);
+		auto const s = buf.c_str();
 		// see pubs.opengroup.org
-		return *(void**)(&fn);
+		(void) ::dlerror();
+		auto f = ::dlsym(dl, s);
+		string const e = dlerror();
+		if (not empty(e))
+		{
+			::error("dlsym", name, e);
+		}
+		return f;
 	}
 }
 
