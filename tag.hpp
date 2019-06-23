@@ -61,7 +61,7 @@ namespace fmt
 
 			bool operator==(iterator const& it) const
 			{
-				return that == it.that or pos == it.pos;
+				return that == it.that and pos == it.pos;
 			}
 
 			bool operator!=(iterator const& it) const

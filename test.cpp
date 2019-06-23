@@ -176,25 +176,17 @@ namespace
 		using namespace fmt;
 		string_view u = "A,B,C,D";
 		delimiter del {u, ","};
-		for (auto const d : del)
-		{
-			auto const v = u.substr(d.first, d.second);
-			std::cout << v << std::endl;
-		}
-	});
 
-	TEST(fmt_parse,
-	{
-		using namespace fmt;
-		string_view u = "A<B>C<D>";
-		parser p(u, { "<", ">"});
-		string_vector t;
-		for (const auto r : p)
+		string_view::size_type pos = 0;
+		string_view_vector t;
+		for (auto it : del)
 		{
-			auto const s = u.substr(r.first, r.second);
-			t.emplace_back(s);
+			auto const n = it.first - pos;
+			t.emplace_back(u.substr(pos, n));
+			pos = it.second;
 		}
-		std::cout << t.size() << std::endl;
+		t.emplace_back(u.substr(pos));	
+
 		ASSERT_EQ(t.size(), 4);
 		ASSERT_EQ(t[0], "A");
 		ASSERT_EQ(t[1], "B");
@@ -271,27 +263,6 @@ namespace
 		f << fmt::key_value("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir) << std::endl;
 		f << fmt::key_value("XDG_TEMPLATES_DIR", xdg::templates_dir) << std::endl;
 		f << fmt::key_value("XDG_VIDEOS_DIR", xdg::videos_dir) << std::endl;
-	});
-}
-
-//
-// System utilities
-//
-
-int visible() { return 42; }
-
-namespace
-{
-	int hidden() { return 42; }
-
-	TEST(sym_mod,
-	{
-		(void) hidden();
-		sys::sym mod;
-		auto f = mod.link<int()>("visible");
-		auto g = mod.link<int()>("hidden");
-		ASSERT(f);
-		ASSERT(not g);
 	});
 }
 
