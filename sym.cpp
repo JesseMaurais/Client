@@ -14,13 +14,11 @@ using namespace fmt;
 
 namespace
 {
-	inline void error(string_view who, string_view with, string_view what)
+	inline void error(string_view who, string_view what)
 	{
 		if constexpr (DEBUG)
 		{
-			std::cerr << who << ": ";
-			std::cerr << with << ": ";
-			std::cerr << what << std::endl;
+			std::cerr << who << ": " << what << std::endl;
 		}
 	}
 }
@@ -33,14 +31,14 @@ namespace sys
 	}
 
 	sym::sym(string_view path)
-	: image(to_string(path))
 	{
-		auto const s = image.c_str();
+		auto const buf = fmt::to_string(path);
+		auto const s = buf.c_str();
 		dl = ::dlopen(s, 0);
 		if (nullptr == dl)
 		{
-			string const e = dlerror();
-			::error("dlopen", image, e);
+			string const e = ::dlerror();
+			error("dlopen", e);
 		}
 	}
 
@@ -48,8 +46,8 @@ namespace sys
 	{
 		if (dl and ::dlclose(dl))
 		{
-			string const e = dlerror();
-			::error("dlclose", image, e);
+			string const e = ::dlerror();
+			error("dlclose", e);
 		}
 	}
 
@@ -60,10 +58,10 @@ namespace sys
 		// see pubs.opengroup.org
 		(void) ::dlerror();
 		auto f = ::dlsym(dl, s);
-		string const e = dlerror();
+		string const e = ::dlerror();
 		if (not empty(e))
 		{
-			::error("dlsym", name, e);
+			error("dlsym", e);
 		}
 		return f;
 	}

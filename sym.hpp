@@ -27,6 +27,5 @@ namespace sys
 
 		void *dl = nullptr;
 		void *link(string_view name);
-		string image;
 	};
 }
