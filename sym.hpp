@@ -1,5 +1,4 @@
 #include "str.hpp"
-#include <functional>
 
 namespace sys
 {
@@ -20,7 +19,7 @@ namespace sys
 			S *addr = nullptr;
 			// see pubs.opengroup.org
 			*(void**)(&addr) = link(name);
-			return std::function<S>(addr);
+			return addr;
 		}
 
 	private:

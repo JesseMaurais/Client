@@ -5,16 +5,12 @@
 
 namespace fmt
 {
-	//
-	// Iterator between occurances of a string inside another string
-	//
-
 	template <class Char> class basic_delimiter : public basic_string_view_pair<Char>
 	{
 		using char_type = Char;
-		using string_view = fmt::basic_string_view<char_type>;
-		using string_size_pair = fmt::basic_string_size_pair<char_type>;
-		using string_view_pair = fmt::basic_string_view_pair<char_type>;
+		using string_view = basic_string_view<char_type>;
+		using string_size_pair = basic_string_size_pair<char_type>;
+		using string_view_pair = basic_string_view_pair<char_type>;
 		using size_type = typename string_view::size_type;
 		static constexpr auto npos = string_view::npos;
 
@@ -84,8 +80,8 @@ namespace fmt
 	{
 		using char_type = Char;
 		using delimiter = basic_delimiter<char_type>;
-		using string_view = fmt::basic_string_view<char_type>;
-		using span_view = fmt::basic_span_view<char_type>;
+		using string_view = basic_string_view<char_type>;
+		using span_view = basic_span_view<char_type>;
 
 	protected:
 
@@ -134,14 +130,8 @@ namespace fmt
 				{
 					tag = that->ring.begin();
 				}
-
 				marks.second = *tag;
 				++ it;
-				if (marks.end() == it)
-				{
-					tag = that->ring.begin();
-				}
-
 				return *this;
 			}
 		};
