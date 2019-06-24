@@ -31,7 +31,7 @@ clean:
 	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb
 
 $(EXE): $(OBJ)
-	$(CXX) $(CFLAGS) $(OUT)$(EXE) $(OBJ) $(LIB)
+	$(CXX) $(CFLAGS) $(OUT)$(EXE) $(OBJ) $(LNK)
 
 $(CHK): $(SRC)
 	cppcheck --force --quiet --enable=all $(SRC)

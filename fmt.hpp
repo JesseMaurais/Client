@@ -266,7 +266,7 @@ namespace fmt
 		for (size i = 0, j = u.find(v); i < uz; j = u.find(v, i))
 		{
 			size const k = uz < j ? uz : j;
-			if (i < k) tok.emplace_back(u.substr(i, k - i));
+			if (i <= k) tok.emplace_back(u.substr(i, k - i));
 			i = k + vz;
 		}
 		return tok;

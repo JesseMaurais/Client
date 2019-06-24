@@ -85,7 +85,7 @@ namespace sys::net
 
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
 
-	constexpr bool fail(descriptor h) { return ::INVALID_SOCKET == h; }
+	constexpr bool fail(descriptor h) { return INVALID_SOCKET == h; }
 	inline void perror(char const *prefix) { ::_set_errno(::sys::winerr(prefix)); }
 
 	constexpr auto close = ::closesocket;

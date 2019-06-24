@@ -415,7 +415,7 @@ void *dlsym( void *handle, const char *name )
          */
         if( MyEnumProcessModules( hCurrentProc, NULL, 0, &dwSize ) != 0 )
         {
-            modules = malloc( dwSize );
+            modules = (HMODULE*) malloc( dwSize );
             if( modules )
             {
                 if( MyEnumProcessModules( hCurrentProc, modules, dwSize, &cbNeeded ) != 0 && dwSize == cbNeeded )

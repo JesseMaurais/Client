@@ -4,4 +4,4 @@ RM = rm -f
 CP = cp
 MV = mv
 # POSIX libraries
-LIB = -ldl
+LNK = -ldl

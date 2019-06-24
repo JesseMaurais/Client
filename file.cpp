@@ -317,9 +317,9 @@ namespace sig
 
 	socket::~socket()
 	{
-		auto const fd = sys::net::descriptor(sys::file::socket::fd);
-		stl::erase_if(fds, [fd](auto const& p) { return p.fd == fd; });
-		set.disconnect(fd);
+		auto const pfd = sys::net::descriptor(sys::file::socket::fd);
+		stl::erase_if(fds, [pfd](auto const& p) { return p.fd == pfd; });
+		set.disconnect(pfd);
 	}
 }
 
