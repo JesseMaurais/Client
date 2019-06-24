@@ -10,7 +10,7 @@ namespace sys
 	public:
 
 		operator bool() const;
-		sym() = default;
+		sym();
 		sym(string_view path);
 		~sym();
 

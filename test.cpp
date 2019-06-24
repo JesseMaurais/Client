@@ -69,7 +69,7 @@ namespace
 	// negatives
 
 	TEST_FAIL(int_loss, (void) fmt::to_narrow<char>(256));
-	TEST_FAIL(int_sign, (void) fmt::to_unsigned(-1));
+	TEST_FAIL(int_loss_sign, (void) fmt::to_unsigned(-1));
 }
 
 //
@@ -217,7 +217,7 @@ namespace
 
 namespace
 {
-	TEST(env_eval,
+	TEST(env_path,
 	{
 		std::string const var = fmt::join({sys::esc::sh::first, "PATH", sys::esc::sh::second});
 		std::string const val = fmt::join(env::path, sys::sep::path);
@@ -283,12 +283,27 @@ namespace
 }
 
 //
-// Signal handlers
+// Operating system processes
 //
+
+int visible() { return 42; }
 
 namespace
 {
-	TEST(sig_handler,
+	int hidden() { return visible(); }
+
+	TEST(sys_symbol,
+	{
+		sys::sym module;
+		ASSERT(module);
+		auto f = module.link<int()>("visible");
+		auto g = module.link<int()>("hidden");
+		ASSERT_NOT_EQ(nullptr, f);
+		ASSERT_EQ(nullptr, g);
+		ASSERT_EQ(f(), hidden());
+	});
+
+	TEST(sys_signal,
 	{
 		std::vector<int> caught;
 		for (int const n : { SIGINT, SIGFPE, SIGILL })

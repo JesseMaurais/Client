@@ -30,11 +30,21 @@ namespace sys
 		return nullptr != dl;
 	}
 
+	sym::sym()
+	{ 
+		dl = ::dlopen(nullptr, RTLD_LAZY);
+		if (nullptr == dl)
+		{
+			string const e = ::dlerror();
+			error("dlopen", e);
+		}
+	}
+
 	sym::sym(string_view path)
 	{
 		auto const buf = fmt::to_string(path);
 		auto const s = buf.c_str();
-		dl = ::dlopen(s, 0);
+		dl = ::dlopen(s, RTLD_LAZY);
 		if (nullptr == dl)
 		{
 			string const e = ::dlerror();
