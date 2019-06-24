@@ -286,21 +286,17 @@ namespace
 // Operating system processes
 //
 
-int visible() { return 42; }
+extern "C" int visible() { return 42; }
 
 namespace
 {
-	int hidden() { return visible(); }
-
 	TEST(sys_symbol,
 	{
 		sys::sym module;
 		ASSERT(module);
 		auto f = module.link<int()>("visible");
-		auto g = module.link<int()>("hidden");
 		ASSERT_NOT_EQ(nullptr, f);
-		ASSERT_EQ(nullptr, g);
-		ASSERT_EQ(f(), hidden());
+		ASSERT_EQ(f(), visible());
 	});
 
 	TEST(sys_signal,

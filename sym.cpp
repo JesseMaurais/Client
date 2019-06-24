@@ -14,7 +14,7 @@ using namespace fmt;
 
 namespace
 {
-	inline void error(string_view who, string_view what)
+	inline void error(char const* who, char const* what)
 	{
 		if constexpr (DEBUG)
 		{
@@ -35,8 +35,7 @@ namespace sys
 		dl = ::dlopen(nullptr, RTLD_LAZY);
 		if (nullptr == dl)
 		{
-			string const e = ::dlerror();
-			error("dlopen", e);
+			error("dlopen", ::dlerror());
 		}
 	}
 
@@ -47,8 +46,7 @@ namespace sys
 		dl = ::dlopen(s, RTLD_LAZY);
 		if (nullptr == dl)
 		{
-			string const e = ::dlerror();
-			error("dlopen", e);
+			error("dlopen", ::dlerror());
 		}
 	}
 
@@ -56,8 +54,7 @@ namespace sys
 	{
 		if (dl and ::dlclose(dl))
 		{
-			string const e = ::dlerror();
-			error("dlclose", e);
+			error("dlclose", ::dlerror());
 		}
 	}
 
@@ -68,8 +65,8 @@ namespace sys
 		// see pubs.opengroup.org
 		(void) ::dlerror();
 		auto f = ::dlsym(dl, s);
-		string const e = ::dlerror();
-		if (not empty(e))
+		auto const e = ::dlerror();
+		if (nullptr != e)
 		{
 			error("dlsym", e);
 		}
