@@ -105,7 +105,7 @@ namespace fmt
 			iterator(basic_sequence const* owner, bool start)
 			: delimiter(owner->view, {owner->ring.back(), owner->ring.front()})
 			, that(owner)
-			, it(start ? this->begin(), this->end())
+			, it(start ? this->begin() : this->end())
 			, tag(owner->ring.begin())
 			{ }
 
