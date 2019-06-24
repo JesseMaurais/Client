@@ -1,11 +1,11 @@
-#ifndef tag_hpp
-#define tag_hpp
+#ifndef del_hpp
+#define del_hpp
 
 #include "str.hpp"
 
 namespace fmt
 {
-	template <class Char> class basic_delimiter : public basic_string_view_pair<Char>
+	template <class Char> class basic_delimiter : protected basic_string_view_pair<Char>
 	{
 		using char_type = Char;
 		using string_view = basic_string_view<char_type>;
@@ -33,8 +33,8 @@ namespace fmt
 			friend class basic_delimiter;
 			basic_delimiter const* that;
 
-			iterator(basic_delimiter const* owner, size_type start)
-			: string_size_pair(start, start), that(owner)
+			iterator(basic_delimiter const* owner, size_type pos)
+			: string_size_pair(pos, pos), that(owner)
 			{
 				operator++();
 			}
@@ -46,7 +46,7 @@ namespace fmt
 				return *this;
 			}
 
-			iterator operator++()
+			auto operator++()
 			{
 				this->first = this->second;
 				if (this->first < npos)
@@ -94,23 +94,27 @@ namespace fmt
 		: view(input), ring(sequence)
 		{ }
 
-		class iterator
+		class iterator : protected delimiter
 		{
 			friend class basic_sequence;
 			basic_sequence const* that;
-			delimiter marks;
 
 			typename delimiter::iterator it;
 			typename span_view::const_iterator tag;
 	
-			iterator(basic_sequence const* owner, bool end)
-			: that(owner)
-			, marks(owner->view, {owner->ring.back(), owner->ring.front()})
-			, it(end ? marks.end() : marks.begin())
+			iterator(basic_sequence const* owner, bool start)
+			: delimiter(owner->view, {owner->ring.back(), owner->ring.front()})
+			, that(owner)
+			, it(start ? this->begin(), this->end())
 			, tag(owner->ring.begin())
 			{ }
 
 		public:
+			
+			operator span_view() const
+			{
+				return *tag;
+			}
 
 			string_size_pair operator*() const
 			{
@@ -122,15 +126,15 @@ namespace fmt
 				return that != other.that or it != other.it;  
 			}
 
-			iterator operator++()
+			auto operator++()
 			{
-				marks.first = *tag;
+				this->first = *tag;
 				++ tag;
 				if (that->ring.end() == tag)
 				{
 					tag = that->ring.begin();
 				}
-				marks.second = *tag;
+				this->second = *tag;
 				++ it;
 				return *this;
 			}
@@ -138,12 +142,12 @@ namespace fmt
 
 		auto begin() const
 		{
-			return iterator(this, false);
+			return iterator(this, true);
 		}
 
 		auto end() const
 		{
-			return iterator(this, true);
+			return iterator(this, false);
 		}
 	};
 
