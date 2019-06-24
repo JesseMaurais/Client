@@ -1,5 +1,5 @@
-#ifndef ipc_hpp
-#define ipc_hpp
+#ifndef pstream_hpp
+#define pstream_hpp
 
 #include <vector>
 #include <initializer_list>

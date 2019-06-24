@@ -5,16 +5,16 @@
 #include "alg.hpp"
 #include "int.hpp"
 #include "fmt.hpp"
-#include "tag.hpp"
+#include "del.hpp"
 #include "ios.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
 #include "net.hpp"
 #include "sym.hpp"
 #include "sig.hpp"
-#include "ipc.hpp"
 #include "mem.hpp"
 #include "file.hpp"
+#include "pstream.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -177,21 +177,37 @@ namespace
 		string_view u = "A,B,C,D";
 		delimiter del {u, ","};
 
-		string_view::size_type pos = 0;
 		string_view_vector t;
-		for (auto it : del)
+		for (auto tok : del)
 		{
-			auto const n = it.first - pos;
-			t.emplace_back(u.substr(pos, n));
-			pos = it.second;
+			auto const n = tok.second - tok.first;
+			t.emplace_back(u.substr(tok.first, n));
 		}
-		t.emplace_back(u.substr(pos));	
 
 		ASSERT_EQ(t.size(), 4);
 		ASSERT_EQ(t[0], "A");
 		ASSERT_EQ(t[1], "B");
 		ASSERT_EQ(t[2], "C");
 		ASSERT_EQ(t[3], "D");
+	});
+
+	TEST(fmt_sequence,
+	{
+		using namespace fmt;
+		string_view u = "A<B>C";
+		sequence q {u, {"<", ">"}};
+
+		string_view_vector t;
+		for (auto tok : q)
+		{
+			auto const n = tok.second - tok.first;
+			t.emplace_back(u.substr(tok.first, n));
+		}
+
+		ASSERT_EQ(t.size(), 3);
+		ASSERT_EQ(t[0], "A");
+		ASSERT_EQ(t[1], "B");
+		ASSERT_EQ(t[2], "C");
 	});
 }
 
