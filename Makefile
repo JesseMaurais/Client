@@ -28,7 +28,7 @@ cppcheck: $(CHK)
 pvscheck: $(PVS)
 
 clean:
-	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb
+	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp
 
 $(EXE): $(OBJ)
 	$(CXX) $(LDFLAGS) $(OUT)$(EXE) $(OBJ) $(LNK)

@@ -5,6 +5,8 @@ test
 *.obj
 *.ilk
 *.pdb
+*.exp
+*.lib
 *.o
 *.d
 *.i

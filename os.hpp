@@ -232,4 +232,10 @@ constexpr bool unix =
 	;
 }
 
+#if defined(__WIN32__)
+#define DLSYM __declspec(dllexport)
+#else
+#define DLSYM
+#endif
+
 #endif // file

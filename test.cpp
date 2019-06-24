@@ -286,7 +286,7 @@ namespace
 // Operating system processes
 //
 
-extern "C" int visible() { return 42; }
+extern "C" DLSYM int visible() { return 42; }
 
 namespace
 {
