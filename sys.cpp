@@ -62,77 +62,80 @@ namespace sys
 		return code;
 	}
 
-	HANDLE openprocess(pid_t pid)
+	namespace
 	{
-		HANDLE const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-		if (not h) winerr("OpenProcess");
-		return h;
-	}
-
-	struct Handle
-	{
-		HANDLE h;
-
-		operator HANDLE() const
+		HANDLE openprocess(pid_t pid)
 		{
+			HANDLE const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+			if (not h) winerr("OpenProcess");
 			return h;
 		}
 
-		Handle(HANDLE h = nullptr)
+		struct Handle
 		{
-			this->h = h;
-		}
+			HANDLE h;
 
-		~Handle()
-		{
-			if (h and not CloseHandle(h))
+			operator HANDLE() const
 			{
-				winerr("CloseHandle");
+				return h;
 			}
-		}
 
-		int set(int flags)
-		{
-			auto const ptr = reinterpret_cast<intptr_t>(h);
-			int const fd = _open_osfhandle(ptr, flags);
-			h = nullptr;
-			return fd;
-		}
-	};
-
-	struct Pipe
-	{
-		Handle read;
-		Handle write;
-		BOOL ok;
-
-		Pipe()
-		{
-			SECURITY_ATTRIBUTES sa;
-			ZeroMemory(&sa, sizeof sa);
-			sa.nLength = sizeof sa;
-			sa.bInheritHandle = TRUE;
-
-			ok = CreatePipe
-			(
-				&read.h,
-				&write.h,
-				&sa,
-				BUFSIZ
-			);
-
-			if (not ok)
+			Handle(HANDLE h = nullptr)
 			{
-				winerr("CreatePipe");
+				this->h = h;
 			}
-		}
-	};
+
+			~Handle()
+			{
+				if (h and not CloseHandle(h))
+				{
+					winerr("CloseHandle");
+				}
+			}
+
+			int set(int flags)
+			{
+				auto const ptr = reinterpret_cast<intptr_t>(h);
+				int const fd = _open_osfhandle(ptr, flags);
+				h = nullptr;
+				return fd;
+			}
+		};
+
+		struct Pipe
+		{
+			Handle read;
+			Handle write;
+			BOOL ok;
+
+			Pipe()
+			{
+				SECURITY_ATTRIBUTES sa;
+				ZeroMemory(&sa, sizeof sa);
+				sa.nLength = sizeof sa;
+				sa.bInheritHandle = TRUE;
+
+				ok = CreatePipe
+				(
+					&read.h,
+					&write.h,
+					&sa,
+					BUFSIZ
+				);
+
+				if (not ok)
+				{
+					winerr("CreatePipe");
+				}
+			}
+		};
+	}
 
 	pid_t getppid()
 	{
 		pid_t ppid = -1;
 		DWORD const pid = GetCurrentProcessId();
-		assert(getpid() == pid);
+		assert(_getpid() == pid);
 		Handle h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, pid);
 		if (h)
 		{

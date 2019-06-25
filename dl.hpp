@@ -2,29 +2,31 @@
 
 namespace sys
 {
-	class sym
+	class dl
 	{
 		using string_view = fmt::string_view;
 		using string = fmt::string;
 
 	public:
 
-		operator bool() const;
-		sym();
-		sym(string_view path);
-		~sym();
+		dl();
+		dl(string_view path);
+		~dl();
 
-		template <typename S> auto link(string_view name)
+		operator bool() const;
+		
+		template <typename S> auto sym(string_view name) const
 		{
 			S *addr = nullptr;
 			// see pubs.opengroup.org
-			*(void**)(&addr) = link(name);
+			*(void**)(&addr) = sym(name);
 			return addr;
 		}
 
 	private:
 
-		void *dl = nullptr;
-		void *link(string_view name);
+		void *tab = nullptr;
+		void *sym(string_view name) const;
 	};
 }
+

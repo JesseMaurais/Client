@@ -5,66 +5,44 @@
 
 namespace xml
 {
-	template <class Char>
-	constexpr fmt::basic_string_view_pair<Char> tags()
+	template <class Char> class basic_sax : public fmt::basic_sequence<Char>
 	{
-		fmt::basic_string<Char> const first(1, (Char) '<');
-		fmt::basic_string<Char> const second(1, (Char) '>');
-		return fmt::basic_string_view_pair<Char>(first, second);
-	}
-
-	template <class Char> struct basic_sax
-	{
-		using char_type = typename Char;
+		using char_type = Char;
 		using string = fmt::basic_string<char_type>;
 		using string_view = fmt::basic_string_view<char_type>;
 		using string_view_pair = fmt::basic_string_view_pair<char_type>;
-		using element_parser = tag::basic_parser<char_type>;
-		using element_iterator = element_parser::iterator;
+		using string_vector = fmt::basic_string_vector<char_type>;
+		using span_view = fmt::basic_span_view<char_type>;
+		using sequence = fmt::basic_sequence<char_type>;
+		using iterator = typename sequence::iterator;
 
-		basic_sax(string_view input)
-		: element_parser(input, tags())
+	public:
+
+		basic_sax(string_view view)
+		: basic_sequence(view, { lt, gt })
 		{ }
 
-		iterator begin()
+		static bool is_element(iterator const& it)
 		{
-			auto it = parser.begin();
-			return iterator(it);
+			return gt == it;
 		}
 
-		iterator end()
+		static bool is_comment(iterator const& it)
 		{
-			auto it = parser.end();
-			return iterator(it);
+			return is_match("!--", it, "--");
 		}
 
-		struct iterator
+		static bool is_prolog(iterator const& it)
 		{
-			friend struct basic_sax;
-
-			bool operator!=(iterator const& it) const
-			{
-				return it.element != element;
-			}
-
-			iterator operator++()
-			{
-				++element;
-				return *this;
-			}
-
-		private:
-
-			element_iterator element;
-
-			iterator(element_iterator other)
-			: element(other)
-			{ }
-		};
+			return is_match("?xml ", it, "?");
+		}
 
 	private:
 
-		element_parser parser;
+		static bool is_match(char const* prefix, iterator const& it, char const* suffix)
+		{
+			return it.starts_with(prefix) and it.ends_with(suffix);
+		}
 	};
 
 	using sax = basic_sax<char>;

@@ -110,6 +110,32 @@ namespace fmt
 			{ }
 
 		public:
+
+			template <class C>
+			bool starts_with(fmt::basic_string_view<C> s)
+			{
+				auto const n = this->second - this->first;
+				return s.size() < n and stl::all_of
+				(
+					s, [this, i = this->first](C const c)
+					{
+						return c == view[i++];
+					}
+				);
+			}
+
+			template <class C>
+			bool ends_with(fmt::basic_string_view<C> s)
+			{
+				auto const n = this->second - this->first;
+				return s.size() < n and stl::all_of
+				(
+					s, [this, i = this->second - s.size()](C const c)
+					{
+						return c == view[i++];
+					}
+				);
+			}
 			
 			operator span_view() const
 			{

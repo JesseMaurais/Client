@@ -10,8 +10,8 @@
 #include "xdg.hpp"
 #include "sys.hpp"
 #include "net.hpp"
-#include "sym.hpp"
 #include "sig.hpp"
+#include "dl.hpp"
 #include "mem.hpp"
 #include "file.hpp"
 #include "pstream.hpp"
@@ -292,9 +292,8 @@ namespace
 {
 	TEST(sys_symbol,
 	{
-		sys::sym module;
-		ASSERT(module);
-		auto f = module.link<int()>("visible");
+		sys::dl module;
+		auto f = module.sym<int()>("visible");
 		ASSERT_NOT_EQ(nullptr, f);
 		ASSERT_EQ(f(), visible());
 	});
