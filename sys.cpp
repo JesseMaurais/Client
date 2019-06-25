@@ -13,6 +13,10 @@
 #include <windows.h>
 #endif
 
+#if __has_include(<tlhelp32.h>)
+#include <tlhelp32.h>
+#endif
+
 #if __has_include(<io.h>)
 #include <io.h>
 #endif
@@ -41,7 +45,7 @@ namespace sys
 		DWORD const code = GetLastError();
 		DWORD const size = FormatMessageA
 		(
-		 FORMAT_MESSAGE_ALLOCATE_BUFFER	| FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		 FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		 nullptr, // source
 		 code,    // message
 		 lang,    // language
@@ -68,6 +72,11 @@ namespace sys
 	struct Handle
 	{
 		HANDLE h;
+
+		operator HANDLE() const
+		{
+			return h;
+		}
 
 		Handle(HANDLE h = nullptr)
 		{
@@ -101,7 +110,6 @@ namespace sys
 		{
 			SECURITY_ATTRIBUTES sa;
 			ZeroMemory(&sa, sizeof sa);
-
 			sa.nLength = sizeof sa;
 			sa.bInheritHandle = TRUE;
 
@@ -119,7 +127,42 @@ namespace sys
 			}
 		}
 	};
-	
+
+	pid_t getppid()
+	{
+		pid_t ppid = -1;
+		DWORD const pid = GetCurrentProcessId();
+		assert(getpid() == pid);
+		Handle h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, pid);
+		if (h)
+		{
+			PROCESSENTRY32 pe;
+			ZeroMemory(&pe, sizeof pe);
+			pe.dwSize = sizeof pe;
+			if (Process32First(h, &pe))
+			{
+				do
+				{
+					if (pid == pe.th32ProcessID)
+					{
+						ppid = static_cast<pid_t>(pe.th32ParentProcessID);
+						break;
+					}
+				}
+				while (Process32Next(h, &pe));
+			}
+			else
+			{
+				winerr("Process32First");
+			}
+		}
+		else
+		{
+			winerr("CreateToolhelp32Snapshot");
+		}
+		return ppid;
+	}
+
 	#endif // __WIN32__
 
 	pid_t exec(int fd[3], char const**argv)

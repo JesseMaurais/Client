@@ -1,7 +1,7 @@
 #ifndef sax_hpp
 #define sax_hpp
 
-#include "tag.hpp"
+#include "del.hpp"
 
 namespace xml
 {

@@ -180,6 +180,7 @@ namespace sys
 	constexpr auto fstat = ::fstat;
 	constexpr auto getcwd = ::getcwd;
 	constexpr auto getpid = ::getpid;
+	constexpr auto getppid = ::getppid;
 	constexpr auto isatty = ::isatty;
 	constexpr auto lseek = ::lseek;
 	constexpr auto mkdir = ::mkdir;
@@ -279,6 +280,7 @@ namespace sys
 	constexpr auto write = ::_write;
 
 	unsigned long winerr(char const *prefix); // perror for GetLastError
+	pid_t getppid();
 
 } // namespace sys
 
