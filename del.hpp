@@ -99,13 +99,13 @@ namespace fmt
 			friend class basic_sequence;
 			basic_sequence const* that;
 
-			typename delimiter::iterator it;
+			typename delimiter::iterator mark;
 			typename span_view::const_iterator tag;
 	
 			iterator(basic_sequence const* owner, bool start)
 			: delimiter(owner->view, {owner->ring.back(), owner->ring.front()})
 			, that(owner)
-			, it(start ? this->begin() : this->end())
+			, mark(start ? this->begin() : this->end())
 			, tag(owner->ring.begin())
 			{ }
 
@@ -144,12 +144,12 @@ namespace fmt
 
 			string_size_pair operator*() const
 			{
-				return *it;
+				return *mark;
 			}
 
-			bool operator!=(iterator const& other) const
+			bool operator!=(iterator const& it) const
 			{
-				return that != other.that or it != other.it;  
+				return that != it.that or mark != it.mark;  
 			}
 
 			auto operator++()
@@ -161,7 +161,7 @@ namespace fmt
 					tag = that->ring.begin();
 				}
 				this->second = *tag;
-				++ it;
+				++ mark;
 				return *this;
 			}
 		};
