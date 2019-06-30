@@ -286,7 +286,8 @@ namespace
 // Operating system processes
 //
 
-extern "C" DLSYM int visible() { return 42; }
+static int hidden() { return 42; }
+dynamic int visible() { return hidden(); }
 
 namespace
 {
@@ -295,7 +296,7 @@ namespace
 		sys::dl module;
 		auto f = module.sym<int()>("visible");
 		ASSERT_NOT_EQ(nullptr, f);
-		ASSERT_EQ(f(), visible());
+		ASSERT_EQ(f(), hidden());
 	});
 
 	TEST(sys_signal,

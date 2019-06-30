@@ -3,10 +3,10 @@
 #include "fmt.hpp"
 #include <iostream>
 
-#if __has_include(<dlfcn.h>)
-#include <dlfcn.h>
-#else
+#if defined(__WIN32__)
 #include "dlfcn.c"
+#else
+#include <dlfcn.h>
 #endif
 
 using namespace fmt;
@@ -26,7 +26,10 @@ namespace sys
 		return nullptr != tab;
 	}
 
-	dl::dl() : tab(RTLD_DEFAULT)
+	dl::dl() : dl(RTLD_DEFAULT)
+	{ }
+
+	dl::dl(void *ptr) : tab(ptr)
 	{ }
 
 	dl::dl(string_view path)
@@ -61,6 +64,17 @@ namespace sys
 			error("dlsym", e);
 		}
 		return f;
+	}
+
+	dl const& dl::next()
+	{
+		static struct link : dl
+		{
+			link() : dl(RTLD_NEXT)
+			{ }
+
+		} module;
+		return module; 
 	}
 }
 
