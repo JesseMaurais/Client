@@ -12,7 +12,10 @@ namespace xml
 		using sequence = fmt::basic_sequence<char_type>;
 		using iterator = typename sequence::iterator;
 
-	public:
+		template <class Char>
+		friend bool is_element(iterator const& it);
+
+	private:
 
 		static constexpr char_type lt [] = { '<', '\0' };
 		static constexpr char_type gt [] = { '>', '\0' };
@@ -27,7 +30,7 @@ namespace xml
 	template <class Char>
 	inline bool is_element(basic_sax<Char>::iterator const& it)
 	{
-		return fmt::same(it, it->gt);
+		return fmt::same(it, basic_sax<Char>::gt);
 	}
 
 	template <class Char>
