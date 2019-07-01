@@ -1,11 +1,20 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "mem.hpp"
 #include "err.hpp"
 #include "sys.hpp"
 #include "int.hpp"
 
+#if defined(__WIN32__)
+#include "mman.c"
+#else
+#include <sys/mman.h>
+#endif
+
 namespace sys::file
 {
-	memory::memory(int fd, ssize_t size, size_t offset)
+	memory::memory(int fd, ssize_t size, size_t offset, int mode, int type)
 	{
 		if (size < 0)
 		{
@@ -18,16 +27,34 @@ namespace sys::file
 			size = st.st_size;
 		}
 
-		mem = std::make_unique<sys::mem>();
-		length = fmt::to_size(size);
-		address = mem->map(fd, length, offset);
+		int prot = 0;
+		if (mode & read) prot |= PROT_READ;
+		if (mode & write) prot |= PROT_WRITE;
+		if (mode & execute) prot |= PROT_EXEC;
+
+		int flags = 0;
+		if (type & share) flags |= MAP_SHARED;
+		if (type & privy) flags |= MAP_PRIVATE;
+		if (type & fixed) flags |= MAP_FIXED;
+
+		address = mmap(nullptr, size, prot, flags, fd, offset);
+		if (MAP_FAILED == address)
+		{
+			sys::perror("mmap");
+			address = nullptr;
+			return;
+		}
+		length = size;
 	}
 
 	memory::~memory()
 	{
-		if (mem and address)
+		if (nullptr != address)
 		{
-			mem->unmap(address, length);
+			if (fail(munmap(address, length)))
+			{
+				sys::perror("munmap");
+			}
 		}
 	}
 }

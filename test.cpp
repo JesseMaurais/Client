@@ -13,7 +13,7 @@
 #include "sig.hpp"
 #include "dl.hpp"
 #include "mem.hpp"
-#include "file.hpp"
+#include "fifo.hpp"
 #include "pstream.hpp"
 #include <iostream>
 #include <fstream>

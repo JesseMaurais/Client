@@ -5,9 +5,8 @@
 #include "sys.hpp"
 #include "err.hpp"
 
-namespace
+namespace sys::file
 {
-	using namespace sys::file;
 	int convert(openmode mode)
 	{
 		int flags = 0;
@@ -42,10 +41,7 @@ namespace
 		#endif
 		return flags;
 	}
-}
 
-namespace sys::file
-{
 	size_t bufsiz = BUFSIZ;
 
 	void descriptor::open(char const* path, openmode mode)

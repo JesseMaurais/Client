@@ -3,7 +3,7 @@
 BUGMSG = Known GCC bug up to version 8.2 causes internal compiler error
 
 STD = c++17
-SRC = test.cpp dl.cpp file.cpp mem.cpp dbg.cpp env.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
+SRC = test.cpp dl.cpp fifo.cpp file.cpp mem.cpp dbg.cpp env.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
 BIN = test
 
 LOG = $(SRC:.cpp=.log)
@@ -25,7 +25,7 @@ all: $(EXE)
 
 cppcheck: $(CHK)
 
-pvscheck: $(PVS)
+pvs: $(PVS)
 
 clean:
 	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp

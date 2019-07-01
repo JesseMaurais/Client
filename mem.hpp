@@ -5,16 +5,14 @@
 #include "str.hpp"
 #include <memory>
 
-namespace sys
-{
-	struct mem;
-}
-
 namespace sys::file
 {
 	struct memory
 	{
-		memory(int fd, ssize_t size = -1, size_t offset = 0);
+		enum { none = 0, read = 1, write = 2, execute = 4 };
+		enum { share = 1, privy = 2, fixed = 4 };
+
+		memory(int fd, ssize_t size = -1, size_t offset = 0, int mode = read, int flags = share);
 		~memory();
 
 		void* data()
@@ -34,7 +32,6 @@ namespace sys::file
 
 	private:
 		
-		std::unique_ptr<sys::mem> mem;
 		void* address = nullptr;
 		size_t length = 0;
 	};

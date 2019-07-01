@@ -279,8 +279,26 @@ namespace sys
 	constexpr auto unlink = ::_unlink;
 	constexpr auto write = ::_write;
 
+	// Win32 utilities
+
 	unsigned long winerr(char const *prefix); // perror for GetLastError
-	pid_t getppid();
+
+	struct handle
+	{
+		void* h;
+		int open(int flags);
+		operator void*() const { return h }
+		handle(void* p = nullptr) : h(p) { }
+		~handle();
+	};
+
+	struct winpipe
+	{
+		winpipe();
+		bool ok;
+		handle read;
+		handle write;
+	};
 
 } // namespace sys
 
@@ -308,21 +326,6 @@ namespace sys
 	pid_t exec(int fd[3], char const** argv);
 	void term(pid_t pid);
 	int wait(pid_t pid);
-
-	struct mem
-	{
-		enum { none = 0, read = 1, write = 2, execute = 4 };
-		enum { share = 1, privy = 2, fixed = 4 };
-
-		void* map(int fd, size_t size, off_t off = 0, int mode = read, int type = share);
-		void unmap(void* address, size_t size);
-
-	private:
-
-		#if defined(__WIN32__)
-		void* ptr = nullptr;
-		#endif
-	};
 }
 
 #endif // file

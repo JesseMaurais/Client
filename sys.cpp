@@ -13,20 +13,8 @@
 #include <windows.h>
 #endif
 
-#if __has_include(<tlhelp32.h>)
-#include <tlhelp32.h>
-#endif
-
-#if __has_include(<io.h>)
-#include <io.h>
-#endif
-
 #if __has_include(<processthreadapi.h>)
 #include <processthreadapi.h>
-#endif
-
-#if __has_include(<sys/mman.h>)
-#include <sys/mman.h>
 #endif
 
 #if __has_include(<sys/wait.h>)
@@ -62,117 +50,51 @@ namespace sys
 		return code;
 	}
 
-	namespace
+	int handle::open(int flags)
 	{
-		HANDLE openprocess(pid_t pid)
-		{
-			HANDLE const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-			if (not h) winerr("OpenProcess");
-			return h;
-		}
-
-		struct Handle
-		{
-			HANDLE h;
-
-			operator HANDLE() const
-			{
-				return h;
-			}
-
-			Handle(HANDLE h = nullptr)
-			{
-				this->h = h;
-			}
-
-			~Handle()
-			{
-				if (h and not CloseHandle(h))
-				{
-					winerr("CloseHandle");
-				}
-			}
-
-			int set(int flags)
-			{
-				auto const ptr = reinterpret_cast<intptr_t>(h);
-				int const fd = _open_osfhandle(ptr, flags);
-				h = nullptr;
-				return fd;
-			}
-		};
-
-		struct Pipe
-		{
-			Handle read;
-			Handle write;
-			BOOL ok;
-
-			Pipe()
-			{
-				SECURITY_ATTRIBUTES sa;
-				ZeroMemory(&sa, sizeof sa);
-				sa.nLength = sizeof sa;
-				sa.bInheritHandle = TRUE;
-
-				ok = CreatePipe
-				(
-					&read.h,
-					&write.h,
-					&sa,
-					BUFSIZ
-				);
-
-				if (not ok)
-				{
-					winerr("CreatePipe");
-				}
-			}
-		};
+		auto const ptr = static_cast<intptr_t>(h);
+		int const fd = _open_osfhandle(ptr, flags);
+		h = nullptr;
+		return fd;
 	}
 
-	pid_t getppid()
+	handle::~handle()
 	{
-		pid_t ppid = -1;
-		DWORD const pid = GetCurrentProcessId();
-		assert(_getpid() == pid);
-		Handle h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, pid);
-		if (h)
+		if (h and not CloseHandle(h))
 		{
-			PROCESSENTRY32 pe;
-			ZeroMemory(&pe, sizeof pe);
-			pe.dwSize = sizeof pe;
-			if (Process32First(h, &pe))
-			{
-				do
-				{
-					if (pid == pe.th32ProcessID)
-					{
-						ppid = static_cast<pid_t>(pe.th32ParentProcessID);
-						break;
-					}
-				}
-				while (Process32Next(h, &pe));
-			}
-			else
-			{
-				winerr("Process32First");
-			}
+			winerr("CloseHandle");
 		}
-		else
+	}
+
+	winpipe::winpipe()
+	{
+		SECURITY_ATTRIBUTES sa;
+		ZeroMemory(&sa, sizeof sa);
+		sa.nLength = sizeof sa;
+		sa.bInheritHandle = TRUE;
+
+		ok = CreatePipe
+		(
+			&read.h,
+			&write.h,
+			&sa,
+			BUFSIZ
+		);
+
+		if (not ok)
 		{
-			winerr("CreateToolhelp32Snapshot");
+			winerr("CreatePipe");
 		}
-		return ppid;
 	}
 
 	#endif // __WIN32__
+
 
 	pid_t exec(int fd[3], char const**argv)
 	{
 		#if defined(__WIN32__)
 		{
-			Pipe pair[3];
+			winpipe pair[3];
 
 			for (int n : { 0, 1, 2 })
 			{
@@ -231,11 +153,11 @@ namespace sys
 				return -1;
 			}
 
-			Handle scoped(pi.hThread); // close
+			handle scoped(pi.hThread); // close
 
 			for (int n : { 0, 1, 2 })
 			{
-				fd[n] = n ? pair[n].read.set(_O_RDONLY) : pair[n].write.set(_O_WRONLY);
+				fd[n] = n ? pair[n].read.open(_O_RDONLY) : pair[n].write.open(_O_WRONLY);
 			}
 
 			return pi.dwProcessId;
@@ -298,10 +220,15 @@ namespace sys
 	{
 		#if defined(__WIN32__)
 		{
-			HANDLE const h = openprocess(pid);
-			if (h and not TerminateProcess(h, 0))
+			handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+			if (nullptr == h)
 			{
-				sys::winerr("TerminateProcess");
+				winerr("OpenProcess");
+			}
+			else
+			if (not TerminateProcess(h, 0))
+			{
+				winerr("TerminateProcess");
 			}
 		}
 		#else // defined(__POSIX__)
@@ -319,8 +246,12 @@ namespace sys
 		#if defined(__WIN32__)
 		{
 			DWORD code = ~DWORD{0};
-			HANDLE const h = openprocess(pid);
-			if (h)
+			handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+			if (nullptr == h)
+			{
+				winerr("OpenProcess");
+			}
+			else
 			{
 				if (WaitForSingleObject(h, INFINITE) == WAIT_FAILED)
 				{
@@ -364,142 +295,6 @@ namespace sys
 			}
 
 			return status; // unreachable?
-		}
-		#endif
-	}
-
-	void* mem::map(int fd, size_t size, off_t off, int mode, int type)
-	{
-		#if defined(__WIN32__)
-		{
-			DWORD protect = 0;
-			if (mode & write)
-			{
-				if (mode & execute)
-				{
-					protect = PAGE_EXECUTE_READWRITE;
-				}
-				else
-				{
-					protect = PAGE_READWRITE;
-				}	
-			}
-			else
-			if (mode & execute)
-			{
-				if (mode & read)
-				{
-					protect = PAGE_EXECUTE_READ;
-				}
-				else
-				{
-					protect = PAGE_EXECUTE;
-				}
-			}
-			else // (mode & read)
-			{
-				protect = PAGE_READONLY;
-			}
-
-			off_t const end = size + off;
-			HANDLE const h = CreateFileMapping
-			(
-			 (HANDLE) _get_osfhandle(fd),
-			 nullptr,     // security attributes
-			 protect,     // page access
-			 HIWORD(end), // end position (hi)
-			 LOWORD(end), // end position (lo)
-			 nullptr      // unique name
-			);
-			
-			if (not h)
-			{
-				winerr("CreateFileMapping");
-				return nullptr;
-			}
-
-			DWORD desired = 0;
-			if (mode & write)
-			{
-				desired |= FILE_MAP_WRITE;
-			}
-			else // (mode & read)
-			{
-				desired |= FILE_MAP_READ;
-			}
-			if (mode & execute)
-			{
-				desired |= FILE_MAP_EXECUTE;
-			}
-			if (type & privy)
-			{
-				desired |= FILE_MAP_COPY;
-			}
-
-			auto address = MapViewOfFile
-			(
-			 h,           // file handle
-			 desired,     // desired access
-			 HIWORD(off), // begin position (hi)
-			 LOWORD(off), // begin position (lo)
-			 size         // size in bytes
-			);
-
-			if (address)
-			{
-				ptr = static_cast<LPVOID>(h);
-			}
-			else
-			{
-				sys::winerr("MapViewOfFile");
-				Handle scoped(h); // close
-			}
-
-			return address;
-		}
-		#else // defined(__POSIX__)
-		{
-			int prot = 0;
-			if (mode & read) prot |= PROT_READ;
-			if (mode & write) prot |= PROT_WRITE;
-			if (mode & execute) prot |= PROT_EXEC;
-
-			int flags = 0;
-			if (type & share) flags |= MAP_SHARED;
-			if (type & privy) flags |= MAP_PRIVATE;
-			if (type & fixed) flags |= MAP_FIXED;
-
-			auto address = mmap(nullptr, size, prot, flags, fd, off);
-			if (MAP_FAILED == address)
-			{
-				sys::perror("mmap");
-				address = nullptr;
-			}
-			return address;
-		}
-		#endif
-	}
-
-	void mem::unmap(void* address, size_t size)
-	{
-		#if defined(__WIN32__)
-		{
-			if (not UnmapViewOfFile(address))
-			{
-				sys::winerr("UnmapViewOfFile");
-			}
-			else
-			{
-				Handle scoped(static_cast<HANDLE>(ptr));
-			}
-			(void) size;
-		}
-		#else // defined(__POSIX__)
-		{
-			if (fail(munmap(address, size)))
-			{
-				sys::perror("munmap");
-			}
 		}
 		#endif
 	}
