@@ -26,13 +26,10 @@ namespace sys
 {
 	dl::operator bool() const
 	{
-		return nullptr != tab;
+		return RTLD_DEFAULT != tab;
 	}
 
-	dl::dl() : dl(RTLD_DEFAULT)
-	{ }
-
-	dl::dl(void *ptr) : tab(ptr)
+	dl::dl() : tab(RTLD_DEFAULT)
 	{ }
 
 	dl::dl(string_view path)
@@ -67,17 +64,6 @@ namespace sys
 			error("dlsym", e);
 		}
 		return f;
-	}
-
-	dl const& dl::next()
-	{
-		static struct link : dl
-		{
-			link() : dl(RTLD_NEXT)
-			{ }
-
-		} module;
-		return module; 
 	}
 }
 

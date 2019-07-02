@@ -33,18 +33,10 @@ namespace sys
 			return addr;
 		}
 
-		template <typename S> static auto next(string_view name)
-		{
-			return next().sym<S>(name);
-		}
-
 	private:
 
-		void *tab = nullptr;
+		void *tab;
 		void *sym(string_view name) const;
-		
-		static dl const& next();
-		dl(void *ptr);
 	};
 }
 
