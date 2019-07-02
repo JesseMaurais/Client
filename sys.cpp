@@ -52,7 +52,7 @@ namespace sys
 
 	int handle::open(int flags)
 	{
-		auto const ptr = static_cast<intptr_t>(h);
+		auto const ptr = reinterpret_cast<intptr_t>(h);
 		int const fd = _open_osfhandle(ptr, flags);
 		h = nullptr;
 		return fd;

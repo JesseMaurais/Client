@@ -222,7 +222,21 @@ namespace sys
 #define O_TRUNC  _O_TRUNC
 #define O_WRONLY _O_WRONLY
 
+#define S_IRUSR  _S_IREAD
+#define S_IWUSR  _S_IWRITE
+#define S_IXUSR  0
+#define S_IRGRP  _S_IREAD
+#define S_IWGRP  _S_IWRITE
+#define S_IXGRP  0
+#define S_IROTH  _S_IREAD
+#define S_IWOTH  _S_IWRITE
+#define S_IXOTH  0
+#define S_IRWXU (S_IRUSR | S_IWUSR | S_IXUSR)
+#define S_IRWXG (S_IRGRP | S_IWGRP | S_IXGRP)
+
+
 using STAT_STRUCT = struct _stat;
+
 
 namespace sys
 {
@@ -287,7 +301,7 @@ namespace sys
 	{
 		void* h;
 		int open(int flags);
-		operator void*() const { return h }
+		operator void*() const { return h; }
 		handle(void* p = nullptr) : h(p) { }
 		~handle();
 	};

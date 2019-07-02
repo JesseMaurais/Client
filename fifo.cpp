@@ -7,68 +7,19 @@
 #include "fmt.hpp"
 #include "err.hpp"
 
-#if __has_include(<namedpipeapi.h>)
-#include <namedpipeapi.h>
+#if __has_include(<windows.h>)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #endif
 
 using namespace fmt;
 
-namespace
-{
-	inline bool bit(sys::file::perms const& perms)
-	{
-		return sys::file::no_access != perms;
-	}
-}
-
 namespace sys::file
 {
-	int convert(perms mode)
+	fifo::fifo(string_view name, openmode mode)
 	{
-		int flags = 0;
+		int const flags = convert(mode);
 
-		if (bit(mode & owner_in))
-		{
-			flags |= S_IRUSR;
-		}
-		if (bit(mode & owner_out))
-		{
-			flags |= S_IWUSR;
-		}
-		if (bit(mode & owner_exec))
-		{
-			flags |= S_IXUSR;
-		}
-		if (bit(mode & group_in))
-		{
-			flags |= S_IRGRP;
-		}
-		if (bit(mode & group_out))
-		{
-			flags |= S_IWGRP;
-		}
-		if (bit(mode & group_exec))
-		{
-			flags |= S_IXGRP;
-		}
-		if (bit(mode & other_in))
-		{
-			flags |= S_IROTH;
-		}
-		if (bit(mode & other_out))
-		{
-			flags |= S_IWOTH;
-		}
-		if (bit(mode & other_exec))
-		{
-			flags |= S_IXOTH;
-		}
-
-		return flags;
-	};
-
-	fifo::fifo(string_view name, perms access, openmode mode)
-	{
 		#if defined(__WIN32__)
 		{
 			constexpr auto prefix = "\\\\.\\pipe";
@@ -106,24 +57,25 @@ namespace sys::file
 
 		#if defined(__POSIX__)
 		{
+			constexpr auto mask = 0777;
 			static auto const dir = join({ ::env::tmpdir, ".pipe" }, sys::sep::dir);
 
 			int const exists = sys::access(dir.c_str(), F_OK);
-			if (fail(exists) and fail(sys::mkdir(dir.c_str(), 0777)))
+			if (fail(exists) and fail(sys::mkdir(dir.c_str(), mask)))
 			{
 				sys::perror("mkdir");
 				return;
 			}
 
 			path = join({ dir, name }, sys::sep::dir);
-			if (mkfifo(path.c_str(), convert(access)))
+			if (mkfifo(path.c_str(), mask))
 			{
 				sys::perror("mkfifo", path);
 				path.clear();
 				return;
 			}
 
-			fd = sys::open(path.c_str(), convert(mode), convert(access));
+			fd = sys::open(path.c_str(), flags, mask);
 			if (fail(fd))
 			{
 				sys::perror("open", path);
@@ -139,7 +91,8 @@ namespace sys::file
 		#if defined(__WIN32__)
 		{
 			auto const ptr = _get_osfhandle(fd);
-			auto const h = static_cast<HANDLE>(ptr);
+			auto const h = reinterpret_cast<HANDLE>(ptr);
+
 			if (h and not DisconnectNamedPipe(h))
 			{
 				sys::winerr("DisconnectNamedPipe");
