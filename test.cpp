@@ -20,6 +20,12 @@
 #include <sstream>
 #include <csignal>
 
+#define HELLO_WORLD "Hello, World!"
+#define HELLO_WIDE L"Hello, World!"
+#define HELLO_UPPER "HELLO, WORLD!"
+#define HELLO_LOWER "hello, world!"
+#define DLROW_OLLEH "!dlroW ,olleH"
+
 static_assert(DEBUG, "Compiling unit tests without debug mode.");
 
 int main(int argc, char **argv)
@@ -28,40 +34,31 @@ int main(int argc, char **argv)
 	return debug::run(argv[1]);
 }
 
-// Some strings to use in tests
-
-#define HELLO_WORLD "Hello, World!"
-#define HELLO_WIDE L"Hello, World!"
-#define HELLO_UPPER "HELLO, WORLD!"
-#define HELLO_LOWER "hello, world!"
-#define DLROW_OLLEH "!dlroW ,olleH"
-
-//
-// Sanity test the unit test code itself
-// Disabled by default for code analyzers
-//
-
 namespace
 {
-	//TEST(sane, ASSERT(true and not false));
-	//TEST(sane_equality, ASSERT_EQ(true, true));
-	//TEST(sane_inequality, ASSERT_NOT_EQ(true, false));
-	//TEST_FAIL(sane_throw, throw "sane");
+	using namespace debug;
+
+	//
+	// Sanity test the unit test code itself
+	// Disabled by default for code analyzers
+	//
+	/*
+	TEST(sane, ASSERT(true and not false));
+	TEST(sane_equality, ASSERT_EQ(true, true));
+	TEST(sane_inequality, ASSERT_NOT_EQ(true, false));
+	TEST_FAIL(sane_throw, throw "sane");
 
 	// negatives
 	
-	//TEST(not_sane, ASSERT(false and not true));
-	//TEST(not_equal, ASSERT_EQ(true, false));
-	//TEST(not_unequal, ASSERT_NOT_EQ(true, true));
-	//TEST_FAIL(not_throw, (void) 0);
-}
+	TEST(not_sane, ASSERT(false and not true));
+	TEST(not_equal, ASSERT_EQ(true, false));
+	TEST(not_unequal, ASSERT_NOT_EQ(true, true));
+	TEST_FAIL(not_throw, (void) 0);
+	*/
+	//
+	// Checked integer conversions
+	//
 
-//
-// Checked integer conversions
-//
-
-namespace
-{
 	TEST(int_narrow, ASSERT_EQ('*', fmt::to_narrow<char>(42)));
 	TEST(int_unsigned, ASSERT_EQ(42u, fmt::to_unsigned(42)));
 	TEST(int_signed, ASSERT_EQ(42, fmt::to_signed(42u)));
@@ -70,14 +67,11 @@ namespace
 
 	TEST_FAIL(int_loss, (void) fmt::to_narrow<char>(256));
 	TEST_FAIL(int_loss_sign, (void) fmt::to_unsigned(-1));
-}
 
-//
-// Base template algorithms
-//
+	//
+	// Base template algorithms
+	//
 
-namespace
-{
 	TEST(alg_sort,
 	{
 		using namespace stl;
@@ -118,14 +112,11 @@ namespace
 		erase_if(u, [](int n) { return n % 2; });
 		ASSERT_EQ(u, (std::vector { 2, 4, 6, 8 }));
 	});
-}
 
-//
-// Text formatting routines
-//
+	//
+	// Text formatting routines
+	//
 
-namespace
-{
 	TEST(fmt_empty,
 	{
 		using namespace fmt;
@@ -209,14 +200,11 @@ namespace
 		ASSERT_EQ(t[1], "B");
 		ASSERT_EQ(t[2], "C");
 	});
-}
 
-//
-// Operating system environment
-//
+	//
+	// Operating system environment
+	//
 
-namespace
-{
 	TEST(env_path,
 	{
 		std::string const var = fmt::join({sys::esc::sh::first, "PATH", sys::esc::sh::second});
@@ -224,7 +212,7 @@ namespace
 		ASSERT_EQ(sys::env::eval(var), val);
 	});
 
-	static std::ofstream& outfile()
+	std::ofstream& outfile()
 	{
 		static std::ofstream f { "sys.ini" };
 		return f;
@@ -280,17 +268,14 @@ namespace
 		f << fmt::key_value("XDG_TEMPLATES_DIR", xdg::templates_dir) << std::endl;
 		f << fmt::key_value("XDG_VIDEOS_DIR", xdg::videos_dir) << std::endl;
 	});
-}
 
-//
-// Operating system processes
-//
+	//
+	// Operating system processes
+	//
 
-static int hidden() { return 42; }
-dynamic int visible() { return hidden(); }
+	static int hidden() { return 42; }
+	dynamic int visible() { return hidden(); }
 
-namespace
-{
 	TEST(sys_symbol,
 	{
 		sys::dl module;
@@ -319,14 +304,11 @@ namespace
 		ASSERT_EQ(stl::find(caught, SIGTERM), caught.end());
 		ASSERT_EQ(stl::find(caught, SIGABRT), caught.end());
 	});
-}
 
-//
-// ANSI escape sequence
-//
+	//
+	// ANSI escape sequence
+	//
 
-namespace
-{
 	TEST(ansi_params,
 	{
 		std::ostringstream ss;
@@ -342,14 +324,11 @@ namespace
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
 	});
-}
 
-//
-// Inter-process communications
-//
+	//
+	// Inter-process communications
+	//
 
-namespace
-{
 	TEST(ipc_rev,
 	{
 		sys::io::pstream ps { "rev" };
