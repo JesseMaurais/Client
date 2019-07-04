@@ -7,7 +7,7 @@
 #define STRING(n) ASSTRING(n)
 
 #ifndef NDEBUG
-namespace debug
+namespace dbg
 {
 	int run(char const *pattern);
 
@@ -17,22 +17,28 @@ namespace debug
 		test(char const *name);
 		~test();
 	};
+
+	struct fail : test
+	{
+		using test::test;
+		void run() final;
+		virtual void run2() = 0;
+	};
 }
 constexpr bool DEBUG = true;
-#define TEST(unit, ...) struct : debug::test { void run() final { __VA_ARGS__; } using test::test; } unit(#unit);
+#define TEST(unit) struct unit : dbg::test { using test::test; void run() final; } test_##unit(#unit); void unit::run()
+#define FAIL(unit) struct unit : dbg::fail { using fail::fail; void run2() final; } test_##unit(#unit); void unit::run2()
 #define ASSERT(...) if (not(__VA_ARGS__)) throw __FILE__ ":" STRING(__LINE__) ": " #__VA_ARGS__
 #define verify(...) assert(__VA_ARGS__)
 #else
 constexpr bool DEBUG = false;
-#define TEST(unit, ...) 
+#define TEST(unit) (void) []()
 #define ASSERT(...)
-#define verify(...) (__VA_ARGS__)
+#define verify(...) (void) (__VA_ARGS__)
 #endif
 
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))
 #define ASSERT_NOT_EQ(a, b) ASSERT((a) != (b))
-#define TEST_FAIL(unit, ...) TEST(unit, try { __VA_ARGS__; } catch (...) { return; } throw "Did not throw";)
-
 #undef assert
 #define assert(...) ASSERT(__VA_ARGS__)
 

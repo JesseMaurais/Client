@@ -13,11 +13,11 @@
 
 namespace
 {
-	//TEST(dumb_assert, ASSERT(false));
-	//TEST(dumb_except, throw std::runtime_error("Holy Cow!"));
-	TEST(_dumb, throw "You should not run hidden unit tests."); 
+	//TEST(dumb_assert) { ASSERT(false); };
+	//TEST(dumb_except) { throw std::runtime_error("Holy Cow!"); };
+	//TEST(_dumb) { throw "You should not run hidden unit tests."; }; 
 
-	using map = std::map<debug::test*, std::string>;
+	using map = std::map<dbg::test*, std::string>;
 	std::string::size_type max_size = 0;
 
 	map& registry()
@@ -27,7 +27,7 @@ namespace
 	}
 }
 
-namespace debug
+namespace dbg
 {
 	test::test(char const *name)
 	{
@@ -40,6 +40,19 @@ namespace debug
 	test::~test()
 	{
 		registry().erase(this);
+	}
+
+	void fail::run()
+	{
+		try
+		{
+			run2();
+		}
+		catch (...)
+		{
+			return;
+		}
+		throw "Did not throw";
 	}
 
 	int run(char const *expression)
