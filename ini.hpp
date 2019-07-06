@@ -15,13 +15,15 @@ namespace ini
 	{
 		while (std::getline(in, s))
 		{
-			auto const it = fmt::skip(s.begin(), s.end());
+			auto const it = fmt::next(s.begin(), s.end());
 			if (it != s.end() and c != *it)
 			{
 				auto const t = s.find(c);
 				s = s.substr(0, t);
-				if (fmt::trim(s))
+				auto const u = fmt::trim(s);
+				if (not empty(u))
 				{
+					s = fmt::to_string(u);
 					break;
 				}
 			}

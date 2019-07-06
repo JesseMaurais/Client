@@ -65,8 +65,10 @@ namespace
 	{
 		operator fmt::span_view() const final
 		{
+			static thread_local fmt::string_view_vector t;
 			fmt::string_view u = sys::env::get("PATH");
-			return fmt::split(u, sys::sep::path);
+			t = fmt::split(u, sys::sep::path);
+			return t;
 		}
 
 	} PATH;

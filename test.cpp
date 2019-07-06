@@ -138,12 +138,12 @@ namespace
 	{
 		using namespace fmt;
 		string whitespace = " \t\n";
-		ASSERT(not trim(whitespace));
+		ASSERT(empty(trim(whitespace)));
 		constexpr auto raw = " \t" HELLO_WORLD "\n";
-		string s = raw;
-		ASSERT(trim(s));
-		ASSERT_EQ(s, HELLO_WORLD);
-		ASSERT_NOT_EQ(s, raw);
+		auto const u = trim(raw);
+		ASSERT(not empty(u));
+		ASSERT_EQ(u, HELLO_WORLD);
+		ASSERT_NOT_EQ(u, raw);
 	};
 
 	TEST(fmt_wide)

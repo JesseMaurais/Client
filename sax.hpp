@@ -15,10 +15,10 @@ namespace xml
 		template <class Char>
 		friend bool is_element(iterator const& it);
 
-	private:
-
-		static constexpr char_type lt [] = { '<', '\0' };
-		static constexpr char_type gt [] = { '>', '\0' };
+		static constexpr char_type quot [] = { '"', '\0' };
+		static constexpr char_type amp  [] = { '&', '\0' };
+		static constexpr char_type lt   [] = { '<', '\0' };
+		static constexpr char_type gt   [] = { '>', '\0' };
 
 	public:
 

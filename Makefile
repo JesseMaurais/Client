@@ -34,7 +34,7 @@ $(EXE): $(OBJ)
 	$(CXX) $(LDFLAGS) $(OUT)$(EXE) $(OBJ) $(LNK)
 
 $(CHK): $(SRC)
-	cppcheck --force --quiet --enable=all $(SRC)
+	cppcheck --force --quiet --verbose --enable=all $(SRC)
 	#cppcheck-htmlreport --report-dir=.make --source-dir=. --file=$*.xml 
 
 $(PVS): $(SRC) $(LOG)

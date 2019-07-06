@@ -5,7 +5,8 @@
 
 namespace fmt
 {
-	template <class Char> class basic_delimiter : protected basic_string_view_pair<Char>
+	template <class Char> class basic_delimiter
+	: protected basic_string_view_pair<Char>
 	{
 		using char_type = Char;
 		using string_view = basic_string_view<char_type>;
@@ -18,6 +19,18 @@ namespace fmt
 
 		string_view const view;
 
+		static size_type count(string_view s, string_view t)
+		{
+			size_type n = 0;
+			size_type const m = t.size();
+			for (auto i = s.find(t); i != npos; i = s.find(t, i))
+			{
+				i += m;
+				++n;
+			}
+			return n;
+		}
+
 	public:
 
 		basic_delimiter(string_view input, string_view_pair pair)
@@ -25,7 +38,7 @@ namespace fmt
 		{ }
 
 		basic_delimiter(string_view input, string_view mark)
-		: basic_delimiter(input, {mark, mark})
+		: basic_delimiter(input, { mark, mark })
 		{ }
 
 		class iterator : public string_size_pair
@@ -82,6 +95,8 @@ namespace fmt
 		using delimiter = basic_delimiter<char_type>;
 		using string_view = basic_string_view<char_type>;
 		using span_view = basic_span_view<char_type>;
+		using size_type = typename string_view::size_type;
+		static constexpr auto npos = string_view::npos;
 
 	protected:
 
@@ -112,29 +127,37 @@ namespace fmt
 		public:
 
 			template <class C>
-			bool starts_with(fmt::basic_string_view<C> s)
+			size_type start_after(fmt::basic_string_view<C> s)
 			{
+				auto const m = s.size();
 				auto const n = this->second - this->first;
-				return s.size() < n and stl::all_of
-				(
-					s, [this, i = this->first](C const c)
+				if (m < n) return npos;
+
+				for (size_type i = 0; i < m; ++i)
+				{
+					if (s[i] != view[this->first + i])
 					{
-						return c == view[i++];
+						return npos;
 					}
-				);
+				}
+				return this->first + m;
 			}
 
 			template <class C>
-			bool ends_with(fmt::basic_string_view<C> s)
+			size_type ends_before(fmt::basic_string_view<C> s)
 			{
+				auto const m = s.size();
 				auto const n = this->second - this->first;
-				return s.size() < n and stl::all_of
-				(
-					s, [this, i = this->second - s.size()](C const c)
+				if (m < n) return npos;
+
+				for (size_type i = 0; i < m; ++i)
+				{
+					if (s[i] != view[this->second - m + i])
 					{
-						return c == view[i++];
+						return npos;
 					}
-				);
+				}
+				return this->second - m;
 			}
 			
 			operator span_view() const

@@ -31,6 +31,7 @@ namespace fmt
 	using span_view = std::span<fmt::string_view>;
 	using wspan_view = std::span<fmt::wstring_view>;
 	template <typename... Args> using basic_span_view = std::span<basic_string_view<Args...>>;
+	template <typename Type> using span = std::span<Type>;
 }
 #elif __has_include(<experimetal/span>)
 #include <experimental/span>
@@ -39,6 +40,7 @@ namespace fmt
 	using span_view = std::experimental::span<fmt::string_view>;
 	using wspan_view = std::experimental::span<fmt::wstring_view>;
 	template <typename... Args> using basic_span_view = std::span<basic_string_view<Args...>>;
+	template <typename Type> using span = std::span<Type>;
 }
 #else
 //#warning Cannot find an implementation of std::span. Using std::vector instead.
@@ -48,6 +50,7 @@ namespace fmt
 	using span_view = std::vector<fmt::string_view>;
 	using wspan_view = std::vector<fmt::wstring_view>;
 	template <typename... Args> using basic_span_view = std::vector<basic_string_view<Args...>>;
+	template <typename Type> using span = std::vector<Type>;
 }
 #endif
 
@@ -94,6 +97,9 @@ namespace fmt
 
 	using span_view = basic_span_view<char>;
 	using wspan_view = basic_span_view<wchar_t>;
+
+	using size = string::size_type;
+	constexpr auto npos = string::npos;
 }
 
 #endif // file

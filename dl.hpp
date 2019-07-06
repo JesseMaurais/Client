@@ -38,6 +38,8 @@ namespace sys
 		void *tab;
 		void *sym(string_view name) const;
 	};
+
+	fmt::string_view lib(fmt::string_view);
 }
 
 #endif // file
