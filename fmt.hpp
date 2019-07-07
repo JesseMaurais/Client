@@ -199,9 +199,9 @@ namespace fmt
 	// Character class injection
 	//
 
-	template <class Char, template<class> class Type = std::ctype> struct ctype : Type<Char>
+	template <class Char> struct ctype : std::ctype<Char>
 	{
-		using base = Type<Char>;
+		using base = std::ctype<Char>;
 		using mask = typename base::mask;
 		using string_mask = std::vector<mask>;	
 		using string = fmt::basic_string<Char>;
@@ -360,6 +360,7 @@ namespace fmt
 		}
 
 		static bool terminated(string_view u)
+		/// Check whether string is null terminated
 		{
 			return not u.empty() and not u[u.size()];
 		}
@@ -372,6 +373,19 @@ namespace fmt
 			{
 				(void) w;
 				++n;
+			}
+			return n;
+		}
+
+		static auto count(string_view u, string_view v)
+		/// Count occurances in $u of a substring $v
+		{
+			auto n = null;
+			auto const z = v.size();
+			for (auto i = u.find(v); i != npos; i = u.find(v, i))
+			{
+				i += z;
+				++ n;
 			}
 			return n;
 		}
@@ -488,6 +502,11 @@ namespace fmt
 	inline auto count(string_view u)
 	{
 		return lc.count(u);
+	}
+
+	inline auto count(string_view u, string_view v)
+	{
+		return lc.count(u, v);
 	}
 
 	inline auto join(span_view t, string_view u = "")

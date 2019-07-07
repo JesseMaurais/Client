@@ -5,31 +5,18 @@
 
 namespace fmt
 {
-	template <class Char> class basic_delimiter
-	: protected basic_string_view_pair<Char>
+	template <class Char>
+	class basic_delimiter : protected basic_string_view_pair<Char>
 	{
-		using char_type = Char;
-		using string_view = basic_string_view<char_type>;
-		using string_size_pair = basic_string_size_pair<char_type>;
-		using string_view_pair = basic_string_view_pair<char_type>;
+		using string_view = fmt::basic_string_view<Char>;
+		using string_size_pair = fmt::basic_string_size_pair<Char>;
+		using string_view_pair = fmt::basic_string_view_pair<Char>;
 		using size_type = typename string_view::size_type;
 		static constexpr auto npos = string_view::npos;
 
 	private:
 
 		string_view const view;
-
-		static size_type count(string_view s, string_view t)
-		{
-			size_type n = 0;
-			size_type const m = t.size();
-			for (auto i = s.find(t); i != npos; i = s.find(t, i))
-			{
-				i += m;
-				++n;
-			}
-			return n;
-		}
 
 	public:
 
