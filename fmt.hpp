@@ -91,7 +91,7 @@ namespace fmt
 	inline string to_string(wstring_view const& w)
 	{
 		string s;
-		for (char const c : narrow(w)) s.push_back(c);
+		for (auto const c : narrow(w)) s.push_back(c);
 		return s;
 	}
 
@@ -99,7 +99,7 @@ namespace fmt
 	inline wstring to_wstring(string_view const& s)
 	{
 		wstring w;
-		for (wchar_t const c : widen(s)) w.push_back(c);
+		for (auto const c : widen(s)) w.push_back(c);
 		return w;
 	}
 
@@ -195,13 +195,6 @@ namespace fmt
 		return true;
 	}
 
-	// Termination safety check
-
-	inline bool terminated(string_view u)
-	{
-		return not empty(u) and not u[u.size()];
-	}
-
 	//
 	// Character class injection
 	//
@@ -223,20 +216,20 @@ namespace fmt
 
 		static_assert(sizeof (div) == sizeof (size_pair), "Conformance failure.");
 
-		static constexpr auto first = size { 0 };
-		static constexpr auto last = string::npos;
+		static constexpr auto null = size { 0 };
+		static constexpr auto npos = string::npos;
 		static constexpr auto space = base::space;
 
 		template <typename as> static string from(as const& s);
 
 		bool check(wint_t w, mask x = space) const
-		/// Check whether code $w is class $x
+		/// Check whether code $w is an $x
 		{
 			return base::is(x, w);
 		}
 
-		string_mask type(string_view u) const
-		/// Scan and classify characters in vie
+		auto type(string_view u) const
+		/// Classify characters in view $u
 		{
 			string_mask x(u.size());
 			base::is(u.data(), u.data() + u.size(), x.data());
@@ -244,6 +237,7 @@ namespace fmt
 		}
 
 		mask type(wint_t w) const
+		/// Classify character $w
 		{
 			auto const x = type(string_view(w));
 			return empty(x) ? 0 : x.front();
@@ -251,11 +245,11 @@ namespace fmt
 
 		template <typename iterator>
 		auto next(iterator it, iterator end, mask x = space) const
-		/// Next iterator after $it but not after $end which is class $x
+		/// Next iterator after $it but not after $end which is an $x
 		{
 			while (it != end) 
 			{
-				wint_t const w = *it;
+				auto const w = *it;
 				if (check(w, x))
 				{
 					++it;
@@ -265,14 +259,14 @@ namespace fmt
 			return it;
 		}
 
-		auto after(string_view u, mask x = space) const
-		/// First iterator in view $u not an $x
+		auto first(string_view u, mask x = space) const
+		/// First iterator in view $u that is not $x
 		{
 			return next(begin(u), end(u), x);
 		}
 
-		auto before(string_view u, mask x = space) const
-		/// Last iterator in view $u not an $x
+		auto last(string_view u, mask x = space) const
+		/// Last iterator in view $u that is not $x
 		{
 			return next(rbegin(u), rend(u), x).base();
 		}
@@ -280,18 +274,18 @@ namespace fmt
 		auto trim(string_view u, mask x = space) const
 		/// Trim $x off the front and back of $u
 		{
-			auto const last = before(u, x);
-			auto const first = after(u, x);
-			auto const pos = std::distance(begin(u), first);
-			auto const size = std::distance(first, last);
+			auto const before = last(u, x);
+			auto const after = first(u, x);
+			auto const pos = std::distance(begin(u), after);
+			auto const size = std::distance(after, before);
 			return u.substr(pos, size);
 		}
 
 		auto divide(string_view u, mask x = space) const
 		/// Count the quotient in $u that are $x and remainder that are not
 		{
-			div n { first, first };
-			for (wint_t const w : widen(u))
+			div n { 0, 0 };
+			for (auto const w : widen(u))
 			{
 				if (check(w, x))
 				{
@@ -305,28 +299,28 @@ namespace fmt
 			return n;
 		}
 
-		auto remainder(string_view u, mask x = space) const
+		auto rem(string_view u, mask x = space) const
 		/// Count characters in $u that are not $x
 		{
 			return divide(u, x).rem; 
 		}
 
-		auto quotient(string_view u, mask x = space) const
-		/// Count characters in $u with class $x
+		auto quot(string_view u, mask x = space) const
+		/// Count characters in $u that are $x
 		{
 			return divide(u, x).quot;
 		}
 
 		bool all_of(string_view u, mask x = space) const
-		/// All decoded characters in $u are class $x
+		/// All decoded characters in $u are $x
 		{
-			return 0 == remainder(u, x);
+			return 0 == rem(u, x);
 		}
 
 		bool none_of(string_view u, mask x = space) const
-		/// No decoded characters in $u are class $x
+		/// No decoded characters in $u are $x
 		{
-			return 0 == quotient(u, x);
+			return 0 == quot(u, x);
 		}
 
 		bool clear(string_view u) const
@@ -342,10 +336,10 @@ namespace fmt
 		}
 
 		auto to_upper(string_view u) const
-		// Recode characters in upper case
+		/// Recode characters in upper case
 		{
 			string s;
-			for (wint_t const w : widen(u))
+			for (auto const w : widen(u))
 			{
 				auto const p = base::toupper(w);
 				s += from(p);
@@ -357,7 +351,7 @@ namespace fmt
 		/// Recode characters in lower case
 		{
 			string s;
-			for (wint_t const w : widen(u))
+			for (auto const w : widen(u))
 			{
 				auto const p = base::tolower(w);
 				s += from(p);
@@ -365,11 +359,16 @@ namespace fmt
 			return s;
 		}
 
-		static auto count(string_view u)
-		/// Count characters in view $u
+		static bool terminated(string_view u)
 		{
-			auto n = first;
-			for (wint_t const w : widen(u))
+			return not u.empty() and not u[u.size()];
+		}
+
+		static auto count(string_view u)
+		/// Count characters in view
+		{
+			auto n = null;
+			for (auto const w : widen(u))
 			{
 				(void) w;
 				++n;
@@ -378,11 +377,11 @@ namespace fmt
 		}
 
 		static auto join(span_view t, string_view u)
-		/// Join strings in $t with $u between
+		/// Join strings in $t with $u inserted between
 		{
 			string s;
 			auto const z = t.size();
-			for (auto i = first; i < z; ++i)
+			for (auto i = null; i < z; ++i)
 			{
 				if (i) s += u;
 				s += t[i];
@@ -395,7 +394,7 @@ namespace fmt
 		{
 			string_view_vector t;
 			auto const uz = u.size(), vz = v.size();
-			for (auto i = first, j = u.find(v); i < uz; j = u.find(v, i))
+			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
 			{
 				auto const k = uz < j ? uz : j;
 				auto const w = u.substr(i, k - i);
@@ -410,7 +409,7 @@ namespace fmt
 		{
 			string s;
 			auto const uz = u.size(), vz = v.size();
-			for (auto i = first, j = u.find(v); i < uz; j = u.find(v, i))
+			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
 			{
 				auto const k = uz < j ? uz : j;
 				s += u.substr(i, k - i);
@@ -420,16 +419,18 @@ namespace fmt
 			return s;
 		}
 
-		static auto to_pair(string_view u)
-		/// Divide view by the first "="
+		static auto to_pair(string_view u, string_view v)
+		/// Divide view $u by first occurance of $v
 		{
 			auto const m = u.size();
-			auto const n = u.find('=');
-			auto const k = u.substr(0, n);
-			auto const v = u.substr(n < m ? n + 1 : m);
-			return string_view_pair(k, v);
+			auto const n = u.find(v);
+			auto const p = u.substr(0, n);
+			auto const q = u.substr(n < m ? n + 1 : m);
+			return string_view_pair { p, q };
 		}
 	};
+
+	// Common characters
 
 	using cc = ctype<char>;
 	using wc = ctype<wchar_t>;
@@ -444,14 +445,29 @@ namespace fmt
 		return ::fmt::to_wstring(s);
 	}
 
-	static thread_local cc lc; // C locale
+	// C locale shims
 
-	// Commons
+	static thread_local cc lc;
 
 	template <typename iterator>
 	inline auto next(iterator it, iterator end)
 	{
 		return lc.next(it, end);
+	}
+
+	inline auto first(string_view u)
+	{
+		return lc.first(u);
+	}
+
+	inline auto last(string_view u)
+	{
+		return lc.last(u);
+	}
+
+	inline auto trim(string_view u)
+	{
+		return lc.trim(u);
 	}
 
 	inline auto to_upper(string_view u)
@@ -464,9 +480,14 @@ namespace fmt
 		return lc.to_lower(u);
 	}
 
-	inline auto split(string_view u, string_view v)
+	inline auto terminated(string_view u)
 	{
-		return lc.split(u, v);
+		return lc.terminated(u);
+	}
+
+	inline auto count(string_view u)
+	{
+		return lc.count(u);
 	}
 
 	inline auto join(span_view t, string_view u = "")
@@ -474,19 +495,24 @@ namespace fmt
 		return lc.join(t, u);
 	}
 
+	inline auto split(string_view u, string_view v)
+	{
+		return lc.split(u, v);
+	}
+
+	inline auto replace(string_view u, string_view v, string_view w)
+	{
+		return lc.replace(u, v, w);
+	}
+
+	inline auto to_pair(string_view u, string_view v = "=")
+	{
+		return lc.to_pair(u, v);
+	}
+
 	inline auto key_value(string_view u, string_view v)
 	{
 		return join({ u, v }, "=");
-	}
-
-	inline auto key_value(string_view u)
-	{
-		return lc.to_pair(u);
-	}
-
-	inline auto trim(string_view u)
-	{
-		return lc.trim(u);
 	}
 }
 

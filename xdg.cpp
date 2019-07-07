@@ -295,7 +295,7 @@ namespace
 					auto const first = line.find_first_not_of(quote);
 					auto const second = line.find_first_of(quote, first);
 					line = line.substr(first, second);
-					fmt::string_view_pair pair = fmt::key_value(line);
+					auto pair = fmt::to_pair(line);
 					pair.second = sys::env::eval(fmt::to_string(pair.second));
 					data.emplace(pair);
 				}
