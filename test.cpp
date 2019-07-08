@@ -77,7 +77,7 @@ namespace
 		std::vector num { 5, 7, 3, 9, 6, 1, 2, 0, 4, 8 };
 		sort(num, [](int a, int b) { return a < b; });
 		ASSERT_EQ(num, (std::vector { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
-	};
+	}
 
 	TEST(alg_find)
 	{
@@ -93,7 +93,7 @@ namespace
 		std::vector<int> odds;
 		for_each(pow2, [&odds](int n) { odds.push_back(n + 1); }); 
 		ASSERT(none_of(odds, is_even));
-	};
+	}
 
 	TEST(alg_copy)
 	{
@@ -109,7 +109,7 @@ namespace
 
 		erase_if(u, [](int n) { return n % 2; });
 		ASSERT_EQ(u, (std::vector { 2, 4, 6, 8 }));
-	};
+	}
 
 	//
 	// Text formatting routines
@@ -122,17 +122,17 @@ namespace
 		ASSERT(not empty(string { HELLO_WORLD }));
 		ASSERT(empty(string_view { }));
 		ASSERT(not empty(string_view { HELLO_WORLD }));
-		ASSERT(empty(span_view { }));
-		ASSERT(not empty(span_view { HELLO_WORLD }));
-		ASSERT(empty(span_view { string_view { } }));
-	};
+		ASSERT(empty(string_view_span { }));
+		ASSERT(not empty(string_view_span { HELLO_WORLD }));
+		ASSERT(empty(string_view_span { string_view { } }));
+	}
 
 	TEST(fmt_terminated)
 	{
 		using namespace fmt;
 		ASSERT(terminated(string_view(HELLO_WORLD, 13)));
 		ASSERT(not terminated(string_view(HELLO_WORLD, 5)));
-	};
+	}
 
 	TEST(fmt_trim)
 	{
@@ -144,21 +144,21 @@ namespace
 		ASSERT(not empty(u));
 		ASSERT_EQ(u, HELLO_WORLD);
 		ASSERT_NOT_EQ(u, raw);
-	};
+	}
 
 	TEST(fmt_wide)
 	{
 		using namespace fmt;
 		ASSERT_EQ(to_wstring(string { HELLO_WORLD }), HELLO_WIDE);
 		ASSERT_EQ(to_string(wstring { HELLO_WIDE }), HELLO_WORLD);
-	};
+	}
 
 	TEST(fmt_case)
 	{
 		using namespace fmt;
 		ASSERT_EQ(to_upper(HELLO_WORLD), HELLO_UPPER);
 		ASSERT_EQ(to_lower(HELLO_WORLD), HELLO_LOWER);
-	};
+	}
 
 	TEST(fmt_delimiter)
 	{
@@ -178,14 +178,13 @@ namespace
 		ASSERT_EQ(t[1], "B");
 		ASSERT_EQ(t[2], "C");
 		ASSERT_EQ(t[3], "D");
-	};
+	}
 
 	TEST(fmt_sequence)
 	{
 		using namespace fmt;
 		string_view u = "A<B>C";
 		sequence q {u, {"<", ">"}};
-
 		string_view_vector t;
 		for (auto tok : q)
 		{
@@ -197,7 +196,27 @@ namespace
 		ASSERT_EQ(t[0], "A");
 		ASSERT_EQ(t[1], "B");
 		ASSERT_EQ(t[2], "C");
-	};
+	}
+
+	TEST(fmt_tag)
+	{
+		using namespace fmt;
+		auto const s = "banana, apple, grape, bananas";
+		string_view_span a { "apple", "banana" };
+		string_vector t;
+		tag(a, s, [&](auto it, auto pos)
+		{
+			(void) pos;
+			std::cout << '(' << pos << ')' << *it << std::endl;
+			t.emplace_back(*it);
+			return false;
+		});
+
+		//ASSERT_EQ(t.size(), 3);
+		//ASSERT_EQ(t[0], "banana");
+		//ASSERT_EQ(t[1], "apple");
+		//ASSERT_EQ(t[2], "banana");
+	}
 
 	//
 	// Operating system environment
@@ -208,7 +227,7 @@ namespace
 		std::string const var = fmt::join({sys::esc::sh::first, "PATH", sys::esc::sh::second});
 		std::string const val = fmt::join(env::path, sys::sep::path);
 		ASSERT_EQ(sys::env::eval(var), val);
-	};
+	}
 
 	std::ofstream& outfile()
 	{
@@ -230,7 +249,7 @@ namespace
 		f << fmt::key_value("ROOTDIR", env::rootdir) << std::endl;
 		f << fmt::key_value("DESKTOP", env::desktop) << std::endl;
 		f << fmt::key_value("PROMPT", env::prompt) << std::endl;
-	};
+	}
 
 	TEST(xdg_desktop)
 	{
@@ -239,7 +258,7 @@ namespace
 		f << fmt::key_value("XDG_CURRENT_DESKTOP", xdg::current_desktop) << std::endl;
 		f << fmt::key_value("XDG_MENU_PREFIX", xdg::menu_prefix) << std::endl;
 		f << fmt::key_value("XDG_APPLICATIONS_MENU", xdg::applications_menu) << std::endl;
-	};
+	}
 
 	TEST(xdg_data)
 	{
@@ -251,7 +270,7 @@ namespace
 		f << fmt::key_value("XDG_CACHE_HOME", xdg::cache_home) << std::endl;
 		f << fmt::key_value("XDG_DATA_DIRS", fmt::join(xdg::data_dirs, sys::sep::path)) << std::endl;
 		f << fmt::key_value("XDG_CONFIG_DIRS", fmt::join(xdg::config_dirs, sys::sep::path)) << std::endl;
-	};
+	}
 
 	TEST(xdg_user)
 	{
@@ -265,7 +284,7 @@ namespace
 		f << fmt::key_value("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir) << std::endl;
 		f << fmt::key_value("XDG_TEMPLATES_DIR", xdg::templates_dir) << std::endl;
 		f << fmt::key_value("XDG_VIDEOS_DIR", xdg::videos_dir) << std::endl;
-	};
+	}
 
 	//
 	// Operating system processes
@@ -280,7 +299,7 @@ namespace
 		auto f = module.sym<int()>("visible");
 		ASSERT_NOT_EQ(nullptr, f);
 		ASSERT_EQ(f(), hidden());
-	};
+	}
 
 	TEST(sys_signal)
 	{
@@ -301,7 +320,7 @@ namespace
 		ASSERT_EQ(stl::find(caught, SIGSEGV), caught.end());
 		ASSERT_EQ(stl::find(caught, SIGTERM), caught.end());
 		ASSERT_EQ(stl::find(caught, SIGABRT), caught.end());
-	};
+	}
 
 	//
 	// ANSI escape sequence
@@ -313,7 +332,7 @@ namespace
 		ss << io::params<1, 2, 3, 4>;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "1;2;3;4");
-	};
+	}
 
 	TEST(ansi_fg)
 	{
@@ -321,7 +340,7 @@ namespace
 		ss << io::fg_green << "GREEN" << io::fg_off;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
-	};
+	}
 
 	//
 	// Inter-process communications
@@ -335,7 +354,7 @@ namespace
 		std::string s;
 		ASSERT(std::getline(ps, s));
 		ASSERT_EQ(s, DLROW_OLLEH);
-	};
+	}
 
 	TEST(ipc_mem)
 	{
@@ -346,6 +365,6 @@ namespace
 		fmt::string_view const view = map;
 		auto pos = view.find("Self referencing find.");
 		ASSERT_NOT_EQ(pos, fmt::string_view::npos);
-	};
+	}
 }
 

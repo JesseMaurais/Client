@@ -12,7 +12,7 @@ namespace env
 
 	struct list
 	{
-		virtual operator fmt::span_view() const = 0;
+		virtual operator fmt::string_view_span() const = 0;
 	};
 }
 

@@ -63,7 +63,7 @@ namespace
 {
 	struct : env::list
 	{
-		operator fmt::span_view() const final
+		operator fmt::string_view_span() const final
 		{
 			static thread_local fmt::string_view_vector t;
 			fmt::string_view u = sys::env::get("PATH");

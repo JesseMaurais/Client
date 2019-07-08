@@ -1,6 +1,8 @@
 #ifndef fmt_hpp
 #define fmt_hpp
 
+#include <functional>
+#include <algorithm>
 #include <cinttypes>
 #include <cstdlib>
 #include <locale>
@@ -183,7 +185,7 @@ namespace fmt
 		return empty(p.first) and empty(p.second);
 	}
 
-	inline bool empty(span_view const &v)
+	inline bool empty(string_view_span const &v)
 	{
 		for (auto const& u : v)
 		{
@@ -208,10 +210,13 @@ namespace fmt
 		using string_view = fmt::basic_string_view<Char>;
 		using string_view_pair = fmt::basic_string_view_pair<Char>;
 		using string_view_vector = fmt::basic_string_view_vector<Char>;
+		using string_view_span = fmt::basic_string_view_span<Char>;
 		using string_vector = fmt::basic_string_vector<Char>;
 		using string_pair = fmt::basic_string_pair<Char>;
 		using size_pair = fmt::basic_string_size_pair<Char>;
-		using size = typename string::size_type;
+		using iterator = typename string_view_span::iterator;
+		using range = fmt::basic_string_view_span_range<Char>;
+		using size = typename string_view::size_type;
 		using div = std::imaxdiv_t;
 
 		static_assert(sizeof (div) == sizeof (size_pair), "Conformance failure.");
@@ -390,7 +395,7 @@ namespace fmt
 			return n;
 		}
 
-		static auto join(span_view t, string_view u)
+		static auto join(string_view_span t, string_view u)
 		/// Join strings in $t with $u inserted between
 		{
 			string s;
@@ -431,6 +436,34 @@ namespace fmt
 				i = k + vz;
 			}
 			return s;
+		}
+
+		using reactor = std::function<bool(iterator, size)>;
+		static bool tag(range a, string_view u, reactor f)
+		/// Call $f for any tag in sorted $a that is found in $u
+		{
+			auto it = a;
+			auto const z = u.size();
+			for (size i = 0, j = 1; j <= z; ++j)
+			{
+				auto const n = j - i;
+				auto const v = u.substr(i, n);
+				it = std::equal_range(it.first, it.second, v);
+				if (it.first->size() == n)
+				{
+					if (f(it.first, i))
+					{
+						return true;
+					}
+					else
+					if (it.first == it.second)
+					{
+						it = a;
+						i = j;
+					}
+				}
+			}
+			return false;
 		}
 
 		static auto to_pair(string_view u, string_view v)
@@ -509,7 +542,7 @@ namespace fmt
 		return lc.count(u, v);
 	}
 
-	inline auto join(span_view t, string_view u = "")
+	inline auto join(string_view_span t, string_view u = "")
 	{
 		return lc.join(t, u);
 	}
@@ -522,6 +555,11 @@ namespace fmt
 	inline auto replace(string_view u, string_view v, string_view w)
 	{
 		return lc.replace(u, v, w);
+	}
+
+	inline auto tag(string_view_span t, string_view u, cc::reactor r)
+	{
+		return lc.tag(range<string_view_span>{ begin(t), end(t) }, u, r);
 	}
 
 	inline auto to_pair(string_view u, string_view v = "=")

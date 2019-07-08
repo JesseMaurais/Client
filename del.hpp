@@ -81,7 +81,7 @@ namespace fmt
 		using char_type = Char;
 		using delimiter = basic_delimiter<char_type>;
 		using string_view = basic_string_view<char_type>;
-		using span_view = basic_span_view<char_type>;
+		using span_view = basic_string_view_span<char_type>;
 		using size_type = typename string_view::size_type;
 		static constexpr auto npos = string_view::npos;
 

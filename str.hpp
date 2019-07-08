@@ -28,28 +28,19 @@ namespace fmt
 #include <span>
 namespace fmt
 {
-	using span_view = std::span<fmt::string_view>;
-	using wspan_view = std::span<fmt::wstring_view>;
-	template <typename... Args> using basic_span_view = std::span<basic_string_view<Args...>>;
 	template <typename Type> using span = std::span<Type>;
 }
 #elif __has_include(<experimetal/span>)
 #include <experimental/span>
 namespace fmt
 {
-	using span_view = std::experimental::span<fmt::string_view>;
-	using wspan_view = std::experimental::span<fmt::wstring_view>;
-	template <typename... Args> using basic_span_view = std::span<basic_string_view<Args...>>;
-	template <typename Type> using span = std::span<Type>;
+	template <typename Type> using span = std::experimental::span<Type>;
 }
 #else
 //#warning Cannot find an implementation of std::span. Using std::vector instead.
 #include <vector>
 namespace fmt
 {
-	using span_view = std::vector<fmt::string_view>;
-	using wspan_view = std::vector<fmt::wstring_view>;
-	template <typename... Args> using basic_span_view = std::vector<basic_string_view<Args...>>;
 	template <typename Type> using span = std::vector<Type>;
 }
 #endif
@@ -61,12 +52,20 @@ namespace fmt
 namespace fmt
 {
 	template <class Type> using pair = std::pair<Type, Type>;
+	template <class Type> using range = pair<typename Type::iterator>;
+
 	template <class Char> using basic_string = std::basic_string<Char>;
 	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
 	template <class Char> using basic_string_view_pair = pair<basic_string_view<Char>>;
 	template <class Char> using basic_string_size_pair = pair<typename basic_string_view<Char>::size_type>;
 	template <class Char> using basic_string_vector = typename std::vector<basic_string<Char>>;
 	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
+	template <class Char> using basic_string_span = span<basic_string<Char>>;
+	template <class Char> using basic_string_view_span = span<basic_string_view<Char>>;
+	template <class Char> using basic_string_range = range<basic_string<Char>>;
+	template <class Char> using basic_string_vector_range = range<basic_string_vector<Char>>;
+	template <class Char> using basic_string_view_range = range<basic_string_view<Char>>;
+	template <class Char> using basic_string_view_span_range = range<basic_string_view_span<Char>>;
 
 	template <class Char>
 	inline bool same(basic_string_view<Char> u, basic_string_view<Char> v)
@@ -76,9 +75,6 @@ namespace fmt
 
 	using std::string;
 	using std::wstring;
-
-	using string_vector = basic_string_vector<char>;
-	using wstring_vector = basic_string_vector<wchar_t>;
 
 	using string_pair = basic_string_pair<char>;
 	using wstring_pair = basic_string_pair<wchar_t>;
@@ -95,8 +91,20 @@ namespace fmt
 	using string_view_vector = basic_string_view_vector<char>;
 	using wstring_view_vector = basic_string_view_vector<wchar_t>;
 
-	using span_view = basic_span_view<char>;
-	using wspan_view = basic_span_view<wchar_t>;
+	using string_span = basic_string_span<char>;
+	using wstring_span = basic_string_span<wchar_t>; 
+
+	using string_view_span = basic_string_view_span<char>;
+	using wstring_view_span = basic_string_view_span<wchar_t>;
+
+	using string_range = basic_string_vector_range<char>;
+	using wstring_range = basic_string_vector_range<wchar_t>;
+
+	using string_view_range = basic_string_view_range<char>;
+	using wstring_view_range = basic_string_view_range<wchar_t>;
+
+	using string_view_span_range = basic_string_view_span_range<char>;
+	using wstring_view_span_range = basic_string_view_span_range<wchar_t>;
 
 	using size = string::size_type;
 	constexpr auto npos = string::npos;

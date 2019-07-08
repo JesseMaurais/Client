@@ -70,7 +70,8 @@ namespace
 				path = fmt::join({xdg::config_home, "menus", menu}, sys::sep::dir);
 				if (not exists(path))
 				{
-					for (auto const dir : (fmt::span_view) xdg::config_dirs)
+					fmt::string_view_span list = xdg::config_dirs;
+					for (auto const dir : list)
 					{
 						path = fmt::join({dir, menu}, sys::sep::dir);
 						if (exists(path)) break;
@@ -102,7 +103,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					fmt::span_view const p { env::home, ".local", "share" };
+					fmt::string_view_span const p { env::home, ".local", "share" };
 					s = fmt::join(p, sys::sep::dir);
 				}
 				u = s;
@@ -122,7 +123,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					fmt::span_view const p { env::home, ".config" };
+					fmt::string_view_span const p { env::home, ".config" };
 					s = fmt::join(p, sys::sep::dir);
 				}
 				u = s;
@@ -142,7 +143,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					fmt::span_view const p { env::home, ".cache" };
+					fmt::string_view_span const p { env::home, ".cache" };
 					s = fmt::join(p, sys::sep::dir);
 				}
 				u = s;
@@ -154,7 +155,7 @@ namespace
 
 	struct : env::list
 	{
-		operator fmt::span_view() const final
+		operator fmt::string_view_span() const final
 		{
 			fmt::string_view u = sys::env::get("XDG_DATA_DIRS");
 			if (empty(u))
@@ -176,7 +177,7 @@ namespace
 
 	struct : env::list
 	{
-		operator fmt::span_view() const final
+		operator fmt::string_view_span() const final
 		{
 			fmt::string_view u = sys::env::get("XDG_CONFIG_DIRS");
 			if (empty(u))
@@ -264,7 +265,7 @@ namespace
 			if (empty(u))
 			{
 				static fmt::string s;
-				fmt::span_view const p { env::home, val };
+				fmt::string_view_span const p { env::home, val };
 				s = fmt::join(p, sys::sep::dir);
 				u = s;
 			}
@@ -285,7 +286,7 @@ namespace
 			static ini::entry data;
 			if (empty(data))
 			{
-				fmt::span_view const dirs { xdg::config_home, "user-dirs.dirs" };
+				fmt::string_view_span const dirs { xdg::config_home, "user-dirs.dirs" };
 				auto const path = fmt::join(dirs, sys::sep::dir);
 				std::ifstream in(path);
 				fmt::string line;
