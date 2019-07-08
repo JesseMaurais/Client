@@ -201,14 +201,13 @@ namespace
 	TEST(fmt_tag)
 	{
 		using namespace fmt;
-		auto const s = "banana, apple, grape, bananas";
+		string_view u = "bananas, apple, grape, banana";
 		string_view_span a { "apple", "banana" };
-		string_vector t;
-		tag(a, s, [&](auto it, auto pos)
+		string_view_vector t;
+		tag(a, u, [&](auto it, auto pos)
 		{
-			(void) pos;
+			ASSERT_EQ(0, u.compare(pos, it->size(), *it));
 			t.emplace_back(*it);
-			return false;
 		});
 
 		ASSERT_EQ(t.size(), 3);

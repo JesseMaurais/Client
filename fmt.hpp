@@ -438,9 +438,9 @@ namespace fmt
 			return s;
 		}
 
-		using reactor = std::function<bool(iterator, size)>;
-		static bool tag(iterator begin, iterator end, string_view u, reactor f)
-		/// Call $f for any tag in sorted range $[begin, end) that is found in $u
+		using reactor = std::function<void(iterator, size)>;
+		static void tag(iterator begin, iterator end, string_view u, reactor f)
+		/// Call $f for any in sorted range $[begin, end) that is found in $u
 		{
 			auto it = begin;
 			auto const z = u.size();
@@ -449,32 +449,26 @@ namespace fmt
 				auto const n = j - i;
 				auto const v = u.substr(i, n);
 
-				auto const lower = std::lower_bound(it, end, v);
-				if (end == lower)
+				it = std::lower_bound(it, end, v);
+				if (end == it)
 				{
 					i = j;
 					it = begin;
 					continue;
 				}
-				else if (lower->size() == n)
+
+				if (it->size() == n)
 				{
-					if (f(it, i))
-					{
-						return true;
-					}
+					f(it, i);
 				}
-			
-				auto const upper = std::upper_bound(lower, end, v);
-				if (end == upper or upper->compare(0, n, v))
+
+				it = std::upper_bound(it, end, v);
+				if (end == it or it->compare(0, n, v))
 				{
 					i = j;
 					it = begin;
-					continue;
 				}
-			
-				it = upper;
 			}
-			return false;
 		}
 
 		static auto to_pair(string_view u, string_view v)
@@ -568,7 +562,7 @@ namespace fmt
 		return lc.replace(u, v, w);
 	}
 
-	inline auto tag(string_view_span t, string_view u, cc::reactor r)
+	inline void tag(string_view_span t, string_view u, cc::reactor r)
 	{
 		return lc.tag(begin(t), end(t), u, r);
 	}
