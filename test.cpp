@@ -207,15 +207,14 @@ namespace
 		tag(a, s, [&](auto it, auto pos)
 		{
 			(void) pos;
-			std::cout << '(' << pos << ')' << *it << std::endl;
 			t.emplace_back(*it);
 			return false;
 		});
 
-		//ASSERT_EQ(t.size(), 3);
-		//ASSERT_EQ(t[0], "banana");
-		//ASSERT_EQ(t[1], "apple");
-		//ASSERT_EQ(t[2], "banana");
+		ASSERT_EQ(t.size(), 3);
+		ASSERT_EQ(t[0], "banana");
+		ASSERT_EQ(t[1], "apple");
+		ASSERT_EQ(t[2], "banana");
 	}
 
 	//

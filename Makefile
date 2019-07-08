@@ -1,6 +1,6 @@
 # Common configuration variables for the project
 
-BUGMSG = Known GCC bug up to version 8.2 causes internal compiler error
+BUGMSG = Known GCC bug up to version 8.3 causes internal compiler error
 
 STD = c++17
 SRC = test.cpp dl.cpp fifo.cpp file.cpp mem.cpp dbg.cpp env.cpp sig.cpp socket.cpp sys.cpp xdg.cpp

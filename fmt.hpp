@@ -439,29 +439,40 @@ namespace fmt
 		}
 
 		using reactor = std::function<bool(iterator, size)>;
-		static bool tag(range a, string_view u, reactor f)
-		/// Call $f for any tag in sorted $a that is found in $u
+		static bool tag(iterator begin, iterator end, string_view u, reactor f)
+		/// Call $f for any tag in sorted range $[begin, end) that is found in $u
 		{
-			auto it = a;
+			auto it = begin;
 			auto const z = u.size();
 			for (size i = 0, j = 1; j <= z; ++j)
 			{
 				auto const n = j - i;
 				auto const v = u.substr(i, n);
-				it = std::equal_range(it.first, it.second, v);
-				if (it.first->size() == n)
+
+				auto const lower = std::lower_bound(it, end, v);
+				if (end == lower)
 				{
-					if (f(it.first, i))
+					i = j;
+					it = begin;
+					continue;
+				}
+				else if (lower->size() == n)
+				{
+					if (f(it, i))
 					{
 						return true;
 					}
-					else
-					if (it.first == it.second)
-					{
-						it = a;
-						i = j;
-					}
 				}
+			
+				auto const upper = std::upper_bound(lower, end, v);
+				if (end == upper or upper->compare(0, n, v))
+				{
+					i = j;
+					it = begin;
+					continue;
+				}
+			
+				it = upper;
 			}
 			return false;
 		}
@@ -559,7 +570,7 @@ namespace fmt
 
 	inline auto tag(string_view_span t, string_view u, cc::reactor r)
 	{
-		return lc.tag(range<string_view_span>{ begin(t), end(t) }, u, r);
+		return lc.tag(begin(t), end(t), u, r);
 	}
 
 	inline auto to_pair(string_view u, string_view v = "=")
