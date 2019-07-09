@@ -20,17 +20,30 @@ namespace fmt
 	{
 		using base = std::ctype<Char>;
 		using mask = typename base::mask;
-		using string_mask = std::vector<mask>;	
+
 		using string = fmt::basic_string<Char>;
+		using string_pair = fmt::basic_string_pair<Char>;
+		using string_range = fmt::basic_string_range<Char>;
+		using string_size = fmt::basic_string_size<Char>;
+		using string_size_pair = fmt::basic_string_size_pair<Char>;
+		using string_vector = fmt::basic_string_vector<Char>;
+		using string_vector_range = fmt::basic_string_vector_range<Char>;
+		using string_span = fmt::basic_string_span<Char>;
+		using string_span_range = fmt::basic_string_span_range<Char>;
+
 		using string_view = fmt::basic_string_view<Char>;
 		using string_view_pair = fmt::basic_string_view_pair<Char>;
+		using string_view_range = fmt::basic_string_view_range<Char>;
+		using string_view_size = fmt::basic_string_view_size<Char>;
+		using string_view_size_pair = fmt::basic_string_view_size_pair<Char>;
 		using string_view_vector = fmt::basic_string_view_vector<Char>;
+		using string_view_vector_range = fmt::basic_string_view_vector_range<Char>;
 		using string_view_span = fmt::basic_string_view_span<Char>;
-		using string_vector = fmt::basic_string_vector<Char>;
-		using string_pair = fmt::basic_string_pair<Char>;
-		using size_pair = fmt::basic_string_size_pair<Char>;
+		using string_view_span_range = fmt::basic_string_view_span_range<Char>;
+
 		using iterator = typename string_view_span::iterator;
-		using size = typename string_view::size_type;
+		using size_pair = string_size_pair;
+		using size = string_size;
 		using div = std::imaxdiv_t;
 
 		static_assert(sizeof (div) == sizeof (size_pair), "Conformance failure.");
@@ -50,7 +63,7 @@ namespace fmt
 		auto type(string_view u) const
 		/// Classify characters in view $u
 		{
-			string_mask x(u.size());
+			std::vector<mask> x(u.size());
 			base::is(u.data(), u.data() + u.size(), x.data());
 			return x;
 		}
@@ -294,6 +307,8 @@ namespace fmt
 			auto const q = u.substr(n < m ? n + 1 : m);
 			return string_view_pair { p, q };
 		}
+
+
 	};
 
 	// Common characters

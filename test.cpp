@@ -115,18 +115,6 @@ namespace
 	// Text formatting routines
 	//
 
-	TEST(fmt_empty)
-	{
-		using namespace fmt;
-		ASSERT(empty(string { }));
-		ASSERT(not empty(string { HELLO_WORLD }));
-		ASSERT(empty(string_view { }));
-		ASSERT(not empty(string_view { HELLO_WORLD }));
-		ASSERT(empty(string_view_span { }));
-		ASSERT(not empty(string_view_span { HELLO_WORLD }));
-		ASSERT(empty(string_view_span { string_view { } }));
-	}
-
 	TEST(fmt_terminated)
 	{
 		using namespace fmt;

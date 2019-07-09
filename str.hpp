@@ -56,15 +56,21 @@ namespace fmt
 
 	template <class Char> using basic_string = std::basic_string<Char>;
 	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
-	template <class Char> using basic_string_view_pair = pair<basic_string_view<Char>>;
-	template <class Char> using basic_string_size_pair = pair<typename basic_string_view<Char>::size_type>;
-	template <class Char> using basic_string_vector = typename std::vector<basic_string<Char>>;
-	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
-	template <class Char> using basic_string_span = span<basic_string<Char>>;
-	template <class Char> using basic_string_view_span = span<basic_string_view<Char>>;
 	template <class Char> using basic_string_range = range<basic_string<Char>>;
+	template <class Char> using basic_string_size = typename basic_string<Char>::size_type;
+	template <class Char> using basic_string_size_pair = pair<basic_string_size<Char>>;
+	template <class Char> using basic_string_vector = typename std::vector<basic_string<Char>>;
 	template <class Char> using basic_string_vector_range = range<basic_string_vector<Char>>;
+	template <class Char> using basic_string_span = span<basic_string<Char>>;
+	template <class Char> using basic_string_span_range = range<basic_string_span<Char>>;
+
+	template <class Char> using basic_string_view_pair = pair<basic_string_view<Char>>;
 	template <class Char> using basic_string_view_range = range<basic_string_view<Char>>;
+	template <class Char> using basic_string_view_size = typename basic_string<Char>::size_type;
+	template <class Char> using basic_string_view_size_pair = pair<basic_string_size<Char>>;
+	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
+	template <class Char> using basic_string_view_vector_range = range<basic_string_vector<Char>>;
+	template <class Char> using basic_string_view_span = span<basic_string_view<Char>>;
 	template <class Char> using basic_string_view_span_range = range<basic_string_view_span<Char>>;
 
 	template <class Char>
@@ -79,8 +85,11 @@ namespace fmt
 	using string_pair = basic_string_pair<char>;
 	using wstring_pair = basic_string_pair<wchar_t>;
 
-	using string_view_pair = basic_string_view_pair<char>;
-	using wstring_view_pair = basic_string_view_pair<wchar_t>;
+	using string_range = basic_string_vector_range<char>;
+	using wstring_range = basic_string_vector_range<wchar_t>;
+
+	using string_size = basic_string_size<char>;
+	using wstring_size = basic_string_size<wchar_t>;
 
 	using string_size_pair = basic_string_size_pair<char>;
 	using wstring_size_pair = basic_string_size_pair<wchar_t>;
@@ -88,25 +97,41 @@ namespace fmt
 	using string_vector = basic_string_vector<char>;
 	using wstring_vector = basic_string_vector<wchar_t>;
 
-	using string_view_vector = basic_string_view_vector<char>;
-	using wstring_view_vector = basic_string_view_vector<wchar_t>;
+	using string_vector_range = basic_string_vector_range<char>;
+	using wstring_vector_range = basic_string_vector_range<wchar_t>;
 
 	using string_span = basic_string_span<char>;
 	using wstring_span = basic_string_span<wchar_t>; 
 
-	using string_view_span = basic_string_view_span<char>;
-	using wstring_view_span = basic_string_view_span<wchar_t>;
+	using string_span_range = basic_string_span_range<char>;
+	using wstring_span_range = basic_string_span_range<wchar_t>;
 
-	using string_range = basic_string_vector_range<char>;
-	using wstring_range = basic_string_vector_range<wchar_t>;
+
+	using string_view_pair = basic_string_view_pair<char>;
+	using wstring_view_pair = basic_string_view_pair<wchar_t>;
 
 	using string_view_range = basic_string_view_range<char>;
 	using wstring_view_range = basic_string_view_range<wchar_t>;
 
+	using string_view_size = basic_string_size<char>;
+	using wstring_view_size = basic_string_size<wchar_t>;
+
+	using string_view_size_pair = basic_string_size_pair<char>;
+	using wstring_view_size_pair = basic_string_size_pair<wchar_t>;
+
+	using string_view_vector = basic_string_view_vector<char>;
+	using wstring_view_vector = basic_string_view_vector<wchar_t>;
+
+	using string_view_vector_range = basic_string_view_vector_range<char>;
+	using wstring_view_vector_range = basic_string_view_vector_range<wchar_t>;
+
+	using string_view_span = basic_string_view_span<char>;
+	using wstring_view_span = basic_string_view_span<wchar_t>;
+
 	using string_view_span_range = basic_string_view_span_range<char>;
 	using wstring_view_span_range = basic_string_view_span_range<wchar_t>;
 
-	using size = string::size_type;
+
 	constexpr auto npos = string::npos;
 }
 
