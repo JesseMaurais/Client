@@ -126,8 +126,8 @@ namespace
 	{
 		using namespace fmt;
 		string whitespace = " \t\n";
-		ASSERT(empty(trim(whitespace)));
-		constexpr auto raw = " \t" HELLO_WORLD "\n";
+		ASSERT(trim(whitespace).empty());
+		constexpr auto raw = " \t" HELLO_WORLD " \n";
 		auto const u = trim(raw);
 		ASSERT(not empty(u));
 		ASSERT_EQ(u, HELLO_WORLD);

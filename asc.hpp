@@ -1,9 +1,9 @@
-#ifndef esc_hpp
-#define esc_hpp
+#ifndef asc_hpp
+#define asc_hpp
 
 // https://www.ecma-international.org/publications/standards/Ecma-048.htm
 
-namespace ascii
+namespace asc
 {
 	template <char Min, char Max> struct range
 	{

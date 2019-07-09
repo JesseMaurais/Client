@@ -8,7 +8,7 @@
 #include <locale>
 #include "str.hpp"
 #include "its.hpp"
-#include "tos.hpp"
+#include "to.hpp"
 
 namespace fmt
 {
@@ -51,6 +51,17 @@ namespace fmt
 		static constexpr auto null = size { 0 };
 		static constexpr auto npos = string::npos;
 		static constexpr auto space = base::space;
+		static constexpr auto print = base::print;
+		static constexpr auto cntrl = base::cntrl;
+		static constexpr auto upper = base::upper;
+		static constexpr auto lower = base::lower;
+		static constexpr auto alpha = base::alpha;
+		static constexpr auto digit = base::digit;
+		static constexpr auto punct = base::punct;
+		static constexpr auto xdigit = base::xdigit;
+		static constexpr auto blank = base::blank;
+		static constexpr auto alnum = base::alnum;
+		static constexpr auto graph = base::graph;
 
 		template <typename as> static string from(as const& s);
 
@@ -72,12 +83,12 @@ namespace fmt
 		/// Classify character $w
 		{
 			auto const x = type(string_view(w));
-			return empty(x) ? 0 : x.front();
+			return x.empty() ? 0 : x.front();
 		}
 
 		template <typename iterator>
 		auto next(iterator it, iterator end, mask x = space) const
-		/// Next iterator after $it but not after $end which is an $x
+		/// Next iterator after $it but before $end which is an $x
 		{
 			while (it != end) 
 			{
@@ -89,6 +100,34 @@ namespace fmt
 				else break;
 			}
 			return it;
+		}
+
+		auto next(Char const* it, Char const* end, mask x = space) const
+		/// Next character after $it but before $end which is an $x
+		{
+			return base::scan_is(x, it, end);
+		}
+
+		template <typename iterator>
+		auto skip(iterator it, iterator end, mask x = space) const
+		/// Next iterator after $it but before $end which is not $x
+		{
+			while (it != end)
+			{
+				auto const w = *it;
+				if (check(w, x))
+				{
+					break;
+				}
+				else ++it;
+			}
+			return it;
+		}
+
+		auto skip(Char const* it, Char const* end, mask x = space) const
+		/// Next character after $it but before $end whic is not $x
+		{
+			return base::scan_not(x, it, end);
 		}
 
 		auto first(string_view u, mask x = space) const

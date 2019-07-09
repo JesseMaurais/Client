@@ -2,7 +2,7 @@
 #define ios_hpp
 
 #include <ostream>
-#include "esc.hpp"
+#include "asc.hpp"
 
 namespace io
 {
@@ -25,11 +25,11 @@ namespace io
 
 	template <int... Code> inline std::ostream& set(std::ostream& out)
 	{
-		using namespace ascii;
+		using namespace asc;
 		return out << encode<C0::ESC, G0::CSI> << params<Code...> << encode<CSI::SGR>;
 	}
 
-	using ascii::SGR;
+	using asc::SGR;
 
 	constexpr auto reset = set<SGR::reset>;
 	constexpr auto intense = set<SGR::intense>;
