@@ -52,7 +52,24 @@ namespace fmt
 namespace fmt
 {
 	template <class Type> using pair = std::pair<Type, Type>;
-	template <class Type> using range = pair<typename Type::iterator>;
+	template <class Type> struct range : pair<typename Type::iterator>
+	{
+		using base = pair<typename Type::iterator>;
+
+		range(Type const& t)
+		: base(t.begin(), t.end())
+		{ }
+
+		auto begin() const
+		{
+			return base::first;
+		}
+
+		auto end() const
+		{
+			return base::second;
+		}
+	};
 
 	template <class Char> using basic_string = std::basic_string<Char>;
 	template <class Char> using basic_string_pair = pair<basic_string<Char>>;

@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <locale>
 #include "str.hpp"
-#include "its.hpp"
+#include "it.hpp"
 #include "to.hpp"
 
 namespace fmt
@@ -41,10 +41,11 @@ namespace fmt
 		using string_view_span = fmt::basic_string_view_span<Char>;
 		using string_view_span_range = fmt::basic_string_view_span_range<Char>;
 
-		using iterator = typename string_view_span::iterator;
-		using size_pair = string_size_pair;
-		using size = string_size;
 		using div = std::imaxdiv_t;
+		using size = string_size;
+		using size_pair = string_size_pair;
+		using iterator = typename string_view_span::iterator;
+		using reactor = std::function<void(iterator, size)>;
 
 		static_assert(sizeof (div) == sizeof (size_pair), "Conformance failure.");
 
@@ -95,9 +96,9 @@ namespace fmt
 				auto const w = *it;
 				if (check(w, x))
 				{
-					++it;
+					break;
 				}
-				else break;
+				else ++it;
 			}
 			return it;
 		}
@@ -117,9 +118,9 @@ namespace fmt
 				auto const w = *it;
 				if (check(w, x))
 				{
-					break;
+					++it;
 				}
-				else ++it;
+				else break;
 			}
 			return it;
 		}
@@ -133,13 +134,13 @@ namespace fmt
 		auto first(string_view u, mask x = space) const
 		/// First iterator in view $u that is not $x
 		{
-			return next(begin(u), end(u), x);
+			return skip(begin(u), end(u), x);
 		}
 
 		auto last(string_view u, mask x = space) const
 		/// Last iterator in view $u that is not $x
 		{
-			return next(rbegin(u), rend(u), x).base();
+			return skip(rbegin(u), rend(u), x).base();
 		}
 
 		auto trim(string_view u, mask x = space) const
@@ -304,7 +305,6 @@ namespace fmt
 			return s;
 		}
 
-		using reactor = std::function<void(iterator, size)>;
 		static void tag(iterator begin, iterator end, string_view u, reactor f)
 		/// Call $f for any in sorted range $[begin, end) that is found in $u
 		{
