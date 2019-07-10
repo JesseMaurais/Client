@@ -55,6 +55,7 @@ namespace fmt
 	template <class Type> struct range : pair<typename Type::iterator>
 	{
 		using base = pair<typename Type::iterator>;
+		using base::base;
 
 		range(Type const& t)
 		: base(t.begin(), t.end())

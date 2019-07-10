@@ -16,9 +16,9 @@ namespace fmt
 	// Character class injection
 	//
 
-	template <class Char> struct ctype : std::ctype<Char>
+	template <class Char, template <class> class Type = std::ctype> struct ctype : Type<Char>
 	{
-		using base = std::ctype<Char>;
+		using base = Type<Char>;
 		using mask = typename base::mask;
 
 		using string = fmt::basic_string<Char>;
@@ -72,19 +72,12 @@ namespace fmt
 			return base::is(x, w);
 		}
 
-		auto type(string_view u) const
-		/// Classify characters in view $u
+		auto check(string_view u) const
+		/// Classify all characters in a view
 		{
 			std::vector<mask> x(u.size());
 			base::is(u.data(), u.data() + u.size(), x.data());
 			return x;
-		}
-
-		mask type(wint_t w) const
-		/// Classify character $w
-		{
-			auto const x = type(string_view(w));
-			return x.empty() ? 0 : x.front();
 		}
 
 		template <typename iterator>
@@ -109,6 +102,14 @@ namespace fmt
 			return base::scan_is(x, it, end);
 		}
 
+		auto next(string_view u, mask x = space) const
+		/// Index of first character in view $u which is an $x
+		{
+			auto const from = begin(u);
+			auto const to = next(from, end(u), x);
+			return distance(from, to);
+		}
+
 		template <typename iterator>
 		auto skip(iterator it, iterator end, mask x = space) const
 		/// Next iterator after $it but before $end which is not $x
@@ -129,6 +130,14 @@ namespace fmt
 		/// Next character after $it but before $end whic is not $x
 		{
 			return base::scan_not(x, it, end);
+		}
+
+		auto skip(string_view u, mask x = space) const
+		/// Index of first character in view $u which is not $x
+		{
+			auto const from = begin(u);
+			auto const to = skip(from, end(u), x);
+			return distance(from, to);
 		}
 
 		auto first(string_view u, mask x = space) const
