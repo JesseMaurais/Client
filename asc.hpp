@@ -5,15 +5,18 @@
 
 namespace asc
 {
-	template <char Min, char Max> struct range
+	namespace
 	{
-		static_assert(Min <= Max, "Invalid range");
-		static constexpr char min = Min, max = Max;
-	};
+		template <char Min, char Max> struct range
+		{
+			static_assert(Min <= Max, "Invalid range");
+			static constexpr char min = Min, max = Max;
+		};
 
-	template <class Range> constexpr bool in(char code)
-	{
-		return Range::min <= code and code <= Range::max;
+		template <class Range> constexpr bool in(char code)
+		{
+			return Range::min <= code and code <= Range::max;
+		}
 	}
 
 	//

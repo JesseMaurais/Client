@@ -1,7 +1,6 @@
 #ifndef err_hpp
 #define err_hpp
 
-#include "fmt.hpp"
 #include "dbg.hpp"
 #include <sstream>
 #include <string>

@@ -15,7 +15,7 @@ namespace ini
 	{
 		while (std::getline(in, s))
 		{
-			auto const it = fmt::next(s.begin(), s.end());
+			auto const it = fmt::skip(s.begin(), s.end());
 			if (it != s.end() and c != *it)
 			{
 				auto const t = s.find(c);

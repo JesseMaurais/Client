@@ -2,9 +2,32 @@
 #define alg_hpp
 
 #include <algorithm>
+#include <utility>
 
 namespace stl
 {
+	template <class Type> using pair = std::pair<Type, Type>;
+
+	template <class Type> struct range : pair<typename Type::iterator>
+	{
+		using base = pair<typename Type::iterator>;
+		using base::base;
+
+		range(Type const& t)
+		: base(t.begin(), t.end())
+		{ }
+
+		auto begin() const
+		{
+			return base::first;
+		}
+
+		auto end() const
+		{
+			return base::second;
+		}
+	};
+
 	// Non-modifying sequence operations
 
 	template <typename Container, typename Operation>

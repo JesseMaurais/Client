@@ -1,7 +1,6 @@
 #ifndef fmt_hpp
 #define fmt_hpp
 
-#include <algorithm>
 #include <functional>
 #include <cinttypes>
 #include <cstdlib>
@@ -12,6 +11,20 @@
 
 namespace fmt
 {
+	constexpr auto
+		space  = std::ctype_base::space,
+		print  = std::ctype_base::print,
+		cntrl  = std::ctype_base::cntrl,
+		upper  = std::ctype_base::upper,
+		lower  = std::ctype_base::lower,
+		alpha  = std::ctype_base::alpha,
+		digit  = std::ctype_base::digit,
+		punct  = std::ctype_base::punct,
+		blank  = std::ctype_base::blank,
+		alnum  = std::ctype_base::alnum,
+		graph  = std::ctype_base::graph,
+		xdigit = std::ctype_base::xdigit;
+
 	//
 	// Character class injection
 	//
@@ -21,25 +34,25 @@ namespace fmt
 		using base = Type<Char>;
 		using mask = typename base::mask;
 
-		using string = fmt::basic_string<Char>;
-		using string_pair = fmt::basic_string_pair<Char>;
-		using string_range = fmt::basic_string_range<Char>;
-		using string_size = fmt::basic_string_size<Char>;
-		using string_size_pair = fmt::basic_string_size_pair<Char>;
-		using string_vector = fmt::basic_string_vector<Char>;
-		using string_vector_range = fmt::basic_string_vector_range<Char>;
-		using string_span = fmt::basic_string_span<Char>;
-		using string_span_range = fmt::basic_string_span_range<Char>;
+		using string = basic_string<Char>;
+		using string_pair = basic_string_pair<Char>;
+		using string_range = basic_string_range<Char>;
+		using string_size = basic_string_size<Char>;
+		using string_size_pair = basic_string_size_pair<Char>;
+		using string_vector = basic_string_vector<Char>;
+		using string_vector_range = basic_string_vector_range<Char>;
+		using string_span = basic_string_span<Char>;
+		using string_span_range = basic_string_span_range<Char>;
 
-		using string_view = fmt::basic_string_view<Char>;
-		using string_view_pair = fmt::basic_string_view_pair<Char>;
-		using string_view_range = fmt::basic_string_view_range<Char>;
-		using string_view_size = fmt::basic_string_view_size<Char>;
-		using string_view_size_pair = fmt::basic_string_view_size_pair<Char>;
-		using string_view_vector = fmt::basic_string_view_vector<Char>;
-		using string_view_vector_range = fmt::basic_string_view_vector_range<Char>;
-		using string_view_span = fmt::basic_string_view_span<Char>;
-		using string_view_span_range = fmt::basic_string_view_span_range<Char>;
+		using string_view = basic_string_view<Char>;
+		using string_view_pair = basic_string_view_pair<Char>;
+		using string_view_range = basic_string_view_range<Char>;
+		using string_view_size = basic_string_view_size<Char>;
+		using string_view_size_pair = basic_string_view_size_pair<Char>;
+		using string_view_vector = basic_string_view_vector<Char>;
+		using string_view_vector_range = basic_string_view_vector_range<Char>;
+		using string_view_span = basic_string_view_span<Char>;
+		using string_view_span_range = basic_string_view_span_range<Char>;
 
 		using div = std::imaxdiv_t;
 		using size = string_size;
@@ -49,21 +62,9 @@ namespace fmt
 
 		static_assert(sizeof (div) == sizeof (size_pair), "Conformance failure.");
 
-		static constexpr auto null = size { 0 };
+		static constexpr auto null = size { };
 		static constexpr auto npos = string::npos;
-		static constexpr auto space = base::space;
-		static constexpr auto print = base::print;
-		static constexpr auto cntrl = base::cntrl;
-		static constexpr auto upper = base::upper;
-		static constexpr auto lower = base::lower;
-		static constexpr auto alpha = base::alpha;
-		static constexpr auto digit = base::digit;
-		static constexpr auto punct = base::punct;
-		static constexpr auto xdigit = base::xdigit;
-		static constexpr auto blank = base::blank;
-		static constexpr auto alnum = base::alnum;
-		static constexpr auto graph = base::graph;
-
+		
 		template <typename as> static string from(as const& s);
 
 		bool check(wint_t w, mask x = space) const
@@ -382,6 +383,12 @@ namespace fmt
 	inline auto next(iterator it, iterator end)
 	{
 		return lc.next(it, end);
+	}
+
+	template <typename iterator>
+	inline auto skip(iterator it, iterator end)
+	{
+		return lc.skip(it, end);
 	}
 
 	inline auto first(string_view u)
