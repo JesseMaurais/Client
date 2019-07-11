@@ -6,7 +6,7 @@
 #include "int.hpp"
 #include "fmt.hpp"
 #include "del.hpp"
-#include "ios.hpp"
+#include "sgr.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
 #include "net.hpp"
@@ -315,7 +315,7 @@ namespace
 	TEST(ansi_params)
 	{
 		std::ostringstream ss;
-		ss << io::params<1, 2, 3, 4>;
+		ss << sgr::params<1, 2, 3, 4>;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "1;2;3;4");
 	}
@@ -323,7 +323,7 @@ namespace
 	TEST(ansi_fg)
 	{
 		std::ostringstream ss;
-		ss << io::fg_green << "GREEN" << io::fg_off;
+		ss << sgr::fg_green << "GREEN" << sgr::fg_off;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
 	}

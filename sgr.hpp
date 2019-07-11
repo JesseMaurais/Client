@@ -1,10 +1,10 @@
-#ifndef ios_hpp
-#define ios_hpp
+#ifndef sgr_hpp
+#define sgr_hpp
 
 #include <ostream>
 #include "asc.hpp"
 
-namespace io
+namespace sgr
 {
 	template <char... Code> inline std::ostream& encode(std::ostream& out)
 	{

@@ -13,6 +13,7 @@ Using the compilers
 * CL
 Checked with analyzers
 * PVS-Studio
+* Cppcheck
 
 Build
 =====
