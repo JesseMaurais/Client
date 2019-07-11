@@ -141,6 +141,68 @@ namespace fmt
 			return distance(from, to);
 		}
 
+		auto widen(basic_string_view<char> u) const
+		{
+			auto const begin = u.data();
+			auto const end = begin + u.size();
+			struct iterator
+			{
+				ctype const* that;
+				char* pos;
+				Char c;
+
+				bool operator!=(iterator const& it) const
+				{
+					return it.that != that and it.pos != pos; 
+				}
+
+				auto operator*() const
+				{
+					return c;
+				}
+
+				auto operator++()
+				{
+					auto const n = std::mblen(pos, MB_CUR_MAX);
+					pos = that->widen(pos, pos + n, &c);
+					return *this;
+				}
+
+			} first { this, begin }, last { this, end };
+			return range { ++ first, last };
+		}
+
+		auto narrow(basic_string_view<wchar_t> u) const
+		{
+			auto const begin = u.data();
+			auto const end = begin + u.size();
+			struct iterator
+			{
+				ctype const* that;
+				char* pos;
+				string s(MB_CUR_MAX);
+
+				bool operator!=(iterator const& it) const
+				{
+					return it.that != that and it.pos != pos;
+				}
+
+				auto operator*() const
+				{
+					return s;
+				}
+
+				auto operator++()
+				{
+					auto const n = std::mblen(pos, s.size());
+					pos = that->narrow(pos, pos + n, 0, s.data());
+					return *this;
+				}
+
+			} first { this, begin }, last { this, end };
+			return range { ++ first, last };
+		}
+
 		auto first(string_view u, mask x = space) const
 		/// First iterator in view $u that is not $x
 		{
