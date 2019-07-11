@@ -8,14 +8,10 @@ namespace stl
 {
 	template <class Type> using pair = std::pair<Type, Type>;
 
-	template <class Type> struct range : pair<typename Type::iterator>
+	template <class Iterator> struct range : pair<Iterator>
 	{
-		using base = pair<typename Type::iterator>;
+		using base = pair<Iterator>;
 		using base::base;
-
-		range(Type const& t)
-		: base(t.begin(), t.end())
-		{ }
 
 		auto begin() const
 		{

@@ -5,8 +5,8 @@
 #include <cinttypes>
 #include <cstdlib>
 #include <locale>
+#include "char.hpp"
 #include "str.hpp"
-#include "it.hpp"
 #include "to.hpp"
 
 namespace fmt
@@ -143,64 +143,79 @@ namespace fmt
 
 		auto widen(basic_string_view<char> u) const
 		{
-			auto const begin = u.data();
-			auto const end = begin + u.size();
-			struct iterator
+			struct iterator : mb
 			{
-				ctype const* that;
-				char* pos;
-				Char c;
+				base const* that;
+				char const* pos;
+				size n;
 
 				bool operator!=(iterator const& it) const
 				{
-					return it.that != that and it.pos != pos; 
+					return it.pos != pos; 
 				}
 
 				auto operator*() const
 				{
-					return c;
+					Char c[1];
+					(void) that->widen(pos, pos + n, c);
+					return *c;
 				}
 
 				auto operator++()
 				{
-					auto const n = std::mblen(pos, MB_CUR_MAX);
-					pos = that->widen(pos, pos + n, &c);
+					pos += n;
+					n = mb::len(pos);
 					return *this;
 				}
 
-			} first { this, begin }, last { this, end };
-			return range { ++ first, last };
+				iterator(base const* owner, char const* it)
+				: that(owner), pos(it)
+				{
+					if (that)
+					{
+						n = mb::len(pos);
+					}
+				}
+			};
+
+			auto const begin = u.data();
+			auto const end = begin + u.size();
+			return range<iterator>({ this, begin }, { nullptr, end });
 		}
 
-		auto narrow(basic_string_view<wchar_t> u) const
+		auto narrow(basic_string_view<Char> u) const
 		{
-			auto const begin = u.data();
-			auto const end = begin + u.size();
 			struct iterator
 			{
-				ctype const* that;
-				char* pos;
-				string s(MB_CUR_MAX);
+				base const* that;
+				Char const* pos;
 
 				bool operator!=(iterator const& it) const
 				{
-					return it.that != that and it.pos != pos;
+					return it.pos != pos;
 				}
 
 				auto operator*() const
 				{
-					return s;
+					std::string s(MB_CUR_MAX, 0);
+					(void) that->narrow(pos, pos + 1, 0, s.data());
+					return std::string_view(s);
 				}
 
 				auto operator++()
 				{
-					auto const n = std::mblen(pos, s.size());
-					pos = that->narrow(pos, pos + n, 0, s.data());
+					++ pos;
 					return *this;
 				}
 
-			} first { this, begin }, last { this, end };
-			return range { ++ first, last };
+				iterator(base const* owner, Char const* it)
+				: that(owner), pos(it)
+				{ }
+			};
+
+			auto const begin = u.data();
+			auto const end = begin + u.size();
+			return range<iterator>({ this, begin }, { nullptr, end });
 		}
 
 		auto first(string_view u, mask x = space) const
@@ -313,10 +328,17 @@ namespace fmt
 		/// Count characters in view
 		{
 			auto n = null;
-			for (auto const w : widen(u))
+			auto m = null;
+			mb mbs;
+			while (u.size() > m)
 			{
-				(void) w;
-				++n;
+				auto const k = mbs.len(u.data() + m);
+				if (k < 0)
+				{
+					return npos;
+				}
+				m += k;
+				++ n;
 			}
 			return n;
 		}
