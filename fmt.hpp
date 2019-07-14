@@ -5,8 +5,8 @@
 #include <cinttypes>
 #include <cstdlib>
 #include <locale>
-#include "char.hpp"
 #include "str.hpp"
+#include "mb.hpp"
 
 namespace fmt
 {
