@@ -3,11 +3,17 @@
 
 #include <cuchar>
 #include <cwchar>
+#include <cstring>
 
 namespace fmt
 {
 	struct mb : std::mbstate_t
 	{
+		mb()
+		{
+			std::memset(this, 0, sizeof(mb));
+		}
+
 		operator bool() const
 		{
 			return 0 != std::mbsinit(this);

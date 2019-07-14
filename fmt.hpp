@@ -7,10 +7,13 @@
 #include <locale>
 #include "char.hpp"
 #include "str.hpp"
-#include "to.hpp"
 
 namespace fmt
 {
+	//
+	// Character class injection
+	//
+
 	constexpr auto
 		space  = std::ctype_base::space,
 		print  = std::ctype_base::print,
@@ -24,10 +27,6 @@ namespace fmt
 		alnum  = std::ctype_base::alnum,
 		graph  = std::ctype_base::graph,
 		xdigit = std::ctype_base::xdigit;
-
-	//
-	// Character class injection
-	//
 
 	template <class Char, template <class> class Type = std::ctype> struct ctype : Type<Char>
 	{
@@ -62,7 +61,7 @@ namespace fmt
 
 		static_assert(sizeof (div) == sizeof (size_pair), "Conformance failure.");
 
-		static constexpr auto null = size { };
+		static constexpr auto null = size {  0  };
 		static constexpr auto npos = string::npos;
 		
 		template <typename as> static string from(as const& s);
@@ -199,7 +198,7 @@ namespace fmt
 				{
 					std::string s(MB_CUR_MAX, 0);
 					(void) that->narrow(pos, pos + 1, 0, s.data());
-					return std::string_view(s);
+					return s;
 				}
 
 				auto operator++()
@@ -440,8 +439,6 @@ namespace fmt
 			auto const q = u.substr(n < m ? n + 1 : m);
 			return string_view_pair { p, q };
 		}
-
-
 	};
 
 	// Common characters
@@ -449,19 +446,10 @@ namespace fmt
 	using cc = ctype<char>;
 	using wc = ctype<wchar_t>;
 
-	template <> template <class T> string cc::from(T const& s)
-	{
-		return ::fmt::to_string(s);
-	}
-
-	template <> template <class T> wstring wc::from(T const& s)
-	{
-		return ::fmt::to_wstring(s);
-	}
-
 	// C locale shims
 
 	static thread_local cc lc;
+	static thread_local wc lw;
 
 	template <typename iterator>
 	inline auto next(iterator it, iterator end)
@@ -473,6 +461,16 @@ namespace fmt
 	inline auto skip(iterator it, iterator end)
 	{
 		return lc.skip(it, end);
+	}
+
+	inline auto widen(string_view u)
+	{
+		return lc.widen(u);
+	}
+
+	inline auto narrow(wstring_view u)
+	{
+		return lw.narrow(u);
 	}
 
 	inline auto first(string_view u)
@@ -500,7 +498,7 @@ namespace fmt
 		return lc.to_lower(u);
 	}
 
-	inline auto terminated(string_view u)
+	inline bool terminated(string_view u)
 	{
 		return lc.terminated(u);
 	}
@@ -543,6 +541,162 @@ namespace fmt
 	inline auto key_value(string_view u, string_view v)
 	{
 		return join({ u, v }, "=");
+	}
+
+	//
+	// Generic string converters
+	//
+
+	template <typename T>
+	inline string to_string(T const& x)
+	{
+		return std::to_string(x);
+	}
+
+	template <typename T>
+	inline wstring to_wstring(T const& x)
+	{
+		return std::to_wstring(x);
+	}
+
+	template <>
+	inline string to_string(string const& s)
+	{
+		return s;
+	}
+
+	template <>
+	inline wstring to_wstring(wstring const& w)
+	{
+		return w;
+	}
+
+	template <>
+	inline string to_string(string_view const& s)
+	{
+		return string(s.data(), s.size());
+	}
+
+	template <>
+	inline wstring to_wstring(wstring_view const& w)
+	{
+		return wstring(w.data(), w.size());
+	}
+
+	template <>
+	inline string to_string(char const*const& s)
+	{
+		return s ? string(s) : string();
+	}
+
+	template <>
+	inline wstring to_wstring(wchar_t const*const& w)
+	{
+		return w ? wstring(w) : wstring();
+	}
+
+	template <>
+	inline string to_string(char *const& s)
+	{
+		return s ? string(s) : string();
+	}
+
+	template <>
+	inline wstring to_wstring(wchar_t *const& w)
+	{
+		return w ? wstring(w) : wstring();
+	}
+
+	template <>
+	inline string to_string(char const& c)
+	{
+		return string(1, c);
+	}
+
+	template <>
+	inline wstring to_wstring(wchar_t const& c)
+	{
+		return wstring(1, c);
+	}
+
+	//
+	// Wide & narrow conversions
+	//
+
+	template <>
+	inline string to_string(wstring_view const& w)
+	{
+		string s;
+		for (auto const c : narrow(w)) s += c;
+		return s;
+	}
+
+	template <>
+	inline wstring to_wstring(string_view const& s)
+	{
+		wstring w;
+		for (auto const c : widen(s)) w += c;
+		return w;
+	}
+
+	template <>
+	inline string to_string(wstring const& w)
+	{
+		return to_string(wstring_view(w));
+	}
+
+	template <>
+	inline wstring to_wstring(string const& s)
+	{
+		return to_wstring(string_view(s));
+	}
+
+	template <>
+	inline string to_string(wchar_t const*const& w)
+	{
+		return to_string(wstring_view(w));
+	}
+
+	template <>
+	inline wstring to_wstring(char const*const& s)
+	{
+		return to_wstring(string_view(s));
+	}
+
+	template <>
+	inline string to_string(wchar_t *const& w)
+	{
+		return to_string(wstring_view(w));
+	}
+
+	template <>
+	inline wstring to_wstring(char *const& s)
+	{
+		return to_wstring(string_view(s));
+	}
+
+	template <>
+	inline string to_string(wchar_t const& c)
+	{
+		return to_string(wstring(1, c));
+	}
+
+	template <>
+	inline wstring to_wstring(char const& c)
+	{
+		return to_wstring(string(1, c));
+	}
+
+	// Converters for character class
+
+	template <> template <class T> string cc::from(T const& s)
+	{
+		return ::fmt::to_string(s);
+	}
+
+	template <> template <class T> wstring wc::from(T const& s)
+	{
+		return ::fmt::to_wstring(s);
 	}
 }
 
