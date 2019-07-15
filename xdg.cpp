@@ -288,8 +288,7 @@ namespace
 			static ini::entry data;
 			if (empty(data))
 			{
-				fmt::string_view_span const dirs { xdg::config_home, "user-dirs.dirs" };
-				auto const path = fmt::dir::join(dirs);
+				auto const path = fmt::dir::join({xdg::config_home, "user-dirs.dirs" });
 				std::ifstream in(path);
 				fmt::string line;
 				while (ini::getline(in, line))

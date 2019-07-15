@@ -10,9 +10,10 @@
 #include <regex>
 
 #ifdef _WIN32
-#include "dirent.h"
+# define WIN32_LEAN_AND_MEAN
+# include "dirent.h"
 #else
-#include <dirent.h>
+# include <dirent.h>
 #endif
 
 namespace sys::file
@@ -192,7 +193,18 @@ namespace env::dir
 		auto const flags = sys::file::convert(bits);
 		return [flags](dirent const* ent)
 		{
-			return not sys::fail(sys::access(ent->d_name, flags));
+			if (sys::fail(sys::access(ent->d_name, flags)))
+			{
+				return false;
+			}
+			#ifdef _WIN32
+			if (bits & mode::run)
+			{
+				DWORD type;
+				return GetBinaryType(ent->d_name, &type);
+			}
+			#endif
+			return true;
 		};
 	}
 

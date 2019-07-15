@@ -1,16 +1,16 @@
 #ifndef err_hpp
 #define err_hpp
 
-#include "dbg.hpp"
+#ifndef NDEBUG
 #include <sstream>
-#include <string>
 #include <cstdio>
+#endif
 
 namespace sys
 {
 	template <typename... Args> void perror(Args... args)
 	{
-		if constexpr (DEBUG)
+		#ifndef NDEBUG
 		{
 			std::stringstream stream;
 			((stream << args << " "), ...);
@@ -19,6 +19,7 @@ namespace sys
 				std::perror(stream.str().c_str());
 			}
 		}
+		#endif
 	}
 }
 
