@@ -2,9 +2,9 @@
 #define int_hpp
 
 #include <cstddef>
+#include <cassert>
 #include <type_traits>
 #include <limits>
-#include "dbg.hpp"
 
 namespace fmt
 {
