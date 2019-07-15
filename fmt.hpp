@@ -139,6 +139,7 @@ namespace fmt
 		}
 
 		auto widen(basic_string_view<char> u) const
+		/// Decode multibyte characters as wide type
 		{
 			struct iterator : mb
 			{
@@ -181,6 +182,7 @@ namespace fmt
 		}
 
 		auto narrow(basic_string_view<Char> u) const
+		/// Encode wide characters as multibyte type
 		{
 			struct iterator
 			{
