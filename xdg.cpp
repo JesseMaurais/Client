@@ -5,6 +5,7 @@
 #include "fmt.hpp"
 #include "ini.hpp"
 #include "sys.hpp"
+#include "dir.hpp"
 #include "dbg.hpp"
 #include <fstream>
 
@@ -20,7 +21,7 @@ namespace
 	{
 		assert(fmt::terminated(u));
 		char const* path = u.data();
-		int check = sys::access(path, F_OK);
+		int const check = sys::access(path, F_OK);
 		return not sys::fail(check);
 	}
 
@@ -65,13 +66,13 @@ namespace
 			if (empty(path))
 			{
 				fmt::string const menu = fmt::join({xdg::menu_prefix, "applications.menu"});
-				path = fmt::join({xdg::config_home, "menus", menu}, sys::sep::dir);
+				path = fmt::dir::join({xdg::config_home, "menus", menu});
 				if (not exists(path))
 				{
 					fmt::string_view_span list = xdg::config_dirs;
 					for (auto const dir : list)
 					{
-						path = fmt::join({dir, menu}, sys::sep::dir);
+						path = fmt::dir::join({dir, menu});
 						if (exists(path)) break;
 						path.clear();
 					}
@@ -107,7 +108,7 @@ namespace
 				if (empty(s))
 				{
 					fmt::string_view_span const p { env::home, ".local", "share" };
-					s = fmt::join(p, sys::sep::dir);
+					s = fmt::dir::join(p);
 				}
 				u = s;
 			}
@@ -127,7 +128,7 @@ namespace
 				if (empty(s))
 				{
 					fmt::string_view_span const p { env::home, ".config" };
-					s = fmt::join(p, sys::sep::dir);
+					s = fmt::dir::join(p);
 				}
 				u = s;
 			}
@@ -147,7 +148,7 @@ namespace
 				if (empty(s))
 				{
 					fmt::string_view_span const p { env::home, ".cache" };
-					s = fmt::join(p, sys::sep::dir);
+					s = fmt::dir::join(p);
 				}
 				u = s;
 			}
@@ -173,7 +174,7 @@ namespace
 					u = sys::env::get("ALLUSERSPROFILE");
 				}
 			}
-			return fmt::split(u, sys::sep::path);
+			return fmt::path::split(u);
 		}
 
 	} XDG_DATA_DIRS;
@@ -182,6 +183,7 @@ namespace
 	{
 		operator fmt::string_view_span() const final
 		{
+			static fmt::string_view_vector t;
 			fmt::string_view u = sys::env::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
@@ -195,18 +197,15 @@ namespace
 					static fmt::string s;
 					if (empty(s))
 					{
-						u = sys::env::get("APPDATA");
-						s.append(u.data(), u.size());
-						
-						s += sys::sep::path;
-
-						u = sys::env::get("LOCALAPPDATA");
-						s.append(u.data(), u.size());
+						auto const appdata = fmt::to_string(sys::env::get("APPDATA"));
+						auto const local = fmt::to_string(sys::env::get("LOCALAPPDATA"));
+						s = fmt::path::join({appdata, local});
 					}
 					u = s;
 				}
 			}
-			return fmt::split(u, sys::sep::path);
+			t = fmt::path::split(u);
+			return t;
 		}
 
 	} XDG_CONFIG_DIRS;
@@ -269,7 +268,7 @@ namespace
 			{
 				static fmt::string s;
 				fmt::string_view_span const p { env::home, val };
-				s = fmt::join(p, sys::sep::dir);
+				s = fmt::dir::join(p);
 				u = s;
 			}
 			return u;
@@ -290,7 +289,7 @@ namespace
 			if (empty(data))
 			{
 				fmt::string_view_span const dirs { xdg::config_home, "user-dirs.dirs" };
-				auto const path = fmt::join(dirs, sys::sep::dir);
+				auto const path = fmt::dir::join(dirs);
 				std::ifstream in(path);
 				fmt::string line;
 				while (ini::getline(in, line))
