@@ -20,8 +20,8 @@ namespace sys::file
 	{
 		#ifdef _WIN32
 		{
-			constexpr auto prefix = "\\\\.\\pipe";
-			path = fmt::join({ prefix, name }, "\\");
+			constexpr auto prefix = "\\\\.\\pipe\\";
+			path = fmt::join({ prefix, name });
 
 			sys::handle h = CreateNamedPipe
 			(
