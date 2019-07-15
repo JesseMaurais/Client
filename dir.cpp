@@ -83,7 +83,7 @@ namespace
 	{
 		operator fmt::string_view_span() const final
 		{
-			return env::path;
+			return env::paths;
 		}
 
 	} BIN;

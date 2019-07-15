@@ -11,6 +11,7 @@
 #include "sys.hpp"
 #include "net.hpp"
 #include "sig.hpp"
+#include "dir.hpp"
 #include "dl.hpp"
 #include "mem.hpp"
 #include "fifo.hpp"
@@ -210,9 +211,9 @@ namespace
 
 	TEST(env_path)
 	{
-		std::string const var = fmt::join({sys::esc::sh::first, "PATH", sys::esc::sh::second});
-		std::string const val = fmt::join(env::path, sys::sep::path);
-		ASSERT_EQ(sys::env::eval(var), val);
+		std::string_view const var = sys::env::get("PATH");
+		std::string const val = fmt::path::join(env::paths);
+		ASSERT_EQ(var, val);
 	}
 
 	std::ofstream& outfile()

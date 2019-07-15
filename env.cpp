@@ -260,7 +260,7 @@ namespace
 
 namespace env
 {
-	list const& path = PATH;
+	list const& paths = PATH;
 	view const& user = USER;
 	view const& home = HOME;
 	view const& root = ROOT;

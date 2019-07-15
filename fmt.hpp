@@ -59,17 +59,15 @@ namespace fmt
 		using iterator = typename string_view_span::iterator;
 		using reactor = std::function<void(iterator, size)>;
 
-		static_assert(sizeof (div) == sizeof (size_pair), "Conformance failure.");
-
 		static constexpr auto null = size {  0  };
 		static constexpr auto npos = string::npos;
 		
 		template <typename as> static string from(as const& s);
 
-		bool check(wint_t w, mask x = space) const
+		bool check(Char c, mask x = space) const
 		/// Check whether code $w is an $x
 		{
-			return base::is(x, w);
+			return base::is(x, c);
 		}
 
 		auto check(string_view u) const
