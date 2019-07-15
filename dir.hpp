@@ -3,6 +3,7 @@
 
 #include "env.hpp"
 #include <functional>
+
 struct dirent;
 
 namespace sys::file
@@ -15,13 +16,13 @@ namespace sys::file
 	int convert(mode);
 }
 
-namespace sys::dir
+namespace fmt::path
 {
 	fmt::string join(fmt::string_view_span);
 	fmt::string_view_vector split(fmt::string_view);
 }
 
-namespace sys::path
+namespace fmt::dir
 {
 	fmt::string join(fmt::string_view_span);
 	fmt::string_view_vector split(fmt::string_view);
@@ -29,17 +30,12 @@ namespace sys::path
 
 namespace env::dir
 {
-	extern env::list const& bin;
-	extern env::list const& share;
-	extern env::list const& include;
-
-	struct view : std::function<bool(dirent const*)>
+	struct mask : std::function<bool(dirent const*)>
 	{
 		using base = std::function<bool(dirent const*)>;
-
 		using base::base;
 
-		view operator | (base const& that) const
+		mask operator | (base const& that) const
 		{
 			return [&](dirent const* ent)
 			{
@@ -48,17 +44,24 @@ namespace env::dir
 		}
 	};
 
-	view mode(sys::file::mode);
-	view regex(fmt::string_view);
-	view name(fmt::string&);
+	inline env::view const& tmp = ::env::tmpdir;
+	extern env::view const& run;
+	extern env::list const& bin;
+	extern env::list const& lib;
+	extern env::list const& share;
+	extern env::list const& include;
 
-	bool find(fmt::string_view path, view);
+	mask mode(sys::file::mode);
+	mask regex(fmt::string_view);
+	mask name(fmt::string&);
 
-	inline bool find(fmt::string_view_span list, view mask)
+	bool find(fmt::string_view path, mask);
+
+	inline bool find(fmt::string_view_span list, mask view)
 	{
 		for (auto const path : list)
 		{
-			if (find(path, mask))
+			if (find(path, view))
 			{
 				return true;
 			}
@@ -66,19 +69,19 @@ namespace env::dir
 		return false;
 	}
 
-	inline bool find_bin(fmt::string_view binary, view mask)
+	inline bool find_bin(fmt::string_view name, mask view)
 	{
-		return find(bin, regex(binary) | mode(sys::file::mode::run) | mask);
+		return find(bin, regex(name) | mode(sys::file::mode::run) | view);
 	}
 
-	inline bool find_obj(fmt::string_view object, view mask)
+	inline bool find_obj(fmt::string_view name, mask view)
 	{
-		return find(share, regex(object) | mode(sys::file::mode::read) | mask);
+		return find(share, regex(name) | mode(sys::file::mode::read) | view);
 	}
 
-	inline bool find_src(fmt::string_view header, view mask)
+	inline bool find_src(fmt::string_view name, mask view)
 	{
-		return find(include, regex(header) | mode(sys::file::mode::read) | mask);
+		return find(include, regex(name) | mode(sys::file::mode::read) | view);
 	}
 }
 

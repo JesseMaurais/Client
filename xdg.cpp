@@ -8,12 +8,10 @@
 #include "dbg.hpp"
 #include <fstream>
 
-#if defined(__WIN32__)
-# if __has_include(<shlobj.h>)
-#  include <shlobj.h>
-#  pragma comment(lib, "shell32.lib")
-#  pragma comment(lib, "ole32.lib")
-# endif
+#ifdef _WIN32
+# include <shlobj.h>
+# pragma comment(lib, "shell32.lib")
+# pragma comment(lib, "ole32.lib")
 #endif
 
 namespace
@@ -88,7 +86,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			return sys::env::get("XDG_RUNTIME_DIR");
+			fmt::string_view u = sys::env::get("XDG_RUNTIME_DIR");
+			if (empty(u))
+			{
+				u = env::tmpdir;
+			}
+			return u;
 		}
 
 	} XDG_RUNTIME_DIR;
@@ -227,10 +230,10 @@ namespace
 				u = cached();
 			}
 			
-			#if defined(__WIN32__) && __has_include(<shlobj.h>)
+			#ifdef _WIN32
 			if (empty(u))
 			{
-				std::map<fmt::string_view, KNOWNFOLDERID> map =
+				static std::map<fmt::string_view, KNOWNFOLDERID> map =
 				{
 					{ Desktop, FOLDERID_Desktop },
 					{ Documents, FOLDERID_Documents },

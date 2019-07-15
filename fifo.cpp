@@ -6,24 +6,22 @@
 #include "env.hpp"
 #include "fmt.hpp"
 #include "err.hpp"
+#include "dir.hpp"
 
 #if _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
-using namespace fmt;
-
 namespace sys::file
 {
-	fifo::fifo(string_view name, openmode mode)
+	fifo::fifo(fmt::string_view name, openmode mode)
+	: flags(convert(mode))
 	{
-		int const flags = convert(mode);
-
 		#ifdef _WIN32
 		{
 			constexpr auto prefix = "\\\\.\\pipe";
-			path = join({ prefix, name }, "\\");
+			path = fmt::join({ prefix, name }, "\\");
 
 			sys::handle h = CreateNamedPipe
 			(
@@ -44,42 +42,71 @@ namespace sys::file
 				return;
 			}
 
-			if (not ConnectNamedPipe(h, nullptr))
-			{
-				sys::winerr("ConnectNamedPipe");
-				path.clear();
-				return;
-			}
-
 			fd = h.open(flags);
 		}
-		#else // _POSIX
+		#else
 		{
-			constexpr auto mask = 0777;
-			static auto const dir = join({ ::env::tmpdir, ".pipe" }, sys::sep::dir);
+			auto const dir = fmt::dir::join({ ::env::dir::run, ".fifo" });
+			auto const s = dir.c_str();
 
-			int const exists = sys::access(dir.c_str(), F_OK);
-			if (fail(exists) and fail(sys::mkdir(dir.c_str(), mask)))
+			constexpr mode_t rw = S_IRGRP | S_IWGRP;
+			sys::mode const um;
+
+			if (sys::fail(sys::access(s, F_OK)))
 			{
-				sys::perror("mkdir");
-				return;
+				if (sys::fail(sys::mkdir(s, um | rw)))
+				{
+					sys::perror("mkdir", dir);
+					return;
+				}
 			}
 
-			path = join({ dir, name }, sys::sep::dir);
-			if (mkfifo(path.c_str(), mask))
+			if (sys::fail(sys::access(s, R_OK | W_OK)))
+			{
+				if (sys::fail(sys::chmod(s, um | rw)))
+				{
+					sys::perror("chmod", dir);
+					return;
+				}
+			}
+
+			path = fmt::dir::join({ dir, name });
+			auto const ps = path.c_str();
+			if (mkfifo(ps, um | rw))
 			{
 				sys::perror("mkfifo", path);
 				path.clear();
-				return;
 			}
+		}
+		#endif
+	}
 
-			fd = sys::open(path.c_str(), flags, mask);
-			if (fail(fd))
+	bool fifo::connect()
+	{
+		#ifdef _WIN32
+		{
+			auto const ptr = _get_osfhandle(fd);
+			auto const h = reinterpret_cast<HANDLE>(ptr);
+			if (h and not ConnectNamedPipe(h, nullptr))
+			{
+				sys::winerr("ConnectNamedPipe");
+				path.clear();
+				return false;
+			}
+			return nullptr != h;
+		}
+		#else
+		{
+			sys::mode const um;
+			auto const s = path.c_str();
+			fd = sys::open(s, flags, (mode_t) um);
+			if (sys::fail(fd))
 			{
 				sys::perror("open", path);
 				path.clear();
-				return;
+				return false;
 			}
+			return true;
 		}
 		#endif
 	}
@@ -90,19 +117,17 @@ namespace sys::file
 		{
 			auto const ptr = _get_osfhandle(fd);
 			auto const h = reinterpret_cast<HANDLE>(ptr);
-
 			if (h and not DisconnectNamedPipe(h))
 			{
 				sys::winerr("DisconnectNamedPipe");
 			}
 		}
-		#endif
-
-		#ifdef _POSIX
+		#else
 		{
 			if (not empty(path))
 			{
-				if (sys::unlink(path.c_str()))
+				auto const s = path.c_str();
+				if (sys::unlink(s))
 				{
 					sys::perror("unlink", path);
 				}

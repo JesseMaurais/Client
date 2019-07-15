@@ -16,9 +16,12 @@ namespace sys::file
 			return path;
 		}
 
+		bool connect();
+
 	private:
 
 		fmt::string path;
+		int const flags;
 	};
 }
 

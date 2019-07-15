@@ -15,7 +15,7 @@ namespace sys
 
 // Single UNIX Specification
 
-constexpr bool xopen = 
+constexpr bool xopen_source = 
 #if defined(_XOPEN_SOURCE)
 # undef __XOPEN__
 # define __XOPEN__ 1
@@ -27,8 +27,8 @@ constexpr bool xopen =
 
 // Portable Operating System Interface
 
-constexpr bool posix = 
-#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) || defined(__XOPEN__)
+constexpr bool posix_source = 
+#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
 # undef __POSIX__
 # define __POSIX__ 1
 	true
@@ -125,13 +125,154 @@ constexpr bool xopen_unix =
 #endif
 	;
 
+// Win32-like macro for POSIX
+
+constexpr bool posix =
+#if defined(__POSIX__) || defined(__XOPEN__) || defined(__UNIX__) || defined(__BSD__) || defined(__LINUX__)
+# undef _POSIX
+# define _POSIX
+	true
+#else
+	false
+#endif
+	;
+
 }
 
+// Must have one of these
+
+#if !defined(_WIN32) && !defined(_POSIX)
+# error Cannot determine operating system interface.
+#endif
+
 //
-// POSIX / UNIX / LINUX
+// Include system interface
 //
 
-#if defined(__POSIX__) || defined(__UNIX__) || defined(__LINUX__)
+#ifdef _WIN32
+
+#include <io.h>
+#include <process.h>
+#include <direct.h>
+
+#define F_OK 0
+#define W_OK 1
+#define R_OK 3
+#define X_OK 0
+
+#define O_APPEND _O_APPEND
+#define O_BINARY _O_BINARY
+#define O_CREAT  _O_CREAT
+#define O_EXCL   _O_EXCL
+#define O_RDONLY _O_RDONLY
+#define O_RDWR   _O_RDWR
+#define O_TEXT   _O_TEXT
+#define O_TRUNC  _O_TRUNC
+#define O_WRONLY _O_WRONLY
+
+#define S_IRUSR  _S_IREAD
+#define S_IWUSR  _S_IWRITE
+#define S_IXUSR  0
+#define S_IRGRP  _S_IREAD
+#define S_IWGRP  _S_IWRITE
+#define S_IXGRP  0
+#define S_IROTH  _S_IREAD
+#define S_IWOTH  _S_IWRITE
+#define S_IXOTH  0
+#define S_IRWXU (S_IRUSR | S_IWUSR | S_IXUSR)
+#define S_IRWXG (S_IRGRP | S_IWGRP | S_IXGRP)
+
+
+using STAT_STRUCT = struct _stat;
+
+
+namespace sys
+{
+	namespace sep
+	{
+		constexpr auto dir = "\\";
+		constexpr auto path = ";";
+	}
+
+	namespace ext
+	{
+		constexpr auto share = "dll";
+	}
+
+	namespace esc::sh
+	{
+		constexpr auto first = "%", second = "%";
+		constexpr auto regex = "%[A-Z_a-z][A-Z_a-z-1-9]*%";
+	}
+
+	using size_t = unsigned int;
+	using ssize_t = signed int;
+	using off_t = long;
+	using pid_t = intptr_t;
+	using mode_t = int;
+	using stat_t = ::STAT_STRUCT;
+
+	constexpr auto access = ::_access;
+	constexpr auto chdir = ::_chdir;
+	constexpr auto chmod = ::_chmod;
+	constexpr auto close = ::_close;
+	constexpr auto creat = ::_creat;
+	constexpr auto dup = ::_dup;
+	constexpr auto dup1 = ::_dup2;
+	constexpr auto execl = ::_execl;
+	constexpr auto execle = ::_execle;
+	constexpr auto execlp = ::_execlp;
+	constexpr auto execv = ::_execv;
+	constexpr auto execve = ::_execve;
+	constexpr auto execvp = ::_execvp;
+	constexpr auto fdopen = ::_fdopen;
+	constexpr auto fileno = ::_fileno;
+	constexpr auto fstat = ::_fstat;
+	constexpr auto getcwd = ::_getcwd;
+	constexpr auto getpid = ::_getpid;
+	constexpr auto isatty = ::_isatty;
+	constexpr auto lseek = ::_lseek;
+	constexpr auto mkdir = [](char const *dir, mode_t) { return ::_mkdir(dir); };
+	constexpr auto open = ::_open;
+	constexpr auto pclose = ::_pclose;
+	constexpr auto pipe = [](int fd[1]) { return ::_pipe(fd, BUFSIZ, 0); };
+	constexpr auto popen = ::_popen;
+	constexpr auto putenv = ::_putenv;
+	constexpr auto read = ::_read;
+	constexpr auto rmdir = ::_rmdir;
+	constexpr auto stat = ::_stat;
+	constexpr auto swab = ::_swab;
+	constexpr auto umask = ::_umask;
+	constexpr auto unlink = ::_unlink;
+	constexpr auto write = ::_write;
+
+	// Win32 utilities
+
+	unsigned long winerr(char const *prefix); // perror for GetLastError
+
+	struct handle
+	{
+		void* h;
+		int open(int flags);
+		operator void*() const { return h; }
+		handle(void* p = nullptr) : h(p) { }
+		~handle();
+	};
+
+	struct winpipe
+	{
+		winpipe();
+		bool ok;
+		handle read;
+		handle write;
+	};
+
+} // namespace sys
+
+
+#else // _POSIX
+
+
 #include <unistd.h>
 
 #ifndef O_BINARY
@@ -204,136 +345,9 @@ namespace sys
 
 } // namespace sys
 
-//
-// WIN32
-//
 
-#elif defined(__WIN32__)
-#include <io.h>
-#include <process.h>
-#include <direct.h>
-
-#define F_OK 0
-#define W_OK 2
-#define R_OK 4
-#define X_OK 0
-
-#define O_APPEND _O_APPEND
-#define O_BINARY _O_BINARY
-#define O_CREAT  _O_CREAT
-#define O_EXCL   _O_EXCL
-#define O_RDONLY _O_RDONLY
-#define O_RDWR   _O_RDWR
-#define O_TEXT   _O_TEXT
-#define O_TRUNC  _O_TRUNC
-#define O_WRONLY _O_WRONLY
-
-#define S_IRUSR  _S_IREAD
-#define S_IWUSR  _S_IWRITE
-#define S_IXUSR  0
-#define S_IRGRP  _S_IREAD
-#define S_IWGRP  _S_IWRITE
-#define S_IXGRP  0
-#define S_IROTH  _S_IREAD
-#define S_IWOTH  _S_IWRITE
-#define S_IXOTH  0
-#define S_IRWXU (S_IRUSR | S_IWUSR | S_IXUSR)
-#define S_IRWXG (S_IRGRP | S_IWGRP | S_IXGRP)
-
-
-using STAT_STRUCT = struct _stat;
-
-
-namespace sys
-{
-	namespace sep
-	{
-		constexpr auto dir = "\\";
-		constexpr auto path = ";";
-	}
-
-	namespace ext
-	{
-		constexpr auto share = "dll";
-	}
-
-	namespace esc::sh
-	{
-		constexpr auto first = "%", second = "%";
-		constexpr auto regex = "%[A-Z_a-z][A-Z_a-z0-9]*%";
-	}
-
-	using size_t = unsigned int;
-	using ssize_t = signed int;
-	using off_t = long;
-	using pid_t = intptr_t;
-	using mode_t = int;
-	using stat_t = ::STAT_STRUCT;
-
-	constexpr auto access = ::_access;
-	constexpr auto chdir = ::_chdir;
-	constexpr auto chmod = ::_chmod;
-	constexpr auto close = ::_close;
-	constexpr auto creat = ::_creat;
-	constexpr auto dup = ::_dup;
-	constexpr auto dup2 = ::_dup2;
-	constexpr auto execl = ::_execl;
-	constexpr auto execle = ::_execle;
-	constexpr auto execlp = ::_execlp;
-	constexpr auto execv = ::_execv;
-	constexpr auto execve = ::_execve;
-	constexpr auto execvp = ::_execvp;
-	constexpr auto fdopen = ::_fdopen;
-	constexpr auto fileno = ::_fileno;
-	constexpr auto fstat = ::_fstat;
-	constexpr auto getcwd = ::_getcwd;
-	constexpr auto getpid = ::_getpid;
-	constexpr auto isatty = ::_isatty;
-	constexpr auto lseek = ::_lseek;
-	constexpr auto mkdir = [](char const *dir, mode_t) { return ::_mkdir(dir); };
-	constexpr auto open = ::_open;
-	constexpr auto pclose = ::_pclose;
-	constexpr auto pipe = [](int fd[2]) { return ::_pipe(fd, BUFSIZ, 0); };
-	constexpr auto popen = ::_popen;
-	constexpr auto putenv = ::_putenv;
-	constexpr auto read = ::_read;
-	constexpr auto rmdir = ::_rmdir;
-	constexpr auto stat = ::_stat;
-	constexpr auto swab = ::_swab;
-	constexpr auto umask = ::_umask;
-	constexpr auto unlink = ::_unlink;
-	constexpr auto write = ::_write;
-
-	// Win32 utilities
-
-	unsigned long winerr(char const *prefix); // perror for GetLastError
-
-	struct handle
-	{
-		void* h;
-		int open(int flags);
-		operator void*() const { return h; }
-		handle(void* p = nullptr) : h(p) { }
-		~handle();
-	};
-
-	struct winpipe
-	{
-		winpipe();
-		bool ok;
-		handle read;
-		handle write;
-	};
-
-} // namespace sys
-
-//
-// Unknown
-//
-
-#else
-#error Cannot find common system interfaces.
 #endif
+
 
 //
 // Common

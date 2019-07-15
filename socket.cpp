@@ -18,7 +18,7 @@ namespace sys::file
 
 	socket::socket(int family, int type, int proto)
 	{
-		#if defined(__WIN32__)
+		#ifdef _WIN32
 		{
 			constexpr WORD version = MAKEWORD(2, 2);
 			static sys::net::wsadata ws(version);

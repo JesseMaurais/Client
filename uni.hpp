@@ -1,9 +1,11 @@
 #ifndef uni_hpp
 #define uni_hpp
 
+#include <cwchar>
+
 namespace uni
 {
-	using codepoint = unsigned;
+	using codepoint = wint_t;
 
 	namespace
 	{

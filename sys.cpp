@@ -23,7 +23,7 @@
 
 namespace sys
 {
-	#if defined(__WIN32__)
+	#ifdef _WIN32
 
 	unsigned long winerr(char const *prefix)
 	{
@@ -87,12 +87,12 @@ namespace sys
 		}
 	}
 
-	#endif // __WIN32__
+	#endif
 
 
 	pid_t exec(int fd[3], char const**argv)
 	{
-		#if defined(__WIN32__)
+		#ifdef _WIN32
 		{
 			winpipe pair[3];
 
@@ -162,7 +162,7 @@ namespace sys
 
 			return pi.dwProcessId;
 		}
-		#else // defined(__POSIX__)
+		#else//_POSIX
 		{
 			sys::file::pipe pair[3];
 
@@ -218,7 +218,7 @@ namespace sys
 
 	void term(pid_t pid)
 	{
-		#if defined(__WIN32__)
+		#ifdef _WIN32
 		{
 			handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
 			if (nullptr == h)
@@ -231,7 +231,7 @@ namespace sys
 				winerr("TerminateProcess");
 			}
 		}
-		#else // defined(__POSIX__)
+		#else//_POSIX
 		{
 			if (not fail(pid) and fail(kill(pid, SIGTERM)))
 			{
@@ -243,7 +243,7 @@ namespace sys
 
 	int wait(pid_t pid)
 	{
-		#if defined(__WIN32__)
+		#ifdef _WIN32
 		{
 			DWORD code = ~DWORD{0};
 			handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
@@ -265,7 +265,7 @@ namespace sys
 			}
 			return code;
 		}
-		#else // defined(__POSIX__)
+		#else//_POSIX
 		{
 			int status = -1;
 			pid_t const parent = pid;

@@ -20,6 +20,19 @@ namespace
 	{
 		std::cerr << who << ": " << what << std::endl;
 	}
+
+	fmt::string expr(fmt::string_view name)
+	{
+		#ifdef _WIN32
+		{
+			return fmt::to_string(name) + ".dll";
+		}
+		#else
+		{
+			return fmt::to_string(name) + ".so";
+		}
+		#endif
+	}
 }
 
 namespace sys
@@ -69,7 +82,7 @@ namespace sys
 	dl dl::find(string_view name)
 	{
 		fmt::string path;
-		::env::dir::find_obj(name, ::env::dir::name(path));
+		::env::dir::find_obj(expr(name), ::env::dir::name(path));
 		return fmt::string_view(path);
 	}
 }

@@ -1,8 +1,12 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "dir.hpp"
 #include "err.hpp"
 #include "fmt.hpp"
 #include "sys.hpp"
 #include "ptr.hpp"
+#include "xdg.hpp"
 #include <regex>
 
 #ifdef _WIN32
@@ -36,7 +40,7 @@ namespace sys::file
 	}
 }
 
-namespace sys::dir
+namespace fmt::dir
 {
 	fmt::string join(fmt::string_view_span p)
 	{
@@ -50,7 +54,7 @@ namespace sys::dir
 	}
 }
 
-namespace sys::path
+namespace fmt::path
 {
 	fmt::string join(fmt::string_view_span p)
 	{
@@ -66,6 +70,15 @@ namespace sys::path
 
 namespace
 {
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			return xdg::runtime_dir;
+		}
+
+	} RUN;
+
 	struct : env::list
 	{
 		operator fmt::string_view_span() const final
@@ -74,6 +87,18 @@ namespace
 		}
 
 	} BIN;
+
+	struct : env::list
+	{
+		operator fmt::string_view_span() const final
+		{
+			static fmt::string_view_vector t;
+			fmt::string_view u = sys::env::get("LIB");
+			t = fmt::dir::split(u);
+			return t;
+		}
+
+	} LIB;
 
 	struct : env::list
 	{
@@ -104,7 +129,7 @@ namespace
 		{
 			static fmt::string_view_vector t;
 			auto const u = get();
-			t = sys::path::split(u);
+			t = fmt::path::split(u);
 			return t;
 		}
 
@@ -116,7 +141,7 @@ namespace
 		{
 			static fmt::string_view_vector t;
 			auto const u = sys::env::get("INCLUDE");
-			t = sys::path::split(u);
+			t = fmt::path::split(u);
 			return t;
 		}
 
@@ -125,11 +150,13 @@ namespace
 
 namespace env::dir
 {
+	env::view const& run = RUN;
 	env::list const& bin = BIN;
+	env::list const& lib = LIB;
 	env::list const& share = SHARE;
 	env::list const& include = INCLUDE;
 
-	bool find(fmt::string_view path, view check)
+	bool find(fmt::string_view path, mask check)
 	{
 		auto const buf = fmt::to_string(path);
 		auto const str = buf.c_str(); // terminated
@@ -160,16 +187,16 @@ namespace env::dir
 		return false;
 	}
 
-	view mode(sys::file::mode mask)
+	mask mode(sys::file::mode bits)
 	{
-		auto const flags = sys::file::convert(mask);
+		auto const flags = sys::file::convert(bits);
 		return [flags](dirent const* ent)
 		{
 			return not sys::fail(sys::access(ent->d_name, flags));
 		};
 	}
 
-	view regex(fmt::string_view pattern)
+	mask regex(fmt::string_view pattern)
 	{
 		auto const buf = fmt::to_string(pattern);
 		auto const expr = std::regex(buf);
@@ -180,7 +207,7 @@ namespace env::dir
 		};
 	}
 
-	view name(fmt::string& buf)
+	mask name(fmt::string& buf)
 	{
 		return [&](dirent const* ent)
 		{
