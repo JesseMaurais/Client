@@ -149,6 +149,11 @@ namespace sys
 		constexpr auto path = ":";
 	}
 
+	namespace ext
+	{
+		constexpr auto share = "so";
+	}
+
 	namespace esc::sh
 	{
 		constexpr auto first = "$", second = "";
@@ -246,6 +251,11 @@ namespace sys
 		constexpr auto path = ";";
 	}
 
+	namespace ext
+	{
+		constexpr auto share = "dll";
+	}
+
 	namespace esc::sh
 	{
 		constexpr auto first = "%", second = "%";
@@ -336,6 +346,28 @@ namespace sys
 		constexpr T invalid = -1;
 		return invalid == value;
 	}
+
+	class mode
+	{
+		mode_t um;
+
+	public:
+
+		operator mode_t() const
+		{
+			return um;
+		}
+
+		umask(mode_t mask = 0777)
+		{
+			um = sys::umask(mask);
+		}
+
+		~umask()
+		{
+			(void) sys::umask(um):
+		}
+	};
 
 	pid_t exec(int fd[3], char const** argv);
 	void term(pid_t pid);

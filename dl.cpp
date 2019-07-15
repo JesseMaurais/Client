@@ -3,10 +3,10 @@
 
 #include "dl.hpp"
 #include "os.hpp"
-#include "fmt.hpp"
+#include "dir.hpp"
 #include <iostream>
 
-#if defined(__WIN32__)
+#ifdef _WIN32
 #include "dlfcn.c"
 #else
 #include <dlfcn.h>
@@ -64,6 +64,13 @@ namespace sys
 			error("dlsym", e);
 		}
 		return f;
+	}
+
+	dl dl::find(string_view name)
+	{
+		string path;
+		env::dir::find_obj(name, env::dir::name(path));
+		return path;
 	}
 }
 

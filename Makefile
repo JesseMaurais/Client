@@ -3,7 +3,7 @@
 BUGMSG = Known GCC bug up to version 8.3 causes internal compiler error
 
 STD = c++17
-SRC = test.cpp dl.cpp fifo.cpp file.cpp mem.cpp dbg.cpp env.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
+SRC = test.cpp dir.cpp dl.cpp fifo.cpp file.cpp mem.cpp dbg.cpp env.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
 BIN = test
 
 LOG = $(SRC:.cpp=.log)

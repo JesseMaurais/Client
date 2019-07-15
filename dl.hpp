@@ -2,11 +2,10 @@
 #define dl_hpp
 
 #include "str.hpp"
-#include "os.hpp"
 
-#if defined(__WIN32__)
+#ifdef _WIN32
 #define dynamic extern "C" __declspec(dllexport)
-#else // __POSIX__
+#else
 #define dynamic extern "C" 
 #endif
 
@@ -14,18 +13,17 @@ namespace sys
 {
 	class dl
 	{
-		using string_view = fmt::string_view;
-		using string = fmt::string;
-
 	public:
 
-		dl(string_view path);
+		dl(fmt::string_view path);
 		~dl();
 		dl();
 
 		operator bool() const;
+
+		static dl find(fmt::string_view name);
 		
-		template <typename S> auto sym(string_view name) const
+		template <typename S> auto sym(fmt::string_view name) const
 		{
 			S *addr = nullptr;
 			// see pubs.opengroup.org
@@ -36,10 +34,8 @@ namespace sys
 	private:
 
 		void *tab;
-		void *sym(string_view name) const;
+		void *sym(fmt::string_view name) const;
 	};
-
-	fmt::string_view lib(fmt::string_view);
 }
 
 #endif // file

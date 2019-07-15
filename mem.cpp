@@ -6,7 +6,7 @@
 #include "sys.hpp"
 #include "int.hpp"
 
-#if defined(__WIN32__)
+#ifdef _WIN32
 #include "mman.c"
 #else
 #include <sys/mman.h>

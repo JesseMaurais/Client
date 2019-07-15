@@ -7,7 +7,7 @@
 #include "fmt.hpp"
 #include "err.hpp"
 
-#if __has_include(<windows.h>)
+#if _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
@@ -20,7 +20,7 @@ namespace sys::file
 	{
 		int const flags = convert(mode);
 
-		#if defined(__WIN32__)
+		#ifdef _WIN32
 		{
 			constexpr auto prefix = "\\\\.\\pipe";
 			path = join({ prefix, name }, "\\");
@@ -55,7 +55,7 @@ namespace sys::file
 		}
 		#endif
 
-		#if defined(__POSIX__)
+		#ifdef _POSIX
 		{
 			constexpr auto mask = 0777;
 			static auto const dir = join({ ::env::tmpdir, ".pipe" }, sys::sep::dir);
@@ -88,7 +88,7 @@ namespace sys::file
 
 	fifo::~fifo()
 	{
-		#if defined(__WIN32__)
+		#ifdef _WIN32
 		{
 			auto const ptr = _get_osfhandle(fd);
 			auto const h = reinterpret_cast<HANDLE>(ptr);
@@ -100,7 +100,7 @@ namespace sys::file
 		}
 		#endif
 
-		#if defined(__POSIX__)
+		#ifdef _POSIX
 		{
 			if (not empty(path))
 			{
