@@ -1,4 +1,5 @@
 #include "dir.hpp"
+#include "err.hpp"
 #include "fmt.hpp"
 #include "sys.hpp"
 #include "ptr.hpp"
@@ -15,21 +16,21 @@ namespace sys::file
 	int convert(mode bit)
 	{
 		int mask = 0;
-		if (bit & ok)
+		if (bit & mode::ok)
 		{
 			mask |= F_OK;
 		}
-		if (bit & run)
+		if (bit & mode::run)
 		{
-			mask |= F_X;
+			mask |= X_OK;
 		}
-		if (bit & read)
+		if (bit & mode::read)
 		{
-			mask |= F_R;
+			mask |= R_OK;
 		}
-		if (bit & write)
+		if (bit & mode::write)
 		{
-			mask |= F_W;
+			mask |= W_OK;
 		}
 		return mask;
 	}
@@ -128,9 +129,10 @@ namespace env::dir
 	env::list const& share = SHARE;
 	env::list const& include = INCLUDE;
 
-	bool find(fmt::string path, view check)
+	bool find(fmt::string_view path, view check)
 	{
-		auto const str = path.c_str();
+		auto const buf = fmt::to_string(path);
+		auto const str = buf.c_str(); // terminated
 		auto const dir = ptr::make(opendir(str), +[](DIR* dir)
 		{
 			if (nullptr == dir)
@@ -146,7 +148,7 @@ namespace env::dir
 
 		while (dir) // as if
 		{
-			if (auto const ent = readdir(dir); ent)
+			if (auto const ent = readdir(dir.get()); ent)
 			{
 				if (check(ent))
 				{
@@ -169,11 +171,12 @@ namespace env::dir
 
 	view regex(fmt::string_view pattern)
 	{
-		auto const expr = std::regex(pattern);
+		auto const buf = fmt::to_string(pattern);
+		auto const expr = std::regex(buf);
 		return [expr](dirent const* ent)
 		{
-			std::match_results res;
-			return std::regex_search(ent->d_name, res, expr);
+			std::cmatch match;
+			return std::regex_search(ent->d_name, match, expr);
 		};
 	}
 

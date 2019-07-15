@@ -53,9 +53,7 @@ namespace sys::file
 
 			fd = h.open(flags);
 		}
-		#endif
-
-		#ifdef _POSIX
+		#else // _POSIX
 		{
 			constexpr auto mask = 0777;
 			static auto const dir = join({ ::env::tmpdir, ".pipe" }, sys::sep::dir);

@@ -7,17 +7,12 @@ struct dirent;
 
 namespace sys::file
 {
-	enum class mode : int
+	enum mode : int
 	{
 		ok = 1, read = 2, write = 4, run = 8
 	};
 
 	int convert(mode);
-
-	inline mode operator | (mode L, mode R)
-	{
-		return static_cast<mode>(static_cast<int>(L)|static_cast<int>(R));
-	}
 }
 
 namespace sys::dir
@@ -42,6 +37,8 @@ namespace env::dir
 	{
 		using base = std::function<bool(dirent const*)>;
 
+		using base::base;
+
 		view operator | (base const& that) const
 		{
 			return [&](dirent const* ent)
@@ -55,13 +52,13 @@ namespace env::dir
 	view regex(fmt::string_view);
 	view name(fmt::string&);
 
-	bool find(fmt::string path, view);
+	bool find(fmt::string_view path, view);
 
-	inline bool find(fmt::string_view_span list, view)
+	inline bool find(fmt::string_view_span list, view mask)
 	{
 		for (auto const path : list)
 		{
-			if (find(path, view))
+			if (find(path, mask))
 			{
 				return true;
 			}
@@ -69,19 +66,19 @@ namespace env::dir
 		return false;
 	}
 
-	inline bool find_bin(fmt::string_view binary)
+	inline bool find_bin(fmt::string_view binary, view mask)
 	{
-		return find(bin, regex(binary) | mode(sys::file::run));
+		return find(bin, regex(binary) | mode(sys::file::mode::run) | mask);
 	}
 
-	inline bool find_obj(fmt::string_view object)
+	inline bool find_obj(fmt::string_view object, view mask)
 	{
-		return find(share, regex(object) | mode(sys::file::read));
+		return find(share, regex(object) | mode(sys::file::mode::read) | mask);
 	}
 
-	inline bool find_src(fmt::string_view header)
+	inline bool find_src(fmt::string_view header, view mask)
 	{
-		return find(include, regex(header) | mode(sys::file::read));
+		return find(include, regex(header) | mode(sys::file::mode::read) | mask);
 	}
 }
 

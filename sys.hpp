@@ -216,6 +216,7 @@ namespace sys
 #define F_OK 0
 #define W_OK 2
 #define R_OK 4
+#define X_OK 0
 
 #define O_APPEND _O_APPEND
 #define O_BINARY _O_BINARY
@@ -358,14 +359,14 @@ namespace sys
 			return um;
 		}
 
-		umask(mode_t mask = 0777)
+		mode(mode_t mask = 0777)
 		{
 			um = sys::umask(mask);
 		}
 
-		~umask()
+		~mode()
 		{
-			(void) sys::umask(um):
+			(void) sys::umask(um);
 		}
 	};
 

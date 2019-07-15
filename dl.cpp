@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dl.hpp"
-#include "os.hpp"
+#include "fmt.hpp"
 #include "dir.hpp"
 #include <iostream>
 
@@ -32,10 +32,10 @@ namespace sys
 	dl::dl() : tab(RTLD_DEFAULT)
 	{ }
 
-	dl::dl(string_view path)
+	dl::dl(fmt::string_view path)
 	{
 		auto const buf = fmt::to_string(path);
-		auto const s = empty(buf) ? nullptr : buf.c_str();
+		auto const s = buf.empty() ? nullptr : buf.c_str();
 		tab = dlopen(s, RTLD_LAZY);
 		if (nullptr == tab)
 		{
@@ -68,9 +68,9 @@ namespace sys
 
 	dl dl::find(string_view name)
 	{
-		string path;
-		env::dir::find_obj(name, env::dir::name(path));
-		return path;
+		fmt::string path;
+		::env::dir::find_obj(name, ::env::dir::name(path));
+		return fmt::string_view(path);
 	}
 }
 
