@@ -7,9 +7,9 @@
 #include "int.hpp"
 
 #ifdef _WIN32
-#include "mman.c"
+# include "mman.c"
 #else
-#include <sys/mman.h>
+# include <sys/mman.h>
 #endif
 
 namespace sys::file

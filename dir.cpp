@@ -10,7 +10,6 @@
 #include <regex>
 
 #ifdef _WIN32
-# define WIN32_LEAN_AND_MEAN
 # include "dirent.h"
 #else
 # include <dirent.h>
@@ -198,10 +197,13 @@ namespace env::dir
 				return false;
 			}
 			#ifdef _WIN32
-			if (bits & mode::run)
 			{
-				DWORD type;
-				return GetBinaryType(ent->d_name, &type);
+				if (bits & mode::run)
+				{
+					DWORD type;
+					BOOL ok = GetBinaryType(ent->d_name, &type);
+					return TRUE == ok;
+				}
 			}
 			#endif
 			return true;

@@ -230,36 +230,38 @@ namespace
 			}
 			
 			#ifdef _WIN32
-			if (empty(u))
 			{
-				static std::map<fmt::string_view, KNOWNFOLDERID> map =
+				if (empty(u))
 				{
-					{ Desktop, FOLDERID_Desktop },
-					{ Documents, FOLDERID_Documents },
-					{ Downloads, FOLDERID_Downloads },
-					{ Music, FOLDERID_Music },
-					{ Pictures, FOLDERID_Pictures },
-					{ PublicShare, FOLDERID_Public },
-					{ Templates, FOLDERID_Templates },
-					{ Videos, FOLDERID_Videos },
-				};
-				struct scoped
-				{
-					~scoped() { if (p) CoTaskMemFree(p); }
-					PWSTR p = nullptr;
-				} ws;
-				HRESULT const ok = SHGetKnownFolderPath
-				(
-					map.at(val),
-					0,
-					nullptr,
-					&ws.p
-				);
-				if (S_OK == ok)
-				{
-					static std::string s;
-					s = fmt::to_string(ws.p);
-					u = s;
+					static std::map<fmt::string_view, KNOWNFOLDERID> map =
+					{
+						{ Desktop, FOLDERID_Desktop },
+						{ Documents, FOLDERID_Documents },
+						{ Downloads, FOLDERID_Downloads },
+						{ Music, FOLDERID_Music },
+						{ Pictures, FOLDERID_Pictures },
+						{ PublicShare, FOLDERID_Public },
+						{ Templates, FOLDERID_Templates },
+						{ Videos, FOLDERID_Videos },
+					};
+					struct scoped
+					{
+						~scoped() { if (p) CoTaskMemFree(p); }
+						PWSTR p = nullptr;
+					} ws;
+					HRESULT const ok = SHGetKnownFolderPath
+					(
+						map.at(val),
+						0,
+						nullptr,
+						&ws.p
+					);
+					if (S_OK == ok)
+					{
+						static std::string s;
+						s = fmt::to_string(ws.p);
+						u = s;
+					}
 				}
 			}
 			#endif

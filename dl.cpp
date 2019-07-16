@@ -7,9 +7,9 @@
 #include <iostream>
 
 #ifdef _WIN32
-#include "dlfcn.c"
+# include "dlfcn.c"
 #else
-#include <dlfcn.h>
+# include <dlfcn.h>
 #endif
 
 using namespace fmt;

@@ -8,7 +8,7 @@
 #include <iostream>
 #include <signal.h>
 
-#if __has_include(<windows.h>)
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
@@ -162,7 +162,7 @@ namespace sys
 
 			return pi.dwProcessId;
 		}
-		#else//_POSIX
+		#else
 		{
 			sys::file::pipe pair[3];
 
@@ -231,7 +231,7 @@ namespace sys
 				winerr("TerminateProcess");
 			}
 		}
-		#else//_POSIX
+		#else
 		{
 			if (not fail(pid) and fail(kill(pid, SIGTERM)))
 			{
@@ -265,7 +265,7 @@ namespace sys
 			}
 			return code;
 		}
-		#else//_POSIX
+		#else
 		{
 			int status = -1;
 			pid_t const parent = pid;

@@ -24,6 +24,11 @@ namespace stl
 		}
 	};
 
+	template <class Type> inline void swap(pair<Type>& p)
+	{
+		std::swap(p.first, p.second);
+	}
+
 	// Non-modifying sequence operations
 
 	template <typename Container, typename Operation>
