@@ -1,6 +1,7 @@
 sys.ini
 tags
 test
+*.tmp
 *.swp
 *.exe
 *.obj

@@ -2,7 +2,6 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dbg.hpp"
-#include "alg.hpp"
 #include "int.hpp"
 #include "fmt.hpp"
 #include "del.hpp"

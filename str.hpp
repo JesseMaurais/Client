@@ -47,12 +47,27 @@ namespace fmt
 
 #include <string>
 #include <vector>
-#include "alg.hpp"
+#include <utility>
 
 namespace fmt
 {
-	using stl::pair;
-	using stl::range;
+	template <class Type> using pair = std::pair<Type, Type>;
+
+	template <class Iterator> struct range : pair<Iterator>
+	{
+		using base = pair<Iterator>;
+		using base::base;
+
+		auto begin() const
+		{
+			return base::first;
+		}
+
+		auto end() const
+		{
+			return base::second;
+		}
+	};
 
 	template <class Char> using basic_string = std::basic_string<Char>;
 	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
