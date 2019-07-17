@@ -1,9 +1,22 @@
 #ifndef err_hpp
 #define err_hpp
 
-#ifndef NDEBUG
-#include <sstream>
-#include <cstdio>
+#ifdef NDEBUG
+# define verify(x) (x)
+#else
+# define verify(x) assert(x)
+# include <sstream>
+# include <cstdio>
+# include <cassert>
+namespace fmt
+{
+	template <typename... Args> auto error(Args... args)
+	{
+		std::stringstream ss;
+		((ss << args << ": "), ...);
+		return ss.str();
+	}
+}
 #endif
 
 namespace sys
@@ -12,11 +25,10 @@ namespace sys
 	{
 		#ifndef NDEBUG
 		{
-			std::stringstream stream;
-			((stream << args << " "), ...);
-			if (stream)
+			auto s = fmt::error(args...);
+			if (not empty(s))
 			{
-				std::perror(stream.str().c_str());
+				std::perror(s.c_str());
 			}
 		}
 		#endif

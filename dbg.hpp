@@ -1,10 +1,7 @@
 #ifndef dbg_hpp
 #define dbg_hpp
 
-#include <cassert>
-
-#define ASSTRING(s) #s
-#define STRING(n) ASSTRING(n)
+#include "err.hpp"
 
 #ifndef NDEBUG
 namespace dbg
@@ -28,18 +25,20 @@ namespace dbg
 constexpr bool DEBUG = true;
 #define TEST(unit) struct unit : dbg::test { using test::test; void run() final; } test_##unit(#unit); void unit::run()
 #define FAIL(unit) struct unit : dbg::fail { using fail::fail; void run2() final; } test_##unit(#unit); void unit::run2()
-#define ASSERT(...) if (not(__VA_ARGS__)) throw __FILE__ ":" STRING(__LINE__) ": " #__VA_ARGS__
-#define verify(...) assert(__VA_ARGS__)
+#define ASSERT(x) { if (not(x)) throw ::fmt::error(__FILE__, __LINE__, __func__, #x); }
+#define VERIFY(x) ASSERT(x)
 #else
 constexpr bool DEBUG = false;
 #define TEST(unit) (void) []()
-#define ASSERT(...)
-#define verify(...) (void) (__VA_ARGS__)
+#define FAIL(unit) (void) []()
+#define ASSERT(x)
+#define VERIFY(x) (x)
 #endif
 
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))
 #define ASSERT_NOT_EQ(a, b) ASSERT((a) != (b))
+
 #undef assert
-#define assert(...) ASSERT(__VA_ARGS__)
+#define assert(x) ASSERT(x)
 
 #endif // file

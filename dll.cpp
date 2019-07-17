@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "dl.hpp"
+#include "dll.hpp"
 #include "fmt.hpp"
 #include "dir.hpp"
 #include <iostream>
@@ -37,15 +37,15 @@ namespace
 
 namespace sys
 {
-	dl::operator bool() const
+	dll::operator bool() const
 	{
 		return RTLD_DEFAULT != tab;
 	}
 
-	dl::dl() : tab(RTLD_DEFAULT)
+	dll::dll() : tab(RTLD_DEFAULT)
 	{ }
 
-	dl::dl(fmt::string_view path)
+	dll::dll(fmt::string_view path)
 	{
 		auto const buf = fmt::to_string(path);
 		auto const s = buf.empty() ? nullptr : buf.c_str();
@@ -56,7 +56,7 @@ namespace sys
 		}
 	}
 
-	dl::~dl()
+	dll::~dll()
 	{
 		if (tab and dlclose(tab))
 		{
@@ -64,7 +64,7 @@ namespace sys
 		}
 	}
 
-	void *dl::sym(string_view name) const
+	void *dll::sym(string_view name) const
 	{
 		auto const buf = fmt::to_string(name);
 		auto const s = buf.c_str();
@@ -79,7 +79,7 @@ namespace sys
 		return f;
 	}
 
-	dl dl::find(string_view name)
+	dll dll::find(string_view name)
 	{
 		fmt::string path;
 		::env::dir::find_obj(expr(name), ::env::dir::name(path));

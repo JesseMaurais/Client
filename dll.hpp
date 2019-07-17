@@ -1,5 +1,5 @@
-#ifndef dl_hpp
-#define dl_hpp
+#ifndef dll_hpp
+#define dll_hpp
 
 #include "str.hpp"
 
@@ -11,17 +11,17 @@
 
 namespace sys
 {
-	class dl
+	class dll
 	{
 	public:
 
-		dl(fmt::string_view path);
-		~dl();
-		dl();
+		dll(fmt::string_view path);
+		~dll();
+		dll();
 
 		operator bool() const;
 
-		static dl find(fmt::string_view name);
+		static dll find(fmt::string_view name);
 		
 		template <typename S> auto sym(fmt::string_view name) const
 		{

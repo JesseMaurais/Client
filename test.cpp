@@ -12,7 +12,7 @@
 #include "net.hpp"
 #include "sig.hpp"
 #include "dir.hpp"
-#include "dl.hpp"
+#include "dll.hpp"
 #include "mem.hpp"
 #include "fifo.hpp"
 #include "pstream.hpp"
@@ -282,8 +282,8 @@ namespace
 
 	TEST(sys_symbol)
 	{
-		sys::dl module;
-		auto f = module.sym<int()>("visible");
+		sys::dll lib;
+		auto f = lib.sym<int()>("visible");
 		ASSERT_NOT_EQ(nullptr, f);
 		ASSERT_EQ(f(), hidden());
 	}

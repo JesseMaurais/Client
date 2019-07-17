@@ -1,9 +1,9 @@
 #ifndef int_hpp
 #define int_hpp
 
+#include <limits>
 #include <cstddef>
 #include <type_traits>
-#include <limits>
 
 namespace fmt
 {
