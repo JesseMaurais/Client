@@ -1,12 +1,12 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include <cassert>
 #include "socket.hpp"
 #include "sys.hpp"
 #include "net.hpp"
 #include "sig.hpp"
 #include "int.hpp"
-#include <cassert>
 
 namespace sys::file
 {

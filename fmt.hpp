@@ -1,6 +1,7 @@
 #ifndef fmt_hpp
 #define fmt_hpp
 
+#include <algorithm>
 #include <functional>
 #include <cinttypes>
 #include <cstdlib>

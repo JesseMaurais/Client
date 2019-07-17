@@ -366,7 +366,7 @@ namespace sys
 	{
 		stat(char const* path)
 		{
-			ok = ::stat(path, this);
+			ok = sys::stat(path, this);
 		}
 
 		operator bool() const

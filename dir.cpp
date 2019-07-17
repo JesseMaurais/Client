@@ -180,7 +180,7 @@ namespace env::dir
 	mask mode(sys::file::mode bits)
 	{
 		auto const flags = sys::file::convert(bits);
-		return [flags](dirent const* ent)
+		return [=](dirent const* ent)
 		{
 			if (sys::fail(sys::access(ent->d_name, flags)))
 			{
@@ -188,7 +188,7 @@ namespace env::dir
 			}
 			#ifdef _WIN32
 			{
-				if (bits & mode::run)
+				if (bits & sys::file::mode::run)
 				{
 					DWORD type;
 					BOOL ok = GetBinaryType(ent->d_name, &type);

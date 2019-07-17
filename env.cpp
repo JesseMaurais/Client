@@ -111,7 +111,11 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
+			#ifdef _WIN32
+			{
+				return sys::env::get("COMPUTERNAME");
+			}
+			#else
 			{
 				static char name[64];
 				if (sys::fail(gethostname(name, sizeof name)))
@@ -121,11 +125,7 @@ namespace
 				}
 				return name;
 			}
-			else
-			if constexpr (sys::win32)
-			{
-				return sys::env::get("COMPUTERNAME");
-			}
+			#endif
 		}
 
 	} HOST;
@@ -134,7 +134,11 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
+			#ifdef _WIN32
+			{
+				return sys::env::get("USERDOMAIN");
+			}
+			#else
 			{
 				static char name[64];
 				if (sys::fail(getdomainname(name, sizeof name)))
@@ -144,14 +148,10 @@ namespace
 				}
 				return name;
 			}
-			else
-			if constexpr (sys::win32)
-			{
-				return sys::env::get("USERDOMAIN");
-			}
+			#endif
 		}
 
-	} DOMAIN;
+	} DOMAIN_;
 
 	struct : env::view
 	{
@@ -310,7 +310,7 @@ namespace env
 	view const& user = USER;
 	view const& home = HOME;
 	view const& host = HOST;
-	view const& domain = DOMAIN;
+	view const& domain = DOMAIN_;
 	view const& root = ROOT;
 	view const& pwd = PWD;
 	view const& lang = LANG;
