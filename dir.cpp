@@ -83,15 +83,6 @@ namespace
 	{
 		operator fmt::string_view_span() const final
 		{
-			return env::paths;
-		}
-
-	} BIN;
-
-	struct : env::list
-	{
-		operator fmt::string_view_span() const final
-		{
 			static fmt::string_view_vector t;
 			fmt::string_view u = sys::env::get("LIB");
 			t = fmt::dir::split(u);
@@ -151,7 +142,6 @@ namespace
 namespace env::dir
 {
 	env::view const& run = RUN;
-	env::list const& bin = BIN;
 	env::list const& lib = LIB;
 	env::list const& share = SHARE;
 	env::list const& include = INCLUDE;

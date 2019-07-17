@@ -6,7 +6,6 @@
 #include "net.hpp"
 #include "sig.hpp"
 #include "int.hpp"
-#include "alg.hpp"
 #include <cassert>
 
 namespace sys::file
@@ -199,7 +198,8 @@ namespace sig
 	socket::~socket()
 	{
 		auto const pfd = sys::net::descriptor(sys::file::socket::fd);
-		stl::erase_if(fds, [pfd](auto const& p) { return p.fd == pfd; });
+		auto eq = [pfd](auto const& p) { return p.fd == pfd; };
+		fds.erase(remove_if(begin(fds), end(fds), eq), end(fds));
 		set.disconnect(pfd);
 	}
 }

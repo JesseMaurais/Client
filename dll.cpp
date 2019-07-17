@@ -82,7 +82,7 @@ namespace sys
 	dll dll::find(string_view name)
 	{
 		fmt::string path;
-		::env::dir::find_obj(expr(name), ::env::dir::name(path));
+		::env::dir::find(::env::dir::share, ::env::dir::regex(expr(name)) | ::env::dir::name(path));
 		return fmt::string_view(path);
 	}
 }

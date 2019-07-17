@@ -362,6 +362,23 @@ namespace sys
 		return invalid == value;
 	}
 
+	struct stat : stat_t
+	{
+		stat(char const* path)
+		{
+			ok = ::stat(path, this);
+		}
+
+		operator bool() const
+		{
+			return not fail(ok);
+		}
+
+	private:
+
+		int ok;
+	};
+
 	class mode
 	{
 		mode_t um;

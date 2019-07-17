@@ -68,51 +68,6 @@ namespace
 	FAIL(int_loss_sign) { (void) fmt::to_unsigned(-1); }
 
 	//
-	// Base template algorithms
-	//
-
-	TEST(alg_sort)
-	{
-		using namespace stl;
-
-		std::vector num { 5, 7, 3, 9, 6, 1, 2, 0, 4, 8 };
-		sort(num, [](int a, int b) { return a < b; });
-		ASSERT_EQ(num, (std::vector { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
-	}
-
-	TEST(alg_find)
-	{
-		using namespace stl;
-
-		std::vector const pow2 { 2, 4, 8, 16, 32, 64, 128, 256 };
-		ASSERT_EQ(find(pow2, 13), end(pow2));
-		ASSERT_NOT_EQ(find(pow2, 64), end(pow2));
-
-		auto const is_even = [](int n) { return (n % 2) == 0; };
-		ASSERT(all_of(pow2, is_even));
-
-		std::vector<int> odds;
-		for_each(pow2, [&odds](int n) { odds.push_back(n + 1); }); 
-		ASSERT(none_of(odds, is_even));
-	}
-
-	TEST(alg_copy)
-	{
-		using namespace stl;
-
-		std::vector<int> u(9);
-		generate(u, [n = 0]() mutable { return ++n; });
-		ASSERT_EQ(u, (std::vector { 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
-
-		std::vector<int> v(9);
-		copy(u, begin(v));
-		ASSERT_EQ(u, v);
-
-		erase_if(u, [](int n) { return n % 2; });
-		ASSERT_EQ(u, (std::vector { 2, 4, 6, 8 }));
-	}
-
-	//
 	// Text formatting routines
 	//
 
@@ -300,13 +255,10 @@ namespace
 			std::raise(n);
 		}
 
-		ASSERT_NOT_EQ(stl::find(caught, SIGINT), caught.end());
-		ASSERT_NOT_EQ(stl::find(caught, SIGFPE), caught.end());
-		ASSERT_NOT_EQ(stl::find(caught, SIGILL), caught.end());
-
-		ASSERT_EQ(stl::find(caught, SIGSEGV), caught.end());
-		ASSERT_EQ(stl::find(caught, SIGTERM), caught.end());
-		ASSERT_EQ(stl::find(caught, SIGABRT), caught.end());
+		ASSERT_EQ(caught.size(), 3);
+		ASSERT_EQ(caught[0], SIGINT);
+		ASSERT_EQ(caught[1], SIGFPE);
+		ASSERT_EQ(caught[2], SIGILL);
 	}
 
 	//

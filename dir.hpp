@@ -46,7 +46,8 @@ namespace env::dir
 
 	inline env::view const& tmp = ::env::tmpdir;
 	extern env::view const& run;
-	extern env::list const& bin;
+	inline env::list const& bin = ::env::paths;
+	extern env::view const& obj;
 	extern env::list const& lib;
 	extern env::list const& share;
 	extern env::list const& include;
@@ -67,21 +68,6 @@ namespace env::dir
 			}
 		}
 		return false;
-	}
-
-	inline bool find_bin(fmt::string_view name, mask view)
-	{
-		return find(bin, regex(name) | mode(sys::file::mode::run) | view);
-	}
-
-	inline bool find_obj(fmt::string_view name, mask view)
-	{
-		return find(share, regex(name) | mode(sys::file::mode::read) | view);
-	}
-
-	inline bool find_src(fmt::string_view name, mask view)
-	{
-		return find(include, regex(name) | mode(sys::file::mode::read) | view);
 	}
 }
 
