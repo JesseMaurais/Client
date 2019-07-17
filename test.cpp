@@ -183,6 +183,8 @@ namespace
 		f << fmt::key_value("HOME", env::home) << std::endl;
 		f << fmt::key_value("USER", env::user) << std::endl;
 		f << fmt::key_value("ROOT", env::root) << std::endl;
+		f << fmt::key_value("DOMAIN", env::domain) << std::endl;
+		f << fmt::key_value("HOST", env::host) << std::endl;
 		f << fmt::key_value("PWD", env::pwd) << std::endl;
 		f << fmt::key_value("LANG", env::lang) << std::endl;
 		f << fmt::key_value("SHELL", env::shell) << std::endl;

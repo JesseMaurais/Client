@@ -113,6 +113,52 @@ namespace
 		{
 			if constexpr (sys::posix)
 			{
+				static char name[64];
+				if (sys::fail(gethostname(name, sizeof name)))
+				{
+					sys::perror("gethostname");
+					name[0] = '\0';
+				}
+				return name;
+			}
+			else
+			if constexpr (sys::win32)
+			{
+				return sys::env::get("COMPUTERNAME");
+			}
+		}
+
+	} HOST;
+
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			if constexpr (sys::posix)
+			{
+				static char name[64];
+				if (sys::fail(getdomainname(name, sizeof name)))
+				{
+					sys::perror("getdomainname");
+					name[0] = '\0';
+				}
+				return name;
+			}
+			else
+			if constexpr (sys::win32)
+			{
+				return sys::env::get("USERDOMAIN");
+			}
+		}
+
+	} DOMAIN;
+
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			if constexpr (sys::posix)
+			{
 				return ""; // omit "/" for join operations
 			}
 			else
@@ -263,6 +309,8 @@ namespace env
 	list const& paths = PATH;
 	view const& user = USER;
 	view const& home = HOME;
+	view const& host = HOST;
+	view const& domain = DOMAIN;
 	view const& root = ROOT;
 	view const& pwd = PWD;
 	view const& lang = LANG;
