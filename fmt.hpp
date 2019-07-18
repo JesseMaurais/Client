@@ -1,11 +1,8 @@
 #ifndef fmt_hpp
 #define fmt_hpp
 
-#include <algorithm>
-#include <functional>
-#include <cinttypes>
-#include <cstdlib>
 #include <locale>
+#include <cstdlib>
 #include "str.hpp"
 #include "mb.hpp"
 
@@ -54,11 +51,9 @@ namespace fmt
 		using string_view_span = basic_string_view_span<Char>;
 		using string_view_span_range = basic_string_view_span_range<Char>;
 
-		using div = std::imaxdiv_t;
 		using size = string_size;
 		using size_pair = string_size_pair;
 		using iterator = typename string_view_span::iterator;
-		using reactor = std::function<void(iterator, size)>;
 
 		static constexpr auto null = size {  0  };
 		static constexpr auto npos = string::npos;
@@ -243,16 +238,16 @@ namespace fmt
 		auto divide(string_view u, mask x = space) const
 		/// Count the quotient in $u that are $x and remainder that are not
 		{
-			div n { 0, 0 };
+			size_pair n { 0, 0 };
 			for (auto const w : widen(u))
 			{
 				if (check(w, x))
 				{
-					++ n.quot; 
+					++ n.first; 
 				}
 				else
 				{
-					++ n.rem;
+					++ n.second;
 				}
 			}
 			return n;
@@ -261,13 +256,13 @@ namespace fmt
 		auto rem(string_view u, mask x = space) const
 		/// Count characters in $u that are not $x
 		{
-			return divide(u, x).rem; 
+			return divide(u, x).second; 
 		}
 
 		auto quot(string_view u, mask x = space) const
 		/// Count characters in $u that are $x
 		{
-			return divide(u, x).quot;
+			return divide(u, x).first;
 		}
 
 		bool all_of(string_view u, mask x = space) const
@@ -399,38 +394,6 @@ namespace fmt
 			return s;
 		}
 
-		static void tag(iterator begin, iterator end, string_view u, reactor f)
-		/// Call $f for any in sorted range $[begin, end) that is found in $u
-		{
-			auto it = begin;
-			auto const z = u.size();
-			for (size i = 0, j = 1; j <= z; ++j)
-			{
-				auto const n = j - i;
-				auto const v = u.substr(i, n);
-
-				it = std::lower_bound(it, end, v);
-				if (end == it)
-				{
-					i = j;
-					it = begin;
-					continue;
-				}
-
-				if (it->size() == n)
-				{
-					f(it, i);
-				}
-
-				it = std::upper_bound(it, end, v);
-				if (end == it or it->compare(0, n, v))
-				{
-					i = j;
-					it = begin;
-				}
-			}
-		}
-
 		static auto to_pair(string_view u, string_view v)
 		/// Divide view $u by first occurance of $v
 		{
@@ -527,11 +490,6 @@ namespace fmt
 	inline auto replace(string_view u, string_view v, string_view w)
 	{
 		return lc.replace(u, v, w);
-	}
-
-	inline void tag(string_view_span t, string_view u, cc::reactor r)
-	{
-		return lc.tag(begin(t), end(t), u, r);
 	}
 
 	inline auto to_pair(string_view u, string_view v = "=")

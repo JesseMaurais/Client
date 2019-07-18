@@ -1,5 +1,5 @@
-#ifndef fd_hpp
-#define fd_hpp
+#ifndef fds_hpp
+#define fds_hpp
 
 #include <iostream>
 #include "file.hpp"

@@ -4,6 +4,7 @@
 #include "dbg.hpp"
 #include "int.hpp"
 #include "fmt.hpp"
+#include "tag.hpp"
 #include "del.hpp"
 #include "sgr.hpp"
 #include "xdg.hpp"
