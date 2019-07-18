@@ -90,7 +90,8 @@ namespace
 			fmt::string_view u = sys::env::get("XDG_RUNTIME_DIR");
 			if (empty(u))
 			{
-				u = env::tmpdir;
+				static auto const path = fmt::dir::join({env::tmpdir, "run", env::user});
+				u = path;
 			}
 			return u;
 		}

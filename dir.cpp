@@ -74,7 +74,23 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			return xdg::runtime_dir;
+			constexpr mode_t um = S_IRUSR | S_IWUSR | S_IXUSR;
+			fmt::string_view u = xdg::runtime_dir;
+			const auto s = u.data();
+			
+			if (sys::fail(sys::access(s, F_OK)))
+			{
+				if (sys::fail(sys::mkdir(s, um)))
+				{
+					sys::perror("mkdir", u);
+				}
+			}
+			else
+			if (sys::fail(sys::chmod(s, um)))
+			{
+				sys::perror("chmod", u);
+			}
+			return u;
 		}
 
 	} RUN;
