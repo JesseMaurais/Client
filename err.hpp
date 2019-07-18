@@ -1,9 +1,12 @@
 #ifndef err_hpp
 #define err_hpp
 
+constexpr bool DEBUG =
 #ifdef NDEBUG
+	false;
 # define verify(x) (x)
 #else
+	true;
 # define verify(x) assert(x)
 # include <sstream>
 # include <cstdio>
