@@ -3,20 +3,10 @@
 
 #include "env.hpp"
 #include "fmt.hpp"
+#include "dir.hpp"
 #include "sys.hpp"
 #include "dbg.hpp"
 #include <regex>
-
-namespace
-{
-	fmt::string_view eval(fmt::string_view u)
-	{
-		auto const i = u.find_first_not_of(sys::esc::sh::first);
-		auto const j = u.find_last_of(sys::esc::sh::second);
-		auto const v = u.substr(i, j - i);
-		return sys::env::get(fmt::to_string(v));
-	}
-}
 
 namespace sys::env
 {
@@ -41,21 +31,43 @@ namespace sys::env
 		return put(s);
 	}
 
-	fmt::string eval(fmt::string u)
+	static auto val(fmt::string_view u)
 	{
-		static std::regex x { sys::esc::sh::regex };
-		std::smatch m;
-		fmt::string s;
-		while (std::regex_search(u, m, x))
+		#ifdef _WIN32
 		{
-			s += m.prefix();
-			auto t = m.str();
-			auto v = ::eval(t);
-			s.append(v.data(), v.size());
-			u = m.suffix();
+			assert('%' == u.front());
+			assert('%' == u.back());
+			u = u.substr(1, u.size() - 1);
 		}
-		s.shrink_to_fit();
-		return s;
+		#else
+		{
+			assert('$' == u.front());
+			u = u.substr(1);
+		}
+		#endif
+
+		if (empty(u))
+		{
+			return u;
+		}
+		return get(u);
+	}
+
+	fmt::string value(fmt::string s)
+	{
+		static std::regex x { sys::esc::env };
+		std::smatch m;
+		std::string r;
+		while (std::regex_search(s, m, x))
+		{
+			r += m.prefix();
+			auto t = m.str();
+			auto u = val(t);
+			r.append(u.data(), u.size());
+			s = m.suffix();
+		}
+		r.shrink_to_fit();
+		return r;
 	}
 }
 
@@ -67,7 +79,7 @@ namespace
 		{
 			static thread_local fmt::string_view_vector t;
 			fmt::string_view u = sys::env::get("PATH");
-			t = fmt::split(u, sys::sep::path);
+			t = fmt::path::split(u);
 			return t;
 		}
 
@@ -77,15 +89,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return sys::env::get("USER");
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				return sys::env::get("USERNAME");
 			}
+			#else
+			{
+				return sys::env::get("USER");
+			}
+			#endif
 		}
 
 	} USER;
@@ -94,15 +106,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return sys::env::get("HOME");
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				return sys::env::get("USERPROFILE");
 			}
+			#else
+			{
+				return sys::env::get("HOME");
+			}
+			#endif
 		}
 
 	} HOME;
@@ -157,15 +169,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return ""; // omit "/" for join operations
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				return sys::env::get("SYSTEMDRIVE");
 			}
+			#else
+			{
+				return ""; // omit "/" for join
+			}
+			#endif
 		}
 
 	} ROOT;
@@ -174,15 +186,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return "/root";
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				return sys::env::get("SYSTEMROOT");
 			}
+			#else
+			{
+				return "/root";
+			}
+			#endif
 		}
 
 	} ROOTDIR;
@@ -191,16 +203,16 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return sys::env::get("PWD");
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				static char buf[FILENAME_MAX];
 				return sys::getcwd(buf, sizeof buf);
 			}
+			#else
+			{
+				return sys::env::get("PWD");
+			}
+			#endif
 		}
 
 	} PWD;
@@ -237,15 +249,15 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				if constexpr (sys::posix)
+				#ifdef _WIN32
 				{
-					s = fmt::join({env::root, "tmp"}, sys::sep::dir);
+					s = fmt::dir::join(env::rootdir, "Temp");
 				}
-				else
-				if constexpr (sys::win32)
+				#else
 				{
-					s = fmt::join({env::rootdir, "Temp"}, sys::sep::dir);
+					s = fmt::dir::join(env::root, "tmp");
 				}
+				#endif
 			}
 			return s;
 		}
@@ -256,15 +268,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return sys::env::get("SHELL");
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				return sys::env::get("COMSPEC");
 			}
+			#else
+			{
+				return sys::env::get("SHELL");
+			}
+			#endif
 		}
 
 	} SHELL;
@@ -273,15 +285,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return sys::env::get("PS1");
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				return sys::env::get("PROMPT");
 			}
+			#else
+			{
+				return sys::env::get("PS1");
+			}
+			#endif
 		}
 
 	} PROMPT;
@@ -290,15 +302,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			if constexpr (sys::posix)
-			{
-				return sys::env::get("DESKTOP_SESSION");
-			}
-			else
-			if constexpr (sys::win32)
+			#ifdef _WIN32
 			{
 				return sys::env::get("OS");
 			}
+			#else
+			{
+				return sys::env::get("DESKTOP_SESSION");
+			}
+			#endif
 		}
 
 	} DESKTOP;

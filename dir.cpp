@@ -42,10 +42,10 @@ namespace sys::file
 
 namespace fmt::dir
 {
-	fmt::string join(fmt::string_view_span p)
+	fmt::string impl::join(fmt::string_view_span p)
 	{
 		// todo: check for illegal characters
-		return fmt::join(p, sys::sep::dir);
+		return fmt::lc.join(p, sys::sep::dir);
 	}
 
 	fmt::string_view_vector split(fmt::string_view u)
@@ -56,10 +56,10 @@ namespace fmt::dir
 
 namespace fmt::path
 {
-	fmt::string join(fmt::string_view_span p)
+	fmt::string impl::join(fmt::string_view_span p)
 	{
 		// todo: check for illegal characters
-		return fmt::join(p, sys::sep::path);
+		return fmt::lc.join(p, sys::sep::path);
 	}
 
 	fmt::string_view_vector split(fmt::string_view u)

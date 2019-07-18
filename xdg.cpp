@@ -65,14 +65,14 @@ namespace
 			static fmt::string path;
 			if (empty(path))
 			{
-				fmt::string const menu = fmt::join({xdg::menu_prefix, "applications.menu"});
-				path = fmt::dir::join({xdg::config_home, "menus", menu});
+				auto const menu = fmt::join(xdg::menu_prefix, "applications.menu");
+				path = fmt::dir::join(xdg::config_home, "menus", menu);
 				if (not exists(path))
 				{
 					fmt::string_view_span list = xdg::config_dirs;
 					for (auto const dir : list)
 					{
-						path = fmt::dir::join({dir, menu});
+						path = fmt::dir::join(dir, menu);
 						if (exists(path)) break;
 						path.clear();
 					}
@@ -90,7 +90,7 @@ namespace
 			fmt::string_view u = sys::env::get("XDG_RUNTIME_DIR");
 			if (empty(u))
 			{
-				static auto const path = fmt::dir::join({env::tmpdir, "run", env::user});
+				static auto const path = fmt::dir::join(env::tmpdir, "run", env::user);
 				u = path;
 			}
 			return u;
@@ -108,8 +108,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					fmt::string_view_span const p { env::home, ".local", "share" };
-					s = fmt::dir::join(p);
+					s = fmt::dir::join(env::home, ".local", "share");
 				}
 				u = s;
 			}
@@ -128,8 +127,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					fmt::string_view_span const p { env::home, ".config" };
-					s = fmt::dir::join(p);
+					s = fmt::dir::join(env::home, ".config");
 				}
 				u = s;
 			}
@@ -148,8 +146,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					fmt::string_view_span const p { env::home, ".cache" };
-					s = fmt::dir::join(p);
+					s = fmt::dir::join(env::home, ".cache");
 				}
 				u = s;
 			}
@@ -200,7 +197,7 @@ namespace
 					{
 						auto const appdata = fmt::to_string(sys::env::get("APPDATA"));
 						auto const local = fmt::to_string(sys::env::get("LOCALAPPDATA"));
-						s = fmt::path::join({appdata, local});
+						s = fmt::path::join(appdata, local);
 					}
 					u = s;
 				}
@@ -270,8 +267,7 @@ namespace
 			if (empty(u))
 			{
 				static fmt::string s;
-				fmt::string_view_span const p { env::home, val };
-				s = fmt::dir::join(p);
+				s = fmt::dir::join(env::home, val);
 				u = s;
 			}
 			return u;
@@ -291,7 +287,7 @@ namespace
 			static ini::entry data;
 			if (empty(data))
 			{
-				auto const path = fmt::dir::join({xdg::config_home, "user-dirs.dirs" });
+				auto const path = fmt::dir::join(xdg::config_home, "user-dirs.dirs");
 				std::ifstream in(path);
 				fmt::string line;
 				while (ini::getline(in, line))
@@ -301,7 +297,7 @@ namespace
 					auto const second = line.find_first_of(quote, first);
 					line = line.substr(first, second);
 					auto pair = fmt::to_pair(line);
-					pair.second = sys::env::eval(fmt::to_string(pair.second));
+					pair.second = sys::env::value(fmt::to_string(pair.second));
 					data.emplace(pair);
 				}
 			}

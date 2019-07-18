@@ -164,70 +164,102 @@ namespace
 	// Operating system environment
 	//
 
-	TEST(env_path)
-	{
-		std::string_view const var = sys::env::get("PATH");
-		std::string const val = fmt::path::join(env::paths);
-		ASSERT_EQ(var, val);
-	}
-
-	std::ofstream& outfile()
+	std::ofstream& sysini()
 	{
 		static std::ofstream f { "sys.ini" };
 		return f;
 	}
 
+	auto kv(fmt::string_view key, fmt::string_view value)
+	{
+		return fmt::key_value(key, value) + '\n';
+	}
+
+	TEST(env_path)
+	{
+		auto var = sys::env::get("PATH");
+		auto val = fmt::path::join(env::paths);
+		ASSERT_EQ(var, val);
+
+		#ifdef _WIN32
+		{
+			val = sys::env::value("%PATH%");
+		}
+		#else
+		{
+			val = sys::env::value("$PATH");
+		}
+		#endif
+
+		var = sys::env::get("PATH");
+		ASSERT_EQ(var, val);
+	}
+
 	TEST(env_fake)
 	{
-		auto& f = outfile();
-		f << "[Fake Environment]" << std::endl;
-		f << fmt::key_value("HOME", env::home) << std::endl;
-		f << fmt::key_value("USER", env::user) << std::endl;
-		f << fmt::key_value("ROOT", env::root) << std::endl;
-		f << fmt::key_value("DOMAIN", env::domain) << std::endl;
-		f << fmt::key_value("HOST", env::host) << std::endl;
-		f << fmt::key_value("PWD", env::pwd) << std::endl;
-		f << fmt::key_value("LANG", env::lang) << std::endl;
-		f << fmt::key_value("SHELL", env::shell) << std::endl;
-		f << fmt::key_value("TMPDIR", env::tmpdir) << std::endl;
-		f << fmt::key_value("ROOTDIR", env::rootdir) << std::endl;
-		f << fmt::key_value("DESKTOP", env::desktop) << std::endl;
-		f << fmt::key_value("PROMPT", env::prompt) << std::endl;
+		sysini()
+		<< "[Fake Environment]\n"
+		<< kv("HOME", env::home)
+		<< kv("USER", env::user)
+		<< kv("ROOT", env::root)
+		<< kv("DOMAIN", env::domain)
+		<< kv("HOST", env::host)
+		<< kv("PWD", env::pwd)
+		<< kv("LANG", env::lang)
+		<< kv("SHELL", env::shell)
+		<< kv("TMPDIR", env::tmpdir)
+		<< kv("ROOTDIR", env::rootdir)
+		<< kv("DESKTOP", env::desktop)
+		<< kv("PROMPT", env::prompt)
+		<< std::endl;
+	}
+
+	TEST(env_dir)
+	{
+		sysini()
+		<< "[Common Directores]\n"
+		<< kv("LIB", fmt::dir::join(env::dir::lib))
+		<< kv("SHARE", fmt::dir::join(env::dir::share))
+		<< kv("INCLUDE", fmt::dir::join(env::dir::include))
+		<< std::endl;
 	}
 
 	TEST(xdg_desktop)
 	{
-		auto& f = outfile();
-		f << "[Desktop]" << std::endl;
-		f << fmt::key_value("XDG_CURRENT_DESKTOP", xdg::current_desktop) << std::endl;
-		f << fmt::key_value("XDG_MENU_PREFIX", xdg::menu_prefix) << std::endl;
-		f << fmt::key_value("XDG_APPLICATIONS_MENU", xdg::applications_menu) << std::endl;
+		sysini()
+		<< "[Desktop]\n"
+		<< kv("XDG_CURRENT_DESKTOP", xdg::current_desktop)
+		<< kv("XDG_MENU_PREFIX", xdg::menu_prefix)
+		<< kv("XDG_APPLICATIONS_MENU", xdg::applications_menu)
+		<< std::endl;
 	}
 
 	TEST(xdg_data)
 	{
-		auto& f = outfile();
-		f << "[Data Directories]" << std::endl;
-		f << fmt::key_value("XDG_RUNDTIME_DIR", xdg::runtime_dir) << std::endl;
-		f << fmt::key_value("XDG_DATA_HOME", xdg::data_home) << std::endl;
-		f << fmt::key_value("XDG_CONFIG_HOME", xdg::config_home) << std::endl;
-		f << fmt::key_value("XDG_CACHE_HOME", xdg::cache_home) << std::endl;
-		f << fmt::key_value("XDG_DATA_DIRS", fmt::join(xdg::data_dirs, sys::sep::path)) << std::endl;
-		f << fmt::key_value("XDG_CONFIG_DIRS", fmt::join(xdg::config_dirs, sys::sep::path)) << std::endl;
+		sysini()
+		<< "[Data Directories]\n"
+		<< kv("XDG_RUNDTIME_DIR", xdg::runtime_dir)
+		<< kv("XDG_DATA_HOME", xdg::data_home)
+		<< kv("XDG_CONFIG_HOME", xdg::config_home)
+		<< kv("XDG_CACHE_HOME", xdg::cache_home)
+		<< kv("XDG_DATA_DIRS", fmt::path::join(xdg::data_dirs))
+		<< kv("XDG_CONFIG_DIRS", fmt::path::join(xdg::config_dirs))
+		<< std::endl;
 	}
 
 	TEST(xdg_user)
 	{
-		auto& f = outfile();
-		f << "[User Directories]" << std::endl;
-		f << fmt::key_value("XDG_DESKTOP_DIR", xdg::desktop_dir) << std::endl;
-		f << fmt::key_value("XDG_DOCUMENTS_DIR", xdg::documents_dir) << std::endl;
-		f << fmt::key_value("XDG_DOWNLOAD_DIR", xdg::download_dir) << std::endl;
-		f << fmt::key_value("XDG_MUSIC_DIR", xdg::music_dir) << std::endl;
-		f << fmt::key_value("XDG_PICTURES_DIR", xdg::pictures_dir) << std::endl;
-		f << fmt::key_value("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir) << std::endl;
-		f << fmt::key_value("XDG_TEMPLATES_DIR", xdg::templates_dir) << std::endl;
-		f << fmt::key_value("XDG_VIDEOS_DIR", xdg::videos_dir) << std::endl;
+		sysini()
+		<< "[User Directories]\n"
+		<< kv("XDG_DESKTOP_DIR", xdg::desktop_dir)
+		<< kv("XDG_DOCUMENTS_DIR", xdg::documents_dir)
+		<< kv("XDG_DOWNLOAD_DIR", xdg::download_dir)
+		<< kv("XDG_MUSIC_DIR", xdg::music_dir)
+		<< kv("XDG_PICTURES_DIR", xdg::pictures_dir)
+		<< kv("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir)
+		<< kv("XDG_TEMPLATES_DIR", xdg::templates_dir)
+		<< kv("XDG_VIDEOS_DIR", xdg::videos_dir)
+		<< std::endl;
 	}
 
 	//
@@ -239,8 +271,8 @@ namespace
 
 	TEST(sys_symbol)
 	{
-		sys::dll lib;
-		auto f = lib.sym<int()>("visible");
+		sys::dll self;
+		auto f = self.sym<int()>("visible");
 		ASSERT_NOT_EQ(nullptr, f);
 		ASSERT_EQ(f(), hidden());
 	}

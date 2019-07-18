@@ -20,8 +20,7 @@ namespace sys::file
 	{
 		#ifdef _WIN32
 		{
-			constexpr auto prefix = "\\\\.\\pipe\\";
-			path = fmt::join({ prefix, name });
+			path = fmt::join("\\\\.\\pipe\\", name);
 
 			sys::handle h = CreateNamedPipe
 			(
@@ -46,7 +45,7 @@ namespace sys::file
 		}
 		#else
 		{
-			auto const dir = fmt::dir::join({ ::env::dir::run, ".fifo" });
+			auto const dir = fmt::dir::join(::env::dir::run, ".fifo");
 			auto const s = dir.c_str();
 
 			constexpr mode_t rw = S_IRGRP | S_IWGRP;
@@ -70,9 +69,9 @@ namespace sys::file
 				}
 			}
 
-			path = fmt::dir::join({ dir, name });
+			path = fmt::dir::join(dir, name);
 			auto const ps = path.c_str();
-			if (mkfifo(ps, um | rw))
+			if (sys::fail(mkfifo(ps, um | rw)))
 			{
 				sys::perror("mkfifo", path);
 				path.clear();

@@ -199,10 +199,9 @@ namespace sys
 		constexpr auto share = "dll";
 	}
 
-	namespace esc::sh
+	namespace esc
 	{
-		constexpr auto first = "%", second = "%";
-		constexpr auto regex = "%[A-Z_a-z][A-Z_a-z-1-9]*%";
+		constexpr auto env = "%[A-Z_a-z][A-Z_a-z-1-9]*%";
 	}
 
 	using size_t = unsigned int;
@@ -295,10 +294,9 @@ namespace sys
 		constexpr auto share = "so";
 	}
 
-	namespace esc::sh
+	namespace esc
 	{
-		constexpr auto first = "$", second = "";
-		constexpr auto regex = "\\$[A-Z_][A-Z_0-9]*";
+		constexpr auto env = "\\$[A-Z_][A-Z_0-9]*";
 	}
 
 	using size_t = ::size_t;

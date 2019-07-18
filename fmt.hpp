@@ -2,7 +2,6 @@
 #define fmt_hpp
 
 #include <locale>
-#include <cstdlib>
 #include "str.hpp"
 #include "mb.hpp"
 
@@ -121,7 +120,7 @@ namespace fmt
 		}
 
 		auto skip(Char const* it, Char const* end, mask x = space) const
-		/// Next character after $it but before $end whic is not $x
+		/// Next character after $it but before $end which is not $x
 		{
 			return base::scan_not(x, it, end);
 		}
@@ -477,9 +476,10 @@ namespace fmt
 		return lc.count(u, v);
 	}
 
-	inline auto join(string_view_span t, string_view u = "")
+	template <typename... StringView>
+	inline auto join(StringView const&... args)
 	{
-		return lc.join(t, u);
+		return lc.join({ string_view(args)... }, "");
 	}
 
 	inline auto split(string_view u, string_view v)
@@ -499,7 +499,7 @@ namespace fmt
 
 	inline auto key_value(string_view u, string_view v)
 	{
-		return join({ u, v }, "=");
+		return lc.join({ u, v }, "=");
 	}
 
 	//
