@@ -17,10 +17,8 @@ EXE = $(BIN)$(EXEEXT)
 
 all: $(EXE)
 
-pvsstudio: $(PVS)
-
 clean:
-	$(RM) $(EXE) $(OBJ) $(DEP) $(INL) $(LOG) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp
+	$(RM) $(EXE) $(OBJ) $(DEP) $(SRC:.cpp=.i) $(SRC:.cpp=.log) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp
 
 $(EXE): $(OBJ)
 	$(CXX) $(LDFLAGS) $(OUT)$(EXE) $(OBJ) $(LNK)
