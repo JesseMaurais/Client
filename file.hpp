@@ -42,10 +42,10 @@ namespace sys::file
 			close();
 		}
 
-		int set(int fd_ = -1)
+		int set(int newfd = -1)
 		{
 			int const tmp = fd;
-			fd = fd_;
+			fd = newfd;
 			return tmp;
 		}
 
@@ -81,7 +81,7 @@ namespace sys::file
 
 	protected:
 
-		int fd;
+		int fd = -1;
 	};
 
 	struct pipe

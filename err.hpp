@@ -3,11 +3,11 @@
 
 constexpr bool DEBUG =
 #ifdef NDEBUG
-	false;
 # define verify(x) (x)
+	false;
 #else
-	true;
 # define verify(x) assert(x)
+	true;
 # include <sstream>
 # include <cstdio>
 # include <cassert>
@@ -26,7 +26,7 @@ namespace sys
 {
 	template <typename... Args> void perror(Args... args)
 	{
-		#ifndef NDEBUG
+		if constexpr (DEBUG)
 		{
 			auto s = fmt::error(args...);
 			if (not empty(s))
@@ -34,7 +34,6 @@ namespace sys
 				std::perror(s.c_str());
 			}
 		}
-		#endif
 	}
 }
 
