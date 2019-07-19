@@ -21,8 +21,8 @@ namespace sys
 
 		operator bool() const;
 
-		static dll find(fmt::string_view name);
-		
+		dll find(fmt::string_view name);
+	
 		template <typename S> auto sym(fmt::string_view name) const
 		{
 			S *addr = nullptr;

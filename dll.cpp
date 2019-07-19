@@ -4,7 +4,11 @@
 #include "dll.hpp"
 #include "fmt.hpp"
 #include "dir.hpp"
+#include "err.hpp"
+
+#ifndef NDEBUG
 #include <iostream>
+#endif
 
 #ifdef _WIN32
 # include "dlfcn.c"
@@ -12,16 +16,18 @@
 # include <dlfcn.h>
 #endif
 
-using namespace fmt;
-
-namespace
+namespace sys
 {
-	inline void error(char const* who, char const* what)
+	static void error(fmt::string_view who, fmt::string_view what)
 	{
-		std::cerr << who << ": " << what << std::endl;
+		#ifndef NDEBUG
+		{
+			std::cerr << fmt::error(who, what) << std::endl;
+		}
+		#endif
 	}
 
-	fmt::string expr(fmt::string_view name)
+	static fmt::string expr(fmt::string_view name)
 	{
 		#ifdef _WIN32
 		{
@@ -33,10 +39,7 @@ namespace
 		}
 		#endif
 	}
-}
 
-namespace sys
-{
 	dll::operator bool() const
 	{
 		return RTLD_DEFAULT != tab;
@@ -64,7 +67,7 @@ namespace sys
 		}
 	}
 
-	void *dll::sym(string_view name) const
+	void *dll::sym(fmt::string_view name) const
 	{
 		auto const buf = fmt::to_string(name);
 		auto const s = buf.c_str();
@@ -79,7 +82,7 @@ namespace sys
 		return f;
 	}
 
-	dll dll::find(string_view name)
+	dll dll::find(fmt::string_view name)
 	{
 		fmt::string path;
 		::env::dir::find(::env::dir::share, ::env::dir::regex(expr(name)) | ::env::dir::name(path));

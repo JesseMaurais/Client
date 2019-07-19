@@ -27,7 +27,9 @@
 #define HELLO_LOWER "hello, world!"
 #define DLROW_OLLEH "!dlroW ,olleH"
 
-static_assert(DEBUG, "Compiling unit tests without debug mode.");
+#ifdef NDEBUG
+static_assert("Compiling unit tests without debug mode.");
+#endif
 
 int main(int argc, char **argv)
 {
@@ -269,7 +271,7 @@ namespace
 	static int hidden() { return 42; }
 	dynamic int visible() { return hidden(); }
 
-	TEST(sys_symbol)
+	TEST(sys_dll)
 	{
 		sys::dll self;
 		auto f = self.sym<int()>("visible");
@@ -277,7 +279,7 @@ namespace
 		ASSERT_EQ(f(), hidden());
 	}
 
-	TEST(sys_signal)
+	TEST(sys_sig)
 	{
 		std::vector<int> caught;
 		for (int const n : { SIGINT, SIGFPE, SIGILL })
