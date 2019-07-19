@@ -74,7 +74,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			constexpr mode_t um = S_IRUSR | S_IWUSR | S_IXUSR;
+			constexpr sys::mode_t um = S_IRUSR | S_IWUSR | S_IXUSR;
 			fmt::string_view u = xdg::runtime_dir;
 			const auto s = u.data();
 			

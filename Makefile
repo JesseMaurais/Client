@@ -10,7 +10,6 @@ include .make/Configure.mk
 
 # Common make rules for the project
 
-.PHONY: all clean cppcheck pvsstudio
 .SUFFIXES: .cpp .hpp .obj .o .d .i .log .xml .html .ilk .pdb
 
 EXE = $(BIN)$(EXEEXT)
@@ -29,6 +28,8 @@ $(EXE): $(OBJ)
 .cpp.obj:
 	$(CXX) $(CFLAGS) -c $<
 
-# Generated dependencies
+# Additional features
 
 include .make/Depends.mk
+include .make/Cppcheck.mk
+include .make/PVS.mk

@@ -2,5 +2,5 @@
 RM = del /f
 CP = copy
 MV = move
-MK = mkdir
+MK = md
 EXEEXT = .exe
