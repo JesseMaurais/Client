@@ -20,7 +20,6 @@ ifneq ($(findstring clang, $(CXX)),)
 include .make/Clang.mk
 else
 ifneq ($(findstring g++, $(CXX)),)
-$(warning $(BUGMSG))
 include .make/GCC.mk
 else
 ifneq ($(findstring cl, $(CXX)),)

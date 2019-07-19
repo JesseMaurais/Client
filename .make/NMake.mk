@@ -17,7 +17,6 @@ include .make/CMD.mk
 !if "$(CXX)" != "$(CXX:clang=)"
 include .make/Clang.mk
 !elseif "$(CXX)" != "$(CXX:g++=)"
-!message $(BUGMSG)
 include .make/GCC.mk
 !elseif "$(CXX)" != "$(CXX:cl=)"
 include .make/CL.mk

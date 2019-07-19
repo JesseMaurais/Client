@@ -6,3 +6,5 @@ include .make/NMake.mk
 include .make/GNU.mk
 # \
 !endif
+include .make/Cppcheck.mk
+include .make/PVS.mk
