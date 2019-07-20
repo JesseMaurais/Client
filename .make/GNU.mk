@@ -17,7 +17,7 @@ endif # COMSPEC
 # Guess the compiler used
 
 ifneq ($(findstring clang, $(CXX)),)
-include .make/Clang.mk
+include .make/LLVM.mk
 else
 ifneq ($(findstring g++, $(CXX)),)
 include .make/GCC.mk
@@ -28,14 +28,14 @@ else
 $(warning Cannot determine your compiler)
 endif # CL
 endif # GCC
-endif # Clang
+endif # LLVM
 
 # Compiler commands
 
 CFLAGS += $(DEF) $(FLAGS) $(WARN)
 
 ifdef CA
-CFLAGS += $(ANALYZE)
+CFLAGS += $(ANAL)
 endif
 
 ifdef STD

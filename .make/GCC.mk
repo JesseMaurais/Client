@@ -6,4 +6,3 @@ USESTD = -std=
 DEBUG = -g
 OUT = -o 
 OBJ = $(SRC:.cpp=.o)
-DEP = $(SRC:.cpp=.d)

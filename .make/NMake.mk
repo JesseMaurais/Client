@@ -15,7 +15,7 @@ include .make/CMD.mk
 # Guess the compiler
 
 !if "$(CXX)" != "$(CXX:clang=)"
-include .make/Clang.mk
+include .make/LLVM.mk
 !elseif "$(CXX)" != "$(CXX:g++=)"
 include .make/GCC.mk
 !elseif "$(CXX)" != "$(CXX:cl=)"
@@ -29,7 +29,7 @@ include .make/CL.mk
 CFLAGS = $(CFLAGS) $(DEF) $(FLAGS) $(WARN)
 
 !ifdef CA
-CFLAGS = $(CFLAGS) $(ANALYZE)
+CFLAGS = $(CFLAGS) $(ANAL)
 !endif
 
 !ifdef STD

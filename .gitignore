@@ -13,6 +13,7 @@ test
 *.o
 *.d
 *.i
+*.db
 *.log
 *.xml
 *.html

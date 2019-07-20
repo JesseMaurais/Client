@@ -10,17 +10,15 @@ include .make/Configure.mk
 
 # Common make rules for the project
 
-.SUFFIXES: .cpp .hpp .obj .o .d .i .log .xml .html .ilk .pdb
+.SUFFIXES: .cpp .hpp .obj .o .d .i .log .xml .html .ilk .pdb .db
 
-EXE = $(BIN)$(EXEEXT)
-
-all: $(EXE)
+all: $(BIN)$(EXE)
 
 clean:
-	$(RM) $(EXE) $(OBJ) $(DEP) $(SRC:.cpp=.i) $(SRC:.cpp=.log) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp
+	$(RM) $(BIN)$(EXE) $(OBJ) $(SRC:.cpp=.d)) $(SRC:.cpp=.i) $(SRC:.cpp=.db) $(SRC:.cpp=.log) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp
 
-$(EXE): $(OBJ)
-	$(CXX) $(LDFLAGS) $(OUT)$(EXE) $(OBJ) $(LNK)
+$(BIN)$(EXE): $(OBJ)
+	$(CXX) $(LDFLAGS) $(OUT)$(BIN)$(EXE) $(OBJ) $(LNK)
 
 .cpp.o:
 	$(CXX) $(CFLAGS) -c $<
