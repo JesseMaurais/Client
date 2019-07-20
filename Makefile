@@ -15,7 +15,7 @@ include .make/Configure.mk
 all: $(BIN)$(EXE)
 
 clean:
-	$(RM) $(BIN)$(EXE) $(OBJ) $(SRC:.cpp=.d)) $(SRC:.cpp=.i) $(SRC:.cpp=.db) $(SRC:.cpp=.log) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp
+	$(RM) $(BIN)$(EXE) $(OBJ) $(SRC:.cpp=.d) $(SRC:.cpp=.i) $(SRC:.cpp=.db) $(SRC:.cpp=.log) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp
 
 $(BIN)$(EXE): $(OBJ)
 	$(CXX) $(LDFLAGS) $(OUT)$(BIN)$(EXE) $(OBJ) $(LNK)

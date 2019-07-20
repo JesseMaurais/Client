@@ -9,8 +9,7 @@
 #include "dir.hpp"
 
 #ifdef _WIN32
-# define WIN32_LEAN_AND_MEAN
-# include <windows.h>
+# include "win.hpp"
 #endif
 
 namespace sys::file
@@ -22,7 +21,7 @@ namespace sys::file
 		{
 			path = fmt::join("\\\\.\\pipe\\", name);
 
-			sys::handle h = CreateNamedPipe
+			sys::handle const h = CreateNamedPipe
 			(
 				path.c_str(),
 				PIPE_ACCESS_DUPLEX,
@@ -34,9 +33,9 @@ namespace sys::file
 				nullptr // default security
 			);
 
-			if (nullptr == h)
+			if (sys::win::fail(h))
 			{
-				sys::winerr("CreateNamedPipe");
+				sys::win::perror("CreateNamedPipe", name);
 				path.clear();
 				return;
 			}
@@ -84,15 +83,15 @@ namespace sys::file
 	{
 		#ifdef _WIN32
 		{
-			auto const ptr = _get_osfhandle(fd);
-			auto const h = reinterpret_cast<HANDLE>(ptr);
-			if (h and not ConnectNamedPipe(h, nullptr))
+			auto const h = sys::win::get(fd);
+			bool const ok = not sys::win::fail(h);
+			if (ok and not ConnectNamedPipe(h, nullptr))
 			{
-				sys::winerr("ConnectNamedPipe");
+				sys::win::perror("ConnectNamedPipe");
 				path.clear();
 				return false;
 			}
-			return nullptr != h;
+			return ok;
 		}
 		#else
 		{
@@ -114,11 +113,10 @@ namespace sys::file
 	{
 		#ifdef _WIN32
 		{
-			auto const ptr = _get_osfhandle(fd);
-			auto const h = reinterpret_cast<HANDLE>(ptr);
-			if (h and not DisconnectNamedPipe(h))
+			auto const h = sys::win::get(fd);
+			if (not sys::win::fail(h) and not DisconnectNamedPipe(h))
 			{
-				sys::winerr("DisconnectNamedPipe");
+				sys::win::perror("DisconnectNamedPipe");
 			}
 		}
 		#else

@@ -9,16 +9,15 @@
 #include <signal.h>
 
 #ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+# include "win.hpp"
 #endif
 
 #if __has_include(<processthreadapi.h>)
-#include <processthreadapi.h>
+# include <processthreadapi.h>
 #endif
 
 #if __has_include(<sys/wait.h>)
-#include <sys/wait.h>
+# include <sys/wait.h>
 #endif
 
 namespace sys
@@ -50,43 +49,6 @@ namespace sys
 		return code;
 	}
 
-	int handle::open(int flags)
-	{
-		auto const ptr = reinterpret_cast<intptr_t>(h);
-		int const fd = _open_osfhandle(ptr, flags);
-		h = nullptr;
-		return fd;
-	}
-
-	handle::~handle()
-	{
-		if (h and not CloseHandle(h))
-		{
-			winerr("CloseHandle");
-		}
-	}
-
-	winpipe::winpipe()
-	{
-		SECURITY_ATTRIBUTES sa;
-		ZeroMemory(&sa, sizeof sa);
-		sa.nLength = sizeof sa;
-		sa.bInheritHandle = TRUE;
-
-		ok = CreatePipe
-		(
-			&read.h,
-			&write.h,
-			&sa,
-			BUFSIZ
-		);
-
-		if (not ok)
-		{
-			winerr("CreatePipe");
-		}
-	}
-
 	#endif
 
 
@@ -94,7 +56,7 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			winpipe pair[3];
+			sys::win::pipe pair[3];
 
 			for (int n : { 0, 1, 2 })
 			{
@@ -153,7 +115,7 @@ namespace sys
 				return -1;
 			}
 
-			handle scoped(pi.hThread); // close
+			sys::win::handle scoped(pi.hThread); // close
 
 			for (int n : { 0, 1, 2 })
 			{

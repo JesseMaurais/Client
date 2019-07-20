@@ -7,9 +7,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-#include "os.hpp"
-#include "cc.hpp"
-
 namespace sys
 {
 

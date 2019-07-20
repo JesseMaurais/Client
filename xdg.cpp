@@ -162,15 +162,15 @@ namespace
 			fmt::string_view u = sys::env::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
-				if constexpr (sys::posix)
-				{
-					u = "/usr/local/share/:/usr/share/";
-				}
-				else
-				if constexpr (sys::win32)
+				#ifdef _WIN32
 				{
 					u = sys::env::get("ALLUSERSPROFILE");
 				}
+				#else
+				{
+					u = "/usr/local/share/:/usr/share/";
+				}
+				#endif
 			}
 			return fmt::path::split(u);
 		}
@@ -185,12 +185,7 @@ namespace
 			fmt::string_view u = sys::env::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
-				if constexpr (sys::posix)
-				{
-					u = "/etc/xdg";
-				}
-				else
-				if constexpr (sys::win32)
+				#ifdef _WIN32
 				{
 					static fmt::string s;
 					if (empty(s))
@@ -201,6 +196,11 @@ namespace
 					}
 					u = s;
 				}
+				#else
+				{
+					u = "/etc/xdg";
+				}
+				#endif
 			}
 			t = fmt::path::split(u);
 			return t;

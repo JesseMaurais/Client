@@ -7,6 +7,7 @@
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "xdg.hpp"
+#include "os.hpp"
 #include <regex>
 
 #ifdef _WIN32

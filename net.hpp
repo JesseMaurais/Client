@@ -48,28 +48,34 @@ namespace sys::net
 	constexpr auto recv = ::recv;
 	constexpr auto recvfrom = ::recvfrom;
 
-	struct wsadata : ::WSADATA
+	namespace win
 	{
-		wsadata(WORD version)
+		struct data : ::WSADATA
 		{
-			if (error = ::WSAStartup(version, this); error)
+			data(WORD version)
 			{
-				::sys::winerr("WSAStartup");
+				if (error = ::WSAStartup(version, this); error)
+				{
+					::sys::winerr("WSAStartup");
+				}
 			}
-		}
-		~wsadata()
-		{
-			if (not error and ::WSACleanup())
+
+			~data()
 			{
-				::sys::winerr("WSACleanup");
+				if (not error and ::WSACleanup())
+				{
+					::sys::winerr("WSACleanup");
+				}
 			}
-		}
-		operator bool() const
-		{
-			return not error;
-		}
-		int error;
-	};
+
+			operator bool() const
+			{
+				return not error;
+			}
+
+			int error;
+		};
+	}
 
 } // sys::net
 
