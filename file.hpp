@@ -176,8 +176,8 @@ namespace sys::file
 			return file[n];
 		}
 
-		bool execute(char const** argv);
-		void terminate();
+		bool run(char const** argv);
+		void kill();
 		int wait();
 
 		void close(int n)

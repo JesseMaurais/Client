@@ -122,25 +122,7 @@ constexpr bool xopen_unix =
 #endif
 	;
 
-// Win32-like macro for POSIX
-
-constexpr bool posix =
-#if defined(__POSIX__) || defined(__XOPEN__) || defined(__UNIX__) || defined(__BSD__) || defined(__LINUX__)
-# undef _POSIX
-# define _POSIX
-	true
-#else
-	false
-#endif
-	;
-
 }
-
-// Must have one of these
-
-#if !defined(_WIN32) && !defined(_POSIX)
-# error Cannot determine operating system interface.
-#endif
 
 //
 // Include system interface
@@ -246,23 +228,6 @@ namespace sys
 
 	unsigned long winerr(char const *prefix); // perror for GetLastError
 
-	struct handle
-	{
-		void* h;
-		int open(int flags);
-		operator void*() const { return h; }
-		handle(void* p = nullptr) : h(p) { }
-		~handle();
-	};
-
-	struct winpipe
-	{
-		winpipe();
-		bool ok;
-		handle read;
-		handle write;
-	};
-
 } // namespace sys
 
 
@@ -359,6 +324,11 @@ namespace sys
 
 	struct stat : stat_t
 	{
+		stat(int fd)
+		{
+			ok = sys::fstat(fd, this);
+		}
+
 		stat(char const* path)
 		{
 			ok = sys::stat(path, this);
@@ -396,8 +366,8 @@ namespace sys
 		}
 	};
 
-	pid_t exec(int fd[3], char const** argv);
-	void term(pid_t pid);
+	pid_t run(int fd[3], char const** argv);
+	void kill(pid_t pid);
 	int wait(pid_t pid);
 }
 

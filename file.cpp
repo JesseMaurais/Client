@@ -34,11 +34,6 @@ namespace sys::file
 		{
 			flags |= O_TRUNC;
 		}
-		#if defined(__LINUX__)
-		{
-			flags |= O_DIRECT;
-		}
-		#endif
 		return flags;
 	}
 
@@ -47,7 +42,7 @@ namespace sys::file
 	void descriptor::open(char const* path, openmode mode)
 	{
 		fd = sys::open(path, convert(mode), 0);
-		if (fail(fd))
+		if (sys::fail(fd))
 		{
 			sys::perror("open");
 		}
@@ -56,7 +51,7 @@ namespace sys::file
 	ssize_t descriptor::write(const void* buffer, size_t size) const
 	{
 		ssize_t const n = sys::write(fd, buffer, size);
-		if (fail(n))
+		if (sys::fail(n))
 		{
 			sys::perror("write", fd, size);
 		}
@@ -66,7 +61,7 @@ namespace sys::file
 	ssize_t descriptor::read(void* buffer, size_t size) const
 	{
 		ssize_t const n = sys::read(fd, buffer, size);
-		if (fail(n))
+		if (sys::fail(n))
 		{
 			sys::perror("read", fd, size);
 		}
@@ -75,9 +70,9 @@ namespace sys::file
 
 	void descriptor::close()
 	{
-		if (not fail(fd))
+		if (not sys::fail(fd))
 		{
-			if (fail(sys::close(fd)))
+			if (sys::fail(sys::close(fd)))
 			{
 				sys::perror("close", fd);
 			}
@@ -88,30 +83,33 @@ namespace sys::file
 	pipe::pipe()
 	{
 		int fd[2];
-		if (fail(sys::pipe(fd)))
+		if (sys::fail(sys::pipe(fd)))
 		{
 			sys::perror("pipe");
 		}
 		else set(fd);
 	}
 
-	bool process::execute(char const** argv)
+	bool process::run(char const** argv)
 	{
 		int fd[3];
-		pid = sys::exec(fd, argv);
-		bool const ok = not fail(pid);
+		pid = sys::run(fd, argv);
+		bool const ok = not sys::fail(pid);
 		if (ok) set(fd);
 		return ok;
 	}
 
-	void process::terminate()
+	void process::kill()
 	{
-		if (not fail(pid))
+		if (not sys::fail(pid))
 		{
-			sys::term(pid);
+			sys::kill(pid);
 			for (int n : { 0, 1, 2 })
 			{
-				if (file[n]) file[n].close();
+				if (file[n])
+				{
+					file[n].close();
+				}
 			}
 			pid = -1;
 		}

@@ -34,16 +34,16 @@ namespace sys::io
 			file.set(fd);
 		}
 
-		bool execute(arguments args)
+		bool run(arguments args)
 		{
 			std::vector<char const*> argv(args);
 			argv.push_back(nullptr); // terminator
-			return file.execute(argv.data());
+			return file.run(argv.data());
 		}
 
-		void terminate()
+		void kill()
 		{
-			file.terminate();
+			file.kill();
 		}
 
 		void close(int n)
@@ -106,7 +106,7 @@ namespace sys::io
 			basic_pstream(arguments args)
 			: basic_pstream()
 			{
-				this->execute(args);
+				this->run(args);
 			}
 		};
 	}

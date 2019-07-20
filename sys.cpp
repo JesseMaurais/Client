@@ -5,19 +5,14 @@
 #include "env.hpp"
 #include "err.hpp"
 #include "file.hpp"
-#include <iostream>
-#include <signal.h>
 
 #ifdef _WIN32
 # include "win.hpp"
-#endif
-
-#if __has_include(<processthreadapi.h>)
 # include <processthreadapi.h>
-#endif
-
-#if __has_include(<sys/wait.h>)
+# include <iostream>
+#else
 # include <sys/wait.h>
+# include <signal.h>
 #endif
 
 namespace sys
@@ -52,7 +47,7 @@ namespace sys
 	#endif
 
 
-	pid_t exec(int fd[3], char const**argv)
+	pid_t run(int fd[3], char const**argv)
 	{
 		#ifdef _WIN32
 		{
@@ -65,7 +60,7 @@ namespace sys
 					return -1;
 				}
 
-				HANDLE h = n ? pair[n].read.h : pair[n].write.h;
+				auto const h = n ? pair[n].read.h : pair[n].write.h;
 
 				if (not SetHandleInformation(h, HANDLE_FLAG_INHERIT, false))
 				{
@@ -111,15 +106,15 @@ namespace sys
 
 			if (not ok)
 			{
-				winerr("CreateProcess");
+				sys::winerr("CreateProcess");
 				return -1;
 			}
 
-			sys::win::handle scoped(pi.hThread); // close
+			sys::win::handle const closed(pi.hThread);
 
 			for (int n : { 0, 1, 2 })
 			{
-				fd[n] = n ? pair[n].read.open(_O_RDONLY) : pair[n].write.open(_O_WRONLY);
+				fd[n] = n ? pair[n].read.open(O_RDONLY) : pair[n].write.open(O_WRONLY);
 			}
 
 			return pi.dwProcessId;
@@ -136,7 +131,7 @@ namespace sys
 			pid_t const pid = fork();
 			if (pid)
 			{
-				if (fail(pid))
+				if (sys::fail(pid))
 				{
 					perror("fork");
 				}
@@ -151,7 +146,7 @@ namespace sys
 			{
 				int k = pair[i][0 != i].get();
 
-				if (fail(close(i)) or fail(dup2(k, i)))
+				if (sys::fail(close(i)) or sys::fail(dup2(k, i)))
 				{
 					std::exit(EXIT_FAILURE);
 				}
@@ -160,7 +155,7 @@ namespace sys
 				{
 					k = pair[i][j].set();
 
-					if (fail(close(k)))
+					if (sys::fail(close(k)))
 					{
 						std::exit(EXIT_FAILURE);
 					}
@@ -172,30 +167,30 @@ namespace sys
 			args.push_back(nullptr);
 
 			int const res = execvp(args.front(), args.data());
-			perror("execvp");
+			sys::perror("execvp", args.front());
 			std::exit(res);
 		}
 		#endif
 	}
 
-	void term(pid_t pid)
+	void kill(pid_t pid)
 	{
 		#ifdef _WIN32
 		{
-			handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-			if (nullptr == h)
+			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+			if (sys::win::fail(h))
 			{
-				winerr("OpenProcess");
+				sys::winerr("OpenProcess");
 			}
 			else
 			if (not TerminateProcess(h, 0))
 			{
-				winerr("TerminateProcess");
+				sys::winerr("TerminateProcess");
 			}
 		}
 		#else
 		{
-			if (not fail(pid) and fail(kill(pid, SIGTERM)))
+			if (not sys::fail(pid) and sys::fail(::kill(pid, SIGTERM)))
 			{
 				sys::perror("kill", pid);
 			}
@@ -207,9 +202,9 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			DWORD code = ~DWORD{0};
+			DWORD code = static_cast<DWORD>(-1);
 			handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-			if (nullptr == h)
+			if (sys::win::fail(h))
 			{
 				winerr("OpenProcess");
 			}
@@ -217,15 +212,15 @@ namespace sys
 			{
 				if (WaitForSingleObject(h, INFINITE) == WAIT_FAILED)
 				{
-					winerr("WaitForSingleObject");
+					sys::winerr("WaitForSingleObject");
 				}
 				else
 				if (not GetExitCodeProcess(h, &code))
 				{
-					winerr("GetExitCodeProcess");
+					sys::winerr("GetExitCodeProcess");
 				}
 			}
-			return code;
+			return static_cast<int>(code);
 		}
 		#else
 		{
@@ -234,9 +229,9 @@ namespace sys
 			do
 			{
 				pid = waitpid(parent, &status, 0);
-				if (fail(pid))
+				if (sys::fail(pid))
 				{
-					perror("waitpid");
+					sys::perror("waitpid");
 				}
 			}
 			while (pid != parent);

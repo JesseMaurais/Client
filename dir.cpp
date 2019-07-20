@@ -127,7 +127,6 @@ namespace
 				return sys::env::get("SHLIB_PATH");
 			}
 			else
-			if constexpr (sys::posix)
 			{
 				return sys::env::get("LD_LIBRARY_PATH");
 			}
