@@ -29,7 +29,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			fmt::string_view u = sys::env::get("XDG_CURRENT_DESKTOP");
+			auto u = sys::env::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
 			{
 				u = env::desktop;
@@ -43,7 +43,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			fmt::string_view u = sys::env::get("XDG_MENU_PREFIX");
+			auto u = sys::env::get("XDG_MENU_PREFIX");
 			if (empty(u))
 			{
 				u = xdg::current_desktop;
@@ -87,7 +87,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			fmt::string_view u = sys::env::get("XDG_RUNTIME_DIR");
+			auto u = sys::env::get("XDG_RUNTIME_DIR");
 			if (empty(u))
 			{
 				static auto const path = fmt::dir::join(env::tmpdir, "run", env::user);
@@ -102,7 +102,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			fmt::string_view u = sys::env::get("XDG_DATA_HOME");
+			auto u = sys::env::get("XDG_DATA_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -121,7 +121,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			fmt::string_view u = sys::env::get("XDG_CONFIG_HOME");
+			auto u = sys::env::get("XDG_CONFIG_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -140,7 +140,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			fmt::string_view u = sys::env::get("XDG_CACHE_HOME");
+			auto u = sys::env::get("XDG_CACHE_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -159,7 +159,7 @@ namespace
 	{
 		operator fmt::string_view_span() const final
 		{
-			fmt::string_view u = sys::env::get("XDG_DATA_DIRS");
+			auto u = sys::env::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
 				#ifdef _WIN32
@@ -182,7 +182,7 @@ namespace
 		operator fmt::string_view_span() const final
 		{
 			static fmt::string_view_vector t;
-			fmt::string_view u = sys::env::get("XDG_CONFIG_DIRS");
+			auto u = sys::env::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
 				#ifdef _WIN32
@@ -221,7 +221,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			fmt::string_view u = sys::env::get(var);
+			auto u = sys::env::get(var);
 			if (empty(u))
 			{
 				u = cached();

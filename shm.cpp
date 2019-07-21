@@ -1,19 +1,20 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "mem.hpp"
-#include "err.hpp"
+#include "shm.hpp"
 #include "sys.hpp"
+#include "err.hpp"
 
 #ifdef _WIN32
 # include "win.hpp"
+# pragma comment(lib, "user32.lib")
 #else
 # include <sys/mman.h>
 #endif
 
 namespace sys::file
 {
-	memory::memory(int fd, ssize_t size, size_t off, int mode, int type)
+	void open(int fd, ssize_t size, size_t off, int mode, int type)
 	{
 		if (size < 0)
 		{
@@ -23,49 +24,48 @@ namespace sys::file
 				sys::perror("fstat");
 				return;
 			}
-			length = st.st_size;
+			size = st.st_size;
 		}
-		else length = size;
 
 		#ifdef _WIN32
 		{
-			DWORD access = 0;
-			DWORD protect = 0;
+			DWORD flags = 0;
+			DWORD prot = 0;
 
 			if (mode & execute)
 			{
-				access |= FILE_MAP_EXECUTE;
+				flags |= FILE_MAP_EXECUTE;
 
 				if (mode & write)
 				{
-					protect = PAGE_EXECUTE_READWRITE;
-					access |= FILE_MAP_WRITE;
+					prot = PAGE_EXECUTE_READWRITE;
+					flags |= FILE_MAP_WRITE;
 				}
 				else
 				{
-					protect = PAGE_EXECUTE_READ;
+					prot = PAGE_EXECUTE_READ;
 				}
 
 				if (mode & read)
 				{
-					access |= FILE_MAP_READ;
+					flags |= FILE_MAP_READ;
 				}
 			}
 			else
 			{
 				if (mode & write)
 				{
-					protect = PAGE_READWRITE;
-					access |= FILE_MAP_WRITE;
+					prot = PAGE_READWRITE;
+					flags |= FILE_MAP_WRITE;
 				}
 				else
 				{
-					protect = PAGE_READONLY;
+					prot = PAGE_READONLY;
 				}
 
 				if (mode & read)
 				{
-					access |= FILE_MAP_READ;
+					flags |= FILE_MAP_READ;
 				}
 			}
 
@@ -76,7 +76,7 @@ namespace sys::file
 			(
 				sys::win::get(fd),
 				nullptr,
-				protect,
+				prot,
 				hi,
 				lo,
 				nullptr
@@ -88,7 +88,7 @@ namespace sys::file
 				return;
 			}
 
-			address = MapViewOfFile(h, access, hi, lo, length);
+			address = MapViewOfFile(h, flags, hi, lo, size);
 			if (nullptr == address)
 			{
 				sys::winerr("MapViewOfFile");
@@ -107,7 +107,7 @@ namespace sys::file
 			if (type & privy) flags |= MAP_PRIVATE;
 			if (type & fixed) flags |= MAP_FIXED;
 
-			address = mmap(nullptr, length, prot, flags, fd, off);
+			address = mmap(nullptr, size, prot, flags, fd, off);
 			if (MAP_FAILED == address)
 			{
 				sys::perror("mmap");
@@ -116,9 +116,11 @@ namespace sys::file
 			}
 		}
 		#endif
+
+		length = size;
 	}
 
-	memory::~memory()
+	void memory::close()
 	{
 		if (nullptr != address)
 		{
@@ -126,14 +128,23 @@ namespace sys::file
 			{
 				if (not UnmapViewOfFile(address))
 				{
-					sys::winerr("UnmapViewOfFile");
+					sys::win:perror("UnmapViewOfFile", path);
 				}
 			}
 			#else
 			{
 				if (sys::fail(munmap(address, length)))
 				{
-					sys::perror("munmap");
+					sys::perror("munmap", path);
+				}
+
+				if (not empty(path))
+				{
+					auto const s = path.c_str();
+					if (sys::fail(shm_unlink(s)))
+					{
+						sys::perror("shm_unlink", path);
+					}
 				}
 			}
 			#endif

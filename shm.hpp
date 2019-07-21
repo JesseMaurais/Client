@@ -1,5 +1,5 @@
-#ifndef mem_hpp
-#define mem_hpp
+#ifndef shm_hpp
+#define shm_hpp
 
 #include "file.hpp"
 #include "str.hpp"
@@ -9,11 +9,17 @@ namespace sys::file
 {
 	struct memory
 	{
-		enum { none = 0, read = 1, write = 2, execute = 4 };
+		enum { none = 0, read = 1, write = 2, run = 4 };
 		enum { share = 1, privy = 2, fixed = 4 };
 
-		memory(int fd, ssize_t size = -1, size_t offset = 0, int mode = read, int flags = share);
-		~memory();
+		bool open(fmt::string_view name, ssize_t size = -1, size_t off = 0, int mode = read | write, int type = share) 
+		bool open(int fd, ssize_t size = -1, size_t off = 0, int mode = read | write, int type = share);
+		void close();
+
+		~memory()
+		{
+			close();
+		}
 
 		void* data()
 		{
@@ -30,10 +36,16 @@ namespace sys::file
 			return length;
 		}
 
+		fmt::string_view name() const
+		{
+			return path;
+		}
+
 	private:
-		
+
 		void* address = nullptr;
 		size_t length = 0;
+		fmt::string path;
 	};
 
 	template

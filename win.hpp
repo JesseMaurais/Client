@@ -31,13 +31,18 @@ namespace sys::win
 		return _open_osfhandle(iptr, flags);
 	}
 
+	namespace impl
+	{
+		void perror(char const* prefix);
+	}
+
 	template <typename... Args>
 	inline void perror(Args... args)
 	{
 		#ifndef NDEBUG
 		{
 			auto const s = ftm::error(args...);
-			winerr(s.c_str());
+			impl::perror(s.c_str());
 		}
 		#endif
 	}
@@ -85,6 +90,7 @@ namespace sys::win
 	};
 
 	using security_attributes = sized<SECURITY_ATTRIBUTES, SECURITY_ATTRIBUTES::nLength>;
+	using startup_info = sized<STARTUPINFO, STARTUPINFO::cb>;
 
 	class pipe
 	{

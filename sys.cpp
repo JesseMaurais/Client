@@ -46,7 +46,6 @@ namespace sys
 
 	#endif
 
-
 	pid_t run(int fd[3], char const**argv)
 	{
 		#ifdef _WIN32
