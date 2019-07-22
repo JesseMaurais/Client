@@ -2,30 +2,60 @@
 #define file_hpp
 
 #include <cstddef>
-#include <ios>
+#include <cstdint>
+#include <initializer_list>
 
 namespace sys::file
 {
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
-	using openmode = std::ios_base::openmode;
-	constexpr openmode
-		app   = std::ios_base::app,
-		bin   = std::ios_base::binary,
-		in    = std::ios_base::in,
-		out   = std::ios_base::out,
-		trunc = std::ios_base::trunc,
-		ate   = std::ios_base::ate,
-		io    = std::ios_base::in | std::ios_base::out;
-
-	int convert(openmode); // C++ to POSIX
 
 	enum mode : int
 	{
-		none = 0, ok = 1, read = 2, write = 4, run = 8
+		run    = 1 << 0,
+		write  = 1 << 1,
+		read   = 1 << 2,
+		extant = 1 << 3,
+		only   = 1 << 4,
+		erase  = 1 << 5,
+		append = 1 << 6,
+		text   = 1 << 7,
+		binary = 1 << 8,
+	};
+
+	constexpr int owner(mode bit)
+	{
+		return (bit & 07) << 6;
+	}
+
+	constexpr int group(mode bit)
+	{
+		return (bit & 07) << 3;
+	}
+
+	constexpr int other(mode bit)
+	{
+		return (bit & 07) << 0;
+	}
+
+	enum permit : int
+	{
+		owner_x = owner(run),
+		owner_w = owner(write),
+		owner_r = owner(read),
+
+		group_x = group(run),
+		group_w = group(write),
+		group_r = group(read),
+
+		other_x = other(run),
+		other_w = other(write),
+		other_r = other(read),
 	};
 
 	int convert(mode);
+	int openmode(mode);
+	int convert(permit);
 
 	template <typename T>
 	constexpr bool fail(T const value)
@@ -77,7 +107,7 @@ namespace sys::file
 			return read(static_cast<void*>(buffer), size);
 		}
 
-		void open(char const* path, openmode mode);
+		void open(char const* path, mode);
 		void close();
 
 	private:

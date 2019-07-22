@@ -8,7 +8,7 @@ namespace sys::file
 {
 	struct fifo : descriptor
 	{
-		fifo(fmt::string_view name, openmode mode = in);
+		fifo(fmt::string_view name, mode mask = sys::file::read);
 		~fifo();
 
 		operator fmt::string_view() const

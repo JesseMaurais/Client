@@ -7,66 +7,130 @@
 
 namespace sys::file
 {
-	int convert(openmode mode)
+	int openmode(mode bit)
 	{
 		int flags = 0;
-		if (mode & in and mode & out)
+
+		if (bit & read and bit & write)
 		{
 			flags |= O_RDWR;
 		}
-		else if (mode & out)
+		else 
+		if (bit & write)
 		{
 			flags |= O_WRONLY;
 		}
-		else if (mode & in)
+		else 
+		if (bit & read)
 		{
 			flags |= O_RDONLY;
 		}
-		if (mode & bin)
+
+		if (bit & text)
+		{
+			flags |= O_TEXT;
+		}
+		else
+		if (bit & binary)
 		{
 			flags |= O_BINARY;
 		}
-		if (mode & app)
+
+		if (bit & append)
 		{
 			flags |= O_APPEND;
 		}
-		if (mode & sys::file::trunc)
+
+		if (bit & erase)
 		{
 			flags |= O_TRUNC;
 		}
+
+		if (bit & only)
+		{
+			flags |= O_EXCL;
+		}
+
+		if (~bit & extant)
+		{
+			flags |= O_CREAT;
+		}
+
 		return flags;
 	}
 
 	int convert(mode bit)
 	{
-		int mask = 0;
-		if (bit & mode::ok)
+		int flags = 0;
+		if (bit & extant)
 		{
-			mask |= F_OK;
+			flags |= F_OK;
 		}
-		if (bit & mode::run)
+		if (bit & run)
 		{
-			mask |= X_OK;
+			flags |= X_OK;
 		}
-		if (bit & mode::read)
+		if (bit & read)
 		{
-			mask |= R_OK;
+			flags |= R_OK;
 		}
-		if (bit & mode::write)
+		if (bit & write)
 		{
-			mask |= W_OK;
+			flags |= W_OK;
 		}
-		return mask;
+		return flags;
+	}
+
+	int convert(permit bit)
+	{
+		int flags = 0;
+		if (bit & owner_x)
+		{
+			flags |= S_IXUSR;
+		}
+		if (bit & owner_w)
+		{
+			flags |= S_IWUSR;
+		}
+		if (bit & owner_r)
+		{
+			flags |= S_IRUSR;
+		}
+		if (bit & group_x)
+		{
+			flags |= S_IXGRP;
+		}
+		if (bit & group_w)
+		{
+			flags |= S_IWGRP;
+		}
+		if (bit & group_r)
+		{
+			flags |= S_IRGRP;
+		}
+		if (bit & other_x)
+		{
+			flags |= S_IXOTH;
+		}
+		if (bit & other_w)
+		{
+			flags |= S_IWOTH;
+		}
+		if (bit & other_r)
+		{
+			flags |= S_IROTH;
+		}
+		return flags;
 	}
 
 	size_t bufsiz = BUFSIZ;
 
-	void descriptor::open(char const* path, openmode mode)
+	void descriptor::open(char const* path, mode mask)
 	{
-		fd = sys::open(path, convert(mode), 0);
+		fd = sys::open(path, convert(mask), 0);
 		if (sys::fail(fd))
 		{
-			sys::perror("open");
+			sys::perror("open", path, mask);
 		}
 	}
 

@@ -13,7 +13,7 @@
 
 namespace sys::file
 {
-	bool memory::open(char const* name, int fd, void* ptr, ssize_t sz, size_t off, int mode, int type)
+	bool memory::open(char const* name, int fd, ssize_t sz, size_t off, int mode, int type, void* ptr)
 	{
 		assert(sys::fail(fd) != (nullptr == name));
 
@@ -108,7 +108,7 @@ namespace sys::file
 					}
 					else
 					{
-						oflags |= O_RONLY;
+						oflags |= O_RDONLY;
 					}
 				}
 				else
@@ -120,7 +120,7 @@ namespace sys::file
 				}
 
 				sys::mode const um;
-				fd = shm_open(name, oflag, um);
+				fd = shm_open(name, oflags, um);
 				if (sys::fail(fd))
 				{
 					sys::perror("shm_open", name);

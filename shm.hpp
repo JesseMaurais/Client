@@ -3,7 +3,6 @@
 
 #include "file.hpp"
 #include "str.hpp"
-#include <memory>
 
 namespace sys::file
 {
@@ -12,15 +11,14 @@ namespace sys::file
 		enum { none = 0, read = 1, write = 2, run = 4 };
 		enum { share = 1, privy = 2, fixed = 4 };
 
-		bool open(fmt::string_view name, ssize_t size = -1, size_t off = 0, int mode = read, int type = share)
+		bool open(char const* name, ssize_t sz = -1, size_t off = 0, int mode = read, int type = share, void* ptr = nullptr)
 		{
-			path = name;
-			return open(path.c_str(), -1, size, off, mode, type);
+			return open(name, -1, sz, off, mode, type, ptr);
 		}
 
-		bool open(int fd, ssize_t size = -1, size_t off = 0, int mode = read, int type = share)
+		bool open(int fd, ssize_t sz = -1, size_t off = 0, int mode = read, int type = share, void* ptr = nullptr)
 		{
-			return open(nullptr, fd, size, off, mode, type);
+			return open(nullptr, fd, sz, off, mode, type, ptr);
 		}
 
 		bool close();
@@ -52,7 +50,7 @@ namespace sys::file
 
 	private:
 
-		void open(char const* name, int fd, ssize_t sz, size_t off, int mode, int type);
+		bool open(char const* name, int fd, ssize_t sz, size_t off, int mode, int type, void* ptr);
 
 		void* address = nullptr;
 		size_t length = 0;
@@ -72,9 +70,9 @@ namespace sys::file
 
 		operator string_view() const
 		{
-			auto const addr = reinterpret_cast<Char const*>(data());
-			auto const len = size() / sizeof (Char);
-			return string_view(addr, len);
+			auto const address = reinterpret_cast<Char const*>(data());
+			auto const length = size() / sizeof (Char);
+			return string_view(address, length);
 		}
 	};
 

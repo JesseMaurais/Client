@@ -197,7 +197,7 @@ namespace
 		ASSERT_EQ(var, val);
 	}
 
-	TEST(env_fake)
+	TEST(env_vars)
 	{
 		sysini()
 		<< "[Fake Environment]\n"
@@ -301,7 +301,7 @@ namespace
 	// ANSI escape sequence
 	//
 
-	TEST(ansi_params)
+	TEST(ios_params)
 	{
 		std::ostringstream ss;
 		ss << sgr::params<1, 2, 3, 4>;
@@ -309,7 +309,7 @@ namespace
 		ASSERT_EQ(s, "1;2;3;4");
 	}
 
-	TEST(ansi_fg)
+	TEST(ios_fg)
 	{
 		std::ostringstream ss;
 		ss << sgr::fg_green << "GREEN" << sgr::fg_off;
@@ -334,7 +334,7 @@ namespace
 	TEST(ipc_map)
 	{
 		sys::file::descriptor file;
-		file.open(__FILE__, sys::file::in);
+		file.open(__FILE__, sys::file::read);
 		sys::file::view map;
 		ASSERT(not map.open(file.get()));
 		fmt::string_view const view = map;

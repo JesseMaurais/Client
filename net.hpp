@@ -2,6 +2,7 @@
 #define net_hpp
 
 #include "sys.hpp"
+#include <cstdio>
 
 #ifdef _WIN32
 
