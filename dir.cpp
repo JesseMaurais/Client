@@ -4,9 +4,9 @@
 #include "dir.hpp"
 #include "err.hpp"
 #include "fmt.hpp"
-#include "sys.hpp"
 #include "ptr.hpp"
 #include "xdg.hpp"
+#include "sys.hpp"
 #include "os.hpp"
 #include <regex>
 
@@ -15,31 +15,6 @@
 #else
 # include <dirent.h>
 #endif
-
-namespace sys::file
-{
-	int convert(mode bit)
-	{
-		int mask = 0;
-		if (bit & mode::ok)
-		{
-			mask |= F_OK;
-		}
-		if (bit & mode::run)
-		{
-			mask |= X_OK;
-		}
-		if (bit & mode::read)
-		{
-			mask |= R_OK;
-		}
-		if (bit & mode::write)
-		{
-			mask |= W_OK;
-		}
-		return mask;
-	}
-}
 
 namespace fmt::dir
 {

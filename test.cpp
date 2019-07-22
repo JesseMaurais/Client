@@ -13,7 +13,7 @@
 #include "sig.hpp"
 #include "dir.hpp"
 #include "dll.hpp"
-#include "mem.hpp"
+#include "shm.hpp"
 #include "fifo.hpp"
 #include "pstream.hpp"
 #include <iostream>
@@ -331,15 +331,16 @@ namespace
 		ASSERT_EQ(s, DLROW_OLLEH);
 	}
 
-	TEST(ipc_mem)
+	TEST(ipc_map)
 	{
 		sys::file::descriptor file;
 		file.open(__FILE__, sys::file::in);
-		sys::file::view map(file.get());
-
+		sys::file::view map;
+		ASSERT(not map.open(file.get()));
 		fmt::string_view const view = map;
 		auto pos = view.find("Self referencing find.");
 		ASSERT_NOT_EQ(pos, fmt::string_view::npos);
+		ASSERT(not map.close());
 	}
 }
 

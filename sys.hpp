@@ -322,8 +322,12 @@ namespace sys
 		return invalid == value;
 	}
 
-	struct stat : stat_t
+	class stat : public stat_t
 	{
+		int ok;
+
+	public:
+
 		stat(int fd)
 		{
 			ok = sys::fstat(fd, this);
@@ -334,15 +338,16 @@ namespace sys
 			ok = sys::stat(path, this);
 		}
 
-		operator bool() const
+		operator int() const
 		{
-			return not fail(ok);
+			return ok;
 		}
-
-	private:
-
-		int ok;
 	};
+
+	inline bool fail(class stat const& st)
+	{
+			return fail((int) st);
+	}
 
 	class mode
 	{

@@ -2,19 +2,10 @@
 #define dir_hpp
 
 #include "env.hpp"
+#include "file.hpp"
 #include <functional>
 
 struct dirent;
-
-namespace sys::file
-{
-	enum mode : int
-	{
-		ok = 1, read = 2, write = 4, run = 8
-	};
-
-	int convert(mode);
-}
 
 namespace fmt::path
 {

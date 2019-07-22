@@ -9,7 +9,6 @@ namespace sys::file
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
 	using openmode = std::ios_base::openmode;
-
 	constexpr openmode
 		app   = std::ios_base::app,
 		bin   = std::ios_base::binary,
@@ -20,6 +19,13 @@ namespace sys::file
 		io    = std::ios_base::in | std::ios_base::out;
 
 	int convert(openmode); // C++ to POSIX
+
+	enum mode : int
+	{
+		none = 0, ok = 1, read = 2, write = 4, run = 8
+	};
+
+	int convert(mode);
 
 	template <typename T>
 	constexpr bool fail(T const value)

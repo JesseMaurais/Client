@@ -10,10 +10,12 @@
 # include <cassert>
 namespace fmt
 {
-	template <typename... Args> inline auto error(Args... args)
+	template <typename Arg, typename... Args>
+	inline auto error(Arg init, Args... args)
 	{
 		std::stringstream ss;
-		((ss << args << ": "), ...);
+		ss << init;
+		((ss << ": " << args), ...);
 		return ss.str();
 	}
 }
@@ -35,9 +37,10 @@ namespace sys
 	}
 }
 
+// Compile error on std::perror use -- switch to sys::perror
 #ifndef NDEBUG
 # define inplace __FILE__, __LINE__, __func__
-# define perror(...) perror(inplace, __VA_ARGS__)
+//# define perror(...) perror(inplace, __VA_ARGS__)
 #else
 # define inplace
 #endif

@@ -37,6 +37,28 @@ namespace sys::file
 		return flags;
 	}
 
+	int convert(mode bit)
+	{
+		int mask = 0;
+		if (bit & mode::ok)
+		{
+			mask |= F_OK;
+		}
+		if (bit & mode::run)
+		{
+			mask |= X_OK;
+		}
+		if (bit & mode::read)
+		{
+			mask |= R_OK;
+		}
+		if (bit & mode::write)
+		{
+			mask |= W_OK;
+		}
+		return mask;
+	}
+
 	size_t bufsiz = BUFSIZ;
 
 	void descriptor::open(char const* path, openmode mode)

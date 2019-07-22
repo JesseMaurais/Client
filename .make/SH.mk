@@ -4,6 +4,6 @@ CP = cp
 MV = mv
 MK = mkdir -p
 # POSIX libraries
-LNK = -ldl
+LNK = -ldl -lrt
 # POSIX macro
 DEF = -D_XOPEN_SOURCE
