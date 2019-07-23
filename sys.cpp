@@ -8,7 +8,6 @@
 
 #ifdef _WIN32
 # include "win.hpp"
-# include <processthreadapi.h>
 # include <iostream>
 #else
 # include <sys/wait.h>
@@ -202,7 +201,7 @@ namespace sys
 		#ifdef _WIN32
 		{
 			DWORD code = static_cast<DWORD>(-1);
-			handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
 			if (sys::win::fail(h))
 			{
 				winerr("OpenProcess");

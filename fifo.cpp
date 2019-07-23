@@ -21,7 +21,7 @@ namespace sys::file
 		{
 			path = fmt::join("\\\\.\\pipe\\", name);
 
-			sys::handle const h = CreateNamedPipe
+			sys::win::handle h = CreateNamedPipe
 			(
 				path.c_str(),
 				PIPE_ACCESS_DUPLEX,

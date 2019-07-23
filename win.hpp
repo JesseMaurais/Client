@@ -19,30 +19,26 @@ namespace sys::win
 
 	inline HANDLE get(int fd)
 	{
-		if (fail(fd)) return INVALID_HANDLE_VALUE;
+		if (sys::fail(fd)) return INVALID_HANDLE_VALUE;
 		auto const iptr = _get_osfhandle(fd);
-		return static_cast<HANDLE>(iptr):
+		return reinterpret_cast<HANDLE>(iptr);
 	}
 
 	inline int open(HANDLE h, int flags)
 	{
-		if (fail(h)) return -1;
-		auto const iptr = static_cast<intptr_t>(h);
+		if (sys::win::fail(h)) return -1;
+		auto const iptr = reinterpret_cast<intptr_t>(h);
 		return _open_osfhandle(iptr, flags);
 	}
 
-	namespace impl
-	{
-		void perror(char const* prefix);
-	}
 
 	template <typename... Args>
 	inline void perror(Args... args)
 	{
 		#ifndef NDEBUG
 		{
-			auto const s = ftm::error(args...);
-			impl::perror(s.c_str());
+			auto const s = fmt::error(args...);
+			sys::winerr(s.c_str());
 		}
 		#endif
 	}
@@ -55,13 +51,11 @@ namespace sys::win
 	template <typename T, DWORD T::*Size> struct sized : zero<T>
 	{
 		sized() { this->*Size = sizeof(T); }
-	}
+	};
 
-	class handle
+	struct handle
 	{
 		HANDLE h;
-
-	public:
 
 		handle(HANDLE p = nullptr)
 		: h(p)
@@ -77,7 +71,7 @@ namespace sys::win
 
 		int open(int flags)
 		{
-			int const fd = open(h, flags);
+			int const fd = sys::win::open(h, flags);
 			h = nullptr;
 			return fd;
 		}
@@ -89,8 +83,8 @@ namespace sys::win
 
 	};
 
-	using security_attributes = sized<SECURITY_ATTRIBUTES, SECURITY_ATTRIBUTES::nLength>;
-	using startup_info = sized<STARTUPINFO, STARTUPINFO::cb>;
+	using security_attributes = sized<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
+	using startup_info = sized<STARTUPINFO, &STARTUPINFO::cb>;
 
 	class pipe
 	{

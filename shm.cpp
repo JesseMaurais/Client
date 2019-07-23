@@ -19,10 +19,12 @@ namespace sys::file
 
 		#ifdef _WIN32
 		{
+			(void) type;
+
 			DWORD flags = 0;
 			DWORD prot = 0;
 
-			if (mode & execute)
+			if (mode & run)
 			{
 				flags |= FILE_MAP_EXECUTE;
 
@@ -174,7 +176,7 @@ namespace sys::file
 			{
 				if (not UnmapViewOfFile(address))
 				{
-					sys::win:perror("UnmapViewOfFile", name);
+					sys::win::perror("UnmapViewOfFile", name);
 					return true;
 				}
 			}

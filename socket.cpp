@@ -20,7 +20,7 @@ namespace sys::file
 		#ifdef _WIN32
 		{
 			constexpr WORD version = MAKEWORD(2, 2);
-			static sys::net::wsadata ws(version);
+			static sys::net::win::data ws(version);
 		}
 		#endif
 

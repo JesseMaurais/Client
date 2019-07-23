@@ -70,9 +70,9 @@ namespace sys::file
 
 		operator string_view() const
 		{
-			auto const address = reinterpret_cast<Char const*>(data());
-			auto const length = size() / sizeof (Char);
-			return string_view(address, length);
+			auto const ptr = reinterpret_cast<Char const*>(data());
+			auto const sz = size() / sizeof (Char);
+			return string_view(ptr, sz);
 		}
 	};
 
