@@ -7,7 +7,7 @@
 #include "file.hpp"
 #include "buf.hpp"
 
-namespace sys::io
+namespace io
 {
 	//
 	// Abstract buffer class
@@ -19,9 +19,9 @@ namespace sys::io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_procbuf : public basic_membuf<Char, Traits, Alloc>
+	class basic_processbuf : public basic_stringbuf<Char, Traits, Alloc>
 	{
-		using base = basic_membuf<Char, Traits, Alloc>;
+		using base = basic_stringbuf<Char, Traits, Alloc>;
 
 	public:
 
@@ -34,16 +34,26 @@ namespace sys::io
 			file.set(fd);
 		}
 
-		bool run(arguments args)
+		void run(arguments args)
 		{
 			std::vector<char const*> argv(args);
 			argv.push_back(nullptr); // terminator
-			return file.run(argv.data());
+			file.run(argv.data());
 		}
 
 		void kill()
 		{
 			file.kill();
+		}
+
+		int wait()
+		{
+			file.wait();
+		}
+
+		int join()
+		{
+			file.join();
 		}
 
 		void close(int n)
@@ -70,8 +80,8 @@ namespace sys::io
 
 	// Common alias types
 
-	using procbuf = basic_procbuf<char>;
-	using wprocbuf = basic_procbuf<wchar_t>;
+	using processbuf = basic_processbuf<char>;
+	using wprocessbuf = basic_processbuf<wchar_t>;
 
 	//
 	// Abstract stream class
@@ -87,17 +97,17 @@ namespace sys::io
 		 template <class, class> class basic_stream
 		>
 		class basic_pstream
-		: public basic_procbuf<Char, Traits, Alloc>
+		: public basic_processbuf<Char, Traits, Alloc>
 		, public basic_stream<Char, Traits<Char>>
 		{
 			using base = basic_stream<Char, Traits<Char>>;
-			using procbuf = basic_procbuf<Char, Traits, Alloc>;
-			using arguments = typename procbuf::arguments;
+			using processbuf = basic_processbuf<Char, Traits, Alloc>;
+			using arguments = typename processbuf::arguments;
 
 		public:
 
 			basic_pstream(std::size_t sz = sys::file::bufsiz)
-			: procbuf()
+			: processbuf()
 			, base(this)
 			{
 				this->setbufsiz(sz);

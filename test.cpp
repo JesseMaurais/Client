@@ -6,7 +6,7 @@
 #include "fmt.hpp"
 #include "tag.hpp"
 #include "del.hpp"
-#include "sgr.hpp"
+#include "esc.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
 #include "net.hpp"
@@ -304,7 +304,7 @@ namespace
 	TEST(ios_params)
 	{
 		std::ostringstream ss;
-		ss << sgr::params<1, 2, 3, 4>;
+		ss << io::params<1, 2, 3, 4>;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "1;2;3;4");
 	}
@@ -312,7 +312,7 @@ namespace
 	TEST(ios_fg)
 	{
 		std::ostringstream ss;
-		ss << sgr::fg_green << "GREEN" << sgr::fg_off;
+		ss << io::fg_green << "GREEN" << io::fg_off;
 		std::string const s = ss.str();
 		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
 	}
@@ -323,7 +323,7 @@ namespace
 
 	TEST(ipc_rev)
 	{
-		sys::io::pstream ps { "rev" };
+		io::pstream ps { "rev" };
 		ps << HELLO_WORLD;
 		ps.close(0);
 		std::string s;

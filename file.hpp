@@ -23,52 +23,54 @@ namespace sys::file
 		binary = 1 << 8,
 	};
 
-	constexpr int owner(mode bit)
+	enum permit : int;
+
+	constexpr auto owner(mode bit)
 	{
-		return (bit & 07) << 6;
+		return static_cast<permit>((bit & 07) << 6);
 	}
 
-	constexpr int group(mode bit)
+	constexpr auto group(mode bit)
 	{
-		return (bit & 07) << 3;
+		return static_cast<permit>((bit & 07) << 3);
 	}
 
-	constexpr int other(mode bit)
+	constexpr auto other(mode bit)
 	{
-		return (bit & 07) << 0;
+		return static_cast<permit>((bit & 07) << 0);
 	}
 
 	enum permit : int
 	{
-		owner_x = owner(run),
-		owner_w = owner(write),
 		owner_r = owner(read),
+		owner_w = owner(write),
+		owner_x = owner(run),
 
-		group_x = group(run),
-		group_w = group(write),
 		group_r = group(read),
+		group_w = group(write),
+		group_x = group(run),
 
-		other_x = other(run),
-		other_w = other(write),
 		other_r = other(read),
+		other_w = other(write),
+		other_x = other(run),
 	};
 
+	int access(mode);
 	int convert(mode);
-	int openmode(mode);
 	int convert(permit);
 
-	template <typename T>
-	constexpr bool fail(T const value)
+	constexpr int invalid = -1;
+
+	inline bool fail(int fd)
 	{
-		constexpr T invalid = -1;
-		return invalid == value;
+		return invalid == fd;
 	}
 	
 	extern size_t bufsiz;
 
 	struct descriptor
 	{
-		explicit descriptor(int fd = -1)
+		explicit descriptor(int fd = invalid)
 		{
 			set(fd);
 		}
@@ -78,7 +80,7 @@ namespace sys::file
 			close();
 		}
 
-		int set(int newfd = -1)
+		int set(int newfd = invalid)
 		{
 			int const tmp = fd;
 			fd = newfd;
@@ -96,15 +98,15 @@ namespace sys::file
 		}
 
 		template <class C>
-		ssize_t write(const C* buffer, size_t size) const
+		ssize_t write(const C* buf, size_t sz) const
 		{
-			return write(static_cast<const void*>(buffer), size);
+			return write(static_cast<const void*>(buf), sz);
 		}
 
 		template <class C>
-		ssize_t read(C* buffer, size_t size) const
+		ssize_t read(C* buf, size_t sz) const
 		{
-			return read(static_cast<void*>(buffer), size);
+			return read(static_cast<void*>(buf), sz);
 		}
 
 		void open(char const* path, mode);
@@ -112,8 +114,8 @@ namespace sys::file
 
 	private:
 
-		ssize_t write(const void* buffer, size_t size) const;
-		ssize_t read(void* buffer, size_t size) const;
+		ssize_t write(const void* buf, size_t sz) const;
+		ssize_t read(void* buf, size_t sz) const;
 
 	protected:
 
@@ -171,7 +173,7 @@ namespace sys::file
 
 	struct process
 	{
-		process() : pid(-1)
+		process() : pid(invalid)
 		{
 			set();
 		}
@@ -212,9 +214,14 @@ namespace sys::file
 			return file[n];
 		}
 
-		bool run(char const** argv);
+		void run(char const** argv);
 		void kill();
 		int wait();
+		int join()
+		{
+			kill();
+			return wait();
+		}
 
 		void close(int n)
 		{

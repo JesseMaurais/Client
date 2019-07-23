@@ -7,7 +7,29 @@
 
 namespace sys::file
 {
-	int openmode(mode bit)
+	int access(mode bit)
+	{
+		int flags = 0;
+		if (bit & extant)
+		{
+			flags |= F_OK;
+		}
+		if (bit & run)
+		{
+			flags |= X_OK;
+		}
+		if (bit & read)
+		{
+			flags |= R_OK;
+		}
+		if (bit & write)
+		{
+			flags |= W_OK;
+		}
+		return flags;
+	}
+
+	int convert(mode bit)
 	{
 		int flags = 0;
 
@@ -56,28 +78,6 @@ namespace sys::file
 			flags |= O_CREAT;
 		}
 
-		return flags;
-	}
-
-	int convert(mode bit)
-	{
-		int flags = 0;
-		if (bit & extant)
-		{
-			flags |= F_OK;
-		}
-		if (bit & run)
-		{
-			flags |= X_OK;
-		}
-		if (bit & read)
-		{
-			flags |= R_OK;
-		}
-		if (bit & write)
-		{
-			flags |= W_OK;
-		}
 		return flags;
 	}
 
@@ -176,13 +176,14 @@ namespace sys::file
 		else set(fd);
 	}
 
-	bool process::run(char const** argv)
+	void process::run(char const** argv)
 	{
 		int fd[3];
 		pid = sys::run(fd, argv);
-		bool const ok = not sys::fail(pid);
-		if (ok) set(fd);
-		return ok;
+		if (not fail(pid))
+		{
+			set(fd);
+		}
 	}
 
 	void process::kill()

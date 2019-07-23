@@ -6,14 +6,14 @@
 #include "int.hpp"
 #include "str.hpp"
 
-namespace sys::io
+namespace io
 {
 	template
 	<
 	 class Char,
 	 template <class> class Traits = std::char_traits
 	>
-	class basic_iobuf : public std::basic_streambuf<Char, Traits<Char>>
+	class basic_streambuf : public std::basic_streambuf<Char, Traits<Char>>
 	{
 		using base = std::basic_streambuf<Char, Traits<Char>>;
 		using ios = std::basic_ios<Char, Traits<Char>>;
@@ -88,8 +88,8 @@ namespace sys::io
 
 	// Common alias types
 
-	using buf = basic_iobuf<char>;
-	using wbuf = basic_iobuf<wchar_t>;
+	using streambuf = basic_streambuf<char>;
+	using wstreambuf = basic_streambuf<wchar_t>;
 
 	//
 	// Abstract buffer class
@@ -101,9 +101,9 @@ namespace sys::io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_membuf : public basic_iobuf<Char, Traits>
+	class basic_stringbuf : public basic_streambuf<Char, Traits>
 	{
-		using base = basic_iobuf<Char, Traits>;
+		using base = basic_streambuf<Char, Traits>;
 		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
 
@@ -112,8 +112,8 @@ namespace sys::io
 		using char_type = typename base::char_type;
 		using size_type = typename base::size_type;
 
-		basic_membuf() = default;
-		basic_membuf(size_type n)
+		basic_stringbuf() = default;
+		basic_stringbuf(size_type n)
 		{
 			setbufsiz(n);
 		}
@@ -164,8 +164,8 @@ namespace sys::io
 
 	// Common alias types
 
-	using membuf = basic_membuf<char>;
-	using wmembuf = basic_membuf<wchar_t>;
+	using stringbuf = basic_stringbuf<char>;
+	using wstringbuf = basic_stringbuf<wchar_t>;
 }
 
 #endif // file

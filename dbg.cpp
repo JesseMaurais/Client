@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dbg.hpp"
-#include "sgr.hpp"
+#include "esc.hpp"
 #include <chrono>
 #include <algorithm>
 #include <stdexcept>
@@ -63,7 +63,7 @@ namespace dbg
 		}
 		std::regex pattern(expression);
 
-		using namespace sgr;
+		using namespace io;
 		auto& out = std::cerr;
 		constexpr auto eol = '\n';
 		map const& tests = registry();

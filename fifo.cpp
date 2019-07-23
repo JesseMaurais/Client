@@ -15,7 +15,7 @@
 namespace sys::file
 {
 	fifo::fifo(fmt::string_view name, mode mask)
-	: flags(openmode(mask))
+	: flags(convert(mask))
 	{
 		#ifdef _WIN32
 		{

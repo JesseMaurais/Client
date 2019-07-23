@@ -1,10 +1,10 @@
-#ifndef sgr_hpp
-#define sgr_hpp
+#ifndef esc_hpp
+#define esc_hpp
 
 #include <ostream>
 #include "asc.hpp"
 
-namespace sgr
+namespace io
 {
 	template <char... Code> inline std::ostream& encode(std::ostream& out)
 	{
