@@ -154,9 +154,12 @@ namespace sys::file
 		}
 		#endif
 
-		path = name;
 		length = sz;
 		address = ptr;
+		if (nullptr != name)
+		{
+			path = name;
+		}
 		return false;
 	}
 
