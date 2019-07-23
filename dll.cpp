@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dll.hpp"
+#include "sys.hpp"
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "err.hpp"
@@ -29,15 +30,7 @@ namespace sys
 
 	static fmt::string expr(fmt::string_view name)
 	{
-		#ifdef _WIN32
-		{
-			return fmt::to_string(name) + ".dll";
-		}
-		#else
-		{
-			return fmt::to_string(name) + ".so";
-		}
-		#endif
+		return fmt::to_string(name) + ext::share;
 	}
 
 	dll::operator bool() const
@@ -51,7 +44,7 @@ namespace sys
 	dll::dll(fmt::string_view path)
 	{
 		auto const buf = fmt::to_string(path);
-		auto const s = buf.empty() ? nullptr : buf.c_str();
+		auto const s = empty(buf) ? nullptr : buf.c_str();
 		tab = dlopen(s, RTLD_LAZY);
 		if (nullptr == tab)
 		{

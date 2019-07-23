@@ -119,7 +119,7 @@ namespace sys::file
 
 	protected:
 
-		int fd = -1;
+		int fd = invalid;
 	};
 
 	struct pipe
@@ -135,7 +135,7 @@ namespace sys::file
 		{
 			for (int n : { 0, 1 })
 			{
-				file[n].set(fd ? fd[n] : -1);
+				file[n].set(fd ? fd[n] : invalid);
 			}
 		}
 
@@ -182,7 +182,7 @@ namespace sys::file
 		{
 			for (int n : { 0, 1, 2 })
 			{
-				file[n].set(fd ? fd[n] : -1);
+				file[n].set(fd ? fd[n] : invalid);
 			}
 		}
 
