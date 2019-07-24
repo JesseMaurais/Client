@@ -2,12 +2,12 @@
 #define net_hpp
 
 #include "sys.hpp"
-#include <cstdio>
+#include "err.hpp"
 
 #ifdef _WIN32
 
+#include "win.hpp"
 #include <winsock2.h>
-#include <afunix.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -30,7 +30,11 @@ namespace sys::net
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
 
 	inline bool fail(descriptor h) { return INVALID_SOCKET == h; }
-	inline void perror(char const *prefix) { ::_set_errno(::sys::winerr(prefix)); }
+
+	template <typename... Args> inline void perror(Args... args)
+	{
+			sys::win::perror(args);
+	}
 
 	constexpr auto close = ::closesocket;
 	constexpr auto accept = ::accept;
@@ -57,7 +61,7 @@ namespace sys::net
 			{
 				if (error = ::WSAStartup(version, this); error)
 				{
-					::sys::winerr("WSAStartup");
+					::sys::win::perror(here, "WSAStartup");
 				}
 			}
 
@@ -65,7 +69,7 @@ namespace sys::net
 			{
 				if (not error and ::WSACleanup())
 				{
-					::sys::winerr("WSACleanup");
+					::sys::win::perror(here, "WSACleanup");
 				}
 			}
 
@@ -108,7 +112,11 @@ namespace sys::net
 	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
 
 	inline bool fail(descriptor fd) { return ::sys::fail(fd); }
-	inline void perror(char const *prefix) { std::perror(prefix); }
+
+	template <typename... Args> inline void perror(Args... args)
+	{
+		sys::perror(args...);
+	}
 
 	constexpr auto close = ::sys::close;
 	constexpr auto accept = ::accept;

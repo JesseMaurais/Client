@@ -70,7 +70,7 @@ namespace sys::win
 			bool const ok = not fail(h);
 			if (ok and not CloseHandle(h))
 			{
-				sys::win::perror("CloseHandle");
+				sys::win::perror(here, "CloseHandle");
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace sys::win
 			ok = CreatePipe(&read.h, &write.h, &sa, BUFSIZ);
 			if (not ok)
 			{
-				sys::win::perror("CreatePipe");
+				sys::win::perror(here, "CreatePipe");
 			}
 		}
 	};
@@ -112,7 +112,7 @@ namespace sys::win
 
 		operator bool() const
 		{
-			return not fail(h);
+			return not sys::win::fail(h);
 		}
 
 		find(char const* s)
@@ -120,7 +120,7 @@ namespace sys::win
 			h = FindFirstFile(s, this);
 			if (fail(h))
 			{
-				perror("FindFirstFile", s);
+				sys::win::perror(here, "FindFirstFile", s);
 			}
 		}
 
@@ -129,7 +129,7 @@ namespace sys::win
 			bool const ok = not fail(h);
 			if (ok and not FindClose(h))
 			{
-				perror("FindClose");
+				sys::win::perror(here, "FindClose");
 			}
 		}
 
@@ -140,7 +140,7 @@ namespace sys::win
 				auto const err = GetLastError();
 				if (ERROR_NO_MORE_FILES != err)
 				{
-					perror("FindNextFile");
+					sys::win::perror(here, "FindNextFile");
 				}
 				return false;
 			}

@@ -6,12 +6,12 @@
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "err.hpp"
+#include <iostream>
 
 #ifdef _WIN32
 # include "win.hpp"
 #else
 # include <dlfcn.h>
-# include <iostream>
 #endif
 
 namespace
@@ -19,11 +19,10 @@ namespace
 	#ifndef _WIN32
 	template <typename... Args> inline void error(Args... args)
 	{
-		#ifndef NDEBUG
+		if (sys::debug)
 		{
 			std::cerr << fmt::error(args...) << std::endl;
 		}
-		#endif
 	}
 	#endif
 }
@@ -40,7 +39,7 @@ namespace sys
 			auto const h = LoadLibrary(s, nullptr);
 			if (nullptr == h)
 			{
-				sys::win::perror("LoadLibrary", path);
+				sys::win::perror(here, "LoadLibrary", path);
 			}
 			else ptr = h;
 		}
@@ -49,7 +48,7 @@ namespace sys
 			ptr = dlopen(s, RTLD_LAZY);
 			if (nullptr == ptr)
 			{
-				error("dlopen", path, dlerror());
+				error(here, "dlopen", path, dlerror());
 			}
 		}
 		#endif
@@ -62,14 +61,14 @@ namespace sys
 			auto const h = static_cast<HMODULE>(ptr);
 			if (nullptr != h and not FreeLibrary(h))
 			{
-				sys::win::perror("FreeLibrary");
+				sys::win::perror(here, "FreeLibrary");
 			}
 		}
 		#else
 		{
 			if (nullptr != ptr and dlclose(ptr))
 			{
-				error("dlclose", dlerror());
+				error(here, "dlclose", dlerror());
 			}
 		}
 		#endif
@@ -88,7 +87,7 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 				if (nullptr == h)
 				{
-					sys::win::perror("GetModuleHandle");
+					sys::win::perror(here, "GetModuleHandle");
 					return nullptr;
 				}
 			}
@@ -96,7 +95,7 @@ namespace sys
 			auto const f = GetProcAddress(h, s);
 			if (nullptr == f)
 			{
-				sys::win::perror("GetProcAddress", name);
+				sys::win::perror(here, "GetProcAddress", name);
 			}
 			return f;
 		}
@@ -107,7 +106,7 @@ namespace sys
 			auto const e = dlerror();
 			if (nullptr != e)
 			{
-				error("dlsym", name, e);
+				error(here, "dlsym", name, e);
 			}
 			return f;
 		}

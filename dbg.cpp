@@ -27,6 +27,11 @@ namespace
 	}
 }
 
+namespace sys
+{
+	bool debug = true;
+}
+
 namespace dbg
 {
 	test::test(char const *name)
@@ -91,6 +96,7 @@ namespace dbg
 		}
 		catch (...)
 		{
+			++errors;
 			out << fg_red << "\tUnknown exception" << fg_off << eol;
 		}
 

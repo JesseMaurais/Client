@@ -5,27 +5,34 @@
 # define verify(x) (x)
 #else
 # define verify(x) assert(x)
-# include <sstream>
-# include <cstdio>
-# include <cassert>
+#endif
+
+#include <sstream>
+#include <cstdio>
+
+namespace sys
+{
+	extern bool debug;
+}
+
 namespace fmt
 {
 	template <typename Arg, typename... Args>
-	inline auto error(Arg init, Args... args)
+	inline auto error(Arg arg, Args... args)
 	{
 		std::stringstream ss;
-		ss << init;
+		ss << arg;
 		((ss << ": " << args), ...);
 		return ss.str();
 	}
 }
-#endif
 
 namespace sys
 {
-	template <typename... Args> inline void perror(Args... args)
+	template <typename... Args>
+	inline void perror(Args... args)
 	{
-		#ifndef NDEBUG
+		if (debug)
 		{
 			auto s = fmt::error(args...);
 			if (not empty(s))
@@ -33,13 +40,9 @@ namespace sys
 				std::perror(s.c_str());
 			}
 		}
-		#endif
 	}
 }
 
-// Compile error on std::perror use -- switch to sys::perror
-#ifndef NDEBUG
-//# define perror(...) perror(__FILE__, __LINE__, __VA_ARGS__)
-#endif
+#define here __FILE__, __LINE__, __func__
 
 #endif // file

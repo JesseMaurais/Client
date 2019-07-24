@@ -15,8 +15,6 @@ namespace sys::file
 {
 	bool memory::open(char const* name, int fd, ssize_t sz, size_t off, int mode, int type, void* ptr)
 	{
-		assert(sys::fail(fd) != (nullptr == name));
-
 		#ifdef _WIN32
 		{
 			(void) type;
@@ -76,14 +74,14 @@ namespace sys::file
 
 			if (sys::win::fail(h))
 			{
-				sys::win::perror("CreateFileMapping");
+				sys::win::perror(here, "CreateFileMapping");
 				return true;
 			}
 
 			ptr = MapViewOfFileEx(h, flags, hi, lo, sz, ptr);
 			if (nullptr == ptr)
 			{
-				sys::win::perror("MapViewOfFile");
+				sys::win::perror(here, "MapViewOfFile");
 				return true;
 			}
 		}
@@ -125,13 +123,13 @@ namespace sys::file
 				fd = shm_open(name, oflags, um);
 				if (sys::fail(fd))
 				{
-					sys::perror("shm_open", name);
+					sys::perror(here, "shm_open", name);
 					return true;
 				}
 
 				if (sys::fail(ftruncate(fd, sz)))
 				{
-					sys::perror("ftruncate", name);
+					sys::perror(here, "ftruncate", name);
 					return true;
 				}
 			}
@@ -141,7 +139,7 @@ namespace sys::file
 				class sys::stat st(fd);
 				if (sys::fail(st))
 				{
-					sys::perror("stat");
+					sys::perror(here, "stat");
 					return true;
 				}
 				sz = st.st_size;
@@ -150,7 +148,7 @@ namespace sys::file
 			ptr = mmap(ptr, sz, prot, flags, fd, off);
 			if (MAP_FAILED == ptr)
 			{
-				sys::perror("mmap");
+				sys::perror(here, "mmap");
 				return true;
 			}
 		}
@@ -176,7 +174,7 @@ namespace sys::file
 			{
 				if (not UnmapViewOfFile(address))
 				{
-					sys::win::perror("UnmapViewOfFile", name);
+					sys::win::perror(here, "UnmapViewOfFile", name);
 					return true;
 				}
 			}
@@ -184,7 +182,7 @@ namespace sys::file
 			{
 				if (sys::fail(munmap(address, length)))
 				{
-					sys::perror("munmap", name);
+					sys::perror(here, "munmap", name);
 					return true;
 				}
 
@@ -193,7 +191,7 @@ namespace sys::file
 					auto const s = name.c_str();
 					if (sys::fail(shm_unlink(s)))
 					{
-						sys::perror("shm_unlink", name);
+						sys::perror(here, "shm_unlink", name);
 						return true;
 					}
 				}
