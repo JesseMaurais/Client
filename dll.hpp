@@ -15,11 +15,9 @@ namespace sys
 	{
 	public:
 
+		dll() = default;
 		dll(fmt::string_view path);
 		~dll();
-		dll();
-
-		operator bool() const;
 
 		dll find(fmt::string_view name);
 	
@@ -31,9 +29,14 @@ namespace sys
 			return addr;
 		}
 
+		operator bool() const
+		{
+			return nullptr == ptr;
+		}
+
 	private:
 
-		void *tab;
+		void *ptr = nullptr;
 		void *sym(fmt::string_view name) const;
 	};
 }

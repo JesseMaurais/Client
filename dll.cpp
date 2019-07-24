@@ -7,72 +7,117 @@
 #include "dir.hpp"
 #include "err.hpp"
 
-#ifndef NDEBUG
-#include <iostream>
-#endif
-
 #ifdef _WIN32
-# include "dlfcn.c"
+# include "win.hpp"
 #else
 # include <dlfcn.h>
+# include <iostream>
 #endif
 
-namespace sys
+namespace
 {
-	static void error(fmt::string_view who, fmt::string_view what)
+	#ifndef _WIN32
+	template <typename... Args> inline void error(Args... args)
 	{
 		#ifndef NDEBUG
 		{
-			std::cerr << fmt::error(who, what) << std::endl;
+			std::cerr << fmt::error(args...) << std::endl;
 		}
 		#endif
 	}
+	#endif
 
-	static fmt::string expr(fmt::string_view name)
+	inline fmt::string expr(fmt::string_view name)
 	{
-		return fmt::to_string(name) + ext::share;
+		return fmt::to_string(name) + sys::ext::share;
 	}
+}
 
-	dll::operator bool() const
-	{
-		return RTLD_DEFAULT != tab;
-	}
-
-	dll::dll() : tab(RTLD_DEFAULT)
-	{ }
-
+namespace sys
+{
 	dll::dll(fmt::string_view path)
 	{
 		auto const buf = fmt::to_string(path);
 		auto const s = empty(buf) ? nullptr : buf.c_str();
-		tab = dlopen(s, RTLD_LAZY);
-		if (nullptr == tab)
+
+		#ifdef _WIN32
 		{
-			error("dlopen", dlerror());
+			auto const h = LoadLibrary(s, nullptr);
+			if (nullptr == h)
+			{
+				sys::win::perror("LoadLibrary", path);
+			}
+			else ptr = h;
 		}
+		#else
+		{
+			ptr = dlopen(s, RTLD_LAZY);
+			if (nullptr == ptr)
+			{
+				error("dlopen", path, dlerror());
+			}
+		}
+		#endif
 	}
 
 	dll::~dll()
 	{
-		if (tab and dlclose(tab))
+		#ifdef _WIN32
 		{
-			error("dlclose", dlerror());
+			auto const h = static_cast<HMODULE>(ptr);
+			if (nullptr != h and not FreeLibrary(h))
+			{
+				sys::win::perror("FreeLibrary");
+			}
 		}
+		#else
+		{
+			if (nullptr != ptr and dlclose(ptr))
+			{
+				error("dlclose", dlerror());
+			}
+		}
+		#endif
 	}
 
 	void *dll::sym(fmt::string_view name) const
 	{
 		auto const buf = fmt::to_string(name);
 		auto const s = buf.c_str();
-		// see pubs.opengroup.org
-		(void) dlerror();
-		auto f = dlsym(tab, s);
-		auto const e = dlerror();
-		if (nullptr != e)
+
+		#ifdef _WIN32
 		{
-			error("dlsym", e);
+			auto h = static_cast<HMODULE>(ptr);
+			if (nullptr == h)
+			{
+				h = GetModuleHandle(nullptr);
+				if (nullptr == h)
+				{
+					sys::win::perror("GetModuleHandle");
+					return nullptr;
+				}
+			}
+
+			auto const f = GetProcAddress(h, s);
+			if (nullptr == f)
+			{
+				sys::win::perror("GetProcAddress", name);
+			}
+			return f;
 		}
-		return f;
+		#else
+		{
+			// see pubs.opengroup.org
+			(void) dlerror();
+			auto f = dlsym(ptr, s);
+			auto const e = dlerror();
+			if (nullptr != e)
+			{
+				error("dlsym", name, e);
+			}
+			return f;
+		}
+		#endif
 	}
 
 	dll dll::find(fmt::string_view name)

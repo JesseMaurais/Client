@@ -53,6 +53,21 @@ namespace sys::win
 		size() { this->*Size = sizeof(T); }
 	};
 
+	struct errmode
+	{
+		UINT mode;
+
+		errmode(UINT scoped)
+		{
+			mode = SetErrorMode(scoped);
+		}
+
+		~errmode()
+		{
+			SetErrorMode(mode);
+		}
+	};
+
 	struct handle
 	{
 		HANDLE h;
