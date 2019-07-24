@@ -48,9 +48,9 @@ namespace sys::win
 		zero() { ZeroMemory(this, sizeof(T)); }
 	};
 
-	template <typename T, DWORD T::*Size> struct sized : zero<T>
+	template <typename T, DWORD T::*Size> struct size : zero<T>
 	{
-		sized() { this->*Size = sizeof(T); }
+		size() { this->*Size = sizeof(T); }
 	};
 
 	struct handle
@@ -72,7 +72,7 @@ namespace sys::win
 		int open(int flags)
 		{
 			int const fd = sys::win::open(h, flags);
-			h = nullptr;
+			h = INVALID_HANDLE_VALUE;
 			return fd;
 		}
 
@@ -83,13 +83,12 @@ namespace sys::win
 
 	};
 
-	using security_attributes = sized<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
-	using startup_info = sized<STARTUPINFO, &STARTUPINFO::cb>;
+	using security_attributes = size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
+	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
+	using process_info = zero<PROCESS_INFORMATION>
 
-	class pipe
+	struct pipe
 	{
-	public:
-
 		BOOL ok;
 		handle read;
 		handle write;
@@ -97,7 +96,7 @@ namespace sys::win
 		pipe()
 		{
 			security_attributes sa;
-			sa.bInheritHandle = TRUE;
+			sa.bInheritHandle = true;
 			ok = CreatePipe(&read.h, &write.h, &sa, BUFSIZ);
 			if (not ok)
 			{

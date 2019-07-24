@@ -1,14 +1,21 @@
 
+# Guess the operating system
+
+!ifndef "$(OS)" != "Windows_NT"
+DEF = $(DEF) -D_WIN32
+EXE = .exe
+!else
+DEF = $(DEF) -D_POSIX_C_SOURCE
+LNK = $(LNK) -ldl -lrt
+!endif
+
 # Guess the environment
 
 !ifdef SHELL
-# Probably POSIX
 include .make/SH.mk
 !elseifdef COMSPEC
-# Probably WIN32
 include .make/CMD.mk
 !else
-# Bad way
 !error Cannot determine the operating environment 
 !endif
 

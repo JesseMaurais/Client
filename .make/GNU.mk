@@ -1,15 +1,22 @@
 
+# Guess the operating system
+
+ifneq ($(findstring Windows_NT, $(OS)),)
+DEF += -D_WIN32
+EXE = .exe
+else
+DEF += -D_POSIX_C_SOURCE
+LNK += -ldl -lrt
+endif # OS
+
 # Guess the environment
 
 ifdef SHELL
-# Probably POSIX
 include .make/SH.mk
 else
 ifdef COMSPEC
-# Probably WIN32
 include .make/CMD.mk
 else
-# Bad way
 $(error Cannot determine the operating environment)
 endif # SHELL
 endif # COMSPEC
