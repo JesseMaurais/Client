@@ -14,13 +14,14 @@ namespace sig
 		using signature = void(Args...);
 		using observer = std::function<signature>;
 		using container = std::map<Slot, observer>;
+		using count = typename container::size_type;
 
 		virtual void connect(Slot const& id, observer fn)
 		{
 			slots.emplace(id, fn);
 		}
 
-		virtual auto disconnect(Slot const &id)
+		virtual count disconnect(Slot const &id)
 		{
 			return slots.erase(id);
 		}

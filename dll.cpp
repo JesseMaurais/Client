@@ -118,7 +118,7 @@ namespace sys
 	{
 		using namespace ::env::dir;
 		auto name = fmt::to_string(basename) + sys::ext::share;
-		find(share, match(name) | copy(name));
+		::env::dir::find(share, match(name) | copy(name));
 		return fmt::string_view(name);
 	}
 }
