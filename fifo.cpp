@@ -35,7 +35,7 @@ namespace sys::file
 
 			if (sys::win::fail(h))
 			{
-				sys::win::perror("CreateNamedPipe", name);
+				sys::win::perror("CreateNamedPipe", path);
 				path.clear();
 				return;
 			}
@@ -114,7 +114,8 @@ namespace sys::file
 		#ifdef _WIN32
 		{
 			auto const h = sys::win::get(fd);
-			if (not sys::win::fail(h) and not DisconnectNamedPipe(h))
+			bool const ok = not sys::win::fail(h);
+			if (ok and not DisconnectNamedPipe(h))
 			{
 				sys::win::perror("DisconnectNamedPipe");
 			}
@@ -124,7 +125,7 @@ namespace sys::file
 			if (not empty(path))
 			{
 				auto const s = path.c_str();
-				if (sys::unlink(s))
+				if (sys::fail(sys::unlink(s)))
 				{
 					sys::perror("unlink", path);
 				}
@@ -133,3 +134,4 @@ namespace sys::file
 		#endif
 	}
 }
+

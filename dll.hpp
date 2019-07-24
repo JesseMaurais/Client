@@ -19,7 +19,7 @@ namespace sys
 		dll(fmt::string_view path);
 		~dll();
 
-		dll find(fmt::string_view name);
+		static dll find(fmt::string_view name);
 	
 		template <typename S> auto sym(fmt::string_view name) const
 		{
@@ -31,7 +31,7 @@ namespace sys
 
 		operator bool() const
 		{
-			return nullptr == ptr;
+			return nullptr != ptr;
 		}
 
 	private:

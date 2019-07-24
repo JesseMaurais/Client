@@ -76,19 +76,15 @@ namespace sys
 				else return -1;
 			}
 
-			PROCESS_INFORMATION pi;
-			ZeroMemory(&pi, sizeof pi);
+			sys::win::process_info pi;
+			sys::win::startup_info si;
 
-			STARTUPINFO si;
-			ZeroMemory(&si, sizeof si);
-
-			si.cb = sizeof si;
 			si.dwFlags = STARTF_USESTDHANDLES;
 			si.hStdInput = pair[0].read.h;
 			si.hStdOutput = pair[1].write.h;
 			si.hStdError = pair[2].write.h;
 
-			BOOL const ok = CreateProcessA
+			bool const ok = CreateProcessA
 			(
 			 nullptr,          // application
 			 cmd,              // command line
@@ -104,8 +100,8 @@ namespace sys
 
 			if (not ok)
 			{
-				sys::winerr("CreateProcess");
-				return -1;
+				sys::win::perror("CreateProcess", cmd);
+				return sys::invalid;
 			}
 
 			sys::win::handle const closed(pi.hThread);
@@ -131,7 +127,7 @@ namespace sys
 			{
 				if (sys::fail(pid))
 				{
-					perror("fork");
+					sys::perror("fork");
 				}
 				else for (int i : { 0, 1, 2 })
 				{
@@ -178,17 +174,18 @@ namespace sys
 			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
 			if (sys::win::fail(h))
 			{
-				sys::winerr("OpenProcess");
+				sys::win::perror("OpenProcess", pid);
 			}
 			else
 			if (not TerminateProcess(h, 0))
 			{
-				sys::winerr("TerminateProcess");
+				sys::win::perror("TerminateProcess", pid);
 			}
 		}
 		#else
 		{
-			if (not sys::fail(pid) and sys::fail(::kill(pid, SIGTERM)))
+			bool const ok = not sys::fail(pid);
+			if (ok and sys::fail(::kill(pid, SIGTERM)))
 			{
 				sys::perror("kill", pid);
 			}
@@ -200,22 +197,22 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			DWORD code = static_cast<DWORD>(-1);
+			DWORD code = static_cast<DWORD>(sys::invalid);
 			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
 			if (sys::win::fail(h))
 			{
-				winerr("OpenProcess");
+				sys::win::perror("OpenProcess", pid);
 			}
 			else
 			{
 				if (WaitForSingleObject(h, INFINITE) == WAIT_FAILED)
 				{
-					sys::winerr("WaitForSingleObject");
+					sys::win::perror("WaitForSingleObject", pid);
 				}
 				else
 				if (not GetExitCodeProcess(h, &code))
 				{
-					sys::winerr("GetExitCodeProcess");
+					sys::win::perror("GetExitCodeProcess", pid);
 				}
 			}
 			return static_cast<int>(code);
@@ -229,7 +226,7 @@ namespace sys
 				pid = waitpid(parent, &status, 0);
 				if (sys::fail(pid))
 				{
-					sys::perror("waitpid");
+					sys::perror("waitpid", parent);
 				}
 			}
 			while (pid != parent);

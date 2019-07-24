@@ -1,12 +1,12 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include <cassert>
 #include "socket.hpp"
 #include "sys.hpp"
 #include "net.hpp"
 #include "sig.hpp"
 #include "int.hpp"
+#include <cassert>
 
 namespace sys::file
 {
@@ -33,7 +33,8 @@ namespace sys::file
 
 	socket::~socket()
 	{
-		if (not sys::net::fail(fd) and sys::net::close(fd))
+		bool const ok = not sys::net::fail(fd);
+		if (ok and sys::net::close(fd))
 		{
 			sys::net::perror("closesocket");
 		}
@@ -53,7 +54,7 @@ namespace sys::file
 			sys::net::perror("accept");
 		}
 		else 
-		if (length)
+		if (nullptr != length)
 		{
 			*length = fmt::to_size(n);
 		}

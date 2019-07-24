@@ -186,9 +186,9 @@ namespace env::dir
 		#endif
 	}
 
-	mask mode(sys::file::mode bits)
+	mask mode(sys::file::mode bit)
 	{
-		auto const flags = sys::file::convert(bits);
+		auto const flags = sys::file::convert(bit);
 		return [=](fmt::string_view u)
 		{
 			auto const s = u.data();
@@ -210,19 +210,19 @@ namespace env::dir
 		};
 	}
 
-	mask regex(fmt::string_view pattern)
+	mask match(fmt::string_view u)
 	{
-		auto const buf = fmt::to_string(pattern);
-		auto const expr = std::regex(buf);
-		return [expr](fmt::string_view u)
+		auto const buf = fmt::to_string(u);
+		auto const x = std::regex(buf);
+		return [x](fmt::string_view u)
 		{
-			std::cmatch match;
+			std::cmatch m;
 			auto const s = u.data();
-			return std::regex_search(s, match, expr);
+			return std::regex_search(s, m, x);
 		};
 	}
 
-	mask name(fmt::string& buf)
+	mask copy(fmt::string& buf)
 	{
 		return [&](fmt::string_view u)
 		{

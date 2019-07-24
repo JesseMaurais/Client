@@ -20,8 +20,8 @@ namespace sys::env
 
 	bool put(fmt::string_view u)
 	{
-		assert(fmt::terminated(u));
-		auto p = const_cast<char*>(u.data());
+		auto buf = fmt::to_string(u);
+		auto const p = buf.data();
 		return 0 != sys::putenv(p);
 	}
 

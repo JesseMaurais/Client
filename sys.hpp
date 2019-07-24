@@ -324,10 +324,10 @@ namespace sys
 
 namespace sys
 {
-	template <typename T>
-	constexpr bool fail(T const value) 
+	constexpr int invalid = -1;
+
+	inline bool fail(int value) 
 	{
-		constexpr T invalid = -1;
 		return invalid == value;
 	}
 
@@ -352,11 +352,6 @@ namespace sys
 			return ok;
 		}
 	};
-
-	inline bool fail(class stat const& st)
-	{
-			return fail((int) st);
-	}
 
 	class mode
 	{

@@ -39,8 +39,8 @@ namespace sys
 
 // Compile error on std::perror use -- switch to sys::perror
 #ifndef NDEBUG
-# define inplace __FILE__, __LINE__, __func__
-//# define perror(...) perror(inplace, __VA_ARGS__)
+# define inplace __FILE__, __LINE__, __FUNCTION__
+# define perror(...) perror(inplace, __VA_ARGS__)
 #else
 # define inplace
 #endif

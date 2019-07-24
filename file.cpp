@@ -156,14 +156,12 @@ namespace sys::file
 
 	void descriptor::close()
 	{
-		if (not sys::fail(fd))
+		bool const ok = not sys::fail(fd);
+		if (ok and sys::fail(sys::close(fd)))
 		{
-			if (sys::fail(sys::close(fd)))
-			{
-				sys::perror("close", fd);
-			}
-			else fd = -1;
+			sys::perror("close", fd);
 		}
+		else fd = sys::invalid;
 	}
 
 	pipe::pipe()

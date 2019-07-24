@@ -26,11 +26,6 @@ namespace
 		#endif
 	}
 	#endif
-
-	inline fmt::string expr(fmt::string_view name)
-	{
-		return fmt::to_string(name) + sys::ext::share;
-	}
 }
 
 namespace sys
@@ -38,7 +33,7 @@ namespace sys
 	dll::dll(fmt::string_view path)
 	{
 		auto const buf = fmt::to_string(path);
-		auto const s = empty(buf) ? nullptr : buf.c_str();
+		auto const s = buf.c_str();
 
 		#ifdef _WIN32
 		{
@@ -107,7 +102,6 @@ namespace sys
 		}
 		#else
 		{
-			// see pubs.opengroup.org
 			(void) dlerror();
 			auto f = dlsym(ptr, s);
 			auto const e = dlerror();
@@ -120,11 +114,12 @@ namespace sys
 		#endif
 	}
 
-	dll dll::find(fmt::string_view name)
+	dll dll::find(fmt::string_view basename)
 	{
-		fmt::string path;
-		::env::dir::find(::env::dir::share, ::env::dir::regex(expr(name)) | ::env::dir::name(path));
-		return fmt::string_view(path);
+		using namespace ::env::dir;
+		auto name = fmt::to_string(basename) + sys::ext::share;
+		find(share, match(name) | copy(name));
+		return fmt::string_view(name);
 	}
 }
 

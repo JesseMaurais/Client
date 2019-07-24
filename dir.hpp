@@ -73,16 +73,16 @@ namespace env::dir
 	extern env::list const& include;
 
 	mask mode(sys::file::mode);
-	mask regex(fmt::string_view);
-	mask name(fmt::string&);
+	mask match(fmt::string_view);
+	mask copy(fmt::string&);
 
-	bool find(fmt::string_view path, mask);
+	bool find(fmt::string_view dir, mask);
 
 	inline bool find(fmt::string_view_span list, mask view)
 	{
-		for (auto const path : list)
+		for (auto const dir : list)
 		{
-			if (find(path, view))
+			if (find(dir, view))
 			{
 				return true;
 			}

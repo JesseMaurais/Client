@@ -26,7 +26,7 @@ namespace sys::win
 
 	inline int open(HANDLE h, int flags)
 	{
-		if (sys::win::fail(h)) return -1;
+		if (sys::win::fail(h)) return sys::invalid;
 		auto const iptr = reinterpret_cast<intptr_t>(h);
 		return _open_osfhandle(iptr, flags);
 	}
@@ -53,20 +53,9 @@ namespace sys::win
 		size() { this->*Size = sizeof(T); }
 	};
 
-	struct errmode
-	{
-		UINT mode;
-
-		errmode(UINT scoped)
-		{
-			mode = SetErrorMode(scoped);
-		}
-
-		~errmode()
-		{
-			SetErrorMode(mode);
-		}
-	};
+	using security_attributes = size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
+	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
+	using process_info = zero<PROCESS_INFORMATION>
 
 	struct handle
 	{
@@ -78,7 +67,8 @@ namespace sys::win
 
 		~handle()
 		{
-			if (not fail(h) and not CloseHandle(h))
+			bool const ok = not fail(h);
+			if (ok and not CloseHandle(h))
 			{
 				sys::win::perror("CloseHandle");
 			}
@@ -97,10 +87,6 @@ namespace sys::win
 		}
 
 	};
-
-	using security_attributes = size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
-	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
-	using process_info = zero<PROCESS_INFORMATION>
 
 	struct pipe
 	{
@@ -124,6 +110,11 @@ namespace sys::win
 	{
 		HANDLE h;
 
+		operator bool() const
+		{
+			return not fail(h);
+		}
+
 		find(char const* s)
 		{
 			h = FindFirstFile(s, this);
@@ -135,15 +126,11 @@ namespace sys::win
 
 		~find()
 		{
-			if (not fail(h) and not FildClose(h))
+			bool const ok = not fail(h);
+			if (ok and not FindClose(h))
 			{
 				perror("FindClose");
 			}
-		}
-
-		operator bool() const
-		{
-			return not fail(h);
 		}
 
 		bool operator++()

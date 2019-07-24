@@ -242,23 +242,27 @@ namespace
 						{ Templates, FOLDERID_Templates },
 						{ Videos, FOLDERID_Videos },
 					};
-					struct scoped
-					{
-						~scoped() { if (p) CoTaskMemFree(p); }
-						PWSTR p = nullptr;
-					} ws;
-					HRESULT const ok = SHGetKnownFolderPath
+
+					PWSTR pws = nullptr;
+					auto const id = map.at(val);
+					auto const ok = SHGetKnownFolderPath
 					(
 						map.at(val),
 						0,
 						nullptr,
-						&ws.p
+						&pws
 					);
+
 					if (S_OK == ok)
 					{
-						static std::string s;
-						s = fmt::to_string(ws.p);
+						static fmt::string s;
+						s = fmt::to_string(pws);
 						u = s;
+					}
+
+					if (nullptr != pws)
+					{
+						CoTaskMemFree(pws);
 					}
 				}
 			}

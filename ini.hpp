@@ -3,20 +3,19 @@
 
 #include "fmt.hpp"
 #include <istream>
-#include <string>
 #include <map>
 
 namespace ini
 {
-	using entry = std::map<std::string, std::string>;
-	using group = std::map<std::string, entry>;
+	using entry = std::map<fmt::string, fmt::string>;
+	using group = std::map<fmt::string, entry>;
 
-	static std::istream& getline(std::istream& in, std::string& s, char const c = '#')
+	static std::istream& getline(std::istream& in, fmt::string& s, char const c = '#')
 	{
 		while (std::getline(in, s))
 		{
-			auto const it = fmt::skip(s.begin(), s.end());
-			if (it != s.end() and c != *it)
+			auto const it = fmt::skip(begin(s), end(s));
+			if (it != end(s) and c != *it)
 			{
 				auto const t = s.find(c);
 				s = s.substr(0, t);

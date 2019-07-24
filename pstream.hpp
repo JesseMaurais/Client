@@ -1,9 +1,9 @@
 #ifndef pstream_hpp
 #define pstream_hpp
 
-#include <vector>
 #include <initializer_list>
 #include <iostream>
+#include <vector>
 #include "file.hpp"
 #include "buf.hpp"
 
