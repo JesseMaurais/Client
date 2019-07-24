@@ -5,8 +5,6 @@
 #include "file.hpp"
 #include <functional>
 
-struct dirent;
-
 namespace fmt::path
 {
 	fmt::string_view_vector split(fmt::string_view);
@@ -53,16 +51,16 @@ namespace fmt::dir
 
 namespace env::dir
 {
-	struct mask : std::function<bool(dirent const*)>
+	struct mask : std::function<bool(fmt::string_view)>
 	{
-		using base = std::function<bool(dirent const*)>;
+		using base = std::function<bool(fmt::string_view)>;
 		using base::base;
 
 		mask operator | (base const& that) const
 		{
-			return [&](dirent const* ent)
+			return [&](fmt::string_view u)
 			{
-				return this->operator()(ent) and that(ent);
+				return this->operator()(u) and that(u);
 			};
 		}
 	};

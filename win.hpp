@@ -119,6 +119,47 @@ namespace sys::win
 			}
 		}
 	};
+
+	struct find : WIN32_FIND_DATA
+	{
+		HANDLE h;
+
+		find(char const* s)
+		{
+			h = FindFirstFile(s, this);
+			if (fail(h))
+			{
+				perror("FindFirstFile", s);
+			}
+		}
+
+		~find()
+		{
+			if (not fail(h) and not FildClose(h))
+			{
+				perror("FindClose");
+			}
+		}
+
+		operator bool() const
+		{
+			return not fail(h);
+		}
+
+		bool operator++()
+		{
+			if (not FindNextFile(h, this))
+			{
+				auto const err = GetLastError();
+				if (ERROR_NO_MORE_FILES != err)
+				{
+					perror("FindNextFile");
+				}
+				return false;
+			}
+			return true;
+		}
+	};
 }
 
 #endif // file

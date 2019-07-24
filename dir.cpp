@@ -11,7 +11,7 @@
 #include <regex>
 
 #ifdef _WIN32
-# include "dirent.h"
+# include "win.hpp"
 #else
 # include <dirent.h>
 #endif
@@ -140,40 +140,59 @@ namespace env::dir
 	bool find(fmt::string_view path, mask check)
 	{
 		auto const buf = fmt::to_string(path);
-		auto const str = buf.c_str(); // terminated
-		auto const dir = ptr::make(opendir(str), +[](DIR* dir)
-		{
-			if (nullptr == dir)
-			{
-				sys::perror("opendir");
-			}
-			else
-			if (sys::fail(closedir(dir)))
-			{
-				sys::perror("closedir");
-			}
-		});
+		auto const s = buf.c_str(); // terminated
 
-		while (dir) // as if
+		#ifdef _WIN32
 		{
-			if (auto const ent = readdir(dir.get()); ent)
+			sys::win::find dir(s);
+			if (dir) do
 			{
-				if (check(ent))
+				if (check(dir.cFileName))
 				{
 					return true;
 				}
 			}
-			else break;
+			while (++dir);
+			return false;
 		}
-		return false;
+		#else
+		{
+			auto const dir = ptr::make(opendir(s), +[](DIR* dir)
+			{
+				if (nullptr == dir)
+				{
+					sys::perror("opendir");
+				}
+				else
+				if (sys::fail(closedir(dir)))
+				{
+					sys::perror("closedir");
+				}
+			});
+
+			while (dir) // as if
+			{
+				if (auto const ent = readdir(dir.get()))
+				{
+					if (check(ent->d_name))
+					{
+						return true;
+					}
+				}
+				else break;
+			}
+			return false;
+		}
+		#endif
 	}
 
 	mask mode(sys::file::mode bits)
 	{
 		auto const flags = sys::file::convert(bits);
-		return [=](dirent const* ent)
+		return [=](fmt::string_view u)
 		{
-			if (sys::fail(sys::access(ent->d_name, flags)))
+			auto const s = u.data();
+			if (sys::fail(sys::access(s, flags)))
 			{
 				return false;
 			}
@@ -182,7 +201,7 @@ namespace env::dir
 				if (bits & sys::file::mode::run)
 				{
 					DWORD type;
-					BOOL ok = GetBinaryType(ent->d_name, &type);
+					BOOL ok = GetBinaryType(s, &type);
 					return TRUE == ok;
 				}
 			}
@@ -195,18 +214,19 @@ namespace env::dir
 	{
 		auto const buf = fmt::to_string(pattern);
 		auto const expr = std::regex(buf);
-		return [expr](dirent const* ent)
+		return [expr](fmt::string_view u)
 		{
 			std::cmatch match;
-			return std::regex_search(ent->d_name, match, expr);
+			auto const s = u.data();
+			return std::regex_search(s, match, expr);
 		};
 	}
 
 	mask name(fmt::string& buf)
 	{
-		return [&](dirent const* ent)
+		return [&](fmt::string_view u)
 		{
-			buf.assign(ent->d_name);
+			buf = fmt::to_string(u);
 			return true;
 		};
 	}

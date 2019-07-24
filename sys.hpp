@@ -151,16 +151,25 @@ constexpr bool xopen_unix =
 
 #define S_IRUSR  _S_IREAD
 #define S_IWUSR  _S_IWRITE
-#define S_IXUSR  0
+#define S_IXUSR  _S_IEXEC
 #define S_IRGRP  _S_IREAD
 #define S_IWGRP  _S_IWRITE
-#define S_IXGRP  0
+#define S_IXGRP  _S_IEXEC
 #define S_IROTH  _S_IREAD
 #define S_IWOTH  _S_IWRITE
-#define S_IXOTH  0
-#define S_IRWXU (S_IRUSR | S_IWUSR | S_IXUSR)
-#define S_IRWXG (S_IRGRP | S_IWGRP | S_IXGRP)
+#define S_IXOTH  _S_IEXEC
+#define S_IRWXU ( S_IRUSR | S_IWUSR | S_IXUSR )
+#define S_IRWXG ( S_IRGRP | S_IWGRP | S_IXGRP )
+#define S_IFMT   _S_IFMT
+#define S_IFDIR  _S_IFDIR
+#define S_IFCHR  _S_IFCHR
+#define S_IFREG  _S_IFREG
+#define S_IFIFO  _S_IFIFO
 
+#define S_ISFIFO(x) (((x) & S_IFMT) == S_IFIFO)
+#define S_ISDIR(x)  (((x) & S_IFMT) == S_IFDIR)
+#define S_ISREG(x)  (((x) & S_IFMT) == S_IFREG)
+#define S_ISCHR(x)  (((x) & S_IFMT) == S_IFCHR)
 
 using STAT_STRUCT = struct _stat;
 
