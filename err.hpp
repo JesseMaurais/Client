@@ -7,6 +7,10 @@
 # define verify(x) assert(x)
 #endif
 
+#ifndef assert
+# include <cassert>
+#endif
+
 #include <sstream>
 #include <cstdio>
 

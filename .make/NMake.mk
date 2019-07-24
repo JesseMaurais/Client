@@ -1,7 +1,7 @@
 
 # Guess the operating system
 
-!ifndef "$(OS)" != "Windows_NT"
+!if "$(OS)" == "Windows_NT"
 DEF = $(DEF) -D_WIN32
 EXE = .exe
 !else

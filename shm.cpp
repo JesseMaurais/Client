@@ -78,7 +78,7 @@ namespace sys::file
 				return true;
 			}
 
-			ptr = MapViewOfFileEx(h, flags, hi, lo, sz, ptr);
+			ptr = MapViewOfFile(h, flags, hi, lo, sz);
 			if (nullptr == ptr)
 			{
 				sys::win::perror(here, "MapViewOfFile");

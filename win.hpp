@@ -55,7 +55,7 @@ namespace sys::win
 
 	using security_attributes = size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
 	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
-	using process_info = zero<PROCESS_INFORMATION>
+	using process_info = zero<PROCESS_INFORMATION>;
 
 	struct handle
 	{

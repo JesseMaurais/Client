@@ -23,7 +23,6 @@ namespace sys::net
 	{
 		::SOCKADDR_STORAGE_LH pad;
 		::SOCKADDR address;
-		::SOCKADDR_UN un;
 		::SOCKADDR_IN in;
 	};
 
@@ -33,7 +32,7 @@ namespace sys::net
 
 	template <typename... Args> inline void perror(Args... args)
 	{
-			sys::win::perror(args);
+			sys::win::perror(args...);
 	}
 
 	constexpr auto close = ::closesocket;

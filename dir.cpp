@@ -198,7 +198,7 @@ namespace env::dir
 			}
 			#ifdef _WIN32
 			{
-				if (bits & sys::file::mode::run)
+				if (bit & sys::file::mode::run)
 				{
 					DWORD type;
 					BOOL ok = GetBinaryType(s, &type);
