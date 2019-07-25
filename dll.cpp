@@ -6,7 +6,6 @@
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "err.hpp"
-#include <iostream>
 
 #ifdef _WIN32
 # include "win.hpp"
@@ -21,7 +20,8 @@ namespace
 	{
 		if (sys::debug)
 		{
-			std::cerr << fmt::error(args...) << std::endl;
+			auto const err = fmt::error(args...);
+			std::fputs(err.c_str(), stderr);
 		}
 	}
 	#endif

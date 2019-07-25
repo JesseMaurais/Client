@@ -20,7 +20,6 @@ namespace fmt::dir
 {
 	fmt::string impl::join(fmt::string_view_span p)
 	{
-		// todo: check for illegal characters
 		return fmt::lc.join(p, sys::sep::dir);
 	}
 
@@ -34,7 +33,6 @@ namespace fmt::path
 {
 	fmt::string impl::join(fmt::string_view_span p)
 	{
-		// todo: check for illegal characters
 		return fmt::lc.join(p, sys::sep::path);
 	}
 
