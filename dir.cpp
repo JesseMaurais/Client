@@ -222,12 +222,22 @@ namespace env::dir
 		};
 	}
 
+	mask emplace(fmt::string_vector& buf)
+	{
+		return [&](fmt::string_view u)
+		{
+			auto s = fmt::to_string(u);
+			buf.emplace_back(move(s));
+			return false;
+		};
+	}
+
 	mask copy(fmt::string& buf)
 	{
 		return [&](fmt::string_view u)
 		{
 			buf = fmt::to_string(u);
-			return true;
+			return false;
 		};
 	}
 }

@@ -74,7 +74,10 @@ namespace env::dir
 
 	mask mode(sys::file::mode);
 	mask match(fmt::string_view);
+	mask copy(fmt::string_vector&);
 	mask copy(fmt::string&);
+
+	constexpr auto stop = [](fmt::string_view) { return false; };
 
 	bool find(fmt::string_view dir, mask);
 
