@@ -38,11 +38,8 @@ namespace sys
 	{
 		if (debug)
 		{
-			auto s = fmt::error(args...);
-			if (not empty(s))
-			{
-				std::perror(s.c_str());
-			}
+			auto const s = fmt::error(args...);
+			std::perror(s.c_str());
 		}
 	}
 }

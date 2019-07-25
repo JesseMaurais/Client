@@ -12,6 +12,21 @@
 
 namespace sys::win
 {
+	namespace impl
+	{
+		void perror(char const* prefix);
+	}
+
+	template <typename... Args>
+	inline void perror(Args... args)
+	{
+		if (sys::debug)
+		{
+			auto const s = fmt::error(args...);
+			impl::perror(s.c_str());
+		}
+	}
+
 	inline bool fail(HANDLE h)
 	{
 		return nullptr == h or INVALID_HANDLE_VALUE == h;
@@ -30,19 +45,6 @@ namespace sys::win
 		auto const iptr = reinterpret_cast<intptr_t>(h);
 		return _open_osfhandle(iptr, flags);
 	}
-
-
-	template <typename... Args>
-	inline void perror(Args... args)
-	{
-		#ifndef NDEBUG
-		{
-			auto const s = fmt::error(args...);
-			sys::winerr(s.c_str());
-		}
-		#endif
-	}
-
 	template <typename T> struct zero : T
 	{
 		zero() { ZeroMemory(this, sizeof(T)); }
@@ -67,10 +69,9 @@ namespace sys::win
 
 		~handle()
 		{
-			bool const ok = not fail(h);
-			if (ok and not CloseHandle(h))
+			if (not fail(h))
 			{
-				sys::win::perror(here, "CloseHandle");
+				close();
 			}
 		}
 
@@ -79,6 +80,15 @@ namespace sys::win
 			int const fd = sys::win::open(h, flags);
 			h = INVALID_HANDLE_VALUE;
 			return fd;
+		}
+
+		void close()
+		{
+			if (not CloseHandle(h))
+			{
+				sys::win::perror(here, "CloseHandle");
+			}
+			h = nullptr;
 		}
 
 		operator HANDLE() const
@@ -112,7 +122,16 @@ namespace sys::win
 
 		operator bool() const
 		{
-			return not sys::win::fail(h);
+			return not fail(h);
+		}
+
+		void close()
+		{
+			if (not FileClose(h))
+			{
+				sys::win::perror(here, "FindClose");
+			}
+			h = nullptr;
 		}
 
 		find(char const* s)
@@ -126,10 +145,9 @@ namespace sys::win
 
 		~find()
 		{
-			bool const ok = not fail(h);
-			if (ok and not FindClose(h))
+			if (not fail(h))
 			{
-				sys::win::perror(here, "FindClose");
+				close();
 			}
 		}
 

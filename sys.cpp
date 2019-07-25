@@ -8,7 +8,6 @@
 
 #ifdef _WIN32
 # include "win.hpp"
-# include <iostream>
 #else
 # include <sys/wait.h>
 # include <signal.h>
@@ -16,35 +15,6 @@
 
 namespace sys
 {
-	#ifdef _WIN32
-
-	unsigned long winerr(char const *prefix)
-	{
-		LPSTR data = nullptr;
-		LPSTR address = reinterpret_cast<LPSTR>(&data);
-		constexpr DWORD lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
-		DWORD const code = GetLastError();
-		DWORD const size = FormatMessageA
-		(
-		 FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		 nullptr, // source
-		 code,    // message
-		 lang,    // language
-		 address, // buffer
-		 0,       // size
-		 nullptr  // arguments
-		);
-		if (data)
-		{
-			fmt::string_view msg(data, size);
-			std::cerr << prefix << ": " << msg << std::endl;
-			LocalFree(data);
-		}
-		return code;
-	}
-
-	#endif
-
 	pid_t run(int fd[3], char const**argv)
 	{
 		#ifdef _WIN32

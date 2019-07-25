@@ -1,6 +1,7 @@
 # Use line continuation to distinguish NMake from GNU
 # \
 !ifdef 0
--include $(DEP)
+DEPENDS=$(SRC:.cpp=.d)
+-include $(DEPENDS)
 # \
 !endif

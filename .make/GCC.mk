@@ -5,4 +5,3 @@ FLAGS = -MP -MMD
 USESTD = -std=
 DEBUG = -g
 OUT = -o 
-OBJ = $(SRC:.cpp=.o)
