@@ -20,7 +20,7 @@ namespace
 		// Insecure but portable persistence
 		verify(SIG_ERR != std::signal(no, raise));
 
-		event(no).raise([no](auto const &p)
+		event(no).send([no](auto const &p)
 		{
 			p.second(no);
 		});
@@ -29,39 +29,39 @@ namespace
 
 namespace sys::sig
 {
-	slot::slot(int no, sys::sig::observer fn)
-	: base(&event(no), fn)
+	slot::slot(int on, observer ob)
+	: base(&event(on), ob)
 	{
-		old.fn = std::signal(no, send);
-		if (SIG_ERR == old.fn)
+		old.ob = std::signal(on, raise);
+		if (SIG_ERR == old.ob)
 		{
-			sys::err(here, "signal", no);
+			sys::err(here, "signal", on);
 		}
 		else
 		{
-			old.no = no;
+			old.ob = ob;
 		}
 	}
 
 	slot::~slot()
 	{
-		verify(send == std::signal(old.no, old.fn));
+		verify(raise == std::signal(old.on, old.ob));
 	}
 
 	slot::operator bool()
 	{
-		return SIG_ERR != old.fn;
+		return SIG_ERR != old.ob;
 	}
 
-	link::link(int no, observer ob) : slot(no, next(ob))
+	link::link(int on, observer ob) : slot(on, next(ob))
 	{ }
 
 	observer link::next(observer ob)
 	{
-		return [=](int no)
+		return [=](int on)
 		{
-			ob(no);
-			old.fn(no);
+			ob(on);
+			old.ob(oo);
 		};
 	}
 }

@@ -93,33 +93,33 @@ namespace sys::sig
 	struct scope : slot
 	{
 		operator bool();
-		slot(int no, observer fn);
-		~slot();
+		scope(int no, observer fn);
+		~scope();
 
 	protected:
 
 		using base = ::sig::slot<int>;
 
 		struct {
-			signature *fn;
-			int no;
+			signature *ob;
+			int on;
 		} old;
 	};
 
 	struct link : scope
 	{
-		link(int no, observer fn);
+		link(int on, observer fn);
 
-	protected
+	protected:
 
 		observer next(observer);
 	};
 
 	struct only : link
 	{
-		only(int no, observer fn) : slot(no, fn)
+		only(int on, observer ob) : link(on, ob)
 		{
-			assert(nullptr == old.fn);
+			assert(nullptr == old.ob);
 		}
 	};
 }

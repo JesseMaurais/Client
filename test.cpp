@@ -284,9 +284,9 @@ namespace
 		std::vector<int> caught;
 		for (int const n : { SIGINT, SIGFPE, SIGILL })
 		{
-			sys::sig::slot handle(n, [&](int signo)
+			sys::sig::scope handle(n, [&](int on)
 			{
-				caught.push_back(signo);
+				caught.push_back(on);
 			});
 			std::raise(n);
 		}
