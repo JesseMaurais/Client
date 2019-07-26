@@ -229,9 +229,17 @@ namespace sys::file
 		}
 
 		void run(char const** argv);
+		void quit();
 		void kill();
 		int wait();
+
 		int join()
+		{
+			quit();
+			return wait();
+		}
+
+		int stop()
 		{
 			kill();
 			return wait();

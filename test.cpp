@@ -325,7 +325,7 @@ namespace
 	{
 		io::pstream ps { "rev" };
 		ps << HELLO_WORLD;
-		ps.close(0);
+		ps.quit();
 		std::string s;
 		ASSERT(std::getline(ps, s));
 		ASSERT_EQ(s, DLROW_OLLEH);

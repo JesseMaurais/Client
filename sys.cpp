@@ -2,52 +2,84 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "sys.hpp"
-#include "env.hpp"
 #include "err.hpp"
+#include "ptr.hpp"
 #include "file.hpp"
-
 #ifdef _WIN32
 # include "win.hpp"
-#else
+#else //POSIX
 # include <sys/wait.h>
 # include <signal.h>
 #endif
+#include <vector>
 
 namespace sys
 {
 	#ifdef _WIN32
-	namespace win
+	namespace win::msg
 	{
-		void err(char const *prefix, void *module = nullptr)
+		LPSTR err(HMODULE h)
 		{
-			auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
-			          | FORMAT_MESSAGE_IGNORE_INSERTS
-		    	      | FORMAT_MESSAGE_FROM_SYSTEM;
-
-			if (nullptr != module)
+			if (sys::win::fail(h))
 			{
-				flag |= FORMAT_MESSAGE_MODULE;
+				h = GetModuleHandle(nullptr);
 			}
-							
-			LPSTR buffer = nullptr;
-			auto const data = reinterpret_cast<LPSTR>(&buffer);
+
+			const auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
+			                | FORMAT_MESSAGE_IGNORE_INSERTS
+		    	            | FORMAT_MESSAGE_FROM_SYSTEM
+			                | FORMAT_MESSAGE_MODULE;
+
+			static auto ptr = null(LocalFree);
+			LPSTR const str = nullptr;
+			auto const addr = (LPSTR) &str;
 			auto const code = GetLastError();
 			auto const size = FormatMessage
 			(
-				flag,    // style
-				module,  // source
-				code,    // message
-				lang,    // language
-				data,    // buffer
-				0,       // size
-				nullptr  // arguments
+				flag,   // style
+				h,      // module
+				code,   // message
+				lang,   // language
+				addr,   // buffer
+				0,      // size
+				nullptr // arguments
 			);
 		
 			if (0 < size)
 			{
-				std::fprintf("%s: %s", prefix, buffer);
-				LocalFree(buffer);
+				ptr = make((HLOCAL) str, LocalFree);
 			}
+			return str;
+		}
+
+		static HWND hwnd;
+		static DWORD tid;
+
+		static BOOL CALLBACK find(HWND w, LPARAM lp)
+		{
+			DWORD pid;
+			tid = GetWindowThreadProcessId(w, &pid);
+			if (lp == pid)
+			{
+				hwnd = w;
+				return 1;
+			}
+			return 0;
+		}
+
+		HWND get(DWORD pid, DWORD& thread)
+		{
+			if (EnumWindows(find, pid))
+			{
+				thread = tid;
+				return hwnd;
+			}
+			return sys::win::invalid;
+		}
+
+		HWND get(DWORD pid)
+		{
+			get(pid, thread);
 		}
 	}
 	#endif
@@ -196,7 +228,26 @@ namespace sys
 		{
 			if (fail(::kill(pid, SIGTERM)))
 			{
-				sys::err(here, "kill", pid);
+				sys::err(here, "SIGTERM", pid);
+			}
+		}
+		#endif
+	}
+
+	void quit(pid_t pid)
+	{
+		#ifdef _WIN32
+		{
+			if (sys::win::msg::quit(pid))
+			{
+				sys::warn(here, "quit", pid);
+			}
+		}
+		#else
+		{
+			if (fail(::kill(pid, SIGINT)))
+			{
+				sys::err(here, "SIGINT", pid);
 			}
 		}
 		#endif

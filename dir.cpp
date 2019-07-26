@@ -155,7 +155,7 @@ namespace env::dir
 		}
 		#else
 		{
-			auto const dir = ptr::make(opendir(s), +[](DIR* dir)
+			auto const dir = make(opendir(s), +[](DIR* dir)
 			{
 				if (nullptr == dir)
 				{

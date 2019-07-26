@@ -46,6 +46,11 @@ namespace io
 			file.kill();
 		}
 
+		void quit()
+		{
+			file.quit();
+		}
+
 		int wait()
 		{
 			file.wait();
@@ -54,6 +59,11 @@ namespace io
 		int join()
 		{
 			file.join();
+		}
+
+		int stop()
+		{
+			file.stop();
 		}
 
 		void close(int n)

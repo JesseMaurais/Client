@@ -6,7 +6,7 @@
 #include "net.hpp"
 #include "sig.hpp"
 #include "int.hpp"
-#include <cassert>
+#include "err.hpp"
 
 namespace sys::file
 {

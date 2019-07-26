@@ -12,21 +12,58 @@
 
 namespace sys::win
 {
-	void perror(char const *prefix void *module = nullptr);
+	constexpr auto invalid = INVALID_HANDLE_VALUE;
+
+	inline bool fail(HANDLE h)
+	{
+		return nullptr == h or invalid == h;
+	}
+
+	namespace msg
+	{
+		LPSTR err(HMODULE h = nullptr);
+
+		HWND get(DWORD pid, DWORD& tid);
+		HWND get(DWORD pid);
+
+		inline bool put(MSG& it)
+		{
+			return PostMessage(it.hwnd, it.message, it.wParam, it.lParam);
+		}
+
+		inline bool put(UINT msg, HWND w = nullptr, WPARAM wp = 0, LPARAM lp = 0)
+		{
+			return PostMessage(w, msg, wp, lp);
+		}
+
+		inline bool get(MSG& it, UINT min = 0, UINT max = 0, HWND w = nullptr, UINT rm = PM_REMOVE)
+		{
+			0 != PeekMessage(&it, w, min, max, rm);
+		}
+
+		inline bool join(MSG& it)
+		{
+			return get(it) and WM_QUIT == it.message; 
+		}
+
+		inline bool quit(DWORD pid)
+		{
+			auto const w = get(pid);
+			if (not fail(w))
+			{
+				put(WM_QUIT, w);
+			}
+		}
+	}
 
 	template <typename... Args>
 	inline void err(Args... args)
 	{
 		if (sys::debug)
 		{
-			auto const s = fmt::err(args...);
-			sys::win::perror(s.c_str());
+			auto const s = msg::err();
+			sys::warn(args.., s);
 		}
-	}
-
-	inline bool fail(HANDLE h)
-	{
-		return nullptr == h or INVALID_HANDLE_VALUE == h;
 	}
 
 	inline HANDLE get(int fd)
@@ -61,7 +98,7 @@ namespace sys::win
 	{
 		HANDLE h;
 
-		handle(HANDLE p = nullptr)
+		handle(HANDLE p = invalid)
 		: h(p)
 		{ }
 
@@ -76,7 +113,7 @@ namespace sys::win
 		int open(int flags)
 		{
 			int const fd = open(h, flags);
-			h = INVALID_HANDLE_VALUE;
+			h = invalid;
 			return fd;
 		}
 
@@ -86,7 +123,7 @@ namespace sys::win
 			{
 				err(here, "CloseHandle");
 			}
-			else h = INVALID_HANDLE_VALUE;
+			else h = invalid;
 		}
 	};
 
@@ -152,7 +189,7 @@ namespace sys::win
 			{
 				err(here, "FindClose");
 			}
-			else h = INVALID_HANDLE_VALUE;
+			else h = invalid;
 		}
 	};
 

@@ -5,7 +5,6 @@
 #include "err.hpp"
 #include "dbg.hpp"
 #include <csignal>
-#include <cassert>
 #include <map>
 
 namespace

@@ -4,6 +4,7 @@
 #include <limits>
 #include <cstddef>
 #include <type_traits>
+#include "err.hpp"
 
 namespace fmt
 {

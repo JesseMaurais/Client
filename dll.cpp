@@ -13,21 +13,6 @@
 # include <dlfcn.h>
 #endif
 
-namespace
-{
-	#ifndef _WIN32
-	template <typename... Args>
-	inline void err(Args... args)
-	{
-		if (sys::debug)
-		{
-			auto const s = fmt::err(args...);
-			std::fputs(data(s), stderr);
-		}
-	}
-	#endif
-}
-
 namespace sys
 {
 	dll::dll(fmt::string_view path)
@@ -50,7 +35,7 @@ namespace sys
 			if (nullptr == ptr)
 			{
 				auto const e = dlerror();
-				::err(here, "dlopen", path, e);
+				sys::warn(here, "dlopen", path, e);
 			}
 		}
 		#endif
@@ -71,7 +56,7 @@ namespace sys
 			if (nullptr != ptr and dlclose(ptr))
 			{
 				auto const e = dlerror();
-				::err(here, "dlclose", e);
+				sys::warn(here, "dlclose", e);
 			}
 		}
 		#endif
@@ -109,7 +94,7 @@ namespace sys
 			auto const e = dlerror();
 			if (nullptr != e)
 			{
-				::err(here, "dlsym", name, e);
+				sys::warn(here, "dlsym", name, e);
 			}
 			return f;
 		}

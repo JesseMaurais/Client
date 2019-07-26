@@ -374,6 +374,7 @@ namespace sys
 	pid_t run(int fd[3], char const** argv);
 	void kill(pid_t pid);
 	int wait(pid_t pid);
+	void quit(pid_t pid);
 }
 
 #endif // file

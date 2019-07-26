@@ -36,7 +36,4 @@ namespace dbg
 #define ASSERT_EQ(a, b) ASSERT((a) == (b))
 #define ASSERT_NOT_EQ(a, b) ASSERT((a) != (b))
 
-#undef assert
-#define assert(x) ASSERT(x)
-
 #endif // file
