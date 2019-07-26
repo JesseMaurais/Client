@@ -12,47 +12,47 @@ namespace sys::file
 
 	enum mode : int
 	{
-		run    = 1 << 0,
-		write  = 1 << 1,
-		read   = 1 << 2,
-		extant = 1 << 3,
-		only   = 1 << 4,
-		erase  = 1 << 5,
-		append = 1 << 6,
-		text   = 1 << 7,
-		binary = 1 << 8,
+		ex   = 1 << 0, // execute
+		wr   = 1 << 1, // write
+		rd   = 1 << 2, // read
+		ok   = 1 << 3, // exists
+		lock = 1 << 4, // exclusive
+		sz   = 1 << 5, // truncate
+		app  = 1 << 6, // append
+		txt  = 1 << 7, // text
+		bin  = 1 << 8, // binary
+		rw   = rd | wr,
+		rwx  = rw | ex,
 	};
 
-	enum permit : int;
-
-	constexpr auto owner(mode bit)
+	constexpr int owner(int um)
 	{
-		return static_cast<permit>((bit & 07) << 6);
+		return (um & rwx) << 6;
 	}
 
-	constexpr auto group(mode bit)
+	constexpr int group(int um)
 	{
-		return static_cast<permit>((bit & 07) << 3);
+		return (um & rwx) << 3;
 	}
 
-	constexpr auto other(mode bit)
+	constexpr int other(int um)
 	{
-		return static_cast<permit>((bit & 07) << 0);
+		return (um & rwx) << 0;
 	}
 
 	enum permit : int
 	{
-		owner_r = owner(read),
-		owner_w = owner(write),
-		owner_x = owner(run),
+		owner_r = owner(rd),
+		owner_w = owner(wr),
+		owner_x = owner(ex),
 
-		group_r = group(read),
-		group_w = group(write),
-		group_x = group(run),
+		group_r = group(rd),
+		group_w = group(wr),
+		group_x = group(ex),
 
-		other_r = other(read),
-		other_w = other(write),
-		other_x = other(run),
+		other_r = other(rd),
+		other_w = other(wr),
+		other_x = other(ex),
 	};
 
 	int access(mode);

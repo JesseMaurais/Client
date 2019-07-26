@@ -19,21 +19,17 @@ namespace dbg
 	{
 		using test::test;
 		void run() final;
-		virtual void run2() = 0;
+		virtual void die() = 0;
 	};
 }
 #define TEST(unit) struct unit : dbg::test { using test::test; void run() final; } test_##unit(#unit); void unit::run()
-#define FAIL(unit) struct unit : dbg::fail { using fail::fail; void run2() final; } test_##unit(#unit); void unit::run2()
-#define ASSERT(x) { if (not(x)) throw ::fmt::err(here, #x); }
-#define VERIFY(x) ASSERT(x)
+#define FAIL(unit) struct unit : dbg::fail { using fail::fail; void die() final; } test_##unit(#unit); void unit::die()
 #else
 #define TEST(unit) (void) []()
 #define FAIL(unit) (void) []()
-#define ASSERT(x)
-#define VERIFY(x) (x)
 #endif
 
-#define ASSERT_EQ(a, b) ASSERT((a) == (b))
-#define ASSERT_NOT_EQ(a, b) ASSERT((a) != (b))
+#define assert_eq(a, b) assert((a) == (b))
+#define assert_not_eq(a, b) assert((a) != (b))
 
 #endif // file

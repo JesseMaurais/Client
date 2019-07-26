@@ -44,25 +44,25 @@ namespace
 	// Disabled by default for code analyzers
 	//
 	
-	//TEST(sane) { ASSERT(true and not false); }
-	//TEST(sane_equality) { ASSERT_EQ(true, true); }
-	//TEST(sane_inequality) { ASSERT_NOT_EQ(true, false); }
+	//TEST(sane) { assert(true and not false); }
+	//TEST(sane_equality) { assert_eq(true, true); }
+	//TEST(sane_inequality) { assert_not_eq(true, false); }
 	//FAIL(sane_throw) { throw "sane"; }
 
 	// negatives
 	
-	//TEST(not_sane) { ASSERT(false and not true); }
-	//TEST(not_equal) { ASSERT_EQ(true, false); }
-	//TEST(not_unequal) { ASSERT_NOT_EQ(true, true); }
+	//TEST(not_sane) { assert(false and not true); }
+	//TEST(not_equal) { assert_eq(true, false); }
+	//TEST(not_unequal) { assert_not_eq(true, true); }
 	//FAIL(not_throw) { (void) 0; }
 	
 	//
 	// Checked integer conversions
 	//
 
-	TEST(int_narrow) { ASSERT_EQ('*', fmt::to_narrow<char>(42)); }
-	TEST(int_unsigned) { ASSERT_EQ(42u, fmt::to_unsigned(42)); }
-	TEST(int_signed) { ASSERT_EQ(42, fmt::to_signed(42u)); }
+	TEST(int_narrow) { assert_eq('*', fmt::to_narrow<char>(42)); }
+	TEST(int_unsigned) { assert_eq(42u, fmt::to_unsigned(42)); }
+	TEST(int_signed) { assert_eq(42, fmt::to_signed(42u)); }
 
 	// negatives
 
@@ -76,34 +76,34 @@ namespace
 	TEST(fmt_terminated)
 	{
 		using namespace fmt;
-		ASSERT(terminated(string_view(HELLO_WORLD, 13)));
-		ASSERT(not terminated(string_view(HELLO_WORLD, 5)));
+		assert(terminated(string_view(HELLO_WORLD, 13)));
+		assert(not terminated(string_view(HELLO_WORLD, 5)));
 	}
 
 	TEST(fmt_trim)
 	{
 		using namespace fmt;
 		string whitespace = " \t\n";
-		ASSERT(trim(whitespace).empty());
+		assert(trim(whitespace).empty());
 		constexpr auto raw = " \t" HELLO_WORLD "\n";
 		auto const u = trim(raw);
-		ASSERT(not empty(u));
-		ASSERT_EQ(u, HELLO_WORLD);
-		ASSERT_NOT_EQ(u, raw);
+		assert(not empty(u));
+		assert_eq(u, HELLO_WORLD);
+		assert_not_eq(u, raw);
 	}
 
 	TEST(fmt_wide)
 	{
 		using namespace fmt;
-		ASSERT_EQ(to_wstring(string { HELLO_WORLD }), HELLO_WIDE);
-		ASSERT_EQ(to_string(wstring { HELLO_WIDE }), HELLO_WORLD);
+		assert_eq(to_wstring(string { HELLO_WORLD }), HELLO_WIDE);
+		assert_eq(to_string(wstring { HELLO_WIDE }), HELLO_WORLD);
 	}
 
 	TEST(fmt_case)
 	{
 		using namespace fmt;
-		ASSERT_EQ(to_upper(HELLO_WORLD), HELLO_UPPER);
-		ASSERT_EQ(to_lower(HELLO_WORLD), HELLO_LOWER);
+		assert_eq(to_upper(HELLO_WORLD), HELLO_UPPER);
+		assert_eq(to_lower(HELLO_WORLD), HELLO_LOWER);
 	}
 
 	TEST(fmt_delimiter)
@@ -119,11 +119,11 @@ namespace
 			t.emplace_back(u.substr(tok.first, n));
 		}
 
-		ASSERT_EQ(t.size(), 4);
-		ASSERT_EQ(t[0], "A");
-		ASSERT_EQ(t[1], "B");
-		ASSERT_EQ(t[2], "C");
-		ASSERT_EQ(t[3], "D");
+		assert_eq(t.size(), 4);
+		assert_eq(t[0], "A");
+		assert_eq(t[1], "B");
+		assert_eq(t[2], "C");
+		assert_eq(t[3], "D");
 	}
 
 	TEST(fmt_sequence)
@@ -138,10 +138,10 @@ namespace
 			t.emplace_back(u.substr(tok.first, n));
 		}
 
-		ASSERT_EQ(t.size(), 3);
-		ASSERT_EQ(t[0], "A");
-		ASSERT_EQ(t[1], "B");
-		ASSERT_EQ(t[2], "C");
+		assert_eq(t.size(), 3);
+		assert_eq(t[0], "A");
+		assert_eq(t[1], "B");
+		assert_eq(t[2], "C");
 	}
 
 	TEST(fmt_tag)
@@ -152,14 +152,14 @@ namespace
 		string_view_vector t;
 		tag(a, u, [&](auto it, auto pos)
 		{
-			ASSERT_EQ(0, u.compare(pos, it->size(), *it));
+			assert_eq(0, u.compare(pos, it->size(), *it));
 			t.emplace_back(*it);
 		});
 
-		ASSERT_EQ(t.size(), 3);
-		ASSERT_EQ(t[0], "banana");
-		ASSERT_EQ(t[1], "apple");
-		ASSERT_EQ(t[2], "banana");
+		assert_eq(t.size(), 3);
+		assert_eq(t[0], "banana");
+		assert_eq(t[1], "apple");
+		assert_eq(t[2], "banana");
 	}
 
 	//
@@ -181,7 +181,7 @@ namespace
 	{
 		auto var = sys::env::get("PATH");
 		auto val = fmt::path::join(env::paths);
-		ASSERT_EQ(var, val);
+		assert_eq(var, val);
 
 		#ifdef _WIN32
 		{
@@ -194,7 +194,7 @@ namespace
 		#endif
 
 		var = sys::env::get("PATH");
-		ASSERT_EQ(var, val);
+		assert_eq(var, val);
 	}
 
 	TEST(env_vars)
@@ -275,8 +275,8 @@ namespace
 	{
 		sys::dll self;
 		auto f = self.sym<int()>("visible");
-		ASSERT_NOT_EQ(nullptr, f);
-		ASSERT_EQ(f(), hidden());
+		assert_not_eq(nullptr, f);
+		assert_eq(f(), hidden());
 	}
 
 	TEST(sys_sig)
@@ -291,10 +291,10 @@ namespace
 			std::raise(n);
 		}
 
-		ASSERT_EQ(caught.size(), 3);
-		ASSERT_EQ(caught[0], SIGINT);
-		ASSERT_EQ(caught[1], SIGFPE);
-		ASSERT_EQ(caught[2], SIGILL);
+		assert_eq(caught.size(), 3);
+		assert_eq(caught[0], SIGINT);
+		assert_eq(caught[1], SIGFPE);
+		assert_eq(caught[2], SIGILL);
 	}
 
 	//
@@ -306,7 +306,7 @@ namespace
 		std::ostringstream ss;
 		ss << io::params<1, 2, 3, 4>;
 		std::string const s = ss.str();
-		ASSERT_EQ(s, "1;2;3;4");
+		assert_eq(s, "1;2;3;4");
 	}
 
 	TEST(ios_fg)
@@ -314,7 +314,7 @@ namespace
 		std::ostringstream ss;
 		ss << io::fg_green << "GREEN" << io::fg_off;
 		std::string const s = ss.str();
-		ASSERT_EQ(s, "\x1b[32mGREEN\x1b[39m");
+		assert_eq(s, "\x1b[32mGREEN\x1b[39m");
 	}
 
 	//
@@ -327,20 +327,20 @@ namespace
 		ps << HELLO_WORLD;
 		ps.quit();
 		std::string s;
-		ASSERT(std::getline(ps, s));
-		ASSERT_EQ(s, DLROW_OLLEH);
+		assert(std::getline(ps, s));
+		assert_eq(s, DLROW_OLLEH);
 	}
 
 	TEST(ipc_map)
 	{
 		sys::file::descriptor file;
-		file.open(__FILE__, sys::file::read);
+		file.open(__FILE__, sys::file::rd);
 		sys::file::view map;
-		ASSERT(not map.open(file.get()));
+		assert(not map.open(file.get()));
 		fmt::string_view const view = map;
 		auto pos = view.find("Self referencing find.");
-		ASSERT_NOT_EQ(pos, fmt::string_view::npos);
-		ASSERT(not map.close());
+		assert_not_eq(pos, fmt::string_view::npos);
+		assert(not map.close());
 	}
 }
 

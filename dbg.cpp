@@ -58,15 +58,14 @@ namespace dbg
 
 	void fail::run()
 	{
-		try
+		std::stringstream ss;
+		std::cerr.rdbuf(ss.rdbuf());
+		die();
+		const auto s = ss.str();
+		if (not empty(s))
 		{
-			run2();
+			throw std::runtime_error(s);
 		}
-		catch (...)
-		{
-			return;
-		}
-		throw "Did not throw";
 	}
 
 	int run(char const *expression)

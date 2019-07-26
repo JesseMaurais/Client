@@ -11,19 +11,19 @@ namespace sys::file
 	{
 		int flags = 0;
 
-		if (bit & extant)
+		if (bit & ok)
 		{
 			flags |= F_OK;
 		}
-		if (bit & run)
+		if (bit & ex)
 		{
 			flags |= X_OK;
 		}
-		if (bit & read)
+		if (bit & rd)
 		{
 			flags |= R_OK;
 		}
-		if (bit & write)
+		if (bit & wr)
 		{
 			flags |= W_OK;
 		}
@@ -35,47 +35,47 @@ namespace sys::file
 	{
 		int flags = 0;
 
-		if (bit & read and bit & write)
+		if (bit & rw)
 		{
 			flags |= O_RDWR;
 		}
 		else 
-		if (bit & write)
+		if (bit & wr)
 		{
 			flags |= O_WRONLY;
 		}
 		else 
-		if (bit & read)
+		if (bit & rd)
 		{
 			flags |= O_RDONLY;
 		}
 
-		if (bit & text)
+		if (bit & txt)
 		{
 			flags |= O_TEXT;
 		}
 		else
-		if (bit & binary)
+		if (bit & bin)
 		{
 			flags |= O_BINARY;
 		}
 
-		if (bit & append)
+		if (bit & app)
 		{
 			flags |= O_APPEND;
 		}
 
-		if (bit & erase)
+		if (bit & sz)
 		{
 			flags |= O_TRUNC;
 		}
 
-		if (bit & only)
+		if (bit & lock)
 		{
 			flags |= O_EXCL;
 		}
 
-		if (~bit & extant)
+		if (bit & ok)
 		{
 			flags |= O_CREAT;
 		}
