@@ -28,11 +28,15 @@ namespace sys::net
 
 	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
 
-	inline bool fail(descriptor h) { return INVALID_SOCKET == h; }
-
-	template <typename... Args> inline void perror(Args... args)
+	inline bool fail(descriptor h)
 	{
-			sys::win::perror(args...);
+		return INVALID_SOCKET == h;
+	}
+
+	template <typename... Args>
+	inline void err(Args... args)
+	{
+			sys::win::err(args...);
 	}
 
 	constexpr auto close = ::closesocket;
@@ -56,28 +60,28 @@ namespace sys::net
 	{
 		struct data : ::WSADATA
 		{
-			data(WORD version)
+			data(WORD ver)
 			{
-				if (error = ::WSAStartup(version, this); error)
+				if (e = WSAStartup(ver, this))
 				{
-					::sys::win::perror(here, "WSAStartup");
+					err(here, "WSAStartup");
 				}
 			}
 
 			~data()
 			{
-				if (not error and ::WSACleanup())
+				if (0 == e and WSACleanup())
 				{
-					::sys::win::perror(here, "WSACleanup");
+					err(here, "WSACleanup");
 				}
 			}
 
 			operator bool() const
 			{
-				return not error;
+				return 0 == e;
 			}
 
-			int error;
+			int e;
 		};
 	}
 
@@ -110,11 +114,15 @@ namespace sys::net
 
 	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
 
-	inline bool fail(descriptor fd) { return ::sys::fail(fd); }
-
-	template <typename... Args> inline void perror(Args... args)
+	inline bool fail(descriptor fd) 
 	{
-		sys::perror(args...);
+		return ::sys::fail(fd); 
+	}
+
+	template <typename... Args>
+	inline void err(Args... args)
+	{
+		sys::err(args...);
 	}
 
 	constexpr auto close = ::sys::close;

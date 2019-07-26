@@ -27,7 +27,7 @@ namespace sys::file
 		fd = sys::net::socket(family, type, proto);
 		if (sys::net::fail(fd))
 		{
-			sys::net::perror(here, "socket");
+			sys::net::err(here, "socket");
 		}
 	}
 
@@ -36,7 +36,7 @@ namespace sys::file
 		bool const ok = not sys::net::fail(fd);
 		if (ok and sys::net::close(fd))
 		{
-			sys::net::perror(here, "closesocket");
+			sys::net::err(here, "closesocket");
 		}
 	}
 
@@ -51,7 +51,7 @@ namespace sys::file
 		socket s = sys::net::accept(fd, &name.address, &n);
 		if (not s)
 		{
-			sys::net::perror(here, "accept");
+			sys::net::err(here, "accept");
 		}
 		else 
 		if (nullptr != length)
@@ -65,7 +65,7 @@ namespace sys::file
 	{
 		if (sys::net::connect(fd, &name.address, length))
 		{
-			sys::net::perror(here, "connect");
+			sys::net::err(here, "connect");
 			return false;
 		}
 		return true;
@@ -75,7 +75,7 @@ namespace sys::file
 	{
 		if (sys::net::bind(fd, &name.address, length))
 		{
-			sys::net::perror(here, "bind");
+			sys::net::err(here, "bind");
 			return false;
 		}
 		return true;
@@ -85,7 +85,7 @@ namespace sys::file
 	{
 		if (sys::net::listen(fd, backlog))
 		{
-			sys::net::perror(here, "listen");
+			sys::net::err(here, "listen");
 			return false;
 		}
 		return true;
@@ -95,7 +95,7 @@ namespace sys::file
 	{
 		if (sys::net::shutdown(fd, how))
 		{
-			sys::net::perror(here, "shutdown");
+			sys::net::err(here, "shutdown");
 			return false;
 		}
 		return true;
@@ -107,7 +107,7 @@ namespace sys::file
 		ssize_t const n = sys::net::send(fd, ptr, size, flags);
 		if (n < 0)
 		{
-			sys::net::perror(here, "send");
+			sys::net::err(here, "send");
 		}
 		return n;
 	}
@@ -118,7 +118,7 @@ namespace sys::file
 		ssize_t const n = sys::net::sendto(fd, ptr, size, flags, &name.address, length);
 		if (n < 0)
 		{
-			sys::net::perror(here, "sendto");
+			sys::net::err(here, "sendto");
 		}
 		return n;
 	}
@@ -129,7 +129,7 @@ namespace sys::file
 		ssize_t const n = sys::net::recv(fd, ptr, size, flags);
 		if (n < 0)
 		{
-			sys::net::perror(here, "recv");
+			sys::net::err(here, "recv");
 		}
 		return n;
 	}
@@ -141,7 +141,7 @@ namespace sys::file
 		ssize_t const n = sys::net::recvfrom(fd, ptr, size, flags, &name.address, &m);
 		if (n < 0)
 		{
-			sys::net::perror(here, "recvfrom");
+			sys::net::err(here, "recvfrom");
 		}
 		else length = fmt::to_size(m);
 		return n;
@@ -158,7 +158,7 @@ namespace sig
 		int const n = sys::net::poll(fds.data(), fds.size(), timeout);
 		if (n < 0)
 		{
-			sys::net::perror(here, "poll");
+			sys::net::err(here, "poll");
 		}
 		else
 		for (unsigned i = 0, j = 0, k = n; j < k; ++i)

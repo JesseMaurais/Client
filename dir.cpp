@@ -56,13 +56,13 @@ namespace
 			{
 				if (sys::fail(sys::mkdir(s, um)))
 				{
-					sys::perror(here, "mkdir", u);
+					sys::err(here, "mkdir", u);
 				}
 			}
 			else
 			if (sys::fail(sys::chmod(s, um)))
 			{
-				sys::perror(here, "chmod", u);
+				sys::err(here, "chmod", u);
 			}
 			return u;
 		}
@@ -138,7 +138,7 @@ namespace env::dir
 	bool find(fmt::string_view path, mask check)
 	{
 		auto const buf = fmt::to_string(path);
-		auto const s = buf.c_str(); // terminated
+		auto const s = buf.c_str();
 
 		#ifdef _WIN32
 		{
@@ -159,12 +159,12 @@ namespace env::dir
 			{
 				if (nullptr == dir)
 				{
-					sys::perror(here, "opendir");
+					sys::err(here, "opendir");
 				}
 				else
 				if (sys::fail(closedir(dir)))
 				{
-					sys::perror(here, "closedir");
+					sys::err(here, "closedir");
 				}
 			});
 

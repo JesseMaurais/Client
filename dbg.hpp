@@ -24,7 +24,7 @@ namespace dbg
 }
 #define TEST(unit) struct unit : dbg::test { using test::test; void run() final; } test_##unit(#unit); void unit::run()
 #define FAIL(unit) struct unit : dbg::fail { using fail::fail; void run2() final; } test_##unit(#unit); void unit::run2()
-#define ASSERT(x) { if (not(x)) throw ::fmt::error(__FILE__, __LINE__, __func__, #x); }
+#define ASSERT(x) { if (not(x)) throw ::fmt::err(here, #x); }
 #define VERIFY(x) ASSERT(x)
 #else
 #define TEST(unit) (void) []()

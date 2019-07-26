@@ -36,8 +36,8 @@ namespace io
 
 		void run(arguments args)
 		{
-			std::vector<char const*> argv(args);
-			argv.push_back(nullptr); // terminator
+			std::vector argv(args);
+			argv.push_back(nullptr);
 			file.run(argv.data());
 		}
 

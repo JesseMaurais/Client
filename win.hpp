@@ -12,15 +12,15 @@
 
 namespace sys::win
 {
-	void error(char const *prefix void *module = nullptr);
+	void perror(char const *prefix void *module = nullptr);
 
 	template <typename... Args>
-	inline void perror(Args... args)
+	inline void err(Args... args)
 	{
 		if (sys::debug)
 		{
-			auto const s = fmt::error(args...);
-			error(s.c_str());
+			auto const s = fmt::err(args...);
+			sys::win::perror(s.c_str());
 		}
 	}
 
@@ -38,10 +38,11 @@ namespace sys::win
 
 	inline int open(HANDLE h, int flags)
 	{
-		if (sys::win::fail(h)) return sys::invalid;
+		if (fail(h)) return sys::invalid;
 		auto const iptr = reinterpret_cast<intptr_t>(h);
 		return _open_osfhandle(iptr, flags);
 	}
+
 	template <typename T> struct zero : T
 	{
 		zero() { ZeroMemory(this, sizeof(T)); }
@@ -74,7 +75,7 @@ namespace sys::win
 
 		int open(int flags)
 		{
-			int const fd = sys::win::open(h, flags);
+			int const fd = open(h, flags);
 			h = INVALID_HANDLE_VALUE;
 			return fd;
 		}
@@ -83,21 +84,14 @@ namespace sys::win
 		{
 			if (not CloseHandle(h))
 			{
-				sys::win::perror(here, "CloseHandle");
+				err(here, "CloseHandle");
 			}
-			h = nullptr;
+			else h = INVALID_HANDLE_VALUE;
 		}
-
-		operator HANDLE() const
-		{
-			return h;
-		}
-
 	};
 
 	struct pipe
 	{
-		BOOL ok;
 		handle read;
 		handle write;
 
@@ -105,38 +99,28 @@ namespace sys::win
 		{
 			security_attributes sa;
 			sa.bInheritHandle = true;
-			ok = CreatePipe(&read.h, &write.h, &sa, BUFSIZ);
-			if (not ok)
+			if (not CreatePipe(&read.h, &write.h, &sa, BUFSIZ))
 			{
-				sys::win::perror(here, "CreatePipe");
+				err(here, "CreatePipe");
 			}
 		}
 	};
 
+	inline bool fail(pipe const& p)
+	{
+		return fail(p.read) or fail(p.write);
+	}
+
 	struct find : WIN32_FIND_DATA
 	{
 		HANDLE h;
-
-		operator bool() const
-		{
-			return not fail(h);
-		}
-
-		void close()
-		{
-			if (not FileClose(h))
-			{
-				sys::win::perror(here, "FindClose");
-			}
-			h = nullptr;
-		}
 
 		find(char const* s)
 		{
 			h = FindFirstFile(s, this);
 			if (fail(h))
 			{
-				sys::win::perror(here, "FindFirstFile", s);
+				err(here, "FindFirstFile", s);
 			}
 		}
 
@@ -152,16 +136,30 @@ namespace sys::win
 		{
 			if (not FindNextFile(h, this))
 			{
-				auto const err = GetLastError();
-				if (ERROR_NO_MORE_FILES != err)
+				auto const e = GetLastError();
+				if (ERROR_NO_MORE_FILES != e)
 				{
-					sys::win::perror(here, "FindNextFile");
+					err(here, "FindNextFile");
 				}
 				return false;
 			}
 			return true;
 		}
+
+		void close()
+		{
+			if (not FileClose(h))
+			{
+				err(here, "FindClose");
+			}
+			else h = INVALID_HANDLE_VALUE;
+		}
 	};
+
+	inline bool fail(find const& f)
+	{
+		return fail(f.h);
+	}
 }
 
 #endif // file

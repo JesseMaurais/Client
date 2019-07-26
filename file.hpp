@@ -72,12 +72,20 @@ namespace sys::file
 	{
 		explicit descriptor(int fd = invalid)
 		{
-			set(fd);
+			(void) set(fd);
+		}
+
+		descriptor(char const *path, mode mask)
+		{
+			open(path, mask);
 		}
 
 		~descriptor()
 		{
-			close();
+			if (not fail(fd))
+			{
+				close();
+			}
 		}
 
 		int set(int newfd = invalid)
@@ -90,11 +98,6 @@ namespace sys::file
 		int get() const
 		{
 			return fd;
-		}
-
-		operator bool() const
-		{
-			return not fail(fd);
 		}
 
 		template <class C>
@@ -122,6 +125,11 @@ namespace sys::file
 		int fd = invalid;
 	};
 
+	inline bool fail(descriptor const& fd)
+	{
+		return fail(fd.get());
+	}
+
 	struct pipe
 	{
 		explicit pipe();
@@ -135,7 +143,7 @@ namespace sys::file
 		{
 			for (int n : { 0, 1 })
 			{
-				file[n].set(fd ? fd[n] : invalid);
+				fds[n].set(fd ? fd[n] : invalid);
 			}
 		}
 
@@ -143,33 +151,36 @@ namespace sys::file
 		{
 			for (int n : { 0, 1 })
 			{
-				fd[n] = file[n].get();
+				fd[n] = fds[n].get();
 			}
-		}
-
-		operator bool() const
-		{
-			for (int n : { 0, 1 })
-			{
-				if (file[n]) return true;
-			}
-			return false;
 		}
 
 		const descriptor& operator[](size_t n) const
 		{
-			return file[n];
+			return fds[n];
 		}
 
 		descriptor& operator[](size_t n)
 		{
-			return file[n];
+			return fds[n];
 		}
 
 	protected:
 
-		descriptor file[2];
+		descriptor fds[2];
 	};
+
+	inline bool fail(pipe const& fds)
+	{
+		for (int n : { 0, 1 })
+		{
+			if (fail(fds[n]))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
 	struct process
 	{
@@ -178,11 +189,19 @@ namespace sys::file
 			set();
 		}
 
+		~process()
+		{
+			if (not fail(pid))
+			{
+				close();
+			}
+		}
+
 		void set(int fd[3] = nullptr)
 		{
 			for (int n : { 0, 1, 2 })
 			{
-				file[n].set(fd ? fd[n] : invalid);
+				fds[n].set(fd ? fd[n] : invalid);
 			}
 		}
 
@@ -190,7 +209,7 @@ namespace sys::file
 		{
 			for (int n : { 0, 1, 2 })
 			{
-				fd[n] = file[n].get();
+				fd[n] = fds[n].get();
 			}
 		}
 
@@ -199,19 +218,14 @@ namespace sys::file
 			return pid;
 		}
 
-		operator bool() const
-		{
-			return not fail(pid);
-		}
-
 		const descriptor& operator[](size_t n) const
 		{
-			return file[n];
+			return fds[n];
 		}
 
 		descriptor& operator[](size_t n)
 		{
-			return file[n];
+			return fds[n];
 		}
 
 		void run(char const** argv);
@@ -225,14 +239,31 @@ namespace sys::file
 
 		void close(int n)
 		{
-			file[n].close();
+			fds[n].close();
+		}
+
+		void close()
+		{
+			for (int n : { 0, 1, 2})
+			{
+				if (not fail(fds[n]))
+				{
+					close(n);
+					fds[n].set();
+				}
+			}
 		}
 
 	protected:
 
-		descriptor file[3];
-		std::intptr_t pid;
+		descriptor fds[3];
+		long pid;
 	};
+
+	inline bool fail(process const& pid)
+	{
+		return fail(pid.get());
+	}
 }
 
 #endif // file

@@ -22,7 +22,7 @@ namespace sys
 namespace fmt
 {
 	template <typename Arg, typename... Args>
-	inline auto error(Arg arg, Args... args)
+	inline auto err(Arg arg, Args... args)
 	{
 		std::stringstream ss;
 		ss << arg;
@@ -34,12 +34,12 @@ namespace fmt
 namespace sys
 {
 	template <typename... Args>
-	inline void perror(Args... args)
+	inline void err(Args... args)
 	{
 		if (debug)
 		{
-			auto const s = fmt::error(args...);
-			std::perror(s.c_str());
+			auto const s = fmt::err(args...);
+			std::perror(data(s));
 		}
 	}
 }

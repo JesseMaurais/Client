@@ -74,14 +74,14 @@ namespace sys::file
 
 			if (sys::win::fail(h))
 			{
-				sys::win::perror(here, "CreateFileMapping");
+				sys::win::err(here, "CreateFileMapping");
 				return true;
 			}
 
 			ptr = MapViewOfFile(h, flags, hi, lo, sz);
 			if (nullptr == ptr)
 			{
-				sys::win::perror(here, "MapViewOfFile");
+				sys::win::err(here, "MapViewOfFile");
 				return true;
 			}
 		}
@@ -123,13 +123,13 @@ namespace sys::file
 				fd = shm_open(name, oflags, um);
 				if (sys::fail(fd))
 				{
-					sys::perror(here, "shm_open", name);
+					sys::err(here, "shm_open", name);
 					return true;
 				}
 
 				if (sys::fail(ftruncate(fd, sz)))
 				{
-					sys::perror(here, "ftruncate", name);
+					sys::err(here, "ftruncate", name);
 					return true;
 				}
 			}
@@ -139,7 +139,7 @@ namespace sys::file
 				class sys::stat st(fd);
 				if (sys::fail(st))
 				{
-					sys::perror(here, "stat");
+					sys::err(here, "stat");
 					return true;
 				}
 				sz = st.st_size;
@@ -148,7 +148,7 @@ namespace sys::file
 			ptr = mmap(ptr, sz, prot, flags, fd, off);
 			if (MAP_FAILED == ptr)
 			{
-				sys::perror(here, "mmap");
+				sys::err(here, "mmap");
 				return true;
 			}
 		}
@@ -174,7 +174,7 @@ namespace sys::file
 			{
 				if (not UnmapViewOfFile(address))
 				{
-					sys::win::perror(here, "UnmapViewOfFile", name);
+					sys::win::err(here, "UnmapViewOfFile", name);
 					return true;
 				}
 			}
@@ -182,7 +182,7 @@ namespace sys::file
 			{
 				if (sys::fail(munmap(address, length)))
 				{
-					sys::perror(here, "munmap", name);
+					sys::err(here, "munmap", name);
 					return true;
 				}
 
@@ -191,7 +191,7 @@ namespace sys::file
 					auto const s = name.c_str();
 					if (sys::fail(shm_unlink(s)))
 					{
-						sys::perror(here, "shm_unlink", name);
+						sys::err(here, "shm_unlink", name);
 						return true;
 					}
 				}

@@ -20,7 +20,7 @@ namespace
 	using map = std::map<dbg::test*, std::string>;
 	std::string::size_type max_size = 0;
 
-	map& registry()
+	auto& registry()
 	{
 		static map instance;
 		return instance;
@@ -71,9 +71,9 @@ namespace dbg
 		using namespace io;
 		auto& out = std::cerr;
 		constexpr auto eol = '\n';
-		map const& tests = registry();
+		auto const& tests = registry();
 
-		unsigned int errors = 0;
+		unsigned errors = 0;
 		for (auto const& [that, name] : tests) try
 		{
 			if (std::regex_match(name, pattern))

@@ -10,6 +10,7 @@ namespace sys::file
 	int access(mode bit)
 	{
 		int flags = 0;
+
 		if (bit & extant)
 		{
 			flags |= F_OK;
@@ -26,6 +27,7 @@ namespace sys::file
 		{
 			flags |= W_OK;
 		}
+
 		return flags;
 	}
 
@@ -84,6 +86,7 @@ namespace sys::file
 	int convert(permit bit)
 	{
 		int flags = 0;
+
 		if (bit & owner_x)
 		{
 			flags |= S_IXUSR;
@@ -120,6 +123,7 @@ namespace sys::file
 		{
 			flags |= S_IROTH;
 		}
+
 		return flags;
 	}
 
@@ -128,18 +132,18 @@ namespace sys::file
 	void descriptor::open(char const* path, mode mask)
 	{
 		fd = sys::open(path, convert(mask), 0);
-		if (sys::fail(fd))
+		if (fail(fd))
 		{
-			sys::perror(here, "open", path, mask);
+			sys::err(here, "open", path, mask);
 		}
 	}
 
 	ssize_t descriptor::write(const void* buffer, size_t size) const
 	{
 		ssize_t const n = sys::write(fd, buffer, size);
-		if (sys::fail(n))
+		if (fail(n))
 		{
-			sys::perror(here, "write", fd, size);
+			sys::err(here, "write", fd, size);
 		}
 		return n;
 	}
@@ -147,29 +151,28 @@ namespace sys::file
 	ssize_t descriptor::read(void* buffer, size_t size) const
 	{
 		ssize_t const n = sys::read(fd, buffer, size);
-		if (sys::fail(n))
+		if (fail(n))
 		{
-			sys::perror(here, "read", fd, size);
+			sys::err(here, "read", fd, size);
 		}
 		return n;
 	}
 
 	void descriptor::close()
 	{
-		bool const ok = not sys::fail(fd);
-		if (ok and sys::fail(sys::close(fd)))
+		if (fail(sys::close(fd)))
 		{
-			sys::perror(here, "close", fd);
+			sys::err(here, "close", fd);
 		}
-		else fd = sys::invalid;
+		else fd = invalid;
 	}
 
 	pipe::pipe()
 	{
 		int fd[2];
-		if (sys::fail(sys::pipe(fd)))
+		if (fail(sys::pipe(fd)))
 		{
-			sys::perror(here, "pipe");
+			sys::err(here, "pipe");
 		}
 		else set(fd);
 	}
@@ -186,18 +189,15 @@ namespace sys::file
 
 	void process::kill()
 	{
-		if (not sys::fail(pid))
+		sys::kill(pid);
+		for (int n : { 0, 1, 2 })
 		{
-			sys::kill(pid);
-			for (int n : { 0, 1, 2 })
+			if (fail(fds[n]))
 			{
-				if (file[n])
-				{
-					file[n].close();
-				}
+				fds[n].close();
 			}
-			pid = -1;
 		}
+		pid = invalid;
 	}
 	
 	int process::wait()

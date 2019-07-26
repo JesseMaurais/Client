@@ -36,7 +36,7 @@ namespace sys::sig
 		old.fn = std::signal(no, send);
 		if (SIG_ERR == old.fn)
 		{
-			sys::perror(here, "signal", no);
+			sys::err(here, "signal", no);
 		}
 		else
 		{

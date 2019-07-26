@@ -23,7 +23,7 @@ namespace sys::file
 
 			sys::win::handle h = CreateNamedPipe
 			(
-				path.c_str(),
+				data(path),
 				PIPE_ACCESS_DUPLEX,
 				PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
 				PIPE_UNLIMITED_INSTANCES,
@@ -35,7 +35,7 @@ namespace sys::file
 
 			if (sys::win::fail(h))
 			{
-				sys::win::perror(here, "CreateNamedPipe", path);
+				sys::win::err(here, "CreateNamedPipe", path);
 				path.clear();
 				return;
 			}
@@ -45,7 +45,7 @@ namespace sys::file
 		#else
 		{
 			auto const dir = fmt::dir::join(::env::dir::run, ".fifo");
-			auto const s = dir.c_str();
+			auto const s = data(dir);
 
 			constexpr mode_t rw = S_IRGRP | S_IWGRP;
 			sys::mode const um;
@@ -54,7 +54,7 @@ namespace sys::file
 			{
 				if (sys::fail(sys::mkdir(s, um | rw)))
 				{
-					sys::perror(here, "mkdir", dir);
+					sys::err(here, "mkdir", dir);
 					return;
 				}
 			}
@@ -63,16 +63,16 @@ namespace sys::file
 			{
 				if (sys::fail(sys::chmod(s, um | rw)))
 				{
-					sys::perror(here, "chmod", dir);
+					sys::err(here, "chmod", dir);
 					return;
 				}
 			}
 
 			path = fmt::dir::join(dir, name);
-			auto const ps = path.c_str();
+			auto const ps = data(path);
 			if (sys::fail(mkfifo(ps, um | rw)))
 			{
-				sys::perror(here, "mkfifo", path);
+				sys::err(here, "mkfifo", path);
 				path.clear();
 			}
 		}
@@ -87,7 +87,7 @@ namespace sys::file
 			bool const ok = not sys::win::fail(h);
 			if (ok and not ConnectNamedPipe(h, nullptr))
 			{
-				sys::win::perror(here, "ConnectNamedPipe");
+				sys::win::err(here, "ConnectNamedPipe");
 				path.clear();
 				return false;
 			}
@@ -96,11 +96,11 @@ namespace sys::file
 		#else
 		{
 			sys::mode const um;
-			auto const s = path.c_str();
+			auto const s = data(path);
 			fd = sys::open(s, flags, (mode_t) um);
 			if (sys::fail(fd))
 			{
-				sys::perror(here, "open", path);
+				sys::err(here, "open", path);
 				path.clear();
 				return false;
 			}
@@ -117,17 +117,17 @@ namespace sys::file
 			bool const ok = not sys::win::fail(h);
 			if (ok and not DisconnectNamedPipe(h))
 			{
-				sys::win::perror(here, "DisconnectNamedPipe");
+				sys::win::err(here, "DisconnectNamedPipe");
 			}
 		}
 		#else
 		{
 			if (not empty(path))
 			{
-				auto const s = path.c_str();
+				auto const s = data(path);
 				if (sys::fail(sys::unlink(s)))
 				{
-					sys::perror(here, "unlink", path);
+					sys::err(here, "unlink", path);
 				}
 			}
 		}

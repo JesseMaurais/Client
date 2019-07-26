@@ -16,12 +16,13 @@
 namespace
 {
 	#ifndef _WIN32
-	template <typename... Args> inline void error(Args... args)
+	template <typename... Args>
+	inline void err(Args... args)
 	{
 		if (sys::debug)
 		{
-			auto const err = fmt::error(args...);
-			std::fputs(err.c_str(), stderr);
+			auto const s = fmt::err(args...);
+			std::fputs(data(s), stderr);
 		}
 	}
 	#endif
@@ -32,14 +33,14 @@ namespace sys
 	dll::dll(fmt::string_view path)
 	{
 		auto const buf = fmt::to_string(path);
-		auto const s = buf.c_str();
+		auto const s = data(buf);
 
 		#ifdef _WIN32
 		{
 			auto const h = LoadLibrary(s);
 			if (nullptr == h)
 			{
-				sys::win::perror(here, "LoadLibrary", path);
+				sys::win::err(here, "LoadLibrary", path);
 			}
 			else ptr = h;
 		}
@@ -48,7 +49,8 @@ namespace sys
 			ptr = dlopen(s, RTLD_LAZY);
 			if (nullptr == ptr)
 			{
-				error(here, "dlopen", path, dlerror());
+				auto const e = dlerror();
+				::err(here, "dlopen", path, e);
 			}
 		}
 		#endif
@@ -61,14 +63,15 @@ namespace sys
 			auto const h = static_cast<HMODULE>(ptr);
 			if (nullptr != h and not FreeLibrary(h))
 			{
-				sys::win::perror(here, "FreeLibrary");
+				sys::win::err(here, "FreeLibrary");
 			}
 		}
 		#else
 		{
 			if (nullptr != ptr and dlclose(ptr))
 			{
-				error(here, "dlclose", dlerror());
+				auto const e = dlerror();
+				::err(here, "dlclose", e);
 			}
 		}
 		#endif
@@ -77,7 +80,7 @@ namespace sys
 	void *dll::sym(fmt::string_view name) const
 	{
 		auto const buf = fmt::to_string(name);
-		auto const s = buf.c_str();
+		auto const s = data(buf);
 
 		#ifdef _WIN32
 		{
@@ -87,7 +90,7 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 				if (nullptr == h)
 				{
-					sys::win::perror(here, "GetModuleHandle");
+					sys::win::err(here, "GetModuleHandle");
 					return nullptr;
 				}
 			}
@@ -95,7 +98,7 @@ namespace sys
 			auto const f = GetProcAddress(h, s);
 			if (nullptr == f)
 			{
-				sys::win::perror(here, "GetProcAddress", name);
+				sys::win::err(here, "GetProcAddress", name);
 			}
 			return f;
 		}
@@ -106,7 +109,7 @@ namespace sys
 			auto const e = dlerror();
 			if (nullptr != e)
 			{
-				error(here, "dlsym", name, e);
+				::err(here, "dlsym", name, e);
 			}
 			return f;
 		}

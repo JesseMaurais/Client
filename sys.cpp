@@ -18,7 +18,7 @@ namespace sys
 	#ifdef _WIN32
 	namespace win
 	{
-		void error(char const *prefix, void *module = nullptr)
+		void err(char const *prefix, void *module = nullptr)
 		{
 			auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
 			          | FORMAT_MESSAGE_IGNORE_INSERTS
@@ -26,7 +26,7 @@ namespace sys
 
 			if (nullptr != module)
 			{
-				cl<v |= FORMAT_MESSAGE_MODULE;
+				flag |= FORMAT_MESSAGE_MODULE;
 			}
 							
 			LPSTR buffer = nullptr;
@@ -60,7 +60,7 @@ namespace sys
 
 			for (int n : { 0, 1, 2 })
 			{
-				if (not pair[n].ok)
+				if (fail(pair[n]))
 				{
 					return -1;
 				}
@@ -69,8 +69,8 @@ namespace sys
 
 				if (not SetHandleInformation(h, HANDLE_FLAG_INHERIT, false))
 				{
-					winerr("SetHandleInformation");
-					return -1;
+					sys::win::err("SetHandleInformation");
+					return sys::invalid;
 				}
 			}
 
@@ -91,7 +91,7 @@ namespace sys
 			si.hStdOutput = pair[1].write.h;
 			si.hStdError = pair[2].write.h;
 
-			bool const ok = CreateProcessA
+			bool const ok = CreateProcess
 			(
 			 nullptr,          // application
 			 cmd,              // command line
@@ -107,7 +107,7 @@ namespace sys
 
 			if (not ok)
 			{
-				sys::win::perror(here, "CreateProcess", cmd);
+				sys::win::err(here, "CreateProcess", cmd);
 				return sys::invalid;
 			}
 
@@ -126,15 +126,18 @@ namespace sys
 
 			for (auto const& p : pair)
 			{
-				if (not p) return -1;
+				if (fail(p))
+				{
+					return invalid;
+				}
 			}
 
 			pid_t const pid = fork();
 			if (pid)
 			{
-				if (sys::fail(pid))
+				if (fail(pid))
 				{
-					sys::perror(here, "fork");
+					sys::err(here, "fork");
 				}
 				else for (int i : { 0, 1, 2 })
 				{
@@ -147,18 +150,18 @@ namespace sys
 			{
 				int k = pair[i][0 != i].get();
 
-				if (sys::fail(close(i)) or sys::fail(dup2(k, i)))
+				if (fail(close(i)) or fail(dup2(k, i)))
 				{
-					std::exit(EXIT_FAILURE);
+					exit(EXIT_FAILURE);
 				}
 
 				for (int j : { 0, 1 })
 				{
 					k = pair[i][j].set();
 
-					if (sys::fail(close(k)))
+					if (fail(close(k)))
 					{
-						std::exit(EXIT_FAILURE);
+						exit(EXIT_FAILURE);
 					}
 				}
 			}
@@ -168,7 +171,7 @@ namespace sys
 			args.push_back(nullptr);
 
 			int const res = execvp(args.front(), args.data());
-			sys::perror(here, "execvp", args.front());
+			sys::err(here, "execvp", args.front());
 			std::exit(res);
 		}
 		#endif
@@ -179,22 +182,21 @@ namespace sys
 		#ifdef _WIN32
 		{
 			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::perror(here, "OpenProcess", pid);
+				sys::win::err(here, "OpenProcess", pid);
 			}
 			else
 			if (not TerminateProcess(h, 0))
 			{
-				sys::win::perror(here, "TerminateProcess", pid);
+				sys::win::err(here, "TerminateProcess", pid);
 			}
 		}
 		#else
 		{
-			bool const ok = not sys::fail(pid);
-			if (ok and sys::fail(::kill(pid, SIGTERM)))
+			if (fail(::kill(pid, SIGTERM)))
 			{
-				sys::perror(here, "kill", pid);
+				sys::err(here, "kill", pid);
 			}
 		}
 		#endif
@@ -204,22 +206,22 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			DWORD code = static_cast<DWORD>(sys::invalid);
+			auto code = static_cast<DWORD>(sys::invalid);
 			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::perror(here, "OpenProcess", pid);
+				sys::win::err(here, "OpenProcess", pid);
 			}
 			else
 			{
 				if (WaitForSingleObject(h, INFINITE) == WAIT_FAILED)
 				{
-					sys::win::perror(here, "WaitForSingleObject", pid);
+					sys::win::err(here, "WaitForSingleObject", pid);
 				}
 				else
 				if (not GetExitCodeProcess(h, &code))
 				{
-					sys::win::perror(here, "GetExitCodeProcess", pid);
+					sys::win::err(here, "GetExitCodeProcess", pid);
 				}
 			}
 			return static_cast<int>(code);
@@ -231,9 +233,9 @@ namespace sys
 			do
 			{
 				pid = waitpid(parent, &status, 0);
-				if (sys::fail(pid))
+				if (fail(pid))
 				{
-					sys::perror(here, "waitpid", parent);
+					sys::err(here, "waitpid", parent);
 				}
 			}
 			while (pid != parent);

@@ -132,7 +132,7 @@ namespace
 				static char name[64];
 				if (sys::fail(gethostname(name, sizeof name)))
 				{
-					sys::perror(here, "gethostname");
+					sys::err(here, "gethostname");
 					name[0] = '\0';
 				}
 				return name;
@@ -155,7 +155,7 @@ namespace
 				static char name[64];
 				if (sys::fail(getdomainname(name, sizeof name)))
 				{
-					sys::perror(here, "getdomainname");
+					sys::err(here, "getdomainname");
 					name[0] = '\0';
 				}
 				return name;
