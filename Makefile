@@ -1,7 +1,7 @@
 # Common configuration variables for the project
 
 STD=c++17
-SRC=test.cpp dir.cpp dll.cpp fifo.cpp file.cpp dbg.cpp env.cpp shm.cpp sig.cpp socket.cpp sys.cpp win.cpp xdg.cpp
+SRC=test.cpp dir.cpp dll.cpp fifo.cpp file.cpp dbg.cpp env.cpp shm.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
 BIN=test
 
 # Configurations for system, compiler, and make

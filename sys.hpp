@@ -233,10 +233,6 @@ namespace sys
 	constexpr auto unlink = ::_unlink;
 	constexpr auto write = ::_write;
 
-	// Win32 utilities
-
-	unsigned long winerr(char const *prefix); // perror for GetLastError
-
 } // namespace sys
 
 

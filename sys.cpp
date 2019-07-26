@@ -15,6 +15,43 @@
 
 namespace sys
 {
+	#ifdef _WIN32
+	namespace win
+	{
+		void error(char const *prefix, void *module = nullptr)
+		{
+			auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
+			          | FORMAT_MESSAGE_IGNORE_INSERTS
+		    	      | FORMAT_MESSAGE_FROM_SYSTEM;
+
+			if (nullptr != module)
+			{
+				cl<v |= FORMAT_MESSAGE_MODULE;
+			}
+							
+			LPSTR buffer = nullptr;
+			auto const data = reinterpret_cast<LPSTR>(&buffer);
+			auto const code = GetLastError();
+			auto const size = FormatMessage
+			(
+				flag,    // style
+				module,  // source
+				code,    // message
+				lang,    // language
+				data,    // buffer
+				0,       // size
+				nullptr  // arguments
+			);
+		
+			if (0 < size)
+			{
+				std::fprintf("%s: %s", prefix, buffer);
+				LocalFree(buffer);
+			}
+		}
+	}
+	#endif
+
 	pid_t run(int fd[3], char const**argv)
 	{
 		#ifdef _WIN32

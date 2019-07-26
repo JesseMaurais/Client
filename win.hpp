@@ -12,10 +12,7 @@
 
 namespace sys::win
 {
-	namespace impl
-	{
-		void perror(char const* prefix);
-	}
+	void error(char const *prefix void *module = nullptr);
 
 	template <typename... Args>
 	inline void perror(Args... args)
@@ -23,7 +20,7 @@ namespace sys::win
 		if (sys::debug)
 		{
 			auto const s = fmt::error(args...);
-			impl::perror(s.c_str());
+			error(s.c_str());
 		}
 	}
 
