@@ -1,6 +1,7 @@
 #ifndef sig_hpp
 #define sig_hpp
 
+#include "err.hpp"
 #include <algorithm>
 #include <functional>
 #include <map>
@@ -92,13 +93,10 @@ namespace sys::sig
 
 	struct scope : slot
 	{
-		operator bool();
 		scope(int no, observer fn);
 		~scope();
 
 	protected:
-
-		using base = ::sig::slot<int>;
 
 		struct {
 			signature *ob;

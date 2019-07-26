@@ -15,10 +15,10 @@ namespace
 		return map[signo];
 	}
 
-	void raise(int no)
+	void send(int no)
 	{
 		// Insecure but portable persistence
-		verify(SIG_ERR != std::signal(no, raise));
+		verify(SIG_ERR != std::signal(no, send));
 
 		event(no).send([no](auto const &p)
 		{
@@ -29,31 +29,25 @@ namespace
 
 namespace sys::sig
 {
-	slot::slot(int on, observer ob)
-	: base(&event(on), ob)
+	scope::scope(int on, observer ob)
+	: slot(&event(on), ob)
 	{
-		old.ob = std::signal(on, raise);
+		old.ob = std::signal(on, send);
 		if (SIG_ERR == old.ob)
 		{
 			sys::err(here, "signal", on);
 		}
-		else
+	}
+
+	scope::~scope()
+	{
+		if (SIG_ERR != old.ob)
 		{
-			old.ob = ob;
+			verify(send == std::signal(old.on, old.ob));
 		}
 	}
 
-	slot::~slot()
-	{
-		verify(raise == std::signal(old.on, old.ob));
-	}
-
-	slot::operator bool()
-	{
-		return SIG_ERR != old.ob;
-	}
-
-	link::link(int on, observer ob) : slot(on, next(ob))
+	link::link(int on, observer ob) : scope(on, next(ob))
 	{ }
 
 	observer link::next(observer ob)
@@ -61,7 +55,7 @@ namespace sys::sig
 		return [=](int on)
 		{
 			ob(on);
-			old.ob(oo);
+			old.ob(on);
 		};
 	}
 }
