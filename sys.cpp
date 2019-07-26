@@ -18,6 +18,9 @@ namespace sys
 	#ifdef _WIN32
 	namespace win::msg
 	{
+		sig::quit()
+		: slot(SIGINT, 
+
 		LPSTR err(HMODULE h)
 		{
 			if (sys::win::fail(h))

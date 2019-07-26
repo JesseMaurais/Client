@@ -7,8 +7,10 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <csignal>
 #include "sys.hpp"
 #include "err.hpp"
+#include "sig.hpp"
 
 namespace sys::win
 {
@@ -46,14 +48,36 @@ namespace sys::win
 			return get(it) and WM_QUIT == it.message; 
 		}
 
-		inline bool quit(DWORD pid)
+		inline HWND quit(DWORD pid)
 		{
 			auto const w = get(pid);
 			if (not fail(w))
 			{
 				put(WM_QUIT, w);
 			}
+			return w;
 		}
+	}
+
+	namespace sig
+	{
+		template <int On>
+		struct quit : link
+		{
+			quit() : slot(on, post) { }
+
+		protected:
+
+			void post(int on)
+			{
+				if (On == on)
+				{
+					PostQuitMessage(on);
+				}
+			}
+		};
+
+		using interrupt = quit<SIGINT>;
 	}
 
 	template <typename... Args>

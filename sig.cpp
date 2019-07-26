@@ -15,14 +15,14 @@ namespace
 		return map[signo];
 	}
 
-	void send(int signo)
+	void raise(int no)
 	{
-		// Insecure but portable signal persistence
-		verify(SIG_ERR != std::signal(signo, send));
+		// Insecure but portable persistence
+		verify(SIG_ERR != std::signal(no, raise));
 
-		event(signo).send([signo](auto const &pair)
+		event(no).raise([no](auto const &p)
 		{
-			pair.second(signo);
+			p.second(no);
 		});
 	}
 }
@@ -51,6 +51,18 @@ namespace sys::sig
 	slot::operator bool()
 	{
 		return SIG_ERR != old.fn;
+	}
+
+	link::link(int no, observer ob) : slot(no, next(ob))
+	{ }
+
+	observer link::next(observer ob)
+	{
+		return [=](int no)
+		{
+			ob(no);
+			old.fn(no);
+		};
 	}
 }
 

@@ -187,17 +187,14 @@ namespace sys::file
 		}
 	}
 
+	void process::quit()
+	{
+		sys::quit(pid);
+	}
+
 	void process::kill()
 	{
 		sys::kill(pid);
-		for (int n : { 0, 1, 2 })
-		{
-			if (fail(fds[n]))
-			{
-				fds[n].close();
-			}
-		}
-		pid = invalid;
 	}
 	
 	int process::wait()

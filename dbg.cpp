@@ -11,6 +11,10 @@
 #include <regex>
 #include <map>
 
+#ifdef _WIN32
+# include "win.hpp"
+#endif
+
 namespace
 {
 	//TEST(dumb_assert) { ASSERT(false); };
@@ -22,6 +26,11 @@ namespace
 
 	auto& registry()
 	{
+		#ifdef _WIN32
+		{
+			static auto quit = sys::win::sig::interrupt();
+		}
+		#endif
 		static map instance;
 		return instance;
 	}

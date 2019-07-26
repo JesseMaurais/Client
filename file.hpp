@@ -70,7 +70,7 @@ namespace sys::file
 
 	struct descriptor
 	{
-		explicit descriptor(int fd = invalid)
+		descriptor(int fd = invalid)
 		{
 			(void) set(fd);
 		}
@@ -254,11 +254,7 @@ namespace sys::file
 		{
 			for (int n : { 0, 1, 2})
 			{
-				if (not fail(fds[n]))
-				{
-					close(n);
-					fds[n].set();
-				}
+				fds[n] = invalid;
 			}
 		}
 

@@ -67,9 +67,9 @@ namespace sig
 		using signature = typename subject::signature;
 		using observer = typename subject::observer;
 
-		slot(subject *ev, observer fn) : that(ev)
+		slot(subject *sub, observer ob) : that(sub)
 		{
-			that->connect(this, fn);
+			that->connect(this, ob);
 		}
 
 		~slot()
@@ -85,13 +85,18 @@ namespace sig
 
 namespace sys::sig
 {
-	struct slot : ::sig::slot<int>
+	using slot = ::sig::slot<int>;
+	using subject = slot::subject;
+	using signature = slot::signature;
+	using observer = slot::observer;
+
+	struct scope : slot
 	{
 		operator bool();
 		slot(int no, observer fn);
 		~slot();
 
-	private:
+	protected:
 
 		using base = ::sig::slot<int>;
 
@@ -101,9 +106,22 @@ namespace sys::sig
 		} old;
 	};
 
-	using subject = slot::subject;
-	using signature = slot::signature;
-	using observer = slot::observer;
+	struct link : scope
+	{
+		link(int no, observer fn);
+
+	protected
+
+		observer next(observer);
+	};
+
+	struct only : link
+	{
+		only(int no, observer fn) : slot(no, fn)
+		{
+			assert(nullptr == old.fn);
+		}
+	};
 }
 
 #endif // file
