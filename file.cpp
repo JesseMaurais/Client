@@ -70,7 +70,7 @@ namespace sys::file
 			flags |= O_TRUNC;
 		}
 
-		if (bit & lock)
+		if (bit & xu)
 		{
 			flags |= O_EXCL;
 		}
@@ -129,14 +129,22 @@ namespace sys::file
 
 	size_t bufsiz = BUFSIZ;
 
-	void descriptor::open(char const* path, mode mask)
+	void descriptor::open(char const* path, mode bit)
 	{
-		fd = sys::open(path, convert(mask), 0);
+		sys::mode const um;
+		open(path, bit, (mode_t) um);
+	}
+
+	void descriptor::open(char const* path, mode bit, permit id)
+	{
+		fd = sys::open(path, convert(bit), convert(id));
 		if (fail(fd))
 		{
-			sys::err(here, "open", path, mask);
+			sys::err(here, "open", path, bit, id);
 		}
 	}
+
+
 
 	ssize_t descriptor::write(const void* buffer, size_t size) const
 	{

@@ -16,28 +16,31 @@ namespace sys::file
 		wr   = 1 << 1, // write
 		rd   = 1 << 2, // read
 		ok   = 1 << 3, // exists
-		lock = 1 << 4, // exclusive
+		xu   = 1 << 4, // exclusive
 		sz   = 1 << 5, // truncate
 		app  = 1 << 6, // append
 		txt  = 1 << 7, // text
 		bin  = 1 << 8, // binary
+
 		rw   = rd | wr,
+		rwz  = rw | sz,
 		rwx  = rw | ex,
+		rwo  = rw | ok,
 	};
 
-	constexpr int owner(int um)
+	constexpr int owner(int bit)
 	{
-		return (um & rwx) << 6;
+		return (bit & rwx) << 6;
 	}
 
-	constexpr int group(int um)
+	constexpr int group(int bit)
 	{
-		return (um & rwx) << 3;
+		return (bit & rwx) << 3;
 	}
 
-	constexpr int other(int um)
+	constexpr int other(int bit)
 	{
-		return (um & rwx) << 0;
+		return (bit & rwx) << 0;
 	}
 
 	enum permit : int
@@ -54,6 +57,11 @@ namespace sys::file
 		other_w = other(wr),
 		other_x = other(ex),
 	};
+
+	inline permit own(mode bit)
+	{
+		return static_cast<permit>(owner(bit));
+	}
 
 	int access(mode);
 	int convert(mode);
@@ -75,9 +83,9 @@ namespace sys::file
 			(void) set(fd);
 		}
 
-		descriptor(char const *path, mode mask)
+		descriptor(char const *path, mode flag = rwo, permit id = own(rw))
 		{
-			open(path, mask);
+			open(path, flag, id);
 		}
 
 		~descriptor()
@@ -112,7 +120,7 @@ namespace sys::file
 			return read(static_cast<void*>(buf), sz);
 		}
 
-		void open(char const* path, mode);
+		void open(char const* path, mode flag = rwo, permit id = own(rw));
 		void close();
 
 	private:
