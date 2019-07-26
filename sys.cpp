@@ -7,6 +7,7 @@
 #include "file.hpp"
 #ifdef _WIN32
 # include "win.hpp"
+# include <tlhelp32.h>
 #else //POSIX
 # include <sys/wait.h>
 # include <signal.h>
@@ -18,9 +19,6 @@ namespace sys
 	#ifdef _WIN32
 	namespace win::msg
 	{
-		sig::quit()
-		: slot(SIGINT, 
-
 		LPSTR err(HMODULE h)
 		{
 			if (sys::win::fail(h))
@@ -55,34 +53,19 @@ namespace sys
 			return str;
 		}
 
-		static HWND hwnd;
-		static DWORD tid;
-
-		static BOOL CALLBACK find(HWND w, LPARAM lp)
+		HWND get(DWORD pid, DWORD& tid)
 		{
-			DWORD pid;
-			tid = GetWindowThreadProcessId(w, &pid);
-			if (lp == pid)
+			HWND h = nullptr;
+			while (h = FindWindwoEx(nullptr, h, nullptr, nullptr))
 			{
-				hwnd = w;
-				return 1;
+				DWORD dw;
+				tid = GetWindowProcessThreadId(h, &dw);
+				if (pid == dw)
+				{
+					break;
+				}
 			}
-			return 0;
-		}
-
-		HWND get(DWORD pid, DWORD& thread)
-		{
-			if (EnumWindows(find, pid))
-			{
-				thread = tid;
-				return hwnd;
-			}
-			return sys::win::invalid;
-		}
-
-		HWND get(DWORD pid)
-		{
-			get(pid, thread);
+			return h;
 		}
 	}
 	#endif
@@ -216,10 +199,10 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+			sys::win::process const h(pid);
 			if (fail(h))
 			{
-				sys::win::err(here, "OpenProcess", pid);
+				sys::warn(here, pid);
 			}
 			else
 			if (not TerminateProcess(h, 0))
@@ -243,7 +226,7 @@ namespace sys
 		{
 			if (sys::win::msg::quit(pid))
 			{
-				sys::warn(here, "quit", pid);
+				sys::warn(here, pid);
 			}
 		}
 		#else
@@ -261,10 +244,10 @@ namespace sys
 		#ifdef _WIN32
 		{
 			auto code = static_cast<DWORD>(sys::invalid);
-			sys::win::handle const h = OpenProcess(PROCESS_ALL_ACCESS, true, pid);
+			sys::win::process const h(pid);
 			if (fail(h))
 			{
-				sys::win::err(here, "OpenProcess", pid);
+				sys::warn(here, pid);
 			}
 			else
 			{

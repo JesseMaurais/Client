@@ -151,6 +151,18 @@ namespace sys::win
 		}
 	};
 
+	struct process : handle
+	{
+		PROCESS(DWORD pid)
+		{
+			h = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+			if (fail(h))
+			{
+				err(herr, "OpenProcess", pid);
+			}
+		}
+	};
+
 	struct pipe
 	{
 		handle read;
@@ -220,6 +232,35 @@ namespace sys::win
 	inline bool fail(find const& f)
 	{
 		return fail(f.h);
+	}
+
+	struct entry : size<PROCESSENTRY32, &PROCESSENTRY32::dwSize>
+	{
+		handle h;
+
+		entry(DWORD dw = TH32CS_SNAPPROCESS)
+		{
+			h = CreateToolhelp32Snapshot(dw, 0);
+			if (fail(h))
+			{
+				err(here, "CreateToolhelp32Snapshot", dw);
+			}
+			else
+			if (not Process32First(h, this))
+			{
+				err(herr, "Process32First");
+			}
+		}
+
+		bool operator++()
+		{
+			return Process32Next(h, this);
+		}
+	}
+
+	inline bool fail(entry const& e)
+	{
+		return fail(e.h);
 	}
 }
 
