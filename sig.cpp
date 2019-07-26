@@ -17,9 +17,6 @@ namespace
 
 	void send(int no)
 	{
-		// Insecure but portable persistence
-		verify(SIG_ERR != std::signal(no, send));
-
 		event(no).send([no](auto const &p)
 		{
 			p.second(no);
@@ -43,7 +40,7 @@ namespace sys::sig
 	{
 		if (SIG_ERR != old.ob)
 		{
-			verify(send == std::signal(old.on, old.ob));
+			(void) std::signal(old.on, old.ob);
 		}
 	}
 

@@ -13,7 +13,7 @@
 # define verify(x) (x)
 #else
 # define verify(x) assert(x)
-# define assert(x) if (not(x)) sys::warn(here, #x);
+# define assert(x) if (not(x)) sys::warn(here, #x, '\n');
 #endif
 
 #include <sstream>

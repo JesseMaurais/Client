@@ -1,14 +1,19 @@
-# Common configuration variables for the project
+#pragma // Use the preprocessor to get configurations
+
+#include "os.hpp"
+#include "cc.hpp"
+
+#pragma // Common configuration variables for the project
 
 STD=c++17
 SRC=test.cpp dir.cpp dll.cpp fifo.cpp file.cpp dbg.cpp env.cpp shm.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
 BIN=test
 
-# Configurations for system, compiler, and make
+#pragma // Configurations for system, compiler, and make
 
 include .make/Configure.mk
 
-# Common make rules for the project
+#pragma // Common make rules for the project
 
 .SUFFIXES: .cpp .hpp .obj .d .inl .log .xml .html .ilk .pdb .db
 
@@ -25,7 +30,7 @@ $(BIN)$(EXE): $(OBJ)
 .cpp.obj:
 	$(CXX) $(CFLAGS) -c $< $(OUT)$@
 
-# Additional features
+#pragma // Additional features
 
 include .make/Depends.mk
 include .make/Cppcheck.mk

@@ -3,7 +3,7 @@
 
 #include <locale>
 #include "str.hpp"
-#include "mb.hpp"
+#include "utf.hpp"
 
 namespace fmt
 {
@@ -136,7 +136,7 @@ namespace fmt
 		auto widen(basic_string_view<char> u) const
 		/// Decode multibyte characters as wide type
 		{
-			struct iterator : mb
+			struct iterator : utf
 			{
 				base const* that;
 				char const* pos;
@@ -157,7 +157,7 @@ namespace fmt
 				auto operator++()
 				{
 					pos += n;
-					n = mb::len(pos);
+					n = utf::len(pos);
 					return *this;
 				}
 
@@ -166,7 +166,7 @@ namespace fmt
 				{
 					if (that)
 					{
-						n = mb::len(pos);
+						n = utf::len(pos);
 					}
 				}
 			};
@@ -323,10 +323,10 @@ namespace fmt
 		{
 			auto n = null;
 			auto m = null;
-			mb mbs;
+			utf mb;
 			while (u.size() > m)
 			{
-				auto const k = mbs.len(u.data() + m);
+				auto const k = mb.len(u.data() + m);
 				if (k < 0)
 				{
 					return npos;

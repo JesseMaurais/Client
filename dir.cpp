@@ -85,24 +85,27 @@ namespace
 	{
 		static auto get()
 		{
-			if constexpr (sys::win32)
+			#ifdef __WIN32__
 			{
 				return sys::env::get("PATH");
 			}
-			else
-			if constexpr (sys::aix)
+			#else
+			#ifdef __AIX__
 			{
 				return sys::env::get("LIBPATH");
 			}
-			else
-			if constexpr (sys::hpux)
+			#else
+			#ifdef __HPUX__
 			{
 				return sys::env::get("SHLIB_PATH");
 			}
-			else
+			#else
 			{
 				return sys::env::get("LD_LIBRARY_PATH");
 			}
+			#endif
+			#endif
+			#endif
 		}
 
 		operator fmt::string_view_span() const final

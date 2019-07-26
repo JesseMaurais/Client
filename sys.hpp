@@ -205,7 +205,7 @@ namespace sys
 	constexpr auto close = ::_close;
 	constexpr auto creat = ::_creat;
 	constexpr auto dup = ::_dup;
-	constexpr auto dup1 = ::_dup2;
+	constexpr auto dup2 = ::_dup2;
 	constexpr auto execl = ::_execl;
 	constexpr auto execle = ::_execle;
 	constexpr auto execlp = ::_execlp;

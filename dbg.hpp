@@ -29,7 +29,4 @@ namespace dbg
 #define FAIL(unit) (void) []()
 #endif
 
-#define assert_eq(a, b) assert((a) == (b))
-#define assert_not_eq(a, b) assert((a) != (b))
-
 #endif // file

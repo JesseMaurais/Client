@@ -45,24 +45,24 @@ namespace
 	//
 	
 	//TEST(sane) { assert(true and not false); }
-	//TEST(sane_equality) { assert_eq(true, true); }
-	//TEST(sane_inequality) { assert_not_eq(true, false); }
+	//TEST(sane_equality) { assert(true == true); }
+	//TEST(sane_inequality) { assert(true != false); }
 	//FAIL(sane_throw) { throw "sane"; }
 
 	// negatives
 	
 	//TEST(not_sane) { assert(false and not true); }
-	//TEST(not_equal) { assert_eq(true, false); }
-	//TEST(not_unequal) { assert_not_eq(true, true); }
+	//TEST(not_equal) { assert(true == false); }
+	//TEST(not_unequal) { assert(true != true); }
 	//FAIL(not_throw) { (void) 0; }
 	
 	//
 	// Checked integer conversions
 	//
 
-	TEST(int_narrow) { assert_eq('*', fmt::to_narrow<char>(42)); }
-	TEST(int_unsigned) { assert_eq(42u, fmt::to_unsigned(42)); }
-	TEST(int_signed) { assert_eq(42, fmt::to_signed(42u)); }
+	TEST(int_narrow) { assert('*' == fmt::to_narrow<char>(42)); }
+	TEST(int_unsigned) { assert(42u == fmt::to_unsigned(42)); }
+	TEST(int_signed) { assert(42 == fmt::to_signed(42u)); }
 
 	// negatives
 
@@ -88,22 +88,22 @@ namespace
 		constexpr auto raw = " \t" HELLO_WORLD "\n";
 		auto const u = trim(raw);
 		assert(not empty(u));
-		assert_eq(u, HELLO_WORLD);
-		assert_not_eq(u, raw);
+		assert(u == HELLO_WORLD);
+		assert(u != raw);
 	}
 
 	TEST(fmt_wide)
 	{
 		using namespace fmt;
-		assert_eq(to_wstring(string { HELLO_WORLD }), HELLO_WIDE);
-		assert_eq(to_string(wstring { HELLO_WIDE }), HELLO_WORLD);
+		assert(to_wstring(string { HELLO_WORLD }) == HELLO_WIDE);
+		assert(to_string(wstring { HELLO_WIDE }) == HELLO_WORLD);
 	}
 
 	TEST(fmt_case)
 	{
 		using namespace fmt;
-		assert_eq(to_upper(HELLO_WORLD), HELLO_UPPER);
-		assert_eq(to_lower(HELLO_WORLD), HELLO_LOWER);
+		assert(to_upper(HELLO_WORLD) == HELLO_UPPER);
+		assert(to_lower(HELLO_WORLD) == HELLO_LOWER);
 	}
 
 	TEST(fmt_delimiter)
@@ -119,11 +119,11 @@ namespace
 			t.emplace_back(u.substr(tok.first, n));
 		}
 
-		assert_eq(t.size(), 4);
-		assert_eq(t[0], "A");
-		assert_eq(t[1], "B");
-		assert_eq(t[2], "C");
-		assert_eq(t[3], "D");
+		assert(t.size() == 4);
+		assert(t[0] == "A");
+		assert(t[1] == "B");
+		assert(t[2] == "C");
+		assert(t[3] == "D");
 	}
 
 	TEST(fmt_sequence)
@@ -138,10 +138,10 @@ namespace
 			t.emplace_back(u.substr(tok.first, n));
 		}
 
-		assert_eq(t.size(), 3);
-		assert_eq(t[0], "A");
-		assert_eq(t[1], "B");
-		assert_eq(t[2], "C");
+		assert(t.size() == 3);
+		assert(t[0] == "A");
+		assert(t[1] == "B");
+		assert(t[2] == "C");
 	}
 
 	TEST(fmt_tag)
@@ -152,14 +152,14 @@ namespace
 		string_view_vector t;
 		tag(a, u, [&](auto it, auto pos)
 		{
-			assert_eq(0, u.compare(pos, it->size(), *it));
+			assert(0 == u.compare(pos, it->size(), *it));
 			t.emplace_back(*it);
 		});
 
-		assert_eq(t.size(), 3);
-		assert_eq(t[0], "banana");
-		assert_eq(t[1], "apple");
-		assert_eq(t[2], "banana");
+		assert(t.size() == 3);
+		assert(t[0] == "banana");
+		assert(t[1] == "apple");
+		assert(t[2] == "banana");
 	}
 
 	//
@@ -181,7 +181,7 @@ namespace
 	{
 		auto var = sys::env::get("PATH");
 		auto val = fmt::path::join(env::paths);
-		assert_eq(var, val);
+		assert(var == val);
 
 		#ifdef _WIN32
 		{
@@ -194,7 +194,7 @@ namespace
 		#endif
 
 		var = sys::env::get("PATH");
-		assert_eq(var, val);
+		assert(var == val);
 	}
 
 	TEST(env_vars)
@@ -275,8 +275,8 @@ namespace
 	{
 		sys::dll self;
 		auto f = self.sym<int()>("visible");
-		assert_not_eq(nullptr, f);
-		assert_eq(f(), hidden());
+		assert(nullptr != f);
+		assert(f() == hidden());
 	}
 
 	TEST(sys_sig)
@@ -291,10 +291,10 @@ namespace
 			std::raise(n);
 		}
 
-		assert_eq(caught.size(), 3);
-		assert_eq(caught[0], SIGINT);
-		assert_eq(caught[1], SIGFPE);
-		assert_eq(caught[2], SIGILL);
+		assert(caught.size() == 3);
+		assert(caught[0] == SIGINT);
+		assert(caught[1] == SIGFPE);
+		assert(caught[2] == SIGILL);
 	}
 
 	//
@@ -306,7 +306,7 @@ namespace
 		std::ostringstream ss;
 		ss << io::params<1, 2, 3, 4>;
 		std::string const s = ss.str();
-		assert_eq(s, "1;2;3;4");
+		assert(s == "1;2;3;4");
 	}
 
 	TEST(ios_fg)
@@ -314,7 +314,7 @@ namespace
 		std::ostringstream ss;
 		ss << io::fg_green << "GREEN" << io::fg_off;
 		std::string const s = ss.str();
-		assert_eq(s, "\x1b[32mGREEN\x1b[39m");
+		assert(s == "\x1b[32mGREEN\x1b[39m");
 	}
 
 	//
@@ -325,10 +325,10 @@ namespace
 	{
 		io::pstream ps { "rev" };
 		ps << HELLO_WORLD;
-		ps.quit();
+		ps.close(0);
 		std::string s;
 		assert(std::getline(ps, s));
-		assert_eq(s, DLROW_OLLEH);
+		assert(s == DLROW_OLLEH);
 	}
 
 	TEST(ipc_map)
@@ -339,7 +339,7 @@ namespace
 		assert(not map.open(file.get()));
 		fmt::string_view const view = map;
 		auto pos = view.find("Self referencing find.");
-		assert_not_eq(pos, fmt::string_view::npos);
+		assert(pos != fmt::string_view::npos);
 		assert(not map.close());
 	}
 }

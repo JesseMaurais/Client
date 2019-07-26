@@ -38,7 +38,12 @@ namespace
 
 namespace sys
 {
-	bool debug = true;
+	bool debug =
+	#ifdef NDEBUG
+		false;
+	#else
+		true;
+	#endif
 }
 
 namespace dbg
@@ -59,9 +64,11 @@ namespace dbg
 	void fail::run()
 	{
 		std::stringstream ss;
+		auto const os = std::cerr.rdbuf();
 		std::cerr.rdbuf(ss.rdbuf());
 		die();
 		const auto s = ss.str();
+		std::cerr.rdbuf(os);
 		if (not empty(s))
 		{
 			throw std::runtime_error(s);

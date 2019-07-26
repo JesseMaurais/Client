@@ -1,5 +1,5 @@
-#ifndef char_hpp
-#define char_hpp
+#ifndef utf_hpp
+#define utf_hpp
 
 #include <cuchar>
 #include <cwchar>
@@ -7,11 +7,11 @@
 
 namespace fmt
 {
-	struct mb : std::mbstate_t
+	struct utf : std::mbstate_t
 	{
-		mb()
+		utf()
 		{
-			std::memset(this, 0, sizeof(mb));
+			std::memset(this, 0, sizeof(utf));
 		}
 
 		operator bool() const

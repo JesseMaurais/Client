@@ -21,16 +21,16 @@ namespace sys
 	{
 		LPSTR err(HMODULE h)
 		{
+			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
+			                    | FORMAT_MESSAGE_IGNORE_INSERTS
+		    	                | FORMAT_MESSAGE_FROM_SYSTEM
+			                    | FORMAT_MESSAGE_MODULE;
+
 			if (sys::win::fail(h))
 			{
 				h = GetModuleHandle(nullptr);
 			}
-
-			const auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
-			                | FORMAT_MESSAGE_IGNORE_INSERTS
-		    	            | FORMAT_MESSAGE_FROM_SYSTEM
-			                | FORMAT_MESSAGE_MODULE;
-
+			
 			static auto ptr = null(LocalFree);
 			LPSTR const str = nullptr;
 			auto const addr = (LPSTR) &str;

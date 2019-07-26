@@ -7,10 +7,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <csignal>
 #include "sys.hpp"
 #include "err.hpp"
-#include "sig.hpp"
 
 namespace sys::win
 {
@@ -28,11 +26,6 @@ namespace sys::win
 		HWND get(DWORD pid, DWORD& tid);
 		HWND get(DWORD pid);
 
-		inline bool put(MSG& it)
-		{
-			return PostMessage(it.hwnd, it.message, it.wParam, it.lParam);
-		}
-
 		inline bool put(UINT msg, HWND w = nullptr, WPARAM wp = 0, LPARAM lp = 0)
 		{
 			return PostMessage(w, msg, wp, lp);
@@ -40,7 +33,7 @@ namespace sys::win
 
 		inline bool get(MSG& it, UINT min = 0, UINT max = 0, HWND w = nullptr, UINT rm = PM_REMOVE)
 		{
-			0 != PeekMessage(&it, w, min, max, rm);
+			return 0 != PeekMessage(&it, w, min, max, rm);
 		}
 
 		inline bool join(MSG& it)
@@ -64,7 +57,7 @@ namespace sys::win
 		template <int On>
 		struct quit : link
 		{
-			quit() : slot(on, post) { }
+			quit() : link(on, post) { }
 
 		protected:
 
@@ -117,6 +110,7 @@ namespace sys::win
 	using security_attributes = size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
 	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
 	using process_info = zero<PROCESS_INFORMATION>;
+	using process_entry = size<PROCESSENTRY32, &PROCESSENTRY32::cwSize>;
 
 	struct handle
 	{
@@ -234,7 +228,7 @@ namespace sys::win
 		return fail(f.h);
 	}
 
-	struct entry : size<PROCESSENTRY32, &PROCESSENTRY32::dwSize>
+	struct process_iterator : process_entry
 	{
 		handle h;
 
