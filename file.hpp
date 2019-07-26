@@ -21,11 +21,11 @@ namespace sys::file
 		app  = 1 << 6, // append
 		txt  = 1 << 7, // text
 		bin  = 1 << 8, // binary
-
 		rw   = rd | wr,
-		rwz  = rw | sz,
+		wo   = rw | ok,
 		rwx  = rw | ex,
-		rwo  = rw | ok,
+		oz   = wo | sz,
+		ox   = wo | ex,
 	};
 
 	constexpr int owner(int bit)
@@ -83,9 +83,9 @@ namespace sys::file
 			(void) set(fd);
 		}
 
-		descriptor(char const *path, mode flag = rwo, permit id = own(rw))
+		descriptor(char const *path, mode bit = wo, permit id = own(rw))
 		{
-			open(path, flag, id);
+			open(path, bit, id);
 		}
 
 		~descriptor()
@@ -120,7 +120,7 @@ namespace sys::file
 			return read(static_cast<void*>(buf), sz);
 		}
 
-		void open(char const* path, mode flag = rwo, permit id = own(rw));
+		void open(char const* path, mode bit = wo, permit id = own(rw));
 		void close();
 
 	private:
