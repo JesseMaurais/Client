@@ -90,6 +90,7 @@ namespace sys::win
 	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
 	using process_info = zero<PROCESS_INFORMATION>;
 	using process_entry = size<PROCESSENTRY32, &PROCESSENTRY32::cwSize>;
+	using module_entry = size<MODULEENTRY32, &MODULEENTRY32::cwSize>;
 
 	struct handle
 	{
@@ -152,6 +153,18 @@ namespace sys::win
 		}
 	};
 
+	struct snapshot : handle
+	{
+		snapshot(DWORD dw = TH32CS_SNAPPROCESS)
+		{
+			h = CreateToolhelp32Snapshot(dw, 0);
+			if (sys::win::fail(h))
+			{
+				sys::win::err(here, "CreateToolhelp32Snapshot", dw);
+			}
+		}
+	};
+
 	struct pipe
 	{
 		handle read;
@@ -165,6 +178,42 @@ namespace sys::win
 			{
 				sys::win::err(here, "CreatePipe");
 			}
+		}
+	};
+
+	struct processes : process_entry
+	{
+		snapshot snap;
+
+		processes()
+		{
+			if (not Process32First(h, this))
+			{
+				sys::win::err(here, "Process32First");
+			}
+		}
+
+		bool operator++()
+		{
+			return Process32Next(h, this);
+		}
+	};
+
+	struct modules : module_entry
+	{
+		snapshot snap;
+
+		modules()
+		{
+			if (not Module32First(h, this))
+			{
+				sys::win::err(here, "Module32First");
+			}
+		}
+
+		bool operator++()
+		{
+			return Module32Next(h, this);
 		}
 	};
 
@@ -204,30 +253,6 @@ namespace sys::win
 			return true;
 		}
 	};
-
-	struct processes : process_entry
-	{
-		handle h;
-
-		processes(DWORD dw = TH32CS_SNAPPROCESS)
-		{
-			h = CreateToolhelp32Snapshot(dw, 0);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "CreateToolhelp32Snapshot", dw);
-			}
-			else
-			if (not Process32First(h, this))
-			{
-				sys::win::err(here, "Process32First");
-			}
-		}
-
-		bool operator++()
-		{
-			return Process32Next(h, this);
-		}
-	}
 }
 
 #endif // file
