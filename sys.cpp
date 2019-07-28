@@ -8,7 +8,8 @@
 #ifdef _WIN32
 # include "win.hpp"
 # include <tlhelp32.h>
-#else //POSIX
+#else
+# include "uni.hpp"
 # include <sys/wait.h>
 # include <signal.h>
 #endif
@@ -17,9 +18,9 @@
 namespace sys
 {
 	#ifdef _WIN32
-	namespace win::msg
+	namespace win::fmt
 	{
-		LPSTR err(HMODULE h)
+		LPSTR err(DWORD id, HMODULE h)
 		{
 			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
 			                    | FORMAT_MESSAGE_IGNORE_INSERTS
@@ -34,12 +35,11 @@ namespace sys
 			static auto ptr = null(LocalFree);
 			LPSTR const str = nullptr;
 			auto const addr = (LPSTR) &str;
-			auto const code = GetLastError();
 			auto const size = FormatMessage
 			(
 				flag,   // style
 				h,      // module
-				code,   // message
+				id,     // message
 				lang,   // language
 				addr,   // buffer
 				0,      // size
@@ -52,15 +52,15 @@ namespace sys
 			}
 			return str;
 		}
-
-		bool put(DWORD tid, UINT msg, WPARAM wp, LPARAM lp)
+	}
+	#else
+	namespace uni::fmt
+	{
+		char* err(int no)
 		{
-			bool const ok = PostThreadMessage(tid, msg, wp, lp);
-			if (not ok)
-			{
-				sys::win::err(here, "PostThreadMessage", tid, msg, wp, lp);	
-			}
-			return ok;
+			static thread_local char buf[64] = { '\0' };
+			(void) strerror_r(no, buf, sizeof buf);
+			return buf;
 		}
 	}
 	#endif

@@ -21,9 +21,9 @@ namespace sys::win
 		return nullptr == h or invalid == h;
 	}
 
-	namespace msg
+	namespace fmt
 	{
-		LPSTR err(HMODULE h = nullptr);
+		LPSTR err(DWORD id, HMODULE h = nullptr);
 	}
 
 	template <typename... Args>
@@ -31,7 +31,8 @@ namespace sys::win
 	{
 		if (sys::debug)
 		{
-			auto const s = msg::err();
+			auto const no = GetLastError();
+			auto const s = fmt::err(no);
 			sys::warn(args.., s);
 		}
 	}
@@ -132,12 +133,12 @@ namespace sys::win
 
 	struct thread : handle
 	{
-		thread(DWORD tid, DWORD dw = THREAD_ALL_ACCESS)
+		thread(DWORD thid, DWORD dw = THREAD_ALL_ACCESS)
 		{
-			h = OpenThread(dw, false, tid);
+			h = OpenThread(dw, false, thid);
 			if (sys::win::fail(h))
 			{
-				sys::win::err(here, "OpenThread", tid);
+				sys::win::err(here, "OpenThread", thid);
 			}
 		}
 	};
