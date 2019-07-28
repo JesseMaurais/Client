@@ -2,8 +2,8 @@
 #define dir_hpp
 
 #include "env.hpp"
+#include "fun.hpp"
 #include "file.hpp"
-#include <functional>
 
 namespace fmt::path
 {
@@ -51,20 +51,6 @@ namespace fmt::dir
 
 namespace env::dir
 {
-	struct mask : std::function<bool(fmt::string_view)>
-	{
-		using base = std::function<bool(fmt::string_view)>;
-		using base::base;
-
-		mask operator | (base const& that) const
-		{
-			return [&](fmt::string_view u)
-			{
-				return this->operator()(u) and that(u);
-			};
-		}
-	};
-
 	inline env::view const& tmp = ::env::tmpdir;
 	extern env::view const& run;
 	inline env::list const& bin = ::env::paths;
@@ -72,12 +58,14 @@ namespace env::dir
 	extern env::list const& share;
 	extern env::list const& include;
 
-	mask mode(sys::file::mode);
-	mask match(fmt::string_view);
-	mask copy(fmt::string_vector&);
-	mask copy(fmt::string&);
+	using mask = predicate<fmt::string_view>;
 
-	constexpr auto stop = [](fmt::string_view) { return false; };
+	mask copy(fmt::string&);
+	mask match(fmt::string_view);
+	mask insert(fmt::string_vector&);
+	mask mode(sys::file::mode);
+
+	constexpr auto stop = contra<fmt::string_view>;
 
 	bool find(fmt::string_view dir, mask);
 

@@ -19,16 +19,13 @@ include .make/Configure.mk
 
 OBJ=$(SRC:.cpp=.obj)
 
-all: $(BIN)$(EXE)
+ALL: $(BIN)$(EXE)
 
-clean:
-	$(RM) $(BIN)$(EXE) $(OBJ) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp $(SRC:.cpp=.log) $(SRC:.cpp=.i) $(SRC:.cpp=.d)
+clean: ; $(RM) $(BIN)$(EXE) $(OBJ) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp $(SRC:.cpp=.log) $(SRC:.cpp=.i) $(SRC:.cpp=.d)
 
-$(BIN)$(EXE): $(OBJ)
-	$(CXX) $(LDFLAGS) $(OUT)$@ $(OBJ) $(LNK)
+$(BIN)$(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OUT)$@ $(OBJ) $(LNK)
 
-.cpp.obj:
-	$(CXX) $(CFLAGS) -c $< $(OUT)$@
+.cpp.obj: ; $(CXX) $(CFLAGS) -c $< $(OUT)$@
 
 #pragma // Additional features
 

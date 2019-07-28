@@ -1,12 +1,10 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "dbg.hpp"
-#include "esc.hpp"
-#include <chrono>
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
+#include <csignal>
 #include <string>
 #include <regex>
 #include <map>
@@ -14,6 +12,8 @@
 #ifdef _WIN32
 # include "win.hpp"
 #endif
+#include "dbg.hpp"
+#include "esc.hpp"
 
 namespace
 {
@@ -28,7 +28,7 @@ namespace
 	{
 		#ifdef _WIN32
 		{
-			static auto quit = sys::win::sig::interrupt();
+			static auto quit = sys::win::sig::quit(SIGINT);
 		}
 		#endif
 		static map instance;

@@ -13,7 +13,7 @@
 #ifdef _WIN32
 # include "win.hpp"
 #else
-# include <dirent.h>
+# include "uni.hpp"
 #endif
 
 namespace fmt::dir
@@ -145,8 +145,8 @@ namespace env::dir
 
 		#ifdef _WIN32
 		{
-			sys::win::find dir(s);
-			if (dir) do
+			sys::win::files dir(s);
+			if (dir.h) do
 			{
 				if (check(dir.cFileName))
 				{
@@ -158,22 +158,11 @@ namespace env::dir
 		}
 		#else
 		{
-			auto const dir = make(opendir(s), +[](DIR* dir)
+			sys::uni::files dir(s);
+			while (dir.ptr) // as if
 			{
-				if (nullptr == dir)
-				{
-					sys::err(here, "opendir");
-				}
-				else
-				if (sys::fail(closedir(dir)))
-				{
-					sys::err(here, "closedir");
-				}
-			});
-
-			while (dir) // as if
-			{
-				if (auto const ent = readdir(dir.get()))
+				auto const ent = ++dir;
+				if (ent)
 				{
 					if (check(ent->d_name))
 					{
@@ -199,7 +188,7 @@ namespace env::dir
 			}
 			#ifdef _WIN32
 			{
-				if (bit & sys::file::mode::run)
+				if (bit & sys::file::ex)
 				{
 					DWORD type;
 					BOOL ok = GetBinaryType(s, &type);
@@ -223,7 +212,7 @@ namespace env::dir
 		};
 	}
 
-	mask emplace(fmt::string_vector& buf)
+	mask insert(fmt::string_vector& buf)
 	{
 		return [&](fmt::string_view u)
 		{

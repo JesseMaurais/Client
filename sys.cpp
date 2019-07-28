@@ -53,19 +53,14 @@ namespace sys
 			return str;
 		}
 
-		HWND get(DWORD pid, DWORD& tid)
+		bool put(DWORD tid, UINT msg, WPARAM wp, LPARAM lp)
 		{
-			HWND h = nullptr;
-			while (h = FindWindwoEx(nullptr, h, nullptr, nullptr))
+			bool const ok = PostThreadMessage(tid, msg, wp, lp);
+			if (not ok)
 			{
-				DWORD dw;
-				tid = GetWindowProcessThreadId(h, &dw);
-				if (pid == dw)
-				{
-					break;
-				}
+				sys::win::err(here, "PostThreadMessage", tid, msg, wp, lp);	
 			}
-			return h;
+			return ok;
 		}
 	}
 	#endif
@@ -224,9 +219,9 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			if (sys::win::msg::quit(pid))
+			if (sys::win::msg::quit(tid))
 			{
-				sys::warn(here, pid);
+
 			}
 		}
 		#else
