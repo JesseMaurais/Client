@@ -6,7 +6,7 @@
 #pragma // Common configuration variables for the project
 
 STD=c++17
-SRC=test.cpp dir.cpp dll.cpp fifo.cpp file.cpp dbg.cpp env.cpp shm.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
+SRC=test.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp shm.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
 BIN=test
 
 #pragma // Configurations for system, compiler, and make

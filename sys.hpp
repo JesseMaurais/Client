@@ -7,123 +7,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-namespace sys
-{
-
-// Single UNIX Specification
-
-constexpr bool xopen_source = 
-#if defined(_XOPEN_SOURCE)
-# undef __XOPEN__
-# define __XOPEN__ 1
-	true
-#else
-	false
-#endif
-	;
-
-// Portable Operating System Interface
-
-constexpr bool posix_source = 
-#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE)
-# undef __POSIX__
-# define __POSIX__ 1
-	true
-#else
-	false
-#endif
-	;
-
-// Windows Runtime / Universal Windows Platform
-
-constexpr bool winrt =
-#if defined(_WINRTDLL)
-# undef __WINRT__
-# define __WINRT__ 1
-	true
-#else
-	false
-#endif
-	;
-
-// Portable Operating System Interface
-
-constexpr long posix_version =
-#if defined(_POSIX_VERSION)
-	_POSIX_VERSION
-#else
-	0L
-#endif
-	;
-
-constexpr long posix2_version =
-#if defined(_POSIX2_VERSION)
-	_POSIX2_VERSION
-#else
-	0L
-#endif
-	;
-
-constexpr long posix2_c_version =
-#if defined(_POSIX2_C_VERSION)
-	_POSIX2_C_VERSION
-#else
-	0L
-#endif
-	;
-
-// Single UNIX Specification
-
-constexpr long xopen_version =
-#if defined(_XOPEN_VERSION)
-	_XOPEN_VERSION
-#else
-	0L
-#endif
-	;
-
-constexpr long xopen_xcu_version =
-#if defined(_XOPEN_XCU_VERSION)
-	_XOPEN_XCU_VERSION
-#else
-	0L
-#endif
-	;
-
-constexpr bool xopen_xpg2 =
-#if defined(_XOPEN_XPG2)
-	true
-#else
-	false
-#endif
-	;
-
-constexpr bool xopen_xpg3 =
-#if defined(_XOPEN_XPG3)
-	true
-#else
-	false
-#endif
-	;
-
-constexpr bool xopen_xpg4 =
-#if defined(_XOPEN_XPG4)
-	true
-#else
-	false
-#endif
-	;
-
-constexpr bool xopen_unix =
-#if defined(_XOPEN_UNIX)
-	true
-#else
-	false
-#endif
-	;
-
-}
-
 //
 // Include system interface
 //
@@ -235,9 +118,7 @@ namespace sys
 
 } // namespace sys
 
-
-#else // _POSIX
-
+#else // POSIX
 
 #include <unistd.h>
 
@@ -310,9 +191,7 @@ namespace sys
 
 } // namespace sys
 
-
 #endif
-
 
 //
 // Common
@@ -326,6 +205,11 @@ namespace sys
 	{
 		return invalid == value;
 	}
+
+	pid_t run(int fd[3], char const** argv);
+	void kill(pid_t pid);
+	int wait(pid_t pid);
+	void quit(pid_t pid);
 
 	class stat : public stat_t
 	{
@@ -370,11 +254,6 @@ namespace sys
 			(void) sys::umask(um);
 		}
 	};
-
-	pid_t run(int fd[3], char const** argv);
-	void kill(pid_t pid);
-	int wait(pid_t pid);
-	void quit(pid_t pid);
 }
 
 #endif // file

@@ -150,7 +150,19 @@ namespace sys::win
 			h = OpenEvent(dw, false, name);
 			if (sys::win::fail(h))
 			{
-				sys::win::err(herr, "OpenEvent", name);
+				sys::win::err(here, "OpenEvent", name);
+			}
+		}
+	};
+
+	struct mutex : handle
+	{
+		mutex(char const *name, DWORD dw = MUTEX_ALL_ACCESS)
+		{
+			h = OpenMutex(dw, false, name);
+			if (sys::win::fail(h))
+			{
+				sys::win::err(here, "OpenMutex", name);
 			}
 		}
 	};

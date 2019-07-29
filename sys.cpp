@@ -5,15 +5,15 @@
 #include "err.hpp"
 #include "ptr.hpp"
 #include "file.hpp"
+#include <vector>
+
 #ifdef _WIN32
 # include "win.hpp"
-# include <tlhelp32.h>
 #else
 # include "uni.hpp"
 # include <sys/wait.h>
-# include <signal.h>
+# include <string.h>
 #endif
-#include <vector>
 
 namespace sys
 {
@@ -221,7 +221,7 @@ namespace sys
 		{
 			if (sys::win::msg::quit(tid))
 			{
-
+				sys::err(here, here);
 			}
 		}
 		#else

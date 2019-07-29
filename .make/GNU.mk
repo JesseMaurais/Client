@@ -6,7 +6,7 @@ DEF += -D_WIN32
 EXE = .exe
 else
 DEF += -D_POSIX_C_SOURCE
-LNK += -ldl -lrt
+LNK += -ldl -lrt -lpthread
 endif # OS
 
 # Guess the environment

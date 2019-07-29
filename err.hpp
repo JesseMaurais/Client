@@ -17,7 +17,7 @@
 #endif
 
 #include <sstream>
-#include <cstdio>
+#include "str.hpp"
 
 namespace fmt
 {
@@ -41,9 +41,11 @@ namespace sys
 		if (debug)
 		{
 			auto const s = fmt::err(args...);
-			std::fputs(data(s), stderr);
+			warn(s);
 		}
 	}
+
+	void warn(fmt::string const& s);
 
 	template <typename... Args>
 	inline void err(Args... args)
@@ -51,9 +53,11 @@ namespace sys
 		if (debug)
 		{
 			auto const s = fmt::err(args...);
-			std::perror(data(s));
+			err(s);
 		}
 	}
+
+	void err(fmt::string const& s);
 }
 
 #endif // file
