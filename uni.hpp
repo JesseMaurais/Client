@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 #include <dirent.h>
+#include "bool.hpp"
 #include "sys.hpp"
 #include "err.hpp"
 
@@ -157,7 +158,7 @@ namespace sys::uni
 			}
 		}
 
-		void wait(pthread_mutex_t* mutex = nullptr)
+		void wait(pthread_mutex_t* mutex)
 		{
 			no = pthread_cond_wait(&self, mutex);
 			if (no) sys::uni::err(no, here);
@@ -446,16 +447,17 @@ namespace sys::uni
 
 namespace sys
 {
-	struct mutex : uni::mutex
+	struct mutex : sys::uni::mutex, shared<mutex>
 	{
 		auto lock()
 		{
 			struct key
 			{
-				uni::mutex* ptr;
+				std::shared_ptr<mutex> ptr;
 
-				key(mutex* m) : ptr(m)
+				key(mutex* that)
 				{
+					ptr = that->shared_from_this();
 					ptr->lock();
 				}
 
@@ -470,13 +472,14 @@ namespace sys
 	};
 
 	template <typename Routine>
-	struct thread : uni::thread
+	struct thread
 	{
 		pthread_t id;
 
 		thread(Routine start) : work(start)
 		{
-			id = uni::thread::create(thunk, this);			
+			static sys::uni::thread attr;
+			id = attr.create(thunk, this);
 		}
 
 		~thread()
@@ -486,7 +489,7 @@ namespace sys
 			assert(this == ptr);
 			if (fail(no))
 			{
-				uni::err(no, here, id);
+				sys::uni::err(no, here, id);
 			}
 		}
 
@@ -499,6 +502,17 @@ namespace sys
 			auto that = reinterpret_cast<thread>(ptr);
 			that->work();
 			return ptr;
+		}
+	};
+
+	struct event : sys::uni::cond
+	{
+		using base = sys::uni::cond;
+
+		bool wait(pthread_mutex_t& key)
+		{
+			base::wait(&key);
+			return fail(no);
 		}
 	};
 }

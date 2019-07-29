@@ -1,8 +1,6 @@
 #ifndef err_hpp
 #define err_hpp
 
-#define here __FILE__, __LINE__, __func__
-
 #ifdef assert
 # undef assert
 # warning You should not include assert. 
@@ -26,14 +24,34 @@ namespace fmt
 	{
 		std::stringstream ss;
 		ss << arg;
-		((ss << ": " << args), ...);
+		if constexpr (0 < sizeof...(args))
+		{
+			((ss << " " << args), ...);
+		}
 		return ss.str();
 	}
+
+	struct where
+	{
+		char const *file;
+		int const line;
+		char const *func;
+	};
+
+	std::ostream& operator<<(std::ostream& os, where const& pos);
 }
+
+#define here ::fmt::where { __FILE__, __LINE__, __func__ }
 
 namespace sys
 {
 	extern bool debug;
+
+	namespace impl
+	{
+		void warn(fmt::string const& s);
+		void err(fmt::string const& s);
+	}
 
 	template <typename... Args>
 	inline void warn(Args... args)
@@ -41,11 +59,9 @@ namespace sys
 		if (debug)
 		{
 			auto const s = fmt::err(args...);
-			warn(s);
+			impl::warn(s);
 		}
 	}
-
-	void warn(fmt::string const& s);
 
 	template <typename... Args>
 	inline void err(Args... args)
@@ -53,11 +69,9 @@ namespace sys
 		if (debug)
 		{
 			auto const s = fmt::err(args...);
-			err(s);
+			impl::err(s);
 		}
 	}
-
-	void err(fmt::string const& s);
 }
 
 #endif // file

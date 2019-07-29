@@ -8,6 +8,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <tlhelp32.h>
+#include "bool.hpp"
 #include "sys.hpp"
 #include "sig.hpp"
 #include "err.hpp"
@@ -66,15 +67,26 @@ namespace sys::win
 			if (not PostThreadMessage(thid, msg, wp, lp)
 			{
 				sys::win::err(here, "PostThreadMessage", thid);
-				return true;
+				return failure;
 			}
-			return false;
+			return success;
 		}
 		
 		inline bool quit(DWORD thid)
 		{
 			return put(thid, WM_QUIT);
 		}
+	}
+
+	inline bool wait(HANDLE h, DWORD timeout = INFINITE)
+	{
+		auto const dw = WaitForSingleObject(h, timeout);
+		if (WAIT_FAILED == dw)
+		{
+			sys::win::err(here, "WaitForSingleObject", h);
+			return failure;
+		}
+		return success;
 	}
 
 	template <typename T> struct zero : T
@@ -104,8 +116,7 @@ namespace sys::win
 
 		~handle()
 		{
-			bool const ok = not sys::win::fail(h);
-			if (ok and not CloseHandle(h))
+			if (not fail(h) and not CloseHandle(h))
 			{
 				sys::win::err(here, "CloseHandle");
 			}
@@ -145,7 +156,7 @@ namespace sys::win
 
 	struct event : handle
 	{
-		event(char const *name, DWORD dw = EVENT_ALL_ACCESS)
+		event(char const *name = nullptr, DWORD dw = EVENT_ALL_ACCESS)
 		{
 			h = OpenEvent(dw, false, name);
 			if (sys::win::fail(h))
@@ -157,7 +168,7 @@ namespace sys::win
 
 	struct mutex : handle
 	{
-		mutex(char const *name, DWORD dw = MUTEX_ALL_ACCESS)
+		mutex(char const *name = nullptr, DWORD dw = MUTEX_ALL_ACCESS)
 		{
 			h = OpenMutex(dw, false, name);
 			if (sys::win::fail(h))
@@ -201,33 +212,39 @@ namespace sys::win
 
 		processes()
 		{
-			if (not Process32First(h, this))
+			if (not sys::win::fail(snap.h))
 			{
-				sys::win::err(here, "Process32First");
+				if (not Process32First(snap.h, this))
+				{
+					sys::win::err(here, "Process32First");
+				}
 			}
 		}
 
 		bool operator++()
 		{
-			return Process32Next(h, this);
+			return Process32Next(snap.h, this);
 		}
 	};
 
 	struct modules : module_entry
 	{
-		snapshot snap(TH32CS_SNAPMODULE;
+		snapshot snap(TH32CS_SNAPMODULE);
 
 		modules()
 		{
-			if (not Module32First(h, this))
+			if (not sys::win::fail(snap.h))
 			{
-				sys::win::err(here, "Module32First");
+				if (not Module32First(snap.h, this))
+				{
+					sys::win::err(here, "Module32First");
+				}
 			}
 		}
 
 		bool operator++()
 		{
-			return Module32Next(h, this);
+			return Module32Next(snap.h, this);
 		}
 	};
 
@@ -237,15 +254,18 @@ namespace sys::win
 
 		threads()
 		{
-			if (not Thread32First(h, this))
+			if (not sys::win::fail(snap.h))
 			{
-				sys::win::err(here, "Thread32First");
+				if (not Thread32First(snap.h, this))
+				{
+					sys::win::err(here, "Thread32First");
+				}
 			}
 		}
 
 		bool operator++()
 		{
-			return Thread32Next(h, this);
+			return Thread32Next(snap.h, this);
 		}
 	};
 
@@ -264,10 +284,12 @@ namespace sys::win
 
 		~files()
 		{
-			bool const ok = not sys::win::fail(h);
-			if (ok and not FileClose(h))
+			if (not sys::win::fail(h))
 			{
-				sys::win::err(here, "FindClose");
+				if (not FileClose(h))
+				{
+					sys::win::err(here, "FindClose");
+				}
 			}
 		}
 
@@ -275,8 +297,7 @@ namespace sys::win
 		{
 			if (not FindNextFile(h, this))
 			{
-				auto const e = GetLastError();
-				if (ERROR_NO_MORE_FILES != e)
+				if (GetLastError() != ERROR_NO_MORE_FILES)
 				{
 					sys::win::err(here, "FindNextFile");
 				}
@@ -289,14 +310,14 @@ namespace sys::win
 
 namespace sys
 {
-	struct mutex : win::handle
+	struct mutex : sys::win::handle
 	{
 		mutex()
 		{
 			h = CreateMutex(nullptr, true, nullptr);
-			if (win::fail(h))
+			if (sys::win::fail(h))
 			{
-				win::err(here, "CreateMutex");
+				sys::win::err(here, "CreateMutex");
 			}
 		}
 
@@ -308,20 +329,19 @@ namespace sys
 
 				key(HANDLE h_) : h(h_)
 				{
-					auto const dw = WaitForSingleObject(h, INFINITE);
-					if (WAIT_FAILED == dw)
+					if (fail(sys::win::wait(h)))
 					{
-						win::err(here, "WaitForSingleObject");
+						sys::warn(here);
 					}
 				}
 
 				~key()
 				{
-					if (not win::fail(h))
+					if (not sys::win::fail(h))
 					{
 						if (not ReleaseMutex(h))
 						{
-							win::err(here, "ReleaseMutex"):
+							sys::win::err(here, "ReleaseMutex"):
 						}
 					}
 				}
@@ -332,25 +352,26 @@ namespace sys
 	};
 
 	template <typename Routine>
-	struct thread : win::handle
+	struct thread : sys::win::handle
 	{
 		DWORD id;
 
+		using base = sys::win::handle;
+
 		thread(Routine start) : work(start)
 		{
-			h = CreateThread(nullptr, 0, thunk, this, 0, &id);
-			if (win::fail(h))
+			base::h = CreateThread(nullptr, 0, thunk, this, 0, &id);
+			if (sys::win::fail(base::h))
 			{
-				win::err(here, "CreateThread");
+				sys::win::err(here, "CreateThread");
 			}
 		}
 
 		~thread()
 		{
-			auto dw = WaitForSingleObject(h, INFINITE);
-			if (WAIT_FAILED == dw)
+			if (fail(sys::win::wait(base::h)))
 			{
-				win::err(here, id);
+				sys::warn(here, id);
 			}
 		}
 
@@ -363,6 +384,39 @@ namespace sys
 			auto that = reinterpret_cast<thread>(ptr);
 			that->work();
 			return 0;
+		}
+	};
+
+	struct event : sys::win::handle
+	{
+		event()
+		{
+			h = CreateEvent(nullptr, false, false, nullptr);
+			if (sys::win::fail(h))
+			{
+				sys::win::err(here, "CreateEvent");
+			}
+		}
+
+		bool signal()
+		{
+			if (not SetEvent(h))
+			{
+				sys::win::err(here, "SetEvent");
+				return failure;
+			}
+			return success;
+		}
+
+		bool wait(mutex& key)
+		{
+			(void) key;
+			if (fail(sys::win::wait(h))
+			{
+				sys::warn(here);
+				return failure;
+			}
+			return success;
 		}
 	};
 };

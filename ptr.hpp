@@ -16,6 +16,9 @@ namespace
 	{
 		return make<Type>(nullptr, rm);
 	}
+
+	template <typename Type>
+	using shared = std::enable_shared_from_this<Type>;
 }
 
 #endif // file
