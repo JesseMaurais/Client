@@ -32,7 +32,7 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 			}
 			
-			static auto ptr = null(LocalFree);
+			static thread_local auto ptr = null(LocalFree);
 			LPSTR const str = nullptr;
 			auto const addr = (LPSTR) &str;
 			auto const size = FormatMessage
