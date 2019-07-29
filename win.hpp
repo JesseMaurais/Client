@@ -345,6 +345,15 @@ namespace sys
 			}
 		}
 
+		~thread()
+		{
+			auto dw = WaitForSingleObject(h, INFINITE);
+			if (WAIT_FAILED == dw)
+			{
+				win::err(here, id);
+			}
+		}
+
 	private:
 
 		Routine work;

@@ -479,6 +479,17 @@ namespace sys
 			id = uni::thread::create(thunk, this);			
 		}
 
+		~thread()
+		{
+			void* ptr = nullptr;
+			int no = pthread_join(id, &ptr);
+			assert(this == ptr);
+			if (fail(no))
+			{
+				uni::err(no, here, id);
+			}
+		}
+
 	private:
 
 		Routine work;
@@ -487,7 +498,7 @@ namespace sys
 		{
 			auto that = reinterpret_cast<thread>(ptr);
 			that->work();
-			return nullptr;
+			return ptr;
 		}
 	};
 }
