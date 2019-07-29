@@ -444,4 +444,52 @@ namespace sys::uni
 	};
 }
 
+namespace sys
+{
+	struct mutex : uni::mutex
+	{
+		auto lock()
+		{
+			struct key
+			{
+				uni::mutex* ptr;
+
+				key(mutex* m) : ptr(m)
+				{
+					ptr->lock();
+				}
+
+				~key()
+				{
+					ptr->unlock();
+				}
+
+			} unlock(this);
+			return unlock;
+		}
+	};
+
+	template <typename Routine>
+	struct thread : uni::thread
+	{
+		pthread_t id;
+
+		thread(Routine start) : work(start)
+		{
+			id = un::thread::create(thunk, this);			
+		}
+
+	private:
+
+		Routine work;
+
+		static void* thunk(void* ptr)
+		{
+			auto that = reinterpret_cast<thread>(ptr);
+			that->work();
+			return nullptr;
+		}
+	};
+}
+
 #endif // file

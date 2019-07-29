@@ -287,4 +287,75 @@ namespace sys::win
 	};
 }
 
+namespace sys
+{
+	struct mutex : win::handle
+	{
+		mutex()
+		{
+			h = CreateMutex(nullptr, true, nullptr);
+			if (win::fail(h))
+			{
+				win::err(here, "CreateMutex");
+			}
+		}
+
+		auto lock()
+		{
+			struct key
+			{
+				HANDLE h;
+
+				key(HANDLE h_) : h(h_)
+				{
+					auto const dw = WaitForSingleObject(h, INFINITE);
+					if (WAIT_FAILED == dw)
+					{
+						win::err(here, "WaitForSingleObject");
+					}
+				}
+
+				~key()
+				{
+					if (not win::fail(h))
+					{
+						if (not ReleaseMutex(h))
+						{
+							win::err(here, "ReleaseMutex"):
+						}
+					}
+				}
+
+			} unlock(h);
+			return unlock;
+		}
+	};
+
+	template <typename Routine>
+	struct thread : win::handle
+	{
+		DWORD id;
+
+		thread(Routine start) : work(start)
+		{
+			h = CreateThread(nullptr, 0, thunk, this, 0, &id);
+			if (win::fail(h))
+			{
+				win::err(here, "CreateThread");
+			}
+		}
+
+	private:
+
+		Routine work;
+
+		static DWORD thunk(LPVOID ptr)
+		{
+			auto that = reinterpret_cast<thread>(ptr);
+			that->work();
+			return 0;
+		}
+	};
+};
+
 #endif // file
