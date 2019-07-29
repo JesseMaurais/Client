@@ -476,7 +476,7 @@ namespace sys
 
 		thread(Routine start) : work(start)
 		{
-			id = un::thread::create(thunk, this);			
+			id = uni::thread::create(thunk, this);			
 		}
 
 	private:
