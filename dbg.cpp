@@ -69,9 +69,10 @@ namespace dbg
 		die();
 		const auto s = ss.str();
 		std::cerr.rdbuf(os);
-		if (not empty(s))
+
+		if (empty(s))
 		{
-			throw std::runtime_error(s);
+			throw std::runtime_error("Failing test succeeded");
 		}
 	}
 

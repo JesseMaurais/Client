@@ -260,7 +260,7 @@ namespace sys::uni
 
 		void unlock()
 		{
-			no = pthread_mutex_lock(&self);
+			no = pthread_mutex_unlock(&self);
 			if (no) sys::uni::err(no, here);
 		}
 
@@ -447,17 +447,16 @@ namespace sys::uni
 
 namespace sys
 {
-	struct mutex : sys::uni::mutex, shared<mutex>
+	struct mutex : sys::uni::mutex
 	{
 		auto lock()
 		{
 			struct key
 			{
-				std::shared_ptr<mutex> ptr;
+				sys::uni::mutex* ptr;
 
-				key(mutex* that)
+				key(mutex* that) : ptr(that)
 				{
-					ptr = that->shared_from_this();
 					ptr->lock();
 				}
 

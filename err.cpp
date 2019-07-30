@@ -1,5 +1,7 @@
 #include "err.hpp"
-#include <cstdio>
+#include <cerrno>
+#include <cstring>
+#include <iostream>
 
 #ifdef _WIN32
 # include "win.hpp"
@@ -10,6 +12,7 @@
 namespace
 {
 	sys::mutex key;
+	bool recursive = false;
 }
 
 namespace fmt
@@ -24,14 +27,19 @@ namespace sys::impl
 {
 	void warn(fmt::string const& s)
 	{
+		if (recursive) return;
+		scoped_bool scope(recursive);
 		auto const unlock = key.lock();
-		std::fputs(data(s), stderr);
+		std::cerr << s << std::endl;
 	}
 
 	void err(fmt::string const& s)
 	{
+		if (recursive) return;
+		scoped_bool scope(recursive);
 		auto const unlock = key.lock();
-		std::perror(data(s));
+		auto const e = std::strerror(errno);
+		std::cerr << s << ": " << e << std::endl;
 	}
 }
 

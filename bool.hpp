@@ -13,5 +13,22 @@ constexpr bool fail(boolean ok)
 	return success != ok;
 }
 
+class scoped_bool
+{
+	bool* ptr;
+
+public:
+
+	scoped_bool(bool& ref) : ptr(&ref)
+	{
+		*ptr = true;
+	}
+
+	~scoped_bool()
+	{
+		*ptr = false;
+	}
+};
+
 #endif // file
 
