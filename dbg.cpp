@@ -26,11 +26,6 @@ namespace
 
 	auto& registry()
 	{
-		#ifdef _WIN32
-		{
-			static auto quit = sys::win::sig::quit(SIGINT);
-		}
-		#endif
 		static map instance;
 		return instance;
 	}
