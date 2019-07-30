@@ -13,9 +13,11 @@
 #include "sig.hpp"
 #include "err.hpp"
 
+#pragma comment(lib, "user32.lib")
+
 namespace sys::win
 {
-	constexpr auto invalid = INVALID_HANDLE_VALUE;
+	const auto invalid = INVALID_HANDLE_VALUE;
 
 	inline bool fail(HANDLE h)
 	{
@@ -34,7 +36,7 @@ namespace sys::win
 		{
 			auto const no = GetLastError();
 			auto const s = fmt::err(no);
-			sys::warn(args.., s);
+			sys::warn(args..., s);
 		}
 	}
 
@@ -54,9 +56,9 @@ namespace sys::win
 
 	namespace sig
 	{
-		struct quit : link
+		struct quit : sys::sig::link
 		{
-			quit(int on = SIGTERM) : link(on, PostQuitMessage) { }
+			quit(int on) : link(on, PostQuitMessage) { }
 		};
 	}
 
@@ -64,7 +66,7 @@ namespace sys::win
 	{
 		inline bool put(DWORD thid, UINT msg, WPARAM wp = 0, LPARAM lp = 0)
 		{
-			if (not PostThreadMessage(thid, msg, wp, lp)
+			if (not PostThreadMessage(thid, msg, wp, lp))
 			{
 				sys::win::err(here, "PostThreadMessage", thid);
 				return failure;
@@ -102,13 +104,18 @@ namespace sys::win
 	using security_attributes = size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
 	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
 	using process_info = zero<PROCESS_INFORMATION>;
-	using process_entry = size<PROCESSENTRY32, &PROCESSENTRY32::cwSize>;
-	using module_entry = size<MODULEENTRY32, &MODULEENTRY32::cwSize>;
-	using thread_entry = size<THREADENTRY32, &THREADENTRY32::cwSize>;
+	using process_entry = size<PROCESSENTRY32, &PROCESSENTRY32::dwSize>;
+	using module_entry = size<MODULEENTRY32, &MODULEENTRY32::dwSize>;
+	using thread_entry = size<THREADENTRY32, &THREADENTRY32::dwSize>;
 
 	struct handle
 	{
 		HANDLE h;
+
+		operator HANDLE() const
+		{
+			return h;
+		}
 
 		handle(HANDLE p = invalid)
 		: h(p)
@@ -124,7 +131,7 @@ namespace sys::win
 
 		int open(int flags)
 		{
-			int const fd = open(h, flags);
+			int const fd = sys::win::open(h, flags);
 			h = invalid;
 			return fd;
 		}
@@ -208,9 +215,9 @@ namespace sys::win
 
 	struct processes : process_entry
 	{
-		snapshot snap(TH32CS_SNAPPROCESS);
+		snapshot snap;
 
-		processes()
+		processes() : snap(TH32CS_SNAPPROCESS)
 		{
 			if (not sys::win::fail(snap.h))
 			{
@@ -229,9 +236,9 @@ namespace sys::win
 
 	struct modules : module_entry
 	{
-		snapshot snap(TH32CS_SNAPMODULE);
+		snapshot snap;
 
-		modules()
+		modules() : snap(TH32CS_SNAPMODULE)
 		{
 			if (not sys::win::fail(snap.h))
 			{
@@ -250,9 +257,9 @@ namespace sys::win
 
 	struct threads : thread_entry
 	{
-		snapshot snap(TH32CS_SNAPTHREAD);
+		snapshot snap;
 
-		threads()
+		threads() : snap(TH32CS_SNAPTHREAD)
 		{
 			if (not sys::win::fail(snap.h))
 			{
@@ -286,7 +293,7 @@ namespace sys::win
 		{
 			if (not sys::win::fail(h))
 			{
-				if (not FileClose(h))
+				if (not FindClose(h))
 				{
 					sys::win::err(here, "FindClose");
 				}
@@ -323,11 +330,11 @@ namespace sys
 
 		auto lock()
 		{
-			struct key
+			struct unlock
 			{
 				HANDLE h;
 
-				key(HANDLE h_) : h(h_)
+				unlock(HANDLE mutex) : h(mutex)
 				{
 					if (fail(sys::win::wait(h)))
 					{
@@ -335,19 +342,19 @@ namespace sys
 					}
 				}
 
-				~key()
+				~unlock()
 				{
 					if (not sys::win::fail(h))
 					{
 						if (not ReleaseMutex(h))
 						{
-							sys::win::err(here, "ReleaseMutex"):
+							sys::win::err(here, "ReleaseMutex");
 						}
 					}
 				}
 
-			} unlock(h);
-			return unlock;
+			};
+			return unlock(h);
 		}
 	};
 
@@ -411,7 +418,7 @@ namespace sys
 		bool wait(mutex& key)
 		{
 			(void) key;
-			if (fail(sys::win::wait(h))
+			if (fail(sys::win::wait(h)))
 			{
 				sys::warn(here);
 				return failure;

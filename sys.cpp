@@ -24,15 +24,16 @@ namespace sys
 		{
 			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
 			                    | FORMAT_MESSAGE_IGNORE_INSERTS
-		    	                | FORMAT_MESSAGE_FROM_SYSTEM
-			                    | FORMAT_MESSAGE_MODULE;
+		    	                | FORMAT_MESSAGE_FROM_HMODULE
+			                    | FORMAT_MESSAGE_FROM_SYSTEM;
 
 			if (sys::win::fail(h))
 			{
 				h = GetModuleHandle(nullptr);
 			}
 			
-			static thread_local auto ptr = null(LocalFree);
+			static thread_local auto ptr = null_ptr<HLOCAL>(LocalFree);
+
 			LPSTR const str = nullptr;
 			auto const addr = (LPSTR) &str;
 			auto const size = FormatMessage
@@ -40,7 +41,7 @@ namespace sys
 				flag,   // style
 				h,      // module
 				id,     // message
-				lang,   // language
+				0,      // language
 				addr,   // buffer
 				0,      // size
 				nullptr // arguments
@@ -48,7 +49,7 @@ namespace sys
 		
 			if (0 < size)
 			{
-				ptr = make((HLOCAL) str, LocalFree);
+				ptr.reset((HLOCAL) str);
 			}
 			return str;
 		}
@@ -73,7 +74,7 @@ namespace sys
 
 			for (int n : { 0, 1, 2 })
 			{
-				if (fail(pair[n]))
+				if (fail(pair[n].read))
 				{
 					return -1;
 				}
@@ -219,10 +220,20 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			if (sys::win::msg::quit(tid))
+			auto const dw = static_cast<DWORD>(pid);
+
+			sys::win::threads it;
+			if (not fail(it.snap)) do
 			{
-				sys::err(here, here);
+				if (it.th32OwnerProcessID == dw)
+				{
+					if (sys::win::msg::quit(it.th32ThreadID))
+					{
+						sys::err(here, here);
+					}
+				}
 			}
+			while (++it);
 		}
 		#else
 		{

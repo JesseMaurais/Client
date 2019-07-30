@@ -6,19 +6,16 @@
 namespace
 {
 	template <typename Type, typename Remove>
-	inline auto make(Type* ptr, Remove rm)
+	inline auto make_ptr(Type* ptr, Remove rm)
 	{
 		return std::unique_ptr<Type, Remove>(ptr, rm);
 	}
 
-	template <typename Type, typename Result>
-	inline auto null(Result(*rm)(Type*))
+	template <typename Type, typename Remove>
+	inline auto null_ptr(Remove rm)
 	{
-		return make<Type>(nullptr, rm);
+		return make_ptr((Type) nullptr, rm);
 	}
-
-	template <typename Type>
-	using shared = std::enable_shared_from_this<Type>;
 }
 
 #endif // file
