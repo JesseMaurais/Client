@@ -62,7 +62,8 @@ namespace sys::net
 		{
 			data(WORD ver)
 			{
-				if (e = WSAStartup(ver, this))
+				e = WSAStartup(ver, this);
+				if (e)
 				{
 					err(here, "WSAStartup");
 				}
