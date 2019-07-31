@@ -31,7 +31,7 @@ namespace fmt
 	{
 		std::stringstream ss;
 		ss << arg;
-		if (0 < sizeof...(args))
+		if constexpr (0 < sizeof...(args))
 		{
 			((ss << " " << args), ...);
 		}

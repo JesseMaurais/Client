@@ -84,7 +84,6 @@ namespace dbg
 				auto s = eat.str();
 				if (not empty(s))
 				{
-					constexpr auto npos = std::string::npos;
 					auto pos = npos;
 					while ((pos = s.find("\n")) != npos)
 					{

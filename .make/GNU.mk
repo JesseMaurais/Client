@@ -2,11 +2,11 @@
 # Guess the operating system
 
 ifneq ($(findstring Windows_NT, $(OS)),)
-DEF += -D_WIN32
-EXE = .exe
+DEF+=-D_WIN32
+EXE=.exe
 else
-DEF += -D_POSIX_C_SOURCE
-LNK += -ldl -lrt -lpthread
+DEF+=-D_POSIX_C_SOURCE
+LNK+=-ldl -lrt -lpthread
 endif # OS
 
 # Guess the environment
@@ -39,17 +39,17 @@ endif # LLVM
 
 # Compiler commands
 
-CFLAGS += $(DEF) $(FLAGS) $(WARN)
+CFLAGS+=$(DEF) $(FLAGS) $(WARN)
 
 ifdef CA
-CFLAGS += $(ANAL)
+CFLAGS+=$(ANAL)
 endif
 
 ifdef STD
-CFLAGS += $(USESTD)$(STD)
+CFLAGS+=$(USESTD)$(STD)
 endif 
 
 ifndef NDEBUG
-CFLAGS += $(DEBUG)
+CFLAGS+=$(DEBUG)
 endif
 

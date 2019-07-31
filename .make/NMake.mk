@@ -2,11 +2,11 @@
 # Guess the operating system
 
 !if "$(OS)" == "Windows_NT"
-DEF = $(DEF) -D_WIN32
-EXE = .exe
+DEF=$(DEF) -D_WIN32
+EXE=.exe
 !else
-DEF = $(DEF) -D_POSIX_C_SOURCE
-LNK = $(LNK) -ldl -lrt
+DEF=$(DEF) -D_POSIX_C_SOURCE
+LNK=$(LNK) -ldl -lrt
 !endif
 
 # Guess the environment
@@ -33,17 +33,17 @@ include .make/CL.mk
 
 # Custom configurations
 
-CFLAGS = $(CFLAGS) $(DEF) $(FLAGS) $(WARN)
+CFLAGS=$(CFLAGS) $(DEF) $(FLAGS) $(WARN)
 
 !ifdef CA
-CFLAGS = $(CFLAGS) $(ANAL)
+CFLAGS=$(CFLAGS) $(ANAL)
 !endif
 
 !ifdef STD
-CFLAGS = $(CFLAGS) $(USESTD)$(STD)
+CFLAGS=$(CFLAGS) $(USESTD)$(STD)
 !endif
 
 !ifndef NDEBUG
-CFLAGS = $(CFLAGS) $(DEBUG)
+CFLAGS=$(CFLAGS) $(DEBUG)
 !endif
 

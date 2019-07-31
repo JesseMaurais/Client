@@ -44,16 +44,16 @@ namespace
 	// Sanity test the unit test code itself
 	//
 
-	TEST(dbg_sane) { assert(true and not false); }
-	TEST(dbg_equality) { assert(true == true); }
-	TEST(dbg_inequality) { assert(true != false); }
+	//TEST(dbg_sane) { assert(true and not false); }
+	//TEST(dbg_equality) { assert(true == true); }
+	//TEST(dbg_inequality) { assert(true != false); }
 
 	// negatives
 
-	FAIL(dbg_assert) { assert(false); }
-	FAIL(dbg_except) { throw std::runtime_error("Holy Cow!"); }
-	FAIL(dbg_equal) { assert(true == false); }
-	FAIL(dbg_unequal) { assert(true != true); }
+	//FAIL(dbg_assert) { assert(false); }
+	//FAIL(dbg_except) { throw std::runtime_error("Holy Cow!"); }
+	//FAIL(dbg_equal) { assert(true == false); }
+	//FAIL(dbg_unequal) { assert(true != true); }
 	
 	//
 	// Checked integer conversions
