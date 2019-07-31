@@ -3,16 +3,15 @@
 
 #include "sig.hpp"
 #include "err.hpp"
-#include "dbg.hpp"
 #include <csignal>
 #include <map>
 
 namespace
 {
-	sys::sig::subject &event(int signo)
+	sys::sig::subject &event(int no)
 	{
 		static std::map<int, sys::sig::subject> map;
-		return map[signo];
+		return map[no];
 	}
 
 	void send(int no)

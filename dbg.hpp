@@ -24,9 +24,6 @@ namespace dbg
 }
 #define TEST(unit) struct unit : dbg::test { using test::test; void run() final; } test_##unit(#unit); void unit::run()
 #define FAIL(unit) struct unit : dbg::fail { using fail::fail; void die() final; } test_##unit(#unit); void unit::die()
-#else
-#define TEST(unit) (void) []()
-#define FAIL(unit) (void) []()
 #endif
 
 #endif // file

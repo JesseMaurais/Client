@@ -6,7 +6,7 @@
 #include "ini.hpp"
 #include "sys.hpp"
 #include "dir.hpp"
-#include "dbg.hpp"
+#include "err.hpp"
 #include <fstream>
 
 #ifdef _WIN32

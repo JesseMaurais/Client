@@ -5,7 +5,7 @@
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "sys.hpp"
-#include "dbg.hpp"
+#include "err.hpp"
 #include <regex>
 
 namespace sys::env
@@ -21,7 +21,7 @@ namespace sys::env
 	bool put(fmt::string_view u)
 	{
 		auto buf = fmt::to_string(u);
-		auto const p = buf.data();
+		auto const p = data(buf);
 		return 0 != sys::putenv(p);
 	}
 

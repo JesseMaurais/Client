@@ -43,6 +43,10 @@ namespace
 	// Sanity test the unit test code itself
 	// Disabled by default for code analyzers
 	//
+
+	//TEST(dumb_assert) { ASSERT(false); };
+	//TEST(dumb_except) { throw std::runtime_error("Holy Cow!"); };
+	//TEST(_dumb) { throw "You should not run hidden unit tests."; }; 
 	
 	//TEST(sane) { assert(true and not false); }
 	//TEST(sane_equality) { assert(true == true); }

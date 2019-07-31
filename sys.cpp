@@ -66,7 +66,7 @@ namespace sys
 	}
 	#endif
 
-	pid_t run(int fd[3], char const**argv)
+	pid_t run(int fd[3], char const** argv)
 	{
 		#ifdef _WIN32
 		{
@@ -181,7 +181,10 @@ namespace sys
 			}
 
 			std::vector<char*> args;
-			for (int i = 0; argv[i]; ++i) args.push_back(const_cast<char*>(argv[i]));
+			for (int i = 0; argv[i]; ++i)
+			{
+				args.push_back(const_cast<char*>(argv[i]));
+			}
 			args.push_back(nullptr);
 
 			int const res = execvp(args.front(), args.data());
@@ -257,14 +260,12 @@ namespace sys
 			}
 			else
 			{
-				if (WaitForSingleObject(h, INFINITE) == WAIT_FAILED)
+				if (sys::win::wait(h))
 				{
-					sys::win::err(here, "WaitForSingleObject", pid);
-				}
-				else
-				if (not GetExitCodeProcess(h, &code))
-				{
-					sys::win::err(here, "GetExitCodeProcess", pid);
+					if (not GetExitCodeProcess(h, &code))
+					{
+						sys::win::err(here, "GetExitCodeProcess", pid);
+					}
 				}
 			}
 			return static_cast<int>(code);

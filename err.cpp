@@ -1,7 +1,8 @@
 #include "err.hpp"
-#include <cerrno>
-#include <cstring>
+#include "ptr.hpp"
 #include <iostream>
+#include <cstring>
+#include <cerrno>
 
 #ifdef _WIN32
 # include "win.hpp"
@@ -12,31 +13,35 @@
 namespace
 {
 	sys::mutex key;
-	bool recursive = false;
+	int recursive = 0;
 }
 
-namespace fmt
+std::ostream& fmt::operator<<(std::ostream& os, fmt::where const& pos)
 {
-	std::ostream& operator<<(std::ostream& os, where const& pos)
-	{
-		return os << pos.file << "(" << pos.line << ") " << pos.func << ":";
-	}
+	return os << pos.file << "(" << pos.line << ") " << pos.func << ":";
 }
 
-namespace sys::impl
+namespace sys
 {
-	void warn(fmt::string const& s)
+	bool debug =
+	#ifdef NDEBUG
+		false;
+	#else
+		true;
+	#endif
+
+	void impl::warn(fmt::string const& s)
 	{
 		if (recursive) return;
-		scoped_bool scope(recursive);
+		counter scope(recursive);
 		auto const unlock = key.lock();
 		std::cerr << s << std::endl;
 	}
 
-	void err(fmt::string const& s)
+	void impl::err(fmt::string const& s)
 	{
 		if (recursive) return;
-		scoped_bool scope(recursive);
+		counter scope(recursive);
 		auto const unlock = key.lock();
 		auto const e = std::strerror(errno);
 		std::cerr << s << ": " << e << std::endl;

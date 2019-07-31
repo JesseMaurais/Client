@@ -1,26 +1,17 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include <algorithm>
+#include "dbg.hpp"
+#include "esc.hpp"
+
 #include <stdexcept>
 #include <iostream>
-#include <csignal>
 #include <string>
 #include <regex>
 #include <map>
 
-#ifdef _WIN32
-# include "win.hpp"
-#endif
-#include "dbg.hpp"
-#include "esc.hpp"
-
 namespace
 {
-	//TEST(dumb_assert) { ASSERT(false); };
-	//TEST(dumb_except) { throw std::runtime_error("Holy Cow!"); };
-	//TEST(_dumb) { throw "You should not run hidden unit tests."; }; 
-
 	using map = std::map<dbg::test*, std::string>;
 	std::string::size_type max_size = 0;
 
@@ -29,16 +20,6 @@ namespace
 		static map instance;
 		return instance;
 	}
-}
-
-namespace sys
-{
-	bool debug =
-	#ifdef NDEBUG
-		false;
-	#else
-		true;
-	#endif
 }
 
 namespace dbg
@@ -73,18 +54,18 @@ namespace dbg
 
 	int run(char const *expression)
 	{
-		if (not expression)
+		if (nullptr == expression)
 		{
 			expression = "^[^_](.*?)";
 		}
-		std::regex pattern(expression);
 
 		using namespace io;
-		auto& out = std::cerr;
 		constexpr auto eol = '\n';
 		auto const& tests = registry();
+		auto& out = std::cout;
 
-		unsigned errors = 0;
+		int errors = 0;
+		std::regex pattern(expression);
 		for (auto const& [that, name] : tests) try
 		{
 			if (std::regex_match(name, pattern))
@@ -98,17 +79,14 @@ namespace dbg
 		catch (std::exception const& except)
 		{
 			++errors;
-			out << fg_red << "\tthrown: " << except.what() << fg_off << eol;
-		}
-		catch (char const* message)
-		{
-			++errors;
-			out << fg_red << '\t' << message << fg_off << eol;
+			auto const what = except.what();
+			out << fg_red << '\t' << what << fg_off << eol;
 		}
 		catch (...)
 		{
 			++errors;
-			out << fg_red << "\tUnknown exception" << fg_off << eol;
+			constexpr auto what = "exception";
+			out << fg_red << '\t' << what << fg_off << eol;
 		}
 
 		auto fg_color = errors ? fg_yellow : fg_blue;

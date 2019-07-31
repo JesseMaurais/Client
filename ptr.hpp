@@ -16,6 +16,23 @@ namespace
 	{
 		return make_ptr((Type) nullptr, rm);
 	}
+
+	class counter
+	{
+		int *ptr;
+
+	public:
+
+		counter(int& ref) : ptr(&ref)
+		{
+			++ *ptr;
+		}
+
+		~counter()
+		{
+			-- *ptr;
+		}
+	};
 }
 
 #endif // file
