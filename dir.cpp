@@ -138,7 +138,7 @@ namespace env::dir
 	env::list const& share = SHARE;
 	env::list const& include = INCLUDE;
 
-	bool find(fmt::string_view path, mask check)
+	bool find(fmt::string_view path, view visitor)
 	{
 		auto const buf = fmt::to_string(path);
 		auto const s = buf.c_str();
@@ -148,7 +148,7 @@ namespace env::dir
 			sys::win::files dir(s);
 			if (dir.h) do
 			{
-				if (check(dir.cFileName))
+				if (visitor(dir.cFileName))
 				{
 					return true;
 				}
@@ -164,7 +164,7 @@ namespace env::dir
 				auto const ent = ++dir;
 				if (ent)
 				{
-					if (check(ent->d_name))
+					if (visitor(ent->d_name))
 					{
 						return true;
 					}
@@ -176,7 +176,7 @@ namespace env::dir
 		#endif
 	}
 
-	mask mode(sys::file::mode bit)
+	view mode(sys::file::mode bit)
 	{
 		auto const flags = sys::file::convert(bit);
 		return [=](fmt::string_view u)
@@ -200,7 +200,7 @@ namespace env::dir
 		};
 	}
 
-	mask match(fmt::string_view u)
+	view match(fmt::string_view u)
 	{
 		auto const buf = fmt::to_string(u);
 		auto const x = std::regex(buf);
@@ -212,7 +212,7 @@ namespace env::dir
 		};
 	}
 
-	mask insert(fmt::string_vector& buf)
+	view insert(fmt::string_vector& buf)
 	{
 		return [&](fmt::string_view u)
 		{
@@ -222,7 +222,7 @@ namespace env::dir
 		};
 	}
 
-	mask copy(fmt::string& buf)
+	view copy(fmt::string& buf)
 	{
 		return [&](fmt::string_view u)
 		{

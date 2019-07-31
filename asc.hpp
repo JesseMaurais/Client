@@ -3,20 +3,17 @@
 
 // https://www.ecma-international.org/publications/standards/Ecma-048.htm
 
-namespace asc
+namespace fmt::ascii
 {
-	namespace
+	template <char Min, char Max> struct range
 	{
-		template <char Min, char Max> struct range
-		{
-			static_assert(Min <= Max, "Invalid range");
-			static constexpr char min = Min, max = Max;
-		};
+		static_assert(Min <= Max, "Invalid range");
+		static constexpr auto min = Min, max = Max;
+	};
 
-		template <class Range> constexpr bool in(char code)
-		{
-			return Range::min <= code and code <= Range::max;
-		}
+	template <typename Range> constexpr bool in(char code)
+	{
+		return Range::min <= code and code <= Range::max;
 	}
 
 	//

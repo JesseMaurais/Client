@@ -32,7 +32,7 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 			}
 			
-			static thread_local auto ptr = null_ptr<HLOCAL>(LocalFree);
+			static thread_local auto ptr = etc::null_ptr<HLOCAL>(LocalFree);
 
 			LPSTR const str = nullptr;
 			auto const addr = (LPSTR) &str;

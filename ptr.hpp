@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace
+namespace etc
 {
 	template <typename Type, typename Remove>
 	inline auto make_ptr(Type* ptr, Remove rm)

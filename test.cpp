@@ -162,6 +162,26 @@ namespace
 	}
 
 	//
+	// ANSI escape sequence
+	//
+
+	TEST(fmt_params)
+	{
+		std::ostringstream ss;
+		ss << fmt::params<1, 2, 3, 4>;
+		std::string const s = ss.str();
+		assert(s == "1;2;3;4");
+	}
+
+	TEST(fmt_fg)
+	{
+		std::ostringstream ss;
+		ss << fmt::fg_green << "GREEN" << fmt::fg_off;
+		std::string const s = ss.str();
+		assert(s == "\x1b[32mGREEN\x1b[39m");
+	}
+
+	//
 	// Operating system environment
 	//
 
@@ -294,26 +314,6 @@ namespace
 		assert(caught[0] == SIGINT);
 		assert(caught[1] == SIGFPE);
 		assert(caught[2] == SIGILL);
-	}
-
-	//
-	// ANSI escape sequence
-	//
-
-	TEST(ios_params)
-	{
-		std::ostringstream ss;
-		ss << io::params<1, 2, 3, 4>;
-		std::string const s = ss.str();
-		assert(s == "1;2;3;4");
-	}
-
-	TEST(ios_fg)
-	{
-		std::ostringstream ss;
-		ss << io::fg_green << "GREEN" << io::fg_off;
-		std::string const s = ss.str();
-		assert(s == "\x1b[32mGREEN\x1b[39m");
 	}
 
 	//

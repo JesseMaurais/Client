@@ -58,22 +58,22 @@ namespace env::dir
 	extern env::list const& share;
 	extern env::list const& include;
 
-	using mask = predicate<fmt::string_view>;
+	using view = etc::predicate<fmt::string_view>;
 
-	mask copy(fmt::string&);
-	mask match(fmt::string_view);
-	mask insert(fmt::string_vector&);
-	mask mode(sys::file::mode);
+	view copy(fmt::string&);
+	view match(fmt::string_view);
+	view insert(fmt::string_vector&);
+	view mode(sys::file::mode);
 
-	constexpr auto stop = contra<fmt::string_view>;
+	constexpr auto stop = etc::falsity<fmt::string_view>;
 
-	bool find(fmt::string_view dir, mask);
+	bool find(fmt::string_view dir, view);
 
-	inline bool find(fmt::string_view_span list, mask view)
+	inline bool find(fmt::string_view_span list, view visitor)
 	{
 		for (auto const dir : list)
 		{
-			if (find(dir, view))
+			if (find(dir, visitor))
 			{
 				return true;
 			}

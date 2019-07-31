@@ -65,7 +65,7 @@ namespace dbg
 			expression = "^[^_](.*?)";
 		}
 
-		using namespace io;
+		using namespace fmt;
 		constexpr auto eol = '\n';
 		auto const& tests = registry();
 		auto& out = std::cout;
@@ -78,7 +78,7 @@ namespace dbg
 			{
 				std::string const indent(max_size - name.size(), ' ');
 				out << faint << name << intense_off << indent;
-				eat_streambuf eat(std::cerr);
+				io::eat_streambuf eat(std::cerr);
 				that->run();
 
 				auto s = eat.str();

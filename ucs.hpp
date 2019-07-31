@@ -1,18 +1,15 @@
 #ifndef ucs_hpp
 #define ucs_hpp
 
-namespace ucs
+namespace fmt::unicode
 {
 	using codepoint = char32_t;
 
-	namespace
+	template <codepoint Min, codepoint Max> struct range
 	{
-		template <codepoint Min, codepoint Max> struct range
-		{
-			static_assert(Min <= Max, "Invalid range");
-			static constexpr codepoint min = Min, max = Max;
-		};
-	}
+		static_assert(Min <= Max, "Invalid range");
+		static constexpr auto min = Min, max = Max;
+	};
 
 	using codespace = range<0x000000, 0x10FFFF>;
 

@@ -58,10 +58,10 @@ namespace sys::uni
 		pthread_attr_t self;
 		mutable int no = 0;
 		
-		pthread_t create(routine* start, void* arg = nullptr) const
+		pthread_t create(routine* start, void* that = nullptr) const
 		{
 			pthread_t id;
-			no = pthread_create(&id, &self, start, arg);
+			no = pthread_create(&id, &self, start, that);
 			if (no) sys::uni::err(no, here);
 			return id;
 		}
@@ -451,22 +451,24 @@ namespace sys
 	{
 		auto lock()
 		{
-			struct key
+			class unlock
 			{
 				sys::uni::mutex* ptr;
 
-				key(mutex* that) : ptr(that)
+			public:
+
+				unlock(mutex* that) : ptr(that)
 				{
 					ptr->lock();
 				}
 
-				~key()
+				~unlock()
 				{
 					ptr->unlock();
 				}
 
-			} unlock(this);
-			return unlock;
+			};
+			return unlock(this);
 		}
 	};
 
@@ -483,12 +485,15 @@ namespace sys
 
 		~thread()
 		{
-			void* ptr = nullptr;
-			int no = pthread_join(id, &ptr);
-			assert(this == ptr);
+			void* that = nullptr;
+			int const no = pthread_join(id, &that);
 			if (fail(no))
 			{
 				sys::uni::err(no, here, id);
+			}
+			else
+			{
+				assert(this == that);
 			}
 		}
 

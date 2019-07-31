@@ -4,14 +4,16 @@
 #include <ostream>
 #include "asc.hpp"
 
-namespace io
+namespace fmt
 {
-	template <char... Code> inline std::ostream& encode(std::ostream& out)
+	template <char... Code>
+	inline std::ostream& encode(std::ostream& out)
 	{
 		return (out << ... << Code);
 	}
 
-	template <int Code, int... Params> inline std::ostream& params(std::ostream& out)
+	template <int Code, int... Params>
+	inline std::ostream& params(std::ostream& out)
 	{
 		if constexpr (0 < sizeof...(Params))
 		{
@@ -23,13 +25,14 @@ namespace io
 		}
 	}
 
-	template <int... Code> inline std::ostream& set(std::ostream& out)
+	template <int... Code>
+	inline std::ostream& set(std::ostream& out)
 	{
-		using namespace asc;
+		using namespace fmt::ascii;
 		return out << encode<C0::ESC, G0::CSI> << params<Code...> << encode<CSI::SGR>;
 	}
 
-	using asc::SGR;
+	using ascii::SGR;
 
 	constexpr auto reset = set<SGR::reset>;
 	constexpr auto intense = set<SGR::intense>;

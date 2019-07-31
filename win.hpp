@@ -330,9 +330,11 @@ namespace sys
 
 		auto lock()
 		{
-			struct unlock
+			class unlock
 			{
 				HANDLE h;
+
+			public:
 
 				unlock(HANDLE mutex) : h(mutex)
 				{

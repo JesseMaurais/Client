@@ -33,7 +33,7 @@ namespace sys
 	void impl::warn(fmt::string_view u)
 	{
 		if (recursive) return;
-		counter scope(recursive);
+		etc::counter scope(recursive);
 		auto const unlock = key.lock();
 		std::cerr << u << std::endl;
 	}
@@ -41,7 +41,7 @@ namespace sys
 	void impl::err(fmt::string_view u)
 	{
 		if (recursive) return;
-		counter scope(recursive);
+		etc::counter scope(recursive);
 		auto const unlock = key.lock();
 		auto const e = std::strerror(errno);
 		std::cerr << u << ": " << e << std::endl;

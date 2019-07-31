@@ -1,14 +1,17 @@
 #ifndef bool_hpp
 #define bool_hpp
 
-enum boolean : bool
+namespace etc
 {
-	success = false, failure = true
-};
+	enum boolean : bool
+	{
+		success = false, failure = true
+	};
 
-constexpr bool fail(boolean ok)
-{
-	return success != ok;
+	constexpr bool fail(boolean ok)
+	{
+		return success != ok;
+	}
 }
 
 #endif // file
