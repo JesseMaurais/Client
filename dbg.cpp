@@ -3,9 +3,11 @@
 
 #include "dbg.hpp"
 #include "esc.hpp"
+#include "ios.hpp"
 
 #include <stdexcept>
 #include <iostream>
+#include <cassert>
 #include <string>
 #include <regex>
 #include <map>
@@ -39,13 +41,17 @@ namespace dbg
 
 	void fail::run()
 	{
-		std::stringstream ss;
-		auto const os = std::cerr.rdbuf();
-		std::cerr.rdbuf(ss.rdbuf());
-		die();
-		const auto s = ss.str();
-		std::cerr.rdbuf(os);
+		io::eat_streambuf eat(std::cerr);
+		try
+		{
+			die();
+		}
+		catch (std::exception const& except)
+		{
+			std::cerr << except.what();
+		}
 
+		auto const s = eat.str();
 		if (empty(s))
 		{
 			throw std::runtime_error("Failing test succeeded");
@@ -64,36 +70,43 @@ namespace dbg
 		auto const& tests = registry();
 		auto& out = std::cout;
 
-		int errors = 0;
+		int nerr = 0;
 		std::regex pattern(expression);
-		for (auto const& [that, name] : tests) try
+		for (auto const& [that, name] : tests)
 		{
-			if (std::regex_match(name, pattern))
+			if (std::regex_match(name, pattern)) try
 			{
 				std::string const indent(max_size - name.size(), ' ');
 				out << faint << name << intense_off << indent;
+				eat_streambuf eat(std::cerr);
 				that->run();
+
+				auto s = eat.str();
+				if (not empty(s))
+				{
+					constexpr auto npos = std::string::npos;
+					auto pos = npos;
+					while ((pos = s.find("\n")) != npos)
+					{
+						s.replace(pos, 1, " ");
+					}
+					throw std::runtime_error(s);
+				}
 				out << fg_green << "\tok" << fg_off << eol;
 			}
-		}
-		catch (std::exception const& except)
-		{
-			++errors;
-			auto const what = except.what();
-			out << fg_red << '\t' << what << fg_off << eol;
-		}
-		catch (...)
-		{
-			++errors;
-			constexpr auto what = "exception";
-			out << fg_red << '\t' << what << fg_off << eol;
+			catch (std::exception const& except)
+			{
+				++ nerr;
+				auto const what = except.what();
+				out << fg_red << '\t' << what << fg_off << eol;
+			}
 		}
 
-		auto fg_color = errors ? fg_yellow : fg_blue;
-		out << fg_color << errors << " errors detected." << fg_off << eol;
+		auto const fg_color = nerr ? fg_yellow : fg_blue;
+		out << fg_color << nerr << " errors detected." << fg_off << eol;
 
 		out << reset << eol;
-		return errors;
+		return nerr;
 	}
 }
 

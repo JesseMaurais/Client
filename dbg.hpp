@@ -22,8 +22,8 @@ namespace dbg
 		virtual void die() = 0;
 	};
 }
-#define TEST(unit) struct unit : dbg::test { using test::test; void run() final; } test_##unit(#unit); void unit::run()
-#define FAIL(unit) struct unit : dbg::fail { using fail::fail; void die() final; } test_##unit(#unit); void unit::die()
+#define TEST(unit) struct unit : dbg::test { unit():test(#unit) { } void run() final; } test_##unit; void unit::run()
+#define FAIL(unit) struct unit : dbg::fail { unit():fail(#unit) { } void die() final; } test_##unit; void unit::die()
 #endif
 
 #endif // file

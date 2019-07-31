@@ -16,6 +16,7 @@
 #include "shm.hpp"
 #include "fifo.hpp"
 #include "pstream.hpp"
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -41,24 +42,18 @@ namespace
 {
 	//
 	// Sanity test the unit test code itself
-	// Disabled by default for code analyzers
 	//
 
-	//TEST(dumb_assert) { ASSERT(false); };
-	//TEST(dumb_except) { throw std::runtime_error("Holy Cow!"); };
-	//TEST(_dumb) { throw "You should not run hidden unit tests."; }; 
-	
-	//TEST(sane) { assert(true and not false); }
-	//TEST(sane_equality) { assert(true == true); }
-	//TEST(sane_inequality) { assert(true != false); }
-	//FAIL(sane_throw) { throw "sane"; }
+	TEST(dbg_sane) { assert(true and not false); }
+	TEST(dbg_equality) { assert(true == true); }
+	TEST(dbg_inequality) { assert(true != false); }
 
 	// negatives
-	
-	//TEST(not_sane) { assert(false and not true); }
-	//TEST(not_equal) { assert(true == false); }
-	//TEST(not_unequal) { assert(true != true); }
-	//FAIL(not_throw) { (void) 0; }
+
+	FAIL(dbg_assert) { assert(false); }
+	FAIL(dbg_except) { throw std::runtime_error("Holy Cow!"); }
+	FAIL(dbg_equal) { assert(true == false); }
+	FAIL(dbg_unequal) { assert(true != true); }
 	
 	//
 	// Checked integer conversions

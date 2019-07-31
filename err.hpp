@@ -19,26 +19,24 @@
 
 namespace fmt
 {
+	struct where
+	{
+		char const *file; int const line; char const *func;
+	};
+
+	std::ostream& operator<<(std::ostream& os, where const& pos);
+
 	template <typename Arg, typename... Args>
-	inline auto err(Arg arg, Args... args)
+	auto err(Arg arg, Args... args)
 	{
 		std::stringstream ss;
 		ss << arg;
-		if constexpr (0 < sizeof...(args))
+		if (0 < sizeof...(args))
 		{
 			((ss << " " << args), ...);
 		}
 		return ss.str();
 	}
-
-	struct where
-	{
-		char const *file;
-		int const line;
-		char const *func;
-	};
-
-	std::ostream& operator<<(std::ostream& os, where const& pos);
 }
 
 #define here ::fmt::where { __FILE__, __LINE__, __func__ }
@@ -49,8 +47,8 @@ namespace sys
 
 	namespace impl
 	{
-		void warn(fmt::string const& s);
-		void err(fmt::string const& s);
+		void warn(fmt::string_view);
+		void err(fmt::string_view);
 	}
 
 	template <typename... Args>
@@ -58,8 +56,7 @@ namespace sys
 	{
 		if (debug)
 		{
-			auto const s = fmt::err(args...);
-			impl::warn(s);
+			impl::warn(fmt::err(args...));
 		}
 	}
 
@@ -68,8 +65,7 @@ namespace sys
 	{
 		if (debug)
 		{
-			auto const s = fmt::err(args...);
-			impl::err(s);
+			impl::err(fmt::err(args...));
 		}
 	}
 }
