@@ -3,18 +3,13 @@
 #include <iostream>
 #include <cstring>
 #include <cerrno>
+#include <atomic>
 
 #ifdef _WIN32
 # include "win.hpp"
 #else
 # include "uni.hpp"
 #endif
-
-namespace
-{
-	sys::mutex key;
-	int recursive = 0;
-}
 
 std::ostream& fmt::operator<<(std::ostream& os, fmt::where const& pos)
 {
@@ -30,18 +25,24 @@ namespace sys
 		true;
 	#endif
 
+	namespace
+	{
+		sys::mutex key;
+		std::atomic<int> recursive = 0;
+	}
+
 	void impl::warn(fmt::string_view u)
 	{
-		if (recursive) return;
-		etc::counter scope(recursive);
+		etc::counter n(recursive);
+		if (1 < recursive) return;
 		auto const unlock = key.lock();
 		std::cerr << u << std::endl;
 	}
 
 	void impl::err(fmt::string_view u)
 	{
-		if (recursive) return;
-		etc::counter scope(recursive);
+		etc::counter n(recursive);
+		if (1 < recursive) return;
 		auto const unlock = key.lock();
 		auto const e = std::strerror(errno);
 		std::cerr << u << ": " << e << std::endl;

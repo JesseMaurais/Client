@@ -17,9 +17,10 @@ namespace etc
 		return make_ptr((Type) nullptr, rm);
 	}
 
+	template <typename Type>
 	class counter
 	{
-		int *ptr;
+		Type *ptr;
 
 	public:
 

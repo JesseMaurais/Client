@@ -4,34 +4,35 @@
 #include "dbg.hpp"
 #include "esc.hpp"
 #include "ios.hpp"
+#include "str.hpp"
 
 #include <stdexcept>
 #include <iostream>
 #include <cassert>
-#include <string>
+#include <chrono>
 #include <regex>
 #include <map>
 
-namespace
-{
-	using map = std::map<dbg::test*, std::string>;
-	std::string::size_type max_size = 0;
-
-	auto& registry()
-	{
-		static map instance;
-		return instance;
-	}
-}
-
 namespace dbg
 {
+	using namespace fmt;
+
+	namespace
+	{
+		string::size_type max_size = 0;
+
+		auto& registry()
+		{
+			static std::map<test*, string_view> instance;
+			return instance;
+		}
+	}
+
 	test::test(char const *name)
 	{
 		auto const [it, unique] = registry().emplace(this, name);
+		max_size = std::max(max_size, size(it->second));
 		assert(unique);
-		auto const size = it->second.size();
-		max_size = std::max(max_size, size);
 	}
 
 	test::~test()
@@ -58,53 +59,48 @@ namespace dbg
 		}
 	}
 
-	int run(char const *expression)
+	int run(char const* expression)
 	{
 		if (nullptr == expression)
 		{
 			expression = "^[^_](.*?)";
 		}
 
-		using namespace fmt;
-		constexpr auto eol = '\n';
-		auto const& tests = registry();
-		auto& out = std::cout;
-
 		int nerr = 0;
 		std::regex pattern(expression);
-		for (auto const& [that, name] : tests)
+		for (auto const [that, name] : registry())
 		{
 			if (std::regex_match(name, pattern)) try
 			{
-				std::string const indent(max_size - name.size(), ' ');
-				out << faint << name << intense_off << indent;
+				string const indent(max_size - size(name), ' ');
+				std::cout << faint << name << intense_off << indent;
 				io::eat_streambuf eat(std::cerr);
+
 				that->run();
 
 				auto s = eat.str();
 				if (not empty(s))
 				{
 					auto pos = npos;
-					while ((pos = s.find("\n")) != npos)
+					while (npos != (pos = s.find("\n")))
 					{
 						s.replace(pos, 1, " ");
 					}
 					throw std::runtime_error(s);
 				}
-				out << fg_green << "\tok" << fg_off << eol;
+				std::cout << fg_green << "\tok" << fg_off << eol;
 			}
 			catch (std::exception const& except)
 			{
 				++ nerr;
 				auto const what = except.what();
-				out << fg_red << '\t' << what << fg_off << eol;
+				std::cout << fg_red << '\t' << what << fg_off << eol;
 			}
 		}
 
-		auto const fg_color = nerr ? fg_yellow : fg_blue;
-		out << fg_color << nerr << " errors detected." << fg_off << eol;
-
-		out << reset << eol;
+		auto const fg = nerr ? fg_yellow : fg_blue;
+		std::cout << fg << nerr << " errors detected." << reset << eol;
+		std::cout << std::endl;
 		return nerr;
 	}
 }

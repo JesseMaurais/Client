@@ -142,7 +142,7 @@ namespace sys
 			{
 				if (fail(p))
 				{
-					return invalid;
+					return sys::invalid;
 				}
 			}
 

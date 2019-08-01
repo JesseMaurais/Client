@@ -146,8 +146,9 @@ namespace fmt
 	using string_view_span_range = basic_string_view_span_range<char>;
 	using wstring_view_span_range = basic_string_view_span_range<wchar_t>;
 
-
 	constexpr auto npos = string::npos;
+	constexpr auto eol = '\n';
+	constexpr auto null = '\0';
 }
 
 #endif // file

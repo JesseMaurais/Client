@@ -43,8 +43,10 @@ namespace etc
 		}
 	};
 
-	template <typename T> using predicate = formula<T>;
-	template <typename T, typename S> using relation = formula<T, S>;
+	template <typename T> 
+	using predicate = formula<T>;
+	template <typename T, typename S> 
+	using relation = formula<T, S>;
 
 	template <typename... T>
 	constexpr auto falsity = [](T...) { return false; };

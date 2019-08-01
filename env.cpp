@@ -78,7 +78,7 @@ namespace
 		operator fmt::string_view_span() const final
 		{
 			static thread_local fmt::string_view_vector t;
-			fmt::string_view u = sys::env::get("PATH");
+			auto u = sys::env::get("PATH");
 			t = fmt::path::split(u);
 			return t;
 		}
@@ -129,11 +129,11 @@ namespace
 			}
 			#else
 			{
-				static char name[64];
+				static thread_local char name[64];
 				if (sys::fail(gethostname(name, sizeof name)))
 				{
 					sys::err(here, "gethostname");
-					name[0] = '\0';
+					name[0] = fmt::null;
 				}
 				return name;
 			}
@@ -152,11 +152,11 @@ namespace
 			}
 			#else
 			{
-				static char name[64];
+				static thread_local char name[64];
 				if (sys::fail(getdomainname(name, sizeof name)))
 				{
 					sys::err(here, "getdomainname");
-					name[0] = '\0';
+					name[0] = fmt::null;
 				}
 				return name;
 			}
@@ -205,7 +205,7 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				static char buf[FILENAME_MAX];
+				static thread_local char buf[FILENAME_MAX];
 				return sys::getcwd(buf, sizeof buf);
 			}
 			#else
