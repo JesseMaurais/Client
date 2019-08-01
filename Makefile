@@ -1,13 +1,16 @@
-# Use the C preprocessor to generate another Makefile tailored to the
+# Use the C++ preprocessor to generate another Makefile tailored to the
 # operating system and version of $(MAKE) used. Forward standard targets
 # to it.
 
-all: .make/Makefile
-	$(MAKE) -s -f .make/Makefile
+MAKEFILE=.make/Makefile
+TEMPLATE=$(MAKEFILE).cc
 
-clean: .make/Makefile
-	$(MAKE) -s -f .make/Makefile clean
+all: $(MAKEFILE)
+	$(MAKE) -f $(MAKEFILE)
 
-.make/Makefile: .make/Makefile.cc
-	$(CXX) -E $< > $@
+clean: $(MAKEFILE)
+	$(MAKE) -f $(MAKEFILE) clean
+
+$(MAKEFILE): $(TEMPLATE)
+	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 

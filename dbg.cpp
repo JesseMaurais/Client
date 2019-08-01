@@ -98,8 +98,8 @@ namespace dbg
 			}
 		}
 
-		auto const fg = nerr ? fg_yellow : fg_blue;
-		std::cout << fg << nerr << " errors detected." << reset << eol;
+		auto const fg_color = nerr ? fg_yellow : fg_blue;
+		std::cout << fg_color << nerr << " errors detected." << reset << eol;
 		std::cout << std::endl;
 		return nerr;
 	}
