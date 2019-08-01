@@ -24,7 +24,7 @@ namespace etc
 
 	public:
 
-		counter(int& ref) : ptr(&ref)
+		counter(Type& ref) : ptr(&ref)
 		{
 			++ *ptr;
 		}

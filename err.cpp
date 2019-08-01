@@ -29,11 +29,12 @@ namespace sys
 	{
 		sys::mutex key;
 		std::atomic<int> recursive = 0;
+		using counter = etc::counter<std::atomic<int>>;
 	}
 
 	void impl::warn(fmt::string_view u)
 	{
-		etc::counter n(recursive);
+		counter n(recursive);
 		if (1 < recursive) return;
 		auto const unlock = key.lock();
 		std::cerr << u << std::endl;
@@ -41,7 +42,7 @@ namespace sys
 
 	void impl::err(fmt::string_view u)
 	{
-		etc::counter n(recursive);
+		counter n(recursive);
 		if (1 < recursive) return;
 		auto const unlock = key.lock();
 		auto const e = std::strerror(errno);

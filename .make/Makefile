@@ -1,19 +1,28 @@
-// Use the preprocessor to get configurations
+# 1 ".make/Makefile.c"
+# 1 "<built-in>" 1
+# 1 "<built-in>" 3
+# 382 "<built-in>" 3
+# 1 "<command line>" 1
+# 1 "<built-in>" 2
+# 1 ".make/Makefile.c" 2
 
-#include "../os.hpp"
-#include "../cc.hpp"
 
-// Common configuration variables for the project
+# 1 ".make/../os.hpp" 1
+# 4 ".make/Makefile.c" 2
+# 1 ".make/../cc.hpp" 1
+# 5 ".make/Makefile.c" 2
+
+
 
 STD=c++17
 SRC=test.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp shm.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
 BIN=test
 
-// Configurations for system, compiler, and make
+
 
 include .make/Configure.mk
 
-// Common make rules for the project
+
 
 .SUFFIXES: .cpp .hpp .obj .d .inl .log .xml .html .ilk .pdb .db
 
@@ -27,7 +36,7 @@ $(BIN)$(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OUT)$@ $(OBJ) $(LNK)
 
 .cpp.obj: ; $(CXX) $(CFLAGS) -c $< $(OUT)$@
 
-// Additional features
+
 
 include .make/Depends.mk
 include .make/Cppcheck.mk

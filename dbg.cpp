@@ -23,7 +23,7 @@ namespace dbg
 
 		auto& registry()
 		{
-			static std::map<test*, string_view> instance;
+			static std::map<test*, string> instance;
 			return instance;
 		}
 	}
@@ -68,7 +68,7 @@ namespace dbg
 
 		int nerr = 0;
 		std::regex pattern(expression);
-		for (auto const [that, name] : registry())
+		for (auto const& [that, name] : registry())
 		{
 			if (std::regex_match(name, pattern)) try
 			{
