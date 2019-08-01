@@ -1,34 +1,71 @@
-// Use the preprocessor to get configurations
 
-#include "../os.hpp"
-#include "../cc.hpp"
+#define str(x) #x
 
-// Common configuration variables for the project
+#ifdef _NMAKE
+# define ifdef !ifdef
+# define ifndef !ifndef
+# define else !else
+# define endif !endif
+# define ifeq(x, y) str(x) == str(y)
+# define ifneq(x, y) str(x) != str(y)
+# define error(x) !error x
+# define print(x) !message x
+# define append(x, y) x=$(x) y
+#else // GNU Make
+# define error(x) $(error x)
+# define print(x) $(info x)
+# define append(x, y) x += y
+# define depends(x) -
+#endif
 
-STD=c++17
-SRC=test.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp shm.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
-BIN=test
+// Compiler
 
-// Configurations for system, compiler, and make
+#if defined(__clang__) || defined(__llvm__)
+# include "LLVM.mk"
+#elif defined(__GNUC__)
+# include "GCC.mk"
+#elif defined(_MSC_VER)
+# include "CL.mk"
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+# error "MINGW.mk not implemented."
+#elif defined(__DJGPP__) || defined(__GO32__)
+# error "DJGPP.mk not implemented."
+#elif defined(__DMC__)
+# error "DMC.mk not implemented."
+#elif defined(__INTEL_COMPILER) || defined(__ICC) || defined(__ECC) || defined(__ICL)
+# error "ICC.mk not implemented."
+#elif defined(__IBMC__) || defined(__IBMCPP__) || defined(__xlc__) || defined(__xlC__)
+# error "IBM.mk not implemented.m"
+#else
+# error "Cannot determine your compiler."
+#endif
 
-include .make/Configure.mk
+// Operating System
 
-// Common make rules for the project
+#ifdef _WIN32
+# include "WIN32.mk"
+#else
+# include "POSIX.mk"
+#endif
 
-.SUFFIXES: .cpp .hpp .obj .d .inl .log .xml .html .ilk .pdb .db
+// System Commands
 
-OBJ=$(SRC:.cpp=.obj)
+ifdef SHELL
+include .make/SH.mk
+else
+ifdef COMSPEC
+include .make/CMD.mk
+else
+error("Cannot determine your system commands.")
+endif // COMSPEC
+endif // SHELL
 
-ALL: $(BIN)$(EXE)
+// Rules
 
-clean: ; $(RM) $(BIN)$(EXE) $(OBJ) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp $(SRC:.cpp=.log) $(SRC:.cpp=.i) $(SRC:.cpp=.d)
+#include "../Rules.mk"
 
-$(BIN)$(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OUT)$@ $(OBJ) $(LNK)
+// Other
 
-.cpp.obj: ; $(CXX) $(CFLAGS) -c $< $(OUT)$@
-
-// Additional features
-
-include .make/Depends.mk
-include .make/Cppcheck.mk
+include .make/CppCheck.mk
 include .make/PVS.mk
+
