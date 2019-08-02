@@ -28,7 +28,10 @@ MV=mv
 MK=mkdir -p
 else
 ifdef COMSPEC
-include .make/CMD.mk
+RM=del /f
+CP=copy
+MV=move
+MK=md
 else
 error("Cannot determine your system commands.")
 endif // COMSPEC
