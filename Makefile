@@ -11,6 +11,6 @@ all: $(MAKEFILE)
 clean: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE) clean
 
-$(MAKEFILE): $(TEMPLATE) Rules.mk
+$(MAKEFILE): $(TEMPLATE) Tools.mk
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 

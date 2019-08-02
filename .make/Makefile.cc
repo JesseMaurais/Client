@@ -1,4 +1,6 @@
 
+// Harmonize Syntax
+
 #define str(x) #x
 
 #ifdef _NMAKE
@@ -11,11 +13,12 @@
 # define error(x) !error x
 # define print(x) !message x
 # define append(x, y) x=$(x) y
+# define include_if(x)
 #else // GNU Make
 # define error(x) $(error x)
 # define print(x) $(info x)
 # define append(x, y) x += y
-# define depends(x) -
+# define include_if(x) -include x
 #endif
 
 // Compiler
@@ -62,10 +65,5 @@ endif // SHELL
 
 // Rules
 
-#include "../Rules.mk"
-
-// Other
-
-include .make/CppCheck.mk
-include .make/PVS.mk
+#include "../Tools.mk"
 

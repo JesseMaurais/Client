@@ -1,10 +1,13 @@
 #define obj(src, ext) $(src:ext=.o)
 #define dep(src, ext) $(src:ext=.d)
+#define std(lang) -std=lang
+
+append(CFLAGS, -MP -MMD)
+#ifndef NDEBUG
+append(CFLAGS, -g)
+#endif
+append(LDFLAGS, -rdynamic)
 
 WARN=-Wall -Wextra -Wpedantic
-LDFLAGS=-rdynamic
-FLAGS=-MP -MMD
-USESTD=-std=
-DEBUG=-g
 OUT=-o 
 

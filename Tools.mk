@@ -10,8 +10,8 @@ BIN=test
 .SUFFIXES: .cpp .hpp .obj .d .inl .log .xml .html .ilk .pdb .db
 
 OBJ=obj(SRC, .cpp)
-EXE=exe(BIN)
-append(CFLAGS, $(USESTD)$(STD))
+EXE=exe($(BIN))
+append(CFLAGS, std($(STD)))
 
 all: $(EXE)
 
@@ -19,5 +19,7 @@ clean: ; $(RM) $(EXE) $(OBJ) $(BIN).ilk $(BIN).pdb $(BIN).lib $(BIN).exp $(SRC:.
 
 $(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OUT)$@ $(OBJ) $(LNK)
 
-.cpp.obj: ; $(CXX) $(CFLAGS) -c $< $(OUT)$@
+.cpp.o: ; $(CXX) $(CFLAGS) -c $<
+
+include_if(dep(SRC, .cpp))
 
