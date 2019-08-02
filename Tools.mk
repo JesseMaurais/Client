@@ -10,22 +10,20 @@ BIN=test
 // C++ Compiler
 
 #if defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
-cat(CFLAGS, -std=$(STD))
+cat(CFLAGS, -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD)
 # ifndef NDEBUG
 cat(CFLAGS, -g)
 # endif
 # ifndef _NMAKE
 #  define DEPENDS -include $(SRC:.cpp=.d)
 # endif
-cat(CFLAGS, -Wall -Wextra -Wpedantic -MP -MMD)
 cat(LDFLAGS, -rdynamic -o $@)
 OBJ=$(SRC:.cpp=.o)
 #elif defined(_MSC_VER)
-cat(CFLAGS, -nologo -std:$(STD))
+cat(CFLAGS, -nologo -std:$(STD) -W4 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -EHsc -permissive-)
 # ifndef NDEBUG
 cat(CFLAGS, -Zi)
 # endif
-cat(CFLAGS, -W4 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -EHsc -permissive-)
 cat(LDFLAGS, -Fa$@)
 OBJ=$(SRC:.cpp=.obj)
 #else
