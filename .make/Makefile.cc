@@ -22,7 +22,10 @@
 // System Commands
 
 ifdef SHELL
-include .make/SH.mk
+RM=rm -f
+CP=cp
+MV=mv
+MK=mkdir -p
 else
 ifdef COMSPEC
 include .make/CMD.mk
