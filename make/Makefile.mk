@@ -12,7 +12,7 @@ else
 ifdef COMSPEC
 RM=del /f
 else
-error("Cannot determine your system commands.")
+$(error "Cannot determine your system commands.")
 endif
 endif
 
@@ -43,7 +43,7 @@ clean: ; $(RM) $(EXE) *.o *.d *.obj *.pdb *.lib *.exp *.ilk *.log *.i
 # 70 "make/Makefile.cc"
 CFLAGS += -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD
 ifndef NDEBUG
-CFALGS += -g
+CFLAGS += -g
 endif
 LDFLAGS += -rdynamic
 
@@ -54,3 +54,12 @@ $(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
 
 
 -include $(SRC:.cpp=.d)
+
+
+
+
+
+
+
+include make/Cppcheck.mk
+include make/PVS.mk

@@ -7,10 +7,10 @@
 # define else !else
 # define endif !endif
 # define err(x) !error x
-# define cat(x, y) x=$(x) y
+# define add(x, y) x=$(x) y
 #else // GNU Make
 # define err(x) $(error x)
-# define cat(x, y) x += y
+# define add(x, y) x += y
 #endif
 
 // System Commands
@@ -36,11 +36,11 @@ BIN=test
 // Operating Sytem
 
 #ifdef _WIN32
-cat(CFLAGS, -D_WIN32)
+add(CFLAGS, -D_WIN32)
 EXE=$(BIN).exe
 #else
-cat(CFLAGS, -D_POSIX_C_SOURCE)
-cat(LDFLAGS, -ldl -lrt -lpthread)
+add(CFLAGS, -D_POSIX_C_SOURCE)
+add(LDFLAGS, -ldl -lrt -lpthread)
 EXE=$(BIN)
 #endif
 
@@ -54,11 +54,11 @@ clean: ; $(RM) $(EXE) *.o *.d *.obj *.pdb *.lib *.exp *.ilk *.log *.i
 
 #ifdef _MSC_VER
 
-cat(CFLAGS, -nologo -std:$(STD) -W4 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -EHsc -permissive-)
+add(CFLAGS, -nologo -std:$(STD) -W4 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -EHsc -permissive-)
 ifndef NDEBUG
-cat(CFLAGS, -Zi)
+add(CFLAGS, -Zi)
 endif
-cat(LDFLAGS, -nologo)
+add(LDFLAGS, -nologo)
 
 OBJ=$(SRC:.cpp=.obj)
 
@@ -67,11 +67,11 @@ $(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -Fe$@
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 
-cat(CFLAGS, -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD)
+add(CFLAGS, -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD)
 ifndef NDEBUG
-cat(CFALGS, -g)
+add(CFLAGS, -g)
 endif
-cat(LDFLAGS, -rdynamic)
+add(LDFLAGS, -rdynamic)
 
 OBJ=$(SRC:.cpp=.o)
 
@@ -85,3 +85,7 @@ $(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
 # error "Cannot determine your compiler."
 #endif
 
+// Static Code Analysis
+
+include make/Cppcheck.mk
+include make/PVS.mk

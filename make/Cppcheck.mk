@@ -1,5 +1,5 @@
 
-CPPCHECKDIR=check/Cppcheck
+CPPCHECKDIR=Cppcheck
 CPPCHECKXML=$(CPPCHECKDIR).xml
 
 cppcheck: $(CPPCHECKXML)

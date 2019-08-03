@@ -34,6 +34,23 @@ namespace etc
 			-- *ptr;
 		}
 	};
+
+	class toggle
+	{
+		bool *ptr;
+
+	public:
+
+		toggle(bool& ref) : ptr(&ref)
+		{
+			*ptr = not *ptr;
+		}
+
+		~toggle()
+		{
+			*ptr = not *ptr;
+		}
+	};
 }
 
 #endif // file

@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cstring>
 #include <cerrno>
-#include <atomic>
 
 #ifdef _WIN32
 # include "win.hpp"
@@ -28,22 +27,18 @@ namespace sys
 	namespace
 	{
 		sys::mutex key;
-		std::atomic<int> recursive = 0;
-		using counter = etc::counter<std::atomic<int>>;
 	}
 
 	void impl::warn(fmt::string_view u)
 	{
-		counter n(recursive);
-		if (1 < recursive) return;
+		etc::toggle off(debug);
 		auto const unlock = key.lock();
 		std::cerr << u << std::endl;
 	}
 
 	void impl::err(fmt::string_view u)
 	{
-		counter n(recursive);
-		if (1 < recursive) return;
+		etc::toggle off(debug);
 		auto const unlock = key.lock();
 		auto const e = std::strerror(errno);
 		std::cerr << u << ": " << e << std::endl;
