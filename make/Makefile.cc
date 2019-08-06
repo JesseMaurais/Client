@@ -34,7 +34,7 @@ SRC=test.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp shm.cpp s
 PCH=pre.hpp
 BIN=test
 
-.SUFFIXES: .cpp .hpp .o .d .obj .pdb .lib .exp .ilk .log .i .db
+.SUFFIXES: .cpp .hpp .o .d .gch .obj .pdb .pch .lib .exp .ilk .log .i .db
 
 // Operating Sytem
 
@@ -51,7 +51,7 @@ EXE=$(BIN)
 
 all: $(EXE)
 
-clean: ; $(RM) $(EXE) *.o *.d *.obj *.pdb *.lib *.exp *.ilk *.log *.i
+clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.i
 
 // Compiler Options
 
@@ -65,8 +65,9 @@ add(LDFLAGS, -nologo)
 
 OBJ=$(SRC:.cpp=.obj)
 
-$(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -Fe$@
-.cpp.obj: ; $(CXX) $(CFLAGS) -c $<
+$(EXE): $(PCH:.hpp=.pch) $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -Fe$@
+.cpp.obj: ; $(CXX) $(CFLAGS) /Yu$(PCH) /FI$(PCH) -c $<
+.hpp.pch: ; $(CXX) $(CFLAGS) /Yc$(PCH) /FI$(PCH) $(SRC)
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 
@@ -80,7 +81,7 @@ OBJ=$(SRC:.cpp=.o)
 
 $(EXE): $(PCH).gch $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
 .cpp.o: ; $(CXX) $(CFLAGS) -include $(PCH) -c $<
-pre.hpp.gch: pre.hpp; $(CXX) $(CFLAGS) -c $<
+$(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 
 # ifndef _NMAKE
 -include $(SRC:.cpp=.d)

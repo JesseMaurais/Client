@@ -25,7 +25,7 @@ SRC=test.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp shm.cpp s
 PCH=pre.hpp
 BIN=test
 
-.SUFFIXES: .cpp .hpp .o .d .obj .pdb .lib .exp .ilk .log .i .db
+.SUFFIXES: .cpp .hpp .o .d .gch .obj .pdb .pch .lib .exp .ilk .log .i .db
 
 
 
@@ -42,8 +42,8 @@ EXE=$(BIN)
 
 all: $(EXE)
 
-clean: ; $(RM) $(EXE) *.o *.d *.obj *.pdb *.lib *.exp *.ilk *.log *.i
-# 73 "make/Makefile.cc"
+clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.i
+# 74 "make/Makefile.cc"
 CFLAGS += -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD
 ifndef NDEBUG
 CFLAGS += -g
@@ -54,7 +54,7 @@ OBJ=$(SRC:.cpp=.o)
 
 $(EXE): $(PCH).gch $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
 .cpp.o: ; $(CXX) $(CFLAGS) -include $(PCH) -c $<
-pre.hpp.gch: pre.hpp; $(CXX) $(CFLAGS) -c $<
+$(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 
 
 -include $(SRC:.cpp=.d)
