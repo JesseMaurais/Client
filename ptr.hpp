@@ -35,20 +35,35 @@ namespace etc
 		}
 	};
 
-	class toggle
+	template <typename Type>
+	class store
 	{
-		bool *ptr;
+		Type *ptr;
+		Type value;
 
 	public:
 
-		toggle(bool& ref) : ptr(&ref)
+		store(Type& ref) : ptr(&ref)
 		{
-			*ptr = not *ptr;
+			value = *ptr;
 		}
 
-		~toggle()
+		~store()
 		{
-			*ptr = not *ptr;
+			*ptr = value;
+		}
+	};
+
+	template <typename Type>
+	class stack : store<Type>
+	{
+		using base = store<Type>;
+
+	public:
+
+		stack(Type& ref, Type val) : base(ref)
+		{
+			ref = val;
 		}
 	};
 }

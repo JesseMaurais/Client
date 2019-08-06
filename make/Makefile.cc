@@ -17,9 +17,11 @@
 
 ifdef SHELL
 RM=rm -f
+MD=mkdir -p
 else
 ifdef COMSPEC
 RM=del /f
+MD=md
 else
 err("Cannot determine your system commands.")
 endif // COMSPEC
@@ -29,6 +31,7 @@ endif // SHELL
 
 STD=c++17
 SRC=test.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp shm.cpp sig.cpp socket.cpp sys.cpp xdg.cpp
+PCH=pre.hpp
 BIN=test
 
 .SUFFIXES: .cpp .hpp .o .d .obj .pdb .lib .exp .ilk .log .i .db
@@ -75,8 +78,9 @@ add(LDFLAGS, -rdynamic)
 
 OBJ=$(SRC:.cpp=.o)
 
-$(EXE): $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
-.cpp.o: ; $(CXX) $(CFLAGS) -c $<
+$(EXE): $(PCH).gch $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
+.cpp.o: ; $(CXX) $(CFLAGS) -include $(PCH) -c $<
+pre.hpp.gch: pre.hpp; $(CXX) $(CFLAGS) -c $<
 
 # ifndef _NMAKE
 -include $(SRC:.cpp=.d)
