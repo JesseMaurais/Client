@@ -92,5 +92,5 @@ $(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 
 // Static Code Analysis
 
-include make/Cppcheck.mk
-include make/PVS.mk
+include .make/Cppcheck.mk
+include .make/PVS.mk

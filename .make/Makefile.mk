@@ -1,11 +1,11 @@
-# 1 "make/Makefile.cc"
+# 1 ".make/Makefile.cc"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 382 "<built-in>" 3
 # 1 "<command line>" 1
 # 1 "<built-in>" 2
-# 1 "make/Makefile.cc" 2
-# 18 "make/Makefile.cc"
+# 1 ".make/Makefile.cc" 2
+# 18 ".make/Makefile.cc"
 ifdef SHELL
 RM=rm -f
 MD=mkdir -p
@@ -43,7 +43,7 @@ EXE=$(BIN)
 all: $(EXE)
 
 clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.i
-# 74 "make/Makefile.cc"
+# 74 ".make/Makefile.cc"
 CFLAGS += -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD
 ifndef NDEBUG
 CFLAGS += -g
@@ -65,5 +65,5 @@ $(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 
 
 
-include make/Cppcheck.mk
-include make/PVS.mk
+include .make/Cppcheck.mk
+include .make/PVS.mk

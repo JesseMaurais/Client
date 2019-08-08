@@ -2,8 +2,8 @@
 # operating system and version of $(MAKE) used. Forward standard targets
 # to it.
 
-MAKEFILE=make/Makefile.mk
-TEMPLATE=make/Makefile.cc
+MAKEFILE=.make/Makefile.mk
+TEMPLATE=.make/Makefile.cc
 
 all: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE)
