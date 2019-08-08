@@ -5,6 +5,11 @@
 
 namespace env
 {
+	struct value
+	{
+		virtual operator long() const = 0;
+	};
+
 	struct view
 	{
 		virtual operator fmt::string_view() const = 0;

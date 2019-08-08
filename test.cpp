@@ -8,6 +8,7 @@
 #include "del.hpp"
 #include "esc.hpp"
 #include "usr.hpp"
+#include "cpu.hpp"
 #include "sys.hpp"
 #include "net.hpp"
 #include "sig.hpp"
@@ -314,6 +315,15 @@ namespace
 		assert(caught[0] == SIGINT);
 		assert(caught[1] == SIGFPE);
 		assert(caught[2] == SIGILL);
+	}
+
+	TEST(sys_cpu)
+	{
+		sysini()
+		<< "[CPU Information]\n"
+		<< kv("Count", fmt::to_string(sys::cpu::count))
+		<< kv("PageSize", fmt::to_string(sys::cpu::page_size))
+		<< std::endl;
 	}
 
 	//

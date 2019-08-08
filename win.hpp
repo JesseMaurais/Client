@@ -108,6 +108,14 @@ namespace sys::win
 	using module_entry = size<MODULEENTRY32, &MODULEENTRY32::dwSize>;
 	using thread_entry = size<THREADENTRY32, &THREADENTRY32::dwSize>;
 
+	struct info : SYSTEM_INFO
+	{
+		info()
+		{
+			GetSystemInfo(this);
+		}
+	};
+
 	struct handle
 	{
 		HANDLE h;
@@ -123,9 +131,12 @@ namespace sys::win
 
 		~handle()
 		{
-			if (not sys::win::fail(h) and not CloseHandle(h))
+			if (not sys::win::fail(h))
 			{
-				sys::win::err(here, "CloseHandle");
+				if (not CloseHandle(h))
+				{
+					sys::win::err(here, "CloseHandle");
+				}
 			}
 		}
 
