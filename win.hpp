@@ -17,7 +17,7 @@
 
 namespace sys::win
 {
-	const auto invalid = INVALID_HANDLE_VALUE;
+	inline auto invalid = INVALID_HANDLE_VALUE;
 
 	inline bool fail(HANDLE h)
 	{
@@ -42,7 +42,7 @@ namespace sys::win
 
 	inline HANDLE get(int fd)
 	{
-		if (sys::fail(fd)) return INVALID_HANDLE_VALUE;
+		if (sys::fail(fd)) return sys::win::invalid;
 		auto const iptr = _get_osfhandle(fd);
 		return reinterpret_cast<HANDLE>(iptr);
 	}
@@ -54,41 +54,41 @@ namespace sys::win
 		return _open_osfhandle(iptr, flags);
 	}
 
+	inline bool wait(HANDLE h, DWORD ms = INFINITE)
+	{
+		auto const dw = WaitForSingleObject(h, ms);
+		if (WAIT_FAILED == dw)
+		{
+			sys::win::err(here, "WaitForSingleObject", ms);
+			return failure;
+		}
+		return success;
+	}
+
+	namespace msg
+	{
+		inline bool put(DWORD id, UINT msg, WPARAM wp = 0, LPARAM lp = 0)
+		{
+			if (not PostThreadMessage(id, msg, wp, lp))
+			{
+				sys::win::err(here, "PostThreadMessage", id);
+				return failure;
+			}
+			return success;
+		}
+		
+		inline bool quit(DWORD id)
+		{
+			return put(id, WM_QUIT);
+		}
+	}
+
 	namespace sig
 	{
 		struct quit : sys::sig::link
 		{
 			quit(int on) : link(on, PostQuitMessage) { }
 		};
-	}
-
-	namespace msg
-	{
-		inline bool put(DWORD thid, UINT msg, WPARAM wp = 0, LPARAM lp = 0)
-		{
-			if (not PostThreadMessage(thid, msg, wp, lp))
-			{
-				sys::win::err(here, "PostThreadMessage", thid);
-				return failure;
-			}
-			return success;
-		}
-		
-		inline bool quit(DWORD thid)
-		{
-			return put(thid, WM_QUIT);
-		}
-	}
-
-	inline bool wait(HANDLE h, DWORD timeout = INFINITE)
-	{
-		auto const dw = WaitForSingleObject(h, timeout);
-		if (WAIT_FAILED == dw)
-		{
-			sys::win::err(here, "WaitForSingleObject", h);
-			return failure;
-		}
-		return success;
 	}
 
 	template <typename T> struct zero : T
@@ -117,13 +117,13 @@ namespace sys::win
 			return h;
 		}
 
-		handle(HANDLE p = invalid)
+		handle(HANDLE p = sys::win::invalid)
 		: h(p)
 		{ }
 
 		~handle()
 		{
-			if (not fail(h) and not CloseHandle(h))
+			if (not sys::win::fail(h) and not CloseHandle(h))
 			{
 				sys::win::err(here, "CloseHandle");
 			}
@@ -151,12 +151,12 @@ namespace sys::win
 
 	struct thread : handle
 	{
-		thread(DWORD thid, DWORD dw = THREAD_ALL_ACCESS)
+		thread(DWORD id, DWORD dw = THREAD_ALL_ACCESS)
 		{
-			h = OpenThread(dw, false, thid);
+			h = OpenThread(dw, false, id);
 			if (sys::win::fail(h))
 			{
-				sys::win::err(here, "OpenThread", thid);
+				sys::win::err(here, "OpenThread", id);
 			}
 		}
 	};

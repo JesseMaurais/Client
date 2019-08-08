@@ -58,22 +58,20 @@ namespace env::dir
 	extern env::list const& share;
 	extern env::list const& include;
 
-	using view = etc::predicate<fmt::string_view>;
+	using entry = predicate<fmt::string_view>;
+	constexpr auto stop = falsity<fmt::string_view>;
 
-	view copy(fmt::string&);
-	view match(fmt::string_view);
-	view insert(fmt::string_vector&);
-	view mode(sys::file::mode);
+	entry copy(fmt::string&);
+	entry match(fmt::string_view);
+	entry insert(fmt::string_vector&);
+	entry mode(sys::file::mode);
 
-	constexpr auto stop = etc::falsity<fmt::string_view>;
-
-	bool find(fmt::string_view dir, view);
-
-	inline bool find(fmt::string_view_span list, view visitor)
+	extern bool find(fmt::string_view dir, entry view);
+	inline bool find(fmt::string_view_span list, entry view)
 	{
 		for (auto const dir : list)
 		{
-			if (find(dir, visitor))
+			if (find(dir, view))
 			{
 				return true;
 			}

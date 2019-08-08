@@ -31,7 +31,7 @@ namespace sys::uni
 		files(char const *s)
 		{
 			ptr = opendir(s);
-			if (ptr)
+			if (nullptr == ptr)
 			{
 				sys::err(here, "opendir", s);
 			}
@@ -511,11 +511,9 @@ namespace sys
 
 	struct event : sys::uni::cond
 	{
-		using base = sys::uni::cond;
-
-		bool wait(pthread_mutex_t& key)
+		bool wait(mutex& key)
 		{
-			base::wait(&key);
+			cond::wait(&key.self);
 			return fail(no);
 		}
 	};

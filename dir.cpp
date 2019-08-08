@@ -4,7 +4,6 @@
 #include "dir.hpp"
 #include "err.hpp"
 #include "fmt.hpp"
-#include "ptr.hpp"
 #include "xdg.hpp"
 #include "sys.hpp"
 #include "os.hpp"
@@ -138,7 +137,7 @@ namespace env::dir
 	env::list const& share = SHARE;
 	env::list const& include = INCLUDE;
 
-	bool find(fmt::string_view path, view visitor)
+	bool find(fmt::string_view path, entry view)
 	{
 		auto const buf = fmt::to_string(path);
 		auto const s = buf.c_str();
@@ -148,7 +147,7 @@ namespace env::dir
 			sys::win::files dir(s);
 			if (dir.h) do
 			{
-				if (visitor(dir.cFileName))
+				if (view(dir.cFileName))
 				{
 					return true;
 				}
@@ -164,7 +163,7 @@ namespace env::dir
 				auto const ent = ++dir;
 				if (ent)
 				{
-					if (visitor(ent->d_name))
+					if (view(ent->d_name))
 					{
 						return true;
 					}
@@ -176,7 +175,7 @@ namespace env::dir
 		#endif
 	}
 
-	view mode(sys::file::mode bit)
+	entry mode(sys::file::mode bit)
 	{
 		auto const flags = sys::file::convert(bit);
 		return [=](fmt::string_view u)
@@ -200,7 +199,7 @@ namespace env::dir
 		};
 	}
 
-	view match(fmt::string_view u)
+	entry match(fmt::string_view u)
 	{
 		auto const buf = fmt::to_string(u);
 		auto const x = std::regex(buf);
@@ -212,7 +211,7 @@ namespace env::dir
 		};
 	}
 
-	view insert(fmt::string_vector& buf)
+	entry insert(fmt::string_vector& buf)
 	{
 		return [&](fmt::string_view u)
 		{
@@ -222,7 +221,7 @@ namespace env::dir
 		};
 	}
 
-	view copy(fmt::string& buf)
+	entry copy(fmt::string& buf)
 	{
 		return [&](fmt::string_view u)
 		{

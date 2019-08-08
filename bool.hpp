@@ -1,12 +1,12 @@
 #ifndef bool_hpp
 #define bool_hpp
 
-enum boolean : bool
+enum : bool
 {
 	success = false, failure = true
 };
 
-constexpr bool fail(boolean ok)
+constexpr bool fail(bool ok)
 {
 	return success != ok;
 }

@@ -31,14 +31,12 @@ namespace sys
 
 	void impl::warn(fmt::string_view u)
 	{
-		etc::stack block(debug, false);
 		auto const unlock = key.lock();
 		std::cerr << u << std::endl;
 	}
 
 	void impl::err(fmt::string_view u)
 	{
-		etc::stack block(debug, false);
 		auto const unlock = key.lock();
 		auto const e = std::strerror(errno);
 		std::cerr << u << ": " << e << std::endl;
