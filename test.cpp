@@ -7,7 +7,7 @@
 #include "tag.hpp"
 #include "del.hpp"
 #include "esc.hpp"
-#include "xdg.hpp"
+#include "usr.hpp"
 #include "sys.hpp"
 #include "net.hpp"
 #include "sig.hpp"
@@ -245,41 +245,41 @@ namespace
 		<< std::endl;
 	}
 
-	TEST(xdg_desktop)
+	TEST(usr_desktop)
 	{
 		sysini()
 		<< "[Desktop]\n"
-		<< kv("XDG_CURRENT_DESKTOP", xdg::current_desktop)
-		<< kv("XDG_MENU_PREFIX", xdg::menu_prefix)
-		<< kv("XDG_APPLICATIONS_MENU", xdg::applications_menu)
+		<< kv("XDG_CURRENT_DESKTOP", env::usr::current_desktop)
+		<< kv("XDG_MENU_PREFIX", env::usr::menu_prefix)
+		<< kv("XDG_APPLICATIONS_MENU", env::usr::applications_menu)
 		<< std::endl;
 	}
 
-	TEST(xdg_data)
+	TEST(usr_data)
 	{
 		sysini()
 		<< "[Data Directories]\n"
-		<< kv("XDG_RUNDTIME_DIR", xdg::runtime_dir)
-		<< kv("XDG_DATA_HOME", xdg::data_home)
-		<< kv("XDG_CONFIG_HOME", xdg::config_home)
-		<< kv("XDG_CACHE_HOME", xdg::cache_home)
-		<< kv("XDG_DATA_DIRS", fmt::path::join(xdg::data_dirs))
-		<< kv("XDG_CONFIG_DIRS", fmt::path::join(xdg::config_dirs))
+		<< kv("XDG_RUNDTIME_DIR", env::usr::runtime_dir)
+		<< kv("XDG_DATA_HOME", env::usr::data_home)
+		<< kv("XDG_CONFIG_HOME", env::usr::config_home)
+		<< kv("XDG_CACHE_HOME", env::usr::cache_home)
+		<< kv("XDG_DATA_DIRS", fmt::path::join(env::usr::data_dirs))
+		<< kv("XDG_CONFIG_DIRS", fmt::path::join(env::usr::config_dirs))
 		<< std::endl;
 	}
 
-	TEST(xdg_user)
+	TEST(usr_user)
 	{
 		sysini()
 		<< "[User Directories]\n"
-		<< kv("XDG_DESKTOP_DIR", xdg::desktop_dir)
-		<< kv("XDG_DOCUMENTS_DIR", xdg::documents_dir)
-		<< kv("XDG_DOWNLOAD_DIR", xdg::download_dir)
-		<< kv("XDG_MUSIC_DIR", xdg::music_dir)
-		<< kv("XDG_PICTURES_DIR", xdg::pictures_dir)
-		<< kv("XDG_PUBLICSHARE_DIR", xdg::publicshare_dir)
-		<< kv("XDG_TEMPLATES_DIR", xdg::templates_dir)
-		<< kv("XDG_VIDEOS_DIR", xdg::videos_dir)
+		<< kv("XDG_DESKTOP_DIR", env::usr::desktop_dir)
+		<< kv("XDG_DOCUMENTS_DIR", env::usr::documents_dir)
+		<< kv("XDG_DOWNLOAD_DIR", env::usr::download_dir)
+		<< kv("XDG_MUSIC_DIR", env::usr::music_dir)
+		<< kv("XDG_PICTURES_DIR", env::usr::pictures_dir)
+		<< kv("XDG_PUBLICSHARE_DIR", env::usr::publicshare_dir)
+		<< kv("XDG_TEMPLATES_DIR", env::usr::templates_dir)
+		<< kv("XDG_VIDEOS_DIR", env::usr::videos_dir)
 		<< std::endl;
 	}
 

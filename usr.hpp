@@ -1,9 +1,9 @@
-#ifndef xdg_hpp
-#define xdg_hpp
+#ifndef usr_hpp
+#define usr_hpp
 
 #include "env.hpp"
 
-namespace xdg
+namespace env::usr
 {
 	extern env::view const& current_desktop;
 	extern env::view const& menu_prefix;

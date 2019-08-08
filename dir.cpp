@@ -4,7 +4,7 @@
 #include "dir.hpp"
 #include "err.hpp"
 #include "fmt.hpp"
-#include "xdg.hpp"
+#include "usr.hpp"
 #include "sys.hpp"
 #include "os.hpp"
 #include <regex>
@@ -48,7 +48,7 @@ namespace
 		operator fmt::string_view() const final
 		{
 			constexpr sys::mode_t um = S_IRUSR | S_IWUSR | S_IXUSR;
-			fmt::string_view u = xdg::runtime_dir;
+			fmt::string_view u = env::usr::runtime_dir;
 			const auto s = u.data();
 			
 			if (sys::fail(sys::access(s, F_OK)))
