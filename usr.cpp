@@ -66,7 +66,7 @@ namespace
 			if (empty(path))
 			{
 				constexpr auto base = "applications.menu";
-				auto const menu = fmt::join(env::usr::menu_prefix, base);
+				auto const menu = fmt::join({env::usr::menu_prefix, base});
 				path = fmt::dir::join(env::usr::config_home, "menus", menu);
 				if (not exists(path))
 				{

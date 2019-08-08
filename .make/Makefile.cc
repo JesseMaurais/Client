@@ -30,7 +30,7 @@ endif // SHELL
 // Project Variables
 
 STD=c++17
-SRC=test.cpp cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
+SRC=test.cpp cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
 PCH=pre.hpp
 BIN=test
 

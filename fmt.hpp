@@ -476,10 +476,9 @@ namespace fmt
 		return lc.count(u, v);
 	}
 
-	template <typename... StringView>
-	inline auto join(StringView const&... args)
+	inline auto join(string_view_span t, string_view u = "")
 	{
-		return lc.join({ string_view(args)... }, "");
+		return lc.join(t, u);
 	}
 
 	inline auto split(string_view u, string_view v)

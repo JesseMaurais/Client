@@ -67,7 +67,8 @@ namespace sys
 
 	namespace ext
 	{
-		constexpr auto share = "dll";
+		constexpr auto share = ".dll";
+		constexpr auto image = ".exe";
 	}
 
 	namespace esc
@@ -139,7 +140,8 @@ namespace sys
 
 	namespace ext
 	{
-		constexpr auto share = "so";
+		constexpr auto share = ".so";
+		constexpr auto image = "";
 	}
 
 	namespace esc

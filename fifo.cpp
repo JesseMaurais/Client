@@ -19,7 +19,7 @@ namespace sys::file
 	{
 		#ifdef _WIN32
 		{
-			path = fmt::join("\\\\.\\pipe\\", name);
+			path = fmt::join({ "\\\\.\\pipe\\", name });
 
 			sys::win::handle h = CreateNamedPipe
 			(

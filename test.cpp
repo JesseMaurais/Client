@@ -8,6 +8,7 @@
 #include "del.hpp"
 #include "esc.hpp"
 #include "usr.hpp"
+#include "opt.hpp"
 #include "cpu.hpp"
 #include "sys.hpp"
 #include "net.hpp"
@@ -35,7 +36,8 @@ static_assert("Compiling unit tests without debug mode.");
 
 int main(int argc, char **argv)
 {
-	(void) argc;
+	env::opt::application_name = "Unit Tests";
+	env::opt::init(argc, argv);
 	return dbg::run(argv[1]);
 }
 
@@ -246,6 +248,17 @@ namespace
 		<< std::endl;
 	}
 
+	TEST(env_opt)
+	{
+		sysini()
+		<< "[Application Options]\n"
+		<< kv("Name", env::opt::application)
+		<< kv("Program", env::opt::program)
+		<< kv("CommandLine", fmt::join(env::opt::arguments, " "))
+		<< kv("ConfigurationDir", env::opt::configuration)
+		<< std::endl;
+	}
+
 	TEST(usr_desktop)
 	{
 		sysini()
@@ -269,7 +282,7 @@ namespace
 		<< std::endl;
 	}
 
-	TEST(usr_user)
+	TEST(usr_dir)
 	{
 		sysini()
 		<< "[User Directories]\n"

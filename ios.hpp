@@ -5,12 +5,6 @@
 
 namespace io
 {
-	template <class Char>
-	inline bool fail(std::basic_ios<Char> const& ios)
-	{
-		return not ios;
-	}
-
 	struct eat_streambuf : std::stringstream
 	{
 		eat_streambuf(std::ostream& stream)
