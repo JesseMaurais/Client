@@ -40,7 +40,7 @@ namespace ini
 		{
 			if (header(s))
 			{
-				head = s;
+				head = s.substr(1, s.size() - 2);
 				continue;
 			}
 
@@ -65,24 +65,22 @@ namespace ini
 		return "";
 	}
 
+	void keys::set(entry e, value u)
+	{
+		(void) tree[e.first].insert_or_assign(e.second, u);
+	}
+
 	void keys::put(entry e, value u)
 	{
-		auto const h = store(e.first);
-		auto const k = store(e.second);
-		auto const v = store(u);
-		(void) tree[h].insert_or_assign(k, v);
+		auto first = store(e.first);
+		auto second = store(e.second);
+		auto v = store(u);
+		set({ first, second }, v);
 	}
 
 	value keys::store(value u)
 	{
-		auto s = fmt::to_string(u);
-		auto it = buf.find(s);
-		if (end(buf) == it)
-		{
-			std::tie(it, std::ignore) = buf.emplace(std::move(s));
-			assert(buf.end() != it);
-		}
-		return end(buf) == it ? "" : *it;
+		return *buf.emplace(u).first;
 	}
 }
 

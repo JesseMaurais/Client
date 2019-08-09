@@ -3,8 +3,8 @@
 
 #include "str.hpp"
 #include <istream>
-#include <set>
 #include <map>
+#include <set>
 
 namespace ini
 {
@@ -25,6 +25,7 @@ namespace ini
 	{
 		keys(string_view path);
 		value get(entry) const;
+		void set(entry, value);
 		void put(entry, value);
 
 	protected:

@@ -1,23 +1,24 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "dbg.hpp"
-#include "int.hpp"
-#include "fmt.hpp"
-#include "tag.hpp"
-#include "del.hpp"
-#include "esc.hpp"
-#include "usr.hpp"
-#include "opt.hpp"
-#include "cpu.hpp"
-#include "sys.hpp"
-#include "net.hpp"
-#include "sig.hpp"
-#include "dir.hpp"
-#include "dll.hpp"
-#include "shm.hpp"
-#include "fifo.hpp"
-#include "pstream.hpp"
+#include "dbg.hpp"  // Debug and unit test tools
+#include "int.hpp"  // Numeric conversions
+#include "fmt.hpp"  // Character string formatting
+#include "ini.hpp"  // Desktop configuration parsing
+#include "opt.hpp"  // Query user options
+#include "tag.hpp"  // Tag parsing
+#include "del.hpp"  // Parsing with delimiters
+#include "esc.hpp"  // ASCII escape codes
+#include "usr.hpp"  // User directories
+#include "cpu.hpp"  // CPU information
+#include "sys.hpp"  // System interfaces
+#include "net.hpp"  // Network sockets
+#include "sig.hpp"  // Signal handling
+#include "dir.hpp"  // Directory operators
+#include "dll.hpp"  // Dynamic libraries
+#include "shm.hpp"  // Shared memory
+#include "fifo.hpp" // Named pipes
+#include "pstream.hpp" // Process streams
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
@@ -170,6 +171,16 @@ namespace
 		assert(t[0] == "banana");
 		assert(t[1] == "apple");
 		assert(t[2] == "banana");
+	}
+
+	TEST(fmt_ini)
+	{
+		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
+		ini::keys keys(path);
+		ini::entry entry { "NMAKE", "MAKEFLAGS" };
+		auto const value = keys.get(entry);
+		assert(not empty(value));
+		assert(fmt::npos != value.find("/nologo"));
 	}
 
 	//

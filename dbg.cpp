@@ -84,7 +84,7 @@ namespace dbg
 					auto pos = npos;
 					while (npos != (pos = s.find("\n")))
 					{
-						s.replace(pos, 1, " ");
+						s.replace(pos, 1, ";");
 					}
 					throw std::runtime_error(s);
 				}
