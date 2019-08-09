@@ -25,6 +25,33 @@ namespace io
 		using size_type = std::streamsize;
 		using int_type = typename base::int_type;
 
+		base *setbuf(char_type *s, size_type n) override
+		{
+			size_type const m = n / 2;
+			return setbuf(s, n - m, m);
+		}
+
+		base *setbuf(char_type *s, size_type n, size_type m)
+		{
+			auto t = s + n;
+			auto u = t + m;
+			base::setg(s, t, t);
+			base::setp(t, u);
+			return this;
+		}
+
+		string_view pview() const
+		{
+			auto const sz = base::pptr() - base::pbase();
+			return string_view(base::pbase(), fmt::to_size(sz));
+		}
+
+		string_view gview() const
+		{
+			auto const sz = base::egptr() - base::gptr();
+			return string_view(base::gptr(), sz);
+		}
+
 	protected:
 
 		int_type overflow(int_type c) override
@@ -118,21 +145,6 @@ namespace io
 			setbufsiz(n);
 		}
 
-		base *setbuf(char_type *s, size_type n) override
-		{
-			size_type const m = n / 2;
-			return setbuf(s, n - m, m);
-		}
-
-		base *setbuf(char_type *s, size_type n, size_type m)
-		{
-			auto t = s + n;
-			auto u = t + m;
-			base::setg(s, t, t);
-			base::setp(t, u);
-			return this;
-		}
-
 		base *setbufsiz(size_type n)
 		{
 			buf.resize(fmt::to_size(n));
@@ -143,18 +155,6 @@ namespace io
 		{
 			buf.resize(fmt::to_size(n + m));
 			return setbuf(buf.data(), n, m);
-		}
-
-		string_view pview() const
-		{
-			auto const sz = base::pptr() - base::pbase();
-			return string_view(base::pbase(), fmt::to_size(sz));
-		}
-
-		string_view gview() const
-		{
-			auto const sz = base::egptr() - base::gptr();
-			return string_view(base::gptr(), sz);
 		}
 
 	private:
