@@ -496,7 +496,7 @@ namespace fmt
 		return lc.to_pair(u, v);
 	}
 
-	inline auto key_value(string_view u, string_view v)
+	inline auto key(string_view u, string_view v)
 	{
 		return lc.join({ u, v }, "=");
 	}

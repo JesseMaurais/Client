@@ -2,17 +2,21 @@
 #define opt_hpp
 
 #include "env.hpp"
+#include "str.hpp"
 
 namespace env::opt
 {
-	extern fmt::string application_name;
-	extern env::view const& configuration;
-	extern env::view const& application;
+	extern fmt::string_view application;
 	extern env::list const& arguments;
+	extern env::view const& identity;
 	extern env::view const& program;
-	void init(int argc, char** argv);
+	extern env::view const& config;
+	extern env::view const& cache;
 
-	fmt::string_view key(fmt::string_view);
+	void init(int argc, char** argv);
+	fmt::string_view get(fmt::string_view);
+	fmt::string_view get(fmt::string_view_pair);
+	void put(fmt::string_view_pair, fmt::string_view);
 };
 
 #endif // file

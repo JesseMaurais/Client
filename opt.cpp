@@ -6,36 +6,33 @@
 #include "err.hpp"
 #include "sys.hpp"
 #include <fstream>
+#include <tuple>
 
 namespace
 {
+	struct : env::list
+	{
+		fmt::string_view_vector list;
+
+		operator fmt::string_view_span() const final
+		{
+			return list;
+		}
+
+	} ARGUMENTS;
+
 	struct : env::view
 	{
 		operator fmt::string_view() const final
 		{
-			static fmt::string s;
-			if (empty(s))
+			if (empty(env::opt::application))
 			{
-				s = fmt::dir::join(env::usr::config_home, env::opt::application);
+				env::opt::application = env::opt::program;
 			}
-			return s;
+			return env::opt::application;
 		}
 
-	} CONFIGURATION;
-
-	struct : env::view
-	{
-		operator fmt::string_view() const final
-		{
-			if (empty(env::opt::application_name))
-			{
-				fmt::string_view u = env::opt::program;
-				env::opt::application_name = fmt::to_string(u);
-			}
-			return env::opt::application_name;
-		}
-
-	} APPLICATION;
+	} IDENTITY;
 
 	struct : env::view
 	{
@@ -48,9 +45,9 @@ namespace
 				assert(not empty(args));
 				auto const path = args.front();
 				assert(not empty(path));
-				auto const part = fmt::path::split(path);
-				assert(not empty(part));
-				auto const file = part.back();
+				auto const dirs = fmt::dir::split(path);
+				assert(not empty(dirs));
+				auto const file = dirs.back();
 				assert(not empty(file));
 				auto const first = file.find_first_not_of("./");
 				auto const last = file.rfind(sys::ext::image);
@@ -61,29 +58,123 @@ namespace
 
 	} PROGRAM;
 
-	struct : env::list
+	struct : env::view
 	{
-		fmt::string_view_vector lines;
-
-		operator fmt::string_view_span() const final
+		operator fmt::string_view() const final
 		{
-			return lines;
+			static fmt::string s;
+			if (empty(s))
+			{
+				s = fmt::dir::join(env::usr::config_home, env::opt::identity);
+			}
+			return s;
 		}
 
-	} ARGUMENTS;
+	} CONFIG;
+
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			static fmt::string s;
+			if (empty(s))
+			{
+				s = fmt::dir::join(env::usr::cache_home, env::opt::identity);
+			}
+			return s;
+		}
+
+	} CACHE;
+
+	struct mirror
+	{
+		static constexpr auto defaults = "Defaults";
+
+		mirror()
+		{
+			path = fmt::join(env::opt::config, ".ini");
+			std::ifstream in(path);
+			fmt::string s, sector;
+			while (ini::getline(in, s))
+			{
+				if (ini::section(s))
+				{
+					sector = s;
+					continue;
+				}
+
+				assert(not empty(sector));
+				auto const p = fmt::to_pair(s);
+				put(sector, p);
+			}
+		}
+
+		~mirror()
+		{
+			std::ofstream out(path);
+			for (auto const& sector : cache)
+			{
+				out << "[" << sector.first << "]" << fmt::eol;
+				for (auto const& entry : sector.second)
+				{
+					out << fmt::key(entry) << fmt::eol;
+				}
+				out << fmt::eol;
+			}
+		}
+
+		fmt::string_view get(fmt::string_view_pair p)
+		{
+			auto const it = find(p.first);
+			if (end() != it)
+			{
+				auto const key = it->second.find(p.second);
+				if (it->end() != key)
+				{
+					return key->second;
+				}
+			}
+			return "";
+		}
+
+		fmt::string_view get(fmt::string_view u)
+		{
+			return get({ defaults, u });
+		}
+
+		void put(fmt::string_view u, fmt::string_view_pair p)
+		{
+			const auto [std::ignore, unique] = cache[u].insert(p);
+			if (not unique)
+			{
+				sys::warn(here, "overwrite", p.first, "with", p.second);
+			}
+		}
+
+		void put(fmt::string_view_pair p)
+		{
+			put(defaults, p);
+		}
+
+	private:
+
+		ini::group cache;
+		fmt::string path;
+
+	} registry;
 }
 
 namespace env::opt
 {
-	fmt::string application_name;
-	env::view const& configuration = CONFIGURATION;
-	env::view const& application = APPLICATION;
 	env::list const& arguments = ARGUMENTS;
+	env::view const& identity = IDENTITY;
 	env::view const& program = PROGRAM;
+	env::view const& config = CONFIG;
+	env::view const& cache = CACHE;
+	fmt::string_view application;
 
 	void init(int argc, char** argv)
 	{
-		assert(nullptr == argv[argc]);
 		fmt::string_view_span args = ARGUMENTS;
 		assert(empty(args));
 		if (empty(args))
@@ -94,32 +185,37 @@ namespace env::opt
 
 	fmt::string_view get(fmt::string_view u)
 	{
-		auto pair = fmt::split(u, ":");
-		if (empty(pair.second))
+		fmt::string_view_span t = env::opt::arguments;
+		for (auto const v : t)
 		{
-			fmt::string_view_span t = env::opt::arguments;
-			for (auto const v : t)
+			const auto p = fmt::key(v);
+			if (p.first == u)
 			{
-				pair = fmt::to_pair(v);
-				if (pair.first == u)
-				{
-					return pair.second;
-				}
-			}
-
-			auto const v = sys::env::get(u);
-			pair = fmt::to_pair(v);
-			if (pair.first == u)
-			{
-				return pair.second;
+				return p.second;
 			}
 		}
-
-		static ini::group t;
-		if (empty(t))
+		
+		auto const v = sys::env::get(u);
+		if (empty(v))
 		{
-			
+			v = registry.get(u);
 		}
+		return v;
+	}
+
+	fmt::string_view get(fmt::string_view_pair p)
+	{
+		return registry.get(p);
+	}
+
+	void put(fmt::string_view u, fmt::string_view v)
+	{
+		registry.put({ u, v });
+	}
+
+	void put(fmt::string_view_pair p, fmt::string_view v)
+	{
+		registry.put(p.first, { p.second, v });
 	}
 }
 

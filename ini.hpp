@@ -8,6 +8,7 @@
 namespace ini
 {
 	using entry = std::map<fmt::string, fmt::string>;
+	using value = entry::value_type;
 	using group = std::map<fmt::string, entry>;
 
 	static std::istream& getline(std::istream& in, fmt::string& s, char const c = '#')
@@ -30,7 +31,7 @@ namespace ini
 		return in;
 	}
 
-	inline bool header(fmt::string_view u)
+	inline bool section(fmt::string_view u)
 	{
 		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}

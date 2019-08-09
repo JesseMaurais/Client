@@ -36,7 +36,7 @@ static_assert("Compiling unit tests without debug mode.");
 
 int main(int argc, char **argv)
 {
-	env::opt::application_name = "Unit Tests";
+	env::opt::application = "Unit Tests";
 	env::opt::init(argc, argv);
 	return dbg::run(argv[1]);
 }
