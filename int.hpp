@@ -2,7 +2,6 @@
 #define int_hpp
 
 #include <limits>
-#include <cstddef>
 #include <type_traits>
 #include "err.hpp"
 
@@ -81,13 +80,22 @@ namespace fmt
 
 	template <typename S> inline auto to_size(S s)
 	{
-		return to<std::size_t, S>(s);
+		return to<size_t>(s);
 	}
 
 	template <typename S> inline auto to_int(S s)
 	{
 		return to<int>(s);
 	}
+
+	long to_long(string_view, int base = 10);
+	long long to_llong(string_view, int base = 10);
+	unsigned long to_ulong(string_view, int base = 10);
+	unsigned long long to_ullong(string_view, int base = 10);
+
+	float to_float(string_view);
+	double to_double(string_view);
+	long double to_ldouble(string_view);
 }
 
 #endif // file

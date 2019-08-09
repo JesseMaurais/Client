@@ -11,12 +11,15 @@ namespace io
 	template
 	<
 	 class Char,
-	 template <class> class Traits = std::char_traits
+	 template <class> class Traits = std::char_traits,
+	 template <class> class Alloc = std::allocator
 	>
 	class basic_streambuf : public std::basic_streambuf<Char, Traits<Char>>
 	{
 		using base = std::basic_streambuf<Char, Traits<Char>>;
 		using ios = std::basic_ios<Char, Traits<Char>>;
+		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
+		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
 
 	public:
 
@@ -128,11 +131,10 @@ namespace io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_stringbuf : public basic_streambuf<Char, Traits>
+	class basic_stringbuf : public basic_streambuf<Char, Traits, Alloc>
 	{
 		using base = basic_streambuf<Char, Traits>;
 		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
 
 	public:
 
@@ -145,16 +147,16 @@ namespace io
 			setbufsiz(n);
 		}
 
-		base *setbufsiz(size_type n)
+		auto setbufsiz(size_type n)
 		{
 			buf.resize(fmt::to_size(n));
-			return setbuf(buf.data(), n);
+			return base::setbuf(buf.data(), n);
 		}
 
-		base *setbufsiz(size_type n, size_type m)
+		auto setbufsiz(size_type n, size_type m)
 		{
 			buf.resize(fmt::to_size(n + m));
-			return setbuf(buf.data(), n, m);
+			return base::setbuf(buf.data(), n, m);
 		}
 
 	private:

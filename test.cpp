@@ -23,6 +23,7 @@
 #include <fstream>
 #include <sstream>
 #include <csignal>
+#include <cmath>
 
 #define HELLO_WORLD "Hello, World!"
 #define HELLO_WIDE L"Hello, World!"
@@ -59,17 +60,24 @@ namespace
 	//FAIL(dbg_unequal) { assert(true != true); }
 	
 	//
-	// Checked integer conversions
+	// Checked integer and floating point conversions
 	//
-
+	
 	TEST(int_narrow) { assert('*' == fmt::to_narrow<char>(42)); }
 	TEST(int_unsigned) { assert(42u == fmt::to_unsigned(42)); }
 	TEST(int_signed) { assert(42 == fmt::to_signed(42u)); }
+	TEST(int_format) { assert(42 == fmt::to_long("42")); }
+	TEST(int_oct) { assert(42 == fmt::to_long("52", 8)); }
+	TEST(int_hex) { assert(42 == fmt::to_long("2A", 16)); }
+	TEST(int_fp) { assert(0.42f == fmt::to_float("0.42f")); }
+	TEST(int_nan) { assert(std::isnan(fmt::to_float("nan"))); }
+	TEST(int_inf) { assert(std::isinf(fmt::to_double("inf"))); }
 
 	// negatives
 
 	FAIL(int_loss) { (void) fmt::to_narrow<char>(256); }
 	FAIL(int_loss_sign) { (void) fmt::to_unsigned(-1); }
+	FAIL(int_loss_hex) { (void) fmt::to_long("$"); }
 
 	//
 	// Text formatting routines
@@ -196,7 +204,7 @@ namespace
 
 	auto kv(fmt::string_view key, fmt::string_view value)
 	{
-		return fmt::key_value(key, value) + '\n';
+		return fmt::key(key, value) + fmt::eol;
 	}
 
 	TEST(env_path)
@@ -223,28 +231,28 @@ namespace
 	{
 		sysini()
 		<< "[Fake Environment]\n"
-		<< kv("HOME", env::home)
-		<< kv("USER", env::user)
-		<< kv("ROOT", env::root)
-		<< kv("DOMAIN", env::domain)
-		<< kv("HOST", env::host)
-		<< kv("PWD", env::pwd)
-		<< kv("LANG", env::lang)
-		<< kv("SHELL", env::shell)
-		<< kv("TMPDIR", env::tmpdir)
-		<< kv("ROOTDIR", env::rootdir)
-		<< kv("DESKTOP", env::desktop)
-		<< kv("PROMPT", env::prompt)
+		<< kv("home", env::home)
+		<< kv("user", env::user)
+		<< kv("root", env::root)
+		<< kv("domain", env::domain)
+		<< kv("host", env::host)
+		<< kv("pwd", env::pwd)
+		<< kv("lang", env::lang)
+		<< kv("shell", env::shell)
+		<< kv("tmpdir", env::tmpdir)
+		<< kv("rootdir", env::rootdir)
+		<< kv("desktop", env::desktop)
+		<< kv("prompt", env::prompt)
 		<< std::endl;
 	}
 
 	TEST(env_dir)
 	{
 		sysini()
-		<< "[Common Directores]\n"
-		<< kv("LIB", fmt::dir::join(env::dir::lib))
-		<< kv("SHARE", fmt::dir::join(env::dir::share))
-		<< kv("INCLUDE", fmt::dir::join(env::dir::include))
+		<< "[Development Directores]\n"
+		<< kv("lib", fmt::dir::join(env::dir::lib))
+		<< kv("share", fmt::dir::join(env::dir::share))
+		<< kv("include", fmt::dir::join(env::dir::include))
 		<< std::endl;
 	}
 
@@ -252,10 +260,11 @@ namespace
 	{
 		sysini()
 		<< "[Application Options]\n"
-		<< kv("Name", env::opt::application)
-		<< kv("Program", env::opt::program)
-		<< kv("CommandLine", fmt::join(env::opt::arguments, " "))
-		<< kv("ConfigurationDir", env::opt::configuration)
+		<< kv("name", env::opt::application)
+		<< kv("program", env::opt::program)
+		<< kv("command-line", fmt::join(env::opt::arguments, " "))
+		<< kv("config", env::opt::config)
+		<< kv("cache", env::opt::cache)
 		<< std::endl;
 	}
 
@@ -263,9 +272,9 @@ namespace
 	{
 		sysini()
 		<< "[Desktop]\n"
-		<< kv("XDG_CURRENT_DESKTOP", env::usr::current_desktop)
-		<< kv("XDG_MENU_PREFIX", env::usr::menu_prefix)
-		<< kv("XDG_APPLICATIONS_MENU", env::usr::applications_menu)
+		<< kv("current-desktop", env::usr::current_desktop)
+		<< kv("menu-prefix", env::usr::menu_prefix)
+		<< kv("applications-menu", env::usr::applications_menu)
 		<< std::endl;
 	}
 
@@ -273,12 +282,12 @@ namespace
 	{
 		sysini()
 		<< "[Data Directories]\n"
-		<< kv("XDG_RUNDTIME_DIR", env::usr::runtime_dir)
-		<< kv("XDG_DATA_HOME", env::usr::data_home)
-		<< kv("XDG_CONFIG_HOME", env::usr::config_home)
-		<< kv("XDG_CACHE_HOME", env::usr::cache_home)
-		<< kv("XDG_DATA_DIRS", fmt::path::join(env::usr::data_dirs))
-		<< kv("XDG_CONFIG_DIRS", fmt::path::join(env::usr::config_dirs))
+		<< kv("runtime-dir", env::usr::runtime_dir)
+		<< kv("data-home", env::usr::data_home)
+		<< kv("config-home", env::usr::config_home)
+		<< kv("cache-home", env::usr::cache_home)
+		<< kv("data-dirs", fmt::path::join(env::usr::data_dirs))
+		<< kv("config-dirs", fmt::path::join(env::usr::config_dirs))
 		<< std::endl;
 	}
 
@@ -286,14 +295,14 @@ namespace
 	{
 		sysini()
 		<< "[User Directories]\n"
-		<< kv("XDG_DESKTOP_DIR", env::usr::desktop_dir)
-		<< kv("XDG_DOCUMENTS_DIR", env::usr::documents_dir)
-		<< kv("XDG_DOWNLOAD_DIR", env::usr::download_dir)
-		<< kv("XDG_MUSIC_DIR", env::usr::music_dir)
-		<< kv("XDG_PICTURES_DIR", env::usr::pictures_dir)
-		<< kv("XDG_PUBLICSHARE_DIR", env::usr::publicshare_dir)
-		<< kv("XDG_TEMPLATES_DIR", env::usr::templates_dir)
-		<< kv("XDG_VIDEOS_DIR", env::usr::videos_dir)
+		<< kv("desktop-dir", env::usr::desktop_dir)
+		<< kv("documents-dir", env::usr::documents_dir)
+		<< kv("download-dir", env::usr::download_dir)
+		<< kv("music-dir", env::usr::music_dir)
+		<< kv("pictures-dir", env::usr::pictures_dir)
+		<< kv("publicshare-dir", env::usr::publicshare_dir)
+		<< kv("template-dir", env::usr::templates_dir)
+		<< kv("videos-dir", env::usr::videos_dir)
 		<< std::endl;
 	}
 
@@ -334,8 +343,8 @@ namespace
 	{
 		sysini()
 		<< "[CPU Information]\n"
-		<< kv("Count", fmt::to_string(sys::cpu::count))
-		<< kv("PageSize", fmt::to_string(sys::cpu::page_size))
+		<< kv("count", fmt::to_string(sys::cpu::count))
+		<< kv("page-size", fmt::to_string(sys::cpu::page_size))
 		<< std::endl;
 	}
 

@@ -17,6 +17,16 @@
 #include <sstream>
 #include "str.hpp"
 
+enum : bool
+{
+	success = false, failure = true
+};
+
+constexpr bool fail(bool ok)
+{
+	return success != ok;
+}
+
 namespace fmt
 {
 	struct where

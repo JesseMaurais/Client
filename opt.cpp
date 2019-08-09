@@ -86,82 +86,13 @@ namespace
 
 	} CACHE;
 
-	struct mirror
+	ini::keys& registry()
 	{
-		static constexpr auto defaults = "Defaults";
+		static ini::keys mirror(fmt::join({env::opt::config, ".ini"}));
+		return mirror;
+	}
 
-		mirror()
-		{
-			path = fmt::join(env::opt::config, ".ini");
-			std::ifstream in(path);
-			fmt::string s, sector;
-			while (ini::getline(in, s))
-			{
-				if (ini::section(s))
-				{
-					sector = s;
-					continue;
-				}
-
-				assert(not empty(sector));
-				auto const p = fmt::to_pair(s);
-				put(sector, p);
-			}
-		}
-
-		~mirror()
-		{
-			std::ofstream out(path);
-			for (auto const& sector : cache)
-			{
-				out << "[" << sector.first << "]" << fmt::eol;
-				for (auto const& entry : sector.second)
-				{
-					out << fmt::key(entry) << fmt::eol;
-				}
-				out << fmt::eol;
-			}
-		}
-
-		fmt::string_view get(fmt::string_view_pair p)
-		{
-			auto const it = find(p.first);
-			if (end() != it)
-			{
-				auto const key = it->second.find(p.second);
-				if (it->end() != key)
-				{
-					return key->second;
-				}
-			}
-			return "";
-		}
-
-		fmt::string_view get(fmt::string_view u)
-		{
-			return get({ defaults, u });
-		}
-
-		void put(fmt::string_view u, fmt::string_view_pair p)
-		{
-			const auto [std::ignore, unique] = cache[u].insert(p);
-			if (not unique)
-			{
-				sys::warn(here, "overwrite", p.first, "with", p.second);
-			}
-		}
-
-		void put(fmt::string_view_pair p)
-		{
-			put(defaults, p);
-		}
-
-	private:
-
-		ini::group cache;
-		fmt::string path;
-
-	} registry;
+	constexpr auto defaults = "Defaults";
 }
 
 namespace env::opt
@@ -179,7 +110,7 @@ namespace env::opt
 		assert(empty(args));
 		if (empty(args))
 		{
-			ARGUMENTS.lines.assign(argv, argv + argc);
+			ARGUMENTS.list.assign(argv, argv + argc);
 		}
 	}
 
@@ -188,34 +119,36 @@ namespace env::opt
 		fmt::string_view_span t = env::opt::arguments;
 		for (auto const v : t)
 		{
-			const auto p = fmt::key(v);
+			const auto p = fmt::to_pair(v);
 			if (p.first == u)
 			{
 				return p.second;
 			}
 		}
 		
-		auto const v = sys::env::get(u);
+		auto v = sys::env::get(u);
 		if (empty(v))
 		{
-			v = registry.get(u);
+			ini::entry e { defaults, u };
+			v = registry().get(e);
 		}
 		return v;
 	}
 
-	fmt::string_view get(fmt::string_view_pair p)
-	{
-		return registry.get(p);
-	}
-
 	void put(fmt::string_view u, fmt::string_view v)
 	{
-		registry.put({ u, v });
+		ini::entry e { defaults, u };
+		put(e, v);
+	}
+
+	fmt::string_view get(fmt::string_view_pair p)
+	{
+		return registry().get(p);
 	}
 
 	void put(fmt::string_view_pair p, fmt::string_view v)
 	{
-		registry.put(p.first, { p.second, v });
+		registry().put(p, v);
 	}
 }
 

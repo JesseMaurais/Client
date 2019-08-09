@@ -149,11 +149,6 @@ namespace fmt
 	constexpr auto npos = string::npos;
 	constexpr auto eol = '\n';
 	constexpr auto null = '\0';
-
-	using pair = string_pair;
-	using wpair = wstring_pair;
-	using pair_view = string_view_pair;
-	using wpair_view = wstring_view_pair;
 }
 
 #endif // file

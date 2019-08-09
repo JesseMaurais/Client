@@ -15,6 +15,7 @@ namespace env::opt
 
 	void init(int argc, char** argv);
 	fmt::string_view get(fmt::string_view);
+	void put(fmt::string_view, fmt::string_view);
 	fmt::string_view get(fmt::string_view_pair);
 	void put(fmt::string_view_pair, fmt::string_view);
 };

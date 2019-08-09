@@ -289,7 +289,7 @@ namespace
 
 		fmt::string_view cached() const
 		{
-			static ini::entry data;
+			static ini::group data;
 			if (empty(data))
 			{
 				constexpr auto base = "user-dirs.dirs";

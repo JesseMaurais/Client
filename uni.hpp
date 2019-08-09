@@ -7,7 +7,6 @@
 
 #include <pthread.h>
 #include <dirent.h>
-#include "bool.hpp"
 #include "sys.hpp"
 #include "err.hpp"
 

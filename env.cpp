@@ -27,7 +27,7 @@ namespace sys::env
 
 	bool set(fmt::string_view u, fmt::string_view v)
 	{
-		auto const s = fmt::key_value(u, v);
+		auto const s = fmt::key(u, v);
 		return put(s);
 	}
 

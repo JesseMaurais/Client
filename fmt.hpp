@@ -501,6 +501,11 @@ namespace fmt
 		return lc.join({ u, v }, "=");
 	}
 
+	inline auto key(string_view_pair p)
+	{
+		return key(p.first, p.second);
+	}
+
 	//
 	// Generic string converters
 	//

@@ -8,7 +8,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <tlhelp32.h>
-#include "bool.hpp"
 #include "sys.hpp"
 #include "sig.hpp"
 #include "err.hpp"
