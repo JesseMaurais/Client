@@ -13,11 +13,14 @@ namespace env::opt
 	extern env::view const& config;
 	extern env::view const& cache;
 
+	using view = fmt::string_view;
+	using pair = fmt::string_pair;
+
 	void init(int argc, char** argv);
-	fmt::string_view get(fmt::string_view);
-	void put(fmt::string_view, fmt::string_view);
-	fmt::string_view get(fmt::string_view_pair);
-	void put(fmt::string_view_pair, fmt::string_view);
+	view get(view key);
+	void put(view key, view value);
+	view get(pair key);
+	void put(pair key, view value);
 };
 
 #endif // file

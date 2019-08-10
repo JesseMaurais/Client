@@ -11,9 +11,8 @@ namespace ini
 	using std::istream;
 	using fmt::string;
 	using view = fmt::string_view;
-	using cache = std::vector<string>;
-	using group = std::map<view, view>;
-	using hash = std::map<view, group>;
+	using group = std::map<string, string>;
+	using hash = std::map<string, group>;
 	using entry = group::value_type;
 
 	istream & getline(istream &, string &, char c = '#');
@@ -29,7 +28,6 @@ namespace ini
 	protected:
 
 		hash tree;
-		cache buf;
 	};
 }
 

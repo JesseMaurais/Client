@@ -32,26 +32,20 @@ namespace ini
 
 	keys::keys(istream & in)
 	{
-		view key;
+		string key;
 		string line;
 		while (getline(in, line))
 		{
-			buf.emplace_back(line);
-			const auto& it = buf.back();;
-
-			if (header(it))
+			if (header(line))
 			{
-				key = view(data(it), size(it));
-				bool eof = key == "eof";
-				if (eof) break;
-				else continue;
+				key = move(line);
+				continue;
 			}
 
 			assert(not empty(key));
-
-			auto const p = fmt::to_pair(it);
-			auto const q = std::make_pair(key, p.first);
-			put(q, p.second);
+			auto const p = fmt::to_pair(line);
+			entry const e { key, p.first };
+			put(e, p.second);
 		}
 	}
 

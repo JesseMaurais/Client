@@ -1,4 +1,5 @@
 #include "int.hpp"
+#include "fmt.hpp"
 #include <cstdlib>
 #include <cwchar>
 #include <cmath>
@@ -8,12 +9,13 @@ namespace
 	template <typename T, typename V, typename C>
 	T to_fp(V u, T nan, C* to)
 	{
-		auto begin = data(u);
-		char* end;
-		auto const value = to(begin, &end);
-		if (begin == end)
+		auto ptr = data(u);
+		typename V::value_type* it;
+		auto const value = to(ptr, &it);
+		if (ptr == it)
 		{
-			sys::err(here, u);
+			auto const s = fmt::to_string(u);
+			sys::err(here, s);
 			return nan;
 		}
 		return value;
@@ -26,14 +28,15 @@ namespace
 	}
 
 	template <typename T, typename V, typename C>
-	T to_base(View u, int base, C* to)
+	T to_base(V u, int base, C* to)
 	{
-		auto begin = data(u);
-		char* end;
-		auto const value = to(begin, &end, base);
-		if (begin == end)
+		auto ptr = data(u);
+		typename V::value_type* it;
+		auto const value = to(ptr, &it, base);
+		if (ptr == it)
 		{
-			sys::err(here, u, "in base", base);
+			auto const s = fmt::to_string(u);
+			sys::err(here, s, "in base", base);
 			return inan<T>();
 		}
 		return value;
@@ -44,42 +47,42 @@ namespace fmt
 {
 	long to_long(string_view u, int base)
 	{
-		return to_base(u, base, std::strtol);
+		return to_base<long>(u, base, std::strtol);
 	}
 
 	long to_long(wstring_view u, int base)
 	{
-		return to_base(u, base, std::wcstol);
+		return to_base<long>(u, base, std::wcstol);
 	}
 
 	long long to_llong(string_view u, int base)
 	{
-		return to_base(u, base, std::strtoll);
+		return to_base<long long>(u, base, std::strtoll);
 	}
 
 	long long to_llong(wstring_view u, int base)
 	{
-		return to_base(u, base, std::wcstoll);
+		return to_base<long long>(u, base, std::wcstoll);
 	}
 
 	unsigned long to_ulong(string_view u, int base)
 	{
-		return to_base(u, base, std::strtoul);
+		return to_base<unsigned long>(u, base, std::strtoul);
 	}
 
 	unsigned long to_ulong(wstring_view u, int base)
 	{
-		return to_base(u, base, std::wcstoul);
+		return to_base<unsigned long>(u, base, std::wcstoul);
 	}
 
 	unsigned long long to_ullong(string_view u, int base)
 	{
-		return to_base(u, base, std::strtoull);
+		return to_base<unsigned long long>(u, base, std::strtoull);
 	}
 
 	unsigned long long to_ullong(wstring_view u, int base)
 	{
-		return to_base(u, base, std::wcstoull);
+		return to_base<unsigned long long>(u, base, std::wcstoull);
 	}
 
 	float to_float(string_view u)
@@ -114,7 +117,7 @@ namespace fmt
 
 	long double to_quad(wstring_view u)
 	{
-		auto const man = std::nanl("");
+		auto const nan = std::nanl("");
 		return to_fp(u, nan, std::wcstold);
 	}
 }

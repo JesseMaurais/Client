@@ -100,7 +100,7 @@ namespace
 		return keys;
 	}
 
-	constexpr auto defaults = "D_";
+	constexpr auto def = "D_";
 }
 
 namespace env::opt
@@ -122,41 +122,41 @@ namespace env::opt
 		}
 	}
 
-	fmt::string_view get(fmt::string_view u)
+	view get(view key)
 	{
-		fmt::string_view_span t = env::opt::arguments;
-		for (auto const v : t)
+		fmt::string_view_span args = env::opt::arguments;
+		for (auto const ent : args)
 		{
-			const auto p = fmt::to_pair(v);
-			if (p.first == u)
+			const auto e = fmt::to_pair(ent);
+			if (e.first == key)
 			{
-				return p.second;
+				return e.second;
 			}
 		}
 		
-		auto v = sys::env::get(u);
-		if (empty(v))
+		auto value = sys::env::get(key);
+		if (empty(value))
 		{
-			ini::entry e { defaults, u };
-			v = registry().get(e);
+			ini::entry e { def, key };
+			value = registry().get(e);
 		}
-		return v;
+		return value;
 	}
 
-	void put(fmt::string_view u, fmt::string_view v)
+	void put(view key, view value)
 	{
-		ini::entry e { defaults, u };
-		put(e, v);
+		ini::entry e { def, key };
+		put(e, value);
 	}
 
-	fmt::string_view get(fmt::string_view_pair p)
+	view get(pair key)
 	{
-		return registry().get(p);
+		return registry().get(key);
 	}
 
-	void put(fmt::string_view_pair p, fmt::string_view v)
+	void put(pair key, view value)
 	{
-		registry().put(p, v);
+		registry().put(key, value);
 	}
 }
 

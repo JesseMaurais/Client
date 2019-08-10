@@ -99,7 +99,7 @@ namespace fmt
 
 	float to_float(string_view);
 	float to_float(wstring_view);
-	double to_double(string_view)
+	double to_double(string_view);
 	double to_double(wstring_view);
 	long double to_quad(string_view);
 	long double to_quad(wstring_view);
