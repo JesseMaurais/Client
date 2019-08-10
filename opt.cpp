@@ -100,7 +100,7 @@ namespace
 		return keys;
 	}
 
-	constexpr auto defaults = "Defaults";
+	constexpr auto defaults = "D_";
 }
 
 namespace env::opt
