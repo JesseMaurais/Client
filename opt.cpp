@@ -134,16 +134,16 @@ namespace env::opt
 		auto value = sys::env::get(key);
 		if (empty(value))
 		{
-			ini::entry e { def, key };
+			ini::pair e { def, key };
 			value = registry().get(e);
 		}
 		return value;
 	}
 
-	void put(view key, view value)
+	bool set(view key, view value)
 	{
-		ini::entry e { def, key };
-		put(e, value);
+		ini::pair e { def, key };
+		return set(e, value);
 	}
 
 	view get(pair key)
@@ -151,9 +151,9 @@ namespace env::opt
 		return registry().get(key);
 	}
 
-	void put(pair key, view value)
+	bool set(pair key, view value)
 	{
-		registry().put(key, value);
+		return registry().set(key, value);
 	}
 }
 

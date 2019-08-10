@@ -4,6 +4,7 @@
 #include "usr.hpp"
 #include "fmt.hpp"
 #include "ini.hpp"
+#include "opt.hpp"
 #include "sys.hpp"
 #include "dir.hpp"
 #include "err.hpp"
@@ -289,8 +290,8 @@ namespace
 
 		fmt::string_view cached() const
 		{
-			static ini::group data;
-			if (empty(data))
+			auto u = env::opt::get(var);
+			if (empty(u))
 			{
 				constexpr auto base = "user-dirs.dirs";
 				auto const path = fmt::dir::join(env::usr::config_home, base);
@@ -302,14 +303,13 @@ namespace
 					auto const first = line.find_first_not_of(quote);
 					auto const second = line.find_first_of(quote, first);
 					line = line.substr(first, second);
-					auto pair = fmt::to_pair(line);
-					pair.second = sys::env::value(fmt::to_string(pair.second));
-					data.emplace(pair);
+					auto entry = fmt::to_pair(line);
+					auto value = sys::env::value(entry.second);
+					env::opt::set(entry.first, value);
 				}
+				u = env::opt::get(var);
 			}
-			fmt::string const name(var);
-			auto const it = data.find(name);
-			return data.end() == it ? "" : it->second;
+			return u;
 		}
 	};
 

@@ -53,11 +53,12 @@ namespace sys::env
 		return get(u);
 	}
 
-	fmt::string value(fmt::string s)
+	fmt::string value(fmt::string_view u)
 	{
 		static std::regex x { sys::esc::env };
 		std::smatch m;
 		std::string r;
+		auto s = fmt::to_string(u);
 		while (std::regex_search(s, m, x))
 		{
 			r += m.prefix();

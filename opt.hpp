@@ -18,9 +18,9 @@ namespace env::opt
 
 	void set(int argc, char** argv);
 	view get(view key);
-	void put(view key, view value);
+	bool set(view key, view value);
 	view get(pair key);
-	void put(pair key, view value);
+	bool set(pair key, view value);
 };
 
 #endif // file

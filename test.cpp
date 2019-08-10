@@ -178,7 +178,7 @@ namespace
 		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
 		std::fstream file(path);
 		ini::keys keys(file);
-		ini::entry entry { "NMAKE", "MAKEFLAGS" };
+		ini::pair entry { "NMAKE", "MAKECONFIG" };
 		auto const value = keys.get(entry);
 		assert(not empty(value));
 		assert(fmt::npos != value.find("/D_NMAKE"));
