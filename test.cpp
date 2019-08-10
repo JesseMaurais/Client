@@ -176,11 +176,12 @@ namespace
 	TEST(fmt_ini)
 	{
 		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
-		ini::keys keys(path);
+		std::fstream file(path);
+		ini::keys keys(file);
 		ini::entry entry { "NMAKE", "MAKEFLAGS" };
 		auto const value = keys.get(entry);
 		assert(not empty(value));
-		assert(fmt::npos != value.find("/nologo"));
+		assert(fmt::npos != value.find("/D_NMAKE"));
 	}
 
 	//

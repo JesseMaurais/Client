@@ -1,12 +1,11 @@
 #include "ini.hpp"
 #include "fmt.hpp"
 #include "err.hpp"
-#include <fstream>
 #include <tuple>
 
 namespace ini
 {
-	istream& getline(istream& in, string& s, char c)
+	istream & getline(istream & in, string & s, char c)
 	{
 		while (std::getline(in, s))
 		{
@@ -26,38 +25,44 @@ namespace ini
 		return in;
 	}
 
-	bool header(string_view u)
+	bool header(view u)
 	{
 		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}
 
-	keys::keys(string_view path)
+	keys::keys(istream & in)
 	{
-		auto s = fmt::to_string(path);
-		std::ifstream in(s);
-		string head;
-		while (getline(in, s))
+		view key;
+		string line;
+		while (getline(in, line))
 		{
-			if (header(s))
+			buf.emplace_back(line);
+			const auto& it = buf.back();;
+
+			if (header(it))
 			{
-				head = s.substr(1, s.size() - 2);
-				continue;
+				key = view(data(it), size(it));
+				bool eof = key == "eof";
+				if (eof) break;
+				else continue;
 			}
 
-			assert(not empty(head));
-			auto const p = fmt::to_pair(s);
-			ini::entry e { head, p.first };
-			put(e, p.second);
+			assert(not empty(key));
+
+			auto const p = fmt::to_pair(it);
+			auto const q = std::make_pair(key, p.first);
+			put(q, p.second);
 		}
 	}
 
-	value keys::get(entry e) const
+	view keys::get(entry e) const
 	{
 		auto const node = tree.find(e.first);
 		if (tree.end() != node)
 		{
-			auto const it = node->second.find(e.second);
-			if (node->second.end() != it)
+			auto const& that = node->second;
+			auto it = that.find(e.second);
+			if (that.end() != it)
 			{
 				return it->second;
 			}
@@ -65,22 +70,9 @@ namespace ini
 		return "";
 	}
 
-	void keys::set(entry e, value u)
+	void keys::put(entry e, view u)
 	{
 		(void) tree[e.first].insert_or_assign(e.second, u);
-	}
-
-	void keys::put(entry e, value u)
-	{
-		auto first = store(e.first);
-		auto second = store(e.second);
-		auto v = store(u);
-		set({ first, second }, v);
-	}
-
-	value keys::store(value u)
-	{
-		return *buf.emplace(u).first;
 	}
 }
 

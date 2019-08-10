@@ -86,10 +86,18 @@ namespace
 
 	} CACHE;
 
-	ini::keys& registry()
+	ini::keys open()
 	{
-		static ini::keys mirror(fmt::join({env::opt::config, ".ini"}));
-		return mirror;
+		auto const path = fmt::join({ env::opt::config, ".ini" });
+		std::fstream file(path);
+		ini::keys keys(file);
+		return keys;
+	}
+
+	ini::keys & registry()
+	{
+		static auto keys = open();
+		return keys;
 	}
 
 	constexpr auto defaults = "Defaults";

@@ -3,39 +3,33 @@
 
 #include "str.hpp"
 #include <istream>
-#include <map>
+#include <vector>
 #include <set>
 
 namespace ini
 {
 	using std::istream;
 	using fmt::string;
-	using fmt::string_view;
-	using fmt::string_view_pair;
-	using value = string_view;
-	using cache = std::set<string>;
-	using group = std::map<value, value>;
+	using view = fmt::string_view;
+	using cache = std::vector<string>;
+	using group = std::map<view, view>;
+	using hash = std::map<view, group>;
 	using entry = group::value_type;
-	using order = std::map<value, group>;
 
-	istream& getline(istream& in, string& s, char c = '#');
-	bool header(string_view u);
+	istream & getline(istream &, string &, char c = '#');
+	bool header(view);
 
 	struct keys
 	{
-		keys(string_view path);
-		value get(entry) const;
-		void set(entry, value);
-		void put(entry, value);
+		keys(istream &);
+		view get(entry) const;
+		void set(entry, view);
+		void put(entry, view);
 
 	protected:
 
-		order tree;
+		hash tree;
 		cache buf;
-
-	private:
-
-		value store(value);
 	};
 }
 

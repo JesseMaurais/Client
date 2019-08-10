@@ -14,17 +14,20 @@
 # define assert(x) if (not(x)) sys::warn(here, #x);
 #endif
 
+#include <ostream>
 #include <sstream>
 #include "str.hpp"
 
+// Pessimised boolean
+
 enum : bool
 {
-	success = false, failure = true
+	success = false, failure = true, on = true, off = false
 };
 
 constexpr bool fail(bool ok)
 {
-	return success != ok;
+	return failure == ok;
 }
 
 namespace fmt
@@ -34,7 +37,7 @@ namespace fmt
 		char const *file; int const line; char const *func;
 	};
 
-	std::ostream& operator<<(std::ostream& os, where const& pos);
+	std::ostream & operator<<(std::ostream &, where const &);
 
 	template <typename Arg, typename... Args>
 	auto err(Arg arg, Args... args)
@@ -57,8 +60,9 @@ namespace sys
 
 	namespace impl
 	{
-		void warn(fmt::string_view);
-		void err(fmt::string_view);
+		using fmt::string_view;
+		void warn(string_view);
+		void err(string_view);
 	}
 
 	template <typename... Args>

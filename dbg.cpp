@@ -3,7 +3,7 @@
 
 #include "dbg.hpp"
 #include "esc.hpp"
-#include "ios.hpp"
+#include "sio.hpp"
 #include "str.hpp"
 
 #include <stdexcept>
@@ -42,17 +42,17 @@ namespace dbg
 
 	void fail::run()
 	{
-		io::eat_streambuf eat(std::cerr);
+		sio::eat err;
 		try
 		{
 			die();
 		}
 		catch (std::exception const& except)
 		{
-			std::cerr << except.what();
+			err << except.what();
 		}
 
-		auto const s = eat.str();
+		auto const s = err.str();
 		if (empty(s))
 		{
 			throw std::runtime_error("Failing test succeeded");
@@ -67,18 +67,18 @@ namespace dbg
 		}
 
 		int nerr = 0;
+		auto & out = std::cout;
 		std::regex pattern(expression);
 		for (auto const& [that, name] : registry())
 		{
 			if (std::regex_match(name, pattern)) try
 			{
 				string const indent(max_size - size(name), ' ');
-				std::cout << faint << name << intense_off << indent;
-				io::eat_streambuf eat(std::cerr);
+				out << faint << name << intense_off << indent;
 
+				::sio::eat err;
 				that->run();
-
-				auto s = eat.str();
+				auto s = err.str();
 				if (not empty(s))
 				{
 					auto pos = npos;
@@ -88,19 +88,19 @@ namespace dbg
 					}
 					throw std::runtime_error(s);
 				}
-				std::cout << fg_green << "\tok" << fg_off << eol;
+				out << fg_green << "\tok" << fg_off << eol;
 			}
 			catch (std::exception const& except)
 			{
 				++ nerr;
 				auto const what = except.what();
-				std::cout << fg_red << '\t' << what << fg_off << eol;
+				out << fg_red << '\t' << what << fg_off << eol;
 			}
 		}
 
 		auto const fg_color = nerr ? fg_yellow : fg_blue;
-		std::cout << fg_color << nerr << " errors detected." << reset << eol;
-		std::cout << std::endl;
+		out << fg_color << nerr << " errors detected." << reset << eol;
+		out << std::endl;
 		return nerr;
 	}
 }
