@@ -5,8 +5,9 @@
 #include "fmt.hpp"
 #include "err.hpp"
 #include "sys.hpp"
+#include <algorithm>
+#include <iterator>
 #include <fstream>
-#include <tuple>
 
 namespace
 {
@@ -112,14 +113,10 @@ namespace env::opt
 	env::view const& cache = CACHE;
 	fmt::string_view application;
 
-	void init(int argc, char** argv)
+	void set(int argc, char** argv)
 	{
-		fmt::string_view_span args = ARGUMENTS;
-		assert(empty(args));
-		if (empty(args))
-		{
-			ARGUMENTS.list.assign(argv, argv + argc);
-		}
+		auto it = std::back_inserter(ARGUMENTS.list);
+		copy(argv, argv + argc, it);
 	}
 
 	view get(view key)

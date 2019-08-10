@@ -16,7 +16,7 @@ namespace env::opt
 	using view = fmt::string_view;
 	using pair = fmt::string_pair;
 
-	void init(int argc, char** argv);
+	void set(int argc, char** argv);
 	view get(view key);
 	void put(view key, view value);
 	view get(pair key);
