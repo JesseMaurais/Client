@@ -5,11 +5,11 @@
 #include "err.hpp"
 #include "fmt.hpp"
 #include "usr.hpp"
+#include "opt.hpp"
 #include "sys.hpp"
 #include "os.hpp"
 #include <regex>
 #include <stack>
-#include <list>
 
 #ifdef _WIN32
 # include "win.hpp"
@@ -47,25 +47,16 @@ namespace
 {
 	struct : env::view
 	{
+		static auto directory()
+		{
+			return fmt::dir::join(env::usr::runtime_dir, env::opt::identity);
+		}
+		
 		operator fmt::string_view() const final
 		{
-			constexpr sys::mode_t um = S_IRUSR | S_IWUSR | S_IXUSR;
-			fmt::string_view u = env::usr::runtime_dir;
-			const auto s = u.data();
-			
-			if (sys::fail(sys::access(s, F_OK)))
-			{
-				if (sys::fail(sys::mkdir(s, um)))
-				{
-					sys::err(here, "mkdir", u);
-				}
-			}
-			else
-			if (sys::fail(sys::chmod(s, um)))
-			{
-				sys::err(here, "chmod", u);
-			}
-			return u;
+			static auto const run =	directory();
+			static env::dir::tmp tmp(run);
+			return run;
 		}
 
 	} RUN;
@@ -216,7 +207,7 @@ namespace env::dir
 
 			buf = fmt::dir::join(folders);
 			auto const c = data(buf);
-			if (sys::fail(sys::mkdir(c, 0777)))
+			if (sys::fail(sys::mkdir(c, S_IRWXU)))
 			{
 				sys::err(here, "mkdir", c);
 				stem = "";
