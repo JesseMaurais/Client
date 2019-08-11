@@ -24,8 +24,10 @@ namespace env::opt
 	view get(pair key);
 	bool set(pair key, view value);
 
-	std::istream & read(std::istream &);
-	std::ostream & write(std::ostream &);
+	using std::istream;
+	using std::ostream;
+	istream & get(istream &);
+	ostream & set(ostream &);
 };
 
 #endif // file

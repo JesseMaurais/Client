@@ -157,12 +157,12 @@ namespace env::opt
 		return registry().set(key, value);
 	}
 
-	std::istream & read(std::istream & in)
+	istream & get(istream & in)
 	{
 		return in >> registry();
 	}
 
-	std::ostream & write(std::ostream & out)
+	ostream & set(ostream & out)
 	{
 		return out << registry();
 	}

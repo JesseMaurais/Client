@@ -279,7 +279,7 @@ namespace
 		<< kv("command-line", fmt::join(env::opt::arguments, " "))
 		<< kv("config", env::opt::config)
 		<< kv("cache", env::opt::cache)
-		<< env::opt::write
+		<< env::opt::set
 		<< std::endl;
 	}
 

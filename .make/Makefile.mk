@@ -21,21 +21,16 @@ endif
 
 
 STD=c++17
-SRC=test.cpp cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp ini.cpp int.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
 PCH=pre.hpp
-BIN=test
+SRC=cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp ini.cpp int.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
+BIN=test.cpp docy.cpp
 
 .SUFFIXES: .cpp .hpp .o .d .gch .obj .pdb .pch .lib .exp .ilk .log .i .db
-
-
-
-
-
-
-
+# 46 ".make/Makefile.cc"
 CFLAGS += -D_POSIX_C_SOURCE
 LDFLAGS += -ldl -lrt -lpthread
-EXE=$(BIN)
+EXE=$(BIN:.cpp=)
+
 
 
 
@@ -43,7 +38,7 @@ EXE=$(BIN)
 all: $(EXE)
 
 clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.i
-# 74 ".make/Makefile.cc"
+# 78 ".make/Makefile.cc"
 CFLAGS += -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD
 ifndef NDEBUG
 CFLAGS += -g
@@ -51,8 +46,10 @@ endif
 LDFLAGS += -rdynamic
 
 OBJ=$(SRC:.cpp=.o)
+DEP=$(PCH).gch $(OBJ)
 
-$(EXE): $(PCH).gch $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
+test: $(DEP) test.o; $(CXX) $(LDFLAGS) $(OBJ) test.o -o $@
+docy: $(DEP) docy.o; $(CXX) $(LDFLAGS) $(OBJ) docy.o -o $@
 .cpp.o: ; $(CXX) $(CFLAGS) -include $(PCH) -c $<
 $(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 

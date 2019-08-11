@@ -30,9 +30,9 @@ endif // SHELL
 // Project Variables
 
 STD=c++17
-SRC=test.cpp cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp ini.cpp int.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
 PCH=pre.hpp
-BIN=test
+SRC=cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp ini.cpp int.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
+BIN=test.cpp docy.cpp
 
 .SUFFIXES: .cpp .hpp .o .d .gch .obj .pdb .pch .lib .exp .ilk .log .i .db
 
@@ -40,11 +40,13 @@ BIN=test
 
 #ifdef _WIN32
 add(CFLAGS, -D_WIN32)
-EXE=$(BIN).exe
+EXE=$(BIN:.cpp=.exe)
+#define exe(x) x.exe
 #else
 add(CFLAGS, -D_POSIX_C_SOURCE)
 add(LDFLAGS, -ldl -lrt -lpthread)
-EXE=$(BIN)
+EXE=$(BIN:.cpp=)
+#define exe(x) x
 #endif
 
 // Make Targets
@@ -64,8 +66,10 @@ endif
 add(LDFLAGS, -nologo)
 
 OBJ=$(SRC:.cpp=.obj)
+DEP=$(PCH:.hpp=.pch) $(OBJ)
 
-$(EXE): $(PCH:.hpp=.pch) $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -Fe$@
+exe(test): $(DEP) test.obj; $(CXX) $(LDFLAGS) $(OBJ) test.obj -Fe$@
+exe(docy): $(DEP) docy.obj; $(CXX) $(LDFLAGS) $(OBJ) docy.obj -Fe$@
 .cpp.obj: ; $(CXX) $(CFLAGS) /Yu$(PCH) /FI$(PCH) -c $<
 .hpp.pch: ; $(CXX) $(CFLAGS) /Yc$(PCH) /FI$(PCH) $(SRC)
 
@@ -78,8 +82,10 @@ endif
 add(LDFLAGS, -rdynamic)
 
 OBJ=$(SRC:.cpp=.o)
+DEP=$(PCH).gch $(OBJ)
 
-$(EXE): $(PCH).gch $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
+exe(test): $(DEP) test.o; $(CXX) $(LDFLAGS) $(OBJ) test.o -o $@
+exe(docy): $(DEP) docy.o; $(CXX) $(LDFLAGS) $(OBJ) docy.o -o $@
 .cpp.o: ; $(CXX) $(CFLAGS) -include $(PCH) -c $<
 $(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 
