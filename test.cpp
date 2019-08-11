@@ -241,12 +241,25 @@ namespace
 		assert(var == val);
 	}
 
+	TEST(env_dir_enum)
+	{
+		fmt::string_vector list;
+		env::dir::find(env::pwd, [&](auto path)
+		{
+			list.emplace_back(path);
+			return success;
+		});
+		assert(find(begin(list), end(list), __FILE__) != end(list));
+	}
+
 	TEST(env_dir_make)
 	{
 		auto const d = fmt::dir::join(env::tmpdir, "my", "test", "dir");
-		assert(not empty(env::dir::make(d)));
+		auto const stem = env::dir::make(d);
+		assert(not empty(stem));
 		assert(not env::dir::fail(d));
-		assert(env::dir::remove(d));
+		assert(not env::dir::fail(stem));
+		assert(not fail(env::dir::remove(stem)));
 		{
 			env::dir::tmp tmp(d);
 			assert(not env::dir::fail(d));
@@ -273,7 +286,7 @@ namespace
 		<< std::endl;
 	}
 
-	TEST(env_dir)
+	TEST(env_dev)
 	{
 		sysini()
 		<< "[Development Directores]\n"

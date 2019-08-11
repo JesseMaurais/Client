@@ -231,34 +231,34 @@ namespace env::dir
 	{
 		std::deque<fmt::string> deque;
 
-		auto isdir = [&](fmt::string_view u)
-		{
-			auto const c = data(u);
-			class sys::stat st(c);
-			if (sys::fail(st))
-			{
-				sys::err(here, "stat", u);
-			}
-			else
-			if (S_ISDIR(st.st_mode))
-			{
-				if (u != "." and u != "..")
-				{
-					deque.emplace_back(u);
-				}
-			}
-			else
-			if (sys::fail(sys::unlink(c)))
-			{
-				sys::err(here, "unlink", u);
-			}
-			return success;
-		};
-
 		deque.emplace_back(dir);
-		for (auto const d : deque)
+		for (auto it = deque.begin(); it != deque.end(); ++it)
 		{
-			(void) find(d, isdir);
+			auto const d = *it;
+			(void) find(d, [&](fmt::string_view u)
+			{
+				auto const path = fmt::dir::join(d, u);
+				auto const c = data(path);
+				class sys::stat st(c);
+				if (sys::fail(st))
+				{
+					sys::err(here, "stat", c);
+				}
+				else
+				if (S_ISDIR(st.st_mode))
+				{
+					if (u != "." and u != "..")
+					{
+						deque.emplace_back(move(path));
+					}
+				}
+				else
+				if (sys::fail(sys::unlink(c)))
+				{
+					sys::err(here, "unlink", c);
+				}
+				return success;
+			});
 		}
 
 		bool ok = success;
