@@ -3,6 +3,7 @@ check/*
 sys.ini
 tags
 test
+docy
 *.tmp
 *.swp
 *.exe
