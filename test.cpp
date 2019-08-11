@@ -218,7 +218,7 @@ namespace
 
 	auto kv(fmt::string_view key, fmt::string_view value)
 	{
-		return fmt::key(key, value) + fmt::eol;
+		return fmt::entry(key, value) + fmt::eol;
 	}
 
 	TEST(env_path)
@@ -239,6 +239,19 @@ namespace
 
 		var = sys::env::get("PATH");
 		assert(var == val);
+	}
+
+	TEST(env_dir_make)
+	{
+		auto const d = fmt::dir::join(env::tmpdir, "my", "test", "dir");
+		assert(not empty(env::dir::make(d)));
+		assert(not env::dir::fail(d));
+		assert(env::dir::remove(d));
+		{
+			env::dir::tmp tmp(d);
+			assert(not env::dir::fail(d));
+		}
+		assert(env::dir::fail(d));
 	}
 
 	TEST(env_vars)
@@ -279,7 +292,7 @@ namespace
 		<< kv("command-line", fmt::join(env::opt::arguments, " "))
 		<< kv("config", env::opt::config)
 		<< kv("cache", env::opt::cache)
-		<< env::opt::set
+		<< env::opt::put
 		<< std::endl;
 	}
 

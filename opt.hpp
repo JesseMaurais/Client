@@ -27,7 +27,7 @@ namespace env::opt
 	using std::istream;
 	using std::ostream;
 	istream & get(istream &);
-	ostream & set(ostream &);
+	ostream & put(ostream &);
 };
 
 #endif // file

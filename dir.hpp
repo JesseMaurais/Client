@@ -51,12 +51,35 @@ namespace fmt::dir
 
 namespace env::dir
 {
-	inline env::view const& tmp = ::env::tmpdir;
 	extern env::view const& run;
 	inline env::list const& bin = ::env::paths;
 	extern env::list const& lib;
 	extern env::list const& share;
 	extern env::list const& include;
+
+	bool fail(fmt::string_view path);
+	fmt::string_view make(fmt::string_view path);
+	bool remove(fmt::string_view path);
+
+	struct tmp
+	{
+		tmp(fmt::string_view path)
+		{
+			stem = env::dir::make(path);
+		}
+
+		~tmp()
+		{
+			if (not empty(stem))
+			{
+				env::dir::remove(stem);
+			}
+		}
+
+	private:
+
+		fmt::string_view stem;
+	};
 
 	using entry = predicate<fmt::string_view>;
 	constexpr auto stop = falsity<fmt::string_view>;

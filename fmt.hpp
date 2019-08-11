@@ -496,14 +496,14 @@ namespace fmt
 		return lc.to_pair(u, v);
 	}
 
-	inline auto key(string_view u, string_view v)
+	inline auto entry(string_view u, string_view v)
 	{
 		return lc.join({ u, v }, "=");
 	}
 
-	inline auto key(string_view_pair p)
+	inline auto entry(string_view_pair p)
 	{
-		return key(p.first, p.second);
+		return entry(p.first, p.second);
 	}
 
 	//

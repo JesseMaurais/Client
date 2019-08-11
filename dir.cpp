@@ -8,6 +8,8 @@
 #include "sys.hpp"
 #include "os.hpp"
 #include <regex>
+#include <stack>
+#include <list>
 
 #ifdef _WIN32
 # include "win.hpp"
@@ -173,6 +175,105 @@ namespace env::dir
 			return false;
 		}
 		#endif
+	}
+
+	bool fail(fmt::string_view path)
+	{
+		if (not fmt::terminated(path))
+		{
+			auto const s = fmt::to_string(path);
+			return env::dir::fail(s);
+		}
+
+		auto const c = data(path);
+		int const ok = sys::access(c, F_OK);
+		return sys::fail(ok);
+	}
+
+	fmt::string_view make(fmt::string_view path)
+	{
+		std::stack<fmt::string_view> stack;
+		fmt::string buf;
+
+		auto folders = fmt::dir::split(path);
+		auto stem = path;
+
+		while (env::dir::fail(stem))
+		{
+			stack.push(folders.back());
+			folders.pop_back();
+
+			buf = fmt::dir::join(folders);
+			stem = buf;
+		}
+		
+		stem = path.substr(0, path.find(sys::sep::dir, size(stem) + 1));
+
+		while (not empty(stack))
+		{
+			folders.push_back(stack.top());
+			stack.pop();
+
+			buf = fmt::dir::join(folders);
+			auto const c = data(buf);
+			if (sys::fail(sys::mkdir(c, 0777)))
+			{
+				sys::err(here, "mkdir", c);
+				stem = "";
+				break;
+			}
+		}
+
+		return stem;
+	}
+
+	bool remove(fmt::string_view dir)
+	{
+		std::deque<fmt::string> deque;
+
+		auto isdir = [&](fmt::string_view u)
+		{
+			auto const c = data(u);
+			class sys::stat st(c);
+			if (sys::fail(st))
+			{
+				sys::err(here, "stat", u);
+			}
+			else
+			if (S_ISDIR(st.st_mode))
+			{
+				if (u != "." and u != "..")
+				{
+					deque.emplace_back(u);
+				}
+			}
+			else
+			if (sys::fail(sys::unlink(c)))
+			{
+				sys::err(here, "unlink", u);
+			}
+			return success;
+		};
+
+		deque.emplace_back(dir);
+		for (auto const d : deque)
+		{
+			(void) find(d, isdir);
+		}
+
+		bool ok = success;
+		while (not empty(deque))
+		{
+			dir = deque.back();
+			auto const c = data(dir);
+			if (sys::fail(sys::rmdir(c)))
+			{
+				sys::err(here, "rmdir", c);
+				ok = failure;
+			}
+			deque.pop_back();
+		}
+		return ok;
 	}
 
 	entry mode(sys::file::mode bit)

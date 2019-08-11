@@ -11,6 +11,11 @@
 
 namespace
 {
+	auto home_config()
+	{
+		return fmt::dir::join(env::usr::config_home, env::opt::identity);
+	}
+
 	struct : env::list
 	{
 		fmt::string_view_vector list;
@@ -66,7 +71,20 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				s = fmt::dir::join(env::usr::config_home, env::opt::identity);
+				s = home_config();
+				if (env::dir::fail(s))
+				{
+					fmt::string_view_span dirs = env::usr::config_dirs;
+					for (auto const d : dirs)
+					{
+						s = fmt::dir::join(d, env::opt::identity);
+						if (not env::dir::fail(s))
+						{
+							return s;
+						}
+					}
+					s = home_config();
+				}
 			}
 			return s;
 		}
@@ -162,7 +180,7 @@ namespace env::opt
 		return in >> registry();
 	}
 
-	ostream & set(ostream & out)
+	ostream & put(ostream & out)
 	{
 		return out << registry();
 	}

@@ -33,6 +33,7 @@ STD=c++17
 PCH=pre.hpp
 SRC=cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp ini.cpp int.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
 BIN=test.cpp docy.cpp
+ALL=$(SRC) $(BIN)
 
 .SUFFIXES: .cpp .hpp .o .d .gch .obj .pdb .pch .lib .exp .ilk .log .i .db
 
@@ -90,7 +91,7 @@ exe(docy): $(DEP) docy.o; $(CXX) $(LDFLAGS) $(OBJ) docy.o -o $@
 $(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 
 # ifndef _NMAKE
--include $(SRC:.cpp=.d)
+-include $(ALL:.cpp=.d)
 # endif
 #else
 # error "Cannot determine your compiler."

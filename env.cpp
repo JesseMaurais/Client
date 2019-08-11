@@ -12,7 +12,11 @@ namespace sys::env
 {
 	fmt::string_view get(fmt::string_view u)
 	{
-		assert(fmt::terminated(u));
+		if (not fmt::terminated(u))
+		{
+			auto const s = fmt::to_string(u);
+			return get(s);
+		}
 		auto const var = u.data();
 		auto const val = std::getenv(var);
 		return val ? val : "";
@@ -20,6 +24,11 @@ namespace sys::env
 
 	bool put(fmt::string_view u)
 	{
+		if (not fmt::terminated(u))
+		{
+			auto const s = fmt::to_string(u);
+			return put(s);
+		}
 		auto buf = fmt::to_string(u);
 		auto const p = data(buf);
 		return 0 != sys::putenv(p);
@@ -27,7 +36,7 @@ namespace sys::env
 
 	bool set(fmt::string_view u, fmt::string_view v)
 	{
-		auto const s = fmt::key(u, v);
+		auto const s = fmt::entry(u, v);
 		return put(s);
 	}
 
