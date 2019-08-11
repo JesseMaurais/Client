@@ -14,7 +14,7 @@ namespace env::opt
 	extern env::view const& cache;
 
 	using view = fmt::string_view;
-	using pair = fmt::string_pair;
+	using pair = fmt::string_view_pair;
 
 	void set(int argc, char** argv);
 	view get(view key);

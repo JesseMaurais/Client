@@ -1,6 +1,7 @@
 #ifndef int_hpp
 #define int_hpp
 
+#include <cmath>
 #include <limits>
 #include <type_traits>
 #include "err.hpp"
@@ -103,6 +104,12 @@ namespace fmt
 	double to_double(wstring_view);
 	long double to_quad(string_view);
 	long double to_quad(wstring_view);
+
+	template <typename T>
+	inline bool fail(T t)
+	{
+		return std::isnan(t);
+	}
 }
 
 #endif // file

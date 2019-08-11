@@ -44,7 +44,7 @@ namespace ini
 			assert(not empty(key));
 			auto const p = fmt::to_pair(line);
 			pair const e { key, p.first };
-			if (set(e, p.second))
+			if (put(e, p.second))
 			{
 				sys::warn(here, "overwite", key, "with", p.second);
 			}
@@ -64,6 +64,19 @@ namespace ini
 	bool keys::set(pair key, view value)
 	{
 		return not map.insert_or_assign(key, value).second;
+	}
+
+	bool keys::put(pair key, view value)
+	{
+		key.first = store(key.first);
+		key.second = store(key.second);
+		value = store(value);
+		return set(key, value);
+	}
+
+	view keys::store(view u)
+	{
+		return *buf.emplace(u).first;
 	}
 }
 
