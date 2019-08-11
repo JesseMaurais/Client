@@ -87,21 +87,22 @@ namespace
 
 	} CACHE;
 
-	ini::keys open()
+	ini open()
 	{
+		ini keys;
 		auto const path = fmt::join({ env::opt::config, ".ini" });
 		std::fstream file(path);
-		ini::keys keys(file);
+		file >> keys;
 		return keys;
 	}
 
-	ini::keys & registry()
+	ini & registry()
 	{
 		static auto keys = open();
 		return keys;
 	}
 
-	constexpr auto def = "D_";
+	constexpr auto def = "Defaults";
 }
 
 namespace env::opt
@@ -115,7 +116,7 @@ namespace env::opt
 
 	void set(int argc, char** argv)
 	{
-		auto it = std::back_inserter(ARGUMENTS.list);
+		auto it = back_inserter(ARGUMENTS.list);
 		copy(argv, argv + argc, it);
 	}
 
@@ -154,6 +155,16 @@ namespace env::opt
 	bool set(pair key, view value)
 	{
 		return registry().set(key, value);
+	}
+
+	std::istream & read(std::istream & in)
+	{
+		return in >> registry();
+	}
+
+	std::ostream & write(std::ostream & out)
+	{
+		return out << registry();
 	}
 }
 

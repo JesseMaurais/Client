@@ -2,81 +2,106 @@
 #include "fmt.hpp"
 #include "err.hpp"
 
-namespace ini
-{
-	istream & getline(istream & in, string & s, char c)
-	{
-		while (std::getline(in, s))
-		{
-			auto const it = fmt::skip(begin(s), end(s));
-			if (it != end(s) and c != *it)
-			{
-				auto const t = s.find(c);
-				s = s.substr(0, t);
-				auto const u = fmt::trim(s);
-				if (not empty(u))
-				{
-					s = fmt::to_string(u);
-					break;
-				}
-			}
-		}
-		return in;
-	}
+using view = ini::view;
+using pair = ini::pair;
 
+namespace
+{
 	bool header(view u)
 	{
 		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}
+}
 
-	keys::keys(istream & in)
+std::istream & ini::getline(std::istream & in, std::string & s)
+{
+	constexpr char c = '#';
+	while (std::getline(in, s))
 	{
-		string key;
-		string line;
-		while (getline(in, line))
+		auto const it = fmt::skip(begin(s), end(s));
+		if (it != end(s) and c != *it)
 		{
-			if (header(line))
+			auto const t = s.find(c);
+			s = s.substr(0, t);
+			auto const u = fmt::trim(s);
+			if (not empty(u))
 			{
-				key = line.substr(1, size(line) - 2);
-				continue;
-			}
-
-			assert(not empty(key));
-			auto const p = fmt::to_pair(line);
-			pair const e { key, p.first };
-			if (put(e, p.second))
-			{
-				sys::warn(here, "overwite", key, "with", p.second);
+				s = fmt::to_string(u);
+				break;
 			}
 		}
 	}
+	return in;
+}
 
-	view keys::get(pair key) const
+std::istream & operator>>(std::istream & in, ini & keys)
+{
+	fmt::string key;
+	fmt::string line;
+	while (ini::getline(in, line))
 	{
-		auto const it = map.find(key);
-		if (map.end() != it)
+		if (header(line))
 		{
-			return it->second;
+			key = line.substr(1, size(line) - 2);
+			continue;
 		}
-		return "";
-	}
 
-	bool keys::set(pair key, view value)
-	{
-		return not map.insert_or_assign(key, value).second;
-	}
+		if (empty(key))
+		{
+			sys::warn(here, "no key");
+			break;
+		}
 
-	bool keys::put(pair key, view value)
-	{
-		key.first = store(key.first);
-		key.second = store(key.second);
-		value = store(value);
-		return set(key, value);
+		auto const p = fmt::to_pair(line);
+		pair const e { key, p.first };
+		if (keys.put(e, p.second))
+		{
+			sys::warn(here, "overwrite", key, "with", p.second);
+		}
 	}
+	return in;
+}
 
-	view keys::store(view u)
+std::ostream & operator<<(std::ostream & out, ini & keys)
+{
+	view key;
+	for (auto const i : keys.map)
 	{
-		return *buf.emplace(u).first;
+		if (i.first.first != key)
+		{
+			key = i.first.first;
+			out << '[' << key << ']' << fmt::eol;
+		}
+		out << i.first.second << "=" << i.second;
 	}
+	return out;
+}
+
+view ini::get(pair key) const
+{
+	auto const it = map.find(key);
+	if (map.end() != it)
+	{
+		return it->second;
+	}
+	return "";
+}
+
+bool ini::set(pair key, view value)
+{
+	return not map.insert_or_assign(key, value).second;
+}
+
+bool ini::put(pair key, view value)
+{
+	key.first = store(key.first);
+	key.second = store(key.second);
+	value = store(value);
+	return set(key, value);
+}
+
+view ini::store(view u)
+{
+	return *buf.emplace(u).first;
 }
 

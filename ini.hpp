@@ -3,32 +3,29 @@
 
 #include "str.hpp"
 #include <istream>
+#include <ostream>
 #include <set>
 #include <map>
 
-namespace ini
+struct ini
 {
-	using std::istream;
-	using fmt::string;
+	using string = fmt::string;
 	using view = fmt::string_view;
 	using pair = fmt::string_view_pair;
 
-	istream & getline(istream &, string &, char c = '#');
-	bool header(view);
+	static std::istream & getline(std::istream &, string &);
+	friend std::istream & operator>>(std::istream &, ini &);
+	friend std::ostream & operator<<(std::ostream &, ini &);
 
-	struct keys
-	{
-		keys(istream &);
-		view get(pair key) const;
-		bool set(pair key, view value);
-		bool put(pair key, view value);
+	view get(pair key) const;
+	bool set(pair key, view value);
+	bool put(pair key, view value);
 
-	private:
+private:
 
-		std::map<pair, view> map;
-		std::set<string> buf;
-		view store(view);
-	};
-}
+	std::map<pair, view> map;
+	std::set<string> buf;
+	view store(view);
+};
 
 #endif // file

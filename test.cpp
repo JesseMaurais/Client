@@ -177,7 +177,9 @@ namespace
 	{
 		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
 		std::fstream file(path);
-		ini::keys keys(file);
+		ini keys;
+		file >> keys;
+
 		ini::pair entry { "NMAKE", "MAKECONFIG" };
 		auto const value = keys.get(entry);
 		assert(not empty(value));
@@ -277,6 +279,7 @@ namespace
 		<< kv("command-line", fmt::join(env::opt::arguments, " "))
 		<< kv("config", env::opt::config)
 		<< kv("cache", env::opt::cache)
+		<< env::opt::write
 		<< std::endl;
 	}
 

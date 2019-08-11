@@ -3,6 +3,8 @@
 
 #include "env.hpp"
 #include "str.hpp"
+#include <istream>
+#include <ostream>
 
 namespace env::opt
 {
@@ -21,6 +23,9 @@ namespace env::opt
 	bool set(view key, view value);
 	view get(pair key);
 	bool set(pair key, view value);
+
+	std::istream & read(std::istream &);
+	std::ostream & write(std::ostream &);
 };
 
 #endif // file
