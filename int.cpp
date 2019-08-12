@@ -2,40 +2,38 @@
 #include "fmt.hpp"
 #include <charconv>
 #include <cstdlib>
-#include <cwchar>
 #include <cmath>
 
 namespace
 {
-	template <typename T, typename V, typename C>
-	T to_fp(V u, T nan, C* to)
+	template <typename T, typename C>
+	T to_fp(fmt::string_view u, T nan, C* to)
 	{
+		char* it;
 		auto ptr = data(u);
-		typename V::value_type* it;
 		auto const value = to(ptr, &it);
 		if (ptr == it)
 		{
-			auto const s = fmt::to_string(u);
-			sys::err(here, s);
+			sys::err(here, u);
 			return nan;
 		}
 		return value;
 	}
 
-	template <typename T>
-	const auto inan = static_cast<T>(std::nan(""));
+	std::errc const noerr { };
 
-	template <typename T, typename V, typename C>
-	T to_base(V u, int base, C* to)
+	template <typename T>
+	T to_base(fmt::string_view u, int base)
 	{
-		auto ptr = data(u);
-		typename V::value_type* it;
-		auto const value = to(ptr, &it, base);
-		if (ptr == it)
+		auto value = static_cast<T>(std::nan(""));
+		auto begin = data(u);
+		auto end = begin + size(u);
+		auto code = std::from_chars(begin, end, value, base);
+		if (noerr != code.ec)
 		{
-			auto const s = fmt::to_string(u);
-			sys::err(here, s, "in base", base);
-			return inan<T>;
+			auto const ec = std::make_error_condition(code.ec);
+			auto const s = ec.message();
+			sys::warn(here, s);
 		}
 		return value;
 	}
@@ -50,10 +48,16 @@ namespace
 			auto begin = data(s);
 			auto end = begin + size(s);
 			code = std::to_chars(begin, end, value, base);
-			if (std::errc::value_too_large == code.ec)
+			if (noerr != code.ec)
 			{
-				s.resize(2*size(s), '\0');
-				continue;
+				if (std::errc::value_too_large == code.ec)
+				{
+					s.resize(2*size(s), '\0');
+					continue;
+				}
+				auto const ec = std::make_error_condition(code.ec);
+				auto const s = ec.message();
+				sys::warn(here, s);
 			}
 			s.resize(code.ptr - begin);
 		}
@@ -126,42 +130,22 @@ namespace fmt
 
 	long to_long(string_view u, int base)
 	{
-		return to_base<long>(u, base, std::strtol);
-	}
-
-	long to_long(wstring_view u, int base)
-	{
-		return to_base<long>(u, base, std::wcstol);
+		return to_base<long>(u, base);
 	}
 
 	long long to_llong(string_view u, int base)
 	{
-		return to_base<long long>(u, base, std::strtoll);
-	}
-
-	long long to_llong(wstring_view u, int base)
-	{
-		return to_base<long long>(u, base, std::wcstoll);
+		return to_base<long long>(u, base);
 	}
 
 	unsigned long to_ulong(string_view u, int base)
 	{
-		return to_base<unsigned long>(u, base, std::strtoul);
-	}
-
-	unsigned long to_ulong(wstring_view u, int base)
-	{
-		return to_base<unsigned long>(u, base, std::wcstoul);
+		return to_base<unsigned long>(u, base);
 	}
 
 	unsigned long long to_ullong(string_view u, int base)
 	{
-		return to_base<unsigned long long>(u, base, std::strtoull);
-	}
-
-	unsigned long long to_ullong(wstring_view u, int base)
-	{
-		return to_base<unsigned long long>(u, base, std::wcstoull);
+		return to_base<unsigned long long>(u, base);
 	}
 
 	float to_float(string_view u)
@@ -170,34 +154,16 @@ namespace fmt
 		return to_fp(u, nan, std::strtof);
 	}
 
-	float to_float(wstring_view w)
-	{
-		auto const nan = std::nanf("");
-		return to_fp(w, nan, std::wcstof);
-	}
-
 	double to_double(string_view u)
 	{
 		auto const nan = std::nan("");
 		return to_fp(u, nan, std::strtod);
 	}
 
-	double to_double(wstring_view w)
-	{
-		auto const nan = std::nan("");
-		return to_fp(w, nan, std::wcstod);
-	}
-
 	long double to_quad(string_view u)
 	{
 		auto const nan = std::nanl("");
 		return to_fp(u, nan, std::strtold);
-	}
-
-	long double to_quad(wstring_view u)
-	{
-		auto const nan = std::nanl("");
-		return to_fp(u, nan, std::wcstold);
 	}
 }
 
