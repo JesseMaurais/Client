@@ -12,8 +12,8 @@ namespace env::usr
 	extern env::view const& data_home;
 	extern env::view const& config_home;
 	extern env::view const& cache_home;
-	extern env::list const& data_dirs;
-	extern env::list const& config_dirs;
+	extern env::span const& data_dirs;
+	extern env::span const& config_dirs;
 	extern env::view const& desktop_dir;
 	extern env::view const& documents_dir;
 	extern env::view const& download_dir;

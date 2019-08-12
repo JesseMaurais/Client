@@ -83,7 +83,7 @@ namespace sys::env
 
 namespace
 {
-	struct : env::list
+	struct : env::span
 	{
 		operator fmt::string_view_span() const final
 		{
@@ -328,7 +328,7 @@ namespace
 
 namespace env
 {
-	list const& paths = PATH;
+	span const& paths = PATH;
 	view const& user = USER;
 	view const& home = HOME;
 	view const& host = HOST;

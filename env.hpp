@@ -16,7 +16,7 @@ namespace env
 		virtual operator fmt::string_view() const = 0;
 	};
 
-	struct list : unique
+	struct span : unique
 	{
 		virtual operator fmt::string_view_span() const = 0;
 	};
@@ -32,7 +32,7 @@ namespace sys::env
 
 namespace env
 {
-	extern list const& paths;
+	extern span const& paths;
 	extern view const& home;
 	extern view const& user;
 	extern view const& host;

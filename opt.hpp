@@ -7,7 +7,7 @@
 namespace env::opt
 {
 	extern fmt::string_view application;
-	extern env::list const& arguments;
+	extern env::span const& arguments;
 	extern env::view const& identity;
 	extern env::view const& program;
 	extern env::view const& config;

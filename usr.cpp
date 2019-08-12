@@ -157,7 +157,7 @@ namespace
 
 	} CACHE_HOME;
 
-	struct : env::list
+	struct : env::span
 	{
 		operator fmt::string_view_span() const final
 		{
@@ -179,7 +179,7 @@ namespace
 
 	} DATA_DIRS;
 
-	struct : env::list
+	struct : env::span
 	{
 		operator fmt::string_view_span() const final
 		{
@@ -332,8 +332,8 @@ namespace env::usr
 	env::view const& data_home = DATA_HOME;
 	env::view const& config_home = CONFIG_HOME;
 	env::view const& cache_home = CACHE_HOME;
-	env::list const& data_dirs = DATA_DIRS;
-	env::list const& config_dirs = CONFIG_DIRS;
+	env::span const& data_dirs = DATA_DIRS;
+	env::span const& config_dirs = CONFIG_DIRS;
 	env::view const& desktop_dir = DESKTOP_DIR;
 	env::view const& documents_dir = DOCUMENTS_DIR;
 	env::view const& download_dir = DOWNLOAD_DIR;

@@ -52,10 +52,10 @@ namespace fmt::dir
 namespace env::dir
 {
 	extern env::view const& run;
-	inline env::list const& bin = ::env::paths;
-	extern env::list const& lib;
-	extern env::list const& share;
-	extern env::list const& include;
+	inline env::span const& bin = ::env::paths;
+	extern env::span const& lib;
+	extern env::span const& share;
+	extern env::span const& include;
 
 	bool fail(fmt::string_view path);
 	fmt::string_view make(fmt::string_view path);

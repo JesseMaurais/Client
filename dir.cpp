@@ -61,7 +61,7 @@ namespace
 
 	} RUN;
 
-	struct : env::list
+	struct : env::span
 	{
 		operator fmt::string_view_span() const final
 		{
@@ -73,7 +73,7 @@ namespace
 
 	} LIB;
 
-	struct : env::list
+	struct : env::span
 	{
 		static auto get()
 		{
@@ -110,7 +110,7 @@ namespace
 
 	} SHARE;
 
-	struct : env::list
+	struct : env::span
 	{
 		operator fmt::string_view_span() const final
 		{
@@ -126,9 +126,9 @@ namespace
 namespace env::dir
 {
 	env::view const& run = RUN;
-	env::list const& lib = LIB;
-	env::list const& share = SHARE;
-	env::list const& include = INCLUDE;
+	env::span const& lib = LIB;
+	env::span const& share = SHARE;
+	env::span const& include = INCLUDE;
 
 	bool find(fmt::string_view path, entry view)
 	{

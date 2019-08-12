@@ -24,7 +24,7 @@ namespace
 		return fmt::dir::join(env::usr::config_home, env::opt::identity);
 	}
 
-	struct : env::list
+	struct : env::span
 	{
 		fmt::string_view_vector list;
 
@@ -174,7 +174,7 @@ namespace
 
 namespace env::opt
 {
-	env::list const& arguments = ARGUMENTS;
+	env::span const& arguments = ARGUMENTS;
 	env::view const& identity = IDENTITY;
 	env::view const& program = PROGRAM;
 	env::view const& config = CONFIG;
