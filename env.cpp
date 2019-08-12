@@ -72,8 +72,8 @@ namespace sys::env
 		{
 			r += m.prefix();
 			auto t = m.str();
-			auto u = val(t);
-			r.append(u.data(), u.size());
+			auto v = val(t);
+			r.append(v.data(), v.size());
 			s = m.suffix();
 		}
 		r.shrink_to_fit();

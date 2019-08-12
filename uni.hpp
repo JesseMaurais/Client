@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <dirent.h>
 #include "sys.hpp"
+#include "ptr.hpp"
 #include "err.hpp"
 
 namespace sys::uni
@@ -446,11 +447,11 @@ namespace sys::uni
 
 namespace sys
 {
-	struct mutex : sys::uni::mutex
+	struct mutex : unique, sys::uni::mutex
 	{
 		auto lock()
 		{
-			class unlock
+			class unlock : unique
 			{
 				sys::uni::mutex* ptr;
 
@@ -466,6 +467,51 @@ namespace sys
 					ptr->unlock();
 				}
 
+			};
+			return unlock(this);
+		}
+	};
+
+	struct rwlock : unique, sys::uni::rwlock
+	{
+		auto read()
+		{
+			class unlock : unique
+			{
+				sys::uni::rwlock* ptr;
+
+			public:
+
+				unlock(rwlock* that) : ptr(that)
+				{
+					ptr->rdlock();
+				}
+
+				~unlock()
+				{
+					ptr->unlock();
+				}
+			};
+			return unlock(this);
+		}
+
+		auto write()
+		{
+			class unlock : unique
+			{
+				sys::uni::rwlock* ptr;
+
+			public:
+			
+				unlock(rwlock* that) : ptr(that)
+				{
+					ptr->wrlock();
+				}
+
+				~unlock()
+				{
+					ptr->unlock();
+				}
 			};
 			return unlock(this);
 		}

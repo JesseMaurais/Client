@@ -72,7 +72,7 @@ DEP=$(PCH:.hpp=.pch) $(OBJ)
 exe(test): $(DEP) test.obj; $(CXX) $(LDFLAGS) $(OBJ) test.obj -Fe$@
 exe(docy): $(DEP) docy.obj; $(CXX) $(LDFLAGS) $(OBJ) docy.obj -Fe$@
 .cpp.obj: ; $(CXX) $(CFLAGS) /Yu$(PCH) /FI$(PCH) -c $<
-.hpp.pch: ; $(CXX) $(CFLAGS) /Yc$(PCH) /FI$(PCH) $(SRC)
+.hpp.pch: ; $(CXX) $(CFLAGS) /Yc$(PCH) /FI$(PCH) $(SRC) $(BIN)
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 

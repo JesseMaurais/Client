@@ -140,7 +140,9 @@ namespace env::dir
 			sys::win::files dir(s);
 			if (dir.h) do
 			{
-				if (view(dir.cFileName))
+				auto const part = fmt::dir::split(dir.cFileName);
+				auto const name = part.back();
+				if (view(name))
 				{
 					return true;
 				}
@@ -221,8 +223,8 @@ namespace env::dir
 	bool remove(fmt::string_view dir)
 	{
 		std::deque<fmt::string> deque;
-
 		deque.emplace_back(dir);
+
 		for (auto it = deque.begin(); it != deque.end(); ++it)
 		{
 			auto const d = *it;

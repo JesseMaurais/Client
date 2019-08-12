@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include "sys.hpp"
+#include "ptr.hpp"
 #include "sig.hpp"
 #include "err.hpp"
 
@@ -195,6 +196,44 @@ namespace sys::win
 		}
 	};
 
+	struct srwlock : SRWLOCK
+	{
+		srwlock()
+		{
+			InitializeSRWLock(this);
+		}
+
+		void lock()
+		{
+			AcquireSRWLockShared(this);
+		}
+
+		void xlock()
+		{
+			AcquireSRWLockExclusive(this);
+		}
+
+		void unlock()
+		{
+			ReleaseSRWLockShared(this);
+		}
+
+		void xunlock()
+		{
+			ReleaseSRWLockExclusive(this);
+		}
+
+		auto trylock()
+		{
+			return TryAcquireSRWLockShared(this);
+		}
+
+		auto xtrylock()
+		{
+			return TryAcquireSRWLockExclusive(this);
+		}
+	};
+
 	struct pipe
 	{
 		handle read;
@@ -327,7 +366,7 @@ namespace sys::win
 
 namespace sys
 {
-	struct mutex : sys::win::handle
+	struct mutex : unique, sys::win::handle
 	{
 		mutex()
 		{
@@ -340,7 +379,7 @@ namespace sys
 
 		auto lock()
 		{
-			class unlock
+			class unlock : unique
 			{
 				HANDLE h;
 
@@ -367,6 +406,51 @@ namespace sys
 
 			};
 			return unlock(h);
+		}
+	};
+
+	struct rwlock : unique, sys::win::srwlock
+	{
+		auto read()
+		{
+			class unlock : unique
+			{
+				sys::win::srwlock* ptr;
+
+			public:
+
+				unlock(rwlock* that) : ptr(that)
+				{
+					ptr->lock();
+				}
+
+				~unlock()
+				{
+					ptr->unlock();
+				}
+			};
+			return unlock(this);
+		}
+
+		auto write()
+		{
+			class unlock : unique
+			{
+				sys::win::srwlock* ptr;
+
+			public:
+
+				unlock(rwlock* that) : ptr(that)
+				{
+					ptr->xlock();
+				}
+
+				~unlock()
+				{
+					ptr->xunlock();
+				}
+			};
+			return unlock(this);
 		}
 	};
 

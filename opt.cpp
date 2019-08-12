@@ -11,6 +11,12 @@
 #include <fstream>
 #include <cmath>
 
+#ifdef _WIN32
+# include "win.hpp"
+#else
+# include "uni.hpp"
+#endif
+
 namespace
 {
 	auto home_config()
@@ -122,6 +128,8 @@ namespace
 		return keys;
 	}
 
+	sys::rwlock lock;
+
 	auto make_pair(env::opt::view key)
 	{
 		return make_pair("Defaults", key);
@@ -132,7 +140,15 @@ namespace
 	{
 		auto const u = env::opt::get(key);
 		auto const n = converter(u);
-		return std::isnan(n) ? value : n;
+		if constexpr (fmt::is_floating<V>)
+		{
+			return std::isnan(n) ? value : n;
+		}
+		else
+		{
+			const auto d = static_cast<double>(n);
+			return std::isnan(d) ? value : n;
+		}
 	}
 
 	template <typename K>
@@ -142,10 +158,10 @@ namespace
 		auto const u = env::opt::get(key);
 		if (not empty(u))
 		{
-			for (fmt::string_view c : check)
+			for (fmt::string_view v : check)
 			{
-				auto const n = size(c);
-				if (0 == u.compare(0, n, c))
+				// if u.starts_with(v)
+				if (0 == u.compare(0, size(v), v))
 				{
 					return false;
 				}
@@ -186,6 +202,7 @@ namespace env::opt
 		if (empty(value))
 		{
 			auto const entry = make_pair(key);
+			auto const unlock = lock.read();
 			value = registry().get(entry);
 		}
 		return value;
@@ -205,37 +222,43 @@ namespace env::opt
 
 	view get(pair key)
 	{
+		auto const unlock = lock.read();
 		return registry().get(key);
 	}
 
 	bool set(pair key, view value)
 	{
+		auto const unlock = lock.write();
 		return registry().set(key, value);
 	}
 
 	bool put(pair key, view value)
 	{
+		auto const unlock = lock.write();
 		return registry().put(key, value);
 	}
 
 	bool clear(pair key)
 	{
+		auto const unlock = lock.write();
 		return registry().clear(key);
 	}
 
 	bool clear(view key)
 	{
-		const auto entry = make_pair(key);
+		auto const entry = make_pair(key);
 		return clear(entry);
 	}
 
 	std::istream & get(std::istream & in)
 	{
+		auto const unlock = lock.write();
 		return in >> registry();
 	}
 
 	std::ostream & put(std::ostream & out)
 	{
+		auto const unlock = lock.read();
 		return out << registry();
 	}
 
@@ -251,6 +274,7 @@ namespace env::opt
 
 	bool put(pair key, bool value)
 	{
+		auto const unlock = lock.write();
 		if (value)
 		{
 			return registry().set(key, "enable");
