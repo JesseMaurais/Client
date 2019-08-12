@@ -6,7 +6,19 @@
 #include "dir.hpp"
 #include "sys.hpp"
 #include "err.hpp"
+#include <vector>
 #include <regex>
+
+#ifdef _WIN32
+# include "win.hpp"
+#else
+# include "uni.hpp"
+#endif
+
+namespace
+{
+	sys::rwlock lock;
+}
 
 namespace sys::env
 {
@@ -17,27 +29,34 @@ namespace sys::env
 			auto const s = fmt::to_string(u);
 			return get(s);
 		}
-		auto const var = u.data();
-		auto const val = std::getenv(var);
-		return val ? val : "";
+		auto const v = data(u);
+		auto const unlock = lock.read();
+		auto const w = std::getenv(v);
+		return nullptr == w ? fmt::nil : w;
+	}
+
+	bool set(fmt::string_view u)
+	{
+		if (not fmt::terminated(u))
+		{
+			return put(u);
+		}
+		auto const unlock = lock.write();
+		auto const c = const_cast<char*>(data(u));
+		return 0 != sys::putenv(c);
 	}
 
 	bool put(fmt::string_view u)
 	{
-		if (not fmt::terminated(u))
-		{
-			auto const s = fmt::to_string(u);
-			return put(s);
-		}
-		auto buf = fmt::to_string(u);
-		auto const p = data(buf);
-		return 0 != sys::putenv(p);
+		auto const unlock = lock.write();
+		static std::vector<fmt::string> buf;
+		auto const c = buf.emplace_back(u).data();
+		return 0 != sys::putenv(c);
 	}
 
-	bool set(fmt::string_view u, fmt::string_view v)
+	bool put(fmt::string_view u, fmt::string_view v)
 	{
-		auto const s = fmt::entry(u, v);
-		return put(s);
+		return put(fmt::entry(u, v));
 	}
 
 	static auto val(fmt::string_view u)
@@ -185,7 +204,7 @@ namespace
 			}
 			#else
 			{
-				return ""; // omit "/" for join
+				return fmt::nil; // omit "/" for join
 			}
 			#endif
 		}
@@ -231,15 +250,15 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			for (auto var : { "LC_ALL", "LC_MESSAGES", "LANG" })
+			for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
-				auto view = sys::env::get(var);
-				if (not empty(view))
+				auto v = sys::env::get(u);
+				if (not empty(v))
 				{
-					return view;
+					return v;
 				}
 			}
-			return "";
+			return fmt::nil;
 		}
 
 	} LANG;
@@ -248,12 +267,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			for (auto var : { "TMPDIR", "TEMP", "TMP" })
+			for (auto u : { "TMPDIR", "TEMP", "TMP" })
 			{
-				auto u = sys::env::get(var);
-				if (not empty(u))
+				auto v = sys::env::get(u);
+				if (not empty(v))
 				{
-					return u;
+					return v;
 				}
 			}
 			static fmt::string s;

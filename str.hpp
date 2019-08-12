@@ -149,6 +149,7 @@ namespace fmt
 	constexpr auto npos = string::npos;
 	constexpr auto eol = '\n';
 	constexpr auto null = '\0';
+	constexpr auto nil = "";
 }
 
 #endif // file

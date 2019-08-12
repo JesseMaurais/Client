@@ -25,8 +25,9 @@ namespace env
 namespace sys::env
 {
 	fmt::string_view get(fmt::string_view u);
+	bool set(fmt::string_view u);
 	bool put(fmt::string_view u);
-	bool set(fmt::string_view u, fmt::string_view v);
+	bool put(fmt::string_view u, fmt::string_view v);
 	fmt::string value(fmt::string_view);
 }
 
