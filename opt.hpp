@@ -19,14 +19,15 @@ namespace env::opt
 	using quad = long double;
 
 	void set(int argc, char** argv);
+
 	view get(view key);
 	bool set(view key, view value);
 	bool put(view key, view value);
+	bool cut(view key);
 	view get(pair key);
 	bool set(pair key, view value);
 	bool put(pair key, view value);
-	bool clear(view key);
-	bool clear(pair key);
+	bool cut(pair key);
 
 	bool get(view key, bool value);
 	bool get(pair key, bool value);

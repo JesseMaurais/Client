@@ -48,8 +48,8 @@ namespace sys::env
 
 	bool put(fmt::string_view u)
 	{
+		static fmt::string_vector buf;
 		auto const unlock = lock.write();
-		static std::vector<fmt::string> buf;
 		auto const c = buf.emplace_back(u).data();
 		return 0 != sys::putenv(c);
 	}

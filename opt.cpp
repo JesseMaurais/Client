@@ -221,6 +221,12 @@ namespace env::opt
 		return put(entry, value);
 	}
 
+	bool cut(view key)
+	{
+		auto const entry = make_pair(key);
+		return cut(entry);
+	}
+
 	view get(pair key)
 	{
 		auto const unlock = lock.read();
@@ -239,16 +245,10 @@ namespace env::opt
 		return registry().put(key, value);
 	}
 
-	bool clear(pair key)
+	bool cut(pair key)
 	{
 		auto const unlock = lock.write();
-		return registry().clear(key);
-	}
-
-	bool clear(view key)
-	{
-		auto const entry = make_pair(key);
-		return clear(entry);
+		return registry().cut(key);
 	}
 
 	std::istream & get(std::istream & in)
@@ -282,7 +282,7 @@ namespace env::opt
 		}
 		else
 		{
-			return registry().clear(key);
+			return registry().cut(key);
 		}
 	}
 

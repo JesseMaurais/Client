@@ -93,7 +93,7 @@ bool ini::set(pair key, view value)
 	return not map.insert_or_assign(key, value).second;
 }
 
-bool ini::clear(pair key)
+bool ini::cut(pair key)
 {
 	auto it = map.find(key);
 	if (map.end() != it)
