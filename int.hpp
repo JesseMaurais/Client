@@ -15,7 +15,6 @@ namespace fmt
 	template <typename T> using as_signed = typename std::make_signed<T>::type;
 	template <typename T> using as_unsigned = typename std::make_unsigned<T>::type;
 
-	template <typename T> constexpr bool is_floating = std::is_floating_point<T>::value;
 	template <typename T> constexpr bool is_integral = std::is_integral<T>::value;
 	template <typename T> constexpr bool is_signed = std::is_signed<T>::value;
 	template <typename T> constexpr bool is_unsigned = std::is_unsigned<T>::value;
@@ -114,7 +113,15 @@ namespace fmt
 	template <typename T>
 	inline bool fail(T t)
 	{
-		return std::isnan(t);
+		if constexpr (is_integral<T>)
+		{
+			auto const d = static_cast<double>(t);
+			return std::isnan(d);
+		}
+		else
+		{
+			return std::isnan(t);
+		}
 	}
 }
 

@@ -12,7 +12,7 @@
 
 namespace
 {
-	struct : env::value
+	struct : env::word
 	{
 		operator long() const final
 		{
@@ -40,7 +40,7 @@ namespace
 
 	} COUNT;
 
-	struct : env::value
+	struct : env::word
 	{
 		operator long() const final
 		{
@@ -62,7 +62,7 @@ namespace
 
 namespace sys::cpu
 {
-	::env::value const& count = COUNT;
-	::env::value const& page_size = PAGE_SIZE;
+	::env::word const& count = COUNT;
+	::env::word const& page_size = PAGE_SIZE;
 }
 

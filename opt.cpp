@@ -61,11 +61,11 @@ namespace
 				assert(not empty(path));
 				auto const dirs = fmt::dir::split(path);
 				assert(not empty(dirs));
-				auto const file = dirs.back();
-				assert(not empty(file));
-				auto const first = file.find_first_not_of("./");
-				auto const last = file.rfind(sys::ext::image);
-				u = file.substr(first, last);
+				auto const name = dirs.back();
+				assert(not empty(name));
+				auto const first = name.find_first_not_of("./");
+				auto const last = name.rfind(sys::ext::image);
+				u = name.substr(first, last);
 			}
 			return u;
 		}
@@ -113,11 +113,21 @@ namespace
 
 	} CACHE;
 
-	ini open()
+	auto open()
 	{
-		ini keys;
+		struct config : ini
+		{
+			~config()
+			{
+				auto const path = fmt::join({ home_config(), ".ini" });
+				std::ofstream file(path);
+				file << env::opt::put;
+			}
+
+		} keys;
+
 		auto const path = fmt::join({ env::opt::config, ".ini" });
-		std::fstream file(path);
+		std::ifstream file(path);
 		file >> keys;
 		return keys;
 	}
@@ -140,15 +150,7 @@ namespace
 	{
 		auto const u = env::opt::get(key);
 		auto const n = converter(u);
-		if constexpr (fmt::is_floating<V>)
-		{
-			return std::isnan(n) ? value : n;
-		}
-		else
-		{
-			const auto d = static_cast<double>(n);
-			return std::isnan(d) ? value : n;
-		}
+		return fmt::fail(n) ? value : n;
 	}
 
 	template <typename K>
@@ -160,8 +162,7 @@ namespace
 		{
 			for (fmt::string_view v : check)
 			{
-				// if u.starts_with(v)
-				if (0 == u.compare(0, size(v), v))
+				if (fmt::starts_with(u, v))
 				{
 					return false;
 				}

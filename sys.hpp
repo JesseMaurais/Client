@@ -144,11 +144,6 @@ namespace sys
 		constexpr auto image = "";
 	}
 
-	namespace esc
-	{
-		constexpr auto env = "\\$[A-Z_][A-Z_0-9]*";
-	}
-
 	using size_t = ::size_t;
 	using ssize_t = ::ssize_t;
 	using off_t = ::off_t;

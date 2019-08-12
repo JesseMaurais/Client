@@ -6,7 +6,7 @@
 
 namespace env
 {
-	struct value : unique
+	struct word : unique
 	{
 		virtual operator long() const = 0;
 	};

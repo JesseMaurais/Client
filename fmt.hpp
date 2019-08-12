@@ -315,7 +315,7 @@ namespace fmt
 		static bool terminated(string_view u)
 		/// Check whether string is null terminated
 		{
-			return not u.empty() and not u[u.size()];
+			return not empty(u) and not u[u.size()];
 		}
 
 		static auto count(string_view u)
@@ -401,6 +401,19 @@ namespace fmt
 			auto const p = u.substr(0, n);
 			auto const q = u.substr(n < m ? n + 1 : m);
 			return string_view_pair { p, q };
+		}
+
+		static bool starts_with(string_view u, string_view v)
+		/// Whether $u has $v as a prefix
+		{
+			return 0 == u.compare(0, v.size(), v);
+		}
+
+		static bool ends_with(string_view u, string_view v)
+		/// Whether $u has $v as a suffix
+		{
+			return u.size() >= v.size()
+			   and 0 == u.compare(u.size() - v.size(), v.size(), v);
 		}
 	};
 
@@ -489,6 +502,16 @@ namespace fmt
 	inline auto replace(string_view u, string_view v, string_view w)
 	{
 		return lc.replace(u, v, w);
+	}
+
+	inline auto starts_with(string_view u, string_view v)
+	{
+		return lc.starts_with(u, v);
+	}
+
+	inline auto ends_with(string_view u, string_view v)
+	{
+		return lc.ends_with(u, v);
 	}
 
 	inline auto entry(string_view u)

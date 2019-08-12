@@ -61,19 +61,8 @@ namespace sys::env
 
 	static auto val(fmt::string_view u)
 	{
-		#ifdef _WIN32
-		{
-			assert('%' == u.front());
-			assert('%' == u.back());
-			u = u.substr(1, u.size() - 1);
-		}
-		#else
-		{
-			assert('$' == u.front());
-			u = u.substr(1);
-		}
-		#endif
-
+		assert('$' == u.front());
+		u = u.substr(1);
 		if (empty(u))
 		{
 			return u;
@@ -83,7 +72,7 @@ namespace sys::env
 
 	fmt::string value(fmt::string_view u)
 	{
-		static std::regex x { sys::esc::env };
+		static std::regex x { "\\$[A-Z_][A-Z_0-9]*" };
 		std::smatch m;
 		std::string r;
 		auto s = fmt::to_string(u);

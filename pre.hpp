@@ -32,3 +32,18 @@
 #include <limits>
 #include <stdexcept>
 
+// OS
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#ifdef _WIN32
+# include <process.h>
+# include <direct.h>
+# include <io.h>
+#else
+# include <sys/wait.h>
+# include <unistd.h>
+#endif
+
