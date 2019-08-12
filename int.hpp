@@ -89,6 +89,11 @@ namespace fmt
 		return to<int>(s);
 	}
 
+	string to_string(long value, int base);
+	string to_string(long long value, int base);
+	string to_string(unsigned long value, int base);
+	string to_string(unsigned long long value, int base);
+
 	long to_long(string_view, int base = 10);
 	long to_long(wstring_view, int base = 10);
 	long long to_llong(string_view, int base = 10);

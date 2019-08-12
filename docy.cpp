@@ -2,9 +2,10 @@
 #include "err.hpp"
 #include <cstdlib>
 
+fmt::string_view env::opt::application = "docy";
+
 int main(int argc, char** argv)
 {
-	env::opt::application = "docy";
 	env::opt::set(argc, argv);
 	{
 		auto value = env::opt::get("quiet");

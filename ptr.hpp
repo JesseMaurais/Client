@@ -15,13 +15,6 @@ inline auto null_ptr(Remove rm)
 	return make_ptr((Type) nullptr, rm);
 }
 
-template <typename Type, typename Vector>
-inline auto && emplace(Vector & t, Type & d)
-{
-	t.emplace_back(std::move(d));
-	return t.back();
-}
-
 class unique
 {
 	unique(const unique &) = delete;

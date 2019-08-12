@@ -53,7 +53,7 @@ std::istream & operator>>(std::istream & in, ini & keys)
 			break;
 		}
 
-		auto const p = fmt::to_pair(line);
+		auto const p = fmt::entry(line);
 		pair const e { key, p.first };
 		if (keys.put(e, p.second))
 		{
@@ -91,6 +91,18 @@ view ini::get(pair key) const
 bool ini::set(pair key, view value)
 {
 	return not map.insert_or_assign(key, value).second;
+}
+
+bool ini::clear(pair key)
+{
+	auto it = map.find(key);
+	if (map.end() != it)
+	{
+		auto& value = it->second;
+		value.remove_suffix(size(value));
+		return true;
+	}
+	return false;
 }
 
 bool ini::put(pair key, view value)

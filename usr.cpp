@@ -303,7 +303,7 @@ namespace
 					auto const first = line.find_first_not_of(quote);
 					auto const second = line.find_first_of(quote, first);
 					line = line.substr(first, second);
-					auto entry = fmt::to_pair(line);
+					auto entry = fmt::entry(line);
 					auto value = sys::env::value(entry.second);
 					env::opt::set(entry.first, value);
 				}

@@ -1,5 +1,6 @@
 #include "int.hpp"
 #include "fmt.hpp"
+#include <charconv>
 #include <cstdlib>
 #include <cwchar>
 #include <cmath>
@@ -21,11 +22,8 @@ namespace
 		return value;
 	}
 
-	template <typename T> T inan()
-	{
-		auto const nan = std::nan("");
-		return static_cast<T>(nan);
-	}
+	template <typename T>
+	const auto inan = static_cast<T>(std::nan(""));
 
 	template <typename T, typename V, typename C>
 	T to_base(V u, int base, C* to)
@@ -37,14 +35,95 @@ namespace
 		{
 			auto const s = fmt::to_string(u);
 			sys::err(here, s, "in base", base);
-			return inan<T>();
+			return inan<T>;
 		}
 		return value;
 	}
+
+	template <typename T>
+	fmt::string from_base(T value, int base)
+	{
+		fmt::string s(20, '\0');
+		std::to_chars_result code;
+		do
+		{
+			auto begin = data(s);
+			auto end = begin + size(s);
+			code = std::to_chars(begin, end, value, base);
+			if (std::errc::value_too_large == code.ec)
+			{
+				s.resize(2*size(s), '\0');
+				continue;
+			}
+			s.resize(code.ptr - begin);
+		}
+		while (false);
+		return s;
+	}
+
+	/* Not supported
+	template <typename T>
+	fmt::string from_fp(T value, int precision)
+	{
+		fmt::string s(20, '\0');
+		std::to_chars_result code;
+		do
+		{
+			auto begin = data(s);
+			auto end = begin + size(s);
+			code = std::to_chars(begin, end, value, 0, precision);
+			if (std::errc::value_too_large == code.ec)
+			{
+				s.resize(2*size(s), '\0');
+				continue;
+			}
+			s.resize(code.ptr - begin);
+		}
+		while (false);
+		return s;	
+	}
+	*/
 }
 
 namespace fmt
 {
+	string to_string(long value, int base)
+	{
+		return from_base<long>(value, base);
+	}
+
+	string to_string(long long value, int base)
+	{
+		return from_base<long long>(value, base);
+	}
+
+	string to_string(unsigned long value, int base)
+	{
+		return from_base<unsigned long>(value, base);
+	}
+
+	string to_string(unsigned long long value, int base)
+	{
+		return from_base<unsigned long long>(value, base);
+	}
+
+	/*
+	string to_string(float value, int precision)
+	{
+		return from_fp<float>(value, precision);
+	}
+
+	string to_string(double value, int precision)
+	{
+		return from_fp<double>(value, precision);
+	}
+
+	string to_string(long double value, int precision)
+	{
+		return from_fp<long double>(value, precision);
+	}
+	*/
+
 	long to_long(string_view u, int base)
 	{
 		return to_base<long>(u, base, std::strtol);

@@ -491,9 +491,9 @@ namespace fmt
 		return lc.replace(u, v, w);
 	}
 
-	inline auto to_pair(string_view u, string_view v = "=")
+	inline auto entry(string_view u)
 	{
-		return lc.to_pair(u, v);
+		return lc.to_pair(u, "=");
 	}
 
 	inline auto entry(string_view u, string_view v)

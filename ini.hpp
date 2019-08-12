@@ -20,6 +20,7 @@ struct ini
 	view get(pair key) const;
 	bool set(pair key, view value);
 	bool put(pair key, view value);
+	bool clear(pair key);
 
 private:
 

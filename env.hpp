@@ -2,20 +2,21 @@
 #define env_hpp
 
 #include "str.hpp"
+#include "ptr.hpp"
 
 namespace env
 {
-	struct value
+	struct value : unique
 	{
 		virtual operator long() const = 0;
 	};
 
-	struct view
+	struct view : unique
 	{
 		virtual operator fmt::string_view() const = 0;
 	};
 
-	struct list
+	struct list : unique
 	{
 		virtual operator fmt::string_view_span() const = 0;
 	};
