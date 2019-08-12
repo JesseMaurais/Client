@@ -35,14 +35,6 @@ namespace sio
 		::sio::out& wo;
 		::sio::buf* rd;
 	};
-
-	inline bool flush(str & s)
-	{
-		auto const& ss = s.str();
-		bool any = not empty(ss);
-		if (any) log << ss;
-		return any;
-	}
 }
 
 #endif // file

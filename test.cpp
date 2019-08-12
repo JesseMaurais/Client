@@ -13,6 +13,7 @@
 #include "cpu.hpp"  // CPU information
 #include "sys.hpp"  // System interfaces
 #include "net.hpp"  // Network sockets
+#include "sio.hpp"  // Sequential I/O
 #include "sig.hpp"  // Signal handling
 #include "dir.hpp"  // Directory operators
 #include "dll.hpp"  // Dynamic libraries

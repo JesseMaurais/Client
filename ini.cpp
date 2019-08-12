@@ -43,6 +43,7 @@ std::istream & operator>>(std::istream & in, ini & keys)
 		if (header(line))
 		{
 			key = line.substr(1, size(line) - 2);
+			if ("---" == key) break;
 			continue;
 		}
 
