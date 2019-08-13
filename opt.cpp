@@ -169,7 +169,7 @@ namespace
 		{
 			for (auto const v : check)
 			{
-				if (fmt::starts_with(u, v))
+				if (u.starts_with(v))
 				{
 					return false;
 				}
@@ -190,8 +190,43 @@ namespace env::opt
 
 	void set(int argc, char** argv)
 	{
+		auto const unlock = lock.write();
 		auto back = back_inserter(ARGUMENTS.list);
 		copy(argv, argv + argc, back);
+	}
+
+	list arg(view key, int& n)
+	{
+		auto const unlock = lock.read();
+		auto const begin = ARGUMENTS.list.begin();
+		auto const end = ARGUMENTS.list.end();
+		list items;
+		for (auto it = find(begin, end, key); it != end; ++it)
+		{
+			items.push_back(*it);
+
+			if (begin != it)
+			{
+				if (n < 0)
+				{
+					if (it->starts_with("--"))
+					{
+						break;
+					}
+				}
+				else
+				if (0 < n)
+				{
+					--n;
+				}
+				else break;
+			}
+		}
+		if (0 < n)
+		{
+			items.clear();
+		}
+		return items;
 	}
 
 	view get(view key)

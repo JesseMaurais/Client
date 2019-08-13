@@ -13,7 +13,7 @@ namespace
 	}
 }
 
-std::istream & ini::getline(std::istream & in, std::string & s)
+std::istream & ini::getline(std::istream & in, ini::string & s)
 {
 	constexpr char c = '#';
 	while (std::getline(in, s))

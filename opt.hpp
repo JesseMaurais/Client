@@ -15,11 +15,18 @@ namespace env::opt
 	extern env::view const& home;
 
 	using view = fmt::string_view;
+	using list = fmt::string_view_vector;
 	using pair = fmt::string_view_pair;
 	using word = long long;
 	using quad = long double;
 
 	void set(int argc, char** argv);
+	list arg(view key, int& n);
+	inline list arg(view key)
+	{
+		int any_size = -1;
+		return arg(key, any_size);
+	}
 
 	view get(view key);
 	bool set(view key, view value);

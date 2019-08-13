@@ -231,7 +231,7 @@ namespace fmt
 			auto const after = first(u, x);
 			auto const pos = std::distance(begin(u), after);
 			auto const size = std::distance(after, before);
-			return u.substr(pos, size);
+			return (string_view) u.substr(pos, size);
 		}
 
 		auto divide(string_view u, mask x = space) const
@@ -400,20 +400,7 @@ namespace fmt
 			auto const n = u.find(v);
 			auto const p = u.substr(0, n);
 			auto const q = u.substr(n < m ? n + 1 : m);
-			return string_view_pair { p, q };
-		}
-
-		static bool starts_with(string_view u, string_view v)
-		/// Whether $u has $v as a prefix
-		{
-			return 0 == u.compare(0, v.size(), v);
-		}
-
-		static bool ends_with(string_view u, string_view v)
-		/// Whether $u has $v as a suffix
-		{
-			return u.size() >= v.size()
-			   and 0 == u.compare(u.size() - v.size(), v.size(), v);
+			return make_pair(p, q);
 		}
 	};
 
@@ -504,16 +491,6 @@ namespace fmt
 		return lc.replace(u, v, w);
 	}
 
-	inline auto starts_with(string_view u, string_view v)
-	{
-		return lc.starts_with(u, v);
-	}
-
-	inline auto ends_with(string_view u, string_view v)
-	{
-		return lc.ends_with(u, v);
-	}
-
 	inline auto entry(string_view u)
 	{
 		return lc.to_pair(u, "=");
@@ -560,7 +537,7 @@ namespace fmt
 	template <>
 	inline string to_string(string_view const& s)
 	{
-		return string(s.data(), s.size());
+		return fmt::string(s.data(), s.size());
 	}
 
 	template <>

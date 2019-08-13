@@ -14,15 +14,14 @@
 # define assert(x) if (not(x)) sys::warn(here, #x);
 #endif
 
-#include <ostream>
 #include <sstream>
 #include "str.hpp"
 
-// Pessimised boolean
+// Pessimistic boolean
 
 enum : bool
 {
-	success = false, failure = true, on = true, off = false
+	success = false, failure = true
 };
 
 constexpr bool fail(bool ok)
