@@ -87,9 +87,7 @@ namespace fmt
 	{
 		using base = pair<Iterator>;
 		using base::base;
-
 		using iterator = Iterator;
-		using const_iterator = Iterator;
 
 		auto begin() const
 		{
@@ -130,30 +128,28 @@ namespace fmt
 
 #if __has_include(<span>)
 #include <span>
-namespace fmt::impl
+namespace fmt
 {
-	template <typename Type>
-	using span = std::span<Type>;
+	template <typename Type> using span = std::span<Type>;
 }
 #elif __has_include(<experimetal/span>)
 #include <experimental/span>
-namespace fmt::impl
+namespace fmt
 {
-	template <typename Type> 
-	using span = std::experimental::span<Type>;
+	template <typename Type> using span = std::experimental::span<Type>;
 }
 #else
 #include <initializer_list>
-namespace fmt::impl
+namespace fmt
 {
-	template <typename Type> 
-	struct span : fmt::range<typename std::vector<Type>::const_iterator>
+	template <typename Type> struct span : range<Type const*>
 	{
-		using base = fmt::range<typename std::vector<Type>::const_iterator>;
+		using base = range<Type const*>;
 		using base::base;
+		using const_iterator = Type const*;
 
 		span(std::vector<Type> const& list)
-		: base(begin(list), end(list))
+		: base(data(list), data(list) + size(list))
 		{ }
 
 		span(std::initializer_list<Type> init)
@@ -165,31 +161,23 @@ namespace fmt::impl
 
 namespace fmt
 {
-	template <class Type> using span = impl::span<Type>;
-
 	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
 	template <class Char> using basic_string_range = range<basic_string<Char>>;
 	template <class Char> using basic_string_size = typename basic_string<Char>::size_type;
 	template <class Char> using basic_string_size_pair = pair<basic_string_size<Char>>;
 	template <class Char> using basic_string_vector = typename std::vector<basic_string<Char>>;
-	template <class Char> using basic_string_vector_range = range<basic_string_vector<Char>>;
+	template <class Char> using basic_string_vector_range = range<basic_string_vector<Char>::const_iterator>;
 	template <class Char> using basic_string_span = span<basic_string<Char>>;
-	template <class Char> using basic_string_span_range = range<basic_string_span<Char>>;
+	template <class Char> using basic_string_span_range = range<basic_string_span<Char>::const_iterator>;
 
 	template <class Char> using basic_string_view_pair = pair<basic_string_view<Char>>;
 	template <class Char> using basic_string_view_range = range<basic_string_view<Char>>;
 	template <class Char> using basic_string_view_size = typename basic_string<Char>::size_type;
 	template <class Char> using basic_string_view_size_pair = pair<basic_string_size<Char>>;
 	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_vector_range = range<basic_string_vector<Char>>;
+	template <class Char> using basic_string_view_vector_range = range<basic_string_vector<Char>::const_iterator>;
 	template <class Char> using basic_string_view_span = span<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_span_range = range<basic_string_view_span<Char>>;
-
-	template <class Char>
-	inline bool same(basic_string_view<Char> u, basic_string_view<Char> v)
-	{
-		return u.empty() ? v.empty() : u.size() == v.size() and u.data() == v.data();
-	}
+	template <class Char> using basic_string_view_span_range = range<basic_string_view_span<Char>::const_iterator>;
 
 	using string = basic_string<char>;
 	using wstring = basic_string<wchar_t>;
@@ -220,7 +208,6 @@ namespace fmt
 
 	using string_span_range = basic_string_span_range<char>;
 	using wstring_span_range = basic_string_span_range<wchar_t>;
-
 
 	using string_view_pair = basic_string_view_pair<char>;
 	using wstring_view_pair = basic_string_view_pair<wchar_t>;

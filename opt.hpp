@@ -21,12 +21,7 @@ namespace env::opt
 	using quad = long double;
 
 	void set(int argc, char** argv);
-	list arg(view key, int& n);
-	inline list arg(view key)
-	{
-		int any_size = -1;
-		return arg(key, any_size);
-	}
+	list arg(view key, int n = -1);
 
 	view get(view key);
 	bool set(view key, view value);

@@ -85,7 +85,7 @@ view ini::get(pair key) const
 	{
 		return it->second;
 	}
-	return "";
+	return fmt::nil;
 }
 
 bool ini::set(pair key, view value)

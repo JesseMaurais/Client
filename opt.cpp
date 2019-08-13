@@ -195,7 +195,7 @@ namespace env::opt
 		copy(argv, argv + argc, back);
 	}
 
-	list arg(view key, int& n)
+	list arg(view key, int n)
 	{
 		auto const unlock = lock.read();
 		auto const begin = ARGUMENTS.list.begin();
@@ -203,28 +203,20 @@ namespace env::opt
 		list items;
 		for (auto it = find(begin, end, key); it != end; ++it)
 		{
-			items.push_back(*it);
-
 			if (begin != it)
 			{
-				if (n < 0)
+				if (it->starts_with("--"))
 				{
-					if (it->starts_with("--"))
-					{
-						break;
-					}
+					break;
 				}
 				else
-				if (0 < n)
+				if (n == 0)
 				{
-					--n;
+					break;
 				}
-				else break;
+				else --n;
 			}
-		}
-		if (0 < n)
-		{
-			items.clear();
+			items.push_back(*it);
 		}
 		return items;
 	}
@@ -245,8 +237,7 @@ namespace env::opt
 		if (empty(value))
 		{
 			auto const entry = make_pair(key);
-			auto const unlock = lock.read();
-			value = registry().get(entry);
+			value = env::opt::get(entry);
 		}
 		return value;
 	}
