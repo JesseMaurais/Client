@@ -1,12 +1,12 @@
 #ifndef str_hpp
 #define str_hpp
 
+// Try to get the lightest of string containers, a span of string views.
+// Pull in string buffers and pairs as well for type completeness.
+
 #include <string>
 #include <vector>
 #include <utility>
-
-// Try to get the lightest of string containers, a span of string views.
-// Pull in string buffers and pairs as well for type completeness.
 
 #if __has_include(<string_view>)
 #include <string_view>
@@ -26,48 +26,8 @@ namespace fmt::impl
 #error Cannot find an implementation of std::string_view.
 #endif
 
-#if __has_include(<span>)
-#include <span>
-namespace fmt::impl
-{
-	template <typename Type> using span = std::span<Type>;
-}
-#elif __has_include(<experimetal/span>)
-#include <experimental/span>
-namespace fmt::impl
-{
-	template <typename Type> using span = std::experimental::span<Type>;
-}
-#else
-#include <vector>
-namespace fmt::impl
-{
-	template <typename Type> using span = std::vector<Type>;
-}
-#endif
-
 namespace fmt
 {
-	template <class Type> using span = impl::span<Type>;
-
-	template <class Type> using pair = std::pair<Type, Type>;
-
-	template <class Iterator> struct range : pair<Iterator>
-	{
-		using base = pair<Iterator>;
-		using base::base;
-
-		auto begin() const
-		{
-			return base::first;
-		}
-
-		auto end() const
-		{
-			return base::second;
-		}
-	};
-
 	template <class Char, class Traits = std::char_traits<Char>>
 	struct basic_string_view : impl::basic_string_view<Char, Traits>
 	{
@@ -120,6 +80,92 @@ namespace fmt
 			return view(base::data(), base::size());
 		}
 	};
+
+	template <class Type> using pair = std::pair<Type, Type>;
+
+	template <class Iterator> struct range : pair<Iterator>
+	{
+		using base = pair<Iterator>;
+		using base::base;
+
+		using iterator = Iterator;
+		using const_iterator = Iterator;
+
+		auto begin() const
+		{
+			return base::first;
+		}
+
+		auto end() const
+		{
+			return base::second;
+		}
+
+		bool empty() const
+		{
+			return base::first == base::second;
+		}
+
+		const auto& front() const
+		{
+			return *base::first;
+		}
+
+		const auto& back() const
+		{
+			return *(base::second - 1);
+		}
+
+		std::size_t size() const
+		{
+			return std::distance(base::first, base::second);
+		}
+
+		auto const& operator[](std::size_t index) const
+		{
+			return *(base::first + index);
+		}
+	};
+}
+
+#if __has_include(<span>)
+#include <span>
+namespace fmt::impl
+{
+	template <typename Type>
+	using span = std::span<Type>;
+}
+#elif __has_include(<experimetal/span>)
+#include <experimental/span>
+namespace fmt::impl
+{
+	template <typename Type> 
+	using span = std::experimental::span<Type>;
+}
+#else
+#include <initializer_list>
+namespace fmt::impl
+{
+	template <typename Type> 
+	struct span : fmt::range<typename std::vector<Type>::const_iterator>
+	{
+		using base = fmt::range<typename std::vector<Type>::const_iterator>;
+		using base::base;
+
+		span(std::vector<Type> const& list)
+		: base(begin(list), end(list))
+		{ }
+
+		span(std::initializer_list<Type> init)
+		: base(begin(init), end(init))
+		{ }
+	};
+}
+#endif
+
+namespace fmt
+{
+	template <class Type> using span = impl::span<Type>;
 
 	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
 	template <class Char> using basic_string_range = range<basic_string<Char>>;
