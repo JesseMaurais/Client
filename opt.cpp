@@ -19,9 +19,14 @@
 
 namespace
 {
-	auto home_config()
+	auto directory(fmt::string_view dir)
 	{
-		return fmt::dir::join(env::usr::config_home, env::opt::identity);
+		return fmt::dir::join(dir, env::opt::identity);
+	}
+
+	auto extension(fmt::string_view base)
+	{
+		return fmt::join({ base, ".ini" });
 	}
 
 	struct : env::span
@@ -79,19 +84,20 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				s = home_config();
-				if (env::dir::fail(s))
+				auto home = directory(env::usr::config_home);
+				if (env::dir::fail(home))
 				{
-					fmt::string_view_span dirs = env::usr::config_dirs;
-					for (auto const d : dirs)
+					fmt::string_view_span span = env::usr::config_dirs;
+					for (auto const dir : span)
 					{
-						s = fmt::dir::join(d, env::opt::identity);
-						if (not env::dir::fail(s))
+						s = directory(dir);
+						if (env::dir::fail(s))
 						{
-							return s;
+							continue;
 						}
+						return s;
 					}
-					s = home_config();
+					s = move(home);
 				}
 			}
 			return s;
@@ -106,7 +112,7 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				s = fmt::dir::join(env::usr::cache_home, env::opt::identity);
+				s = directory(env::usr::cache_home);
 			}
 			return s;
 		}
@@ -119,14 +125,15 @@ namespace
 		{
 			~config()
 			{
-				auto const path = fmt::join({ home_config(), ".ini" });
+				auto const base = directory(env::usr::config_home);
+				auto const path = extension(base);
 				std::ofstream file(path);
 				file << env::opt::put;
 			}
 
 		} keys;
 
-		auto const path = fmt::join({ env::opt::config, ".ini" });
+		auto const path = extension(env::opt::config);
 		std::ifstream file(path);
 		file >> keys;
 		return keys;
@@ -160,7 +167,7 @@ namespace
 		auto const u = env::opt::get(key);
 		if (not empty(u))
 		{
-			for (fmt::string_view v : check)
+			for (auto const v : check)
 			{
 				if (fmt::starts_with(u, v))
 				{
@@ -189,10 +196,10 @@ namespace env::opt
 
 	view get(view key)
 	{
-		fmt::string_view_span args = env::opt::arguments;
-		for (auto const argn : args)
+		fmt::string_view_span span = env::opt::arguments;
+		for (auto const arg : span)
 		{
-			const auto e = fmt::entry(argn);
+			const auto e = fmt::entry(arg);
 			if (e.first == key)
 			{
 				return e.second;

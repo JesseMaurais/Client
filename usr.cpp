@@ -18,14 +18,6 @@
 
 namespace
 {
-	bool exists(fmt::string_view u)
-	{
-		assert(fmt::terminated(u));
-		char const* path = u.data();
-		int const check = sys::access(path, F_OK);
-		return not sys::fail(check);
-	}
-
 	struct : env::view
 	{
 		operator fmt::string_view() const final
@@ -69,13 +61,16 @@ namespace
 				constexpr auto base = "applications.menu";
 				auto const menu = fmt::join({env::usr::menu_prefix, base});
 				path = fmt::dir::join(env::usr::config_home, "menus", menu);
-				if (not exists(path))
+				if (env::dir::fail(path))
 				{
-					fmt::string_view_span list = env::usr::config_dirs;
-					for (auto const dir : list)
+					fmt::string_view_span span = env::usr::config_dirs;
+					for (auto const dir : span)
 					{
 						path = fmt::dir::join(dir, menu);
-						if (exists(path)) break;
+						if (not env::dir::fail(path))
+						{
+							break;
+						}
 						path.clear();
 					}
 				}

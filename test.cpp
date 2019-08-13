@@ -229,16 +229,7 @@ namespace
 		auto val = fmt::path::join(env::paths);
 		assert(var == val);
 
-		#ifdef _WIN32
-		{
-			val = sys::env::value("%PATH%");
-		}
-		#else
-		{
-			val = sys::env::value("$PATH");
-		}
-		#endif
-
+		val = sys::env::value("$PATH");
 		var = sys::env::get("PATH");
 		assert(var == val);
 	}
