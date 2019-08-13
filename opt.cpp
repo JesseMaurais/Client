@@ -87,8 +87,8 @@ namespace
 				auto home = directory(env::usr::config_home);
 				if (env::dir::fail(home))
 				{
-					fmt::string_view_span span = env::usr::config_dirs;
-					for (auto const dir : span)
+					fmt::string_view_span dirs = env::usr::config_dirs;
+					for (auto const dir : dirs)
 					{
 						s = directory(dir);
 						if (env::dir::fail(s))
@@ -223,8 +223,8 @@ namespace env::opt
 
 	view get(view key)
 	{
-		fmt::string_view_span span = env::opt::arguments;
-		for (auto const arg : span)
+		fmt::string_view_span args = env::opt::arguments;
+		for (auto const arg : args)
 		{
 			const auto e = fmt::entry(arg);
 			if (e.first == key)
