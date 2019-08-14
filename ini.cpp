@@ -55,7 +55,7 @@ std::istream & operator>>(std::istream & in, ini & keys)
 
 		auto const p = fmt::entry(line);
 		pair const e { key, p.first };
-		if (keys.put(e, p.second))
+		if (not keys.put(e, p.second))
 		{
 			sys::warn(here, "overwrite", key, "with", p.second);
 		}
@@ -90,7 +90,7 @@ view ini::get(pair key) const
 
 bool ini::set(pair key, view value)
 {
-	return not map.insert_or_assign(key, value).second;
+	return map.insert_or_assign(key, value).second;
 }
 
 bool ini::cut(pair key)

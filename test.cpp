@@ -260,6 +260,14 @@ namespace
 		assert(env::dir::fail(d));
 	}
 
+	TEST(env_opt_at)
+	{
+		assert(env::opt::set("ptr", "@key"));
+		assert(env::opt::set("key", HELLO_WORLD));
+		auto const value = env::opt::get("ptr");
+		assert(0 == value.compare(HELLO_WORLD));
+	}
+
 	TEST(env_vars)
 	{
 		sysini()

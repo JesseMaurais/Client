@@ -10,6 +10,7 @@
 #include <iterator>
 #include <fstream>
 #include <cmath>
+#include <set>
 
 #ifdef _WIN32
 # include "win.hpp"
@@ -19,11 +20,6 @@
 
 namespace
 {
-	auto directory(fmt::string_view dir)
-	{
-		return fmt::dir::join(dir, env::opt::identity);
-	}
-
 	auto extension(fmt::string_view base)
 	{
 		return fmt::join({ base, ".ini" });
@@ -39,19 +35,6 @@ namespace
 		}
 
 	} ARGUMENTS;
-
-	struct : env::view
-	{
-		operator fmt::string_view() const final
-		{
-			if (empty(env::opt::application))
-			{
-				env::opt::application = env::opt::program;
-			}
-			return env::opt::application;
-		}
-
-	} IDENTITY;
 
 	struct : env::view
 	{
@@ -84,13 +67,13 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				auto home = directory(env::usr::config_home);
+				auto home = env::opt::directory(env::usr::config_home);
 				if (env::dir::fail(home))
 				{
 					fmt::string_view_span dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
 					{
-						s = directory(dir);
+						s = env::opt::directory(dir);
 						if (env::dir::fail(s))
 						{
 							continue;
@@ -112,7 +95,7 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				s = directory(env::usr::cache_home);
+				s = env::opt::directory(env::usr::cache_home);
 			}
 			return s;
 		}
@@ -125,7 +108,7 @@ namespace
 		{
 			~config()
 			{
-				auto const base = directory(env::usr::config_home);
+				auto const base = env::opt::directory(env::usr::config_home);
 				auto const path = extension(base);
 				std::ofstream file(path);
 				file << env::opt::put;
@@ -183,10 +166,14 @@ namespace
 namespace env::opt
 {
 	env::span const& arguments = ARGUMENTS;
-	env::view const& identity = IDENTITY;
 	env::view const& program = PROGRAM;
 	env::view const& config = CONFIG;
 	env::view const& cache = CACHE;
+
+	view directory(view stem)
+	{
+		return fmt::dir::join(stem, application);
+	}
 
 	void set(int argc, char** argv)
 	{
@@ -263,7 +250,22 @@ namespace env::opt
 	view get(pair key)
 	{
 		auto const unlock = lock.read();
-		return registry().get(key);
+		std::set<view> set;
+		while (true)
+		{
+			view value = registry().get(key);
+			if (value.front() != '@')
+			{
+				return value;
+			}
+			if (not set.emplace(value).second)
+			{
+				sys::warn(here, "Cycle detected at", value);
+				break;
+			}
+			key.second = value.substr(1);
+		}
+		return fmt::nil;
 	}
 
 	bool set(pair key, view value)

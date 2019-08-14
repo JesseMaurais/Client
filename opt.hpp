@@ -8,7 +8,6 @@ namespace env::opt
 {
 	extern fmt::string_view application;
 	extern env::span const& arguments;
-	extern env::view const& identity;
 	extern env::view const& program;
 	extern env::view const& config;
 	extern env::view const& cache;
@@ -21,6 +20,7 @@ namespace env::opt
 
 	void set(int argc, char** argv);
 	list arg(view key, int n = -1);
+	view directory(view stem);
 
 	view get(view key);
 	bool set(view key, view value);

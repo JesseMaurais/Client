@@ -47,14 +47,9 @@ namespace
 {
 	struct : env::view
 	{
-		static auto directory()
-		{
-			return fmt::dir::join(env::usr::runtime_dir, env::opt::identity);
-		}
-		
 		operator fmt::string_view() const final
 		{
-			static auto const run =	directory();
+			static auto const run =	env::opt::directory(env::usr::runtime_dir);
 			static env::dir::tmp tmp(run);
 			return run;
 		}
