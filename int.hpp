@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <type_traits>
+#include "str.hpp"
 #include "err.hpp"
 
 namespace fmt
@@ -15,13 +16,13 @@ namespace fmt
 	template <typename T> using as_signed = typename std::make_signed<T>::type;
 	template <typename T> using as_unsigned = typename std::make_unsigned<T>::type;
 
-	template <typename T> constexpr bool is_integral = std::is_integral<T>::value;
+	template <typename T> constexpr bool is_integer = std::is_integral<T>::value;
 	template <typename T> constexpr bool is_signed = std::is_signed<T>::value;
 	template <typename T> constexpr bool is_unsigned = std::is_unsigned<T>::value;
 
 	template <typename S> inline auto to_unsigned(S s)
 	{
-		static_assert(is_integral<S>);
+		static_assert(is_integer<S>);
 		static_assert(is_signed<S>);
 		assert(zero<S> <= s);
 		using T = as_unsigned<S>;
@@ -30,7 +31,7 @@ namespace fmt
 
 	template <typename S> inline auto to_signed(S s)
 	{
-		static_assert(is_integral<S>);
+		static_assert(is_integer<S>);
 		static_assert(is_unsigned<S>);
 		using T = as_signed<S>;
 		auto const t = static_cast<T>(s);
@@ -58,7 +59,7 @@ namespace fmt
 	template <typename T, typename S> inline T to_narrow(S s)
 	{
 		static_assert(sizeof(T) < sizeof(S));
-		static_assert(is_integral<S> and is_integral<T>);
+		static_assert(is_integer<S> and is_integer<T>);
 		static_assert(is_signed<T> == is_signed<S>);
 		static_assert(S{minimum<T>} <= zero<S>);
 		static_assert(zero<S> <= S{maximum<T>});
@@ -103,10 +104,9 @@ namespace fmt
 	double to_double(string_view);
 	long double to_quad(string_view);
 
-	template <typename T>
-	inline bool fail(T t)
+	template <typename T> inline bool fail(T t)
 	{
-		if constexpr (is_integral<T>)
+		if constexpr (is_integer<T>)
 		{
 			auto const d = static_cast<double>(t);
 			return std::isnan(d);

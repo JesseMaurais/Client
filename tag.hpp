@@ -11,19 +11,18 @@ namespace fmt
 	class basic_tagger : Type<Char, std::ctype>
 	{
 		using base = Type<Char, std::ctype>;
-		using size = typename base::size;
-		using iterator = typename base::iterator;
+		using iterator = typename base::string_view_span::iterator;
 		using string_view = typename base::string_view;
 	
 	public:
 
-		using reactor = std::function<void(iterator, size)>;
+		using reactor = std::function<void(iterator, size_t)>;
 		static void tag(iterator begin, iterator end, string_view u, reactor f)
 		/// Call $f for any in sorted range $[begin, end) that is found in $u
 		{
 			auto it = begin;
 			auto const z = u.size();
-			for (size i = 0, j = 1; j <= z; ++j)
+			for (size_t i = 0, j = 1; j <= z; ++j)
 			{
 				auto const n = j - i;
 				auto const v = u.substr(i, n);

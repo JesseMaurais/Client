@@ -1,8 +1,7 @@
 #ifndef str_hpp
 #define str_hpp
 
-// Try to get the lightest of string containers, a span of string views.
-// Pull in string buffers and pairs as well for type completeness.
+// Try to get the lightest of string containers: a span of string views.
 
 #include <string>
 #include <vector>
@@ -23,7 +22,7 @@ namespace fmt::impl
 	using basic_string_view = std::experimental::basic_string_view<Char, Traits>;
 }
 #else
-#error Cannot find an implementation of std::string_view.
+#error Cannot find an implementation of string_view.
 #endif
 
 namespace fmt
@@ -31,6 +30,7 @@ namespace fmt
 	template <class Char, class Traits = std::char_traits<Char>>
 	struct basic_string_view : impl::basic_string_view<Char, Traits>
 	{
+		using string = std::basic_string<Char, Traits>;
 		using base = impl::basic_string_view<Char, Traits>;
 		using base::base;
 
@@ -41,17 +41,18 @@ namespace fmt
 		}
 		bool ends_with(basic_string_view u) const
 		{
-			return base::size() >= u.size()
-			   and 0 == base::compare(base::size() - u.size(), u.size(), u);
+			auto const n = u.size();
+			auto const m = base::size();
+			return n <= m and 0 == base::compare(m - n, n, u);
 		}
 		#endif
 
-		basic_string_view(std::basic_string<Char, Traits, std::allocator<Char>> const& s)
+		basic_string_view(string const& s)
 		: base(s.data(), s.size())
 		{ }
 
 		basic_string_view(base u)
-		: base(u)
+		: base(u.data(), u.size())
 		{ }
 	};
 
@@ -66,14 +67,14 @@ namespace fmt
 		: base(s)
 		{ }
 
+		basic_string(view u)
+		: base(u.data(), u.size())
+		{ }
+
 		auto& operator=(base const& s)
 		{
 			return base::operator=(s);
 		}
-
-		basic_string(view u)
-		: base(u.data(), u.size())
-		{ }
 
 		operator view() const
 		{
@@ -104,24 +105,9 @@ namespace fmt
 			return base::first == base::second;
 		}
 
-		const auto& front() const
-		{
-			return *base::first;
-		}
-
-		const auto& back() const
-		{
-			return *(base::second - 1);
-		}
-
 		std::size_t size() const
 		{
 			return std::distance(base::first, base::second);
-		}
-
-		auto const& operator[](std::size_t index) const
-		{
-			return *(base::first + index);
 		}
 	};
 }
@@ -155,6 +141,21 @@ namespace fmt
 		span(std::initializer_list<Type> init)
 		: base(begin(init), end(init))
 		{ }
+
+		const auto& front() const
+		{
+			return *base::first;
+		}
+
+		const auto& back() const
+		{
+			return *(base::second - 1);
+		}
+
+		auto const& operator[](std::size_t index) const
+		{
+			return *(base::first + index);
+		}
 	};
 }
 #endif
@@ -162,22 +163,12 @@ namespace fmt
 namespace fmt
 {
 	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
-	template <class Char> using basic_string_range = range<basic_string<Char>>;
-	template <class Char> using basic_string_size = typename basic_string<Char>::size_type;
-	template <class Char> using basic_string_size_pair = pair<basic_string_size<Char>>;
 	template <class Char> using basic_string_vector = typename std::vector<basic_string<Char>>;
-	template <class Char> using basic_string_vector_range = range<typename basic_string_vector<Char>::const_iterator>;
 	template <class Char> using basic_string_span = span<basic_string<Char>>;
-	template <class Char> using basic_string_span_range = range<typename basic_string_span<Char>::const_iterator>;
 
 	template <class Char> using basic_string_view_pair = pair<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_range = range<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_size = typename basic_string<Char>::size_type;
-	template <class Char> using basic_string_view_size_pair = pair<basic_string_size<Char>>;
 	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_vector_range = range<typename basic_string_vector<Char>::const_iterator>;
 	template <class Char> using basic_string_view_span = span<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_span_range = range<typename basic_string_view_span<Char>::const_iterator>;
 
 	using string = basic_string<char>;
 	using wstring = basic_string<wchar_t>;
@@ -188,54 +179,27 @@ namespace fmt
 	using string_pair = basic_string_pair<char>;
 	using wstring_pair = basic_string_pair<wchar_t>;
 
-	using string_range = basic_string_vector_range<char>;
-	using wstring_range = basic_string_vector_range<wchar_t>;
-
-	using string_size = basic_string_size<char>;
-	using wstring_size = basic_string_size<wchar_t>;
-
-	using string_size_pair = basic_string_size_pair<char>;
-	using wstring_size_pair = basic_string_size_pair<wchar_t>;
-
 	using string_vector = basic_string_vector<char>;
 	using wstring_vector = basic_string_vector<wchar_t>;
-
-	using string_vector_range = basic_string_vector_range<char>;
-	using wstring_vector_range = basic_string_vector_range<wchar_t>;
 
 	using string_span = basic_string_span<char>;
 	using wstring_span = basic_string_span<wchar_t>; 
 
-	using string_span_range = basic_string_span_range<char>;
-	using wstring_span_range = basic_string_span_range<wchar_t>;
-
 	using string_view_pair = basic_string_view_pair<char>;
 	using wstring_view_pair = basic_string_view_pair<wchar_t>;
-
-	using string_view_range = basic_string_view_range<char>;
-	using wstring_view_range = basic_string_view_range<wchar_t>;
-
-	using string_view_size = basic_string_size<char>;
-	using wstring_view_size = basic_string_size<wchar_t>;
-
-	using string_view_size_pair = basic_string_size_pair<char>;
-	using wstring_view_size_pair = basic_string_size_pair<wchar_t>;
 
 	using string_view_vector = basic_string_view_vector<char>;
 	using wstring_view_vector = basic_string_view_vector<wchar_t>;
 
-	using string_view_vector_range = basic_string_view_vector_range<char>;
-	using wstring_view_vector_range = basic_string_view_vector_range<wchar_t>;
-
 	using string_view_span = basic_string_view_span<char>;
 	using wstring_view_span = basic_string_view_span<wchar_t>;
 
-	using string_view_span_range = basic_string_view_span_range<char>;
-	using wstring_view_span_range = basic_string_view_span_range<wchar_t>;
+	using size_type = string::size_type;
+	using size_pair = pair<size_type>;
 
 	constexpr auto npos = string::npos;
+	constexpr decltype(npos) null { };
 	constexpr auto eol = '\n';
-	constexpr auto null = '\0';
 	constexpr auto nil = "";
 }
 

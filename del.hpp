@@ -9,10 +9,7 @@ namespace fmt
 	class basic_delimiter : protected basic_string_view_pair<Char>
 	{
 		using string_view = fmt::basic_string_view<Char>;
-		using string_size_pair = fmt::basic_string_size_pair<Char>;
 		using string_view_pair = fmt::basic_string_view_pair<Char>;
-		using size_type = typename string_view::size_type;
-		static constexpr auto npos = string_view::npos;
 
 	private:
 
@@ -28,20 +25,20 @@ namespace fmt
 		: basic_delimiter(input, { mark, mark })
 		{ }
 
-		class iterator : public string_size_pair
+		class iterator : public size_pair
 		{
 			friend class basic_delimiter;
 			basic_delimiter const* that;
 
 			iterator(basic_delimiter const* owner, size_type pos)
-			: string_size_pair(pos, pos), that(owner)
+			: size_pair(pos, pos), that(owner)
 			{
 				operator++();
 			}
 
 		public:
 
-			string_size_pair operator*() const
+			size_pair operator*() const
 			{
 				return *this;
 			}
@@ -82,8 +79,6 @@ namespace fmt
 		using delimiter = basic_delimiter<char_type>;
 		using string_view = basic_string_view<char_type>;
 		using span_view = basic_string_view_span<char_type>;
-		using size_type = typename string_view::size_type;
-		static constexpr auto npos = string_view::npos;
 
 	protected:
 
@@ -152,7 +147,7 @@ namespace fmt
 				return *tag;
 			}
 
-			string_size_pair operator*() const
+			size_pair operator*() const
 			{
 				return *mark;
 			}

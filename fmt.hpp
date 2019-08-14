@@ -32,30 +32,13 @@ namespace fmt
 
 		using string = basic_string<Char>;
 		using string_pair = basic_string_pair<Char>;
-		using string_range = basic_string_range<Char>;
-		using string_size = basic_string_size<Char>;
-		using string_size_pair = basic_string_size_pair<Char>;
 		using string_vector = basic_string_vector<Char>;
-		using string_vector_range = basic_string_vector_range<Char>;
 		using string_span = basic_string_span<Char>;
-		using string_span_range = basic_string_span_range<Char>;
 
 		using string_view = basic_string_view<Char>;
 		using string_view_pair = basic_string_view_pair<Char>;
-		using string_view_range = basic_string_view_range<Char>;
-		using string_view_size = basic_string_view_size<Char>;
-		using string_view_size_pair = basic_string_view_size_pair<Char>;
 		using string_view_vector = basic_string_view_vector<Char>;
-		using string_view_vector_range = basic_string_view_vector_range<Char>;
 		using string_view_span = basic_string_view_span<Char>;
-		using string_view_span_range = basic_string_view_span_range<Char>;
-
-		using size = string_size;
-		using size_pair = string_size_pair;
-		using iterator = typename string_view_span::iterator;
-
-		static constexpr auto null = size {  0  };
-		static constexpr auto npos = string::npos;
 		
 		template <typename as> static string from(as const& s);
 
@@ -140,7 +123,7 @@ namespace fmt
 			{
 				base const* that;
 				char const* pos;
-				size n;
+				size_type size;
 
 				bool operator!=(iterator const& it) const
 				{
@@ -150,23 +133,23 @@ namespace fmt
 				auto operator*() const
 				{
 					Char c[1];
-					(void) that->widen(pos, pos + n, c);
+					(void) that->widen(pos, pos + size, c);
 					return *c;
 				}
 
 				auto operator++()
 				{
-					pos += n;
-					n = utf::len(pos);
+					pos += size;
+					size = utf::len(pos);
 					return *this;
 				}
 
 				iterator(base const* owner, char const* it)
 				: that(owner), pos(it)
 				{
-					if (that)
+					if (nullptr != that)
 					{
-						n = utf::len(pos);
+						size = utf::len(pos);
 					}
 				}
 			};
@@ -237,7 +220,7 @@ namespace fmt
 		auto divide(string_view u, mask x = space) const
 		/// Count the quotient in $u that are $x and remainder that are not
 		{
-			size_pair n { 0, 0 };
+			pair<size_t> n { 0, 0 };
 			for (auto const w : widen(u))
 			{
 				if (check(w, x))

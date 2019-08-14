@@ -2,8 +2,7 @@
 #define ini_hpp
 
 #include "str.hpp"
-#include <istream>
-#include <ostream>
+#include <iosfwd>
 #include <set>
 #include <map>
 

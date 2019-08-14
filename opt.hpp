@@ -12,7 +12,6 @@ namespace env::opt
 	extern env::view const& program;
 	extern env::view const& config;
 	extern env::view const& cache;
-	extern env::view const& home;
 
 	using view = fmt::string_view;
 	using list = fmt::string_view_vector;
