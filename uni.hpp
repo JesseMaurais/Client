@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 #include <dirent.h>
+#include <signal.h>
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
@@ -24,7 +25,7 @@ namespace sys::uni
 		sys::warn(args..., fmt::err(no));
 	}
 
-	struct files
+	struct files : unique
 	{
 		DIR* ptr;
 
@@ -53,7 +54,7 @@ namespace sys::uni
 
 	using routine = void*(void*);
 
-	struct thread
+	struct thread : unique
 	{
 		pthread_attr_t self;
 		mutable int no = 0;
@@ -138,7 +139,7 @@ namespace sys::uni
 		}
 	};
 
-	struct cond
+	struct cond : unique
 	{
 		pthread_cond_t self;
 		mutable int no = 0;
@@ -217,7 +218,7 @@ namespace sys::uni
 		};
 	};
 
-	struct mutex
+	struct mutex : unique
 	{
 		pthread_mutex_t self;
 		mutable int no = 0;
@@ -353,7 +354,7 @@ namespace sys::uni
 		};
 	};
 
-	struct rwlock
+	struct rwlock : unique
 	{
 		pthread_rwlock_t self;
 		mutable int no = 0;
@@ -447,7 +448,7 @@ namespace sys::uni
 
 namespace sys
 {
-	struct mutex : unique, sys::uni::mutex
+	struct mutex : sys::uni::mutex
 	{
 		auto lock()
 		{
@@ -472,7 +473,7 @@ namespace sys
 		}
 	};
 
-	struct rwlock : unique, sys::uni::rwlock
+	struct rwlock : sys::uni::rwlock
 	{
 		auto read()
 		{
@@ -518,7 +519,7 @@ namespace sys
 	};
 
 	template <typename Routine>
-	struct thread
+	struct thread : unique
 	{
 		pthread_t id;
 
@@ -548,7 +549,7 @@ namespace sys
 
 		static void* thunk(void* ptr)
 		{
-			auto that = reinterpret_cast<thread>(ptr);
+			auto that = reinterpret_cast<thread*>(ptr);
 			that->work();
 			return ptr;
 		}

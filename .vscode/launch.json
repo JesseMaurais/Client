@@ -9,32 +9,11 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/test.exe",
-            "args": [],
-            "stopAtEntry": false,
+            "args": ["usr_dir"],
+            "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false
-        },
-        
-        {
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/test.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "C:\\Program Files\\LLVM\\bin\\lldb-vscode.exe",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
         }
     ]
-}
+} d

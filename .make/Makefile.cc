@@ -20,7 +20,7 @@ RM=rm -f
 MD=mkdir -p
 else
 ifdef COMSPEC
-RM=del /f
+RM=del -f
 MD=md
 else
 err("Cannot determine your system commands.")
@@ -62,7 +62,7 @@ clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.
 
 add(CFLAGS, -nologo -std:$(STD) -W4 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -EHsc -permissive-)
 ifndef NDEBUG
-add(CFLAGS, -Zi)
+add(CFLAGS, -Z7)
 endif
 add(LDFLAGS, -nologo)
 
@@ -71,8 +71,8 @@ DEP=$(PCH:.hpp=.pch) $(OBJ)
 
 exe(test): $(DEP) test.obj; $(CXX) $(LDFLAGS) $(OBJ) test.obj -Fe$@
 exe(docy): $(DEP) docy.obj; $(CXX) $(LDFLAGS) $(OBJ) docy.obj -Fe$@
-.cpp.obj: ; $(CXX) $(CFLAGS) /Yu$(PCH) /FI$(PCH) -c $<
-.hpp.pch: ; $(CXX) $(CFLAGS) /Yc$(PCH) /FI$(PCH) $(SRC) $(BIN)
+.cpp.obj: ; $(CXX) $(CFLAGS) -Yu$(PCH) -FI$(PCH) -c $<
+$(PCH:.hpp=.pch): $(PCH); $(CXX) $(CFLAGS) -Yc$(PCH) -FI$(PCH) -c $(SRC) $(BIN)
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 

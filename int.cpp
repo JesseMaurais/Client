@@ -56,8 +56,8 @@ namespace
 					continue;
 				}
 				auto const ec = std::make_error_condition(code.ec);
-				auto const s = ec.message();
-				sys::warn(here, s);
+				auto const msg = ec.message();
+				sys::warn(here, msg);
 			}
 			s.resize(code.ptr - begin);
 		}

@@ -2,6 +2,7 @@
 
 // C
 
+#include <ciso646>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -11,39 +12,61 @@
 #include <cuchar>
 #include <cwchar>
 #include <cerrno>
+#include <cmath>
 
 // C++
 
+#include <initializer_list>
 #include <utility>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <streambuf>
+#include <charconv>
 #include <locale>
 #include <regex>
 #include <string>
+#include <iterator>
 #include <vector>
+#include <stack>
 #include <map>
+#include <set>
 #include <memory>
-#include <initializer_list>
-#include <functional>
 #include <algorithm>
+#include <functional>
 #include <type_traits>
 #include <limits>
-#include <stdexcept>
 
 // OS
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
 
 #ifdef _WIN32
+# define WIN32_LEAN_AND_MEAN
+# include <windows.h>
+# include <tlhelp32.h>
+# include <winsock2.h>
+# include <shlobj.h>
 # include <process.h>
 # include <direct.h>
 # include <io.h>
 #else
+# include <sys/socket.h>
+# include <sys/select.h>
+# include <netinet/in.h>
 # include <sys/wait.h>
+# include <sys/un.h>
+# include <poll.h>
+# include <sys/mman.h>
+# include <pthread.h>
+# include <dirent.h>
+# include <dlfcn.h>
 # include <unistd.h>
 #endif
 

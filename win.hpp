@@ -116,7 +116,7 @@ namespace sys::win
 		}
 	};
 
-	struct handle
+	struct handle : unique
 	{
 		HANDLE h;
 
@@ -196,7 +196,7 @@ namespace sys::win
 		}
 	};
 
-	struct srwlock : SRWLOCK
+	struct srwlock : unique, SRWLOCK
 	{
 		srwlock()
 		{
@@ -262,7 +262,7 @@ namespace sys::win
 		}
 	};
 
-	struct processes : process_entry
+	struct processes : unique, process_entry
 	{
 		snapshot snap;
 
@@ -283,7 +283,7 @@ namespace sys::win
 		}
 	};
 
-	struct modules : module_entry
+	struct modules : unique, module_entry
 	{
 		snapshot snap;
 
@@ -304,7 +304,7 @@ namespace sys::win
 		}
 	};
 
-	struct threads : thread_entry
+	struct threads : unique, thread_entry
 	{
 		snapshot snap;
 
@@ -325,7 +325,7 @@ namespace sys::win
 		}
 	};
 
-	struct files : WIN32_FIND_DATA
+	struct files : unique, WIN32_FIND_DATA
 	{
 		HANDLE h;
 
@@ -366,7 +366,7 @@ namespace sys::win
 
 namespace sys
 {
-	struct mutex : unique, sys::win::handle
+	struct mutex : sys::win::handle
 	{
 		mutex()
 		{
@@ -409,7 +409,7 @@ namespace sys
 		}
 	};
 
-	struct rwlock : unique, sys::win::srwlock
+	struct rwlock : sys::win::srwlock
 	{
 		auto read()
 		{
