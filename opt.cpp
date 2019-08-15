@@ -146,7 +146,7 @@ namespace
 	template <typename K>
 	bool convert(K key, bool value)
 	{
-		auto const check = { "0", "no", "off", "disable" };
+		auto const check = { "0", "no", "off", "false", "disable" };
 		auto const u = env::opt::get(key);
 		if (not empty(u))
 		{
@@ -178,8 +178,22 @@ namespace env::opt
 	void set(int argc, char** argv)
 	{
 		auto const unlock = lock.write();
-		auto back = back_inserter(ARGUMENTS.list);
-		copy(argv, argv + argc, back);
+		auto& args = ARGUMENTS.list;
+
+		for (int argn = 0; argn < argc; ++argn)
+		{
+			view arg = argv[argn];
+			if (arg.starts_with("--"))
+			{
+				auto const e = fmt::entry(arg);
+				auto const p = make_pair(e.first);
+				if (not registry().set(p, e.second))
+				{
+					sys::warn("Unknown parameter", e.first);
+				}
+			}
+			else args.push_back(arg);
+		}
 	}
 
 	list arg(view key, int n)
