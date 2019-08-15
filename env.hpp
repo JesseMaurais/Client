@@ -6,9 +6,9 @@
 
 namespace env
 {
-	struct word : unique
+	struct size : unique
 	{
-		virtual operator long() const = 0;
+		virtual operator fmt::size_type() const = 0;
 	};
 
 	struct view : unique

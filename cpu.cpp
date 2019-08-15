@@ -12,9 +12,9 @@
 
 namespace
 {
-	struct : env::word
+	struct : env::size
 	{
-		operator long() const final
+		operator fmt::size_type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -40,9 +40,9 @@ namespace
 
 	} COUNT;
 
-	struct : env::word
+	struct : env::size
 	{
-		operator long() const final
+		operator fmt::size_type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -62,7 +62,7 @@ namespace
 
 namespace sys::cpu
 {
-	::env::word const& count = COUNT;
-	::env::word const& page_size = PAGE_SIZE;
+	::env::size const& count = COUNT;
+	::env::size const& page_size = PAGE_SIZE;
 }
 

@@ -11,6 +11,18 @@ namespace
 	{
 		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}
+
+	constexpr auto list_separator = ";";
+}
+
+ini::string ini::join(ini::span value)
+{
+	return fmt::join(value, list_separator);
+}
+
+ini::span ini::split(ini::view value)
+{
+	return fmt::split(value, list_separator);
 }
 
 std::istream & ini::getline(std::istream & in, ini::string & s)

@@ -5,8 +5,8 @@
 
 namespace sys::cpu
 {
-	extern ::env::word const& count;
-	extern ::env::word const& page_size;
+	extern ::env::size const& count;
+	extern ::env::size const& page_size;
 }
 
 #endif // file

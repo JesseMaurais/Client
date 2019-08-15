@@ -102,14 +102,15 @@ namespace
 
 	} CACHE;
 
-	auto open()
+	auto& open()
 	{
-		struct config : ini
+		static struct config : ini
 		{
+			fmt::string const home = env::opt::directory(env::usr::config_home);
+
 			~config()
 			{
-				auto const base = env::opt::directory(env::usr::config_home);
-				auto const path = extension(base);
+				auto const path = extension(home);
 				std::ofstream file(path);
 				file << env::opt::put;
 			}
@@ -118,13 +119,13 @@ namespace
 
 		auto const path = extension(env::opt::config);
 		std::ifstream file(path);
-		file >> keys;
+		if (file) file >> keys;
 		return keys;
 	}
 
 	ini & registry()
 	{
-		static auto keys = open();
+		static auto& keys = open();
 		return keys;
 	}
 
@@ -178,48 +179,80 @@ namespace env::opt
 	void set(int argc, char** argv)
 	{
 		auto const unlock = lock.write();
-		auto& args = ARGUMENTS.list;
-
-		for (int argn = 0; argn < argc; ++argn)
-		{
-			view arg = argv[argn];
-			if (arg.starts_with("--"))
-			{
-				auto const e = fmt::entry(arg);
-				auto const p = make_pair(e.first);
-				if (not registry().set(p, e.second))
-				{
-					sys::warn("Unknown parameter", e.first);
-				}
-			}
-			else args.push_back(arg);
-		}
+		auto back = back_inserter(ARGUMENTS.list);
+		copy(argv, argv + argc, back);
 	}
 
-	list arg(view key, int n)
+	list parse(commands const& cmd)
 	{
-		auto const unlock = lock.read();
-		auto const begin = ARGUMENTS.list.begin();
-		auto const end = ARGUMENTS.list.end();
-		list items;
-		for (auto it = find(begin, end, key); it != end; ++it)
+		auto const unlock = lock.write();
+		auto const begin = cmd.begin();
+		auto const end = cmd.end();
+		auto next = end, it = end;
+		int argn = 0, argc = 0;
+		list args;
+		list extra;
+
+		for (auto const arg : ARGUMENTS.list)
 		{
-			if (begin != it)
+			if (arg.starts_with("--"))
 			{
-				if (it->starts_with("--"))
+				auto const key = arg.substr(2);
+				next = find_if(begin, end, [key](auto const& entry)
 				{
-					break;
+					return entry.name == key;
+				});
+			}
+			else
+			if (arg.starts_with("-"))
+			{
+				auto const key = arg.substr(1);
+				next = find_if(begin, end, [key](auto const& entry)
+				{
+					return entry.nick == key;
+				});
+			}
+
+			bool const change = (it != next) and (next != end);
+			
+			if (0 != argn)
+			{
+				if (not change)
+				{
+					args.push_back(arg);
+					--argn;
 				}
 				else
-				if (n == 0)
+				if (0 < argn)
 				{
-					break;
+					sys::warn(it->name, "needs", argn, "more");
 				}
-				else --n;
 			}
-			items.push_back(*it);
+			else
+			if (end == it)
+			{
+				if (0 < argc)
+				{
+					extra.push_back(arg);
+				}
+			}
+			
+			if (change or 0 == argn)
+			{
+				if (end != it)
+				{
+					auto const key = make_pair(it->name);
+					auto const value = ini::join(args);
+					(void) registry().put(key, value);
+				}
+
+				it = next;
+			}
+
+			++argc;
 		}
-		return items;
+
+		return extra;
 	}
 
 	view get(view key)
@@ -391,6 +424,34 @@ namespace env::opt
 	bool put(pair key, quad value)
 	{
 		return set(key, fmt::to_string(value));
+	}
+
+	span get(view key, span value)
+	{
+		auto const entry = make_pair(key);
+		return get(entry, value);
+	}
+	
+	span get(pair key, span value)
+	{
+		view u = get(key);
+		if (empty(u))
+		{
+			return value;
+		}
+		return ini::split(u);
+	}
+
+	bool put(view key, span value)
+	{
+		auto const entry = make_pair(key);
+		return put(entry, value);
+	}
+
+	bool put(pair key, span value)
+	{
+		auto const s = ini::join(value);
+		return put(key, s);
 	}
 }
 

@@ -3,24 +3,35 @@
 
 #include "env.hpp"
 #include <iosfwd>
+#include <vector>
 
 namespace env::opt
 {
-	extern fmt::string_view application;
-	extern env::span const& arguments;
-	extern env::view const& program;
-	extern env::view const& config;
-	extern env::view const& cache;
-
 	using view = fmt::string_view;
+	using span = fmt::string_view_span;
 	using list = fmt::string_view_vector;
 	using pair = fmt::string_view_pair;
 	using word = long long;
 	using quad = long double;
 
-	void set(int argc, char** argv);
-	list arg(view key, int n = -1);
+	extern env::span const& arguments;
+	extern env::view const& program;
+	extern env::view const& config;
+	extern env::view const& cache;
+	extern view const application;
 	view directory(view stem);
+
+	struct description
+	{
+		word argn; // required arguments (or -1 for any number)
+		view nick; // short name with one dash
+		view name; // long name with dual dash
+		view text; // descriptive text for users
+	};
+
+	using commands = std::vector<description>;
+	void set(int argc, char** argv);
+	list parse(commands const& cmd);
 
 	view get(view key);
 	bool set(view key, view value);
@@ -43,6 +54,10 @@ namespace env::opt
 	quad get(pair key, quad value);
 	bool put(view key, quad value);
 	bool put(pair key, quad value);
+	span get(view key, span value);
+	span get(pair key, span value);
+	bool put(view key, span value);
+	bool put(pair key, span value);
 
 	template <typename T> struct meme : unique
 	{

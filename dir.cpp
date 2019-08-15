@@ -195,7 +195,7 @@ namespace env::dir
 			stem = buf;
 		}
 		
-		stem = path.substr(0, path.find(sys::sep::dir, size(stem) + 1));
+		stem = path.substr(0, path.find(sys::sep::dir, stem.size() + 1));
 
 		while (not empty(stack))
 		{
