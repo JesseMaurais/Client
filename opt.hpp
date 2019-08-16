@@ -7,6 +7,7 @@
 
 namespace env::opt
 {
+	using fmt::string;
 	using view = fmt::string_view;
 	using span = fmt::string_view_span;
 	using list = fmt::string_view_vector;
@@ -59,7 +60,7 @@ namespace env::opt
 	bool put(view key, span value);
 	bool put(pair key, span value);
 
-	template <typename T> struct meme : unique
+	template <typename T> struct meme
 	{
 		meme(pair k, T v) : key(k)
 		{

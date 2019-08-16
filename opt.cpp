@@ -188,68 +188,96 @@ namespace env::opt
 		auto const unlock = lock.write();
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
-		auto next = end, it = end;
-		int argn = 0, argc = 0;
+
+		auto next = end;
+		auto it = end;
+		pair entry;
+
+		int argn = 0;
 		list args;
 		list extra;
 
-		for (auto const arg : ARGUMENTS.list)
+		span argv = arguments;
+		for (auto const arg : argv)
 		{
+			// Check whether this argument is a new command
+
 			if (arg.starts_with("--"))
 			{
-				auto const key = arg.substr(2);
-				next = find_if(begin, end, [key](auto const& entry)
+				entry = fmt::entry(arg.substr(2));
+				next = find_if(begin, end, [&](auto const& desc)
 				{
-					return entry.name == key;
+					return desc.name == entry.first;
 				});
 			}
 			else
 			if (arg.starts_with("-"))
 			{
-				auto const key = arg.substr(1);
-				next = find_if(begin, end, [key](auto const& entry)
+				entry = fmt::entry(arg.substr(1));
+				next = find_if(begin, end, [&](auto const& desc)
 				{
-					return entry.nick == key;
+					return desc.nick == entry.first;
 				});
 			}
 
 			bool const change = (it != next) and (next != end);
-			
-			if (0 != argn)
+
+			// Push it either to the command list or to the extra result
+
+			if (not change)
 			{
-				if (not change)
+				if (0 != argn)
 				{
-					args.push_back(arg);
 					--argn;
+					args.push_back(arg);
+					if (0 == argn)
+					{
+						it = end;
+					}
 				}
 				else
-				if (0 < argn)
-				{
-					sys::warn(it->name, "needs", argn, "more");
-				}
-			}
-			else
-			if (end == it)
-			{
-				if (0 < argc)
+				if (data(argv[0]) != data(arg))
 				{
 					extra.push_back(arg);
 				}
 			}
+
+			// Start parsing the next command if changing
 			
-			if (change or 0 == argn)
+			if (change)
 			{
 				if (end != it)
 				{
 					auto const key = make_pair(it->name);
-					auto const value = ini::join(args);
-					(void) registry().put(key, value);
+					if (empty(args))
+					{
+						(void) registry().put(key, entry.second);
+					}
+					else
+					{
+						auto const value = ini::join(args);
+						(void) registry().put(key, value);
+					}
 				}
 
 				it = next;
+				next = end;
+				argn = it->argn;
 			}
+		}
 
-			++argc;
+		if (end != it)
+		{
+			auto const key = make_pair(it->name);
+			if (empty(args))
+			{
+				(void) registry().put(key, entry.second);
+			}
+			else
+			{
+				auto const value = ini::join(args);
+				(void) registry().put(key, value);
+			}
 		}
 
 		return extra;

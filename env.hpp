@@ -2,21 +2,20 @@
 #define env_hpp
 
 #include "str.hpp"
-#include "ptr.hpp"
 
 namespace env
 {
-	struct size : unique
+	struct size
 	{
 		virtual operator fmt::size_type() const = 0;
 	};
 
-	struct view : unique
+	struct view
 	{
 		virtual operator fmt::string_view() const = 0;
 	};
 
-	struct span : unique
+	struct span
 	{
 		virtual operator fmt::string_view_span() const = 0;
 	};
