@@ -90,6 +90,11 @@ std::ostream & operator<<(std::ostream & out, ini & keys)
 	return out;
 }
 
+bool ini::has(pair key) const
+{
+	return map.find(key) != map.end();
+}
+
 view ini::get(pair key) const
 {
 	auto const it = map.find(key);

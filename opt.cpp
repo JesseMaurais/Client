@@ -302,6 +302,12 @@ namespace env::opt
 		return value;
 	}
 
+	bool has(view key)
+	{
+		auto const entry = make_pair(key);
+		return has(entry);
+	}
+
 	bool set(view key, view value)
 	{
 		auto const entry = make_pair(key);
@@ -339,6 +345,12 @@ namespace env::opt
 			key.second = value.substr(1);
 		}
 		return fmt::nil;
+	}
+
+	bool has(pair key)
+	{
+		auto const unlock = lock.read();
+		return registry().has(key);
 	}
 
 	bool set(pair key, view value)

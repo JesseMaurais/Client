@@ -19,6 +19,7 @@ struct ini
 	friend std::istream & operator>>(std::istream &, ini &);
 	friend std::ostream & operator<<(std::ostream &, ini &);
 
+	bool has(pair key) const;
 	view get(pair key) const;
 	bool set(pair key, view value);
 	bool put(pair key, view value);

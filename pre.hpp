@@ -13,6 +13,7 @@
 #include <cwchar>
 #include <cerrno>
 #include <cmath>
+#include <ctime>
 
 // C++
 
@@ -46,6 +47,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <time.h>
 
 #ifdef _WIN32
 # define WIN32_LEAN_AND_MEAN
