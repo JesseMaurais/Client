@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 	{
 		env::opt::commands const cmd
 		{
-			{ 0, "d", "debug", "Enable/disable debug messages" }
+			{ 1, "d", "debug", "Enable/disable debug messages" }
 		};
 
 		auto const extra = env::opt::parse(cmd);

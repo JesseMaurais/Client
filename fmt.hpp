@@ -394,8 +394,8 @@ namespace fmt
 
 	// C locale shims
 
-	static thread_local cc lc;
-	static thread_local wc lw;
+	static cc lc;
+	static wc lw;
 
 	template <typename iterator>
 	inline auto next(iterator it, iterator end)
@@ -487,6 +487,12 @@ namespace fmt
 	inline auto entry(string_view_pair p)
 	{
 		return entry(p.first, p.second);
+	}
+
+	inline bool same(string_view u, string_view v)
+	{
+		return empty(u) ? empty(v) : 
+			data(u) == data(v) and size(u) == size(v);
 	}
 
 	//

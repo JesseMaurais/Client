@@ -222,7 +222,7 @@ namespace env::opt
 
 			bool const change = (it != next) and (next != end);
 
-			// Push it either to the command list or to the extra result
+			// Push it either to the command list or as an extra
 
 			if (not change)
 			{
@@ -230,13 +230,9 @@ namespace env::opt
 				{
 					--argn;
 					args.push_back(arg);
-					if (0 == argn)
-					{
-						it = end;
-					}
 				}
 				else
-				if (data(argv[0]) != data(arg))
+				if (not fmt::same(argv[0], arg))
 				{
 					extra.push_back(arg);
 				}
@@ -253,16 +249,18 @@ namespace env::opt
 					{
 						(void) registry().put(key, entry.second);
 					}
-					else
-					{
-						auto const value = ini::join(args);
-						(void) registry().put(key, value);
-					}
 				}
 
 				it = next;
 				next = end;
 				argn = it->argn;
+
+				if (0 == argn)
+				{
+					auto const key = make_pair(it->name);
+					auto const value = ini::join(args);
+					(void) registry().put(key, value);
+				}
 			}
 		}
 
