@@ -3,56 +3,23 @@
 
 #include "sig.hpp"
 #include "err.hpp"
-#include <csignal>
+#include "pos.hpp"
 #include <map>
-
-namespace
-{
-	sys::sig::subject &event(int no)
-	{
-		static std::map<int, sys::sig::subject> map;
-		return map[no];
-	}
-
-	void send(int no)
-	{
-		event(no).send([no](auto const &p)
-		{
-			p.second(no);
-		});
-	}
-}
 
 namespace sys::sig
 {
-	scope::scope(int on, observer ob)
-	: slot(&event(on), ob)
+	socket &scope::event(int no)
 	{
-		old.ob = std::signal(on, send);
-		if (SIG_ERR == old.ob)
-		{
-			sys::err(here, "signal", on);
-		}
+		static std::map<int, sys::sig::socket> map;
+		return map[no];
 	}
 
-	scope::~scope()
+	void scope::raise(int no)
 	{
-		if (SIG_ERR != old.ob)
+		event(no).raise([no](auto const &p)
 		{
-			(void) std::signal(old.on, old.ob);
-		}
-	}
-
-	link::link(int on, observer ob) : scope(on, next(ob))
-	{ }
-
-	observer link::next(observer ob)
-	{
-		return [=](int on)
-		{
-			ob(on);
-			old.ob(on);
-		};
+			p.second(no);
+		});
 	}
 }
 

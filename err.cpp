@@ -1,14 +1,9 @@
 #include "err.hpp"
 #include "ptr.hpp"
+#include "pos.hpp"
 #include <iostream>
 #include <cstring>
 #include <cerrno>
-
-#ifdef _WIN32
-# include "win.hpp"
-#else
-# include "uni.hpp"
-#endif
 
 std::ostream& fmt::operator<<(std::ostream& os, fmt::where const& pos)
 {

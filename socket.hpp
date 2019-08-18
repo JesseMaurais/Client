@@ -62,16 +62,4 @@ namespace sys::file
 	};
 }
 
-namespace sig
-{
-	struct socket : sys::file::socket
-	{	
-		socket(int family, int type, int proto, short events);
-		~socket();
-
-		virtual void notify(short events) = 0;
-		static int poll(int timeout = -1);
-	};
-}
-
 #endif // file

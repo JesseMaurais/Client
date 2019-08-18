@@ -4,12 +4,7 @@
 #include "shm.hpp"
 #include "sys.hpp"
 #include "err.hpp"
-
-#ifdef _WIN32
-# include "win.hpp"
-#else
-# include <sys/mman.h>
-#endif
+#include "pos.hpp"
 
 namespace sys::file
 {

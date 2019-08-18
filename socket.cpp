@@ -148,6 +148,7 @@ namespace sys::file
 	}
 }
 
+#if 0
 namespace sig
 {
 	static subject<sys::net::descriptor, short> set;
@@ -204,4 +205,4 @@ namespace sig
 		set.disconnect(pfd);
 	}
 }
-
+#endif

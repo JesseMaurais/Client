@@ -7,15 +7,9 @@
 #include "usr.hpp"
 #include "opt.hpp"
 #include "sys.hpp"
-#include "os.hpp"
+#include "pos.hpp"
 #include <regex>
 #include <stack>
-
-#ifdef _WIN32
-# include "win.hpp"
-#else
-# include "uni.hpp"
-#endif
 
 namespace fmt::dir
 {

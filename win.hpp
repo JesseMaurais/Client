@@ -35,7 +35,7 @@ namespace sys::win
 		if (sys::debug)
 		{
 			auto const no = GetLastError();
-			auto const s = fmt::err(no);
+			auto const s = sys::win::fmt::err(no);
 			sys::warn(args..., s);
 		}
 	}
@@ -65,30 +65,53 @@ namespace sys::win
 		return success;
 	}
 
-	namespace msg
+	struct msg : MSG
 	{
-		inline bool put(DWORD id, UINT msg, WPARAM wp = 0, LPARAM lp = 0)
+		template <UINT Min, UINT Max> struct range
 		{
-			if (not PostThreadMessage(id, msg, wp, lp))
+			constexpr UINT first = Min;
+			constexpr UINT second = Max;
+		};
+
+		using key   = range<WM_KEYFIRST, WM_KEY_LAST>;
+		using mouse = range<WM_MOUSEFIRST, WM_MOUSELAST>;
+		using user  = range<WM_USER, 0x7FFF>;
+		using app   = range<WM_APP, 0xBFFF>;
+		using text  = range<0xC000, 0xFFFF>;
+
+		inline bool get(UINT min = 0, UINT max = 0, HWND hw = nullptr)
+		{
+			auto const result = GetMessage(this, hw, min, max);
+			if (sys::win::fail(result))
 			{
-				sys::win::err(here, "PostThreadMessage", id);
+				sys::win::err(here, "GetMessage"):
 				return failure;
 			}
 			return success;
 		}
-		
-		inline bool quit(DWORD id)
-		{
-			return put(id, WM_QUIT);
-		}
-	}
 
-	namespace sig
-	{
-		struct quit : sys::sig::link
+		static bool put(DWORD the, UINT msg, WPARAM wp = 0, LPARAM lp = 0)
 		{
-			quit(int on) : link(on, PostQuitMessage) { }
-		};
+			if (not PostThreadMessage(the, msg, wp, lp))
+			{
+				sys::win::err
+				(
+					here, "PostThreadMessage", the, msg, wp, lp
+				);
+				return failure;
+			}
+			return success;
+		}
+
+		inline bool put(DWORD thread)
+		{
+			return put(thread, message, wParam, lParam);
+		}
+		
+		static bool quit(DWORD thread)
+		{
+			return put(thread, WM_QUIT);
+		}
 	}
 
 	template <typename T> struct zero : T

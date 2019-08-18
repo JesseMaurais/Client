@@ -90,7 +90,7 @@ std::ostream & operator<<(std::ostream & out, ini & keys)
 	return out;
 }
 
-bool ini::has(pair key) const
+bool ini::got(pair key) const
 {
 	return map.find(key) != map.end();
 }
@@ -115,8 +115,7 @@ bool ini::cut(pair key)
 	auto it = map.find(key);
 	if (map.end() != it)
 	{
-		auto& value = it->second;
-		value.remove_suffix(size(value));
+		map.erase(it);
 		return true;
 	}
 	return false;

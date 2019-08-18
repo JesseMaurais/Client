@@ -6,17 +6,12 @@
 #include "int.hpp"
 #include "err.hpp"
 #include "sys.hpp"
+#include "pos.hpp"
 #include <algorithm>
 #include <iterator>
 #include <fstream>
 #include <cmath>
 #include <set>
-
-#ifdef _WIN32
-# include "win.hpp"
-#else
-# include "uni.hpp"
-#endif
 
 namespace
 {
@@ -302,10 +297,10 @@ namespace env::opt
 		return value;
 	}
 
-	bool has(view key)
+	bool got(view key)
 	{
 		auto const entry = make_pair(key);
-		return has(entry);
+		return got(entry);
 	}
 
 	bool set(view key, view value)
@@ -347,10 +342,10 @@ namespace env::opt
 		return fmt::nil;
 	}
 
-	bool has(pair key)
+	bool got(pair key)
 	{
 		auto const unlock = lock.read();
-		return registry().has(key);
+		return registry().got(key);
 	}
 
 	bool set(pair key, view value)

@@ -34,12 +34,12 @@ namespace env::opt
 	void set(int argc, char** argv);
 	list parse(commands const& cmd);
 
-	bool has(view key);
+	bool got(view key);
 	view get(view key);
 	bool set(view key, view value);
 	bool put(view key, view value);
 	bool cut(view key);
-	bool has(pair key);
+	bool got(pair key);
 	view get(pair key);
 	bool set(pair key, view value);
 	bool put(pair key, view value);

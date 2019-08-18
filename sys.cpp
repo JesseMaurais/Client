@@ -3,17 +3,10 @@
 
 #include "sys.hpp"
 #include "err.hpp"
+#include "pos.hpp"
 #include "ptr.hpp"
 #include "file.hpp"
 #include <vector>
-
-#ifdef _WIN32
-# include "win.hpp"
-#else
-# include "uni.hpp"
-# include <sys/wait.h>
-# include <string.h>
-#endif
 
 namespace sys
 {

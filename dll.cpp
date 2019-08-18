@@ -6,12 +6,7 @@
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "err.hpp"
-
-#ifdef _WIN32
-# include "win.hpp"
-#else
-# include <dlfcn.h>
-#endif
+#include "pos.hpp"
 
 namespace sys
 {

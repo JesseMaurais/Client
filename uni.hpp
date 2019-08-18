@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <dirent.h>
 #include <signal.h>
+#include <setjmp.h>
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
@@ -25,32 +26,72 @@ namespace sys::uni
 		sys::warn(args..., fmt::err(no));
 	}
 
-	struct files : unique
+	class jmp
 	{
-		DIR* ptr;
+		sigjmp_buf buf;
 
-		files(char const *s)
+	private:
+
+		int operator()(int store)
 		{
-			ptr = opendir(s);
-			if (nullptr == ptr)
-			{
-				sys::err(here, "opendir", s);
-			}
+			return sigsetjmp(buf, store);
 		}
 
-		~files()
+		void raise(int value)
 		{
-			if (ptr and fail(closedir(ptr)))
-			{
-				sys::err(here, "closedir");
-			}
-		}
-
-		auto operator++()
-		{
-			return readdir(ptr);
+			siglongjmp(buf, value);
 		}
 	};
+
+	namespace sig
+	{
+		struct event : sigevent
+		{
+			using signature = void();
+			using observer = std::function<signature>;
+
+			event(observer ob, int type, pthread_attr_t* attr = nullptr)
+			: go(ob)
+			{
+				sigev_notify = type;
+				sigev_value.sival_ptr = this;
+				sigev_notify_function = thunk;
+				sigev_notify_attributes = attr;
+			}
+
+		private:
+
+			observer go;
+
+			static void thunk(sigval sv)
+			{
+				auto that = reinterpret_cast<event*>(sv.sival_ptr);
+				that->go();
+			}
+		};
+
+		struct timer : event
+		{
+			timer_t id;
+
+			timer(observer ob, int type = SIGEV_THREAD, clockid_t clock = CLOCK_REALTIME)
+			: event(ob, type)
+			{
+				if (fail(timer_create(clock, this, &id)))
+				{
+					sys::err(here, "timer_create");
+				}
+			}
+
+			~timer()
+			{
+				if (fail(timer_delete(id)))
+				{
+					sys::err(here, "timer_delete");
+				}
+			}
+		};
+	}
 
 	using routine = void*(void*);
 
@@ -443,6 +484,33 @@ namespace sys::uni
 				if (no) sys::uni::err(no, here);
 			}
 		};
+	};
+
+	struct files : unique
+	{
+		DIR* ptr;
+
+		files(char const *s)
+		{
+			ptr = opendir(s);
+			if (nullptr == ptr)
+			{
+				sys::err(here, "opendir", s);
+			}
+		}
+
+		~files()
+		{
+			if (ptr and fail(closedir(ptr)))
+			{
+				sys::err(here, "closedir");
+			}
+		}
+
+		auto operator++()
+		{
+			return readdir(ptr);
+		}
 	};
 }
 

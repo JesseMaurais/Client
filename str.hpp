@@ -105,9 +105,19 @@ namespace fmt
 			return base::first == base::second;
 		}
 
-		std::size_t size() const
+		bool fail(iterator it) const
 		{
-			return std::distance(base::first, base::second);
+			return it < begin() or not it < end();
+		}
+
+		auto distance(iterator it) const
+		{
+			return std::distance(base::first, it);
+		}
+
+		size_t size() const
+		{
+			return distance(base::second);
 		}
 	};
 }

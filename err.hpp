@@ -7,9 +7,11 @@
 #endif
 
 #ifdef NDEBUG
+# define alert(x, y)
 # define assert(x)
 # define verify(x) (x)
 #else
+# define alert(x) if (bool(x)) sys::err(here, #x);
 # define verify(x) assert(x)
 # define assert(x) if (not(x)) sys::warn(here, #x);
 #endif

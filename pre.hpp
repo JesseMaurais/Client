@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstring>
 #include <csignal>
+#include <csetjmp>
 #include <cstdlib>
 #include <cstdio>
 #include <cuchar>
@@ -67,6 +68,7 @@
 # include <poll.h>
 # include <sys/mman.h>
 # include <pthread.h>
+# include <setjmp.h>
 # include <dirent.h>
 # include <dlfcn.h>
 # include <unistd.h>

@@ -7,10 +7,7 @@
 #include "fmt.hpp"
 #include "err.hpp"
 #include "dir.hpp"
-
-#ifdef _WIN32
-# include "win.hpp"
-#endif
+#include "pos.hpp"
 
 namespace sys::file
 {

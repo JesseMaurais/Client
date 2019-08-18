@@ -6,14 +6,9 @@
 #include "dir.hpp"
 #include "sys.hpp"
 #include "err.hpp"
+#include "pos.hpp"
 #include <vector>
 #include <regex>
-
-#ifdef _WIN32
-# include "win.hpp"
-#else
-# include "uni.hpp"
-#endif
 
 namespace
 {
