@@ -17,7 +17,7 @@ namespace env
 			return sigjmp(buf);
 		}
 
-		voie raise(int value)
+		void operator()(int value)
 		{
 			longjmp(buf, value);
 		}
