@@ -20,8 +20,6 @@ namespace
 		return value;
 	}
 
-	std::errc const noerr { };
-
 	template <typename T>
 	T to_base(fmt::string_view u, int base)
 	{
@@ -29,11 +27,9 @@ namespace
 		auto begin = data(u);
 		auto end = begin + size(u);
 		auto code = std::from_chars(begin, end, value, base);
-		if (noerr != code.ec)
+		if (fmt::noerr != code.ec)
 		{
-			auto const ec = std::make_error_condition(code.ec);
-			auto const s = ec.message();
-			sys::warn(here, s);
+			sys::warn(here, code.ec);
 		}
 		return value;
 	}
@@ -48,16 +44,14 @@ namespace
 			auto begin = data(s);
 			auto end = begin + size(s);
 			code = std::to_chars(begin, end, value, base);
-			if (noerr != code.ec)
+			if (fmt::noerr != code.ec)
 			{
 				if (std::errc::value_too_large == code.ec)
 				{
 					s.resize(2*size(s), '\0');
 					continue;
 				}
-				auto const ec = std::make_error_condition(code.ec);
-				auto const msg = ec.message();
-				sys::warn(here, msg);
+				sys::warn(here, code.ec);
 			}
 			s.resize(code.ptr - begin);
 		}

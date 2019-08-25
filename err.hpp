@@ -7,7 +7,7 @@
 #endif
 
 #ifdef NDEBUG
-# define alert(x, y)
+# define alert(x)
 # define assert(x)
 # define verify(x) (x)
 #else
@@ -16,6 +16,8 @@
 # define assert(x) if (not(x)) sys::warn(here, #x);
 #endif
 
+#include <system_error>
+#include <exception>
 #include <sstream>
 #include "str.hpp"
 
@@ -38,7 +40,11 @@ namespace fmt
 		char const *file; int const line; char const *func;
 	};
 
-	std::ostream & operator<<(std::ostream &, where const &);
+	inline std::errc const noerr { };
+
+	std::ostream& operator<<(std::ostream&, where const &);
+	std::ostream& operator<<(std::ostream&, std::errc const &);
+	std::ostream& operator<<(std::ostream&, std::exception const &);
 
 	template <typename Arg, typename... Args>
 	auto err(Arg arg, Args... args)

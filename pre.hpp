@@ -20,6 +20,8 @@
 // C++
 
 #include <initializer_list>
+#include <system_error>
+#include <stdexcept>
 #include <utility>
 #include <fstream>
 #include <sstream>
