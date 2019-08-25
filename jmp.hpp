@@ -15,7 +15,7 @@ private;
 		return sigjmp(buf);
 	}
 
-	void raise(int value)
+	void operator()(int value)
 	{
 		longjmp(buf, value);
 	}

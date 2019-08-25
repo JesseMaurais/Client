@@ -5,6 +5,7 @@
 #include <ciso646>
 #include <cstddef>
 #include <cstdint>
+#include <cinttypes>
 #include <cstring>
 #include <csignal>
 #include <csetjmp>
@@ -30,13 +31,18 @@
 #include <string>
 #include <iterator>
 #include <vector>
+#include <array>
 #include <stack>
+#include <queue>
+#include <deque>
 #include <map>
 #include <set>
 #include <memory>
 #include <algorithm>
 #include <functional>
 #include <type_traits>
+#include <typeindex>
+#include <typeinfo>
 #include <limits>
 
 // OS

@@ -17,29 +17,29 @@ namespace sig
 		using signature = void(Args...);
 		using observer = std::function<signature>;
 		using container = std::map<Slot, observer>;
-		using count = typename container::size_type;
+		using size_type = typename container::size_type;
 
-		count const npos = ~count(0);
+		size_type const invalid = ~size_type(0);
 
-		virtual count connect(Slot const& id, observer ob)
+		auto connect(Slot const& id, observer ob)
 		{
 			slots.emplace(id, ob);
 			return slots.size();
 		}
 
-		virtual count disconnect(Slot const &id)
+		auto disconnect(Slot const &id)
 		{
 			return slots.erase(id);
 		}
 
-		count disconnect()
+		auto disconnect()
 		{
-			count const no = slots.size();
+			auto const sz = slots.size();
 			slots.clear();
-			return no;
+			return sz;
 		}
 
-		count find(Slot const &id) const
+		size_type find(Slot const &id) const
 		{
 			auto const it = slots.find(id);
 			auto const begin = slots.begin();
