@@ -2,30 +2,25 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dbg.hpp"  // Debug and unit test tools
-#include "int.hpp"  // Numeric conversions
 #include "fmt.hpp"  // Character string formatting
+#include "int.hpp"  // Numeric conversions
 #include "ini.hpp"  // Desktop configuration parsing
 #include "opt.hpp"  // Query user options
 #include "tag.hpp"  // Tag parsing
 #include "del.hpp"  // Parsing with delimiters
-#include "esc.hpp"  // ASCII escape codes
-#include "usr.hpp"  // User directories
-#include "cpu.hpp"  // CPU information
+#include "ctl.hpp"  // ASCII control sequences
+#include "ios.hpp"  // I/O Streams
 #include "sys.hpp"  // System interfaces
 #include "net.hpp"  // Network sockets
-#include "sio.hpp"  // Sequential I/O
 #include "sig.hpp"  // Signal handling
+#include "env.hpp"  // Environment variables
 #include "dir.hpp"  // Directory operators
+#include "usr.hpp"  // User directories
+#include "cpu.hpp"  // CPU information
 #include "dll.hpp"  // Dynamic libraries
 #include "shm.hpp"  // Shared memory
+#include "ips.hpp"  // Inter process streams
 #include "fifo.hpp" // Named pipes
-#include "pstream.hpp" // Process streams
-#include <stdexcept>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <csignal>
-#include <cmath>
 
 #define HELLO_WORLD "Hello, World!"
 #define HELLO_WIDE L"Hello, World!"

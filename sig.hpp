@@ -19,7 +19,7 @@ namespace sig
 		using container = std::map<Slot, observer>;
 		using count = typename container::size_type;
 
-		count const invalid = ~count(0);
+		count const npos = ~count(0);
 
 		virtual count connect(Slot const& id, observer ob)
 		{
@@ -44,7 +44,7 @@ namespace sig
 			auto const it = slots.find(id);
 			auto const begin = slots.begin();
 			auto const end = slots.end();
-			return end != it ? distance(begin, it) : invalid;
+			return end != it ? distance(begin, it) : npos;
 		}
 
 		void raise(Args... args) const
@@ -64,15 +64,6 @@ namespace sig
 			const auto pair = slots.equal_range(id);
 			for_each(pair.first, pair.second, filter);
 		}
-
-		#ifdef _OPENMP
-		template <typename Iterator, typename Process>
-		inline void for_each(iterator begin, iterator end, Process go)
-		{
-			#pragma omp for
-			for (auto it = begin; it != end; ++it) go(*it);
-		}
-		#endif
 
 	protected:
 
@@ -150,14 +141,6 @@ namespace sys::sig
 			{
 				ob(on); old.ob(on);
 			};
-		}
-	};
-
-	struct first : stack
-	{
-		first(int on, observer ob) : stack(on, ob)
-		{
-			assert(nullptr == old.ob);
 		}
 	};
 }

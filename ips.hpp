@@ -1,5 +1,5 @@
-#ifndef pstream_hpp
-#define pstream_hpp
+#ifndef ips_hpp
+#define ips_hpp
 
 #include <initializer_list>
 #include <iostream>

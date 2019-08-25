@@ -99,19 +99,7 @@ namespace
 
 	auto& open()
 	{
-		static struct config : ini
-		{
-			fmt::string const home = env::opt::directory(env::usr::config_home);
-
-			~config()
-			{
-				auto const path = extension(home);
-				std::ofstream file(path);
-				file << env::opt::put;
-			}
-
-		} keys;
-
+		static ini keys;
 		auto const path = extension(env::opt::config);
 		std::ifstream file(path);
 		if (file) file >> keys;

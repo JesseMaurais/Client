@@ -10,7 +10,6 @@
 #include <tlhelp32.h>
 #include "sys.hpp"
 #include "ptr.hpp"
-#include "sig.hpp"
 #include "err.hpp"
 
 #pragma comment(lib, "user32.lib")
@@ -67,10 +66,10 @@ namespace sys::win
 
 	struct msg : MSG
 	{
-		template <UINT Min, UINT Max> struct range
+		template <UINT Min, UINT Max> struct range : fmt::range<UINT>
 		{
-			constexpr UINT first = Min;
-			constexpr UINT second = Max;
+			using base = fmt::range<UINT>;
+			range() : base(Min, Max) { }
 		};
 
 		using key   = range<WM_KEYFIRST, WM_KEY_LAST>;

@@ -105,9 +105,9 @@ namespace fmt
 			return base::first == base::second;
 		}
 
-		bool fail(iterator it) const
+		bool operator()(iterator it) const
 		{
-			return it < begin() or not it < end();
+			return it < end() and not it < begin();
 		}
 
 		auto distance(iterator it) const

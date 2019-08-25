@@ -2,10 +2,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dbg.hpp"
-#include "esc.hpp"
-#include "sio.hpp"
+#include "ctl.hpp"
+#include "ios.hpp"
 #include "str.hpp"
-
 #include <stdexcept>
 #include <iostream>
 #include <cassert>
@@ -41,7 +40,7 @@ namespace dbg
 
 	void fail::run()
 	{
-		sio::eat err;
+		io::eat err;
 		try
 		{
 			die();
@@ -75,7 +74,7 @@ namespace dbg
 				string const indent(max_size - size(name), ' ');
 				out << faint << name << intense_off << indent;
 
-				::sio::eat err;
+				io::eat err;
 				that->run();
 				auto s = err.str();
 				if (not empty(s))
