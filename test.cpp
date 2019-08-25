@@ -54,10 +54,11 @@ namespace
 	// negatives
 
 	//FAIL(dbg_assert) { assert(false); }
-	//FAIL(dbg_except) { throw std::runtime_error("Holy Cow!"); }
 	//FAIL(dbg_equal) { assert(true == false); }
 	//FAIL(dbg_unequal) { assert(true != true); }
-	
+	FAIL(dbg_except) { throw std::runtime_error("Holy Cow!"); }
+	FAIL(dbg_warn) { sys::warn(here, "Don't do that!"); }
+
 	//
 	// Checked integer and floating point conversions
 	//
