@@ -44,7 +44,7 @@ namespace sig
 			auto const it = slots.find(id);
 			auto const begin = slots.begin();
 			auto const end = slots.end();
-			return end != it ? distance(begin, it) : npos;
+			return end != it ? distance(begin, it) : invalid;
 		}
 
 		void raise(Args... args) const

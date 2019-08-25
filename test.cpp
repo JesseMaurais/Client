@@ -19,6 +19,7 @@
 #include "cpu.hpp"  // CPU information
 #include "dll.hpp"  // Dynamic libraries
 #include "shm.hpp"  // Shared memory
+#include "fds.hpp"  // File descriptor streams
 #include "ips.hpp"  // Inter process streams
 #include "fifo.hpp" // Named pipes
 
@@ -29,7 +30,7 @@
 #define DLROW_OLLEH "!dlroW ,olleH"
 
 #ifdef NDEBUG
-static_assert("Compiling unit tests without debug mode.");
+static_assert(false, "Compiling unit tests without debug mode.");
 #endif
 
 env::opt::view const env::opt::application = "Modify";
@@ -386,11 +387,24 @@ namespace
 	}
 
 	//
-	// Inter-process communications
+	// I/O Streams
 	//
 
+	TEST(ios_fds)
+	{
+		io::ifdstream in { __FILE__ };
+		assert(in);
+		fmt::string line;
+		fmt::size_type count = 0;
+		while (std::getline(in, line))
+		{
+			++count;
+			assert(__LINE__ != count or line.find("assert") != fmt::npos);
+		}
+	}
+
 	/* Break WIN32
-	TEST(ipc_rev)
+	TEST(ios_ipc)
 	{
 		io::pstream ps { "rev" };
 		ps << HELLO_WORLD;
@@ -400,7 +414,7 @@ namespace
 		assert(s == DLROW_OLLEH);
 	}
 
-	TEST(ipc_map)
+	TEST(ios_map)
 	{
 		sys::file::descriptor file;
 		file.open(__FILE__, sys::file::rd);

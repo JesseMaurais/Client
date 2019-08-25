@@ -15,12 +15,12 @@ namespace io
 	template
 	<
 	 class Char,
-	 template <class> class Traits = std::char_traits
+	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
 	class basic_fdbuf : public basic_stringbuf<Char, Traits, Alloc>
 	{
-		using base = basic_membuf<Char, Traits, Alloc>;
+		using base = basic_stringbuf<Char, Traits, Alloc>;
 
 	public:
 
@@ -78,8 +78,8 @@ namespace io
 		 class Char,
 		 template <class> class Traits,
 		 template <class> class Alloc,
-		 template <class, class> basic_stream,
-		 sys::file::openmode default_mode
+		 template <class, class> class basic_stream,
+		 sys::file::mode default_mode
 		>
 		class basic_fdstream
 		: public basic_fdbuf<Char, Traits, Alloc>
@@ -94,9 +94,9 @@ namespace io
 		public:
 
 			basic_fdstream(std::size_t sz = sys::file::bufsiz, int fd = -1)
-			: size(sz)
-			, fdbuf(fd)
+			: fdbuf(fd)
 			, base(this)
+			, size(sz)
 			{ }
 
 			basic_fdstream(string_view path, mode mask = default_mode)
@@ -107,21 +107,25 @@ namespace io
 
 			void open(string_view path, mode mask = default_mode)
 			{
-				if (mask & sys::file::write and mask & sys::file::read)
+				mask = mode(mask | default_mode);
+
+				if (mask & sys::file::rw)
 				{
 					fdbuf::setbufsiz(size, size);
 				}
-				else if (mask & sys::file::write)
+				else 
+				if (mask & sys::file::wr)
 				{
 					fdbuf::setbufsiz(0, size);
 				}
-				else if (mask & sys::file::read)
+				else 
+				if (mask & sys::file::rd)
 				{
 					fdbuf::setbufsiz(size, 0);
 				}
 
-				fmt::string const s = fmt::to_string(path);
-				this->file.open(s, mask | default_mode);
+				auto const s = fmt::to_string(path);
+				this->file.open(data(s), mask);
 			}
 
 		private:
@@ -140,9 +144,7 @@ namespace io
 	>
 	using basic_fdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc,
-	 std::basic_iostream,
-	 sys::file::read|sys::file::write
+	 Char, Traits, Alloc, std::basic_iostream, sys::file::rw
 	>;
 
 	using fdstream = basic_fdstream<char>;
@@ -156,9 +158,7 @@ namespace io
 	>
 	using basic_ifdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc,
-	 std::basic_istream,
-	 sys::file::read
+	 Char, Traits, Alloc, std::basic_istream, sys::file::rd
 	>;
 
 	using ifdstream = basic_ifdstream<char>;
@@ -172,9 +172,7 @@ namespace io
 	>
 	using basic_ofdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc,
-	 std::basic_ostream,
-	 sys::file::write
+	 Char, Traits, Alloc, std::basic_ostream, sys::file::wr
 	>;
 
 	using ofdstream = basic_ofdstream<char>;
