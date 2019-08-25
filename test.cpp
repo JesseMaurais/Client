@@ -395,12 +395,12 @@ namespace
 		io::ifdstream in { __FILE__ };
 		assert(in);
 		fmt::string line;
-		fmt::size_type count = 0;
+		fmt::size_type n = 0;
 		while (std::getline(in, line))
 		{
-			++count;
-			assert(__LINE__ != count or line.find("assert") != fmt::npos);
+			assert(__LINE__ != ++n or line.find("assert") != fmt::npos);
 		}
+		assert(__LINE__ < n);
 	}
 
 	/* Break WIN32
