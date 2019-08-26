@@ -1,5 +1,5 @@
 check/*
-.make/Makefile
+.make/Makefile.mk
 sys.ini
 tags
 test
