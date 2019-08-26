@@ -31,7 +31,7 @@ endif // SHELL
 
 STD=c++17
 PCH=pre.hpp
-SRC=cpu.cpp dbg.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp ini.cpp int.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
+SRC=cpu.cpp dbg.cpp dev.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp ini.cpp int.cpp opt.cpp shm.cpp sig.cpp socket.cpp sys.cpp usr.cpp
 BIN=test.cpp docy.cpp
 ALL=$(SRC) $(BIN)
 

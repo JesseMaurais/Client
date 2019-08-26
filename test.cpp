@@ -15,6 +15,7 @@
 #include "sig.hpp"  // Signal handling
 #include "env.hpp"  // Environment variables
 #include "dir.hpp"  // Directory operators
+#include "dev.hpp"  // Development variables
 #include "usr.hpp"  // User directories
 #include "cpu.hpp"  // CPU information
 #include "dll.hpp"  // Dynamic libraries
@@ -288,9 +289,9 @@ namespace
 	{
 		sysini()
 		<< "[Development Directores]\n"
-		<< kv("lib", fmt::dir::join(env::dir::lib))
-		<< kv("share", fmt::dir::join(env::dir::share))
-		<< kv("include", fmt::dir::join(env::dir::include))
+		<< kv("lib", fmt::dir::join(env::dev::lib))
+		<< kv("share", fmt::dir::join(env::dev::share))
+		<< kv("include", fmt::dir::join(env::dev::include))
 		<< std::endl;
 	}
 

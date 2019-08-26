@@ -51,13 +51,27 @@ namespace fmt::dir
 
 namespace env::dir
 {
-	extern env::view const& run;
-	inline env::span const& bin = ::env::paths;
-	extern env::span const& lib;
-	extern env::span const& share;
-	extern env::span const& include;
+	using entry = predicate<fmt::string_view>;
+	constexpr auto stop = falsity<fmt::string_view>;
 
-	bool fail(fmt::string_view path);
+	entry copy(fmt::string&);
+	entry match(fmt::string_view);
+	entry insert(fmt::string_vector&);
+	entry mode(sys::file::mode);
+
+	extern bool find(fmt::string_view dir, entry view);
+	inline bool find(fmt::string_view_span list, entry view)
+	{
+		for (auto const dir : list)
+		{
+			if (find(dir, view))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	fmt::string_view make(fmt::string_view path);
 	bool remove(fmt::string_view path);
 
@@ -80,27 +94,6 @@ namespace env::dir
 
 		fmt::string_view stem;
 	};
-
-	using entry = predicate<fmt::string_view>;
-	constexpr auto stop = falsity<fmt::string_view>;
-
-	entry copy(fmt::string&);
-	entry match(fmt::string_view);
-	entry insert(fmt::string_vector&);
-	entry mode(sys::file::mode);
-
-	extern bool find(fmt::string_view dir, entry view);
-	inline bool find(fmt::string_view_span list, entry view)
-	{
-		for (auto const dir : list)
-		{
-			if (find(dir, view))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
 }
 
 #endif // file
