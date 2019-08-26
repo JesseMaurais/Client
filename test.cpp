@@ -173,14 +173,14 @@ namespace
 		assert(t[2] == "banana");
 	}
 
-	TEST(fmt_ini)
+	TEST(doc_ini)
 	{
 		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
 		std::fstream file(path);
-		ini keys;
+		doc::ini keys;
 		file >> keys;
 
-		ini::pair entry { "NMAKE", "MAKECONFIG" };
+		doc::ini::pair entry { "NMAKE", "MAKECONFIG" };
 		auto const value = keys.get(entry);
 		assert(not empty(value));
 		assert(fmt::npos != value.find("/D_NMAKE"));
@@ -253,9 +253,9 @@ namespace
 		assert(not fail(env::dir::remove(stem)));
 		{
 			env::dir::tmp tmp(d);
-			assert(not sys::file::fail(d));
+			assert(not sys::dir::fail(d));
 		}
-		assert(sys::file::fail(d));
+		assert(sys::dir::fail(d));
 	}
 
 	TEST(env_opt_at)

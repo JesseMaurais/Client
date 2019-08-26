@@ -37,14 +37,14 @@ namespace fmt::path
 	}
 }
 
-namespace sys::file
+namespace sys::path
 {
-	bool fail(fmt::string_view path, mode um)
+	bool fail(fmt::string_view path, file::mode um)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return sys::file::fail(s);
+			return sys::path::fail(s);
 		}
 
 		auto const c = path.data();
@@ -83,13 +83,18 @@ namespace env::dir
 {
 	bool find(fmt::string_view path, entry view)
 	{
-		auto const buf = fmt::to_string(path);
-		auto const s = buf.c_str();
+		if (not fmt::terminated(path))
+		{
+			auto const s = fmt::to_string(path);
+			return env::dir::find(s, view);
+		}
+
+		auto const c = path.data();
 
 		#ifdef _WIN32
 		{
-			sys::win::files dir(s);
-			if (dir.h) do
+			sys::win::files dir(c);
+			if (not sys::win::fail(dir.h)) do
 			{
 				auto const part = fmt::dir::split(dir.cFileName);
 				auto const name = part.back();
@@ -103,8 +108,8 @@ namespace env::dir
 		}
 		#else
 		{
-			sys::uni::files dir(s);
-			while (dir.ptr) // as if
+			sys::uni::files dir(c);
+			while (nullptr != dir.ptr) // as if
 			{
 				auto const ent = ++dir;
 				if (ent)

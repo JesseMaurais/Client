@@ -61,7 +61,7 @@ namespace
 				constexpr auto base = "applications.menu";
 				auto const menu = fmt::join({env::usr::menu_prefix, base});
 				path = fmt::dir::join(env::usr::config_home, "menus", menu);
-				if (sys::file::fail(path))
+				if (sys::path::fail(path))
 				{
 					fmt::string_view_span span = env::usr::config_dirs;
 					for (auto const dir : span)
@@ -292,7 +292,7 @@ namespace
 				auto const path = fmt::dir::join(env::usr::config_home, base);
 				std::ifstream in(path);
 				fmt::string line;
-				while (ini::getline(in, line))
+				while (doc::ini::getline(in, line))
 				{
 					constexpr char quote = '"';
 					auto const first = line.find_first_not_of(quote);

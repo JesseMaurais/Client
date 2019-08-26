@@ -49,9 +49,9 @@ namespace fmt::dir
 	}
 }
 
-namespace sys::file
+namespace sys::path
 {
-	bool fail(fmt::string_view path, mode um = ok);
+	bool fail(fmt::string_view path, file::mode um = file::ok);
 }
 
 namespace sys::dir

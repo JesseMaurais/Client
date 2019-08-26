@@ -111,14 +111,14 @@ namespace
 
 	auto& open()
 	{
-		static ini keys;
+		static doc::ini keys;
 		auto const path = extension(env::opt::config);
 		std::ifstream file(path);
 		if (file) file >> keys;
 		return keys;
 	}
 
-	ini & registry()
+	auto& registry()
 	{
 		static auto& keys = open();
 		return keys;
@@ -254,7 +254,7 @@ namespace env::opt
 				if (0 == argn)
 				{
 					auto const key = make_pair(it->name);
-					auto const value = ini::join(args);
+					auto const value = doc::ini::join(args);
 					(void) registry().put(key, value);
 				}
 			}
@@ -269,7 +269,7 @@ namespace env::opt
 			}
 			else
 			{
-				auto const value = ini::join(args);
+				auto const value = doc::ini::join(args);
 				(void) registry().put(key, value);
 			}
 		}
@@ -473,7 +473,7 @@ namespace env::opt
 		{
 			return value;
 		}
-		return ini::split(u);
+		return doc::ini::split(u);
 	}
 
 	bool put(view key, span value)
@@ -484,7 +484,7 @@ namespace env::opt
 
 	bool put(pair key, span value)
 	{
-		auto const s = ini::join(value);
+		auto const s = doc::ini::join(value);
 		return put(key, s);
 	}
 }
