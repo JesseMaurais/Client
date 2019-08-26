@@ -37,88 +37,50 @@ namespace fmt::path
 	}
 }
 
-namespace
+namespace sys::file
 {
-	struct : env::view
+	bool fail(fmt::string_view path, mode um)
 	{
-		operator fmt::string_view() const final
+		if (not fmt::terminated(path))
 		{
-			static auto const run =	env::opt::directory(env::usr::runtime_dir);
-			static env::dir::tmp tmp(run);
-			return run;
+			auto const s = fmt::to_string(path);
+			return sys::file::fail(s);
 		}
 
-	} RUN;
+		auto const c = path.data();
+		return sys::file::fail(c, um);
+	}
+}
 
-	struct : env::span
+namespace sys::dir
+{
+	bool fail(fmt::string_view path, file::mode um)
 	{
-		operator fmt::string_view_span() const final
+		if (not fmt::terminated(path))
 		{
-			static fmt::string_view_vector t;
-			fmt::string_view u = sys::env::get("LIB");
-			t = fmt::dir::split(u);
-			return t;
+			auto const s = fmt::to_string(path);
+			return sys::dir::fail(s);
 		}
 
-	} LIB;
-
-	struct : env::span
-	{
-		static auto get()
+		auto const c = path.data();
+		class sys::stat st(c);
+		if (sys::fail(st))
 		{
-			#ifdef __WIN32__
-			{
-				return sys::env::get("PATH");
-			}
-			#else
-			#ifdef __AIX__
-			{
-				return sys::env::get("LIBPATH");
-			}
-			#else
-			#ifdef __HPUX__
-			{
-				return sys::env::get("SHLIB_PATH");
-			}
-			#else
-			{
-				return sys::env::get("LD_LIBRARY_PATH");
-			}
-			#endif
-			#endif
-			#endif
+			return failure;
 		}
 
-		operator fmt::string_view_span() const final
+		if (not S_ISDIR(st.st_mode))
 		{
-			static fmt::string_view_vector t;
-			auto const u = get();
-			t = fmt::path::split(u);
-			return t;
+			return failure;
 		}
 
-	} SHARE;
-
-	struct : env::span
-	{
-		operator fmt::string_view_span() const final
-		{
-			static fmt::string_view_vector t;
-			auto const u = sys::env::get("INCLUDE");
-			t = fmt::path::split(u);
-			return t;
-		}
-
-	} INCLUDE;
+		auto const mask = sys::file::access(um);
+		return st.st_mode & mask;
+	}
 }
 
 namespace env::dir
 {
-	env::view const& run = RUN;
-	env::span const& lib = LIB;
-	env::span const& share = SHARE;
-	env::span const& include = INCLUDE;
-
 	bool find(fmt::string_view path, entry view)
 	{
 		auto const buf = fmt::to_string(path);
@@ -159,19 +121,6 @@ namespace env::dir
 		#endif
 	}
 
-	bool fail(fmt::string_view path)
-	{
-		if (not fmt::terminated(path))
-		{
-			auto const s = fmt::to_string(path);
-			return env::dir::fail(s);
-		}
-
-		auto const c = data(path);
-		int const ok = sys::access(c, F_OK);
-		return sys::fail(ok);
-	}
-
 	fmt::string_view make(fmt::string_view path)
 	{
 		std::stack<fmt::string_view> stack;
@@ -180,7 +129,7 @@ namespace env::dir
 		auto folders = fmt::dir::split(path);
 		auto stem = path;
 
-		while (env::dir::fail(stem))
+		while (sys::dir::fail(stem))
 		{
 			stack.push(folders.back());
 			folders.pop_back();

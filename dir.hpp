@@ -1,7 +1,7 @@
 #ifndef dir_hpp
 #define dir_hpp
 
-#include "env.hpp"
+#include "str.hpp"
 #include "fun.hpp"
 #include "file.hpp"
 
@@ -47,6 +47,16 @@ namespace fmt::dir
 	{
 		return impl::join(fmt::string_view_span(list));
 	}
+}
+
+namespace sys::file
+{
+	bool fail(fmt::string_view path, mode um = ok);
+}
+
+namespace sys::dir
+{
+	bool fail(fmt::string_view path, file::mode um = file::ok);
 }
 
 namespace env::dir

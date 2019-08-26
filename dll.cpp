@@ -5,6 +5,7 @@
 #include "sys.hpp"
 #include "fmt.hpp"
 #include "dir.hpp"
+#include "dev.hpp"
 #include "err.hpp"
 #include "pos.hpp"
 
@@ -98,6 +99,7 @@ namespace sys
 
 	dll dll::find(fmt::string_view basename)
 	{
+		using namespace ::env::dev;
 		using namespace ::env::dir;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
 		::env::dir::find(share, match(name) and copy(name) and stop);

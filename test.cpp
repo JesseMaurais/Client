@@ -248,14 +248,14 @@ namespace
 		auto const d = fmt::dir::join(env::tmpdir, "my", "test", "dir");
 		auto const stem = env::dir::make(d);
 		assert(not empty(stem));
-		assert(not env::dir::fail(d));
-		assert(not env::dir::fail(stem));
+		assert(not sys::dir::fail(d));
+		assert(not sys::dir::fail(stem));
 		assert(not fail(env::dir::remove(stem)));
 		{
 			env::dir::tmp tmp(d);
-			assert(not env::dir::fail(d));
+			assert(not sys::file::fail(d));
 		}
-		assert(env::dir::fail(d));
+		assert(sys::file::fail(d));
 	}
 
 	TEST(env_opt_at)

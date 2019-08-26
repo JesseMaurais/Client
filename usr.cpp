@@ -61,13 +61,13 @@ namespace
 				constexpr auto base = "applications.menu";
 				auto const menu = fmt::join({env::usr::menu_prefix, base});
 				path = fmt::dir::join(env::usr::config_home, "menus", menu);
-				if (env::dir::fail(path))
+				if (sys::file::fail(path))
 				{
 					fmt::string_view_span span = env::usr::config_dirs;
 					for (auto const dir : span)
 					{
 						path = fmt::dir::join(dir, menu);
-						if (not env::dir::fail(path))
+						if (not sys::dir::fail(path))
 						{
 							break;
 						}

@@ -28,6 +28,8 @@ namespace sys::file
 		ox   = wo | ex,
 	};
 
+	bool fail(char const* path, mode um = ok);
+
 	constexpr int owner(int bit)
 	{
 		return (bit & rwx) << 6;
@@ -58,9 +60,19 @@ namespace sys::file
 		other_x = other(ex),
 	};
 
-	inline permit own(mode bit)
+	inline permit owner(mode bit)
 	{
-		return static_cast<permit>(owner(bit));
+		return static_cast<permit>(owner(static_cast<int>(bit)));
+	}
+
+	inline permit group(mode bit)
+	{
+		return static_cast<permit>(group(static_cast<int>(bit)));
+	}
+
+	inline permit other(mode bit)
+	{
+		return static_cast<permit>(other(static_cast<int>(bit)));
 	}
 
 	int access(mode);
@@ -83,9 +95,9 @@ namespace sys::file
 			(void) set(fd);
 		}
 
-		descriptor(char const *path, mode bit = wo, permit id = own(rw))
+		descriptor(char const *path, mode bit = wo, permit pm = owner(rw))
 		{
-			open(path, bit, id);
+			open(path, bit, pm);
 		}
 
 		~descriptor()
@@ -120,7 +132,7 @@ namespace sys::file
 			return read(static_cast<void*>(buf), sz);
 		}
 
-		void open(char const* path, mode bit = wo, permit id = own(rw));
+		void open(char const* path, mode bit = wo, permit pm = owner(rw));
 		void close();
 
 	private:

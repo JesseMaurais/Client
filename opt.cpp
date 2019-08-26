@@ -63,13 +63,14 @@ namespace
 			if (empty(s))
 			{
 				auto home = env::opt::directory(env::usr::config_home);
-				if (env::dir::fail(home))
+				if (sys::dir::fail(home))
 				{
 					fmt::string_view_span dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
 					{
 						s = env::opt::directory(dir);
-						if (env::dir::fail(s))
+						auto const c = data(s);
+						if (sys::dir::fail(c))
 						{
 							continue;
 						}
@@ -96,6 +97,17 @@ namespace
 		}
 
 	} CACHE;
+
+	struct : env::view
+	{
+		operator fmt::string_view() const final
+		{
+			static auto const s = env::opt::directory(env::usr::runtime_dir);
+			static env::dir::tmp rundir(s);
+			return s;
+		}
+
+	} RUN;
 
 	auto& open()
 	{
@@ -153,6 +165,7 @@ namespace env::opt
 	env::view const& program = PROGRAM;
 	env::view const& config = CONFIG;
 	env::view const& cache = CACHE;
+	env::view const& run = RUN;
 
 	view directory(view stem)
 	{

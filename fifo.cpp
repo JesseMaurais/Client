@@ -3,7 +3,7 @@
 
 #include "fifo.hpp"
 #include "sys.hpp"
-#include "env.hpp"
+#include "opt.hpp"
 #include "fmt.hpp"
 #include "err.hpp"
 #include "dir.hpp"
@@ -41,7 +41,7 @@ namespace sys::file
 		}
 		#else
 		{
-			auto const dir = fmt::dir::join(::env::dir::run, ".fifo");
+			auto const dir = fmt::dir::join(::env::opt::run, ".fifo");
 			auto const s = data(dir);
 
 			constexpr mode_t rw = S_IRGRP | S_IWGRP;

@@ -78,16 +78,16 @@ namespace
 		operator fmt::string_view_span() const final
 		{
 			static fmt::string_view_vector t;
-			auto const u = env::::opt::get("INCLUDE");
+			auto const u = env::opt::get("INCLUDE");
 			t = fmt::path::split(u);
 			return t;
 		}
 
 	} INCLUDE;
 
-	struct : env::span
+	struct : env::view
 	{
-		operator fmt::string_view_span() const final
+		operator fmt::string_view() const final
 		{
 			return env::opt::get("CFLAGS");
 		}
@@ -96,9 +96,9 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view_span() const final
+		operator fmt::string_view() const final
 		{
-			auto const u = sys::env::get("CXX");
+			auto u = sys::env::get("CXX");
 			if (empty(u))
 			{
 				u = "c++";
@@ -115,7 +115,7 @@ namespace env::dev
 	env::span const& lib = LIB;
 	env::span const& share = SHARE;
 	env::span const& include = INCLUDE;
-	env::span const& cflags = CFLAGS;
+	env::view const& cflags = CFLAGS;
 	env::view const& cc = CC;
 }
 

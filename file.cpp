@@ -127,6 +127,11 @@ namespace sys::file
 		return flags;
 	}
 
+	bool fail(char const* path, mode um)
+	{
+		return sys::fail(sys::access(path, access(um)));
+	}
+
 	size_t bufsiz = BUFSIZ;
 
 	void descriptor::open(char const* path, mode bit, permit id)

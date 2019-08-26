@@ -15,11 +15,12 @@ namespace env::opt
 	using word = long long;
 	using quad = long double;
 
+	extern view const application;
 	extern env::span const& arguments;
 	extern env::view const& program;
 	extern env::view const& config;
 	extern env::view const& cache;
-	extern view const application;
+	extern env::view const& run;
 	view directory(view stem);
 
 	struct description
