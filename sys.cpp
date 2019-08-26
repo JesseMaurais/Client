@@ -13,19 +13,20 @@ namespace sys
 	#ifdef _WIN32
 	namespace win::fmt
 	{
-		LPSTR err(DWORD id, HMODULE h)
+		char* err(unsigned long id, void* ptr)
 		{
 			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
 			                    | FORMAT_MESSAGE_IGNORE_INSERTS
 		    	                | FORMAT_MESSAGE_FROM_HMODULE
 			                    | FORMAT_MESSAGE_FROM_SYSTEM;
 
+			auto h = static_cast<HANDLE>(ptr);
 			if (sys::win::fail(h))
 			{
 				h = GetModuleHandle(nullptr);
 			}
 			
-			static thread_local auto ptr = null_ptr<HLOCAL>(LocalFree);
+			static thread_local auto tls = null_ptr<HLOCAL>(LocalFree);
 
 			LPSTR const str = nullptr;
 			auto const addr = (LPSTR) &str;
@@ -42,7 +43,7 @@ namespace sys
 		
 			if (0 < size)
 			{
-				ptr.reset((HLOCAL) str);
+				tls.reset((HLOCAL) str);
 			}
 			return str;
 		}

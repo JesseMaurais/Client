@@ -61,10 +61,11 @@ clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.
 #ifdef _MSC_VER
 
 add(CFLAGS, -nologo -std:$(STD) -W4 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -EHsc -permissive-)
+add(LDFLAGS, -nologo)
 ifndef NDEBUG
 add(CFLAGS, -Z7)
+add(LDFLAGS, -Z7)
 endif
-add(LDFLAGS, -nologo)
 
 OBJ=$(SRC:.cpp=.obj)
 DEP=$(PCH:.hpp=.pch) $(OBJ)

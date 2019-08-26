@@ -12,12 +12,11 @@
 
 namespace
 {
-	static auto const rundir = env::opt::directory(env::usr::runtime_dir);
-
 	struct : env::view
 	{
 		operator fmt::string_view() const final
 		{
+			static auto const rundir = env::opt::directory(env::usr::runtime_dir);
 			static env::dir::tmp tmp(rundir);
 			return rundir;
 		}

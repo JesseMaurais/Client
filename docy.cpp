@@ -1,6 +1,8 @@
 #include "opt.hpp"
 #include "err.hpp"
 #include <cstdlib>
+#include <iostream>
+#include <utility>
 
 env::opt::view const env::opt::application = "docy";
 

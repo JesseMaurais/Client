@@ -78,7 +78,7 @@ namespace sys
 
 	namespace win::fmt
 	{
-		LPSTR err(DWORD dw, HMODULE h = nullptr);
+		char* err(unsigned long dw, void* h = nullptr);
 	}
 
 	using size_t = unsigned int;
