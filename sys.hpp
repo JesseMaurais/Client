@@ -76,6 +76,11 @@ namespace sys
 		constexpr auto env = "%[A-Z_a-z][A-Z_a-z-1-9]*%";
 	}
 
+	namespace win::fmt
+	{
+		LPSTR err(DWORD dw, HMODULE h = nullptr);
+	}
+
 	using size_t = unsigned int;
 	using ssize_t = signed int;
 	using off_t = long;

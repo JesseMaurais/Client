@@ -5,6 +5,7 @@
 #include "file.hpp"
 #include "buf.hpp"
 #include "str.hpp"
+#include "int.hpp"
 
 namespace io
 {
@@ -53,12 +54,14 @@ namespace io
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
-			return file.write(s, sizeof (char_type) * n);
+			auto const sz = fmt::to_size(sizeof (char_type) * n);
+			return file.write(s, sz);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
-			return file.read(s, sizeof (char_type) * n);
+			auto const sz = fmt::to_size(sizeof (char_type) * n);
+			return file.read(s, sz);
 		}
 	};
 

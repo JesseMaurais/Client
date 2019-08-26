@@ -11,6 +11,7 @@
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include "str.hpp"
 
 #pragma comment(lib, "user32.lib")
 
@@ -21,11 +22,6 @@ namespace sys::win
 	inline bool fail(HANDLE h)
 	{
 		return nullptr == h or invalid == h;
-	}
-
-	namespace fmt
-	{
-		LPSTR err(DWORD id, HMODULE h = nullptr);
 	}
 
 	template <typename... Args>
@@ -66,13 +62,13 @@ namespace sys::win
 
 	struct msg : MSG
 	{
-		template <UINT Min, UINT Max> struct range : fmt::range<UINT>
+		template <UINT Min, UINT Max> struct range : ::fmt::range<UINT>
 		{
-			using base = fmt::range<UINT>;
+			using base = ::fmt::range<UINT>;
 			range() : base(Min, Max) { }
 		};
 
-		using key   = range<WM_KEYFIRST, WM_KEY_LAST>;
+		using key   = range<WM_KEYFIRST, WM_KEYLAST>;
 		using mouse = range<WM_MOUSEFIRST, WM_MOUSELAST>;
 		using user  = range<WM_USER, 0x7FFF>;
 		using app   = range<WM_APP, 0xBFFF>;
@@ -81,9 +77,9 @@ namespace sys::win
 		inline bool get(UINT min = 0, UINT max = 0, HWND hw = nullptr)
 		{
 			auto const result = GetMessage(this, hw, min, max);
-			if (sys::win::fail(result))
+			if (sys::fail(result))
 			{
-				sys::win::err(here, "GetMessage"):
+				sys::win::err(here, "GetMessage");
 				return failure;
 			}
 			return success;
@@ -111,14 +107,14 @@ namespace sys::win
 		{
 			return put(thread, WM_QUIT);
 		}
-	}
+	};
 
-	template <typename T> struct zero : T
+	template <class T> struct zero : T
 	{
 		zero() { ZeroMemory(this, sizeof(T)); }
 	};
 
-	template <typename T, DWORD T::*Size> struct size : zero<T>
+	template <class T, DWORD T::*Size> struct size : zero<T>
 	{
 		size() { this->*Size = sizeof(T); }
 	};
@@ -165,7 +161,7 @@ namespace sys::win
 		int open(int flags)
 		{
 			int const fd = sys::win::open(h, flags);
-			h = invalid;
+			h = sys::win::invalid;
 			return fd;
 		}
 	};
@@ -218,7 +214,7 @@ namespace sys::win
 		}
 	};
 
-	struct srwlock : unique, SRWLOCK
+	struct srwlock : SRWLOCK
 	{
 		srwlock()
 		{
@@ -284,7 +280,7 @@ namespace sys::win
 		}
 	};
 
-	struct processes : unique, process_entry
+	struct processes : process_entry
 	{
 		snapshot snap;
 
@@ -305,7 +301,7 @@ namespace sys::win
 		}
 	};
 
-	struct modules : unique, module_entry
+	struct modules : module_entry
 	{
 		snapshot snap;
 
@@ -326,7 +322,7 @@ namespace sys::win
 		}
 	};
 
-	struct threads : unique, thread_entry
+	struct threads : thread_entry
 	{
 		snapshot snap;
 
@@ -347,7 +343,7 @@ namespace sys::win
 		}
 	};
 
-	struct files : unique, WIN32_FIND_DATA
+	struct files : WIN32_FIND_DATA
 	{
 		HANDLE h;
 

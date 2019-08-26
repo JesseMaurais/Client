@@ -189,7 +189,7 @@ namespace env::opt
 		auto it = end;
 		pair entry;
 
-		int argn = 0;
+		word argn = 0;
 		list args;
 		list extra;
 

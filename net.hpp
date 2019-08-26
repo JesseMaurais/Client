@@ -35,7 +35,12 @@ namespace sys::net
 	template <typename... Args>
 	inline void err(Args... args)
 	{
-			sys::win::err(args...);
+		if (sys::debug)
+		{
+			auto const no = WSAGetLastError();
+			auto const s = sys::win::fmt::err(no);
+			sys::warn(args..., s);
+		}
 	}
 
 	constexpr auto close = ::closesocket;
