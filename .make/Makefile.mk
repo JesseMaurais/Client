@@ -1,32 +1,22 @@
-#line 1 ".make/Makefile.cc"
-
-
-
-
-
-
-
-
-
-
-
-
-
-#line 15 ".make/Makefile.cc"
-
-
-
-!ifdef SHELL
+# 1 ".make/Makefile.cc"
+# 1 "<built-in>" 1
+# 1 "<built-in>" 3
+# 382 "<built-in>" 3
+# 1 "<command line>" 1
+# 1 "<built-in>" 2
+# 1 ".make/Makefile.cc" 2
+# 18 ".make/Makefile.cc"
+ifdef SHELL
 RM=rm -f
 MD=mkdir -p
-!else
-!ifdef COMSPEC
+else
+ifdef COMSPEC
 RM=del -f
 MD=md
-!else
-!error "Cannot determine your system commands."
-!endif 
-!endif 
+else
+$(error "Cannot determine your system commands.")
+endif
+endif
 
 
 
@@ -37,67 +27,39 @@ BIN=test.cpp docy.cpp
 ALL=$(SRC) $(BIN)
 
 .SUFFIXES: .cpp .hpp .o .d .gch .obj .pdb .pch .lib .exp .ilk .log .i .db
+# 47 ".make/Makefile.cc"
+CFLAGS += -D_XOPEN_SOURCE=600
+LDFLAGS += -ldl -lrt -lpthread
+EXE=$(BIN:.cpp=)
 
 
-
-
-CFLAGS=$(CFLAGS) -D_WIN32
-EXE=$(BIN:.cpp=.exe)
-
-
-
-
-
-
-#line 52 ".make/Makefile.cc"
 
 
 
 all: $(EXE)
 
 clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.i
+# 80 ".make/Makefile.cc"
+CFLAGS += -std=$(STD) -Wall -Wextra -Wpedantic -MP -MMD
+ifndef NDEBUG
+CFLAGS += -g
+endif
+LDFLAGS += -rdynamic
+
+OBJ=$(SRC:.cpp=.o)
+DEP=$(PCH).gch $(OBJ)
+
+test: $(DEP) test.o; $(CXX) $(LDFLAGS) $(OBJ) test.o -o $@
+docy: $(DEP) docy.o; $(CXX) $(LDFLAGS) $(OBJ) docy.o -o $@
+.cpp.o: ; $(CXX) $(CFLAGS) -include $(PCH) -c $<
+$(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
+
+
+-include $(ALL:.cpp=.d)
 
 
 
 
-
-CFLAGS=$(CFLAGS) -nologo -std:$(STD) -W4 -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -EHsc -permissive-
-LDFLAGS=$(LDFLAGS) -nologo
-!ifndef NDEBUG
-CFLAGS=$(CFLAGS) -Z7
-LDFLAGS=$(LDFLAGS) -Z7
-!endif
-
-OBJ=$(SRC:.cpp=.obj)
-DEP=$(PCH:.hpp=.pch) $(OBJ)
-
-test.exe: $(DEP) test.obj; $(CXX) $(LDFLAGS) $(OBJ) test.obj -Fe$@
-docy.exe: $(DEP) docy.obj; $(CXX) $(LDFLAGS) $(OBJ) docy.obj -Fe$@
-.cpp.obj: ; $(CXX) $(CFLAGS) -Yu$(PCH) -FI$(PCH) -c $<
-$(PCH:.hpp=.pch): $(PCH); $(CXX) $(CFLAGS) -Yc$(PCH) -FI$(PCH) -c $(SRC) $(BIN)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#line 100 ".make/Makefile.cc"
 
 
 

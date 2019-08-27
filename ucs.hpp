@@ -1,21 +1,24 @@
 #ifndef ucs_hpp
 #define ucs_hpp
 
+#include "str.hpp"
+
 namespace fmt::unicode
 {
-	using codepoint = char32_t;
+	using point = char32_t;
 
-	template <codepoint Min, codepoint Max> struct range
+	template <point Min, point Max> struct range : range<point>
 	{
-		static_assert(Min <= Max, "Invalid range");
-		static constexpr auto min = Min, max = Max;
+		using base = range<point>;
+		using base::base;
+		range() : base(Min, Max) { }
 	};
 
 	using codespace = range<0x000000, 0x10FFFF>;
 
 	// special chars
 
-	constexpr codepoint BOM = 0x00FEFF; // byte order mark
+	constexpr point BOM = 0x00FEFF; // byte order mark
 
 	// allocations
 

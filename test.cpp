@@ -2,27 +2,27 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dbg.hpp"  // Debug and unit test tools
+#include "err.hpp"  // System error logging
+#include "str.hpp"  // String views and spans
 #include "fmt.hpp"  // Character string formatting
 #include "int.hpp"  // Numeric conversions
-#include "ini.hpp"  // Desktop configuration parsing
-#include "opt.hpp"  // Query user options
-#include "tag.hpp"  // Tag parsing
-#include "del.hpp"  // Parsing with delimiters
-#include "ctl.hpp"  // ASCII control sequences
-#include "ios.hpp"  // I/O Streams
+#include "ctl.hpp"  // Stream control sequences
+#include "ios.hpp"  // I/O stream tools
+#include "fds.hpp"  // File descriptor streams
+#include "ips.hpp"  // Inter process streams
 #include "sys.hpp"  // System interfaces
 #include "net.hpp"  // Network sockets
 #include "sig.hpp"  // Signal handling
+#include "cpu.hpp"  // CPU information
+#include "dll.hpp"  // Dynamic libraries
+#include "shm.hpp"  // Shared memory
+#include "fifo.hpp" // Named pipes
 #include "env.hpp"  // Environment variables
 #include "dir.hpp"  // Directory operators
 #include "dev.hpp"  // Development variables
 #include "usr.hpp"  // User directories
-#include "cpu.hpp"  // CPU information
-#include "dll.hpp"  // Dynamic libraries
-#include "shm.hpp"  // Shared memory
-#include "fds.hpp"  // File descriptor streams
-#include "ips.hpp"  // Inter process streams
-#include "fifo.hpp" // Named pipes
+#include "opt.hpp"  // Query user options
+#include "ini.hpp"  // Desktop configuration parsing
 
 #define HELLO_WORLD "Hello, World!"
 #define HELLO_WIDE L"Hello, World!"
@@ -64,21 +64,21 @@ namespace
 	// Checked integer and floating point conversions
 	//
 	
-	TEST(int_narrow) { assert('*' == fmt::to_narrow<char>(42)); }
-	TEST(int_unsigned) { assert(42u == fmt::to_unsigned(42)); }
-	TEST(int_signed) { assert(42 == fmt::to_signed(42u)); }
-	TEST(int_format) { assert(42 == fmt::to_long("42")); }
-	TEST(int_oct) { assert(42 == fmt::to_long("52", 8)); }
-	TEST(int_hex) { assert(42 == fmt::to_long("2A", 16)); }
-	TEST(int_fp) { assert(0.42f == fmt::to_float("0.42f")); }
-	TEST(int_nan) { assert(std::isnan(fmt::to_float("nan"))); }
-	TEST(int_inf) { assert(std::isinf(fmt::to_double("inf"))); }
+	TEST(fmt_narrow) { assert('*' == fmt::to_narrow<char>(42)); }
+	TEST(fmt_unsigned) { assert(42u == fmt::to_unsigned(42)); }
+	TEST(fmt_signed) { assert(42 == fmt::to_signed(42u)); }
+	TEST(fmt_dec) { assert(42 == fmt::to_long("42")); }
+	TEST(fmt_oct) { assert(42 == fmt::to_long("52", 8)); }
+	TEST(fmt_hex) { assert(42 == fmt::to_long("2A", 16)); }
+	TEST(fmt_float) { assert(0.42f == fmt::to_float("0.42f")); }
+	TEST(fmt_nan) { assert(std::isnan(fmt::to_float("nan"))); }
+	TEST(fmt_inf) { assert(std::isinf(fmt::to_double("inf"))); }
 
 	// negatives
 
-	FAIL(int_loss) { (void) fmt::to_narrow<char>(256); }
-	FAIL(int_loss_sign) { (void) fmt::to_unsigned(-1); }
-	FAIL(int_loss_hex) { (void) fmt::to_long("$"); }
+	FAIL(fmt_loss) { (void) fmt::to_narrow<char>(256); }
+	FAIL(fmt_loss_sign) { (void) fmt::to_unsigned(-1); }
+	FAIL(fmt_loss_hex) { (void) fmt::to_long("$"); }
 
 	//
 	// Text formatting routines
@@ -117,75 +117,6 @@ namespace
 		assert(to_lower(HELLO_WORLD) == HELLO_LOWER);
 	}
 
-	TEST(fmt_delimiter)
-	{
-		using namespace fmt;
-		string_view u = "A,B,C,D";
-		delimiter del {u, ","};
-
-		string_view_vector t;
-		for (auto tok : del)
-		{
-			auto const n = tok.second - tok.first;
-			t.emplace_back(u.substr(tok.first, n));
-		}
-
-		assert(t.size() == 4);
-		assert(t[0] == "A");
-		assert(t[1] == "B");
-		assert(t[2] == "C");
-		assert(t[3] == "D");
-	}
-
-	TEST(fmt_sequence)
-	{
-		using namespace fmt;
-		string_view u = "A<B>C";
-		sequence q {u, {"<", ">"}};
-		string_view_vector t;
-		for (auto tok : q)
-		{
-			auto const n = tok.second - tok.first;
-			t.emplace_back(u.substr(tok.first, n));
-		}
-
-		assert(t.size() == 3);
-		assert(t[0] == "A");
-		assert(t[1] == "B");
-		assert(t[2] == "C");
-	}
-
-	TEST(fmt_tag)
-	{
-		using namespace fmt;
-		string_view u = "bananas, apple, grape, banana";
-		string_view_span a { "apple", "banana" };
-		string_view_vector t;
-		tag(a, u, [&](auto it, auto pos)
-		{
-			assert(0 == u.compare(pos, it->size(), *it));
-			t.emplace_back(*it);
-		});
-
-		assert(t.size() == 3);
-		assert(t[0] == "banana");
-		assert(t[1] == "apple");
-		assert(t[2] == "banana");
-	}
-
-	TEST(doc_ini)
-	{
-		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
-		std::fstream file(path);
-		doc::ini keys;
-		file >> keys;
-
-		doc::ini::pair entry { "NMAKE", "MAKECONFIG" };
-		auto const value = keys.get(entry);
-		assert(not empty(value));
-		assert(fmt::npos != value.find("/D_NMAKE"));
-	}
-
 	//
 	// ANSI escape sequence
 	//
@@ -204,6 +135,23 @@ namespace
 		ss << fmt::fg_green << "GREEN" << fmt::fg_off;
 		std::string const s = ss.str();
 		assert(s == "\x1b[32mGREEN\x1b[39m");
+	}
+
+	//
+	// File formats
+	//
+
+	TEST(doc_ini)
+	{
+		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
+		std::fstream file(path);
+		doc::ini keys;
+		file >> keys;
+
+		doc::ini::pair entry { "NMAKE", "MAKECONFIG" };
+		auto const value = keys.get(entry);
+		assert(not empty(value));
+		assert(fmt::npos != value.find("/D_NMAKE"));
 	}
 
 	//
@@ -256,14 +204,6 @@ namespace
 			assert(not sys::dir::fail(d));
 		}
 		assert(sys::dir::fail(d));
-	}
-
-	TEST(env_opt_at)
-	{
-		assert(env::opt::set("ptr", "@key"));
-		assert(env::opt::set("key", HELLO_WORLD));
-		auto const value = env::opt::get("ptr");
-		assert(0 == value.compare(HELLO_WORLD));
 	}
 
 	TEST(env_vars)

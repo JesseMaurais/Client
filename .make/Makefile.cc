@@ -40,11 +40,11 @@ ALL=$(SRC) $(BIN)
 // Operating Sytem
 
 #ifdef _WIN32
-add(CFLAGS, -D_WIN32)
+add(CFLAGS, -D_WIN32_WINNT=0x0A00)
 EXE=$(BIN:.cpp=.exe)
 #define exe(x) x.exe
 #else
-add(CFLAGS, -D_POSIX_C_SOURCE)
+add(CFLAGS, -D_XOPEN_SOURCE=600)
 add(LDFLAGS, -ldl -lrt -lpthread)
 EXE=$(BIN:.cpp=)
 #define exe(x) x

@@ -1,20 +1,18 @@
 #ifndef asc_hpp
 #define asc_hpp
 
+#include "str.hpp"
+
 // https://www.ecma-international.org/publications/standards/Ecma-048.htm
 
 namespace fmt::ascii
 {
-	template <char Min, char Max> struct range
+	template <char Min, char Max> struct range : range<char>
 	{
-		static_assert(Min <= Max, "Invalid range");
-		static constexpr auto min = Min, max = Max;
+		using base = range<char>;
+		using base::base;
+		range() : base(Min, Max) { }
 	};
-
-	template <typename Range> constexpr bool in(char code)
-	{
-		return Range::min <= code and code <= Range::max;
-	}
 
 	//
 	// Character Codes
