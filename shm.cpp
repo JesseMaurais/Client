@@ -73,7 +73,7 @@ namespace sys::file
 				return true;
 			}
 
-			ptr = MapViewOfFile(h, flags, hi, lo, sz);
+			ptr = MapViewOfFile(h, flags, hi, lo, sz < 0 ? 0 : sz);
 			if (nullptr == ptr)
 			{
 				sys::win::err(here, "MapViewOfFile");
@@ -162,12 +162,14 @@ namespace sys::file
 	{
 		if (nullptr != address)
 		{
-			auto const name = std::move(path);
+			auto const ptr = address;
+			address = nullptr;
+			auto const name = move(path);
 			path.clear();
 
 			#ifdef _WIN32
 			{
-				if (not UnmapViewOfFile(address))
+				if (not UnmapViewOfFile(ptr))
 				{
 					sys::win::err(here, "UnmapViewOfFile", name);
 					return true;

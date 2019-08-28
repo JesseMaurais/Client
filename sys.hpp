@@ -78,7 +78,7 @@ namespace sys
 
 	namespace win::fmt
 	{
-		char* err(unsigned long dw, void* h = nullptr);
+		char const* err(unsigned long dw, void* h = nullptr);
 	}
 
 	using size_t = unsigned int;

@@ -25,7 +25,7 @@ namespace sys::file
 
 		~memory()
 		{
-			close();
+			(void) close();
 		}
 
 		void* data()

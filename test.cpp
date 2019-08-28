@@ -345,7 +345,6 @@ namespace
 		assert(__LINE__ < n);
 	}
 
-	/* Break WIN32
 	TEST(ios_ipc)
 	{
 		io::pstream ps { "rev" };
@@ -355,8 +354,8 @@ namespace
 		assert(std::getline(ps, s));
 		assert(s == DLROW_OLLEH);
 	}
-
-	TEST(ios_map)
+	
+	TEST(sys_map)
 	{
 		sys::file::descriptor file;
 		file.open(__FILE__, sys::file::rd);
@@ -367,6 +366,5 @@ namespace
 		assert(pos != fmt::string_view::npos);
 		assert(not map.close());
 	}
-	*/
 }
 

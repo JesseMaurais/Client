@@ -9,7 +9,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/test.exe",
-            "args": ["env_dir_enum"],
+            "args": ["sys_map"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

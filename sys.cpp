@@ -13,7 +13,7 @@ namespace sys
 	#ifdef _WIN32
 	namespace win::fmt
 	{
-		char* err(unsigned long id, void* ptr)
+		char const* err(unsigned long id, void* ptr)
 		{
 			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
 			                    | FORMAT_MESSAGE_IGNORE_INSERTS
@@ -28,8 +28,8 @@ namespace sys
 			
 			static thread_local auto tls = null_ptr<HLOCAL>(LocalFree);
 
-			LPSTR const str = nullptr;
-			auto const addr = (LPSTR) &str;
+			LPSTR str = nullptr;
+			auto addr = (LPSTR) &str;
 			auto const size = FormatMessage
 			(
 				flag,   // style
