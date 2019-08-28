@@ -97,16 +97,6 @@ namespace sys::win
 			}
 			return success;
 		}
-
-		inline bool put(DWORD thread)
-		{
-			return put(thread, message, wParam, lParam);
-		}
-		
-		static bool quit(DWORD thread)
-		{
-			return put(thread, WM_QUIT);
-		}
 	};
 
 	template <class T> struct zero : T
@@ -114,24 +104,14 @@ namespace sys::win
 		zero() { ZeroMemory(this, sizeof(T)); }
 	};
 
-	template <class T, DWORD T::*Size> struct size : zero<T>
+	template <class T, DWORD T::*Size = &T::dwSize> struct size : zero<T>
 	{
 		size() { this->*Size = sizeof(T); }
 	};
 
-	using security_attributes = size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>;
-	using startup_info = size<STARTUPINFO, &STARTUPINFO::cb>;
-	using process_info = zero<PROCESS_INFORMATION>;
-	using process_entry = size<PROCESSENTRY32, &PROCESSENTRY32::dwSize>;
-	using module_entry = size<MODULEENTRY32, &MODULEENTRY32::dwSize>;
-	using thread_entry = size<THREADENTRY32, &THREADENTRY32::dwSize>;
-
 	struct info : SYSTEM_INFO
 	{
-		info()
-		{
-			GetSystemInfo(this);
-		}
+		info() { GetSystemInfo(this); }
 	};
 
 	struct handle : unique
@@ -259,7 +239,7 @@ namespace sys::win
 
 		pipe()
 		{
-			security_attributes sa;
+			size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength> sa;
 			sa.bInheritHandle = true;
 			if (not CreatePipe(&read.h, &write.h, &sa, BUFSIZ))
 			{
@@ -280,7 +260,7 @@ namespace sys::win
 		}
 	};
 
-	struct processes : process_entry
+	struct processes : size<PROCESSENTRY32>
 	{
 		snapshot snap;
 
@@ -301,7 +281,7 @@ namespace sys::win
 		}
 	};
 
-	struct modules : module_entry
+	struct modules : size<MODULEENTRY32>
 	{
 		snapshot snap;
 
@@ -322,7 +302,7 @@ namespace sys::win
 		}
 	};
 
-	struct threads : thread_entry
+	struct threads : size<THREADENTRY32>
 	{
 		snapshot snap;
 
