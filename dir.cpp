@@ -83,16 +83,11 @@ namespace env::dir
 {
 	bool find(fmt::string_view path, entry view)
 	{
-		if (not fmt::terminated(path))
-		{
-			auto const s = fmt::to_string(path);
-			return env::dir::find(s, view);
-		}
-
-		auto const c = path.data();
-
 		#ifdef _WIN32
 		{
+			auto const s = fmt::to_string(path) + "\\*";
+			auto const c = s.c_str();
+
 			sys::win::files dir(c);
 			if (not sys::win::fail(dir.h)) do
 			{
@@ -108,6 +103,13 @@ namespace env::dir
 		}
 		#else
 		{
+			if (not fmt::terminated(path))
+			{
+				auto const s = fmt::to_string(path);
+				return env::dir::find(s, view);
+			}
+			auto const c = path.data();
+
 			sys::uni::files dir(c);
 			while (nullptr != dir.ptr) // as if
 			{

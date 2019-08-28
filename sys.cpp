@@ -224,7 +224,7 @@ namespace sys
 			{
 				if (it.th32OwnerProcessID == dw)
 				{
-					if (sys::win::msg::quit(it.th32ThreadID))
+					if (sys::win::msg::put(it.th32ThreadID, WM_QUIT))
 					{
 						sys::err(here, here);
 					}
