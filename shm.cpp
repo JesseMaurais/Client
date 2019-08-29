@@ -177,7 +177,7 @@ namespace sys::file
 			}
 			#else
 			{
-				if (sys::fail(munmap(address, length)))
+				if (sys::fail(munmap(ptr, length)))
 				{
 					sys::err(here, "munmap", name);
 					return true;
