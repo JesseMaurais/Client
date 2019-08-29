@@ -35,7 +35,7 @@ SRC=cpu.cpp dbg.cpp dev.cpp dir.cpp dll.cpp env.cpp err.cpp fifo.cpp file.cpp in
 BIN=test.cpp docy.cpp
 ALL=$(SRC) $(BIN)
 
-.SUFFIXES: .cpp .hpp .o .d .gch .obj .pdb .pch .lib .exp .ilk .log .i .db
+.SUFFIXES: .cpp .hpp .o .a .d .gch .obj .lib .dep .pch .pdb .exp .ilk .log .i .db
 
 // Operating Sytem
 
@@ -54,7 +54,7 @@ EXE=$(BIN:.cpp=)
 
 all: $(EXE)
 
-clean: ; $(RM) $(EXE) *.o *.d *.gch *.obj *.pdb *.pch *.lib *.exp *.ilk *.log *.i
+clean: ; $(RM) $(EXE) *.o *.a *.d *.gch *.obj *.lib *.dep *.pch *.pdb *.exp *.ilk *.log *.i
 
 // Compiler Options
 
@@ -67,17 +67,17 @@ add(CFLAGS, -Z7)
 add(LDFLAGS, -Z7)
 endif
 
-OBJ=$(SRC:.cpp=.obj)
-DEP=$(ALL:.cpp=.d) $(PCH:.hpp=.pch) $(OBJ)
+OBJ=$(SRC:.cpp=.obj) $(PCH:.hpp=.obj) 
+DEP=$(ALL:.cpp=.dep) $(PCH:.hpp=.pch) $(OBJ)
 
 exe(test): $(DEP) test.obj; $(CXX) $(LDFLAGS) $(OBJ) test.obj -Fe$@
 exe(docy): $(DEP) docy.obj; $(CXX) $(LDFLAGS) $(OBJ) docy.obj -Fe$@
 .cpp.obj: ; $(CXX) $(CFLAGS) -Yu$(PCH) -FI$(PCH) -c $<
-$(PCH:.hpp=.pch): $(PCH); $(CXX) $(CFLAGS) -Yc$(PCH) -FI$(PCH) -c $(SRC) $(BIN)
+$(PCH:.hpp=.pch): $(PCH); $(CXX) $(CFLAGS) -Yc$(PCH) -c $(PCH:.hpp=.cpp)
 
 #ifdef _NMAKE
 ifdef COMSPEC
-.cpp.d:
+.cpp.dep:
 	@echo $(<:.cpp=.obj): \> $@
 	@set COMMAND=$(CXX) -std:$(STD) -permissive- -EHsc -DNOMINMAX -nologo -showIncludes -Zs -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%COMMAND%') do @if not "%%D"=="" @echo "%%D" \>> $@
