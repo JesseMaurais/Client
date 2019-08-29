@@ -14,8 +14,7 @@ namespace
 			#ifdef _WIN32
 			{
 				sys::win::info const info;
-				auto const dw = info.dwNumberOfProcessors;
-				return static_cast<long>(dw);
+				return info.dwNumberOfProcessors;
 			}
 			#else
 			{
@@ -42,8 +41,7 @@ namespace
 			#ifdef _WIN32
 			{
 				sys::win::info const info;
-				auto const dw = info.dwPageSize;
-				return static_cast<long>(dw);
+				return info.dwPageSize;
 			}
 			#else
 			{

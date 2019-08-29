@@ -1,5 +1,6 @@
 check/*
 .make/Makefile.mk
+Depend.mk
 sys.ini
 tags
 test
@@ -8,12 +9,14 @@ docy
 *.swp
 *.exe
 *.obj
+*.dep
 *.pch
-*.ilk
 *.pdb
-*.exp
 *.lib
+*.exp
+*.ilk
 *.o
+*.a
 *.d
 *.i
 *.gch

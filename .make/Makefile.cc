@@ -20,7 +20,7 @@ RM=rm -f
 MD=mkdir -p
 else
 ifdef COMSPEC
-RM=del -f
+RM=del /f
 MD=md
 else
 err("Cannot determine your system commands.")
@@ -68,12 +68,21 @@ add(LDFLAGS, -Z7)
 endif
 
 OBJ=$(SRC:.cpp=.obj)
-DEP=$(PCH:.hpp=.pch) $(OBJ)
+DEP=$(ALL:.cpp=.d) $(PCH:.hpp=.pch) $(OBJ)
 
 exe(test): $(DEP) test.obj; $(CXX) $(LDFLAGS) $(OBJ) test.obj -Fe$@
 exe(docy): $(DEP) docy.obj; $(CXX) $(LDFLAGS) $(OBJ) docy.obj -Fe$@
 .cpp.obj: ; $(CXX) $(CFLAGS) -Yu$(PCH) -FI$(PCH) -c $<
 $(PCH:.hpp=.pch): $(PCH); $(CXX) $(CFLAGS) -Yc$(PCH) -FI$(PCH) -c $(SRC) $(BIN)
+
+#ifdef _NMAKE
+ifdef COMSPEC
+.cpp.d:
+	@echo $(<:.cpp=.obj): \> $@
+	@set COMMAND=$(CXX) -std:$(STD) -permissive- -EHsc -DNOMINMAX -nologo -showIncludes -Zs -c $<
+	@for /F "tokens=1,2,3,*" %%A in ('%COMMAND%') do @if not "%%D"=="" @echo "%%D" \>> $@
+endif
+#endif
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 
@@ -91,11 +100,20 @@ exe(docy): $(DEP) docy.o; $(CXX) $(LDFLAGS) $(OBJ) docy.o -o $@
 .cpp.o: ; $(CXX) $(CFLAGS) -include $(PCH) -c $<
 $(PCH).gch: $(PCH); $(CXX) $(CFLAGS) -c $<
 
-# ifndef _NMAKE
--include $(ALL:.cpp=.d)
-# endif
 #else
 # error "Cannot determine your compiler."
+#endif
+
+// Auto-dependency resolution
+
+#ifdef _NMAKE
+ifdef COMSPEC
+!if ![(for %i in (*.d) do @echo !include %i) > Depend.mk]
+!include Depend.mk
+endif
+endif
+#else
+-include $(ALL:.cpp=.d)
 #endif
 
 // Static Code Analysis
