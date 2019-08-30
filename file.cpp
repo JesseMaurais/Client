@@ -127,79 +127,80 @@ namespace sys::file
 		return flags;
 	}
 
+	size_t const bufsiz = BUFSIZ;
+
 	bool fail(char const* path, mode um)
 	{
 		return sys::fail(sys::access(path, access(um)));
 	}
 
-	size_t bufsiz = BUFSIZ;
-
-	void descriptor::open(char const* path, mode bit, permit id)
+	bool descriptor::open(char const* path, mode um, permit pm)
 	{
-		fd = sys::open(path, convert(bit), convert(id));
-		if (fail(fd))
+		fd = sys::open(path, convert(um), convert(pm));
+		if (sys::fail(fd))
 		{
-			sys::err(here, "open", path, bit, id);
+			sys::err(here, "open", path, um, pm);
+			return failure;
 		}
+		return success;
 	}
 
-	ssize_t descriptor::write(const void* buffer, size_t size) const
+	ssize_t descriptor::write(const void* buf, size_t sz) const
 	{
-		ssize_t const n = sys::write(fd, buffer, size);
-		if (fail(n))
+		ssize_t const n = sys::write(fd, buf, sz);
+		if (sys::fail(n))
 		{
-			sys::err(here, "write", fd, size);
-		}
-		return n;
-	}
-
-	ssize_t descriptor::read(void* buffer, size_t size) const
-	{
-		ssize_t const n = sys::read(fd, buffer, size);
-		if (fail(n))
-		{
-			sys::err(here, "read", fd, size);
+			sys::err(here, "write", fd, sz);
 		}
 		return n;
 	}
 
-	void descriptor::close()
+	ssize_t descriptor::read(void* buf, size_t sz) const
 	{
-		if (fail(sys::close(fd)))
+		ssize_t const n = sys::read(fd, buf, sz);
+		if (sys::fail(n))
+		{
+			sys::err(here, "read", fd, sz);
+		}
+		return n;
+	}
+
+	bool descriptor::close()
+	{
+		if (sys::fail(sys::close(fd)))
 		{
 			sys::err(here, "close", fd);
+			return failure;
 		}
 		else fd = invalid;
+		return success;
 	}
 
 	pipe::pipe()
 	{
 		int fd[2];
-		if (fail(sys::pipe(fd)))
+		if (sys::fail(sys::pipe(fd)))
 		{
 			sys::err(here, "pipe");
 		}
 		else set(fd);
 	}
 
-	void process::run(char const** argv)
+	bool process::execute(char const** argv)
 	{
 		int fd[3];
-		pid = sys::run(fd, argv);
-		if (not fail(pid))
+		pid = sys::execute(fd, argv);
+		if (sys::fail(pid))
 		{
-			set(fd);
+			return failure;
 		}
+		else set(fd);
+		return success;
 	}
 
-	void process::quit()
+	bool process::kill()
 	{
-		sys::quit(pid);
-	}
-
-	void process::kill()
-	{
-		sys::kill(pid);
+		return sys::kill(pid);
 	}
 	
 	int process::wait()

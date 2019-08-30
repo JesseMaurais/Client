@@ -34,11 +34,11 @@ namespace io
 			file.set(fd);
 		}
 
-		void run(arguments args)
+		void execute(arguments args)
 		{
 			std::vector argv(args);
 			argv.push_back(nullptr);
-			file.run(argv.data());
+			file.execute(data(argv));
 		}
 
 		void kill()
@@ -46,24 +46,9 @@ namespace io
 			file.kill();
 		}
 
-		void quit()
-		{
-			file.quit();
-		}
-
-		int wait()
+		void wait()
 		{
 			file.wait();
-		}
-
-		int join()
-		{
-			file.join();
-		}
-
-		int stop()
-		{
-			file.stop();
 		}
 
 		void close(int n)
@@ -126,7 +111,7 @@ namespace io
 			basic_pstream(arguments args)
 			: basic_pstream()
 			{
-				this->run(args);
+				this->execute(args);
 			}
 		};
 	}

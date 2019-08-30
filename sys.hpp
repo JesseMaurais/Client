@@ -13,9 +13,9 @@
 
 #ifdef _WIN32
 
-#include <io.h>
 #include <process.h>
 #include <direct.h>
+#include <io.h>
 
 #define F_OK 0
 #define W_OK 1
@@ -201,17 +201,9 @@ namespace sys
 
 namespace sys
 {
-	constexpr int invalid = -1;
-
-	inline bool fail(int value) 
-	{
-		return invalid == value;
-	}
-
-	pid_t run(int fd[3], char const** argv);
-	void kill(pid_t pid);
-	int wait(pid_t pid);
-	void quit(pid_t pid);
+	pid_t execute(int fd[3], char const** argv);
+	bool kill(pid_t);
+	int wait(pid_t);
 
 	class stat : public stat_t
 	{

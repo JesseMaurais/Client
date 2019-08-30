@@ -60,7 +60,7 @@ namespace sys
 	}
 	#endif
 
-	pid_t run(int fd[3], char const** argv)
+	pid_t execute(int fd[3], char const** argv)
 	{
 		#ifdef _WIN32
 		{
@@ -134,16 +134,20 @@ namespace sys
 
 			for (auto const& p : pair)
 			{
-				if (fail(p))
+				for (int n : { 0, 1, 2 })
 				{
-					return sys::invalid;
+					int fd = p[n].get();
+					if (sys::fail(fd))
+					{
+						return sys::invalid;
+					}
 				}
 			}
 
 			pid_t const pid = fork();
 			if (pid)
 			{
-				if (fail(pid))
+				if (sys::fail(pid))
 				{
 					sys::err(here, "fork");
 				}
@@ -158,7 +162,7 @@ namespace sys
 			{
 				int k = pair[i][0 != i].get();
 
-				if (fail(close(i)) or fail(dup2(k, i)))
+				if (sys::fail(close(i)) or sys::fail(dup2(k, i)))
 				{
 					exit(EXIT_FAILURE);
 				}
@@ -167,7 +171,7 @@ namespace sys
 				{
 					k = pair[i][j].set();
 
-					if (fail(close(k)))
+					if (sys::fail(close(k)))
 					{
 						exit(EXIT_FAILURE);
 					}
@@ -188,7 +192,7 @@ namespace sys
 		#endif
 	}
 
-	void kill(pid_t pid)
+	bool kill(pid_t pid)
 	{
 		#ifdef _WIN32
 		{
@@ -196,48 +200,24 @@ namespace sys
 			if (fail(h))
 			{
 				sys::warn(here, pid);
+				return failure;
 			}
 			else
 			if (not TerminateProcess(h, 0))
 			{
 				sys::win::err(here, "TerminateProcess", pid);
+				return failure;
 			}
+			return success;
 		}
 		#else
 		{
 			if (fail(::kill(pid, SIGTERM)))
 			{
 				sys::err(here, "SIGTERM", pid);
+				return failure;
 			}
-		}
-		#endif
-	}
-
-	void quit(pid_t pid)
-	{
-		#ifdef _WIN32
-		{
-			auto const dw = static_cast<DWORD>(pid);
-
-			sys::win::threads it;
-			if (not fail(it.snap)) do
-			{
-				if (it.th32OwnerProcessID == dw)
-				{
-					if (sys::win::msg::put(it.th32ThreadID, WM_QUIT))
-					{
-						sys::err(here, here);
-					}
-				}
-			}
-			while (++it);
-		}
-		#else
-		{
-			if (fail(::kill(pid, SIGINT)))
-			{
-				sys::err(here, "SIGINT", pid);
-			}
+			return success;
 		}
 		#endif
 	}

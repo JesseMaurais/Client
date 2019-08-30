@@ -1,15 +1,10 @@
 #ifndef file_hpp
 #define file_hpp
 
-#include <cstddef>
-#include <cstdint>
-#include <initializer_list>
+#include "ops.hpp"
 
 namespace sys::file
 {
-	using size_t = std::size_t;
-	using ssize_t = std::ptrdiff_t;
-
 	enum mode : int
 	{
 		ex   = 1 << 0, // execute
@@ -78,33 +73,26 @@ namespace sys::file
 	int access(mode);
 	int convert(mode);
 	int convert(permit);
-
-	constexpr int invalid = -1;
-
-	inline bool fail(int fd)
-	{
-		return invalid == fd;
-	}
 	
-	extern size_t bufsiz;
+	extern size_t const bufsiz;
 
-	struct descriptor
+	struct descriptor : ops
 	{
 		descriptor(int fd = invalid)
 		{
 			(void) set(fd);
 		}
 
-		descriptor(char const *path, mode bit = wo, permit pm = owner(rw))
+		descriptor(char const *path, mode um = wo, permit pm = owner(rw))
 		{
-			open(path, bit, pm);
+			(void) open(path, um, pm);
 		}
 
 		~descriptor()
 		{
-			if (not fail(fd))
+			if (not sys::fail(fd))
 			{
-				close();
+				(void) close();
 			}
 		}
 
@@ -120,37 +108,17 @@ namespace sys::file
 			return fd;
 		}
 
-		template <class C>
-		ssize_t write(const C* buf, size_t sz) const
-		{
-			return write(static_cast<const void*>(buf), sz);
-		}
-
-		template <class C>
-		ssize_t read(C* buf, size_t sz) const
-		{
-			return read(static_cast<void*>(buf), sz);
-		}
-
-		void open(char const* path, mode bit = wo, permit pm = owner(rw));
-		void close();
-
-	private:
-
-		ssize_t write(const void* buf, size_t sz) const;
-		ssize_t read(void* buf, size_t sz) const;
+		bool open(char const* path, mode bit = wo, permit pm = owner(rw));
+		ssize_t write(const void* buf, size_t sz) const override;
+		ssize_t read(void* buf, size_t sz) const override;
+		bool close();
 
 	protected:
 
-		int fd = invalid;
+		int fd;
 	};
 
-	inline bool fail(descriptor const& fd)
-	{
-		return fail(fd.get());
-	}
-
-	struct pipe
+	struct pipe : ops
 	{
 		explicit pipe();
 
@@ -175,6 +143,16 @@ namespace sys::file
 			}
 		}
 
+		ssize_t read(void* buf, size_t sz) const override
+		{
+			return fds[0].read(buf, sz);
+		}
+
+		ssize_t write(const void* buf, size_t sz) const override
+		{
+			return fds[1].write(buf, sz);
+		}
+
 		const descriptor& operator[](size_t n) const
 		{
 			return fds[n];
@@ -190,19 +168,7 @@ namespace sys::file
 		descriptor fds[2];
 	};
 
-	inline bool fail(pipe const& fds)
-	{
-		for (int n : { 0, 1 })
-		{
-			if (fail(fds[n]))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	struct process
+	struct process : ops
 	{
 		process() : pid(invalid)
 		{
@@ -211,7 +177,7 @@ namespace sys::file
 
 		~process()
 		{
-			if (not fail(pid))
+			if (not sys::fail(pid))
 			{
 				close();
 			}
@@ -238,6 +204,16 @@ namespace sys::file
 			return pid;
 		}
 
+		ssize_t read(void* buf, size_t sz) const override
+		{
+			return fds[0].read(buf, sz);
+		}
+
+		ssize_t write(const void* buf, size_t sz) const override
+		{
+			return fds[1].write(buf, sz);
+		}
+
 		const descriptor& operator[](size_t n) const
 		{
 			return fds[n];
@@ -248,22 +224,9 @@ namespace sys::file
 			return fds[n];
 		}
 
-		void run(char const** argv);
-		void quit();
-		void kill();
+		bool execute(char const** argv);
+		bool kill();
 		int wait();
-
-		int join()
-		{
-			quit();
-			return wait();
-		}
-
-		int stop()
-		{
-			kill();
-			return wait();
-		}
 
 		void close(int n)
 		{
@@ -283,11 +246,6 @@ namespace sys::file
 		descriptor fds[3];
 		long pid;
 	};
-
-	inline bool fail(process const& pid)
-	{
-		return fail(pid.get());
-	}
 }
 
 #endif // file
