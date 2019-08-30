@@ -51,7 +51,7 @@ namespace sys
 	#else
 	namespace uni::fmt
 	{
-		char* err(int no)
+		char const* err(int no)
 		{
 			static thread_local char buf[64] = { '\0' };
 			(void) strerror_r(no, buf, sizeof buf);

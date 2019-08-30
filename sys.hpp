@@ -71,11 +71,6 @@ namespace sys
 		constexpr auto image = ".exe";
 	}
 
-	namespace esc
-	{
-		constexpr auto env = "%[A-Z_a-z][A-Z_a-z-1-9]*%";
-	}
-
 	namespace win::fmt
 	{
 		char const* err(unsigned long dw, void* h = nullptr);
@@ -147,6 +142,11 @@ namespace sys
 	{
 		constexpr auto share = ".so";
 		constexpr auto image = "";
+	}
+
+	namespace uni::fmt
+	{
+		char const* err(int no);
 	}
 
 	using size_t = ::size_t;

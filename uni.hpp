@@ -15,11 +15,6 @@
 
 namespace sys::uni
 {
-	namespace fmt
-	{
-		char* err(int no);
-	}
-
 	template <typename... Args>
 	inline void err(int no, Args... args)
 	{
