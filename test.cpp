@@ -345,10 +345,10 @@ namespace
 		assert(__LINE__ < n);
 	}
 
-	TEST(ios_ipc)
+	TEST(ios_ips)
 	{
 		io::pstream ps { "rev" };
-		ps << HELLO_WORLD;
+		ps << HELLO_WORLD << fmt::eol;
 		ps.close(0);
 		std::string s;
 		assert(std::getline(ps, s));

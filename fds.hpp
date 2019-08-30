@@ -5,7 +5,6 @@
 #include "file.hpp"
 #include "buf.hpp"
 #include "str.hpp"
-#include "int.hpp"
 
 namespace io
 {
@@ -19,9 +18,10 @@ namespace io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_fdbuf : public basic_stringbuf<Char, Traits, Alloc>
+	class basic_fdbuf 
+	: public basic_rwbuf<sys::file::descriptor, Char, Traits, Alloc>
 	{
-		using base = basic_stringbuf<Char, Traits, Alloc>;
+		using base = basic_rwbuf<sys::file::descriptor, Char, Traits, Alloc>;
 
 	public:
 
@@ -30,38 +30,12 @@ namespace io
 
 		basic_fdbuf(int fd = -1)
 		{
-			set(fd);
-		}
-
-		int set(int fd = -1)
-		{
-			return file.set(fd);
+			base::ops.set(fd);
 		}
 
 		bool close()
 		{
-			return file.close();
-		}
-
-		bool is_open() const
-		{
-			return !!file;
-		}
-
-	protected:
-
-		sys::file::descriptor file;
-
-		size_type xsputn(char_type const *s, size_type n) override
-		{
-			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return file.write(s, sz);
-		}
-
-		size_type xsgetn(char_type *s, size_type n) override
-		{
-			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return file.read(s, sz);
+			return base::ops.close();
 		}
 	};
 
@@ -93,22 +67,22 @@ namespace io
 			using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 			using string_view = fmt::basic_string_view<Char, Traits<Char>>;
 			using mode = sys::file::mode;
+			using size_type = std::size_t;
 
 		public:
 
-			basic_fdstream(std::size_t sz = sys::file::bufsiz, int fd = -1)
+			basic_fdstream(int fd = -1)
 			: fdbuf(fd)
 			, base(this)
-			, size(sz)
 			{ }
 
-			basic_fdstream(string_view path, mode mask = default_mode)
+			basic_fdstream(string_view path, mode mask = default_mode, size_type size = sys::file::bufsiz)
 			: basic_fdstream()
 			{
-				open(path, mask);
+				(void) open(path, mask, size);
 			}
 
-			void open(string_view path, mode mask = default_mode)
+			bool open(string_view path, mode mask = default_mode, size_type size = sys::file::bufsiz)
 			{
 				mask = mode(mask | default_mode);
 
@@ -127,13 +101,8 @@ namespace io
 					fdbuf::setbufsiz(size, 0);
 				}
 
-				auto const s = fmt::to_string(path);
-				this->file.open(data(s), mask);
+				return fdbuf::ops.open(path, mask);
 			}
-
-		private:
-
-			std::size_t const size;
 		};
 	}
 

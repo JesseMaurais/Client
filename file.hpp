@@ -2,9 +2,12 @@
 #define file_hpp
 
 #include "ops.hpp"
+#include "str.hpp"
 
 namespace sys::file
 {
+	using fmt::string_view;
+
 	enum mode : int
 	{
 		ex   = 1 << 0, // execute
@@ -23,21 +26,19 @@ namespace sys::file
 		ox   = wo | ex,
 	};
 
-	bool fail(char const* path, mode um = ok);
-
-	constexpr int owner(int bit)
+	constexpr int owner(int am)
 	{
-		return (bit & rwx) << 6;
+		return (am & rwx) << 6;
 	}
 
-	constexpr int group(int bit)
+	constexpr int group(int am)
 	{
-		return (bit & rwx) << 3;
+		return (am & rwx) << 3;
 	}
 
-	constexpr int other(int bit)
+	constexpr int other(int am)
 	{
-		return (bit & rwx) << 0;
+		return (am & rwx) << 0;
 	}
 
 	enum permit : int
@@ -55,25 +56,27 @@ namespace sys::file
 		other_x = other(ex),
 	};
 
-	inline permit owner(mode bit)
+	inline permit owner(mode am)
 	{
-		return static_cast<permit>(owner(static_cast<int>(bit)));
+		return static_cast<permit>(owner(static_cast<int>(am)));
 	}
 
-	inline permit group(mode bit)
+	inline permit group(mode am)
 	{
-		return static_cast<permit>(group(static_cast<int>(bit)));
+		return static_cast<permit>(group(static_cast<int>(am)));
 	}
 
-	inline permit other(mode bit)
+	inline permit other(mode am)
 	{
-		return static_cast<permit>(other(static_cast<int>(bit)));
+		return static_cast<permit>(other(static_cast<int>(am)));
 	}
 
 	int access(mode);
 	int convert(mode);
 	int convert(permit);
-	
+
+	bool fail(string_view path, mode am = ok);
+
 	extern size_t const bufsiz;
 
 	struct descriptor : ops
@@ -83,9 +86,9 @@ namespace sys::file
 			(void) set(fd);
 		}
 
-		descriptor(char const *path, mode um = wo, permit pm = owner(rw))
+		descriptor(string_view path, mode am = ok, permit pm = owner(rw))
 		{
-			(void) open(path, um, pm);
+			(void) open(path, am, pm);
 		}
 
 		~descriptor()
@@ -108,7 +111,7 @@ namespace sys::file
 			return fd;
 		}
 
-		bool open(char const* path, mode bit = wo, permit pm = owner(rw));
+		bool open(string_view path, mode am = ok, permit pm = owner(rw));
 		ssize_t write(const void* buf, size_t sz) const override;
 		ssize_t read(void* buf, size_t sz) const override;
 		bool close();
@@ -170,16 +173,11 @@ namespace sys::file
 
 	struct process : ops
 	{
-		process() : pid(invalid)
-		{
-			set();
-		}
-
 		~process()
 		{
 			if (not sys::fail(pid))
 			{
-				close();
+				(void) close();
 			}
 		}
 
@@ -204,14 +202,19 @@ namespace sys::file
 			return pid;
 		}
 
+		ssize_t err(void* buf, size_t sz) const
+		{
+			return fds[2].read(buf, sz);
+		}
+
 		ssize_t read(void* buf, size_t sz) const override
 		{
-			return fds[0].read(buf, sz);
+			return fds[1].read(buf, sz);
 		}
 
 		ssize_t write(const void* buf, size_t sz) const override
 		{
-			return fds[1].write(buf, sz);
+			return fds[0].write(buf, sz);
 		}
 
 		const descriptor& operator[](size_t n) const
@@ -228,23 +231,27 @@ namespace sys::file
 		bool kill();
 		int wait();
 
-		void close(int n)
+		bool close(int n)
 		{
-			fds[n].close();
+			return fds[n].close();
 		}
 
 		void close()
 		{
-			for (int n : { 0, 1, 2})
+			for (int n : { 0, 1, 2 })
 			{
-				fds[n] = invalid;
+				int fd = fds[n].get();
+				if (not sys::fail(fd))
+				{
+					(void) fds[n].close();
+				}
 			}
 		}
 
 	protected:
 
 		descriptor fds[3];
-		long pid;
+		int pid = invalid;
 	};
 }
 

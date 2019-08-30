@@ -31,6 +31,12 @@ namespace sys
 		true;
 	#endif
 
+	bool iserr(std::errc ec)
+	{
+		auto const code = std::make_error_code(ec);
+		return code.value() == errno;
+	}
+
 	namespace
 	{
 		sys::mutex key;

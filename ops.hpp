@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include "str.hpp"
 
 namespace sys
 {
@@ -31,6 +32,28 @@ namespace sys
 		ssize_t write(const C* buf, size_t sz) const
 		{
 			return write(static_cast<const void*>(buf), sz);
+		}
+
+		ssize_t read(fmt::string& s) const
+		{
+			return read(data(s), size(s));
+		}
+
+		ssize_t write(fmt::string_view u) const
+		{
+			return write(data(u), size(u));
+		}
+
+		ssize_t read(fmt::wstring& w) const
+		{
+			constexpr auto sz = sizeof (wchar_t);
+			return read(data(w), size(w) * sz) / sz;
+		}
+
+		ssize_t write(fmt::wstring_view w) const
+		{
+			constexpr auto sz = sizeof (wchar_t);
+			return write(data(w), size(w) * sz) / sz;
 		}
 	};
 }

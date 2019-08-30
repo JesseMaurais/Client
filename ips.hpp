@@ -19,9 +19,10 @@ namespace io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_processbuf : public basic_stringbuf<Char, Traits, Alloc>
+	class basic_processbuf 
+	: public basic_rwbuf<sys::file::process, Char, Traits, Alloc>
 	{
-		using base = basic_stringbuf<Char, Traits, Alloc>;
+		using base = basic_rwbuf<sys::file::process, Char, Traits, Alloc>;
 
 	public:
 
@@ -29,47 +30,16 @@ namespace io
 		using size_type = typename base::size_type;
 		using arguments = std::initializer_list<char const*>;
 
-		void set(int fd[3] = nullptr)
-		{
-			file.set(fd);
-		}
-
 		void execute(arguments args)
 		{
 			std::vector argv(args);
 			argv.push_back(nullptr);
-			file.execute(data(argv));
-		}
-
-		void kill()
-		{
-			file.kill();
-		}
-
-		void wait()
-		{
-			file.wait();
+			base::ops.execute(data(argv));
 		}
 
 		void close(int n)
 		{
-			file.close(n);
-		}
-
-	protected:
-
-		sys::file::process file;
-
-		size_type xsputn(char_type const *s, size_type n) override
-		{
-			auto const sz = n * sizeof (char_type);
-			return file[0].write(s, fmt::to_size(sz));
-		}
-
-		size_type xsgetn(char_type *s, size_type n) override
-		{
-			auto const sz = n * sizeof (char_type);
-			return file[1].read(s, fmt::to_size(sz));
+			base::ops.close(n);
 		}
 	};
 
@@ -101,17 +71,11 @@ namespace io
 
 		public:
 
-			basic_pstream(std::size_t sz = sys::file::bufsiz)
-			: processbuf()
-			, base(this)
-			{
-				this->setbufsiz(sz);
-			}
-
 			basic_pstream(arguments args)
-			: basic_pstream()
+			: base(this)
 			{
-				this->execute(args);
+				processbuf::setbufsiz(sys::file::bufsiz);
+				processbuf::execute(args);
 			}
 		};
 	}

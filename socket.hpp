@@ -2,6 +2,7 @@
 #define socket_hpp
 
 #include "file.hpp"
+#include "ops.hpp"
 
 namespace sys::net
 {
@@ -10,7 +11,7 @@ namespace sys::net
 
 namespace sys::file
 {
-	struct socket
+	struct socket : ops
 	{
 		using address = sys::net::address;
 
@@ -23,42 +24,48 @@ namespace sys::file
 		bool listen(int backlog) const;
 		bool shutdown(int how) const;
 
-		template <typename T>
-		inline ssize_t write(T const* data, size_t size, int flags) const
+		ssize_t read(void* buf, size_t sz, int flags) const;
+		ssize_t read(void* buf, size_t sz, int flags, address& addr, size_t& len) const;
+		ssize_t read(void* buf, size_t sz) const override
 		{
-			return write(static_cast<const void*>(data), size, flags);
+			return read(buf, sz, 0);
 		}
 
-		template <typename T>
-		inline ssize_t write(T const* data, size_t size, int flags, address const& name, size_t length) const
+		template <typename C>
+		ssize_t read(C* buf, size_t sz, int flags) const
 		{
-			return write(static_cast<const void*>(data), size, flags, name, length);
+			return read(static_cast<void*>(buf), sz, flags);
 		}
 
-		template <typename T>
-		inline ssize_t read(T* data, size_t size, int flags) const
+		template <typename C>
+		ssize_t read(C* buf, size_t sz, int flags, address& name, size_t& length) const
 		{
-			return read(static_cast<T*>(data), size, flags);
+			return read(static_cast<void*>(buf), sz, flags, name, length);
 		}
 
-		template <typename T>
-		inline ssize_t read(T* data, size_t size, int flags, address& name, size_t& length) const
+		ssize_t write(const void* buf, size_t sz, int flags) const;
+		ssize_t write(const void* buf, size_t sz, int flags, address const& addr, size_t len) const;
+		ssize_t write(const void* buf, size_t sz) const override
 		{
-			return read(static_cast<T*>(data), size, flags, name, length);
+			return write(buf, sz, 0);
 		}
 
-	private:
+		template <typename C>
+		ssize_t write(const C* buf, size_t sz, int flags) const
+		{
+			return write(static_cast<const void*>(buf), sz, flags);
+		}
 
-		ssize_t write(const void *data, size_t size, int flags) const;
-		ssize_t write(const void *data, size_t size, int flags, address const& name, size_t length) const;
-
-		ssize_t read(void *data, size_t size, int flags) const;
-		ssize_t read(void *data, size_t size, int flags, address& name, size_t& length) const;
+		template <typename C>
+		ssize_t write(const C* buf, size_t sz, int flags, address const& name, size_t length) const
+		{
+			return write(static_cast<const void*>(buf), sz, flags, name, length);
+		}
 
 	protected:
 
 		socket(int fd);
-		int fd;
+		int fd = invalid;
 	};
 }
 

@@ -5,6 +5,7 @@
 #include <streambuf>
 #include "int.hpp"
 #include "str.hpp"
+#include "ops.hpp"
 
 namespace io
 {
@@ -116,14 +117,9 @@ namespace io
 		}
 	};
 
-	// Common alias types
-
 	using streambuf = basic_streambuf<char>;
 	using wstreambuf = basic_streambuf<wchar_t>;
 
-	//
-	// Abstract buffer class
-	//
 
 	template
 	<
@@ -164,10 +160,44 @@ namespace io
 		string buf;
 	};
 
-	// Common alias types
-
 	using stringbuf = basic_stringbuf<char>;
 	using wstringbuf = basic_stringbuf<wchar_t>;
+
+
+	template
+	<
+	 class RW,
+	 class Char,
+	 template <class> class Traits = std::char_traits,
+	 template <class> class Alloc = std::allocator
+	>
+	class basic_rwbuf : public basic_stringbuf<Char, Traits, Alloc>
+	{
+		using base = basic_stringbuf<Char, Traits, Alloc>;
+
+	public:
+
+		using size_type = typename base::size_type;
+		using char_type = typename base::char_type;
+
+	protected:
+
+		RW ops;
+
+	private:
+
+		size_type xsputn(char_type const *s, size_type n) override
+		{
+			auto const sz = fmt::to_size(sizeof (char_type) * n);
+			return ops.write(s, sz);
+		}
+
+		size_type xsgetn(char_type *s, size_type n) override
+		{
+			auto const sz = fmt::to_size(sizeof (char_type) * n);
+			return ops.read(s, sz);
+		}
+	};
 }
 
 #endif // file

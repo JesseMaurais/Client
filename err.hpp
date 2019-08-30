@@ -40,8 +40,6 @@ namespace fmt
 		char const *file; int const line; char const *func;
 	};
 
-	inline std::errc const noerr { };
-
 	std::ostream& operator<<(std::ostream&, where const &);
 	std::ostream& operator<<(std::ostream&, std::errc const &);
 	std::ostream& operator<<(std::ostream&, std::exception const &);
@@ -64,6 +62,10 @@ namespace fmt
 namespace sys
 {
 	extern bool debug;
+
+	inline std::errc const noerr { };
+
+	bool iserr(std::errc ec);
 
 	namespace impl
 	{

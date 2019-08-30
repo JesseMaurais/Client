@@ -4,26 +4,27 @@
 #include "file.hpp"
 #include "sys.hpp"
 #include "err.hpp"
+#include "fmt.hpp"
 
 namespace sys::file
 {
-	int access(mode bit)
+	int access(mode um)
 	{
 		int flags = 0;
 
-		if (bit & ok)
+		if (um & ok)
 		{
 			flags |= F_OK;
 		}
-		if (bit & ex)
+		if (um & ex)
 		{
 			flags |= X_OK;
 		}
-		if (bit & rd)
+		if (um & rd)
 		{
 			flags |= R_OK;
 		}
-		if (bit & wr)
+		if (um & wr)
 		{
 			flags |= W_OK;
 		}
@@ -31,51 +32,51 @@ namespace sys::file
 		return flags;
 	}
 
-	int convert(mode bit)
+	int convert(mode um)
 	{
 		int flags = 0;
 
-		if (bit & rw)
+		if (um & rw)
 		{
 			flags |= O_RDWR;
 		}
 		else 
-		if (bit & wr)
+		if (um & wr)
 		{
 			flags |= O_WRONLY;
 		}
 		else 
-		if (bit & rd)
+		if (um & rd)
 		{
 			flags |= O_RDONLY;
 		}
 
-		if (bit & txt)
+		if (um & txt)
 		{
 			flags |= O_TEXT;
 		}
 		else
-		if (bit & bin)
+		if (um & bin)
 		{
 			flags |= O_BINARY;
 		}
 
-		if (bit & app)
+		if (um & app)
 		{
 			flags |= O_APPEND;
 		}
 
-		if (bit & sz)
+		if (um & sz)
 		{
 			flags |= O_TRUNC;
 		}
 
-		if (bit & xu)
+		if (um & xu)
 		{
 			flags |= O_EXCL;
 		}
 
-		if (bit & ok)
+		if (um & ok)
 		{
 			flags |= O_CREAT;
 		}
@@ -83,43 +84,43 @@ namespace sys::file
 		return flags;
 	}
 
-	int convert(permit bit)
+	int convert(permit pm)
 	{
 		int flags = 0;
 
-		if (bit & owner_x)
+		if (pm & owner_x)
 		{
 			flags |= S_IXUSR;
 		}
-		if (bit & owner_w)
+		if (pm & owner_w)
 		{
 			flags |= S_IWUSR;
 		}
-		if (bit & owner_r)
+		if (pm & owner_r)
 		{
 			flags |= S_IRUSR;
 		}
-		if (bit & group_x)
+		if (pm & group_x)
 		{
 			flags |= S_IXGRP;
 		}
-		if (bit & group_w)
+		if (pm & group_w)
 		{
 			flags |= S_IWGRP;
 		}
-		if (bit & group_r)
+		if (pm & group_r)
 		{
 			flags |= S_IRGRP;
 		}
-		if (bit & other_x)
+		if (pm & other_x)
 		{
 			flags |= S_IXOTH;
 		}
-		if (bit & other_w)
+		if (pm & other_w)
 		{
 			flags |= S_IWOTH;
 		}
-		if (bit & other_r)
+		if (pm & other_r)
 		{
 			flags |= S_IROTH;
 		}
@@ -129,14 +130,26 @@ namespace sys::file
 
 	size_t const bufsiz = BUFSIZ;
 
-	bool fail(char const* path, mode um)
+	bool fail(string_view path, mode um)
 	{
-		return sys::fail(sys::access(path, access(um)));
+		if (not fmt::terminated(path))
+		{
+			auto const s = fmt::to_string(path);
+			return fail(s, um);
+		}
+
+		return sys::fail(sys::access(data(path), access(um)));
 	}
 
-	bool descriptor::open(char const* path, mode um, permit pm)
+	bool descriptor::open(string_view path, mode um, permit pm)
 	{
-		fd = sys::open(path, convert(um), convert(pm));
+		if (not fmt::terminated(path))
+		{
+			auto const s = fmt::to_string(path);
+			return open(s, um, pm);
+		}
+
+		fd = sys::open(data(path), convert(um), convert(pm));
 		if (sys::fail(fd))
 		{
 			sys::err(here, "open", path, um, pm);
