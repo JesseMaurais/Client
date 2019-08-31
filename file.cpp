@@ -32,7 +32,7 @@ namespace sys::file
 		return flags;
 	}
 
-	int convert(mode um)
+	int convert(mode am)
 	{
 		int flags = 0;
 
