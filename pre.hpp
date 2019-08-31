@@ -47,7 +47,19 @@
 #include <typeinfo>
 #include <limits>
 
-// version
+// OS
 
 #include "ver.hpp"
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <pthread.h>
+#include <dirent.h>
+#include <dlfcn.h>
+#include <sys/wait.h>
+#include <sys/mman.h>
+#endif
 

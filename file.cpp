@@ -8,23 +8,23 @@
 
 namespace sys::file
 {
-	int access(mode um)
+	int access(mode am)
 	{
 		int flags = 0;
 
-		if (um & ok)
+		if (am & ok)
 		{
 			flags |= F_OK;
 		}
-		if (um & ex)
+		if (am & ex)
 		{
 			flags |= X_OK;
 		}
-		if (um & rd)
+		if (am & rd)
 		{
 			flags |= R_OK;
 		}
-		if (um & wr)
+		if (am & wr)
 		{
 			flags |= W_OK;
 		}
@@ -36,47 +36,47 @@ namespace sys::file
 	{
 		int flags = 0;
 
-		if (um & rw)
+		if (am & rw)
 		{
 			flags |= O_RDWR;
 		}
 		else 
-		if (um & wr)
+		if (am & wr)
 		{
 			flags |= O_WRONLY;
 		}
 		else 
-		if (um & rd)
+		if (am & rd)
 		{
 			flags |= O_RDONLY;
 		}
 
-		if (um & txt)
+		if (am & txt)
 		{
 			flags |= O_TEXT;
 		}
 		else
-		if (um & bin)
+		if (am & bin)
 		{
 			flags |= O_BINARY;
 		}
 
-		if (um & app)
+		if (am & app)
 		{
 			flags |= O_APPEND;
 		}
 
-		if (um & sz)
+		if (am & sz)
 		{
 			flags |= O_TRUNC;
 		}
 
-		if (um & xu)
+		if (am & xu)
 		{
 			flags |= O_EXCL;
 		}
 
-		if (um & ok)
+		if (am & ok)
 		{
 			flags |= O_CREAT;
 		}
@@ -130,29 +130,29 @@ namespace sys::file
 
 	size_t const bufsiz = BUFSIZ;
 
-	bool fail(string_view path, mode um)
+	bool fail(string_view path, mode am)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return fail(s, um);
+			return fail(s, am);
 		}
 
-		return sys::fail(sys::access(data(path), access(um)));
+		return sys::fail(sys::access(data(path), access(am)));
 	}
 
-	bool descriptor::open(string_view path, mode um, permit pm)
+	bool descriptor::open(string_view path, mode am, permit pm)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return open(s, um, pm);
+			return open(s, am, pm);
 		}
 
-		fd = sys::open(data(path), convert(um), convert(pm));
+		fd = sys::open(data(path), convert(am), convert(pm));
 		if (sys::fail(fd))
 		{
-			sys::err(here, "open", path, um, pm);
+			sys::err(here, path, am, pm);
 			return failure;
 		}
 		return success;
@@ -160,20 +160,20 @@ namespace sys::file
 
 	ssize_t descriptor::write(const void* buf, size_t sz) const
 	{
-		ssize_t const n = sys::write(fd, buf, sz);
+		auto const n = sys::write(fd, buf, sz);
 		if (sys::fail(n))
 		{
-			sys::err(here, "write", fd, sz);
+			sys::err(here, fd, sz);
 		}
 		return n;
 	}
 
 	ssize_t descriptor::read(void* buf, size_t sz) const
 	{
-		ssize_t const n = sys::read(fd, buf, sz);
+		auto const n = sys::read(fd, buf, sz);
 		if (sys::fail(n))
 		{
-			sys::err(here, "read", fd, sz);
+			sys::err(here, fd, sz);
 		}
 		return n;
 	}
@@ -182,7 +182,7 @@ namespace sys::file
 	{
 		if (sys::fail(sys::close(fd)))
 		{
-			sys::err(here, "close", fd);
+			sys::err(here, fd);
 			return failure;
 		}
 		else fd = invalid;
@@ -194,7 +194,7 @@ namespace sys::file
 		int fd[2];
 		if (sys::fail(sys::pipe(fd)))
 		{
-			sys::err(here, "pipe");
+			sys::err(here);
 		}
 		else set(fd);
 	}

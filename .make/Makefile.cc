@@ -4,6 +4,8 @@
 #ifdef _NMAKE
 # define ifdef !ifdef
 # define ifndef !ifndef
+# define ifeq(x,y) !if #x == #y
+# define ifneq(x,y) !if #x != #y
 # define else !else
 # define endif !endif
 # define err(x) !error x

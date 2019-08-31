@@ -86,7 +86,7 @@ namespace sys::file
 			(void) set(fd);
 		}
 
-		descriptor(string_view path, mode am = ok, permit pm = owner(rw))
+		descriptor(string_view path, mode am = rw, permit pm = owner(rw))
 		{
 			(void) open(path, am, pm);
 		}
@@ -111,7 +111,7 @@ namespace sys::file
 			return fd;
 		}
 
-		bool open(string_view path, mode am = ok, permit pm = owner(rw));
+		bool open(string_view path, mode am = rw, permit pm = owner(rw));
 		ssize_t write(const void* buf, size_t sz) const override;
 		ssize_t read(void* buf, size_t sz) const override;
 		bool close();
