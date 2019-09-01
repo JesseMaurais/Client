@@ -1,9 +1,5 @@
-check/*
 make/Configure.mk
 Tests.ini
-tags
-test
-docy
 *.tmp
 *.swp
 *.exe
@@ -14,6 +10,7 @@ docy
 *.lib
 *.exp
 *.ilk
+*.out
 *.o
 *.a
 *.d
