@@ -183,12 +183,17 @@ namespace
 	TEST(env_dir_enum)
 	{
 		fmt::string_vector list;
-		env::dir::find(env::pwd, [&](auto path)
+		auto parts = fmt::dir::split(__FILE__);
+		auto const name = parts.back();
+		parts.pop_back();
+		auto const folder = fmt::dir::join(parts);
+		auto const srcdir = fmt::dir::join(env::pwd, folder);
+		env::dir::find(srcdir, [&](auto path)
 		{
 			list.emplace_back(path);
 			return success;
 		});
-		assert(find(begin(list), end(list), __FILE__) != end(list));
+		assert(find(begin(list), end(list), name) != end(list));
 	}
 
 	TEST(env_dir_make)
