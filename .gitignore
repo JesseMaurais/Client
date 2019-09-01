@@ -1,7 +1,6 @@
 check/*
-.make/Makefile.mk
-Depend.mk
-sys.ini
+make/Configure.mk
+Tests.ini
 tags
 test
 docy
