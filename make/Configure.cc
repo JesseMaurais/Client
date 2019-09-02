@@ -46,8 +46,9 @@ endif
 .SUFFIXES: .cpp .hpp .mak $(OUT)
 STD=c++17
 MAKDIR=make$(DIR)
-SRCDIR=src$(DIR)
 OBJDIR=obj$(DIR)
+SRCDIR=src$(DIR)
+HDRDIR=$(SRCDIR)
 ALLHDR=$(SRCDIR)*.hpp
 ALLSRC=$(SRCDIR)*.cpp
 PRE=$(SRCDIR)pre.hpp
@@ -93,13 +94,18 @@ ifdef STD
 	add(CFLAGS, /std:%(STD))
 endif
 
+// Header
+ifdef HDRDIR
+	add(CFLAGS, /I$(HDRDIR))
+endif
+
 // Debug
 ifndef NDEBUG
 	add(CFLAGS, /Z7 /W4 /D_CRT_SECURE_NO_WARNINGS)
 	add(LDFLAGS, /Z7)
 endif
 
-// Header
+// Precompile
 ifdef PRE
 	PCH=$(PRE:.hpp=.pch)
 	$(PCH): $(PRE:.hpp=.cpp); $(CXX) $(CFLAGS) /Yc$(PCH) /Fe$@ /c $<
@@ -154,12 +160,17 @@ ifdef STD
 	add(CFLAGS, -std=$(STD))
 endif
 
+// Header
+ifdef HDRDIR
+	add(CFLAGS, -I$(HDRDIR))
+endif
+
 // Debug
 ifndef NDEBUG
 	add(CFLAGS, -Wall -Wextra -Wpedantic -g)
 endif
 
-// Header
+// Precompile
 ifdef PRE
 	PCH=$(PRE).gch
 	$(PCH): $(PRE); $(CXX) $(CFLAGS) -c $< -o $@

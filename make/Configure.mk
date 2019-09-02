@@ -33,8 +33,9 @@ endif
 .SUFFIXES: .cpp .hpp .mak $(OUT)
 STD=c++17
 MAKDIR=make$(DIR)
-SRCDIR=src$(DIR)
 OBJDIR=obj$(DIR)
+SRCDIR=src$(DIR)
+HDRDIR=$(SRCDIR)
 ALLHDR=$(SRCDIR)*.hpp
 ALLSRC=$(SRCDIR)*.cpp
 PRE=$(SRCDIR)pre.hpp
@@ -42,10 +43,10 @@ BIN=$(SRCDIR)test.cpp
 
 all: $(OBJDIR) test$(OUT)
 $(OBJDIR): ; $(MKD) $(OBJDIR)
-# 76 "make/Configure.cc"
+# 77 "make/Configure.cc"
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
-# 147 "make/Configure.cc"
+# 153 "make/Configure.cc"
 .SUFFIXES: .o .d .i .a .gch
 CFLAGS += -MP -MMD
 LDFLAGS += -rdynamic
@@ -54,6 +55,11 @@ CXXFLAGS += $(CFLAGS)
 
 ifdef STD
  CFLAGS += -std=$(STD)
+endif
+
+
+ifdef HDRDIR
+ CFLAGS += -I$(HDRDIR)
 endif
 
 
@@ -67,7 +73,7 @@ ifdef PRE
  $(PCH): $(PRE); $(CXX) $(CFLAGS) -c $< -o $@
  CXXFLAGS += -include $(PRE)
 endif
-# 186 "make/Configure.cc"
+# 197 "make/Configure.cc"
 DEP=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.d, $(SRC))
 OBJ=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.o, $(SRC))
 
@@ -84,7 +90,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp $(PCH); $(CXX) $(CXXFLAGS) -c $< -o $@
 
 
 clean: ; $(RM) test$(OUT) $(OBJ) $(DEP) $(PCH)
-# 212 "make/Configure.cc"
+# 223 "make/Configure.cc"
 -include $(DEP)
 
 

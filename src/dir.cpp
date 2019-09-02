@@ -7,7 +7,8 @@
 #include "usr.hpp"
 #include "opt.hpp"
 #include "sys.hpp"
-#include "pos.hpp"
+#include "files.hpp"
+#include <algorithm>
 #include <regex>
 #include <stack>
 
@@ -83,49 +84,18 @@ namespace env::dir
 {
 	bool find(fmt::string_view path, entry view)
 	{
-		#ifdef _WIN32
+		if (not fmt::terminated(path))
 		{
-			auto const s = fmt::to_string(path) + "\\*";
-			auto const c = s.c_str();
-
-			sys::win::files dir(c);
-			if (not sys::win::fail(dir.h)) do
-			{
-				auto const part = fmt::dir::split(dir.cFileName);
-				auto const name = part.back();
-				if (view(name))
-				{
-					return true;
-				}
-			}
-			while (++dir);
-			return false;
+			auto const s = fmt::to_string(path);
+			return env::dir::find(s, view);
 		}
-		#else
+
+		auto const c = data(path);
+		for (auto const name : sys::files(c))
 		{
-			if (not fmt::terminated(path))
-			{
-				auto const s = fmt::to_string(path);
-				return env::dir::find(s, view);
-			}
-			auto const c = path.data();
-
-			sys::uni::files dir(c);
-			while (nullptr != dir.ptr) // as if
-			{
-				auto const ent = ++dir;
-				if (ent)
-				{
-					if (view(ent->d_name))
-					{
-						return true;
-					}
-				}
-				else break;
-			}
-			return false;
+			if (view(name)) return success;
 		}
-		#endif
+		return failure;
 	}
 
 	fmt::string_view make(fmt::string_view path)
