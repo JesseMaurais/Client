@@ -6,7 +6,6 @@
 #endif
 
 #include <pthread.h>
-#include <dirent.h>
 #include <signal.h>
 #include <setjmp.h>
 #include "sys.hpp"
@@ -15,6 +14,11 @@
 
 namespace sys::uni
 {
+	extern "C"
+	{
+		#include <unistd.h>
+	}
+
 	template <typename... Args>
 	inline void err(int no, Args... args)
 	{

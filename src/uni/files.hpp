@@ -1,13 +1,17 @@
 #ifndef uni_files_hpp
 #define uni_files_hpp
 
-#include <dirent.h>
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
 
 namespace sys::uni
 {
+	extern "C"
+	{
+		#include <dirent.h>
+	}
+
 	class directory : unique
 	{
 		DIR *ptr;
@@ -56,11 +60,6 @@ namespace sys
 			: that(dir), ptr(ent)
 			{ }
 
-			struct dirent const *operator->() const
-			{
-				return ptr;
-			}
-
 			bool operator!=(iterator const &it) const
 			{
 				return it.that != that or it.ptr != ptr;
@@ -69,6 +68,11 @@ namespace sys
 			auto operator*() const
 			{
 				return ptr->d_name;
+			}
+
+			auto operator->() const
+			{
+				return ptr;
 			}
 
 			auto& operator++()

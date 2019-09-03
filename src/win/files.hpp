@@ -4,24 +4,21 @@
 #include "win.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
-#include "str.hpp"
 #include <cstring>
+#include <string>
 
 namespace sys::win
 {
 	struct find_files : unique, WIN32_FIND_DATA
 	{
-		HANDLE h = invalid;
+		HANDLE h;
 
 		find_files(char const *path)
 		{
-			if (nullptr != path)
+			h = FindFirstFile(path, this);
+			if (sys::win::fail(h))
 			{
-				h = FindFirstFile(path, this);
-				if (sys::win::fail(h))
-				{
-					sys::win::err(here, "FindFirstFile", path);
-				}
+				sys::win::err(here, path);
 			}
 		}
 
@@ -31,7 +28,7 @@ namespace sys::win
 			{
 				if (not FindClose(h))
 				{
-					sys::win::err(here, "FindClose");
+					sys::win::err(here);
 				}
 			}
 		}
@@ -42,7 +39,7 @@ namespace sys::win
 			{
 				if (GetLastError() != ERROR_NO_MORE_FILES)
 				{
-					sys::win::err(here, "FindNextFile");
+					sys::win::err(here);
 				}
 				return failure;
 			}
@@ -66,11 +63,6 @@ namespace sys
 			: that(ptr), flag(end)
 			{ }
 
-			WIN32_FILE_DATA const *operator->() const
-			{
-				return that;
-			}
-
 			bool operator!=(iterator const &it) const
 			{
 				return it.that != that or it.flag != it.flag;
@@ -80,6 +72,11 @@ namespace sys
 			{
 				auto const c = std::strrchr(that->cFileName, '\\');
 				return nullptr == c ? that->cFileName : c + 1;
+			}
+
+			auto operator->() const
+			{
+				return (LPWIN32_FIND_DATA) that;
 			}
 
 			auto& operator++()
