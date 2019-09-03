@@ -23,7 +23,7 @@ ifeq($(OS),Windows_NT)
 EXT=exe
 RM=del /f
 MKD=md
-DIR=\ 
+DIR=\ // not continuation
 ENT=;
 ifndef WINVER
 WINVER=0x0A00
@@ -152,7 +152,7 @@ endif
 .SUFFIXES: .o .d .i .a .gch
 add(CFLAGS, -MP -MMD)
 add(LDFLAGS, -rdynamic)
-add(CXXFLAGS, $(CFLAGS))ls
+add(CXXFLAGS, $(CFLAGS))
 
 // Standard
 ifdef STD
@@ -171,8 +171,8 @@ endif
 
 // Precompile
 ifdef PRE
-PCH=$(PRE).gch
-$(PCH): $(PRE); $(CXX) $(CFLAGS) -c $< -o $@
+PCH=$(SRCDIR)$(PRE).gch
+$(PCH): $(SRCDIR)$(PRE); $(CXX) $(CFLAGS) -c $< -o $@
 add(CXXFLAGS, -include $(PRE))
 endif
 
