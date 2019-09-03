@@ -2,7 +2,7 @@
 # operating system and version of $(MAKE) used. Forward standard targets
 # to it.
 
-MAKEFILE=make/Configure.mk
+MAKEFILE=make/Configure.mak
 TEMPLATE=make/Configure.cc
 
 all: $(MAKEFILE)
