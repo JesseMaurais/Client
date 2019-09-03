@@ -5,6 +5,7 @@
 #include "ptr.hpp"
 #include "err.hpp"
 #include "str.hpp"
+#include <cstring>
 
 namespace sys::win
 {
@@ -65,9 +66,20 @@ namespace sys
 			: that(ptr), flag(end)
 			{ }
 
+			WIN32_FILE_DATA const *operator->() const
+			{
+				return that;
+			}
+
+			bool operator!=(iterator const &it) const
+			{
+				return it.that != that or it.flag != it.flag;
+			}
+
 			auto operator*() const
 			{
-				return that->cFileName;
+				auto const c = std::strrchr(that->cFileName, '\\');
+				return nullptr == c ? that->cFileName : c + 1;
 			}
 
 			auto& operator++()

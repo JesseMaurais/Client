@@ -56,6 +56,11 @@ namespace sys
 			: that(dir), ptr(ent)
 			{ }
 
+			struct dirent const *operator->() const
+			{
+				return ptr;
+			}
+
 			bool operator!=(iterator const &it) const
 			{
 				return it.that != that or it.ptr != ptr;
