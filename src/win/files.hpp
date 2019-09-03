@@ -65,7 +65,7 @@ namespace sys
 
 			bool operator!=(iterator const &it) const
 			{
-				return it.that != that or it.flag != it.flag;
+				return it.that != that or it.flag != flag;
 			}
 
 			auto operator*() const

@@ -83,30 +83,30 @@ SRC=$(wildcard $(ALLSRC))
 #ifdef _MSC_VER
 
 .SUFFIXES: .obj .dep. .inl .pch .lib .pdb .ilk
-add(CFLAGS, /nologo /DNOMINMAX /EHsc /permissive-)
-add(LDFLAGS, /nologo)
+add(CFLAGS, -nologo -DNOMINMAX -EHsc -permissive-)
+add(LDFLAGS, -nologo)
 add(CXXFLAGS, $(CFLAGS))
 
 // Standard
 ifdef STD
-add(CFLAGS, /std:$(STD))
+add(CFLAGS, -std:$(STD))
 endif
 
 // Header
 ifdef HDRDIR
-add(CFLAGS, /I$(HDRDIR))
+add(CFLAGS, -I$(HDRDIR))
 endif
 
 // Debug
 ifndef NDEBUG
-add(CFLAGS, /Z7 /W4 /D_CRT_SECURE_NO_WARNINGS)
-add(LDFLAGS, /Z7)
+add(CFLAGS, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
+add(LDFLAGS, -Z7)
 endif
 
 // Precompile
 ifdef PRE
-PCH=$(PRE:.hpp=.pch)
-$(PCH): $(SRCDIR)$(PRE); $(CXX) $(CFLAGS) /Yc$(PRE) /Fe$@ /c $(SRCDIR)$(PRE:.hpp=.cpp)
+PCH=$(SRCDIR)$(PRE:.hpp=.pch)
+$(PCH): $(SRCDIR)$(PRE); $(CXX) $(CFLAGS) -Yc$(PRE) -FI$(PRE) -Fe$(PCH) -c $(SRCDIR)$(PRE:.hpp=.cpp)
 add(CCFLAGS, -Yu$(PCH) -FI$(PRE))
 add(LDFLAGS, -Yu$(PCH))
 endif
@@ -136,14 +136,14 @@ ALLDEP=$(OBJDIR)*.dep
 // Rules
 test.$(EXT): $(PCH) $(OBJ) $(DEP); $(CXX) $(LDFLAGS) $(OBJ) -Yu$(PCH) -Fe$@
 #ifdef _NMAKE
-{$(SRCDIR)}.cpp{$(OBJDIR)}.obj:; $(CXX) $(CXXFLAGS) /c $< /Fo$@
+{$(SRCDIR)}.cpp{$(OBJDIR)}.obj:; $(CXX) $(CXXFLAGS) -c $< -Fo$@
 #else
-$(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXX) $(CXXFLAGS) /c $< /Fo$@
+$(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXX) $(CXXFLAGS) -c $< -Fo$@
 #endif
 ifdef COMSPEC
 {$(SRCDIR)}.cpp{$(OBJDIR)}.dep:
 	@echo $< : \> $@
-	@set CMD=$(CXX) $(CFLAGS) /showIncludes /Zs /c $<
+	set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
 endif
 
