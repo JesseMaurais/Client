@@ -8,6 +8,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <tlhelp32.h>
+#include "ops.hpp"
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"

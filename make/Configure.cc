@@ -3,8 +3,8 @@
 #ifdef _NMAKE
 # define ifdef !ifdef
 # define ifndef !ifndef
-# define ifeq(x,y) !if #x == #y
-# define ifneq(x,y) !if #x != #y
+# define ifeq(x,y) !if #x==#y
+# define ifneq(x,y) !if #x!=#y
 # define else !else
 # define endif !endif
 # define message(x) !message x
@@ -15,35 +15,35 @@
 # define ifneq(x,y) ifneq (x,y)
 # define message(x) $(message x)
 # define error(x) $(error x)
-# define add(x, y) x += y
+# define add(x, y) x+=y
 #endif
 
 // System
 ifeq($(OS),Windows_NT)
-	OUT=.exe
-	RM=del /f
-	MKD=md
-	DIR=\
-	ENT=;
-	ifndef WINVER
-		WINVER=0xA000
-	endif
-	add(CFLAGS, -D_WIN32 -D_WIN32_WINNT=$(WINVER))
+EXT=exe
+RM=del /f
+MKD=md
+DIR=\ 
+ENT=;
+ifndef WINVER
+WINVER=0x0A00
+endif
+add(CFLAGS, -D_WIN32 -D_WIN32_WINNT=$(WINVER))
 else // POSIX
-	OUT=.out
-	RM=rm -f
-	MKD=mkdir -p
-	DIR=/
-	ENT=:
-	ifndef UNIVER
-		UNIVER=700
-	endif
-	add(CFLAGS, -D_POSIX_SOURCE -D_XOPEN_SOURCE=$(UNIVER))
-	add(LDFLAGS, -lm -ldl -lrt -lpthread)
+EXT=out
+RM=rm -f
+MKD=mkdir -p
+DIR=/
+ENT=:
+ifndef UNIVER
+UNIVER=700
+endif
+add(CFLAGS, -D_POSIX_SOURCE -D_XOPEN_SOURCE=$(UNIVER))
+add(LDFLAGS, -lm -ldl -lrt -lpthread)
 endif
 
 // Project
-.SUFFIXES: .cpp .hpp .mak $(OUT)
+.SUFFIXES: .cpp .hpp .mak .$(EXT)
 STD=c++17
 MAKDIR=make$(DIR)
 OBJDIR=obj$(DIR)
@@ -51,27 +51,25 @@ SRCDIR=src$(DIR)
 HDRDIR=$(SRCDIR)
 ALLHDR=$(SRCDIR)*.hpp
 ALLSRC=$(SRCDIR)*.cpp
-PRE=$(SRCDIR)pre.hpp
-BIN=$(SRCDIR)test.cpp
+PRE=pre.hpp
 
-all: $(OBJDIR) test$(OUT)
-$(OBJDIR): ; $(MKD) $(OBJDIR)
+all: test.$(EXT)
 
 // Source
 #ifdef _NMAKE
 ifdef COMSPEC
-	MAKHDR=$(MAKDIR)Header.mak
-	!if ![echo HDR=>$(MAKHDR)\ ] 
-		!if ![for %i in ($(ALLHDR)) do echo %i>>$(MAKHDR)\ ]
-			!include $(MAKHDR)
-		endif
-	endif
-	MAKSRC=$(MAKDIR)Source.mak
-	!if ![echo SRC=>>$(MAKSRC)\ ]
-		!if ![for %i in ($(ALLSRC)) do echo %i>>$(MAKSRC)\ ]
-			!include $(MAKSRC)
-		endif
-	endif
+MAKHDR=$(MAKDIR)Header.mak
+!if ![echo HDR=\>$(MAKHDR) ] 
+!if ![for %i in ($(ALLHDR)) do @echo %i\>>$(MAKHDR) ]
+!include $(MAKHDR)
+endif
+endif
+MAKSRC=$(MAKDIR)Source.mak
+!if ![echo SRC=\>$(MAKSRC) ]
+!if ![for %i in ($(ALLSRC)) do @echo %i\>>$(MAKSRC) ]
+!include $(MAKSRC)
+endif
+endif
 endif
 #else // GNU
 HDR=$(wildcard $(ALLHDR))
@@ -91,58 +89,59 @@ add(CXXFLAGS, $(CFLAGS))
 
 // Standard
 ifdef STD
-	add(CFLAGS, /std:%(STD))
+add(CFLAGS, /std:$(STD))
 endif
 
 // Header
 ifdef HDRDIR
-	add(CFLAGS, /I$(HDRDIR))
+add(CFLAGS, /I$(HDRDIR))
 endif
 
 // Debug
 ifndef NDEBUG
-	add(CFLAGS, /Z7 /W4 /D_CRT_SECURE_NO_WARNINGS)
-	add(LDFLAGS, /Z7)
+add(CFLAGS, /Z7 /W4 /D_CRT_SECURE_NO_WARNINGS)
+add(LDFLAGS, /Z7)
 endif
 
 // Precompile
 ifdef PRE
-	PCH=$(PRE:.hpp=.pch)
-	$(PCH): $(PRE:.hpp=.cpp); $(CXX) $(CFLAGS) /Yc$(PCH) /Fe$@ /c $<
-	add(CCFLAGS, -Yu$(PCH) -FI$(PRE))
-	add(LDFLAGS, -Yu$(PCH))
+PCH=$(PRE:.hpp=.pch)
+$(PCH): $(SRCDIR)$(PRE); $(CXX) $(CFLAGS) /Yc$(PRE) /Fe$@ /c $(SRCDIR)$(PRE:.hpp=.cpp)
+add(CCFLAGS, -Yu$(PCH) -FI$(PRE))
+add(LDFLAGS, -Yu$(PCH))
 endif
 
 // Outputs
 #ifdef _NMAKE
 ifdef COMSPEC
-	MAKDEP=$(MAKDIR)Depend.mak
-	!if ![echo DEP=>$(MAKDEP)\ ] 
-		!if ![for %I in ($(ALLSRC)) do echo $(OBJDIR)%~nI.dep>>$(MAKDEP)\ ]
-			!include $(MAKDEP)
-		endif
-	endif
-	MAKOBJ=$(MAKDIR)Object.mak
-	!if ![echo OBJ=>>$(MAKOBJ)\ ]
-		!if ![for %I in ($(ALLSRC)) do echo $(OBJDIR)%~nI.obj>>$(MAKOBJ)\ ]
-			!include $(MAKOBJ)
-		endif
-	endif
+MAKDEP=$(MAKDIR)Depend.mak
+!if ![echo DEP=\>$(MAKDEP) ] 
+!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.dep\>>$(MAKDEP) ]
+!include $(MAKDEP)
+endif
+endif
+MAKOBJ=$(MAKDIR)Object.mak
+!if ![echo OBJ=\>$(MAKOBJ) ]
+!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.obj\>>$(MAKOBJ) ]
+!include $(MAKOBJ)
+endif
+endif
 endif
 #else // GNU
 DEP=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.dep, $(SRC))
 OBJ=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.obj, $(SRC))
 #endif
+ALLDEP=$(OBJDIR)*.dep
 
 // Rules
-test$(OUT): $(PCH) $(OBJ) $(DEP); $(CXX) $(LDFLAGS) $(OBJ) -Yu$(PCH) -Fe$@
+test.$(EXT): $(PCH) $(OBJ) $(DEP); $(CXX) $(LDFLAGS) $(OBJ) -Yu$(PCH) -Fe$@
 #ifdef _NMAKE
-{$(OBJDIR)}.obj{$(OBJDIR)}.cpp:; $(CXX) $(CXXFLAGS) /c $<
+{$(SRCDIR)}.cpp{$(OBJDIR)}.obj:; $(CXX) $(CXXFLAGS) /c $< /Fo$@
 #else
-$(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXX) $(CXXFLAGS) /c $<
+$(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXX) $(CXXFLAGS) /c $< /Fo$@
 #endif
 ifdef COMSPEC
-.obj.dep:
+{$(SRCDIR)}.cpp{$(OBJDIR)}.dep:
 	@echo $< : \> $@
 	@set CMD=$(CXX) $(CFLAGS) /showIncludes /Zs /c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
@@ -153,53 +152,54 @@ endif
 .SUFFIXES: .o .d .i .a .gch
 add(CFLAGS, -MP -MMD)
 add(LDFLAGS, -rdynamic)
-add(CXXFLAGS, $(CFLAGS))
+add(CXXFLAGS, $(CFLAGS))ls
 
 // Standard
 ifdef STD
-	add(CFLAGS, -std=$(STD))
+add(CFLAGS, -std=$(STD))
 endif
 
 // Header
 ifdef HDRDIR
-	add(CFLAGS, -I$(HDRDIR))
+add(CFLAGS, -I$(HDRDIR))
 endif
 
 // Debug
 ifndef NDEBUG
-	add(CFLAGS, -Wall -Wextra -Wpedantic -g)
+add(CFLAGS, -Wall -Wextra -Wpedantic -g)
 endif
 
 // Precompile
 ifdef PRE
-	PCH=$(PRE).gch
-	$(PCH): $(PRE); $(CXX) $(CFLAGS) -c $< -o $@
-	add(CXXFLAGS, -include $(PRE))
+PCH=$(PRE).gch
+$(PCH): $(PRE); $(CXX) $(CFLAGS) -c $< -o $@
+add(CXXFLAGS, -include $(PRE))
 endif
 
 // Outputs
 #ifdef _NMAKE
 ifdef COMSPEC
-	MAKDEP=$(MAKDIR)Depend.mak
-	!if ![echo DEP=>$(MAKDEP)\ ] 
-		!if ![for %I in ($(ALLSRC)) do echo $(OBJDIR)%~nI.d>>$(MAKDEP)\ ]
-			!include $(MAKDEP)
-		endif
-	endif
-	MAKOBJ=$(MAKDIR)Object.mak
-	!if ![echo OBJ=>>$(MAKOBJ)\ ]
-		!if ![for %I in ($(ALLSRC)) do echo $(OBJDIR)%~nI.o>>$(MAKOBJ)\ ]
-			!include $(MAKOBJ)
-		endif
-	endif
+MAKDEP=$(MAKDIR)Depend.mak
+!if ![echo DEP=\>$(MAKDEP) ] 
+!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.d\>>$(MAKDEP) ]
+!include $(MAKDEP)
+endif
+endif
+MAKOBJ=$(MAKDIR)Object.mak
+!if ![echo OBJ=\>$(MAKOBJ) ]
+!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.o\>>$(MAKOBJ) ]
+!include $(MAKOBJ)
+endif
+endif
 endif
 #else // GNU
 DEP=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.d, $(SRC))
 OBJ=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.o, $(SRC))
 #endif
+ALLDEP=$(OBJDIR)*.d
 
 // Rules
-test$(OUT): $(PCH) $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
+test.$(EXT): $(PCH) $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
 #ifdef _NMAKE
 {$(OBJDIR)}.o{$(OBJDIR)}.cpp: ; $(CXX) $(CXXFLAGS) -c $<
 #else // GNU
@@ -209,22 +209,17 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp $(PCH); $(CXX) $(CXXFLAGS) -c $< -o $@
 #endif // Compile //
 
 // Clean
-clean: ; $(RM) test$(OUT) $(OBJ) $(DEP) $(PCH)
+clean: ; $(RM) test.$(EXT) $(OBJ) $(DEP) $(PCH)
 
 // Depend
 #ifdef _NMAKE
 ifdef COMSPEC
-	MAKALLDEP=$(MAKDIR)All.mak
-	!if ![(for %i in ($(DEP)) do @echo !include %i) > $(MAKALLDEP)]
-		!include $(MAKALLDEP)
-	endif
+MAKALLDEP=$(MAKDIR)All.mak
+!if ![(for %i in ($(ALLDEP)) do @echo !include %i) > $(MAKALLDEP)]
+!include $(MAKALLDEP)
+endif
 endif
 #else // GNU
 -include $(DEP)
 #endif
-
-// Extra
-.SUFFIXES: .mk
-include $(MAKDIR)Cppcheck.mk
-include $(MAKDIR)PVS.mk
 

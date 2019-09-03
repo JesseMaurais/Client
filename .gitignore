@@ -1,5 +1,6 @@
 make/Configure.mk
 Tests.ini
+*.mak
 *.tmp
 *.swp
 *.exe
