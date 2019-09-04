@@ -124,7 +124,7 @@ $(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCH
 endif
 
 // Commands
-CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$@
+CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
 LNKDEP=$(PCHOBJ) $(OBJ)
 
@@ -136,7 +136,7 @@ ifdef __COMSPEC
 	@set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
 endif
-{$(SRCDIR)}.cpp{$(OBJDIR)}.obj: ; $(CXXCMD)
+{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
 #else
 $(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXXCMD)
 #endif
@@ -184,7 +184,7 @@ LNKDEP=$(PCHOBJ) $(OBJ)
 
 // Rules
 #ifdef _NMAKE
-{$(OBJDIR)}.o{$(OBJDIR)}.cpp:; $(CXXCMD)
+{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
 #else
 $(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
 #endif
