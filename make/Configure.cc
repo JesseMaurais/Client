@@ -23,7 +23,7 @@ ifeq($(OS),Windows_NT)
 OUTEXT=exe
 RM=del /f
 MKD=md
-DIR=\ // not continuation
+DIR=\ //
 ENT=;
 ifndef WINVER
 WINVER=0x0A00
@@ -49,11 +49,11 @@ MAKDIR=make$(DIR)
 OBJDIR=obj$(DIR)
 SRCDIR=src$(DIR)
 HDRDIR=$(SRCDIR)
+PCH=pre
 SRCEXT=cpp
 HDREXT=hpp
 ALLSRC=$(SRCDIR)*.$(SRCEXT)
 ALLHDR=$(SRCDIR)*.$(HDREXT)
-PRE=pre.hpp
 
 all: test.$(OUTEXT)
 
@@ -82,7 +82,7 @@ SRC=$(wildcard $(ALLSRC))
 // Compiler
 //
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER // Microsoft Visual C++
 
 OBJEXT=obj
 DEPEXT=dep
@@ -100,43 +100,45 @@ ifdef STD
 add(CFLAGS, -std:$(STD))
 endif
 
-// Header
-ifdef HDRDIR
-add(CFLAGS, -I$(HDRDIR))
-endif
-
 // Debug
 ifndef NDEBUG
 add(CFLAGS, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
 add(LDFLAGS, -Z7)
 endif
 
-// Precompile
-ifdef PRE
-PCH=$(SRCDIR)$(PRE:.hpp=.pch)
-$(PCH): $(SRCDIR)$(PRE); $(CXX) $(CFLAGS) -Yc$(PRE) -FI$(PRE) -Fe$(PCH) -c $(SRCDIR)$(PRE:.hpp=.cpp)
-add(CCFLAGS, -Yu$(PCH) -FI$(PRE))
-add(LDFLAGS, -Yu$(PCH))
+// Header
+ifdef HDRDIR
+add(CFLAGS, -I$(HDRDIR))
 endif
 
-// Compile
-CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$@
+// Precompile
+ifdef PCH
+PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
+PCHSRC=$(SRCDIR)$(PCH).$(SRCEXT)
+PCHOBJ=$(OBJDIR)$(PCH).$(OBJEXT)
+PCHOUT=$(SRCDIR)$(PCH).$(PCHEXT)
+add(CFLAGS, -FI$(PCH).$(HDREXT) -Fp$(PCHOUT))
+add(CXXFLAGS, -Yu$(PCH).$(HDREXT))
+add(LDFLAGS, -Yu$(PCH).$(HDREXT))
+$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ)
+endif
 
-// Link
-LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Yu$(PCH) -Fe$@
-LNKDEP=$(PCH) $(OBJ) $(DEP)
+// Commands
+CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$@
+LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
+LNKDEP=$(PCHOBJ) $(OBJ)
 
 // Rules
 #ifdef _NMAKE
-ifdef COMSPEC
+ifdef __COMSPEC
 {$(SRCDIR)}.cpp{$(OBJDIR)}.dep:
 	@echo $< : \> $@
-	set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
+	@set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
 endif
-{$(OBJDIR)}.o{$(OBJDIR)}.cpp:; $(CXXCMD)
+{$(SRCDIR)}.cpp{$(OBJDIR)}.obj: ; $(CXXCMD)
 #else
-$(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
+$(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXXCMD)
 #endif
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
@@ -157,29 +159,28 @@ ifdef STD
 add(CFLAGS, -std=$(STD))
 endif
 
-// Header
-ifdef HDRDIR
-add(CFLAGS, -I$(HDRDIR))
-endif
-
 // Debug
 ifndef NDEBUG
 add(CFLAGS, -Wall -Wextra -Wpedantic -g)
 endif
 
-// Precompile
-ifdef PRE
-PCH=$(SRCDIR)$(PRE).gch
-$(PCH): $(SRCDIR)$(PRE); $(CXX) $(CFLAGS) -c $< -o $@
-add(CXXFLAGS, -include $(PRE))
+// Header
+ifdef HDRDIR
+add(CFLAGS, -I$(HDRDIR))
 endif
 
-// Compile
-CXXCMD=$(CXX) $(CXXFLAGS) -c $< -o $@
+// Precompile
+ifdef PCH
+PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
+PCHOBJ=$(SRCDIR)$(PCH).$(PCHEXT)
+add(CXXFLAGS, -include $(PCHHDR))
+$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -c $< -o $@
+endif
 
-// Link
+// Commands
+CXXCMD=$(CXX) $(CXXFLAGS) -c $< -o $@
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
-LNKDEP=$(PCH) $(OBJ)
+LNKDEP=$(PCHOBJ) $(OBJ)
 
 // Rules
 #ifdef _NMAKE
@@ -188,7 +189,7 @@ LNKDEP=$(PCH) $(OBJ)
 $(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
 #endif
 
-#endif // Compile //
+#endif // Compilers
 
 .SUFFIXES: .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
 
@@ -217,7 +218,7 @@ OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 test.$(OUTEXT): $(LNKDEP); $(LNKCMD)
 
 // Clean
-clean: ; $(RM) test.$(OUTEXT) $(OBJ) $(DEP) $(PCH)
+clean: ; $(RM) test.$(OUTEXT) $(OBJ) $(PCHOBJ) $(DEP) 
 
 // Depend
 #ifdef _NMAKE
