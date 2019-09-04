@@ -20,7 +20,7 @@
 
 // System
 ifeq($(OS),Windows_NT)
-EXT=exe
+OUTEXT=exe
 RM=del /f
 MKD=md
 DIR=\ // not continuation
@@ -30,7 +30,7 @@ WINVER=0x0A00
 endif
 add(CFLAGS, -D_WIN32 -D_WIN32_WINNT=$(WINVER))
 else // POSIX
-EXT=out
+OUTEXT=out
 RM=rm -f
 MKD=mkdir -p
 DIR=/
@@ -43,17 +43,19 @@ add(LDFLAGS, -lm -ldl -lrt -lpthread)
 endif
 
 // Project
-.SUFFIXES: .cpp .hpp .mak .$(EXT)
+.SUFFIXES: .cpp .hpp .mak .mk
 STD=c++17
 MAKDIR=make$(DIR)
 OBJDIR=obj$(DIR)
 SRCDIR=src$(DIR)
 HDRDIR=$(SRCDIR)
-ALLHDR=$(SRCDIR)*.hpp
-ALLSRC=$(SRCDIR)*.cpp
+SRCEXT=cpp
+HDREXT=hpp
+ALLSRC=$(SRCDIR)*.$(SRCEXT)
+ALLHDR=$(SRCDIR)*.$(HDREXT)
 PRE=pre.hpp
 
-all: test.$(EXT)
+all: test.$(OUTEXT)
 
 // Source
 #ifdef _NMAKE
@@ -82,7 +84,13 @@ SRC=$(wildcard $(ALLSRC))
 
 #ifdef _MSC_VER
 
-.SUFFIXES: .obj .dep. .inl .pch .lib .pdb .ilk
+OBJEXT=obj
+DEPEXT=dep
+INLEXT=inl
+LIBEXT=lib
+PCHEXT=pch
+
+// Flags
 add(CFLAGS, -nologo -DNOMINMAX -EHsc -permissive-)
 add(LDFLAGS, -nologo)
 add(CXXFLAGS, $(CFLAGS))
@@ -111,45 +119,35 @@ add(CCFLAGS, -Yu$(PCH) -FI$(PRE))
 add(LDFLAGS, -Yu$(PCH))
 endif
 
-// Outputs
-#ifdef _NMAKE
-ifdef COMSPEC
-MAKDEP=$(MAKDIR)Depend.mak
-!if ![echo DEP=\>$(MAKDEP) ] 
-!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.dep\>>$(MAKDEP) ]
-!include $(MAKDEP)
-endif
-endif
-MAKOBJ=$(MAKDIR)Object.mak
-!if ![echo OBJ=\>$(MAKOBJ) ]
-!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.obj\>>$(MAKOBJ) ]
-!include $(MAKOBJ)
-endif
-endif
-endif
-#else // GNU
-DEP=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.dep, $(SRC))
-OBJ=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.obj, $(SRC))
-#endif
-ALLDEP=$(OBJDIR)*.dep
+// Compile
+CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$@
+
+// Link
+LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Yu$(PCH) -Fe$@
+LNKDEP=$(PCH) $(OBJ) $(DEP)
 
 // Rules
-test.$(EXT): $(PCH) $(OBJ) $(DEP); $(CXX) $(LDFLAGS) $(OBJ) -Yu$(PCH) -Fe$@
 #ifdef _NMAKE
-{$(SRCDIR)}.cpp{$(OBJDIR)}.obj:; $(CXX) $(CXXFLAGS) -c $< -Fo$@
-#else
-$(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXX) $(CXXFLAGS) -c $< -Fo$@
-#endif
 ifdef COMSPEC
 {$(SRCDIR)}.cpp{$(OBJDIR)}.dep:
 	@echo $< : \> $@
 	set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
 endif
+{$(OBJDIR)}.o{$(OBJDIR)}.cpp:; $(CXXCMD)
+#else
+$(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
+#endif
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 
-.SUFFIXES: .o .d .i .a .gch
+OBJEXT=o
+DEPEXT=d
+INLEXT=i
+LIBEXT=a
+PCHEXT=gch
+
+// Flags
 add(CFLAGS, -MP -MMD)
 add(LDFLAGS, -rdynamic)
 add(CXXFLAGS, $(CFLAGS))
@@ -176,40 +174,50 @@ $(PCH): $(SRCDIR)$(PRE); $(CXX) $(CFLAGS) -c $< -o $@
 add(CXXFLAGS, -include $(PRE))
 endif
 
+// Compile
+CXXCMD=$(CXX) $(CXXFLAGS) -c $< -o $@
+
+// Link
+LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
+LNKDEP=$(PCH) $(OBJ)
+
+// Rules
+#ifdef _NMAKE
+{$(OBJDIR)}.o{$(OBJDIR)}.cpp:; $(CXXCMD)
+#else
+$(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
+#endif
+
+#endif // Compile //
+
+.SUFFIXES: .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
+
 // Outputs
 #ifdef _NMAKE
 ifdef COMSPEC
 MAKDEP=$(MAKDIR)Depend.mak
 !if ![echo DEP=\>$(MAKDEP) ] 
-!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.d\>>$(MAKDEP) ]
+!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(DEPEXT)\>>$(MAKDEP) ]
 !include $(MAKDEP)
 endif
 endif
 MAKOBJ=$(MAKDIR)Object.mak
 !if ![echo OBJ=\>$(MAKOBJ) ]
-!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.o\>>$(MAKOBJ) ]
+!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ) ]
 !include $(MAKOBJ)
 endif
 endif
 endif
 #else // GNU
-DEP=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.d, $(SRC))
-OBJ=$(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.o, $(SRC))
+DEP=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(DEPEXT), $(SRC))
+OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 #endif
-ALLDEP=$(OBJDIR)*.d
 
 // Rules
-test.$(EXT): $(PCH) $(OBJ); $(CXX) $(LDFLAGS) $(OBJ) -o $@
-#ifdef _NMAKE
-{$(OBJDIR)}.o{$(OBJDIR)}.cpp: ; $(CXX) $(CXXFLAGS) -c $<
-#else // GNU
-$(OBJDIR)%.o: $(SRCDIR)%.cpp $(PCH); $(CXX) $(CXXFLAGS) -c $< -o $@
-#endif
-
-#endif // Compile //
+test.$(OUTEXT): $(LNKDEP); $(LNKCMD)
 
 // Clean
-clean: ; $(RM) test.$(EXT) $(OBJ) $(DEP) $(PCH)
+clean: ; $(RM) test.$(OUTEXT) $(OBJ) $(DEP) $(PCH)
 
 // Depend
 #ifdef _NMAKE
