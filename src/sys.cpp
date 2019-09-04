@@ -3,9 +3,9 @@
 
 #include "sys.hpp"
 #include "err.hpp"
-#include "pos.hpp"
 #include "ptr.hpp"
 #include "file.hpp"
+#include "thread.hpp"
 #include <vector>
 
 namespace sys

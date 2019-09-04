@@ -6,7 +6,7 @@
 #include "dig.hpp"
 #include "err.hpp"
 #include "sys.hpp"
-#include "pos.hpp"
+#include "thread.hpp"
 #include <algorithm>
 #include <iterator>
 #include <fstream>

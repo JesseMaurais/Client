@@ -1,91 +1,16 @@
-#ifndef uni_hpp
-#define uni_hpp
+#ifndef uni_thread_hpp
+#define uni_thread_hpp
 
-#ifdef _WIN32
-# error POSIX utility header included with Win32 macro.
-#endif
-
-#include <pthread.h>
-#include <dirent.h>
-#include <signal.h>
-#include <setjmp.h>
+#include "uni.hpp"
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
 
 namespace sys::uni
 {
-	template <typename... Args>
-	inline void err(int no, Args... args)
+	extern "C"
 	{
-		sys::warn(args..., fmt::err(no));
-	}
-
-	class jmp
-	{
-		sigjmp_buf buf;
-
-	private:
-
-		int operator()(int store)
-		{
-			return sigsetjmp(buf, store);
-		}
-
-		void raise(int value)
-		{
-			siglongjmp(buf, value);
-		}
-	};
-
-	namespace sig
-	{
-		struct event : sigevent
-		{
-			using signature = void();
-			using observer = std::function<signature>;
-
-			event(observer ob, int type, pthread_attr_t* attr = nullptr)
-			: go(ob)
-			{
-				sigev_notify = type;
-				sigev_value.sival_ptr = this;
-				sigev_notify_function = thunk;
-				sigev_notify_attributes = attr;
-			}
-
-		private:
-
-			observer go;
-
-			static void thunk(sigval sv)
-			{
-				auto that = reinterpret_cast<event*>(sv.sival_ptr);
-				that->go();
-			}
-		};
-
-		struct timer : event
-		{
-			timer_t id;
-
-			timer(observer ob, int type = SIGEV_THREAD, clockid_t clock = CLOCK_REALTIME)
-			: event(ob, type)
-			{
-				if (fail(timer_create(clock, this, &id)))
-				{
-					sys::err(here, "timer_create");
-				}
-			}
-
-			~timer()
-			{
-				if (fail(timer_delete(id)))
-				{
-					sys::err(here, "timer_delete");
-				}
-			}
-		};
+		#include <pthread.h>
 	}
 
 	using routine = void*(void*);
@@ -479,33 +404,6 @@ namespace sys::uni
 				if (no) sys::uni::err(no, here);
 			}
 		};
-	};
-
-	struct files : unique
-	{
-		DIR* ptr;
-
-		files(char const *s)
-		{
-			ptr = opendir(s);
-			if (nullptr == ptr)
-			{
-				sys::err(here, "opendir", s);
-			}
-		}
-
-		~files()
-		{
-			if (ptr and fail(closedir(ptr)))
-			{
-				sys::err(here, "closedir");
-			}
-		}
-
-		auto operator++()
-		{
-			return readdir(ptr);
-		}
 	};
 }
 

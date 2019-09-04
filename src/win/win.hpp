@@ -5,18 +5,20 @@
 # error Win32 utility header included without feature macro.
 #endif
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <tlhelp32.h>
 #include "sys.hpp"
+#include "ops.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
 #include "str.hpp"
 
-#pragma comment(lib, "user32.lib")
-
 namespace sys::win
 {
+	extern "C"
+	{
+		#define WIN32_LEAN_AND_MEAN
+		#include <windows.h>
+	}
+
 	inline auto invalid = INVALID_HANDLE_VALUE;
 
 	inline bool fail(HANDLE h)
@@ -54,50 +56,11 @@ namespace sys::win
 		auto const dw = WaitForSingleObject(h, ms);
 		if (WAIT_FAILED == dw)
 		{
-			sys::win::err(here, "WaitForSingleObject", ms);
+			sys::win::err(here, ms);
 			return failure;
 		}
 		return success;
 	}
-
-	struct msg : MSG
-	{
-		template <UINT Min, UINT Max> struct range : ::fmt::range<UINT>
-		{
-			using base = ::fmt::range<UINT>;
-			range() : base(Min, Max) { }
-		};
-
-		using key   = range<WM_KEYFIRST, WM_KEYLAST>;
-		using mouse = range<WM_MOUSEFIRST, WM_MOUSELAST>;
-		using user  = range<WM_USER, 0x7FFF>;
-		using app   = range<WM_APP, 0xBFFF>;
-		using text  = range<0xC000, 0xFFFF>;
-
-		inline bool get(UINT min = 0, UINT max = 0, HWND hw = nullptr)
-		{
-			auto const result = GetMessage(this, hw, min, max);
-			if (sys::fail(result))
-			{
-				sys::win::err(here, "GetMessage");
-				return failure;
-			}
-			return success;
-		}
-
-		static bool put(DWORD the, UINT msg, WPARAM wp = 0, LPARAM lp = 0)
-		{
-			if (not PostThreadMessage(the, msg, wp, lp))
-			{
-				sys::win::err
-				(
-					here, "PostThreadMessage", the, msg, wp, lp
-				);
-				return failure;
-			}
-			return success;
-		}
-	};
 
 	template <class T> struct zero : T
 	{
@@ -133,7 +96,7 @@ namespace sys::win
 			{
 				if (not CloseHandle(h))
 				{
-					sys::win::err(here, "CloseHandle");
+					sys::win::err(here);
 				}
 			}
 		}
@@ -143,92 +106,6 @@ namespace sys::win
 			int const fd = sys::win::open(h, flags);
 			h = sys::win::invalid;
 			return fd;
-		}
-	};
-
-	struct process : handle
-	{
-		process(DWORD pid, DWORD dw = PROCESS_ALL_ACCESS)
-		{
-			h = OpenProcess(dw, false, pid);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "OpenProcess", pid);
-			}
-		}
-	};
-
-	struct thread : handle
-	{
-		thread(DWORD id, DWORD dw = THREAD_ALL_ACCESS)
-		{
-			h = OpenThread(dw, false, id);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "OpenThread", id);
-			}
-		}
-	};
-
-	struct event : handle
-	{
-		event(char const *name = nullptr, DWORD dw = EVENT_ALL_ACCESS)
-		{
-			h = OpenEvent(dw, false, name);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "OpenEvent", name);
-			}
-		}
-	};
-
-	struct mutex : handle
-	{
-		mutex(char const *name = nullptr, DWORD dw = MUTEX_ALL_ACCESS)
-		{
-			h = OpenMutex(dw, false, name);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "OpenMutex", name);
-			}
-		}
-	};
-
-	struct srwlock : SRWLOCK
-	{
-		srwlock()
-		{
-			InitializeSRWLock(this);
-		}
-
-		void lock()
-		{
-			AcquireSRWLockShared(this);
-		}
-
-		void xlock()
-		{
-			AcquireSRWLockExclusive(this);
-		}
-
-		void unlock()
-		{
-			ReleaseSRWLockShared(this);
-		}
-
-		void xunlock()
-		{
-			ReleaseSRWLockExclusive(this);
-		}
-
-		auto trylock()
-		{
-			return TryAcquireSRWLockShared(this);
-		}
-
-		auto xtrylock()
-		{
-			return TryAcquireSRWLockExclusive(this);
 		}
 	};
 
@@ -243,245 +120,10 @@ namespace sys::win
 			sa.bInheritHandle = true;
 			if (not CreatePipe(&read.h, &write.h, &sa, BUFSIZ))
 			{
-				sys::win::err(here, "CreatePipe");
+				sys::win::err(here);
 			}
-		}
-	};
-
-	struct snapshot : handle
-	{
-		snapshot(DWORD dw)
-		{
-			h = CreateToolhelp32Snapshot(dw, 0);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "CreateToolhelp32Snapshot", dw);
-			}
-		}
-	};
-
-	struct processes : size<PROCESSENTRY32>
-	{
-		snapshot snap;
-
-		processes() : snap(TH32CS_SNAPPROCESS)
-		{
-			if (not sys::win::fail(snap.h))
-			{
-				if (not Process32First(snap.h, this))
-				{
-					sys::win::err(here, "Process32First");
-				}
-			}
-		}
-
-		bool operator++()
-		{
-			return Process32Next(snap.h, this);
-		}
-	};
-
-	struct modules : size<MODULEENTRY32>
-	{
-		snapshot snap;
-
-		modules() : snap(TH32CS_SNAPMODULE)
-		{
-			if (not sys::win::fail(snap.h))
-			{
-				if (not Module32First(snap.h, this))
-				{
-					sys::win::err(here, "Module32First");
-				}
-			}
-		}
-
-		bool operator++()
-		{
-			return Module32Next(snap.h, this);
-		}
-	};
-
-	struct threads : size<THREADENTRY32>
-	{
-		snapshot snap;
-
-		threads() : snap(TH32CS_SNAPTHREAD)
-		{
-			if (not sys::win::fail(snap.h))
-			{
-				if (not Thread32First(snap.h, this))
-				{
-					sys::win::err(here, "Thread32First");
-				}
-			}
-		}
-
-		bool operator++()
-		{
-			return Thread32Next(snap.h, this);
 		}
 	};
 }
-
-namespace sys
-{
-	struct mutex : sys::win::handle
-	{
-		mutex()
-		{
-			h = CreateMutex(nullptr, true, nullptr);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "CreateMutex");
-			}
-		}
-
-		auto lock()
-		{
-			class unlock : unique
-			{
-				HANDLE h;
-
-			public:
-
-				unlock(HANDLE mutex) : h(mutex)
-				{
-					if (fail(sys::win::wait(h)))
-					{
-						sys::warn(here);
-					}
-				}
-
-				~unlock()
-				{
-					if (not sys::win::fail(h))
-					{
-						if (not ReleaseMutex(h))
-						{
-							sys::win::err(here, "ReleaseMutex");
-						}
-					}
-				}
-
-			};
-			return unlock(h);
-		}
-	};
-
-	struct rwlock : sys::win::srwlock
-	{
-		auto read()
-		{
-			class unlock : unique
-			{
-				sys::win::srwlock* ptr;
-
-			public:
-
-				unlock(rwlock* that) : ptr(that)
-				{
-					ptr->lock();
-				}
-
-				~unlock()
-				{
-					ptr->unlock();
-				}
-			};
-			return unlock(this);
-		}
-
-		auto write()
-		{
-			class unlock : unique
-			{
-				sys::win::srwlock* ptr;
-
-			public:
-
-				unlock(rwlock* that) : ptr(that)
-				{
-					ptr->xlock();
-				}
-
-				~unlock()
-				{
-					ptr->xunlock();
-				}
-			};
-			return unlock(this);
-		}
-	};
-
-	template <typename Routine>
-	struct thread : sys::win::handle
-	{
-		DWORD id;
-
-		using base = sys::win::handle;
-
-		thread(Routine start) : work(start)
-		{
-			base::h = CreateThread(nullptr, 0, thunk, this, 0, &id);
-			if (sys::win::fail(base::h))
-			{
-				sys::win::err(here, "CreateThread");
-			}
-		}
-
-		~thread()
-		{
-			if (fail(sys::win::wait(base::h)))
-			{
-				sys::warn(here, id);
-			}
-		}
-
-	private:
-
-		Routine work;
-
-		static DWORD thunk(LPVOID ptr)
-		{
-			auto that = reinterpret_cast<thread>(ptr);
-			that->work();
-			return 0;
-		}
-	};
-
-	struct event : sys::win::handle
-	{
-		event()
-		{
-			h = CreateEvent(nullptr, false, false, nullptr);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "CreateEvent");
-			}
-		}
-
-		bool signal()
-		{
-			if (not SetEvent(h))
-			{
-				sys::win::err(here, "SetEvent");
-				return failure;
-			}
-			return success;
-		}
-
-		bool wait(mutex& key)
-		{
-			(void) key;
-			if (fail(sys::win::wait(h)))
-			{
-				sys::warn(here);
-				return failure;
-			}
-			return success;
-		}
-	};
-};
 
 #endif // file
