@@ -61,18 +61,14 @@ all: test.$(OUTEXT)
 #ifdef _NMAKE
 ifdef COMSPEC
 MAKHDR=$(MAKDIR)Header.mak
-!if ![echo HDR=\>$(MAKHDR) ] 
-!if ![for %i in ($(ALLHDR)) do @echo %i\>>$(MAKHDR) ]
+!if ![(echo HDR=\>$(MAKHDR)) && for %i in ($(ALLHDR)) do @echo %i\>>$(MAKHDR)]
 !include $(MAKHDR)
-endif
-endif
+endif // HDR
 MAKSRC=$(MAKDIR)Source.mak
-!if ![echo SRC=\>$(MAKSRC) ]
-!if ![for %i in ($(ALLSRC)) do @echo %i\>>$(MAKSRC) ]
+!if ![(echo SRC=\>$(MAKSRC)) && for %i in ($(ALLSRC)) do @echo %i\>>$(MAKSRC)]
 !include $(MAKSRC)
-endif
-endif
-endif
+endif // SRC
+endif // COMSPEC
 #else // GNU
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
@@ -197,18 +193,14 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
 #ifdef _NMAKE
 ifdef COMSPEC
 MAKDEP=$(MAKDIR)Depend.mak
-!if ![echo DEP=\>$(MAKDEP) ] 
-!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(DEPEXT)\>>$(MAKDEP) ]
+!if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
 !include $(MAKDEP)
-endif
-endif
+endif // DEP
 MAKOBJ=$(MAKDIR)Object.mak
-!if ![echo OBJ=\>$(MAKOBJ) ]
-!if ![for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ) ]
+!if ![(echo OBJ=\>$(MAKOBJ)) && for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ)]
 !include $(MAKOBJ)
-endif
-endif
-endif
+endif // OBJ
+endif // COMSPEC
 #else // GNU
 DEP=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(DEPEXT), $(SRC))
 OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
