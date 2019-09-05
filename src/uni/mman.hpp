@@ -2,6 +2,7 @@
 #define uni_mman_hpp
 
 #include "uni.hpp"
+#include "ptr.hpp"
 #include "err.hpp"
 
 namespace sys::uni
@@ -12,7 +13,7 @@ namespace sys::uni
 	}
 
 	template <typename C>
-	auto make_mmap(int prot, int flags, int fd, off_t off, C* ptr, size_t sz)
+	auto make_mmap(size_t sz, int prot, int flags, int fd, off_t off = 0, C* ptr = nullptr)
 	{
 		ptr = mmap(ptr, sz, prot, flags, fd, off);
 		if (MAP_FAILED == ptr)
@@ -21,7 +22,7 @@ namespace sys::uni
 			ptr = nullptr;
 		}
 
-		return std::shared_ptr(ptr, [sz](auto ptr)
+		return make_ptr(ptr, [sz](auto ptr)
 		{
 			if (nullptr != ptr)
 			{

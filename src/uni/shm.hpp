@@ -17,18 +17,18 @@ namespace sys::uni
 	auto make_shm(int id, int flag = 0, C const *ptr = nullptr)
 	{
 		ptr = shmat(id, ptr, flag);
-		if (sys::fail(ptr))
+		if (fail(ptr))
 		{
-			sys::err(here, "shmat");
+			err(here, "shmat");
 		}
 
-		return std::shared_ptr(ptr, [](auto ptr)
+		return make_ptr(ptr, [](auto ptr)
 		{
 			if (nullptr != ptr)
 			{
-				if (sys::fail(shmdt(ptr)))
+				if (fail(shmdt(ptr)))
 				{
-					sys::err(here, "shmdt");
+					err(here, "shmdt");
 				}
 			}
 		});
@@ -40,7 +40,7 @@ namespace sys::uni
 		{
 			if (fail(shmctl(id, IPC_STAT, this)))
 			{
-				sys::err(here, "shmctl", id);
+				err(here, "shmctl", id);
 				return failure;
 			}
 			return success;
@@ -50,7 +50,7 @@ namespace sys::uni
 		{
 			if (fail(shmctl(id, IPC_SET, this)))
 			{
-				sys::err(here, "shmctl", id);
+				err(here, "shmctl", id);
 				return failure;
 			}
 			return success;
@@ -59,14 +59,17 @@ namespace sys::uni
 
 	struct shmid
 	{
-		int id;
+		operator int() const
+		{
+			return id;
+		}
 
 		shmid(key_t key, size_t sz, int flag)
 		{
 			id = shmget(key, sz, flag);
 			if (fail(id))
 			{
-				sys::err(here, "shmget", sz, flags);	
+				err(here, "shmget", sz, flags);	
 			}
 		}
 
@@ -76,10 +79,14 @@ namespace sys::uni
 			{
 				if (fail(shmctl(id, IPC_RMID, nullptr)))
 				{
-					sys::err(here, "shmctl", id);
+					err(here, "shmctl", id);
 				}
 			}
 		}
+
+	private:
+
+		int id;
 	};
 }
 
