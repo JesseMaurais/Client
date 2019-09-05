@@ -25,20 +25,20 @@ RM=del /f
 MKD=md
 DIR=\ //
 ENT=;
-ifndef WINVER
-WINVER=0x0A00
+add(CFLAGS, -D_WIN32)
+ifdef WINVER
+add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
 endif
-add(CFLAGS, -D_WIN32 -D_WIN32_WINNT=$(WINVER))
 else // POSIX
 OUTEXT=out
 RM=rm -f
 MKD=mkdir -p
 DIR=/
 ENT=:
-ifndef UNIVER
-UNIVER=700
+add(CFLAGS, -D_POSIX_SOURCE)
+ifdef UNIVER
+add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
-add(CFLAGS, -D_POSIX_SOURCE -D_XOPEN_SOURCE=$(UNIVER))
 add(LDFLAGS, -lm -ldl -lrt -lpthread)
 endif
 
@@ -122,12 +122,12 @@ endif
 // Commands
 CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
-LNKDEP=$(PCHOBJ) $(OBJ)
+LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 
 // Rules
 #ifdef _NMAKE
-ifdef __COMSPEC
-{$(SRCDIR)}.cpp{$(OBJDIR)}.dep:
+ifdef COMSPEC
+{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(DEPEXT):
 	@echo $< : \> $@
 	@set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
