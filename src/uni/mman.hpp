@@ -4,6 +4,7 @@
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include "str.hpp"
 
 namespace sys::uni
 {
@@ -33,6 +34,35 @@ namespace sys::uni
 			}
 		});
 	}
+
+	class shm
+	{
+		char const *str;
+
+	public:
+
+		int fd;
+
+		shm(char const *name, int flag, mode_t mode) : str(name)
+		{
+			fd = shm_open(str, flag, mode);
+			if (fail(fd))
+			{
+				err(here, "shm_open", str, flag, mode);
+			}
+		}
+
+		~shm()
+		{
+			if (not fail(fd))
+			{
+				if (fail(shm_unlink(str)))
+				{
+					err(here, "shm_unlink", str, flag, mode);
+				}
+			}
+		}
+	};
 }
 
 #endif // file

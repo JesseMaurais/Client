@@ -64,7 +64,7 @@ namespace sys::uni
 			return id;
 		}
 
-		shmid(key_t key, size_t sz, int flag)
+		shmid(size_t sz, int flag = 0, key_t key = IPC_PRIVATE)
 		{
 			id = shmget(key, sz, flag);
 			if (fail(id))
