@@ -1,20 +1,16 @@
 #ifndef uni_mman_hpp
 #define uni_mman_hpp
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
-#include "str.hpp"
 
 namespace sys::uni
 {
-	extern "C"
-	{
-		#include <sys/mman.h>
-	}
-
-	template <typename C>
-	auto make_mmap(size_t sz, int prot, int flags, int fd, off_t off = 0, C* ptr = nullptr)
+	inline auto make_map(size_t sz, int prot, int flags, int fd, off_t off = 0, void* ptr = nullptr)
 	{
 		ptr = mmap(ptr, sz, prot, flags, fd, off);
 		if (MAP_FAILED == ptr)
@@ -41,26 +37,20 @@ namespace sys::uni
 
 	public:
 
-		int fd;
-
-		shm(char const *name, int flag, mode_t mode) : str(name)
-		{
-			fd = shm_open(str, flag, mode);
-			if (fail(fd))
-			{
-				err(here, "shm_open", str, flag, mode);
-			}
-		}
+		shm(char const *name) : str(name)
+		{ }
 
 		~shm()
 		{
-			if (not fail(fd))
+			if (fail(shm_unlink(str)))
 			{
-				if (fail(shm_unlink(str)))
-				{
-					err(here, "shm_unlink", str, flag, mode);
-				}
+				err(here, "shm_unlink", str);
 			}
+		}
+
+		int open(int flags, mode_t mode)
+		{
+			return shm_open(str, flags, mode);
 		}
 	};
 }

@@ -8,6 +8,11 @@
 #include "opt.hpp"
 #include "sys.hpp"
 #include "files.hpp"
+#ifdef _WIN32
+# include "win/files.hpp"
+#else
+# include "uni/dirent.hpp"
+#endif
 #include <algorithm>
 #include <regex>
 #include <stack>

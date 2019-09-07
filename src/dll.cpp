@@ -9,6 +9,10 @@
 #include "err.hpp"
 #include "pos.hpp"
 
+#ifndef _WIN32
+# include <dlfcn.h>
+#endif
+
 namespace sys
 {
 	dll::dll(fmt::string_view path)

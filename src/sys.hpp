@@ -71,9 +71,9 @@ namespace sys
 		constexpr auto image = ".exe";
 	}
 
-	namespace win::fmt
+	namespace win
 	{
-		char const* err(unsigned long dw, void* h = nullptr);
+		char const* strerr(unsigned long dw, void* h = nullptr);
 	}
 
 	using size_t = unsigned int;
@@ -144,9 +144,9 @@ namespace sys
 		constexpr auto image = "";
 	}
 
-	namespace uni::fmt
+	namespace uni
 	{
-		char const* err(int no);
+		char const* strerr(int no);
 	}
 
 	using size_t = ::size_t;

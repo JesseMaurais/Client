@@ -364,12 +364,14 @@ namespace
 	{
 		sys::file::descriptor file;
 		file.open(__FILE__, sys::file::rd);
-		sys::file::view map;
-		assert(not map.open(file.get()));
-		fmt::string_view const view = map;
+		assert(not sys::fail(file.get()));
+		std::size_t sz = 0;
+		auto const mem = sys::file::make_shm(file.get(), 0, 0, sys::file::rd, &sz);
+		assert(nullptr != mem);
+		auto const c = static_cast<char*>(mem.get());
+		fmt::string_view const view(c, sz);
 		auto pos = view.find("Self referencing find.");
 		assert(pos != fmt::string_view::npos);
-		assert(not map.close());
 	}
 }
 

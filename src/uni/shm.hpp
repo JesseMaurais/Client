@@ -4,20 +4,15 @@
 #include "uni.hpp"
 #include "err.hpp"
 #include "ptr.hpp"
+#include <sys/types.h>
+#include <sys/shm.h>
 
 namespace sys::uni
 {
-	extern "C"
-	{
-		#include <sys/types.h>
-		#include <sys/shm.h>
-	}
-
-	template <typename C>
-	auto make_shm(int id, int flag = 0, C const *ptr = nullptr)
+	auto make_shm(int id, int flag = 0, void *ptr = nullptr)
 	{
 		ptr = shmat(id, ptr, flag);
-		if (fail(ptr))
+		if (nullptr == ptr)
 		{
 			err(here, "shmat");
 		}
@@ -64,9 +59,9 @@ namespace sys::uni
 			return id;
 		}
 
-		shmid(size_t sz, int flag = 0, key_t key = IPC_PRIVATE)
+		shmid(size_t sz, int flags = 0, key_t key = IPC_PRIVATE)
 		{
-			id = shmget(key, sz, flag);
+			id = shmget(key, sz, flags);
 			if (fail(id))
 			{
 				err(here, "shmget", sz, flags);	

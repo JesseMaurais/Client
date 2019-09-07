@@ -1,3 +1,5 @@
+#ifndef api_hpp
+#define api_hpp
 
 // https://sourceforge.net/p/predef/wiki/Standards/
 
@@ -63,4 +65,5 @@
 
 #else
 #error "System target missing"
+#endif
 #endif

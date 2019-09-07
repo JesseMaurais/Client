@@ -4,14 +4,10 @@
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include <dirent.h>
 
 namespace sys::uni
 {
-	extern "C"
-	{
-		#include <dirent.h>
-	}
-
 	class directory : unique
 	{
 		DIR *ptr;

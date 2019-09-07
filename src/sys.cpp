@@ -8,12 +8,16 @@
 #include "thread.hpp"
 #include <vector>
 
+#ifndef _WIN32
+# include <sys/wait.h>
+#endif
+
 namespace sys
 {
 	#ifdef _WIN32
-	namespace win::fmt
+	namespace win
 	{
-		char const* err(unsigned long id, void* ptr)
+		char const* strerr(unsigned long id, void* ptr)
 		{
 			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
 			                    | FORMAT_MESSAGE_IGNORE_INSERTS
@@ -49,9 +53,9 @@ namespace sys
 		}
 	}
 	#else
-	namespace uni::fmt
+	namespace uni
 	{
-		char const* err(int no)
+		char const* strerr(int no)
 		{
 			static thread_local char buf[64] = { '\0' };
 			(void) strerror_r(no, buf, sizeof buf);

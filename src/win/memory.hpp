@@ -6,8 +6,7 @@
 
 namespace sys::win
 {
-	template <typename C>
-	auto make_view(HANDLE h, DWORD dw, off_t off = 0, size_t sz = 0, C* ptr = nullptr)
+	auto make_map(HANDLE h, DWORD dw, off_t off = 0, size_t sz = 0, void *ptr = nullptr)
 	{
 		ptr = MapViewOfFileEx(h, dw, HIWORD(off), LOWORD(off), sz, ptr);
 		if (nullptr == ptr)

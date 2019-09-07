@@ -1,11 +1,11 @@
 #include "err.hpp"
+#include "api.hpp"
 #include "ptr.hpp"
 #include "thread.hpp"
 #include <system_error>
 #include <exception>
 #include <iostream>
 #include <cstring>
-#include <cerrno>
 
 std::ostream& fmt::operator<<(std::ostream& out, fmt::where const& pos)
 {
