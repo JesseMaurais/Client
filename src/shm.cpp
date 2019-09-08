@@ -96,11 +96,40 @@ namespace sys::file
 			}
 			*out = sz;
 
-			int prot = 0;
-			if (mask & sys::file::rd) prot |= PROT_READ;
-			if (mask & sys::file::wr) prot |= PROT_WRITE;
-			if (mask & sys::file::ex) prot |= PROT_EXEC;
-			return sys::uni::make_map(sz, prot, MAP_PRIVATE, fd, off);
+			#ifdef _POSIX_MAPPED_FILES
+			{
+				int prot = 0;
+				if (mask & sys::file::rd) prot |= PROT_READ;
+				if (mask & sys::file::wr) prot |= PROT_WRITE;
+				if (mask & sys::file::ex) prot |= PROT_EXEC;
+				return sys::uni::make_map(sz, prot, MAP_PRIVATE, fd, off);
+			}
+			#else
+			{
+				auto key = IPC_PRIVATE;
+
+				if (not sys::fail(fd))
+				{
+					char path[PATH_MAX];
+					if (sys::fail(fcntl(fd, F_GETPATH, path)))
+					{
+						sys::err(here, "F_GETPATH", fd);
+					}
+
+					key = ftok(path, 'f');
+					if (sys::fail(key))
+					{
+						sys::err(here, "ftok", path);
+					}
+				}
+
+				int flags = 0;
+				if (mode & sys::file::ok) flags |= IPC_CREAT;
+				if (mode & sys::file::xu) flags |= IPC_EXCL;
+				auto const id = sys::uni::shm::get(sz, flags, key);
+				return sys::uni::shm::at(id, flags);
+			}
+			#endif
 		}
 		#endif
 	}

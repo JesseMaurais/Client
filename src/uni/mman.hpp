@@ -30,29 +30,6 @@ namespace sys::uni
 			}
 		});
 	}
-
-	class shm
-	{
-		char const *str;
-
-	public:
-
-		shm(char const *name) : str(name)
-		{ }
-
-		~shm()
-		{
-			if (fail(shm_unlink(str)))
-			{
-				err(here, "shm_unlink", str);
-			}
-		}
-
-		int open(int flags, mode_t mode)
-		{
-			return shm_open(str, flags, mode);
-		}
-	};
 }
 
 #endif // file
