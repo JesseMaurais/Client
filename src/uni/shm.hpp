@@ -40,12 +40,12 @@ namespace sys::uni::shm
 			return id;
 		}
 
-		get(size_t sz, int flags = 0, key_t key = IPC_PRIVATE)
+		get(size_t sz, int flags, key_t key = IPC_PRIVATE)
 		{
 			id = shmget(key, sz, flags);
 			if (fail(id))
 			{
-				err(here, "shmget", sz, flags);	
+				err(here, "shmget", key, sz, flags);	
 			}
 		}
 
@@ -61,7 +61,7 @@ namespace sys::uni::shm
 		}
 	};
 
-	struct ds : shmid_ds
+	struct ctl : shmid_ds
 	{
 		bool get(int id)
 		{
