@@ -6,14 +6,10 @@
 #include "ptr.hpp"
 #include "err.hpp"
 #include "str.hpp"
+#include <tlhelp32.h>
 
 namespace sys::win
 {
-	extern "C"
-	{
-		#include <tlhelp32.h>
-	}
-
 	struct snapshot : handle
 	{
 		snapshot(DWORD dw)

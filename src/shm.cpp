@@ -48,7 +48,7 @@ namespace sys::file
 			}
 			else
 			{
-				if (mode & sys::file::wr)
+				if (mask & sys::file::wr)
 				{
 					prot = PAGE_READWRITE;
 					flags |= FILE_MAP_WRITE;

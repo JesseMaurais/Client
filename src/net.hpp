@@ -38,7 +38,7 @@ namespace sys::net
 		if (sys::debug)
 		{
 			auto const no = WSAGetLastError();
-			auto const s = sys::win::fmt::err(no);
+			auto const s = sys::win::strerr(no);
 			sys::warn(args..., s);
 		}
 	}
