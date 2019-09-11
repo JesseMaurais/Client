@@ -54,19 +54,19 @@ namespace sys::win
 		}
 	};
 
-	struct critical : CRITICAL_SECTION
+	struct critical_section : CRITICAL_SECTION
 	{
-		critical()
+		critical_section()
 		{
 			InitializeCriticalSection(this);
 		}
 
-		critical(DWORD spin_count)
+		critical_section(DWORD spin_count)
 		{
 			InitializeCriticalSectionAndSpinCount(this, spin_count);
 		}
 
-		~critical()
+		~critical_section()
 		{
 			DeleteCriticalSection(this);
 		}
@@ -133,46 +133,28 @@ namespace sys::win
 
 namespace sys
 {
-	struct mutex : sys::win::handle
+	struct mutex : sys::win::critical_section
 	{
-		mutex()
-		{
-			h = CreateMutex(nullptr, true, nullptr);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "CreateMutex");
-			}
-		}
-
 		auto lock()
 		{
 			class unlock : unique
 			{
-				HANDLE h;
+				sys::win::critical_section* that;
 
 			public:
 
-				unlock(HANDLE mutex) : h(mutex)
+				unlock(sys::win::critical_section* ptr) : that(ptr)
 				{
-					if (fail(sys::win::wait(h)))
-					{
-						sys::warn(here);
-					}
+					that->enter();
 				}
 
 				~unlock()
 				{
-					if (not sys::win::fail(h))
-					{
-						if (not ReleaseMutex(h))
-						{
-							sys::win::err(here, "ReleaseMutex");
-						}
-					}
+					that->leave();
 				}
 
 			};
-			return unlock(h);
+			return unlock(this);
 		}
 	};
 
@@ -182,18 +164,18 @@ namespace sys
 		{
 			class unlock : unique
 			{
-				sys::win::srwlock* ptr;
+				sys::win::srwlock* that;
 
 			public:
 
-				unlock(rwlock* that) : ptr(that)
+				unlock(sys::win::rwlock* ptr) : that(ptr)
 				{
-					ptr->lock();
+					that->lock();
 				}
 
 				~unlock()
 				{
-					ptr->unlock();
+					that->unlock();
 				}
 			};
 			return unlock(this);
@@ -203,18 +185,18 @@ namespace sys
 		{
 			class unlock : unique
 			{
-				sys::win::srwlock* ptr;
+				sys::win::srwlock* that;
 
 			public:
 
-				unlock(rwlock* that) : ptr(that)
+				unlock(sys::win::rwlock* ptr) : that(ptr)
 				{
-					ptr->xlock();
+					that->xlock();
 				}
 
 				~unlock()
 				{
-					ptr->xunlock();
+					that->xunlock();
 				}
 			};
 			return unlock(this);
@@ -224,16 +206,17 @@ namespace sys
 	template <typename Routine>
 	struct thread : sys::win::handle
 	{
-		DWORD id;
-
 		using base = sys::win::handle;
+
+		unsigned id;
 
 		thread(Routine start) : work(start)
 		{
-			base::h = CreateThread(nullptr, 0, thunk, this, 0, &id);
+			auto const ptr = _beginthreadex(nullptr, 0, thunk, this, 0, &id);
+			base::h = reinterpret_cast<HANDLE>(ptr);
 			if (sys::win::fail(base::h))
 			{
-				sys::win::err(here, "CreateThread");
+				sys::win::err(here);
 			}
 		}
 
@@ -249,11 +232,12 @@ namespace sys
 
 		Routine work;
 
-		static DWORD thunk(LPVOID ptr)
+		static unsigned thunk(void *ptr)
 		{
-			auto that = reinterpret_cast<thread>(ptr);
+			auto that = reinterpret_cast<thread*>(ptr);
 			that->work();
-			return 0;
+			_endthreadex(that->id);
+			return that->id;
 		}
 	};
 

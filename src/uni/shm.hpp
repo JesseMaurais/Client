@@ -61,7 +61,7 @@ namespace sys::uni::shm
 		}
 	};
 
-	struct ctl : shmid_ds
+	struct ds : shmid_ds
 	{
 		bool get(int id)
 		{

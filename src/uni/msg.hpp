@@ -62,7 +62,7 @@ namespace sys::uni::msg
 		}
 	};
 
-	struct ctl : msqid_ds
+	struct ds : msqid_ds
 	{
 		bool get(int id)
 		{

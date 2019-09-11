@@ -5,14 +5,10 @@
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include <pthread.h>
 
 namespace sys::uni
 {
-	extern "C"
-	{
-		#include <pthread.h>
-	}
-
 	using routine = void*(void*);
 
 	struct thread : unique
@@ -415,18 +411,18 @@ namespace sys
 		{
 			class unlock : unique
 			{
-				sys::uni::mutex* ptr;
+				sys::uni::mutex* that;
 
 			public:
 
-				unlock(mutex* that) : ptr(that)
+				unlock(mutex* ptr) : that(ptr)
 				{
-					ptr->lock();
+					that->lock();
 				}
 
 				~unlock()
 				{
-					ptr->unlock();
+					that->unlock();
 				}
 
 			};
@@ -440,18 +436,18 @@ namespace sys
 		{
 			class unlock : unique
 			{
-				sys::uni::rwlock* ptr;
+				sys::uni::rwlock* that;
 
 			public:
 
-				unlock(rwlock* that) : ptr(that)
+				unlock(sys::uni::rwlock* ptr) : that(ptr)
 				{
-					ptr->rdlock();
+					that->rdlock();
 				}
 
 				~unlock()
 				{
-					ptr->unlock();
+					that->unlock();
 				}
 			};
 			return unlock(this);
@@ -461,18 +457,18 @@ namespace sys
 		{
 			class unlock : unique
 			{
-				sys::uni::rwlock* ptr;
+				sys::uni::rwlock* that;
 
 			public:
 			
-				unlock(rwlock* that) : ptr(that)
+				unlock(sys::uni::rwlock* ptr) : that(ptr)
 				{
-					ptr->wrlock();
+					that->wrlock();
 				}
 
 				~unlock()
 				{
-					ptr->unlock();
+					that->unlock();
 				}
 			};
 			return unlock(this);
