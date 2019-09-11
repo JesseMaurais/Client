@@ -5,6 +5,8 @@
 # error Win32 utility header included without feature macro.
 #endif
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include "sys.hpp"
 #include "ops.hpp"
 #include "ptr.hpp"
@@ -13,12 +15,6 @@
 
 namespace sys::win
 {
-	extern "C"
-	{
-		#define WIN32_LEAN_AND_MEAN
-		#include <windows.h>
-	}
-
 	inline auto invalid = INVALID_HANDLE_VALUE;
 
 	inline bool fail(HANDLE h)
@@ -32,7 +28,7 @@ namespace sys::win
 		if (sys::debug)
 		{
 			auto const no = GetLastError();
-			auto const s = sys::win::fmt::err(no);
+			auto const s = sys::win::strerr(no);
 			sys::warn(args..., s);
 		}
 	}

@@ -2,7 +2,7 @@
 #define thread_hpp
 
 #ifdef _WIN32
-# include "win/thread.hpp"
+# include "win/sync.hpp"
 #else
 # include "uni/pthread.hpp"
 #endif

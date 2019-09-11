@@ -24,7 +24,7 @@ namespace sys::win
 	{
 		HANDLE h;
 
-		find_files(char const *path)
+		find_file(char const *path)
 		{
 			h = FindFirstFile(path, this);
 			if (sys::win::fail(h))
@@ -33,7 +33,7 @@ namespace sys::win
 			}
 		}
 
-		~find_files()
+		~find_file()
 		{
 			if (not sys::win::fail(h))
 			{
@@ -66,11 +66,11 @@ namespace sys
 		class iterator
 		{
 			sys::win::find_file *that;
-			bool flag; 
+			bool flag;
 
 		public:
 
-			iterator(sys::win::find_file* ptr, bool end) 
+			iterator(sys::win::find_file* ptr, bool end)
 			: that(ptr), flag(end)
 			{ }
 

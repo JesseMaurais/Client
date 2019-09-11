@@ -54,6 +54,44 @@ namespace sys::win
 		}
 	};
 
+	struct critical : CRITICAL_SECTION
+	{
+		critical()
+		{
+			InitializeCriticalSection(this);
+		}
+
+		critical(DWORD spin_count)
+		{
+			InitializeCriticalSectionAndSpinCount(this, spin_count);
+		}
+
+		~critical()
+		{
+			DeleteCriticalSection(this);
+		}
+
+		auto set(DWORD spin_count)
+		{
+			return SetCriticalSectionSpinCount(this, spin_count);
+		}
+
+		void enter()
+		{
+			EnterCriticalSection(this);
+		}
+
+		bool tryenter()
+		{
+			return TRUE == TryEnterCriticalSection(this);
+		}
+
+		void leave()
+		{
+			LeaveCriticalSection(this);
+		}
+	};
+
 	struct srwlock : SRWLOCK
 	{
 		srwlock()
