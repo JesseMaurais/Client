@@ -4,7 +4,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <vector>
-#include "file.hpp"
+#include "ipc.hpp"
 #include "buf.hpp"
 
 namespace io
@@ -28,7 +28,7 @@ namespace io
 
 		using char_type = typename base::char_type;
 		using size_type = typename base::size_type;
-		using arguments = std::initializer_list<char const*>;
+		using arguments = sys::command;
 		using base::base;
 	};
 
@@ -58,19 +58,12 @@ namespace io
 			using processbuf = basic_processbuf<Char, Traits, Alloc>;
 			using arguments = typename processbuf::arguments;
 
-			static auto term(arguments args)
-			{
-				std::vector<char const*> argv(args);
-				argv.push_back(nullptr);
-				return argv;
-			}
-
 		public:
 
-			basic_pstream(arguments args)
-			: processbuf(args.size(), term(args).data()), base(this)
+			basic_pstream(arguments args) : processbuf(args), base(this)
 			{
-				processbuf::setbufsiz(sys::file::bufsiz());
+				auto const sz = sys::file::bufsiz();
+				processbuf::setbufsiz(sz);
 			}
 		};
 	}

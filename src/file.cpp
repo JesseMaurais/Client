@@ -216,25 +216,5 @@ namespace sys::file
 		}
 		else set(fd);
 	}
-
-	process::process(int argc, char const **argv)
-	{
-		int fd[3];
-		pid = sys::execute(fd, argc, argv);
-		if (not sys::fail(pid))
-		{
-			set(pid, fd);
-		}
-	}
-
-	bool process::kill()
-	{
-		return sys::kill(pid);
-	}
-	
-	int process::wait()
-	{
-		return sys::wait(pid);
-	}
 }
 
