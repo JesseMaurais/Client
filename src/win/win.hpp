@@ -68,6 +68,15 @@ namespace sys::win
 		size() { this->*Size = sizeof(T); }
 	};
 
+	struct security_attributes 
+	: size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>
+	{
+		security_attributes(bool inherit = true)
+		{
+			bInheritHandle = inherit;
+		}
+	};
+
 	struct info : SYSTEM_INFO
 	{
 		info() { GetSystemInfo(this); }
@@ -77,13 +86,9 @@ namespace sys::win
 	{
 		HANDLE h;
 
-		operator HANDLE() const
-		{
-			return h;
-		}
+		operator auto() const { return h; }
 
-		handle(HANDLE p = sys::win::invalid)
-		: h(p)
+		handle(HANDLE p = sys::win::invalid) : h(p)
 		{ }
 
 		~handle()
@@ -112,13 +117,12 @@ namespace sys::win
 
 		pipe()
 		{
-			size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength> sa;
-			sa.bInheritHandle = true;
+			security_attributes sa;
 			if (not CreatePipe(&read.h, &write.h, &sa, BUFSIZ))
 			{
-				sys::win::err(here);
+				sys::win::ere(here);
 			}
-		}
+		} 
 	};
 }
 

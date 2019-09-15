@@ -59,7 +59,7 @@ namespace sys::path
 
 namespace sys::dir
 {
-	bool fail(fmt::string_view path, file::mode um)
+	bool fail(fmt::string_view path, file::mode am)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -79,7 +79,7 @@ namespace sys::dir
 			return failure;
 		}
 
-		auto const mask = sys::file::access(um);
+		auto const mask = sys::file::check(am);
 		return st.st_mode & mask;
 	}
 }

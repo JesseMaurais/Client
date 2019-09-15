@@ -27,16 +27,7 @@ namespace io
 
 		using size_type = typename base::size_type;
 		using char_type = typename base::char_type;
-
-		basic_fdbuf(int fd = -1)
-		{
-			base::ops.set(fd);
-		}
-
-		bool close()
-		{
-			return base::ops.close();
-		}
+		using base::base;
 	};
 
 	// Common alias types
@@ -71,21 +62,10 @@ namespace io
 
 		public:
 
-			basic_fdstream(int fd = -1)
-			: fdbuf(fd)
+			basic_fdstream(string_view path, mode mask = default_mode, size_type size = sys::file::bufsiz())
+			: fdbuf(path, mode(mask | default_mode))
 			, base(this)
-			{ }
-
-			basic_fdstream(string_view path, mode mask = default_mode, size_type size = sys::file::bufsiz)
-			: basic_fdstream()
 			{
-				(void) open(path, mask, size);
-			}
-
-			bool open(string_view path, mode mask = default_mode, size_type size = sys::file::bufsiz)
-			{
-				mask = mode(mask | default_mode);
-
 				if (mask & sys::file::rw)
 				{
 					fdbuf::setbufsiz(size, size);
@@ -100,8 +80,6 @@ namespace io
 				{
 					fdbuf::setbufsiz(size, 0);
 				}
-
-				return fdbuf::ops.open(path, mask);
 			}
 		};
 	}

@@ -2,13 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "file.hpp"
+#include "thread.hpp"
 #include "sys.hpp"
 #include "err.hpp"
 #include "fmt.hpp"
+#include <utility>
 
 namespace sys::file
 {
-	int access(mode am)
+	int check(mode am)
 	{
 		int flags = 0;
 
@@ -128,7 +130,19 @@ namespace sys::file
 		return flags;
 	}
 
-	size_t const bufsiz = BUFSIZ;
+	size_t bufsiz(ssize_t n)
+	{
+		static sys::rwlock lock;
+		static ssize_t sz = BUFSIZ;
+		if (n < 0)
+		{
+			auto unlock = lock.read();
+			return sz;
+		}
+		auto unlock = lock.write();
+		std::swap(n, sz);
+		return n;
+	}
 
 	bool fail(string_view path, mode am)
 	{
@@ -138,24 +152,7 @@ namespace sys::file
 			return fail(s, am);
 		}
 
-		return sys::fail(sys::access(data(path), access(am)));
-	}
-
-	bool descriptor::open(string_view path, mode am, permit pm)
-	{
-		if (not fmt::terminated(path))
-		{
-			auto const s = fmt::to_string(path);
-			return open(s, am, pm);
-		}
-
-		fd = sys::open(data(path), convert(am), convert(pm));
-		if (sys::fail(fd))
-		{
-			sys::err(here, path, am, pm);
-			return failure;
-		}
-		return success;
+		return sys::fail(sys::access(data(path), check(am)));
 	}
 
 	ssize_t descriptor::write(const void* buf, size_t sz) const
@@ -178,6 +175,27 @@ namespace sys::file
 		return n;
 	}
 
+	static int open(string_view path, mode am, permit pm)
+	{
+		if (not fmt::terminated(path))
+		{
+			auto const s = fmt::to_string(path);
+			return open(s, am, pm);
+		}
+
+		auto const fd = sys::open(data(path), convert(am), convert(pm));
+		if (sys::fail(fd))
+		{
+			sys::err(here, path, am, pm);
+		}
+		return fd;
+	}
+
+	descriptor::descriptor(string_view path, mode am, permit pm)
+	{
+		fd = open(path, am, pm);
+	}
+
 	bool descriptor::close()
 	{
 		if (sys::fail(sys::close(fd)))
@@ -185,7 +203,7 @@ namespace sys::file
 			sys::err(here, fd);
 			return failure;
 		}
-		else fd = invalid;
+		fd = invalid;
 		return success;
 	}
 
@@ -199,16 +217,14 @@ namespace sys::file
 		else set(fd);
 	}
 
-	bool process::execute(char const** argv)
+	process::process(int argc, char const **argv)
 	{
 		int fd[3];
-		pid = sys::execute(fd, argv);
-		if (sys::fail(pid))
+		pid = sys::execute(fd, argc, argv);
+		if (not sys::fail(pid))
 		{
-			return failure;
+			set(pid, fd);
 		}
-		else set(fd);
-		return success;
 	}
 
 	bool process::kill()

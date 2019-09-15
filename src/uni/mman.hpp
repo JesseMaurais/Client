@@ -30,6 +30,14 @@ namespace sys::uni
 			}
 		});
 	}
+
+	namespace shm
+	{
+		inline auto open(char const* name, int flags, mode_t mode)
+		{
+			return file::descriptor(shm_open(name, flags, mode));
+		}
+	}
 }
 
 #endif // file

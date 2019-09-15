@@ -74,22 +74,28 @@ namespace sys
 		void err(string_view);
 	}
 
-	template <typename... Args>
-	inline void warn(Args... args)
+	template <typename... Args> inline bool warn(Args... args)
 	{
+		#ifndef NDEBUG
 		if (debug)
 		{
 			impl::warn(fmt::err(args...));
+			return success;
 		}
+		#endif
+		return failure;
 	}
 
-	template <typename... Args>
-	inline void err(Args... args)
+	template <typename... Args> inline bool err(Args... args)
 	{
+		#ifndef NDEBUG
 		if (debug)
 		{
 			impl::err(fmt::err(args...));
+			return success;
 		}
+		#endif
+		return failure;
 	}
 }
 

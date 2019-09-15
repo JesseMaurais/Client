@@ -354,7 +354,7 @@ namespace
 	{
 		io::pstream ps { "rev" };
 		ps << HELLO_WORLD << fmt::eol;
-		ps.close(0);
+		ps[0].close();
 		std::string s;
 		assert(std::getline(ps, s));
 		assert(s == DLROW_OLLEH);
@@ -362,8 +362,7 @@ namespace
 	
 	TEST(sys_map)
 	{
-		sys::file::descriptor file;
-		file.open(__FILE__, sys::file::rd);
+		sys::file::descriptor file(__FILE__, sys::file::rd);
 		assert(not sys::fail(file.get()));
 		std::size_t sz = 0;
 		auto const mem = sys::file::make_shm(file.get(), 0, 0, sys::file::rd, &sz);

@@ -166,12 +166,12 @@ namespace io
 
 	template
 	<
-	 class RW,
+	 class Ops,
 	 class Char,
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_rwbuf : public basic_stringbuf<Char, Traits, Alloc>
+	class basic_rwbuf : public basic_stringbuf<Char, Traits, Alloc>, public Ops
 	{
 		using base = basic_stringbuf<Char, Traits, Alloc>;
 
@@ -180,23 +180,22 @@ namespace io
 		using size_type = typename base::size_type;
 		using char_type = typename base::char_type;
 
-	protected:
-
-		RW ops;
-
 	private:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return ops.write(s, sz);
+			return Ops::write(s, sz);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return ops.read(s, sz);
+			return Ops::read(s, sz);
 		}
+
+		using base::base;
+		using Ops::Ops;
 	};
 }
 

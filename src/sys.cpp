@@ -51,6 +51,18 @@ namespace sys
 			}
 			return str;
 		}
+
+		static struct security_attributes 
+		: size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>
+		{
+			security_attributes()
+			{
+				bInheritHandle = TRUE;
+			}
+
+		} SECURITY;
+
+		LPSECURITY_ATTRIBUTES security = &SECURITY;
 	}
 	#else
 	namespace uni
@@ -64,8 +76,10 @@ namespace sys
 	}
 	#endif
 
-	pid_t execute(int fd[3], char const** argv)
+	pid_t execute(int fd[3], int argc, char const **argv)
 	{
+		assert(nullptr == argv[argc]);
+
 		#ifdef _WIN32
 		{
 			sys::win::pipe pair[3];

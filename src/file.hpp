@@ -1,13 +1,15 @@
 #ifndef file_hpp
 #define file_hpp
 
-#include "ops.hpp"
 #include "str.hpp"
+#include "ptr.hpp"
+#include "ops.hpp"
 
 namespace sys::file
 {
 	using fmt::string_view;
 
+	// Access modes
 	enum mode : int
 	{
 		ex   = 1 << 0, // execute
@@ -41,16 +43,15 @@ namespace sys::file
 		return (am & rwx) << 0;
 	}
 
+	// User permission
 	enum permit : int
 	{
 		owner_r = owner(rd),
 		owner_w = owner(wr),
 		owner_x = owner(ex),
-
 		group_r = group(rd),
 		group_w = group(wr),
 		group_x = group(ex),
-
 		other_r = other(rd),
 		other_w = other(wr),
 		other_x = other(ex),
@@ -71,24 +72,27 @@ namespace sys::file
 		return static_cast<permit>(other(static_cast<int>(am)));
 	}
 
-	int access(mode);
-	int convert(mode);
-	int convert(permit);
+	int check(mode); // file access mode
+	int convert(mode); // file open mode
+	int convert(permit); // permissions
 
+	// Check for access to the file at path
 	bool fail(string_view path, mode am = ok);
 
-	extern size_t const bufsiz;
+	// Query or change data buffer size
+	size_t bufsiz(ssize_t sz = invalid);
 
-	struct descriptor : ops
+	// Scoped file descriptor
+	struct descriptor : unique, ops
 	{
-		descriptor(int fd = invalid)
+		explicit descriptor(string_view path, mode am = rw, permit pm = owner(rw));
+		ssize_t write(const void *buf, size_t sz) const override;
+		ssize_t read(void *buf, size_t sz) const override;
+		bool close();
+
+		explicit descriptor(int fd = invalid)
 		{
 			(void) set(fd);
-		}
-
-		descriptor(string_view path, mode am = rw, permit pm = owner(rw))
-		{
-			(void) open(path, am, pm);
 		}
 
 		~descriptor()
@@ -99,10 +103,10 @@ namespace sys::file
 			}
 		}
 
-		int set(int newfd = invalid)
+		int set(int value = invalid)
 		{
 			int const tmp = fd;
-			fd = newfd;
+			fd = value;
 			return tmp;
 		}
 
@@ -111,17 +115,12 @@ namespace sys::file
 			return fd;
 		}
 
-		bool open(string_view path, mode am = rw, permit pm = owner(rw));
-		ssize_t write(const void* buf, size_t sz) const override;
-		ssize_t read(void* buf, size_t sz) const override;
-		bool close();
-
 	protected:
 
 		int fd;
 	};
 
-	struct pipe : ops
+	struct pipe : unique, ops
 	{
 		explicit pipe();
 
@@ -171,48 +170,46 @@ namespace sys::file
 		descriptor fds[2];
 	};
 
-	struct process : ops
+	struct process : unique, ops
 	{
-		~process()
+		explicit process(int argc, char const **argv);
+		bool kill();
+		int wait();
+
+		int set(int id = invalid, int fd[3] = nullptr)
 		{
-			if (not sys::fail(pid))
+			for (int n : { 0, 1, 2 }) if (fd)
 			{
-				(void) close();
+				int tmp = fds[n].get();
+				fds[n].set(fd[n]);
+				fd[n] = tmp;
 			}
+			else fds[n].set();
+			int tmp = pid;
+			pid = id;
+			return tmp;
 		}
 
-		void set(int fd[3] = nullptr)
-		{
-			for (int n : { 0, 1, 2 })
-			{
-				fds[n].set(fd ? fd[n] : invalid);
-			}
-		}
-
-		void get(int fd[3]) const
+		int get(int fd[3]) const
 		{
 			for (int n : { 0, 1, 2 })
 			{
 				fd[n] = fds[n].get();
 			}
-		}
-
-		auto get() const
-		{
 			return pid;
 		}
 
-		ssize_t err(void* buf, size_t sz) const
+		ssize_t error(char *str, size_t sz) const
 		{
-			return fds[2].read(buf, sz);
+			return fds[2].read(str, sz);
 		}
 
-		ssize_t read(void* buf, size_t sz) const override
+		ssize_t read(void *buf, size_t sz) const override
 		{
 			return fds[1].read(buf, sz);
 		}
 
-		ssize_t write(const void* buf, size_t sz) const override
+		ssize_t write(const void *buf, size_t sz) const override
 		{
 			return fds[0].write(buf, sz);
 		}
@@ -225,27 +222,6 @@ namespace sys::file
 		descriptor& operator[](size_t n)
 		{
 			return fds[n];
-		}
-
-		bool execute(char const** argv);
-		bool kill();
-		int wait();
-
-		bool close(int n)
-		{
-			return fds[n].close();
-		}
-
-		void close()
-		{
-			for (int n : { 0, 1, 2 })
-			{
-				int fd = fds[n].get();
-				if (not sys::fail(fd))
-				{
-					(void) fds[n].close();
-				}
-			}
 		}
 
 	protected:
