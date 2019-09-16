@@ -16,7 +16,8 @@ namespace sys::file
 {
 	struct process : unique, ops
 	{
-		explicit process(command);
+		explicit process(size_t argc, char const** argv);
+		explicit process(command line);
 		bool kill();
 		int wait();
 
@@ -73,6 +74,11 @@ namespace sys::file
 		descriptor fds[3];
 		int pid = invalid;
 	};
+}
+
+namespace sys::ipc
+{
+	file::process twin(command line);
 }
 
 #endif // file

@@ -23,6 +23,12 @@ namespace env::opt
 	extern env::view const& run;
 	view directory(view stem);
 
+	inline auto arg(size_t argn)
+	{
+		fmt::string_view_span const argv = arguments;
+		return argv[argn];
+	}
+
 	struct description
 	{
 		word argn; // required arguments (or -1 for any number)

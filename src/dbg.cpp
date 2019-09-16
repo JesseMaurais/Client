@@ -24,6 +24,16 @@ namespace dbg
 			static std::map<test*, string> instance;
 			return instance;
 		}
+
+		std::ostream& stream(fmt::string_view pattern)
+		{
+			if (pattern.front() == '_')
+			{
+				static std::stringstream sink;
+				return sink;
+			}
+			return std::cout;
+		}
 	}
 
 	test::test(char const *name)
@@ -63,9 +73,9 @@ namespace dbg
 		{
 			expression = "^[^_](.*?)";
 		}
+		auto & out = stream(expression);
 
 		int nerr = 0;
-		auto & out = std::cout;
 		std::regex pattern(expression);
 		for (auto const& [that, name] : registry())
 		{

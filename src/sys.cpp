@@ -76,7 +76,7 @@ namespace sys
 	}
 	#endif
 
-	pid_t execute(int fd[3], int argc, char const **argv)
+	pid_t execute(int fd[3], size_t argc, char const **argv)
 	{
 		assert(nullptr == argv[argc]);
 

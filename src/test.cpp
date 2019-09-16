@@ -350,14 +350,21 @@ namespace
 		assert(__LINE__ < n);
 	}
 
-	TEST(ios_ips)
+	TEST(_sys_ipc_rev)
 	{
-		io::pstream ps { "rev" };
-		ps << HELLO_WORLD << fmt::eol;
-		ps[0].close();
+		std::string s;
+		assert(std::getline(std::cin, s));
+		std::reverse(s.begin(), s.end());
+		std::cout << s << std::endl;
+	}
+
+	TEST(sys_ipc)
+	{
+		io::pstream ps { env::opt::arg(0), "_sys_ipc_rev" };
+		ps << HELLO_WORLD << std::endl;
 		std::string s;
 		assert(std::getline(ps, s));
-		assert(s == DLROW_OLLEH);
+		assert(DLROW_OLLEH == s);
 	}
 	
 	TEST(sys_map)
