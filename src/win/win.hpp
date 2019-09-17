@@ -86,7 +86,7 @@ namespace sys::win
 	{
 		HANDLE h;
 
-		operator auto() const { return h; }
+		operator HANDLE() const { return h; }
 
 		handle(HANDLE p = sys::win::invalid) : h(p)
 		{ }
@@ -120,7 +120,7 @@ namespace sys::win
 			security_attributes sa;
 			if (not CreatePipe(&read.h, &write.h, &sa, BUFSIZ))
 			{
-				sys::win::ere(here);
+				sys::win::err(here);
 			}
 		} 
 	};

@@ -51,18 +51,6 @@ namespace sys
 			}
 			return str;
 		}
-
-		static struct security_attributes 
-		: size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>
-		{
-			security_attributes()
-			{
-				bInheritHandle = TRUE;
-			}
-
-		} SECURITY;
-
-		LPSECURITY_ATTRIBUTES security = &SECURITY;
 	}
 	#else
 	namespace uni

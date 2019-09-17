@@ -168,7 +168,7 @@ namespace sys
 
 			public:
 
-				unlock(sys::win::rwlock* ptr) : that(ptr)
+				unlock(sys::win::srwlock* ptr) : that(ptr)
 				{
 					that->lock();
 				}
@@ -189,7 +189,7 @@ namespace sys
 
 			public:
 
-				unlock(sys::win::rwlock* ptr) : that(ptr)
+				unlock(sys::win::srwlock* ptr) : that(ptr)
 				{
 					that->xlock();
 				}
