@@ -63,7 +63,7 @@ namespace
 	//
 	// Checked integer and floating point conversions
 	//
-	
+
 	TEST(fmt_narrow) { assert('*' == fmt::to_narrow<char>(42)); }
 	TEST(fmt_unsigned) { assert(42u == fmt::to_unsigned(42)); }
 	TEST(fmt_signed) { assert(42 == fmt::to_signed(42u)); }
@@ -171,12 +171,12 @@ namespace
 
 	TEST(env_path)
 	{
-		auto var = sys::env::get("PATH");
+		auto var = env::sys::get("PATH");
 		auto val = fmt::path::join(env::paths);
 		assert(var == val);
 
-		val = sys::env::value("$PATH");
-		var = sys::env::get("PATH");
+		val = env::sys::value("$PATH");
+		var = env::sys::get("PATH");
 		assert(var == val);
 	}
 
@@ -366,7 +366,7 @@ namespace
 		assert(std::getline(ps, s));
 		assert(DLROW_OLLEH == s);
 	}
-	
+
 	TEST(sys_map)
 	{
 		sys::file::descriptor file(__FILE__, sys::file::rd);
@@ -380,4 +380,3 @@ namespace
 		assert(pos != fmt::string_view::npos);
 	}
 }
-

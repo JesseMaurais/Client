@@ -28,7 +28,7 @@ namespace
 		operator fmt::string_view_span() const final
 		{
 			static fmt::string_view_vector t;
-			fmt::string_view u = sys::env::get("LIB");
+			fmt::string_view u = env::sys::get("LIB");
 			t = fmt::dir::split(u);
 			return t;
 		}
@@ -41,21 +41,21 @@ namespace
 		{
 			#ifdef __WIN32__
 			{
-				return sys::env::get("PATH");
+				return env::sys::get("PATH");
 			}
 			#else
 			#ifdef __AIX__
 			{
-				return sys::env::get("LIBPATH");
+				return env::sys::get("LIBPATH");
 			}
 			#else
 			#ifdef __HPUX__
 			{
-				return sys::env::get("SHLIB_PATH");
+				return env::sys::get("SHLIB_PATH");
 			}
 			#else
 			{
-				return sys::env::get("LD_LIBRARY_PATH");
+				return env::sys::get("LD_LIBRARY_PATH");
 			}
 			#endif
 			#endif
@@ -97,7 +97,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get("CXX");
+			auto u = env::sys::get("CXX");
 			if (empty(u))
 			{
 				u = "c++";

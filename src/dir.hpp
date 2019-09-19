@@ -67,7 +67,7 @@ namespace env::dir
 	entry copy(fmt::string&);
 	entry match(fmt::string_view);
 	entry insert(fmt::string_vector&);
-	entry mode(sys::file::mode);
+	entry mode(::sys::file::mode);
 
 	extern bool find(fmt::string_view dir, entry view);
 	inline bool find(fmt::string_view_span list, entry view)

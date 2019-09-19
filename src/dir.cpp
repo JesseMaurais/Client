@@ -84,6 +84,11 @@ namespace sys::dir
 	}
 }
 
+namespace env::sys
+{
+	using namespace ::sys;
+}
+
 namespace env::dir
 {
 	bool find(fmt::string_view path, entry view)
@@ -118,7 +123,7 @@ namespace env::dir
 			buf = fmt::dir::join(folders);
 			stem = buf;
 		}
-		
+
 		stem = path.substr(0, path.find(sys::sep::dir, stem.size() + 1));
 
 		while (not empty(stack))
@@ -243,4 +248,3 @@ namespace env::dir
 		};
 	}
 }
-

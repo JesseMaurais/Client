@@ -22,7 +22,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get("XDG_CURRENT_DESKTOP");
+			auto u = env::sys::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
 			{
 				u = env::desktop;
@@ -36,7 +36,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get("XDG_MENU_PREFIX");
+			auto u = env::sys::get("XDG_MENU_PREFIX");
 			if (empty(u))
 			{
 				u = env::usr::current_desktop;
@@ -84,7 +84,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get("XDG_RUNTIME_DIR");
+			auto u = env::sys::get("XDG_RUNTIME_DIR");
 			if (empty(u))
 			{
 				static auto const path = fmt::dir::join(env::tmpdir, "run", env::user);
@@ -99,7 +99,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get("XDG_DATA_HOME");
+			auto u = env::sys::get("XDG_DATA_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -118,7 +118,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get("XDG_CONFIG_HOME");
+			auto u = env::sys::get("XDG_CONFIG_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -137,7 +137,7 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get("XDG_CACHE_HOME");
+			auto u = env::sys::get("XDG_CACHE_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -156,12 +156,12 @@ namespace
 	{
 		operator fmt::string_view_span() const final
 		{
-			auto u = sys::env::get("XDG_DATA_DIRS");
+			auto u = env::sys::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
 				#ifdef _WIN32
 				{
-					u = sys::env::get("ALLUSERSPROFILE");
+					u = env::sys::get("ALLUSERSPROFILE");
 				}
 				#else
 				{
@@ -179,7 +179,7 @@ namespace
 		operator fmt::string_view_span() const final
 		{
 			static fmt::string_view_vector t;
-			auto u = sys::env::get("XDG_CONFIG_DIRS");
+			auto u = env::sys::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
 				#ifdef _WIN32
@@ -187,8 +187,8 @@ namespace
 					static fmt::string s;
 					if (empty(s))
 					{
-						auto const appdata = fmt::to_string(sys::env::get("APPDATA"));
-						auto const local = fmt::to_string(sys::env::get("LOCALAPPDATA"));
+						auto const appdata = fmt::to_string(env::sys::get("APPDATA"));
+						auto const local = fmt::to_string(env::sys::get("LOCALAPPDATA"));
 						s = fmt::path::join(appdata, local);
 					}
 					u = s;
@@ -218,12 +218,12 @@ namespace
 	{
 		operator fmt::string_view() const final
 		{
-			auto u = sys::env::get(var);
+			auto u = env::sys::get(var);
 			if (empty(u))
 			{
 				u = cached();
 			}
-			
+
 			#ifdef _WIN32
 			{
 				if (empty(u))
@@ -264,7 +264,7 @@ namespace
 				}
 			}
 			#endif
-			
+
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -299,7 +299,7 @@ namespace
 					auto const second = line.find_first_of(quote, first);
 					line = line.substr(first, second);
 					auto entry = fmt::entry(line);
-					auto value = sys::env::value(entry.second);
+					auto value = env::sys::value(entry.second);
 					env::opt::set(entry.first, value);
 				}
 				u = env::opt::get(var);
@@ -338,4 +338,3 @@ namespace env::usr
 	env::view const& templates_dir = TEMPLATES_DIR;
 	env::view const& videos_dir = VIDEOS_DIR;
 }
-

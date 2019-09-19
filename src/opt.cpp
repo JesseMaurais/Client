@@ -159,6 +159,11 @@ namespace
 	}
 }
 
+namespace env::sys
+{
+	using namespace ::sys;
+}
+
 namespace env::opt
 {
 	env::span const& arguments = ARGUMENTS;
@@ -235,7 +240,7 @@ namespace env::opt
 			}
 
 			// Start parsing the next command if changing
-			
+
 			if (change)
 			{
 				if (end != it)
@@ -288,8 +293,8 @@ namespace env::opt
 				return e.second;
 			}
 		}
-		
-		auto value = sys::env::get(key);
+
+		auto value = env::sys::get(key);
 		if (empty(value))
 		{
 			auto const entry = make_pair(key);
@@ -465,7 +470,7 @@ namespace env::opt
 		auto const entry = make_pair(key);
 		return get(entry, value);
 	}
-	
+
 	span get(pair key, span value)
 	{
 		view u = get(key);
@@ -488,4 +493,3 @@ namespace env::opt
 		return put(key, s);
 	}
 }
-

@@ -15,8 +15,10 @@ namespace
 	sys::rwlock lock;
 }
 
-namespace sys::env
+namespace env::sys
 {
+	using namespace ::sys;
+
 	fmt::string_view get(fmt::string_view u)
 	{
 		if (not fmt::terminated(u))
@@ -91,7 +93,7 @@ namespace
 		operator fmt::string_view_span() const final
 		{
 			static thread_local fmt::string_view_vector t;
-			auto u = sys::env::get("PATH");
+			auto u = env::sys::get("PATH");
 			t = fmt::path::split(u);
 			return t;
 		}
@@ -104,11 +106,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("USERNAME");
+				return env::sys::get("USERNAME");
 			}
 			#else
 			{
-				return sys::env::get("USER");
+				return env::sys::get("USER");
 			}
 			#endif
 		}
@@ -121,11 +123,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("USERPROFILE");
+				return env::sys::get("USERPROFILE");
 			}
 			#else
 			{
-				return sys::env::get("HOME");
+				return env::sys::get("HOME");
 			}
 			#endif
 		}
@@ -138,7 +140,7 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("COMPUTERNAME");
+				return env::sys::get("COMPUTERNAME");
 			}
 			#else
 			{
@@ -161,7 +163,7 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("USERDOMAIN");
+				return env::sys::get("USERDOMAIN");
 			}
 			#else
 			{
@@ -184,7 +186,7 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("SYSTEMDRIVE");
+				return env::sys::get("SYSTEMDRIVE");
 			}
 			#else
 			{
@@ -201,7 +203,7 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("SYSTEMROOT");
+				return env::sys::get("SYSTEMROOT");
 			}
 			#else
 			{
@@ -223,7 +225,7 @@ namespace
 			}
 			#else
 			{
-				return sys::env::get("PWD");
+				return env::sys::get("PWD");
 			}
 			#endif
 		}
@@ -236,7 +238,7 @@ namespace
 		{
 			for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
-				auto v = sys::env::get(u);
+				auto v = env::sys::get(u);
 				if (not empty(v))
 				{
 					return v;
@@ -253,7 +255,7 @@ namespace
 		{
 			for (auto u : { "TMPDIR", "TEMP", "TMP" })
 			{
-				auto v = sys::env::get(u);
+				auto v = env::sys::get(u);
 				if (not empty(v))
 				{
 					return v;
@@ -283,11 +285,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("COMSPEC");
+				return env::sys::get("COMSPEC");
 			}
 			#else
 			{
-				return sys::env::get("SHELL");
+				return env::sys::get("SHELL");
 			}
 			#endif
 		}
@@ -300,11 +302,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("PROMPT");
+				return env::sys::get("PROMPT");
 			}
 			#else
 			{
-				return sys::env::get("PS1");
+				return env::sys::get("PS1");
 			}
 			#endif
 		}
@@ -317,11 +319,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return sys::env::get("OS");
+				return env::sys::get("OS");
 			}
 			#else
 			{
-				return sys::env::get("DESKTOP_SESSION");
+				return env::sys::get("DESKTOP_SESSION");
 			}
 			#endif
 		}
@@ -345,4 +347,3 @@ namespace env
 	view const& desktop = DESKTOP;
 	view const& prompt = PROMPT;
 }
-

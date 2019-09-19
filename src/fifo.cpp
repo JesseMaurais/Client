@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "fifo.hpp"
+#include "file.hpp"
 #include "sys.hpp"
 #include "opt.hpp"
 #include "fmt.hpp"
@@ -18,14 +19,15 @@ namespace sys::file
 		{
 			path = fmt::join({ "\\\\.\\pipe\\", name });
 
+			auto const size = bufsiz();
 			sys::win::handle h = CreateNamedPipe
 			(
-				data(path),
+				path.c_str(),
 				PIPE_ACCESS_DUPLEX,
 				PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
 				PIPE_UNLIMITED_INSTANCES,
-				BUFSIZ, // output
-				BUFSIZ, // input
+				size,   // output
+				size,   // input
 				0,      // default time out
 				nullptr // default security
 			);
@@ -66,7 +68,7 @@ namespace sys::file
 			}
 
 			path = fmt::dir::join(dir, name);
-			auto const ps = data(path);
+			auto const ps = path.c_str();
 			if (sys::fail(mkfifo(ps, um | rw)))
 			{
 				sys::err(here, "mkfifo", path);
@@ -131,4 +133,3 @@ namespace sys::file
 		#endif
 	}
 }
-
