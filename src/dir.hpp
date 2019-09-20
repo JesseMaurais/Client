@@ -7,70 +7,70 @@
 
 namespace fmt::path
 {
-	fmt::string_view_vector split(fmt::string_view);
+	std::vector<view> split(view);
 
 	namespace impl
 	{
-		fmt::string join(fmt::string_view_span);
+		string join(span);
 	}
 
 	template <typename... StringView>
 	inline auto join(StringView const&... args)
 	{
-		return impl::join({ fmt::string_view(args)... });
+		return impl::join({ view(args)... });
 	}
 
 	template <typename StringViewSpan>
 	inline auto join(StringViewSpan const& list)
 	{
-		return impl::join(fmt::string_view_span(list));
+		return impl::join(span(list));
 	}
 }
 
 namespace fmt::dir
 {
-	fmt::string_view_vector split(fmt::string_view);
+	std::vector<view> split(view);
 
 	namespace impl
 	{
-		fmt::string join(fmt::string_view_span);
+		string join(span);
 	}
 
 	template <typename... StringView>
 	inline auto join(StringView const&... args)
 	{
-		return impl::join({ fmt::string_view(args)... });
+		return impl::join({ view(args)... });
 	}
 
 	template <typename StringViewSpan>
 	inline auto join(StringViewSpan const& list)
 	{
-		return impl::join(fmt::string_view_span(list));
+		return impl::join(span(list));
 	}
 }
 
 namespace sys::path
 {
-	bool fail(fmt::string_view path, file::mode um = file::ok);
+	bool fail(fmt::view path, file::mode = file::ok);
 }
 
 namespace sys::dir
 {
-	bool fail(fmt::string_view path, file::mode um = file::ok);
+	bool fail(fmt::view path, file::mode = file::ok);
 }
 
 namespace env::dir
 {
-	using entry = predicate<fmt::string_view>;
-	constexpr auto stop = falsity<fmt::string_view>;
+	using entry = predicate<fmt::view>;
+	constexpr auto stop = falsity<fmt::view>;
 
 	entry copy(fmt::string&);
-	entry match(fmt::string_view);
-	entry insert(fmt::string_vector&);
+	entry match(fmt::view);
+	entry insert(std::vector<fmt::string>&);
 	entry mode(::sys::file::mode);
 
-	extern bool find(fmt::string_view dir, entry view);
-	inline bool find(fmt::string_view_span list, entry view)
+	extern bool find(fmt::view dir, entry view);
+	inline bool find(fmt::span list, entry view)
 	{
 		for (auto const dir : list)
 		{
@@ -82,12 +82,12 @@ namespace env::dir
 		return false;
 	}
 
-	fmt::string_view make(fmt::string_view path);
-	bool remove(fmt::string_view path);
+	fmt::view make(fmt::view path);
+	bool remove(fmt::view path);
 
 	struct tmp
 	{
-		tmp(fmt::string_view path)
+		tmp(fmt::view path)
 		{
 			stem = env::dir::make(path);
 		}
@@ -102,7 +102,7 @@ namespace env::dir
 
 	private:
 
-		fmt::string_view stem;
+		fmt::view stem;
 	};
 }
 

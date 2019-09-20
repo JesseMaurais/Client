@@ -11,14 +11,14 @@
 #include <string_view>
 namespace fmt::impl
 {
-	template <class Char, class Traits = std::char_traits<Char>> 
+	template <class Char, class Traits = std::char_traits<Char>>
 	using basic_string_view = std::basic_string_view<Char, Traits>;
 }
 #elif __has_include(<experimental/string_view>)
 #include <experimental/string_view>
 namespace fmt::impl
 {
-	template <class Char, class Traits = std::char_traits<Char>> 
+	template <class Char, class Traits = std::char_traits<Char>>
 	using basic_string_view = std::experimental::basic_string_view<Char, Traits>;
 }
 #else
@@ -126,29 +126,29 @@ namespace fmt
 #include <span>
 namespace fmt
 {
-	template <typename Type> using span = std::span<Type>;
+	template <typename Type> using basic_span = std::span<Type>;
 }
 #elif __has_include(<experimetal/span>)
 #include <experimental/span>
 namespace fmt
 {
-	template <typename Type> using span = std::experimental::span<Type>;
+	template <typename Type> using basic_span = std::experimental::span<Type>;
 }
 #else
 #include <initializer_list>
 namespace fmt
 {
-	template <typename Type> struct span : range<Type const*>
+	template <typename Type> struct basic_span : range<Type const*>
 	{
 		using base = range<Type const*>;
 		using base::base;
 		using const_iterator = Type const*;
 
-		span(std::vector<Type> const& list)
+		basic_span(std::vector<Type> const& list)
 		: base(data(list), data(list) + size(list))
 		{ }
 
-		span(std::initializer_list<Type> init)
+		basic_span(std::initializer_list<Type> init)
 		: base(begin(init), end(init))
 		{ }
 
@@ -172,40 +172,18 @@ namespace fmt
 
 namespace fmt
 {
-	template <class Char> using basic_string_pair = pair<basic_string<Char>>;
-	template <class Char> using basic_string_vector = typename std::vector<basic_string<Char>>;
-	template <class Char> using basic_string_span = span<basic_string<Char>>;
-
-	template <class Char> using basic_string_view_pair = pair<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_vector = typename std::vector<basic_string_view<Char>>;
-	template <class Char> using basic_string_view_span = span<basic_string_view<Char>>;
-
 	using string = basic_string<char>;
 	using wstring = basic_string<wchar_t>;
 
 	using string_view = basic_string_view<char>;
 	using wstring_view = basic_string_view<wchar_t>;
 
-	using string_pair = basic_string_pair<char>;
-	using wstring_pair = basic_string_pair<wchar_t>;
+	using span = basic_span<string_view>;
+	using wspan = basic_span<wstring_view>;
 
-	using string_vector = basic_string_vector<char>;
-	using wstring_vector = basic_string_vector<wchar_t>;
-
-	using string_span = basic_string_span<char>;
-	using wstring_span = basic_string_span<wchar_t>; 
-
-	using string_view_pair = basic_string_view_pair<char>;
-	using wstring_view_pair = basic_string_view_pair<wchar_t>;
-
-	using string_view_vector = basic_string_view_vector<char>;
-	using wstring_view_vector = basic_string_view_vector<wchar_t>;
-
-	using string_view_span = basic_string_view_span<char>;
-	using wstring_view_span = basic_string_view_span<wchar_t>;
-
-	using size_type = string::size_type;
-	using size_pair = pair<size_type>;
+	using view = string_view;
+	using wview = wstring_view;
+	using size = string::size_type;
 
 	constexpr auto npos = string::npos;
 	constexpr decltype(npos) null { };

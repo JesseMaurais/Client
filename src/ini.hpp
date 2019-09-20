@@ -11,9 +11,9 @@ namespace doc
 	struct ini
 	{
 		using string = fmt::string;
-		using view = fmt::string_view;
-		using pair = fmt::string_view_pair;
-		using span = fmt::string_view_span;
+		using view = fmt::view;
+		using pair = fmt::pair<view>;
+		using span = fmt::span;
 
 		static string join(span value);
 		static span split(view value);

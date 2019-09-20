@@ -12,15 +12,13 @@
 
 #ifdef _WIN32
 # include <shlobj.h>
-# pragma comment(lib, "shell32.lib")
-# pragma comment(lib, "ole32.lib")
 #endif
 
 namespace
 {
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
@@ -34,7 +32,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get("XDG_MENU_PREFIX");
 			if (empty(u))
@@ -53,7 +51,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			static fmt::string path;
 			if (empty(path))
@@ -63,7 +61,7 @@ namespace
 				path = fmt::dir::join(env::usr::config_home, "menus", menu);
 				if (sys::path::fail(path))
 				{
-					fmt::string_view_span span = env::usr::config_dirs;
+					fmt::span span = env::usr::config_dirs;
 					for (auto const dir : span)
 					{
 						path = fmt::dir::join(dir, menu);
@@ -82,7 +80,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get("XDG_RUNTIME_DIR");
 			if (empty(u))
@@ -97,7 +95,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get("XDG_DATA_HOME");
 			if (empty(u))
@@ -116,7 +114,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get("XDG_CONFIG_HOME");
 			if (empty(u))
@@ -135,7 +133,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get("XDG_CACHE_HOME");
 			if (empty(u))
@@ -154,7 +152,7 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::string_view_span() const final
+		operator fmt::span() const final
 		{
 			auto u = env::sys::get("XDG_DATA_DIRS");
 			if (empty(u))
@@ -176,9 +174,9 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::string_view_span() const final
+		operator fmt::span() const final
 		{
-			static fmt::string_view_vector t;
+			static std::vector<fmt::view> t;
 			auto u = env::sys::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
@@ -216,7 +214,7 @@ namespace
 
 	struct user_dir : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get(var);
 			if (empty(u))
@@ -283,7 +281,7 @@ namespace
 
 		char const *var, *val;
 
-		fmt::string_view cached() const
+		fmt::view cached() const
 		{
 			auto u = env::opt::get(var);
 			if (empty(u))

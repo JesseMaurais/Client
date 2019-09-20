@@ -18,12 +18,12 @@
 
 namespace fmt::dir
 {
-	fmt::string impl::join(fmt::string_view_span p)
+	fmt::string impl::join(fmt::span p)
 	{
 		return fmt::lc.join(p, sys::sep::dir);
 	}
 
-	fmt::string_view_vector split(fmt::string_view u)
+	std::vector<fmt::view> split(fmt::view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -31,12 +31,12 @@ namespace fmt::dir
 
 namespace fmt::path
 {
-	fmt::string impl::join(fmt::string_view_span p)
+	fmt::string impl::join(fmt::span p)
 	{
 		return fmt::lc.join(p, sys::sep::path);
 	}
 
-	fmt::string_view_vector split(fmt::string_view u)
+	std::vector<fmt::view> split(fmt::view u)
 	{
 		return fmt::split(u, sys::sep::path);
 	}
@@ -44,7 +44,7 @@ namespace fmt::path
 
 namespace sys::path
 {
-	bool fail(fmt::string_view path, file::mode um)
+	bool fail(fmt::view path, file::mode um)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -59,7 +59,7 @@ namespace sys::path
 
 namespace sys::dir
 {
-	bool fail(fmt::string_view path, file::mode am)
+	bool fail(fmt::view path, file::mode am)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -91,7 +91,7 @@ namespace env::sys
 
 namespace env::dir
 {
-	bool find(fmt::string_view path, entry view)
+	bool find(fmt::view path, entry view)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -99,7 +99,7 @@ namespace env::dir
 			return env::dir::find(s, view);
 		}
 
-		auto const c = data(path);
+		auto const c = path.data();
 		for (auto const name : sys::files(c))
 		{
 			if (view(name)) return success;
@@ -107,9 +107,9 @@ namespace env::dir
 		return failure;
 	}
 
-	fmt::string_view make(fmt::string_view path)
+	fmt::view make(fmt::view path)
 	{
-		std::stack<fmt::string_view> stack;
+		std::stack<fmt::view> stack;
 		fmt::string buf;
 
 		auto folders = fmt::dir::split(path);
@@ -144,7 +144,7 @@ namespace env::dir
 		return stem;
 	}
 
-	bool remove(fmt::string_view dir)
+	bool remove(fmt::view dir)
 	{
 		std::deque<fmt::string> deque;
 		deque.emplace_back(dir);
@@ -152,10 +152,10 @@ namespace env::dir
 		for (auto it = deque.begin(); it != deque.end(); ++it)
 		{
 			auto const d = *it;
-			(void) find(d, [&](fmt::string_view u)
+			(void) find(d, [&](fmt::view u)
 			{
 				auto const path = fmt::dir::join(d, u);
-				auto const c = data(path);
+				auto const c = path.c_str();
 				class sys::stat st(c);
 				if (sys::fail(st))
 				{
@@ -196,7 +196,7 @@ namespace env::dir
 	entry mode(sys::file::mode bit)
 	{
 		auto const flags = sys::file::convert(bit);
-		return [=](fmt::string_view u)
+		return [=](fmt::view u)
 		{
 			auto const s = u.data();
 			if (sys::fail(sys::access(s, flags)))
@@ -217,11 +217,11 @@ namespace env::dir
 		};
 	}
 
-	entry match(fmt::string_view u)
+	entry match(fmt::view u)
 	{
 		auto const buf = fmt::to_string(u);
 		auto const x = std::regex(buf);
-		return [x](fmt::string_view u)
+		return [x](fmt::view u)
 		{
 			std::cmatch m;
 			auto const s = u.data();
@@ -229,9 +229,9 @@ namespace env::dir
 		};
 	}
 
-	entry insert(fmt::string_vector& buf)
+	entry insert(std::vector<fmt::string>& buf)
 	{
-		return [&](fmt::string_view u)
+		return [&](fmt::view u)
 		{
 			auto s = fmt::to_string(u);
 			buf.emplace_back(move(s));
@@ -241,7 +241,7 @@ namespace env::dir
 
 	entry copy(fmt::string& buf)
 	{
-		return [&](fmt::string_view u)
+		return [&](fmt::view u)
 		{
 			buf = fmt::to_string(u);
 			return false;

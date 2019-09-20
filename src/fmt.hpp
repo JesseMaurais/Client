@@ -31,14 +31,14 @@ namespace fmt
 		using mask = typename base::mask;
 
 		using string = basic_string<Char>;
-		using string_pair = basic_string_pair<Char>;
-		using string_vector = basic_string_vector<Char>;
-		using string_span = basic_string_span<Char>;
+		using string_pair = pair<string>;
+		using string_vector = std::vector<string>;
+		using string_span = basic_span<string>;
 
 		using string_view = basic_string_view<Char>;
-		using string_view_pair = basic_string_view_pair<Char>;
-		using string_view_vector = basic_string_view_vector<Char>;
-		using string_view_span = basic_string_view_span<Char>;
+		using string_view_pair = pair<string_view>;
+		using string_view_vector = std::vector<string_view>;
+		using string_view_span = basic_span<string_view>;
 		
 		template <typename as> static string from(as const& s);
 
@@ -123,7 +123,7 @@ namespace fmt
 			{
 				base const* that;
 				char const* pos;
-				size_type size;
+				size  size;
 
 				bool operator!=(iterator const& it) const
 				{
@@ -459,7 +459,7 @@ namespace fmt
 		return lc.count(u, v);
 	}
 
-	inline auto join(string_view_span t, string_view u = "")
+	inline auto join(span t, string_view u = "")
 	{
 		return lc.join(t, u);
 	}
@@ -484,15 +484,15 @@ namespace fmt
 		return lc.join({ u, v }, "=");
 	}
 
-	inline auto entry(string_view_pair p)
+	inline auto entry(pair<string_view> p)
 	{
 		return entry(p.first, p.second);
 	}
 
 	inline bool same(string_view u, string_view v)
 	{
-		return empty(u) ? empty(v) : 
-			data(u) == data(v) and size(u) == size(v);
+		return u.empty() ? v.empty() : 
+			u.data() == v.data() and u.size() == v.size();
 	}
 
 	//

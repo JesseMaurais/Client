@@ -9,7 +9,7 @@ namespace
 {
 	struct : env::size
 	{
-		operator fmt::size_type() const final
+		operator fmt::size() const final
 		{
 			#ifdef _WIN32
 			{
@@ -25,7 +25,7 @@ namespace
 				#else
 				{
 					sys::warn("Cannot determine CPU count.");
-					return sys::invalid;
+					return 0;
 				}
 				#endif
 			}
@@ -36,7 +36,7 @@ namespace
 
 	struct : env::size
 	{
-		operator fmt::size_type() const final
+		operator fmt::size() const final
 		{
 			#ifdef _WIN32
 			{
@@ -53,9 +53,9 @@ namespace
 	} PAGE_SIZE;
 }
 
-namespace sys::cpu
+namespace env::sys::cpu
 {
-	::env::size const& count = COUNT;
-	::env::size const& page_size = PAGE_SIZE;
+	env::size const& count = COUNT;
+	env::size const& page_size = PAGE_SIZE;
 }
 

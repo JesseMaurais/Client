@@ -22,9 +22,9 @@ namespace
 
 	struct : env::span
 	{
-		fmt::string_view_vector list;
+		std::vector<fmt::view> list;
 
-		operator fmt::string_view_span() const final
+		operator fmt::span() const final
 		{
 			return list;
 		}
@@ -33,12 +33,12 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
-			static fmt::string_view u;
+			static fmt::view u;
 			if (empty(u))
 			{
-				fmt::string_view_span args = env::opt::arguments;
+				fmt::span const args = env::opt::arguments;
 				assert(not empty(args));
 				auto const path = args.front();
 				assert(not empty(path));
@@ -57,7 +57,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			static fmt::string s;
 			if (empty(s))
@@ -65,7 +65,7 @@ namespace
 				auto home = env::opt::directory(env::usr::config_home);
 				if (sys::dir::fail(home))
 				{
-					fmt::string_view_span dirs = env::usr::config_dirs;
+					fmt::span const dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
 					{
 						s = env::opt::directory(dir);
@@ -86,7 +86,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			static fmt::string s;
 			if (empty(s))
@@ -100,7 +100,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			static auto const s = env::opt::directory(env::usr::runtime_dir);
 			static env::dir::tmp rundir(s);
@@ -284,7 +284,7 @@ namespace env::opt
 
 	view get(view key)
 	{
-		fmt::string_view_span args = env::opt::arguments;
+		fmt::span const args = env::opt::arguments;
 		for (auto const arg : args)
 		{
 			const auto e = fmt::entry(arg);

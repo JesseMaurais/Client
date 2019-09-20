@@ -182,7 +182,7 @@ namespace
 
 	TEST(env_dir_enum)
 	{
-		fmt::string_vector list;
+		std::vector<fmt::string> list;
 		auto parts = fmt::dir::split(__FILE__);
 		auto const name = parts.back();
 		parts.pop_back();
@@ -342,7 +342,7 @@ namespace
 		io::ifdstream in { __FILE__ };
 		assert(in);
 		fmt::string line;
-		fmt::size_type n = 0;
+		fmt::size n = 0;
 		while (std::getline(in, line))
 		{
 			assert(__LINE__ != ++n or line.find("assert") != fmt::npos);

@@ -3,10 +3,10 @@
 
 #include "env.hpp"
 
-namespace sys::cpu
+namespace env::sys::cpu
 {
-	extern ::env::size const& count;
-	extern ::env::size const& page_size;
+	extern env::size const& count;
+	extern env::size const& page_size;
 }
 
 #endif // file

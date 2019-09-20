@@ -7,26 +7,26 @@ namespace env
 {
 	namespace sys
 	{
-		fmt::string_view get(fmt::string_view u);
-		bool set(fmt::string_view u);
-		bool put(fmt::string_view u);
-		bool put(fmt::string_view u, fmt::string_view v);
-		fmt::string value(fmt::string_view);
+		fmt::view get(fmt::view);
+		bool set(fmt::view);
+		bool put(fmt::view);
+		bool put(fmt::view, fmt::view);
+		fmt::string value(fmt::view);
 	}
 
 	struct size
 	{
-		virtual operator fmt::size_type() const = 0;
+		virtual operator fmt::size() const = 0;
 	};
 
 	struct view
 	{
-		virtual operator fmt::string_view() const = 0;
+		virtual operator fmt::view() const = 0;
 	};
 
 	struct span
 	{
-		virtual operator fmt::string_view_span() const = 0;
+		virtual operator fmt::span() const = 0;
 	};
 
 	extern span const& paths;

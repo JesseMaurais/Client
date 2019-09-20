@@ -19,55 +19,54 @@ namespace env::sys
 {
 	using namespace ::sys;
 
-	fmt::string_view get(fmt::string_view u)
+	fmt::view get(fmt::view u)
 	{
 		if (not fmt::terminated(u))
 		{
 			auto const s = fmt::to_string(u);
 			return get(s);
 		}
-		auto const v = data(u);
+		auto const c = u.data();
 		auto const unlock = lock.read();
-		auto const w = std::getenv(v);
-		return nullptr == w ? fmt::nil : w;
+		auto const ptr = std::getenv(c);
+		return nullptr == ptr ? "" : ptr;
 	}
 
-	bool set(fmt::string_view u)
+	bool set(fmt::view u)
 	{
 		if (not fmt::terminated(u))
 		{
 			return put(u);
 		}
 		auto const unlock = lock.write();
-		auto const c = const_cast<char*>(data(u));
+		auto const d = u.data();
+		auto c = const_cast<char*>(d);
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::string_view u)
+	bool put(fmt::view u)
 	{
-		static fmt::string_vector buf;
+		static std::set<fmt::string> buf;
 		auto const unlock = lock.write();
-		auto const c = buf.emplace_back(u).data();
+		auto it = buf.emplace(u).first;
+		auto d = it->data();
+		auto c = const_cast<char*>(d);
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::string_view u, fmt::string_view v)
+	bool put(fmt::view u, fmt::view v)
 	{
 		return put(fmt::entry(u, v));
 	}
 
-	static auto val(fmt::string_view u)
+	static auto evaluate(fmt::view u)
 	{
-		assert('$' == u.front());
+		assert(u.front() == '$');
 		u = u.substr(1);
-		if (empty(u))
-		{
-			return u;
-		}
-		return get(u);
+		return empty(u) ? u : get(u);
 	}
 
-	fmt::string value(fmt::string_view u)
+	fmt::string value(fmt::view u)
 	{
 		static std::regex x { "\\$[A-Z_][A-Z_0-9]*" };
 		std::smatch m;
@@ -77,7 +76,7 @@ namespace env::sys
 		{
 			r += m.prefix();
 			auto t = m.str();
-			auto v = val(t);
+			auto v = evaluate(t);
 			r.append(v.data(), v.size());
 			s = m.suffix();
 		}
@@ -90,9 +89,9 @@ namespace
 {
 	struct : env::span
 	{
-		operator fmt::string_view_span() const final
+		operator fmt::span() const final
 		{
-			static thread_local fmt::string_view_vector t;
+			static thread_local std::vector<fmt::view> t;
 			auto u = env::sys::get("PATH");
 			t = fmt::path::split(u);
 			return t;
@@ -102,7 +101,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -119,7 +118,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -136,7 +135,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -159,7 +158,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -182,7 +181,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -199,7 +198,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -216,7 +215,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -234,7 +233,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
@@ -251,7 +250,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			for (auto u : { "TMPDIR", "TEMP", "TMP" })
 			{
@@ -281,7 +280,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -298,7 +297,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -315,7 +314,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			#ifdef _WIN32
 			{

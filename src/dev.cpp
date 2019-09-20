@@ -14,10 +14,10 @@ namespace
 {
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			static auto const rundir = env::opt::directory(env::usr::runtime_dir);
-			static env::dir::tmp tmp(rundir);
+			static auto tmp = env::dir::tmp(rundir);
 			return rundir;
 		}
 
@@ -25,10 +25,10 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::string_view_span() const final
+		operator fmt::span() const final
 		{
-			static fmt::string_view_vector t;
-			fmt::string_view u = env::sys::get("LIB");
+			static std::vector<fmt::view> t;
+			auto u = env::sys::get("LIB");
 			t = fmt::dir::split(u);
 			return t;
 		}
@@ -62,9 +62,9 @@ namespace
 			#endif
 		}
 
-		operator fmt::string_view_span() const final
+		operator fmt::span() const final
 		{
-			static fmt::string_view_vector t;
+			static std::vector<fmt::view> t;
 			auto const u = get();
 			t = fmt::path::split(u);
 			return t;
@@ -74,9 +74,9 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::string_view_span() const final
+		operator fmt::span() const final
 		{
-			static fmt::string_view_vector t;
+			static std::vector<fmt::view> t;
 			auto const u = env::opt::get("INCLUDE");
 			t = fmt::path::split(u);
 			return t;
@@ -86,7 +86,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			return env::opt::get("CFLAGS");
 		}
@@ -95,7 +95,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator fmt::view() const final
 		{
 			auto u = env::sys::get("CXX");
 			if (empty(u))
