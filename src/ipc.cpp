@@ -60,7 +60,7 @@ namespace sys::file
 	{
 		return sys::kill(pid);
 	}
-	
+
 	int process::wait()
 	{
 		return sys::wait(pid);
@@ -71,7 +71,7 @@ namespace sys::ipc
 {
 	file::process twin(command line)
 	{
-		auto const path = ::env::opt::arg(0);
+		auto const path = env::opt::arg(0);
 		auto const s = fmt::to_string(path);
 		auto const c = s.c_str();
 		assert(not empty(path));
@@ -83,4 +83,3 @@ namespace sys::ipc
 		return sys::file::process(list.size() - 1, list.data());
 	}
 }
-

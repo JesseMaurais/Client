@@ -43,7 +43,7 @@ namespace sys::file
 		}
 		#else
 		{
-			auto const dir = fmt::dir::join(::env::opt::run, ".fifo");
+			auto const dir = fmt::dir::join(env::opt::run, ".fifo");
 			auto const s = data(dir);
 
 			constexpr mode_t rw = S_IRGRP | S_IWGRP;

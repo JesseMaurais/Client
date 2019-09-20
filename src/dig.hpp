@@ -55,7 +55,7 @@ namespace fmt
 			return s;
 		}
 	}
-	
+
 	template <typename T, typename S> inline T to_narrow(S s)
 	{
 		static_assert(sizeof(T) < sizeof(S));
@@ -95,14 +95,14 @@ namespace fmt
 	string to_string(unsigned long value, int base);
 	string to_string(unsigned long long value, int base);
 
-	long to_long(string_view, int base = 10);
-	long long to_llong(string_view, int base = 10);
-	unsigned long to_ulong(string_view, int base = 10);
-	unsigned long long to_ullong(string_view, int base = 10);
+	long to_long(view, int base = 10);
+	long long to_llong(view, int base = 10);
+	unsigned long to_ulong(view, int base = 10);
+	unsigned long long to_ullong(view, int base = 10);
 
-	float to_float(string_view);
-	double to_double(string_view);
-	long double to_quad(string_view);
+	float to_float(view);
+	double to_double(view);
+	long double to_quad(view);
 
 	template <typename T> inline bool fail(T t)
 	{

@@ -17,7 +17,7 @@ namespace dbg
 
 	namespace
 	{
-		string::size_type max_size = 0;
+		size max_size = 0;
 
 		auto& registry()
 		{
@@ -112,4 +112,3 @@ namespace dbg
 		return nerr;
 	}
 }
-

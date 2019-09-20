@@ -7,8 +7,6 @@
 
 namespace sys::file
 {
-	using fmt::string_view;
-
 	// Access modes
 	enum mode : int
 	{
@@ -43,7 +41,7 @@ namespace sys::file
 		return (am & rwx) << 0;
 	}
 
-	// User permission
+	// Permissions
 	enum permit : int
 	{
 		owner_r = owner(rd),
@@ -77,7 +75,7 @@ namespace sys::file
 	int convert(permit); // permissions
 
 	// Check for access to the file at path
-	bool fail(string_view path, mode am = ok);
+	bool fail(fmt::view path, mode am = ok);
 
 	// Query or change data buffer size
 	size_t bufsiz(ssize_t sz = invalid);
@@ -85,7 +83,7 @@ namespace sys::file
 	// Scoped file descriptor
 	struct descriptor : unique, ops
 	{
-		explicit descriptor(string_view path, mode am = rw, permit pm = owner(rw));
+		explicit descriptor(fmt::view path, mode am = rw, permit pm = owner(rw));
 		ssize_t write(const void *buf, size_t sz) const override;
 		ssize_t read(void *buf, size_t sz) const override;
 		bool close();

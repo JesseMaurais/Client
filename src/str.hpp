@@ -178,15 +178,18 @@ namespace fmt
 	using string_view = basic_string_view<char>;
 	using wstring_view = basic_string_view<wchar_t>;
 
+	using strings = std::vector<string>;
+	using wstrings = std::vector<wstring>;
+
 	using span = basic_span<string_view>;
 	using wspan = basic_span<wstring_view>;
 
 	using view = string_view;
 	using wview = wstring_view;
-	using size = string::size_type;
 
+	using size = string::size_type;
 	constexpr auto npos = string::npos;
-	constexpr decltype(npos) null { };
+	constexpr auto null = size {0};
 	constexpr auto eol = '\n';
 	constexpr auto nil = "";
 }

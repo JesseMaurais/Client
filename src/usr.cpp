@@ -61,8 +61,8 @@ namespace
 				path = fmt::dir::join(env::usr::config_home, "menus", menu);
 				if (sys::path::fail(path))
 				{
-					fmt::span span = env::usr::config_dirs;
-					for (auto const dir : span)
+					fmt::span const dirs = env::usr::config_dirs;
+					for (auto const dir : dirs)
 					{
 						path = fmt::dir::join(dir, menu);
 						if (not sys::dir::fail(path))

@@ -7,7 +7,7 @@
 namespace
 {
 	template <typename T, typename C>
-	T to_fp(fmt::string_view u, T nan, C* to)
+	T to_fp(fmt::view u, T nan, C* to)
 	{
 		char* it;
 		auto ptr = data(u);
@@ -21,7 +21,7 @@ namespace
 	}
 
 	template <typename T>
-	T to_base(fmt::string_view u, int base)
+	T to_base(fmt::view u, int base)
 	{
 		auto value = static_cast<T>(std::nan(""));
 		auto begin = data(u);
@@ -78,7 +78,7 @@ namespace
 			s.resize(code.ptr - begin);
 		}
 		while (false);
-		return s;	
+		return s;
 	}
 	*/
 }
@@ -122,42 +122,41 @@ namespace fmt
 	}
 	*/
 
-	long to_long(string_view u, int base)
+	long to_long(view u, int base)
 	{
 		return to_base<long>(u, base);
 	}
 
-	long long to_llong(string_view u, int base)
+	long long to_llong(view u, int base)
 	{
 		return to_base<long long>(u, base);
 	}
 
-	unsigned long to_ulong(string_view u, int base)
+	unsigned long to_ulong(view u, int base)
 	{
 		return to_base<unsigned long>(u, base);
 	}
 
-	unsigned long long to_ullong(string_view u, int base)
+	unsigned long long to_ullong(view u, int base)
 	{
 		return to_base<unsigned long long>(u, base);
 	}
 
-	float to_float(string_view u)
+	float to_float(view u)
 	{
 		auto const nan = std::nanf("");
 		return to_fp(u, nan, std::strtof);
 	}
 
-	double to_double(string_view u)
+	double to_double(view u)
 	{
 		auto const nan = std::nan("");
 		return to_fp(u, nan, std::strtod);
 	}
 
-	long double to_quad(string_view u)
+	long double to_quad(view u)
 	{
 		auto const nan = std::nanl("");
 		return to_fp(u, nan, std::strtold);
 	}
 }
-
