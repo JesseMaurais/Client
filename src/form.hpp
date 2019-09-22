@@ -1,5 +1,5 @@
-#ifndef ops_hpp
-#define ops_hpp
+#ifndef form_hpp
+#define form_hpp
 
 #include <cstddef>
 #include <cstdint>
@@ -10,14 +10,7 @@ namespace sys
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
 
-	constexpr int invalid = -1;
-
-	inline bool fail(int value)
-	{
-		return invalid == value;
-	}
-
-	struct ops
+	struct form
 	{
 		virtual ssize_t read(void *buf, size_t sz) const = 0;
 		virtual ssize_t write(const void *buf, size_t sz) const = 0;
@@ -51,7 +44,7 @@ namespace sys
 			return read(data(s), size(s));
 		}
 
-		ssize_t write(fmt::string_view u) const
+		ssize_t write(fmt::view u) const
 		{
 			return write(data(u), size(u));
 		}
@@ -62,7 +55,7 @@ namespace sys
 			return read(data(w), size(w) * sz) / sz;
 		}
 
-		ssize_t write(fmt::wstring_view w) const
+		ssize_t write(fmt::wview w) const
 		{
 			constexpr auto sz = sizeof (wchar_t);
 			return write(data(w), size(w) * sz) / sz;

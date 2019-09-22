@@ -20,7 +20,7 @@ namespace fmt
 	template <typename T> constexpr bool is_signed = std::is_signed<T>::value;
 	template <typename T> constexpr bool is_unsigned = std::is_unsigned<T>::value;
 
-	template <typename S> inline auto to_unsigned(S s)
+	template <typename S> auto to_unsigned(S s)
 	{
 		static_assert(is_integer<S>);
 		static_assert(is_signed<S>);
@@ -29,7 +29,7 @@ namespace fmt
 		return static_cast<T>(s);
 	}
 
-	template <typename S> inline auto to_signed(S s)
+	template <typename S> auto to_signed(S s)
 	{
 		static_assert(is_integer<S>);
 		static_assert(is_unsigned<S>);
@@ -39,7 +39,7 @@ namespace fmt
 		return t;
 	}
 
-	template <typename T, typename S> inline auto to_sign_of(S s)
+	template <typename T, typename S> auto to_sign_of(S s)
 	{
 		if constexpr (is_signed<S> and is_unsigned<T>)
 		{
@@ -56,7 +56,7 @@ namespace fmt
 		}
 	}
 
-	template <typename T, typename S> inline T to_narrow(S s)
+	template <typename T, typename S> auto to_narrow(S s)
 	{
 		static_assert(sizeof(T) < sizeof(S));
 		static_assert(is_integer<S> and is_integer<T>);
@@ -68,7 +68,7 @@ namespace fmt
 		return static_cast<T>(s);
 	}
 
-	template <typename T, typename S> inline T to(S s)
+	template <typename T, typename S> auto to(S s)
 	{
 		if constexpr (sizeof(T) < sizeof(S))
 		{
@@ -80,12 +80,12 @@ namespace fmt
 		}
 	}
 
-	template <typename S> inline auto to_size(S s)
+	template <typename S> auto to_size(S s)
 	{
 		return to<size_t>(s);
 	}
 
-	template <typename S> inline auto to_int(S s)
+	template <typename S> auto to_int(S s)
 	{
 		return to<int>(s);
 	}
@@ -104,7 +104,7 @@ namespace fmt
 	double to_double(view);
 	long double to_quad(view);
 
-	template <typename T> inline bool fail(T t)
+	template <typename T> bool fail(T t)
 	{
 		if constexpr (is_integer<T>)
 		{

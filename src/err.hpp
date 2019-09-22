@@ -33,6 +33,11 @@ constexpr bool fail(bool ok)
 	return failure == ok;
 }
 
+constexpr bool okay(bool ok)
+{
+	return success == ok;
+}
+
 namespace fmt
 {
 	struct where

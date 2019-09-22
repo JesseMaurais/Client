@@ -18,12 +18,12 @@
 
 namespace fmt::dir
 {
-	fmt::string impl::join(fmt::span p)
+	string join(span p)
 	{
 		return fmt::lc.join(p, sys::sep::dir);
 	}
 
-	std::vector<fmt::view> split(fmt::view u)
+	views split(view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -31,40 +31,46 @@ namespace fmt::dir
 
 namespace fmt::path
 {
-	fmt::string impl::join(fmt::span p)
+	string join(span p)
 	{
 		return fmt::lc.join(p, sys::sep::path);
 	}
 
-	std::vector<fmt::view> split(fmt::view u)
+	views split(view u)
 	{
 		return fmt::split(u, sys::sep::path);
 	}
 }
 
-namespace sys::path
+namespace env::sys
 {
-	bool fail(fmt::view path, file::mode um)
+	using namespace ::sys;
+}
+
+namespace env::dir
+{
+	bool find(fmt::view path, entry visit)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return sys::path::fail(s);
+			return env::dir::find(s, visit);
 		}
 
 		auto const c = path.data();
-		return sys::file::fail(c, um);
+		for (auto const name : sys::files(c))
+		{
+			if (visit(name)) return success;
+		}
+		return failure;
 	}
-}
 
-namespace sys::dir
-{
-	bool fail(fmt::view path, file::mode am)
+	bool fail(fmt::view path, sys::file::mode am)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return sys::dir::fail(s);
+			return env::dir::fail(s);
 		}
 
 		auto const c = path.data();
@@ -82,30 +88,6 @@ namespace sys::dir
 		auto const mask = sys::file::check(am);
 		return st.st_mode & mask;
 	}
-}
-
-namespace env::sys
-{
-	using namespace ::sys;
-}
-
-namespace env::dir
-{
-	bool find(fmt::view path, entry view)
-	{
-		if (not fmt::terminated(path))
-		{
-			auto const s = fmt::to_string(path);
-			return env::dir::find(s, view);
-		}
-
-		auto const c = path.data();
-		for (auto const name : sys::files(c))
-		{
-			if (view(name)) return success;
-		}
-		return failure;
-	}
 
 	fmt::view make(fmt::view path)
 	{
@@ -115,7 +97,7 @@ namespace env::dir
 		auto folders = fmt::dir::split(path);
 		auto stem = path;
 
-		while (sys::dir::fail(stem))
+		while (env::dir::fail(stem))
 		{
 			stack.push(folders.back());
 			folders.pop_back();
@@ -154,7 +136,7 @@ namespace env::dir
 			auto const d = *it;
 			(void) find(d, [&](fmt::view u)
 			{
-				auto const path = fmt::dir::join(d, u);
+				auto const path = fmt::dir::join({d, u});
 				auto const c = path.c_str();
 				class sys::stat st(c);
 				if (sys::fail(st))

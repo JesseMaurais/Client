@@ -8,7 +8,7 @@ namespace env::usr
 	extern env::view const& current_desktop;
 	extern env::view const& menu_prefix;
 	extern env::view const& applications_menu;
-	extern env::view const& runtime_dir;
+	extern env::view const& run_dir;
 	extern env::view const& data_home;
 	extern env::view const& config_home;
 	extern env::view const& cache_home;

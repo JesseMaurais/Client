@@ -7,11 +7,11 @@
 namespace
 {
 	template <typename T, typename C>
-	T to_fp(fmt::view u, T nan, C* to)
+	T to_fp(fmt::view u, T nan, C* cast)
 	{
-		char* it;
-		auto ptr = data(u);
-		auto const value = to(ptr, &it);
+		char *it;
+		auto ptr = u.data();
+		auto const value = cast(ptr, &it);
 		if (ptr == it)
 		{
 			sys::err(here, u);
@@ -23,9 +23,9 @@ namespace
 	template <typename T>
 	T to_base(fmt::view u, int base)
 	{
+		auto begin = u.data();
+		auto end = begin + u.size();
 		auto value = static_cast<T>(std::nan(""));
-		auto begin = data(u);
-		auto end = begin + size(u);
 		auto code = std::from_chars(begin, end, value, base);
 		if (sys::noerr != code.ec)
 		{
@@ -38,24 +38,24 @@ namespace
 	fmt::string from_base(T value, int base)
 	{
 		fmt::string s(20, '\0');
-		std::to_chars_result code;
 		do
 		{
 			auto begin = data(s);
 			auto end = begin + size(s);
-			code = std::to_chars(begin, end, value, base);
+			auto code = std::to_chars(begin, end, value, base);
 			if (sys::noerr != code.ec)
 			{
 				if (std::errc::value_too_large == code.ec)
 				{
-					s.resize(2*size(s), '\0');
+					s.resize(2*s.size(), '\0');
 					continue;
 				}
 				sys::warn(here, code.ec);
 			}
 			s.resize(code.ptr - begin);
 		}
-		while (false);
+		while (0);
+		s.shrink_to_fit();
 		return s;
 	}
 
@@ -64,20 +64,20 @@ namespace
 	fmt::string from_fp(T value, int precision)
 	{
 		fmt::string s(20, '\0');
-		std::to_chars_result code;
 		do
 		{
-			auto begin = data(s);
-			auto end = begin + size(s);
-			code = std::to_chars(begin, end, value, 0, precision);
+			auto begin = s.data();
+			auto end = begin + s.size();
+			auto code = std::to_chars(begin, end, value, 0, precision);
 			if (std::errc::value_too_large == code.ec)
 			{
-				s.resize(2*size(s), '\0');
+				s.resize(2*s.size(), '\0');
 				continue;
 			}
 			s.resize(code.ptr - begin);
 		}
-		while (false);
+		while (0);
+		s.shrink_to_fit();
 		return s;
 	}
 	*/

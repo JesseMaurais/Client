@@ -15,13 +15,14 @@ namespace env::opt
 	using word = long long;
 	using quad = long double;
 
-	extern view const application;
+	extern fmt::view const application;
 	extern env::span const& arguments;
 	extern env::view const& program;
 	extern env::view const& config;
 	extern env::view const& cache;
 	extern env::view const& run;
-	view directory(view stem);
+
+	view dir(view);
 
 	inline auto arg(size_t argn)
 	{

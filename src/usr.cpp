@@ -58,14 +58,14 @@ namespace
 			{
 				constexpr auto base = "applications.menu";
 				auto const menu = fmt::join({env::usr::menu_prefix, base});
-				path = fmt::dir::join(env::usr::config_home, "menus", menu);
-				if (sys::path::fail(path))
+				path = fmt::dir::join({env::usr::config_home, "menus", menu});
+				if (sys::file::fail(path))
 				{
 					fmt::span const dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
 					{
-						path = fmt::dir::join(dir, menu);
-						if (not sys::dir::fail(path))
+						path = fmt::dir::join({dir, menu});
+						if (not env::dir::fail(path))
 						{
 							break;
 						}
@@ -85,13 +85,13 @@ namespace
 			auto u = env::sys::get("XDG_RUNTIME_DIR");
 			if (empty(u))
 			{
-				static auto const path = fmt::dir::join(env::tmpdir, "run", env::user);
+				static auto const path = fmt::dir::join({env::tmpdir, "run", env::user});
 				u = path;
 			}
 			return u;
 		}
 
-	} RUNTIME_DIR;
+	} RUN_DIR;
 
 	struct : env::view
 	{
@@ -103,7 +103,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					s = fmt::dir::join(env::home, ".local", "share");
+					s = fmt::dir::join({env::home, ".local", "share"});
 				}
 				u = s;
 			}
@@ -122,7 +122,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					s = fmt::dir::join(env::home, ".config");
+					s = fmt::dir::join({env::home, ".config"});
 				}
 				u = s;
 			}
@@ -141,7 +141,7 @@ namespace
 				static fmt::string s;
 				if (empty(s))
 				{
-					s = fmt::dir::join(env::home, ".cache");
+					s = fmt::dir::join({env::home, ".cache"});
 				}
 				u = s;
 			}
@@ -266,7 +266,7 @@ namespace
 			if (empty(u))
 			{
 				static fmt::string s;
-				s = fmt::dir::join(env::home, val);
+				s = fmt::dir::join({env::home, val});
 				u = s;
 			}
 			return u;
@@ -287,7 +287,7 @@ namespace
 			if (empty(u))
 			{
 				constexpr auto base = "user-dirs.dirs";
-				auto const path = fmt::dir::join(env::usr::config_home, base);
+				auto const path = fmt::dir::join({env::usr::config_home, base});
 				std::ifstream in(path);
 				fmt::string line;
 				while (doc::ini::getline(in, line))
@@ -321,7 +321,7 @@ namespace env::usr
 	env::view const& current_desktop = CURRENT_DESKTOP;
 	env::view const& menu_prefix = MENU_PREFIX;
 	env::view const& applications_menu = APPLICATIONS_MENU;
-	env::view const& runtime_dir = RUNTIME_DIR;
+	env::view const& run_dir = RUN_DIR;
 	env::view const& data_home = DATA_HOME;
 	env::view const& config_home = CONFIG_HOME;
 	env::view const& cache_home = CACHE_HOME;

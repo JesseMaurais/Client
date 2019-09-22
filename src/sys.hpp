@@ -54,9 +54,6 @@
 #define S_ISREG(x)  (((x) & S_IFMT) == S_IFREG)
 #define S_ISCHR(x)  (((x) & S_IFMT) == S_IFCHR)
 
-using STAT_STRUCT = struct _stat;
-
-
 namespace sys
 {
 	namespace sep
@@ -81,7 +78,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using stat_t = ::STAT_STRUCT;
+	using stat_t = struct _stat;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;

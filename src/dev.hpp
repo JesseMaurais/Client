@@ -9,6 +9,7 @@ namespace env::dev
 	extern env::span const& lib;
 	extern env::span const& share;
 	extern env::span const& include;
+	extern env::view const& lflags;
 	extern env::view const& cflags;
 	extern env::view const& cc;
 }

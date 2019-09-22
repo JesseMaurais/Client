@@ -144,7 +144,7 @@ namespace sys::file
 		return n;
 	}
 
-	bool fail(string_view path, mode am)
+	bool fail(fmt::view path, mode am)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -175,7 +175,7 @@ namespace sys::file
 		return n;
 	}
 
-	static int open(string_view path, mode am, permit pm)
+	static int open(fmt::view path, mode am, permit pm)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -191,7 +191,7 @@ namespace sys::file
 		return fd;
 	}
 
-	descriptor::descriptor(string_view path, mode am, permit pm)
+	descriptor::descriptor(fmt::view path, mode am, permit pm)
 	{
 		fd = open(path, am, pm);
 	}

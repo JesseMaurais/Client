@@ -43,7 +43,7 @@ namespace sys::file
 		}
 		#else
 		{
-			auto const dir = fmt::dir::join(env::opt::run, ".fifo");
+			auto const dir = fmt::dir::join({env::opt::run, ".fifo"});
 			auto const s = data(dir);
 
 			constexpr mode_t rw = S_IRGRP | S_IWGRP;
@@ -67,7 +67,7 @@ namespace sys::file
 				}
 			}
 
-			path = fmt::dir::join(dir, name);
+			path = fmt::dir::join({dir, name});
 			auto const ps = path.c_str();
 			if (sys::fail(mkfifo(ps, um | rw)))
 			{

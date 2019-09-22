@@ -265,11 +265,11 @@ namespace
 			{
 				#ifdef _WIN32
 				{
-					s = fmt::dir::join(env::rootdir, "Temp");
+					s = fmt::dir::join({env::rootdir, "Temp"});
 				}
 				#else
 				{
-					s = fmt::dir::join(env::root, "tmp");
+					s = fmt::dir::join({env::root, "tmp"});
 				}
 				#endif
 			}

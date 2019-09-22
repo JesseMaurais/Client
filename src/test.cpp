@@ -34,7 +34,7 @@
 static_assert(false, "Compiling unit tests without debug mode.");
 #endif
 
-env::opt::view const env::opt::application = "Modify";
+env::opt::view const env::opt::application = "PoTest";
 
 int main(int argc, char **argv)
 {
@@ -117,6 +117,30 @@ namespace
 		assert(to_lower(HELLO_WORLD) == HELLO_LOWER);
 	}
 
+	TEST(fmt_brace)
+	{
+		using namespace fmt;
+		pair<size> pos;
+		pos = brace("<A<B>C>", "<>");
+		assert(0 == pos.first);
+		assert(6 == pos.second);
+		pos = brace("<A<B>C>", "<B>");
+		assert(0 == pos.first);
+		assert(3 == pos.second);
+		pos = brace("A[B]C[D]", "[D]");
+		assert(1 == pos.first);
+		assert(3 == pos.second);
+		pos = brace("{A<B}C}", "<>");
+		assert(2 == pos.first);
+		assert(npos == pos.second);
+		pos = brace("{A{B>C}", "<>");
+		assert(npos == pos.first);
+		assert(npos == pos.second);
+		pos = brace("&amp;", "&;");
+		assert(0 == pos.first);
+		assert(4 == pos.second);
+	}
+
 	//
 	// ANSI escape sequence
 	//
@@ -143,7 +167,7 @@ namespace
 
 	TEST(doc_ini)
 	{
-		auto const path = fmt::dir::join(env::pwd, "Tools.ini");
+		auto const path = fmt::dir::join({env::pwd, "Tools.ini"});
 		std::fstream file(path);
 		doc::ini keys;
 		file >> keys;
@@ -187,7 +211,7 @@ namespace
 		auto const name = parts.back();
 		parts.pop_back();
 		auto const folder = fmt::dir::join(parts);
-		auto const srcdir = fmt::dir::join(env::pwd, folder);
+		auto const srcdir = fmt::dir::join({env::pwd, folder});
 		env::dir::find(srcdir, [&](auto path)
 		{
 			list.emplace_back(path);
@@ -198,17 +222,17 @@ namespace
 
 	TEST(env_dir_make)
 	{
-		auto const d = fmt::dir::join(env::tmpdir, "my", "test", "dir");
+		auto const d = fmt::dir::join({env::tmpdir, "my", "test", "dir"});
 		auto const stem = env::dir::make(d);
 		assert(not empty(stem));
-		assert(not sys::dir::fail(d));
-		assert(not sys::dir::fail(stem));
+		assert(not env::dir::fail(d));
+		assert(not env::dir::fail(stem));
 		assert(not fail(env::dir::remove(stem)));
 		{
 			env::dir::tmp tmp(d);
-			assert(not sys::dir::fail(d));
+			assert(not env::dir::fail(d));
 		}
-		assert(sys::dir::fail(d));
+		assert(env::dir::fail(d));
 	}
 
 	TEST(env_vars)
@@ -267,7 +291,7 @@ namespace
 	{
 		sysini()
 		<< "[Data Directories]\n"
-		<< kv("runtime-dir", env::usr::runtime_dir)
+		<< kv("runtime-dir", env::usr::run_dir)
 		<< kv("data-home", env::usr::data_home)
 		<< kv("config-home", env::usr::config_home)
 		<< kv("cache-home", env::usr::cache_home)
@@ -328,8 +352,8 @@ namespace
 	{
 		sysini()
 		<< "[CPU Information]\n"
-		<< kv("count", fmt::to_string(sys::cpu::count))
-		<< kv("page-size", fmt::to_string(sys::cpu::page_size))
+		<< kv("count", fmt::to_string(env::sys::cpu::count))
+		<< kv("page-size", fmt::to_string(env::sys::cpu::page_size))
 		<< std::endl;
 	}
 

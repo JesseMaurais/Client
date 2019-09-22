@@ -5,7 +5,6 @@
 #include <streambuf>
 #include "dig.hpp"
 #include "str.hpp"
-#include "ops.hpp"
 
 namespace io
 {
@@ -166,12 +165,14 @@ namespace io
 
 	template
 	<
-	 class Ops,
+	 class Form,
 	 class Char,
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_rwbuf : public basic_stringbuf<Char, Traits, Alloc>, public Ops
+	class basic_rwbuf 
+	: public basic_stringbuf<Char, Traits, Alloc>
+	, public Form
 	{
 		using base = basic_stringbuf<Char, Traits, Alloc>;
 
@@ -185,17 +186,17 @@ namespace io
 		size_type xsputn(char_type const *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return Ops::write(s, sz);
+			return Form::write(s, sz);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return Ops::read(s, sz);
+			return Form::read(s, sz);
 		}
 
 		using base::base;
-		using Ops::Ops;
+		using Form::Form;
 	};
 }
 

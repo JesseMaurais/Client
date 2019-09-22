@@ -143,9 +143,9 @@ namespace sys
 				for (int n : { 0, 1, 2 })
 				{
 					int fd = p[n].get();
-					if (sys::fail(fd))
+					if (fail(fd))
 					{
-						return sys::invalid;
+						return invalid;
 					}
 				}
 			}
@@ -153,7 +153,7 @@ namespace sys
 			pid_t const pid = fork();
 			if (pid)
 			{
-				if (sys::fail(pid))
+				if (fail(pid))
 				{
 					sys::err(here, "fork");
 				}
@@ -168,7 +168,7 @@ namespace sys
 			{
 				int k = pair[i][0 != i].get();
 
-				if (sys::fail(close(i)) or sys::fail(dup2(k, i)))
+				if (fail(close(i)) or fail(dup2(k, i)))
 				{
 					exit(EXIT_FAILURE);
 				}
@@ -177,7 +177,7 @@ namespace sys
 				{
 					k = pair[i][j].set();
 
-					if (sys::fail(close(k)))
+					if (fail(close(k)))
 					{
 						exit(EXIT_FAILURE);
 					}

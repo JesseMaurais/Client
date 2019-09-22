@@ -2,7 +2,7 @@
 #define socket_hpp
 
 #include "file.hpp"
-#include "ops.hpp"
+#include "form.hpp"
 
 namespace sys::net
 {
@@ -11,7 +11,7 @@ namespace sys::net
 
 namespace sys::file
 {
-	struct socket : ops
+	struct socket : unique, form
 	{
 		using address = sys::net::address;
 

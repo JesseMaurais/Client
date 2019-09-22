@@ -39,7 +39,7 @@ namespace dbg
 	test::test(char const *name)
 	{
 		auto const [it, unique] = registry().emplace(this, name);
-		max_size = std::max(max_size, size(it->second));
+		max_size = std::max(max_size, it->second.size());
 		assert(unique);
 	}
 
@@ -81,7 +81,7 @@ namespace dbg
 		{
 			if (std::regex_match(name, pattern)) try
 			{
-				string const indent(max_size - size(name), ' ');
+				string const indent(max_size - name.size(), ' ');
 				out << faint << name << intense_off << indent;
 
 				io::eat err;

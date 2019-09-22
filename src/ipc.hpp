@@ -5,16 +5,15 @@
 #include "file.hpp"
 #include "str.hpp"
 #include "ptr.hpp"
-#include "ops.hpp"
 
 namespace sys
 {
-	using command = std::initializer_list<fmt::string_view>;
+	using command = std::initializer_list<fmt::view>;
 }
 
 namespace sys::file
 {
-	struct process : unique, ops
+	struct process : unique, form
 	{
 		explicit process(size_t argc, char const** argv);
 		explicit process(command line);

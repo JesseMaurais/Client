@@ -7,56 +7,14 @@
 
 namespace fmt::path
 {
-	std::vector<view> split(view);
-
-	namespace impl
-	{
-		string join(span);
-	}
-
-	template <typename... StringView>
-	inline auto join(StringView const&... args)
-	{
-		return impl::join({ view(args)... });
-	}
-
-	template <typename StringViewSpan>
-	inline auto join(StringViewSpan const& list)
-	{
-		return impl::join(span(list));
-	}
+	views split(view);
+	string join(span);
 }
 
 namespace fmt::dir
 {
-	std::vector<view> split(view);
-
-	namespace impl
-	{
-		string join(span);
-	}
-
-	template <typename... StringView>
-	inline auto join(StringView const&... args)
-	{
-		return impl::join({ view(args)... });
-	}
-
-	template <typename StringViewSpan>
-	inline auto join(StringViewSpan const& list)
-	{
-		return impl::join(span(list));
-	}
-}
-
-namespace sys::path
-{
-	bool fail(fmt::view path, file::mode = file::ok);
-}
-
-namespace sys::dir
-{
-	bool fail(fmt::view path, file::mode = file::ok);
+	views split(view);
+	string join(span);
 }
 
 namespace env::dir
@@ -69,12 +27,12 @@ namespace env::dir
 	entry insert(fmt::strings&);
 	entry mode(::sys::file::mode);
 
-	extern bool find(fmt::view dir, entry view);
-	inline bool find(fmt::span list, entry view)
+	extern bool find(fmt::view dir, entry visit);
+	inline bool find(fmt::span list, entry visit)
 	{
 		for (auto const dir : list)
 		{
-			if (find(dir, view))
+			if (find(dir, visit))
 			{
 				return true;
 			}
@@ -84,9 +42,14 @@ namespace env::dir
 
 	fmt::view make(fmt::view path);
 	bool remove(fmt::view path);
+	bool fail(fmt::view path, ::sys::file::mode = ::sys::file::ok);
 
-	struct tmp
+	class tmp
 	{
+		fmt::view stem;
+
+	public:
+
 		tmp(fmt::view path)
 		{
 			stem = env::dir::make(path);
@@ -99,10 +62,6 @@ namespace env::dir
 				env::dir::remove(stem);
 			}
 		}
-
-	private:
-
-		fmt::view stem;
 	};
 }
 

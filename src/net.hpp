@@ -121,7 +121,7 @@ namespace sys::net
 
 	inline bool fail(descriptor fd) 
 	{
-		return ::sys::fail(fd); 
+		return -1 == fd;
 	}
 
 	template <typename... Args>

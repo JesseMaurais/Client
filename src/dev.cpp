@@ -7,8 +7,6 @@
 #include "fmt.hpp"
 #include "usr.hpp"
 #include "opt.hpp"
-#include "os.hpp"
-#include "cc.hpp"
 
 namespace
 {
@@ -16,7 +14,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			static auto const rundir = env::opt::directory(env::usr::runtime_dir);
+			static auto const rundir = env::opt::dir(env::usr::run_dir);
 			static auto tmp = env::dir::tmp(rundir);
 			return rundir;
 		}
@@ -39,27 +37,13 @@ namespace
 	{
 		static auto get()
 		{
-			#ifdef __WIN32__
+			fmt::view value;
+			for (auto c : {"LD_LIBRARY_PATH", "LIBPATH", "LIB", "PATH"})
 			{
-				return env::sys::get("PATH");
+				value = env::sys::get(c);
+				if (not empty(value)) break;
 			}
-			#else
-			#ifdef __AIX__
-			{
-				return env::sys::get("LIBPATH");
-			}
-			#else
-			#ifdef __HPUX__
-			{
-				return env::sys::get("SHLIB_PATH");
-			}
-			#else
-			{
-				return env::sys::get("LD_LIBRARY_PATH");
-			}
-			#endif
-			#endif
-			#endif
+			return value;
 		}
 
 		operator fmt::span() const final
@@ -97,6 +81,15 @@ namespace
 	{
 		operator fmt::view() const final
 		{
+			return env::opt::get("LDFLAGS");
+		}
+
+	} LFLAGS;
+
+	struct : env::view
+	{
+		operator fmt::view() const final
+		{
 			auto u = env::sys::get("CXX");
 			if (empty(u))
 			{
@@ -114,6 +107,7 @@ namespace env::dev
 	env::span const& lib = LIB;
 	env::span const& share = SHARE;
 	env::span const& include = INCLUDE;
+	env::view const& lflags = LFLAGS;
 	env::view const& cflags = CFLAGS;
 	env::view const& cc = CC;
 }

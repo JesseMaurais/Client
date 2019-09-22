@@ -3,7 +3,17 @@
 
 #include "str.hpp"
 #include "ptr.hpp"
-#include "ops.hpp"
+#include "form.hpp"
+
+namespace sys
+{
+	constexpr int invalid = -1;
+
+	inline bool fail(int value)
+	{
+		return invalid == value;
+	}
+}
 
 namespace sys::file
 {
@@ -75,15 +85,15 @@ namespace sys::file
 	int convert(permit); // permissions
 
 	// Check for access to the file at path
-	bool fail(fmt::view path, mode am = ok);
+	bool fail(fmt::view path, mode = ok);
 
 	// Query or change data buffer size
 	size_t bufsiz(ssize_t sz = invalid);
 
 	// Scoped file descriptor
-	struct descriptor : unique, ops
+	struct descriptor : unique, form
 	{
-		explicit descriptor(fmt::view path, mode am = rw, permit pm = owner(rw));
+		explicit descriptor(fmt::view path, mode = rw, permit = owner(rw));
 		ssize_t write(const void *buf, size_t sz) const override;
 		ssize_t read(void *buf, size_t sz) const override;
 		bool close();
@@ -118,7 +128,7 @@ namespace sys::file
 		int fd;
 	};
 
-	struct pipe : unique, ops
+	struct pipe : unique, form
 	{
 		explicit pipe();
 

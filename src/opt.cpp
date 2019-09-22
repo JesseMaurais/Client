@@ -62,15 +62,15 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				auto home = env::opt::directory(env::usr::config_home);
-				if (sys::dir::fail(home))
+				auto home = env::opt::dir(env::usr::config_home);
+				if (env::dir::fail(home))
 				{
-					fmt::span const dirs = env::usr::config_dirs;
-					for (auto const dir : dirs)
+					fmt::span const t = env::usr::config_dirs;
+					for (auto const u : t)
 					{
-						s = env::opt::directory(dir);
-						auto const c = data(s);
-						if (sys::dir::fail(c))
+						s = env::opt::dir(u);
+						auto const c = s.data();
+						if (env::dir::fail(c))
 						{
 							continue;
 						}
@@ -91,7 +91,7 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				s = env::opt::directory(env::usr::cache_home);
+				s = env::opt::dir(env::usr::cache_home);
 			}
 			return s;
 		}
@@ -102,8 +102,8 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			static auto const s = env::opt::directory(env::usr::runtime_dir);
-			static env::dir::tmp rundir(s);
+			static auto const s = env::opt::dir(env::usr::run_dir);
+			static auto const run = env::dir::tmp(s);
 			return s;
 		}
 
@@ -172,9 +172,9 @@ namespace env::opt
 	env::view const& cache = CACHE;
 	env::view const& run = RUN;
 
-	view directory(view stem)
+	view dir(view stem)
 	{
-		return fmt::dir::join(stem, application);
+		return fmt::dir::join({stem, application});
 	}
 
 	void set(int argc, char** argv)

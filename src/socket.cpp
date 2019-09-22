@@ -48,8 +48,8 @@ namespace sys::file
 	socket socket::accept(address& name, size_t* length) const
 	{
 		sys::net::size n;
-		socket s = sys::net::accept(fd, &name.address, &n);
-		if (not s)
+		auto const so = sys::net::accept(fd, &name.address, &n);
+		if (sys::fail(so))
 		{
 			sys::net::err(here, "accept");
 		}
@@ -58,7 +58,7 @@ namespace sys::file
 		{
 			*length = fmt::to_size(n);
 		}
-		return s;
+		return so;
 	}
 
 	bool socket::connect(address const& name, size_t length) const

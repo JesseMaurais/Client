@@ -25,7 +25,8 @@ namespace fmt
 		graph  = std::ctype_base::graph,
 		xdigit = std::ctype_base::xdigit;
 
-	template <class Char, template <class> class Type = std::ctype> struct ctype : Type<Char>
+	template <class Char, template <class> class Type = std::ctype> 
+	struct ctype : Type<Char>
 	{
 		using base = Type<Char>;
 		using mask = typename base::mask;
@@ -39,8 +40,8 @@ namespace fmt
 		using string_view_pair = pair<string_view>;
 		using string_view_vector = std::vector<string_view>;
 		using string_view_span = basic_span<string_view>;
-		
-		template <typename as> static string from(as const& s);
+
+		template <typename S> static string from(S const& s);
 
 		bool check(Char c, mask x = space) const
 		/// Check whether code $w is an $x
@@ -123,7 +124,7 @@ namespace fmt
 			{
 				base const* that;
 				char const* pos;
-				size  size;
+				size size;
 
 				bool operator!=(iterator const& it) const
 				{
@@ -376,6 +377,40 @@ namespace fmt
 			return s;
 		}
 
+		static auto brace(string_view u, string_view v)
+		// First matching braces $v front and $v back found in $u
+		{
+			auto i = u.find_first_of(v.front()), j = i;
+			if (i < npos)
+			{
+				size n = 1;
+				do
+				{
+					j = u.find_first_of(v, j + 1);
+					if (npos == j)
+					{
+						break;
+					}
+					else
+					if (u[j] == v.back())
+					{
+						-- n;
+					}
+					else
+					if (u[j] == v.front())
+					{
+						++ n;
+					}
+					else // $v interior
+					{
+						break;
+					}
+				}
+				while (0 < n);
+			}
+			return std::pair{ i, j };
+		}
+
 		static auto to_pair(string_view u, string_view v)
 		/// Divide view $u by first occurance of $v
 		{
@@ -472,6 +507,11 @@ namespace fmt
 	inline auto replace(string_view u, string_view v, string_view w)
 	{
 		return lc.replace(u, v, w);
+	}
+
+	inline auto brace(string_view u, string_view v)
+	{
+		return lc.brace(u, v);
 	}
 
 	inline auto entry(string_view u)
