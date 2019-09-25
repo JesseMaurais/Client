@@ -24,7 +24,7 @@ namespace
 	{
 		std::vector<fmt::view> list;
 
-		operator fmt::span() const final
+		operator fmt::span<fmt::view>() const final
 		{
 			return list;
 		}
@@ -38,7 +38,7 @@ namespace
 			static fmt::view u;
 			if (empty(u))
 			{
-				fmt::span const args = env::opt::arguments;
+				fmt::span<fmt::view> const args = env::opt::arguments;
 				assert(not empty(args));
 				auto const path = args.front();
 				assert(not empty(path));
@@ -65,7 +65,7 @@ namespace
 				auto home = env::opt::dir(env::usr::config_home);
 				if (env::dir::fail(home))
 				{
-					fmt::span const t = env::usr::config_dirs;
+					fmt::span<fmt::view> const t = env::usr::config_dirs;
 					for (auto const u : t)
 					{
 						s = env::opt::dir(u);
@@ -284,7 +284,7 @@ namespace env::opt
 
 	view get(view key)
 	{
-		fmt::span const args = env::opt::arguments;
+		span const args = env::opt::arguments;
 		for (auto const arg : args)
 		{
 			const auto e = fmt::entry(arg);

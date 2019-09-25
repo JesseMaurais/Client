@@ -121,22 +121,22 @@ namespace
 	{
 		using namespace fmt;
 		pair<size> pos;
-		pos = brace("<A<B>C>", "<>");
+		pos = embrace("<A<B>C>", "<>");
 		assert(0 == pos.first);
 		assert(6 == pos.second);
-		pos = brace("<A<B>C>", "<B>");
+		pos = embrace("<A<B>C>", "<B>");
 		assert(0 == pos.first);
 		assert(3 == pos.second);
-		pos = brace("A[B]C[D]", "[D]");
+		pos = embrace("A[B]C[D]", "[D]");
 		assert(1 == pos.first);
 		assert(3 == pos.second);
-		pos = brace("{A<B}C}", "<>");
+		pos = embrace("{A<B}C}", "<>");
 		assert(2 == pos.first);
 		assert(npos == pos.second);
-		pos = brace("{A{B>C}", "<>");
+		pos = embrace("{A{B>C}", "<>");
 		assert(npos == pos.first);
 		assert(npos == pos.second);
-		pos = brace("&amp;", "&;");
+		pos = embrace("&amp;", "&;");
 		assert(0 == pos.first);
 		assert(4 == pos.second);
 	}
@@ -357,23 +357,6 @@ namespace
 		<< std::endl;
 	}
 
-	//
-	// I/O Streams
-	//
-
-	TEST(ios_fds)
-	{
-		io::ifdstream in { __FILE__ };
-		assert(in);
-		fmt::string line;
-		fmt::size n = 0;
-		while (std::getline(in, line))
-		{
-			assert(__LINE__ != ++n or line.find("assert") != fmt::npos);
-		}
-		assert(__LINE__ < n);
-	}
-
 	TEST(_sys_ipc_rev)
 	{
 		std::string s;
@@ -402,5 +385,22 @@ namespace
 		fmt::string_view const view(c, sz);
 		auto pos = view.find("Self referencing find.");
 		assert(pos != fmt::string_view::npos);
+	}
+
+	//
+	// I/O Streams
+	//
+
+	TEST(ios_fds)
+	{
+		io::ifdstream in { __FILE__ };
+		assert(in);
+		fmt::string line;
+		fmt::size n = 0;
+		while (std::getline(in, line))
+		{
+			assert(__LINE__ != ++n or line.find("assert") != fmt::npos);
+		}
+		assert(__LINE__ < n);
 	}
 }

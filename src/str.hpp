@@ -126,29 +126,29 @@ namespace fmt
 #include <span>
 namespace fmt
 {
-	template <typename Type> using basic_span = std::span<Type>;
+	template <typename Type> using span = std::span<Type>;
 }
 #elif __has_include(<experimetal/span>)
 #include <experimental/span>
 namespace fmt
 {
-	template <typename Type> using basic_span = std::experimental::span<Type>;
+	template <typename Type> using span = std::experimental::span<Type>;
 }
 #else
 #include <initializer_list>
 namespace fmt
 {
-	template <typename Type> struct basic_span : range<Type const*>
+	template <typename Type> struct span : range<Type const*>
 	{
 		using base = range<Type const*>;
 		using base::base;
 		using const_iterator = Type const*;
 
-		basic_span(std::vector<Type> const& list)
+		span(std::vector<Type> const& list)
 		: base(data(list), data(list) + size(list))
 		{ }
 
-		basic_span(std::initializer_list<Type> init)
+		span(std::initializer_list<Type> init)
 		: base(begin(init), end(init))
 		{ }
 
@@ -178,17 +178,14 @@ namespace fmt
 	using string_view = basic_string_view<char>;
 	using wstring_view = basic_string_view<wchar_t>;
 
-	using strings = std::vector<string>;
-	using wstrings = std::vector<wstring>;
-
-	using span = basic_span<string_view>;
-	using wspan = basic_span<wstring_view>;
-
 	using view = string_view;
 	using wview = wstring_view;
 
-	using views = std::vector<view>;
-	using wviews = std::vector<wview>;
+	using vector = std::vector<view>;
+	using wvector = std::vector<wview>;
+
+	using buffer = std::vector<string>;
+	using wbuffer = std::vector<wstring>;
 
 	using size = string::size_type;
 	constexpr auto npos = string::npos;

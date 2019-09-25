@@ -7,6 +7,7 @@ namespace env
 {
 	namespace sys
 	{
+		bool got(fmt::view);
 		fmt::view get(fmt::view);
 		bool set(fmt::view);
 		bool put(fmt::view);
@@ -26,7 +27,7 @@ namespace env
 
 	struct span
 	{
-		virtual operator fmt::span() const = 0;
+		virtual operator fmt::span<fmt::view>() const = 0;
 	};
 
 	extern span const& paths;

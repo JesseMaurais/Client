@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "ipc.hpp"
+#include "ips.hpp"
 #include "sys.hpp"
 #include "fmt.hpp"
 #include "dig.hpp"
@@ -12,21 +13,20 @@ namespace
 {
 	using strings = std::vector<char const*>;
 
-	auto repack(sys::command line, strings &list)
+	auto repack(env::command line, strings &list)
 	{
-		fmt::string const term(1, '\0');
-		auto str = fmt::join(line, term);
-		auto args = fmt::split(str, term);
-		for (auto u : args)
+		fmt::string const z(1, '\0');
+		auto s = fmt::join(line, z);
+		for (auto u : fmt::split(s, z))
 		{
 			auto ptr = u.data();
 			list.push_back(ptr);
 		}
 		list.push_back(nullptr);
-		return str;
+		return s;
 	}
 
-	int start(int fd[3], sys::command line)
+	int execute(int fd[3], env::command line)
 	{
 		strings list;
 		auto str = repack(line, list);
@@ -46,10 +46,10 @@ namespace sys::file
 		}
 	}
 
-	process::process(command line)
+	process::process(env::command line)
 	{
 		int fd[3];
-		pid = start(fd, line);
+		pid = ::execute(fd, line);
 		if (not sys::fail(pid))
 		{
 			set(pid, fd);
@@ -67,19 +67,3 @@ namespace sys::file
 	}
 }
 
-namespace sys::ipc
-{
-	file::process twin(command line)
-	{
-		auto const path = env::opt::arg(0);
-		auto const s = fmt::to_string(path);
-		auto const c = s.c_str();
-		assert(not empty(path));
-
-		strings list;
-		list.push_back(c);
-		auto str = repack(line, list);
-
-		return sys::file::process(list.size() - 1, list.data());
-	}
-}

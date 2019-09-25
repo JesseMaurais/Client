@@ -6,7 +6,7 @@
 #include "str.hpp"
 #include "ptr.hpp"
 
-namespace sys
+namespace env
 {
 	using command = std::initializer_list<fmt::view>;
 }
@@ -15,8 +15,9 @@ namespace sys::file
 {
 	struct process : unique, form
 	{
-		explicit process(size_t argc, char const** argv);
-		explicit process(command line);
+		process(int id, int fd[3] = nullptr) { set(id, fd); }
+		process(size_t argc, char const** argv);
+		process(env::command line);
 		bool kill();
 		int wait();
 
@@ -73,11 +74,6 @@ namespace sys::file
 		descriptor fds[3];
 		int pid = invalid;
 	};
-}
-
-namespace sys::ipc
-{
-	file::process twin(command line);
 }
 
 #endif // file

@@ -23,7 +23,7 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span() const final
+		operator fmt::span<fmt::view>() const final
 		{
 			static std::vector<fmt::view> t;
 			auto u = env::sys::get("LIB");
@@ -46,7 +46,7 @@ namespace
 			return value;
 		}
 
-		operator fmt::span() const final
+		operator fmt::span<fmt::view>() const final
 		{
 			static std::vector<fmt::view> t;
 			auto const u = get();
@@ -58,7 +58,7 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span() const final
+		operator fmt::span<fmt::view>() const final
 		{
 			static std::vector<fmt::view> t;
 			auto const u = env::opt::get("INCLUDE");

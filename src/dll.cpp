@@ -106,7 +106,7 @@ namespace sys
 		using namespace ::env::dev;
 		using namespace ::env::dir;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
-		::env::dir::find(share, match(name) and copy(name) and stop);
+		::env::dir::find(share, regx(name) || copy(name) || stop);
 		return fmt::string_view(name);
 	}
 }

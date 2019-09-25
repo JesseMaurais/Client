@@ -19,6 +19,19 @@ namespace env::sys
 {
 	using namespace ::sys;
 
+	bool got(fmt::view u)
+	{
+		if (not fmt::terminated(u))
+		{
+			auto const s = fmt::to_string(u);
+			return got(s);
+		}
+		auto const c = u.data();
+		auto const unlock = lock.read();
+		auto const ptr = std::getenv(c);
+		return nullptr == ptr;
+	}
+
 	fmt::view get(fmt::view u)
 	{
 		if (not fmt::terminated(u))
@@ -89,7 +102,7 @@ namespace
 {
 	struct : env::span
 	{
-		operator fmt::span() const final
+		operator fmt::span<fmt::view>() const final
 		{
 			static thread_local std::vector<fmt::view> t;
 			auto u = env::sys::get("PATH");

@@ -8,10 +8,10 @@
 namespace env::opt
 {
 	using fmt::string;
-	using view = fmt::view;
-	using span = fmt::span;
-	using list = std::vector<fmt::view>;
-	using pair = fmt::pair<fmt::view>;
+	using fmt::view;
+	using span = fmt::span<view>;
+	using list = std::vector<view>;
+	using pair = fmt::pair<view>;
 	using word = long long;
 	using quad = long double;
 
@@ -26,7 +26,7 @@ namespace env::opt
 
 	inline auto arg(size_t argn)
 	{
-		fmt::span const argv = arguments;
+		fmt::span<view> const argv = arguments;
 		return argv[argn];
 	}
 

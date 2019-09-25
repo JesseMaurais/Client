@@ -61,7 +61,7 @@ namespace
 				path = fmt::dir::join({env::usr::config_home, "menus", menu});
 				if (sys::file::fail(path))
 				{
-					fmt::span const dirs = env::usr::config_dirs;
+					fmt::span<fmt::view> const dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
 					{
 						path = fmt::dir::join({dir, menu});
@@ -152,7 +152,7 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span() const final
+		operator fmt::span<fmt::view>() const final
 		{
 			auto u = env::sys::get("XDG_DATA_DIRS");
 			if (empty(u))
@@ -174,7 +174,7 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span() const final
+		operator fmt::span<fmt::view>() const final
 		{
 			static std::vector<fmt::view> t;
 			auto u = env::sys::get("XDG_CONFIG_DIRS");

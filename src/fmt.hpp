@@ -34,12 +34,12 @@ namespace fmt
 		using string = basic_string<Char>;
 		using string_pair = pair<string>;
 		using string_vector = std::vector<string>;
-		using string_span = basic_span<string>;
+		using string_span = span<string>;
 
 		using string_view = basic_string_view<Char>;
 		using string_view_pair = pair<string_view>;
 		using string_view_vector = std::vector<string_view>;
-		using string_view_span = basic_span<string_view>;
+		using string_view_span = span<string_view>;
 
 		template <typename S> static string from(S const& s);
 
@@ -377,7 +377,7 @@ namespace fmt
 			return s;
 		}
 
-		static auto brace(string_view u, string_view v)
+		static auto embrace(string_view u, string_view v)
 		// First matching braces $v front and $v back found in $u
 		{
 			auto i = u.find_first_of(v.front()), j = i;
@@ -494,7 +494,7 @@ namespace fmt
 		return lc.count(u, v);
 	}
 
-	inline auto join(span t, string_view u = "")
+	inline auto join(span<view> t, string_view u = "")
 	{
 		return lc.join(t, u);
 	}
@@ -509,9 +509,9 @@ namespace fmt
 		return lc.replace(u, v, w);
 	}
 
-	inline auto brace(string_view u, string_view v)
+	inline auto embrace(string_view u, string_view v)
 	{
-		return lc.brace(u, v);
+		return lc.embrace(u, v);
 	}
 
 	inline auto entry(string_view u)

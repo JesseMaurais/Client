@@ -7,13 +7,15 @@
 #endif
 
 #ifdef NDEBUG
-# define alert(x)
 # define assert(x)
 # define verify(x) (x)
+# define alert(x) 
+# define debug(x) if constexpr (false)
 #else
-# define alert(x) if (bool(x)) sys::err(here, #x)
 # define verify(x) assert(x)
 # define assert(x) if (not(x)) sys::warn(here, #x)
+# define alert(x) if (bool(x)) sys::err(here, #x)
+# define debug(x) if (x)
 #endif
 
 #include <system_error>

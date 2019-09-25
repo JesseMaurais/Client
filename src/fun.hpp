@@ -47,8 +47,8 @@ template <typename T, typename S>
 using relation = formula<T, S>;
 
 template <typename... T>
-constexpr auto falsity = [](T...) { return false; };
+constexpr auto never = [](T...) { return false; };
 template <typename... T>
-constexpr auto truth = [](T...) { return true; };
+constexpr auto always = [](T...) { return true; };
 
 #endif // file

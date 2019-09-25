@@ -2,6 +2,7 @@ Tests.ini
 *.mak
 *.tmp
 *.swp
+*.swo
 *.exe
 *.obj
 *.dep

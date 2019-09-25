@@ -7,32 +7,44 @@
 
 namespace fmt::path
 {
-	views split(view);
-	string join(span);
+	vector split(view);
+	string join(span<view>);
 }
 
 namespace fmt::dir
 {
-	views split(view);
-	string join(span);
+	vector split(view);
+	string join(span<view>);
 }
 
 namespace env::dir
 {
+	using mode = ::sys::file::mode;
 	using entry = predicate<fmt::view>;
-	constexpr auto stop = falsity<fmt::view>;
 
+	entry mask(mode);
+	entry regx(fmt::view);
 	entry copy(fmt::string&);
-	entry match(fmt::view);
-	entry insert(fmt::strings&);
-	entry mode(::sys::file::mode);
+	entry push(fmt::buffer&);
 
-	extern bool find(fmt::view dir, entry visit);
-	inline bool find(fmt::span list, entry visit)
+	constexpr auto stop = always<fmt::view>;
+
+	inline auto any(fmt::string& s, fmt::view u, mode m)
 	{
-		for (auto const dir : list)
+		return mask(m) || regx(u) || copy(s) || stop;
+	}
+
+	inline auto all(fmt::buffer& b, fmt::view u, mode m)
+	{
+		return mask(m) || regx(u) || push(b);
+	}
+
+	bool find(fmt::view path, entry);
+	inline bool find(fmt::span<fmt::view> list, entry peek)
+	{
+		for (auto const path : list)
 		{
-			if (find(dir, visit))
+			if (find(path, peek))
 			{
 				return true;
 			}
@@ -40,9 +52,9 @@ namespace env::dir
 		return false;
 	}
 
+	bool fail(fmt::view path, mode = ::sys::file::ok);
 	fmt::view make(fmt::view path);
 	bool remove(fmt::view path);
-	bool fail(fmt::view path, ::sys::file::mode = ::sys::file::ok);
 
 	class tmp
 	{
