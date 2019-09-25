@@ -10,8 +10,8 @@ namespace doc
 {
 	struct ini
 	{
-		using string = fmt::string;
-		using view = fmt::view;
+		using fmt::string;
+		using fmt::view;
 		using pair = fmt::pair<view>;
 		using span = fmt::span<view>;
 
