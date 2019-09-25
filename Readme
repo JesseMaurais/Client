@@ -19,7 +19,7 @@ Build
 =====
 There is no library, but to build the unit tests you can simply type 'make'
 or 'nmake' depending on your environment. The authored Makefile has been
-written to work for both without change.
+written to work for both without additional arguments.
 
 Contact
 =======
