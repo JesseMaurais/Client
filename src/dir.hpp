@@ -7,13 +7,13 @@
 
 namespace fmt::path
 {
-	vector split(view);
+	std::vector<view> split(view);
 	string join(span<view>);
 }
 
 namespace fmt::dir
 {
-	vector split(view);
+	std::vector<view> split(view);
 	string join(span<view>);
 }
 
@@ -25,7 +25,7 @@ namespace env::dir
 	entry mask(mode);
 	entry regx(fmt::view);
 	entry copy(fmt::string&);
-	entry push(fmt::buffer&);
+	entry push(std::vector<fmt::string>&);
 
 	constexpr auto stop = always<fmt::view>;
 
@@ -34,7 +34,7 @@ namespace env::dir
 		return mask(m) || regx(u) || copy(s) || stop;
 	}
 
-	inline auto all(fmt::buffer& b, fmt::view u, mode m)
+	inline auto all(std::vector<fmt::string>& b, fmt::view u, mode m)
 	{
 		return mask(m) || regx(u) || push(b);
 	}

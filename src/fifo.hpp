@@ -8,10 +8,10 @@ namespace sys::file
 {
 	struct fifo : descriptor
 	{
-		fifo(fmt::string_view name, mode mask = sys::file::rd);
+		fifo(fmt::view name, mode mask = sys::file::rd);
 		~fifo();
 
-		operator fmt::string_view() const
+		operator fmt::view() const
 		{
 			return path;
 		}
