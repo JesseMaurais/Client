@@ -15,7 +15,7 @@
 
 namespace
 {
-	auto extension(fmt::string_view base)
+	auto extension(fmt::view base)
 	{
 		return fmt::join({ base, ".ini" });
 	}

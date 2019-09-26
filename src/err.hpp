@@ -76,9 +76,8 @@ namespace sys
 
 	namespace impl
 	{
-		using fmt::string_view;
-		void warn(string_view);
-		void err(string_view);
+		void warn(fmt::view);
+		void err(fmt::view);
 	}
 
 	template <typename... Args> inline bool warn(Args... args)

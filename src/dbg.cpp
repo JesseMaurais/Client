@@ -25,7 +25,7 @@ namespace dbg
 			return instance;
 		}
 
-		std::ostream& stream(fmt::string_view pattern)
+		std::ostream& stream(fmt::view pattern)
 		{
 			if (pattern.front() == '_')
 			{

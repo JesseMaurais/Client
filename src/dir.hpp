@@ -7,13 +7,13 @@
 
 namespace fmt::path
 {
-	vector split(view);
+	std::vector<view> split(view);
 	string join(span<view>);
 }
 
 namespace fmt::dir
 {
-	vector split(view);
+	std::vector<view> split(view);
 	string join(span<view>);
 }
 

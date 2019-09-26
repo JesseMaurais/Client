@@ -181,12 +181,6 @@ namespace fmt
 	using view = string_view;
 	using wview = wstring_view;
 
-	using vector = std::vector<view>;
-	using wvector = std::vector<wview>;
-
-	using buffer = std::vector<string>;
-	using wbuffer = std::vector<wstring>;
-
 	using size = string::size_type;
 	constexpr auto npos = string::npos;
 	constexpr auto null = size {0};

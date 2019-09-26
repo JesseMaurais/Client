@@ -23,7 +23,7 @@ namespace fmt::dir
 		return fmt::lc.join(p, sys::sep::dir);
 	}
 
-	vector split(view u)
+	std::vector<view> split(view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -36,7 +36,7 @@ namespace fmt::path
 		return fmt::lc.join(p, sys::sep::path);
 	}
 
-	vector split(view u)
+	std::vector<view> split(view u)
 	{
 		return fmt::split(u, sys::sep::path);
 	}
@@ -211,7 +211,7 @@ namespace env::dir
 		};
 	}
 
-	entry push(fmt::buffer& buf)
+	entry push(std::vector<fmt::string>& buf)
 	{
 		return [&](fmt::view u)
 		{

@@ -226,7 +226,7 @@ namespace
 			{
 				if (empty(u))
 				{
-					static std::map<fmt::string_view, KNOWNFOLDERID> map =
+					static std::map<fmt::view, KNOWNFOLDERID> map =
 					{
 						{ Desktop, FOLDERID_Desktop },
 						{ Documents, FOLDERID_Documents },
