@@ -6,18 +6,15 @@
 #include "str.hpp"
 #include "ptr.hpp"
 
-namespace env
-{
-	using command = std::initializer_list<fmt::view>;
-}
-
 namespace sys::file
 {
+	using command = std::initializer_list<fmt::view>;
+	
 	struct process : unique, form
 	{
 		process(int id, int fd[3] = nullptr) { set(id, fd); }
 		process(size_t argc, char const** argv);
-		process(env::command line);
+		process(command line);
 		bool kill();
 		int wait();
 

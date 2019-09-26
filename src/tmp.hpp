@@ -1,5 +1,5 @@
-#ifndef fun_hpp
-#define fun_hpp
+#ifndef tmp_hpp
+#define tmp_hpp
 
 #include <functional>
 

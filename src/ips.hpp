@@ -28,7 +28,7 @@ namespace io
 
 		using char_type = typename base::char_type;
 		using size_type = typename base::size_type;
-		using arguments = env::command;
+		using arguments = sys::file::command;
 		using base::base;
 	};
 

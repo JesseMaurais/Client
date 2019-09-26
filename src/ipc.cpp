@@ -13,7 +13,7 @@ namespace
 {
 	using strings = std::vector<char const*>;
 
-	auto repack(env::command line, strings &list)
+	auto repack(sys::file::command line, strings &list)
 	{
 		fmt::string const z(1, '\0');
 		auto s = fmt::join(line, z);
@@ -26,7 +26,7 @@ namespace
 		return s;
 	}
 
-	int execute(int fd[3], env::command line)
+	int execute(int fd[3], sys::file::command line)
 	{
 		strings list;
 		auto str = repack(line, list);
@@ -46,7 +46,7 @@ namespace sys::file
 		}
 	}
 
-	process::process(env::command line)
+	process::process(command line)
 	{
 		int fd[3];
 		pid = ::execute(fd, line);
