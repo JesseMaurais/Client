@@ -42,7 +42,7 @@ namespace env::cli
 			return { };
 		}
 	}
-	
+/*	
 	void where(fmt::view program, entry peek)
 	{
 		auto pin = cli::where(program);
@@ -74,5 +74,6 @@ namespace env::cli
 			}
 		}
 	}
+	*/
 }
 

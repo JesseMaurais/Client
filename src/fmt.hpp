@@ -215,7 +215,7 @@ namespace fmt
 			auto const after = first(u, x);
 			auto const pos = std::distance(begin(u), after);
 			auto const size = std::distance(after, before);
-			return (string_view) u.substr(pos, size);
+			return u.substr(pos, size);
 		}
 
 		auto divide(string_view u, mask x = space) const

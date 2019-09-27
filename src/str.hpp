@@ -47,11 +47,13 @@ namespace fmt
 		}
 		#endif
 
-		basic_string_view(string const& s)
+		~basic_string_view() noexcept = default;
+
+		basic_string_view(string const& s) noexcept
 		: base(s.data(), s.size())
 		{ }
 
-		basic_string_view(base u)
+		basic_string_view(base u) noexcept
 		: base(u.data(), u.size())
 		{ }
 	};
@@ -63,11 +65,13 @@ namespace fmt
 		using base = std::basic_string<Char, Traits, Alloc>;
 		using base::base;
 
-		basic_string(base const& s)
+		~basic_string() noexcept = default;
+
+		basic_string(base const& s) noexcept
 		: base(s)
 		{ }
 
-		basic_string(view u)
+		basic_string(view u) noexcept
 		: base(u.data(), u.size())
 		{ }
 
@@ -180,6 +184,9 @@ namespace fmt
 
 	using view = string_view;
 	using wview = wstring_view;
+
+	using array = std::vector<view>;
+	using warray = std::vector<wview>;
 
 	using size = string::size_type;
 	constexpr auto npos = string::npos;
