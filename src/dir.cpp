@@ -198,7 +198,7 @@ namespace env::dir
 		};
 	}
 
-	entry regx(fmt::view u)
+	entry regx(xpath u)
 	{
 		auto const buf = fmt::to_string(u);
 		auto const x = std::regex(buf);
@@ -211,22 +211,20 @@ namespace env::dir
 		};
 	}
 
-	entry push(std::vector<fmt::string>& buf)
+	pass to(table& t)
 	{
-		return [&](fmt::view u)
+		return [&](xpath x)
 		{
-			auto s = fmt::to_string(u);
-			buf.emplace_back(move(s));
-			return success;
+			auto s = fmt::to_string(x);
+			t.emplace_back(move(x));
 		};
 	}
 
-	entry copy(fmt::string& buf)
+	pass to(string &s)
 	{
-		return [&](fmt::view u)
+		return [&](xpath x)
 		{
-			buf = fmt::to_string(u);
-			return success;
+			s = fmt::to_string(x);
 		};
 	}
 }

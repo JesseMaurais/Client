@@ -19,25 +19,50 @@ namespace fmt::dir
 
 namespace env::dir
 {
-	using mode = ::sys::file::mode;
-	using entry = predicate<fmt::view>;
+	namespace file = ::sys::file;
+	using mode = file::mode;
+	using xpath = fmt::view;
+	using fmt::string;
+	using fmt::array;
+	using fmt::table;
+	using entry = predicate<xpath>; // conditional
+	using pass = none<xpath>; // unconditional
 
 	entry mask(mode);
-	entry regx(fmt::view);
-	entry copy(fmt::string&);
-	entry push(std::vector<fmt::string>&);
+	entry regx(xpath);
+	pass to(string &);
+	pass to(table &);
 
 	constexpr auto stop = always<fmt::view>;
+	constexpr auto skip = never<fmt::view>;
 
-	inline auto any(fmt::string& s, fmt::view u, mode m)
+	static auto // sys::file
+		ex = mask(file::ex),
+		wr = mask(file::wr),
+		rd = mask(file::rd),
+		ok = mask(file::ok),
+		xu = mask(file::xu),
+		sz = mask(file::sz),
+		rw = mask(file::rw),
+		wo = mask(file::wo),
+		rwx = mask(file::rwx),
+		oz = mask(file::oz),
+		ox = mask(file::ox),
+		app = mask(file::app),
+		txt = mask(file::txt),
+		bin = mask(file::bin);
+
+	inline auto all(fmt::view u, mode m = file::ok, entry e = skip)
 	{
-		return mask(m) || regx(u) || copy(s) || stop;
+		return mask(m) || regx(u) || e;
 	}
 
-	inline auto all(std::vector<fmt::string>& b, fmt::view u, mode m)
+	inline auto any(fmt::view u, mode m = file::ok, entry e = stop)
 	{
-		return mask(m) || regx(u) || push(b);
+		return all(u, m, e);
 	}
+
+	inline auto an
 
 	bool find(fmt::view path, entry);
 	inline bool find(fmt::span<fmt::view> list, entry peek)
@@ -52,7 +77,7 @@ namespace env::dir
 		return false;
 	}
 
-	bool fail(fmt::view path, mode = ::sys::file::ok);
+	bool fail(fmt::view path, mode = file::ok);
 	fmt::view make(fmt::view path);
 	bool remove(fmt::view path);
 

@@ -42,15 +42,15 @@ namespace env::cli
 			return { };
 		}
 	}
-/*	
-	void where(fmt::view program, entry peek)
+
+	void where(xpath program, entry peek)
 	{
-		auto pin = cli::where(program);
-		auto 
-		if (in)
+		auto const line = cli::where(program);
+		auto const id = line.get();
+		if (not fail(id))
 		{
-			fmt::string s;
-			io::pstream in(cmd);
+			std::string s;
+			io::pstream in(line);
 			while (std::getline(in, s))
 			{
 				if (peek(s))
@@ -62,8 +62,11 @@ namespace env::cli
 		else
 		{
 			using namespace env::dir;
-			using namespace ::sys::file;
-			auto f = mask(ex) || regx(program) || peek;
+			auto f = ex || regx(program) || peek;
+			if (find(env::pwd, f))
+			{
+				return;
+			}
 			fmt::span<fmt::view> const paths = env::path;
 			for (auto const p : paths)
 			{
@@ -74,6 +77,5 @@ namespace env::cli
 			}
 		}
 	}
-	*/
 }
 

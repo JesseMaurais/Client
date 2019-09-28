@@ -172,31 +172,33 @@ namespace io
 	>
 	class basic_rwbuf 
 	: public basic_stringbuf<Char, Traits, Alloc>
-	, public Form
 	{
 		using base = basic_stringbuf<Char, Traits, Alloc>;
+
+		Form &form;
 
 	public:
 
 		using size_type = typename base::size_type;
 		using char_type = typename base::char_type;
 
+		basic_stringbuf(Form& obj) : form(obj) = default;
+
 	private:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return Form::write(s, sz);
+			return form.write(s, sz);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return Form::read(s, sz);
+			return form.read(s, sz);
 		}
 
 		using base::base;
-		using Form::Form;
 	};
 }
 

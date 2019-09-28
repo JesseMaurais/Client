@@ -9,6 +9,7 @@ namespace env::opt
 {
 	using fmt::string;
 	using fmt::view;
+	using cast = view(*)(view);	
 	using span = fmt::span<view>;
 	using list = std::vector<view>;
 	using pair = fmt::pair<view>;
@@ -41,6 +42,7 @@ namespace env::opt
 	using commands = std::vector<description>;
 	void set(int argc, char** argv);
 	list parse(commands const& cmd);
+	string to(view, cast);
 
 	bool got(view key);
 	view get(view key);

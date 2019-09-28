@@ -176,11 +176,11 @@ namespace fmt
 
 namespace fmt
 {
-	using string = basic_string<char>;
-	using wstring = basic_string<wchar_t>;
-
 	using string_view = basic_string_view<char>;
 	using wstring_view = basic_string_view<wchar_t>;
+
+	using string = basic_string<char>;
+	using wstring = basic_string<wchar_t>;
 
 	using view = string_view;
 	using wview = wstring_view;
@@ -188,11 +188,16 @@ namespace fmt
 	using array = std::vector<view>;
 	using warray = std::vector<wview>;
 
+	using table = std::vector<string>;
+	using wtable = std::vector<wstring>;
+
 	using size = string::size_type;
-	constexpr auto npos = string::npos;
-	constexpr auto null = size {0};
+	constexpr size last = string::npos;
+	constexpr size first = 0;
 	constexpr auto eol = '\n';
 	constexpr auto nil = "";
+
+	static_assert(first == ~last);
 }
 
 #endif // file

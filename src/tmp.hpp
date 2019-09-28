@@ -45,10 +45,33 @@ template <typename T>
 using predicate = formula<T>;
 template <typename T, typename S> 
 using relation = formula<T, S>;
+template <bool P, typename... Q> struct property : formula<Q...>
+{
+	using basic = formula<Q...>;
+	using closure = std::function<void(Q...)>;
 
-template <typename... T>
-constexpr auto never = [](T...) { return false; };
-template <typename... T>
-constexpr auto always = [](T...) { return true; };
+	property(closure go) : basic(close(go)) { };
+
+private:
+
+	using basic::basic;
+
+	static auto close(closure go)
+	{
+		return [=](Q... q)
+		{
+			go(q...); 
+			return P; 
+		};
+	}
+};
+
+template <typename... Q> using none = property<false, Q...>;
+template <typename... Q> using total = property<true, Q...>;
+
+template <typename... Q>
+constexpr auto never = [](Q...) { return false; };
+template <typename... Q> 
+constexpr auto always = [](Q...) { return true; };
 
 #endif // file
