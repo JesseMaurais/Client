@@ -27,6 +27,12 @@ namespace env::run
 		while (getline(go, s)) if (look(s)) return true;
 		return false;
 	}
+	
+	inline bool with(console tty, entry look)
+	{
+		viewer go(tty);
+		return with(go, look);
+	}
 
 	inline bool with(command line, entry look)
 	{
