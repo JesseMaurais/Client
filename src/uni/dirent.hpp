@@ -27,7 +27,7 @@ namespace sys::uni
 		{
 			if (nullptr != ptr)
 			{
-				if (sys::fail(closedir(ptr)))
+				if (fail(closedir(ptr)))
 				{
 					sys::err(here);
 				}

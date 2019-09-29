@@ -9,38 +9,6 @@
 
 namespace io
 {
-	//
-	// Abstract buffer class
-	//
-
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
-	>
-	class basic_processbuf 
-	: public basic_rwbuf<sys::file::process, Char, Traits, Alloc>
-	{
-		using base = basic_rwbuf<sys::file::process, Char, Traits, Alloc>;
-
-	public:
-
-		using char_type = typename base::char_type;
-		using size_type = typename base::size_type;
-		using arguments = sys::file::command;
-		using base::base;
-	};
-
-	// Common alias types
-
-	using processbuf = basic_processbuf<char>;
-	using wprocessbuf = basic_processbuf<wchar_t>;
-
-	//
-	// Abstract stream class
-	//
-
 	namespace impl
 	{
 		template
@@ -51,19 +19,21 @@ namespace io
 		 template <class, class> class basic_stream
 		>
 		class basic_pstream
-		: public basic_processbuf<Char, Traits, Alloc>
+		: public basic_rwbuf<Char, Traits, Alloc>
 		, public basic_stream<Char, Traits<Char>>
 		{
-			using base = basic_stream<Char, Traits<Char>>;
-			using processbuf = basic_processbuf<Char, Traits, Alloc>;
-			using arguments = typename processbuf::arguments;
+			using stream = basic_stream<Char, Traits<Char>>;
+			using rwbuf = basic_rwbuf<Char, Traits, Alloc>;
+
+			env::file::process buf;
 
 		public:
 
-			basic_pstream(arguments args) : processbuf(args), base(this)
+			basic_pstream(env::file::command line) 
+			: rwbuf(buf), stream(this), buf(line)
 			{
-				auto const sz = sys::file::bufsiz();
-				processbuf::setbufsiz(sz);
+				auto const sz = env::file::width();
+				rwbuf::setbufsiz(sz);
 			}
 		};
 	}

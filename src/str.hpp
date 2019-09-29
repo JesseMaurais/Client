@@ -188,16 +188,30 @@ namespace fmt
 	using array = std::vector<view>;
 	using warray = std::vector<wview>;
 
-	using table = std::vector<string>;
-	using wtable = std::vector<wstring>;
+	using div = span<view>;
+	using wdiv = span<wview>;
+
+	using alloc = std::vector<string>;
+	using walloc = std::vector<wstring>;
 
 	using size = string::size_type;
-	constexpr size last = string::npos;
-	constexpr size first = 0;
+	constexpr size npos = string::npos;
+	constexpr size null = 0;
 	constexpr auto eol = '\n';
 	constexpr auto nil = "";
 
-	static_assert(first == ~last);
+	static_assert(null == ~npos);
+
+	inline auto nth(size n)
+	{
+		switch (n)
+		{
+			case 1: return "st";
+			case 2: return "nd";
+			case 3: return "rd";
+		}
+		return "th";
+	}
 }
 
 #endif // file

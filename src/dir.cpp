@@ -7,11 +7,7 @@
 #include "usr.hpp"
 #include "opt.hpp"
 #include "sys.hpp"
-#ifdef _WIN32
-# include "win/file.hpp"
-#else
-# include "uni/dirent.hpp"
-#endif
+#include "direct.hpp"
 #include <algorithm>
 #include <regex>
 #include <stack>
@@ -23,7 +19,7 @@ namespace fmt::dir
 		return fmt::lc.join(p, sys::sep::dir);
 	}
 
-	std::vector<view> split(view u)
+	array split(view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -42,30 +38,118 @@ namespace fmt::path
 	}
 }
 
-namespace env::sys
-{
-	using namespace ::sys;
-}
-
 namespace env::dir
 {
-	bool find(fmt::view path, entry peek)
+	using namespace ::env;
+	using namespace ::env::usr;
+
+	bool path(entry look)
+	{
+		return find(pwd, look) or find(paths, look);
+	}
+
+	bool config(entry look)
+	{
+		return find(config_home, look) or find(config_dirs, look);
+	}
+
+	bool data(entry look)
+	{
+		return find(data_home, look) or find(data_dirs, look);
+	}
+
+	bool cache(entry look)
+	{
+		return find(cache_home, look);
+	}
+
+	bool find(fmt::view path, entry look)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return env::dir::find(s, peek);
+			return env::dir::find(s, look);
 		}
 
 		auto const c = path.data();
 		for (auto const name : sys::files(c))
 		{
-			if (peek(name)) return success;
+			if (look(name)) 
+			{
+				return success;
+			}
 		}
 		return failure;
 	}
 
-	bool fail(fmt::view path, mode am)
+	bool find(fmt::span<fmt::view> list, entry look)
+	{
+		for (auto const path : list)
+		{
+			if (find(path, look))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	entry mask(file::mode am)
+	{
+		auto const flags = file::convert(am);
+		return [=](fmt::view u)
+		{
+			auto const c = u.data();
+			if (file::fail(sys::access(c, flags)))
+			{
+				return failure;
+			}
+			#ifdef _WIN32
+			{
+				if (am & file::ex)
+				{
+					DWORD dw;
+					return GetBinaryType(c, &dw)
+						? success : failure;
+				}
+			}
+			#endif
+			return success;
+		};
+	}
+
+	entry regx(fmt::view u)
+	{
+		auto const s = fmt::to_string(u);
+		auto const x = std::regex(s);
+		return [x](fmt::view u)
+		{
+			std::cmatch cm;
+			auto const s = fmt::to_string(u);
+			return std::regex_search(s.data(), cm, x);
+		};
+	}
+
+	entry to(fmt::alloc& t)
+	{
+		return [&](fmt::view u)
+		{
+			auto s = fmt::to_string(u);
+			t.emplace_back(move(s));
+			return success;
+		};
+	}
+
+	entry to(fmt::string &s)
+	{
+		return [&](fmt::view u)
+		{
+			s = fmt::to_string(u);
+			return success;
+		};
+	}
+
+	bool fail(fmt::view path, file::mode am)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -75,7 +159,7 @@ namespace env::dir
 
 		auto const c = path.data();
 		class sys::stat st(c);
-		if (sys::fail(st))
+		if (file::fail(st))
 		{
 			return failure;
 		}
@@ -85,7 +169,7 @@ namespace env::dir
 			return failure;
 		}
 
-		auto const mask = sys::file::check(am);
+		auto const mask = file::check(am);
 		return st.st_mode & mask;
 	}
 
@@ -115,7 +199,7 @@ namespace env::dir
 
 			buf = fmt::dir::join(folders);
 			auto const c = buf.data();
-			if (sys::fail(sys::mkdir(c, S_IRWXU)))
+			if (file::fail(sys::mkdir(c, S_IRWXU)))
 			{
 				sys::err(here, "mkdir", c);
 				stem = "";
@@ -136,9 +220,9 @@ namespace env::dir
 			(void) find(*it, [&](fmt::view u)
 			{
 				auto const path = fmt::dir::join({*it, u});
-				auto const c = path.c_str();
+				auto const c = path.data();
 				class sys::stat st(c);
-				if (sys::fail(st))
+				if (file::fail(st))
 				{
 					sys::err(here, "stat", c);
 				}
@@ -151,7 +235,7 @@ namespace env::dir
 					}
 				}
 				else
-				if (sys::fail(sys::unlink(c)))
+				if (file::fail(sys::unlink(c)))
 				{
 					sys::err(here, "unlink", c);
 				}
@@ -163,8 +247,8 @@ namespace env::dir
 		while (not empty(deque))
 		{
 			dir = deque.back();
-			auto const c = data(dir);
-			if (sys::fail(sys::rmdir(c)))
+			auto const c = dir.data();
+			if (file::fail(sys::rmdir(c)))
 			{
 				sys::err(here, "rmdir", c);
 				ok = failure;
@@ -172,59 +256,5 @@ namespace env::dir
 			deque.pop_back();
 		}
 		return ok;
-	}
-
-	entry mask(mode am)
-	{
-		auto const flags = sys::file::convert(am);
-		return [=](fmt::view u)
-		{
-			auto const s = u.data();
-			if (sys::fail(sys::access(s, flags)))
-			{
-				return failure;
-			}
-			#ifdef _WIN32
-			{
-				if (am & sys::file::ex)
-				{
-					DWORD type;
-					BOOL ok = GetBinaryType(s, &type);
-					return TRUE == ok ? success : failure;
-				}
-			}
-			#endif
-			return success;
-		};
-	}
-
-	entry regx(xpath u)
-	{
-		auto const buf = fmt::to_string(u);
-		auto const x = std::regex(buf);
-		return [x](fmt::view u)
-		{
-			std::cmatch m;
-			auto const s = u.data();
-			auto const b = std::regex_search(s, m, x);
-			return success == b;
-		};
-	}
-
-	pass to(table& t)
-	{
-		return [&](xpath x)
-		{
-			auto s = fmt::to_string(x);
-			t.emplace_back(move(x));
-		};
-	}
-
-	pass to(string &s)
-	{
-		return [&](xpath x)
-		{
-			s = fmt::to_string(x);
-		};
 	}
 }

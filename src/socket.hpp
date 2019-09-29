@@ -9,7 +9,7 @@ namespace sys::net
 	union address;
 }
 
-namespace sys::file
+namespace env::file
 {
 	struct socket : unique, form
 	{

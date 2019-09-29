@@ -195,12 +195,12 @@ namespace
 
 	TEST(env_path)
 	{
-		auto var = env::sys::get("PATH");
+		auto var = env::var::get("PATH");
 		auto val = fmt::path::join(env::paths);
 		assert(var == val);
 
-		val = env::sys::value("$PATH");
-		var = env::sys::get("PATH");
+		val = env::var::value("$PATH");
+		var = env::var::get("PATH");
 		assert(var == val);
 	}
 
@@ -272,7 +272,6 @@ namespace
 		<< kv("program", env::opt::program)
 		<< kv("command-line", fmt::join(env::opt::arguments, " "))
 		<< kv("config", env::opt::config)
-		<< kv("cache", env::opt::cache)
 		<< env::opt::put
 		<< std::endl;
 	}
@@ -376,10 +375,10 @@ namespace
 
 	TEST(sys_map)
 	{
-		sys::file::descriptor file(__FILE__, sys::file::rd);
-		assert(not sys::fail(file.get()));
+		env::file::descriptor file(__FILE__, env::file::rd);
+		assert(not env::file::fail(file.get()));
 		std::size_t sz = 0;
-		auto const mem = sys::file::make_shm(file.get(), 0, 0, sys::file::rd, &sz);
+		auto const mem = env::file::make_shm(file.get(), 0, 0, env::file::rd, &sz);
 		assert(nullptr != mem);
 		auto const c = static_cast<char*>(mem.get());
 		fmt::view const view(c, sz);

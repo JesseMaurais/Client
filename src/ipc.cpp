@@ -13,7 +13,7 @@ namespace
 {
 	using strings = std::vector<char const*>;
 
-	auto repack(sys::file::command line, strings &list)
+	auto repack(env::file::command line, strings &list)
 	{
 		fmt::string const z(1, '\0');
 		auto s = fmt::join(line, z);
@@ -26,7 +26,7 @@ namespace
 		return s;
 	}
 
-	int execute(int fd[3], sys::file::command line)
+	int execute(int fd[3], env::file::command line)
 	{
 		strings list;
 		auto str = repack(line, list);
@@ -34,36 +34,54 @@ namespace
 	}
 }
 
-namespace sys::file
+namespace env::file
 {
-	process::process(size_t argc, char const **argv)
+	console start(size_t argc, char const **argv) noexcept
 	{
-		int fd[3];
-		pid = sys::execute(fd, argc, argv);
-		if (not sys::fail(pid))
+		console com;
+		com.first = sys::execute(com.second, argc, argv);
+		return com;
+	}
+
+	console start(command line) noexcept
+	{
+		console com;
+		com.first = ::execute(com.second, line);
+		return com;
+	}
+
+	void close(console com)
+	{
+		[[maybe_unused]] process const off(com);
+	}
+
+	bool stop(console com)
+	{
+		return sys::kill(com.first);
+	}
+
+	int wait(console com)
+	{
+		return sys::wait(com.first);
+	}
+
+	int dup(console com)
+	{
+		int line = invalid;
+		int const err = com.second[2];
+		if (not fail(err))
 		{
-			set(pid, fd);
+			auto fd = descriptor(err);
+		
+			std::string s;
+			io::rstream in(fd);
+			for (line = 0; std::getline(in, s); ++line)
+			{
+				std::cerr << s;
+			}
+			fd.set();
 		}
-	}
-
-	process::process(command line)
-	{
-		int fd[3];
-		pid = ::execute(fd, line);
-		if (not sys::fail(pid))
-		{
-			set(pid, fd);
-		}
-	}
-
-	bool process::kill()
-	{
-		return sys::kill(pid);
-	}
-
-	int process::wait()
-	{
-		return sys::wait(pid);
+		return line;
 	}
 }
 

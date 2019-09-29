@@ -10,7 +10,7 @@
 #include "dir.hpp"
 #include "pos.hpp"
 
-namespace sys::file
+namespace env::file
 {
 	fifo::fifo(fmt::view name, mode mask)
 	: flags(convert(mask))
@@ -19,7 +19,7 @@ namespace sys::file
 		{
 			path = fmt::join({ "\\\\.\\pipe\\", name });
 
-			auto const size = bufsiz();
+			auto const size = width();
 			sys::win::handle h = CreateNamedPipe
 			(
 				path.c_str(),
@@ -44,23 +44,23 @@ namespace sys::file
 		#else
 		{
 			auto const dir = fmt::dir::join({env::opt::run, ".fifo"});
-			auto const s = data(dir);
+			auto const s = dir.data();
 
 			constexpr mode_t rw = S_IRGRP | S_IWGRP;
 			sys::mode const um;
 
-			if (sys::fail(sys::access(s, F_OK)))
+			if (fail(sys::access(s, F_OK)))
 			{
-				if (sys::fail(sys::mkdir(s, um | rw)))
+				if (fail(sys::mkdir(s, um | rw)))
 				{
 					sys::err(here, "mkdir", dir);
 					return;
 				}
 			}
 
-			if (sys::fail(sys::access(s, R_OK | W_OK)))
+			if (fail(sys::access(s, R_OK | W_OK)))
 			{
-				if (sys::fail(sys::chmod(s, um | rw)))
+				if (fail(sys::chmod(s, um | rw)))
 				{
 					sys::err(here, "chmod", dir);
 					return;
@@ -68,8 +68,8 @@ namespace sys::file
 			}
 
 			path = fmt::dir::join({dir, name});
-			auto const ps = path.c_str();
-			if (sys::fail(mkfifo(ps, um | rw)))
+			auto const c = path.data();
+			if (fail(mkfifo(c, um | rw)))
 			{
 				sys::err(here, "mkfifo", path);
 				path.clear();
@@ -97,7 +97,7 @@ namespace sys::file
 			sys::mode const um;
 			auto const s = data(path);
 			fd = sys::open(s, flags, (mode_t) um);
-			if (sys::fail(fd))
+			if (fail(fd))
 			{
 				sys::err(here, "open", path);
 				path.clear();
@@ -123,8 +123,8 @@ namespace sys::file
 		{
 			if (not empty(path))
 			{
-				auto const s = data(path);
-				if (sys::fail(sys::unlink(s)))
+				auto const c = path.data();
+				if (fail(sys::unlink(c)))
 				{
 					sys::err(here, "unlink", path);
 				}

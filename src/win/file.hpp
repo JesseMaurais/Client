@@ -61,6 +61,7 @@ namespace sys::win
 
 namespace sys
 {
+
 	class files : sys::win::find_file
 	{
 		class iterator

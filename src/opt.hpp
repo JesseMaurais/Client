@@ -23,11 +23,9 @@ namespace env::opt
 	extern env::view const& cache;
 	extern env::view const& run;
 
-	view dir(view);
-
 	inline auto arg(size_t argn)
 	{
-		fmt::span<view> const argv = arguments;
+		span const argv = arguments;
 		return argv[argn];
 	}
 

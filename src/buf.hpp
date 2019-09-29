@@ -3,8 +3,10 @@
 
 #include <cstring>
 #include <streambuf>
+#include "form.hpp"
 #include "dig.hpp"
 #include "str.hpp"
+#include "tmp.hpp"
 
 namespace io
 {
@@ -165,7 +167,6 @@ namespace io
 
 	template
 	<
-	 class Form,
 	 class Char,
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
@@ -175,14 +176,14 @@ namespace io
 	{
 		using base = basic_stringbuf<Char, Traits, Alloc>;
 
-		Form &form;
+		env::file::form const& form;
 
 	public:
 
 		using size_type = typename base::size_type;
 		using char_type = typename base::char_type;
 
-		basic_stringbuf(Form& obj) : form(obj) = default;
+		basic_rwbuf(env::file::form const& obj) : form(obj) { };
 
 	private:
 
@@ -200,6 +201,37 @@ namespace io
 
 		using base::base;
 	};
+
+	template
+	<
+	 template <class, class> class Stream,
+	 class Char,
+	 template <class> class Traits = std::char_traits,
+	 template <class> class Alloc = std::allocator
+	>
+	class basic_rwstream : unique
+	, public basic_rwbuf<Char, Traits, Alloc>
+	, public Stream<Char, Traits<Char>>
+	{
+		using stream = Stream<Char, Traits<Char>>;
+		using rwbuf = basic_rwbuf<Char, Traits, Alloc>;
+
+	public:
+
+		basic_rwstream(env::file::form const& f) 
+		: rwbuf(f), stream(this)
+		{ }
+
+	};
+
+	using rstream = basic_rwstream<std::basic_istream, char>;
+	using wrstream = basic_rwstream<std::basic_istream, wchar_t>;
+
+	using wstream = basic_rwstream<std::basic_ostream, char>;
+	using wwstream = basic_rwstream<std::basic_ostream, wchar_t>;
+
+	using rwstream = basic_rwstream<std::basic_iostream, char>;
+	using wrwstream = basic_rwstream<std::basic_iostream, wchar_t>;
 }
 
 #endif // file

@@ -6,39 +6,40 @@
 #include "str.hpp"
 #include "ptr.hpp"
 
-namespace sys::file
+namespace env::file
 {
 	using command = std::initializer_list<fmt::view>;
-	
+	using console = std::pair<int, int[3]>;
+
+	console start(size_t argc, char const** argv) noexcept;
+	console start(command line) noexcept;
+	void close(console);
+	bool stop(console);
+	int wait(console);
+	int dup(console);
+
 	struct process : unique, form
 	{
-		process(int id, int fd[3] = nullptr) { set(id, fd); }
-		process(size_t argc, char const** argv);
-		process(command line);
-		bool kill();
-		int wait();
+		process() = default;
 
-		int set(int id = invalid, int fd[3] = nullptr)
+		explicit process(size_t argc, char const** argv)
+		: process(start(argc, argv))
+		{ }
+
+		explicit process(command line) 
+		: process(start(line))
+		{ }
+
+		explicit process(console com)
 		{
-			for (int n : { 0, 1, 2 }) if (fd)
-			{
-				int tmp = fds[n].get();
-				fds[n].set(fd[n]);
-				fd[n] = tmp;
-			}
-			else fds[n].set();
-			int tmp = pid;
-			pid = id;
-			return tmp;
+			set(com.first, com.second);
 		}
 
-		int get(int fd[3]) const
+		operator console() const
 		{
-			for (int n : { 0, 1, 2 })
-			{
-				fd[n] = fds[n].get();
-			}
-			return pid;
+			console pair;
+			pair.first = get(pair.second);
+			return pair;
 		}
 
 		ssize_t error(char *str, size_t sz) const
@@ -56,20 +57,46 @@ namespace sys::file
 			return fds[0].write(buf, sz);
 		}
 
-		const descriptor& operator[](size_t n) const
+		int get(int fd[3] = nullptr) const
 		{
-			return fds[n];
+			if (nullptr != fd)
+			{
+				for (int n : { 0, 1, 2 })
+				{
+					fd[n] = fds[n].get();
+				}
+			}
+			return pid;
 		}
 
-		descriptor& operator[](size_t n)
+		int set(int id = invalid, int fd[3] = nullptr)
 		{
-			return fds[n];
+			for (int n : { 0, 1, 2 }) if (fd)
+			{
+				int tmp = fds[n].get();
+				fds[n].set(fd[n]);
+				fd[n] = tmp;
+			}
+			else fds[n].set();
+			int tmp = pid;
+			pid = id;
+			return tmp;
 		}
 
 	protected:
 
 		descriptor fds[3];
 		int pid = invalid;
+	};
+
+	struct viewer : process
+	{
+		using process::process;
+
+		~viewer()
+		{
+			set(); // leave open
+		}
 	};
 }
 

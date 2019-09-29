@@ -4,11 +4,11 @@
 #include "file.hpp"
 #include "str.hpp"
 
-namespace sys::file
+namespace env::file
 {
 	struct fifo : descriptor
 	{
-		fifo(fmt::view name, mode mask = sys::file::rd);
+		fifo(fmt::view, mode = rd);
 		~fifo();
 
 		operator fmt::view() const

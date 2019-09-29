@@ -136,7 +136,7 @@ namespace sys
 		}
 		#else
 		{
-			sys::file::pipe pair[3];
+			env::file::pipe pair[3];
 
 			for (auto const& p : pair)
 			{
@@ -145,7 +145,7 @@ namespace sys
 					int fd = p[n].get();
 					if (fail(fd))
 					{
-						return invalid;
+						return sys::uni::invalid;
 					}
 				}
 			}

@@ -7,12 +7,15 @@
 
 #include "sys.hpp"
 #include "err.hpp"
+#include <unistd.h>
 
 namespace sys::uni
 {
-	extern "C"
+	constexpr int invalid = -1;
+
+	inline bool fail(int value)
 	{
-		#include <unistd.h>
+		return invalid == value;
 	}
 
 	template <typename... Args>

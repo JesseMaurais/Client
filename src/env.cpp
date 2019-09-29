@@ -15,10 +15,8 @@ namespace
 	sys::rwlock lock;
 }
 
-namespace env::sys
+namespace env::var
 {
-	using namespace ::sys;
-
 	bool got(fmt::view u)
 	{
 		if (not fmt::terminated(u))
@@ -42,7 +40,7 @@ namespace env::sys
 		auto const c = u.data();
 		auto const unlock = lock.read();
 		auto const ptr = std::getenv(c);
-		return nullptr == ptr ? "" : ptr;
+		return nullptr == ptr ? fmt::nil : ptr;
 	}
 
 	bool set(fmt::view u)
@@ -105,7 +103,7 @@ namespace
 		operator fmt::span<fmt::view>() const final
 		{
 			static thread_local std::vector<fmt::view> t;
-			auto u = env::sys::get("PATH");
+			auto u = env::var::get("PATH");
 			t = fmt::path::split(u);
 			return t;
 		}
@@ -118,11 +116,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("USERNAME");
+				return env::var::get("USERNAME");
 			}
 			#else
 			{
-				return env::sys::get("USER");
+				return env::var::get("USER");
 			}
 			#endif
 		}
@@ -135,11 +133,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("USERPROFILE");
+				return env::var::get("USERPROFILE");
 			}
 			#else
 			{
-				return env::sys::get("HOME");
+				return env::var::get("HOME");
 			}
 			#endif
 		}
@@ -152,12 +150,12 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("COMPUTERNAME");
+				return env::var::get("COMPUTERNAME");
 			}
 			#else
 			{
 				static thread_local char name[64];
-				if (sys::fail(gethostname(name, sizeof name)))
+				if (fail(gethostname(name, sizeof name)))
 				{
 					sys::err(here, "gethostname");
 					name[0] = fmt::null;
@@ -175,12 +173,12 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("USERDOMAIN");
+				return env::var::get("USERDOMAIN");
 			}
 			#else
 			{
 				static thread_local char name[64];
-				if (sys::fail(getdomainname(name, sizeof name)))
+				if (fail(getdomainname(name, sizeof name)))
 				{
 					sys::err(here, "getdomainname");
 					name[0] = fmt::null;
@@ -198,7 +196,7 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("SYSTEMDRIVE");
+				return env::var::get("SYSTEMDRIVE");
 			}
 			#else
 			{
@@ -215,7 +213,7 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("SYSTEMROOT");
+				return env::var::get("SYSTEMROOT");
 			}
 			#else
 			{
@@ -237,7 +235,7 @@ namespace
 			}
 			#else
 			{
-				return env::sys::get("PWD");
+				return env::var::get("PWD");
 			}
 			#endif
 		}
@@ -250,7 +248,7 @@ namespace
 		{
 			for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
-				auto v = env::sys::get(u);
+				auto v = env::var::get(u);
 				if (not empty(v))
 				{
 					return v;
@@ -267,7 +265,7 @@ namespace
 		{
 			for (auto u : { "TMPDIR", "TEMP", "TMP" })
 			{
-				auto v = env::sys::get(u);
+				auto v = env::var::get(u);
 				if (not empty(v))
 				{
 					return v;
@@ -297,11 +295,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("COMSPEC");
+				return env::var::get("COMSPEC");
 			}
 			#else
 			{
-				return env::sys::get("SHELL");
+				return env::var::get("SHELL");
 			}
 			#endif
 		}
@@ -314,11 +312,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("PROMPT");
+				return env::var::get("PROMPT");
 			}
 			#else
 			{
-				return env::sys::get("PS1");
+				return env::var::get("PS1");
 			}
 			#endif
 		}
@@ -331,11 +329,11 @@ namespace
 		{
 			#ifdef _WIN32
 			{
-				return env::sys::get("OS");
+				return env::var::get("OS");
 			}
 			#else
 			{
-				return env::sys::get("DESKTOP_SESSION");
+				return env::var::get("DESKTOP_SESSION");
 			}
 			#endif
 		}

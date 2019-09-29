@@ -35,7 +35,7 @@ namespace sys::uni
 	{
 		inline auto open(char const* name, int flags, mode_t mode)
 		{
-			return file::descriptor(shm_open(name, flags, mode));
+			return env::file::descriptor(shm_open(name, flags, mode));
 		}
 	}
 }

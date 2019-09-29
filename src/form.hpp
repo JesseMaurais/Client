@@ -5,7 +5,7 @@
 #include <cstdint>
 #include "str.hpp"
 
-namespace sys
+namespace env::file
 {
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
@@ -41,24 +41,24 @@ namespace sys
 
 		ssize_t read(fmt::string& s) const
 		{
-			return read(data(s), size(s));
+			return read(s.data(), s.size());
 		}
 
 		ssize_t write(fmt::view u) const
 		{
-			return write(data(u), size(u));
+			return write(u.data(), u.size());
 		}
 
 		ssize_t read(fmt::wstring& w) const
 		{
 			constexpr auto sz = sizeof (wchar_t);
-			return read(data(w), size(w) * sz) / sz;
+			return read(w.data(), w.size() * sz) / sz;
 		}
 
 		ssize_t write(fmt::wview w) const
 		{
 			constexpr auto sz = sizeof (wchar_t);
-			return write(data(w), size(w) * sz) / sz;
+			return write(w.data(), w.size() * sz) / sz;
 		}
 	};
 }

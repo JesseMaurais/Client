@@ -5,7 +5,7 @@
 
 namespace env
 {
-	namespace sys
+	namespace var
 	{
 		bool got(fmt::view);
 		fmt::view get(fmt::view);

@@ -8,7 +8,7 @@
 #include "dig.hpp"
 #include "err.hpp"
 
-namespace sys::file
+namespace env::file
 {
 	socket::socket(int fd)
 	{
@@ -49,7 +49,7 @@ namespace sys::file
 	{
 		sys::net::size n;
 		auto const so = sys::net::accept(fd, &name.address, &n);
-		if (sys::fail(so))
+		if (sys::net::fail(so))
 		{
 			sys::net::err(here, "accept");
 		}

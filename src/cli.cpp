@@ -2,12 +2,13 @@
 #include "env.hpp"
 #include "dir.hpp"
 #include "err.hpp"
-#include "ips.hpp"
+#include "buf.hpp"
+#include "direct.hpp"
 
 namespace env::cli
 {
-	bool const cmd = sys::got("ComSpec");
-	bool const sh = sys::got("SHELL");
+	bool const cmd = var::got("ComSpec");
+	bool const sh = var::got("SHELL");
 
 	process where(fmt::view program)
 	{
@@ -30,51 +31,16 @@ namespace env::cli
 	{
 		if (cmd)
 		{
-			return { "findstr", pattern };
+			return process { "findstr", pattern };
 		} 
 		else 
 		if (sh)
 		{
-			return { "grep", pattern };
+			return process { "grep", pattern };
 		}
 		else
 		{
 			return { };
-		}
-	}
-
-	void where(xpath program, entry peek)
-	{
-		auto const line = cli::where(program);
-		auto const id = line.get();
-		if (not fail(id))
-		{
-			std::string s;
-			io::pstream in(line);
-			while (std::getline(in, s))
-			{
-				if (peek(s))
-				{
-					break;
-				}
-			}
-		}
-		else
-		{
-			using namespace env::dir;
-			auto f = ex || regx(program) || peek;
-			if (find(env::pwd, f))
-			{
-				return;
-			}
-			fmt::span<fmt::view> const paths = env::path;
-			for (auto const p : paths)
-			{
-				if (find(p, f))
-				{
-					break;
-				}
-			}
 		}
 	}
 }

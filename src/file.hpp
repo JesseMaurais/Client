@@ -5,7 +5,7 @@
 #include "ptr.hpp"
 #include "form.hpp"
 
-namespace sys
+namespace env::file
 {
 	constexpr int invalid = -1;
 
@@ -13,10 +13,7 @@ namespace sys
 	{
 		return invalid == value;
 	}
-}
 
-namespace sys::file
-{
 	// Access modes
 	enum mode : int
 	{
@@ -87,8 +84,8 @@ namespace sys::file
 	// Check for access to the file at path
 	bool fail(fmt::view path, mode = ok);
 
-	// Query or change data buffer size
-	size_t bufsiz(ssize_t sz = invalid);
+	// Query or change the buffer size
+	size_t width(ssize_t sz = invalid);
 
 	// Scoped file descriptor
 	struct descriptor : unique, form
@@ -105,7 +102,7 @@ namespace sys::file
 
 		~descriptor()
 		{
-			if (not sys::fail(fd))
+			if (not fail(fd))
 			{
 				(void) close();
 			}

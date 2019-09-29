@@ -8,37 +8,6 @@
 
 namespace io
 {
-	//
-	// Abstract buffer class
-	//
-
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
-	>
-	class basic_fdbuf 
-	: public basic_rwbuf<sys::file::descriptor, Char, Traits, Alloc>
-	{
-		using base = basic_rwbuf<sys::file::descriptor, Char, Traits, Alloc>;
-
-	public:
-
-		using size_type = typename base::size_type;
-		using char_type = typename base::char_type;
-		using base::base;
-	};
-
-	// Common alias types
-
-	using fdbuf = basic_fdbuf<char>;
-	using wfdbuf = basic_fdbuf<wchar_t>;
-
-	//
-	// Abstract stream class
-	//
-
 	namespace impl
 	{
 		template
@@ -47,38 +16,39 @@ namespace io
 		 template <class> class Traits,
 		 template <class> class Alloc,
 		 template <class, class> class basic_stream,
-		 sys::file::mode default_mode
+		 env::file::mode default_mode
 		>
 		class basic_fdstream
-		: public basic_fdbuf<Char, Traits, Alloc>
+		: public basic_rwbuf<Char, Traits, Alloc>
 		, public basic_stream<Char, Traits<Char>>
 		{
-			using base = basic_stream<Char, Traits<Char>>;
-			using fdbuf = basic_fdbuf<Char, Traits, Alloc>;
+			using stream = basic_stream<Char, Traits<Char>>;
+			using rwbuf = basic_rwbuf<Char, Traits, Alloc>;
 			using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 			using string_view = fmt::basic_string_view<Char, Traits<Char>>;
-			using mode = sys::file::mode;
+			using mode = env::file::mode;
 			using size_type = std::size_t;
+
+			env::file::descriptor buf;
 
 		public:
 
-			basic_fdstream(string_view path, mode mask = default_mode, size_type size = sys::file::bufsiz())
-			: fdbuf(path, mode(mask | default_mode))
-			, base(this)
+			basic_fdstream(string_view path, mode mask = default_mode, size_type size = env::file::width())
+			: rwbuf(buf), stream(this), buf(path, mode(mask | default_mode))
 			{
-				if (mask & sys::file::rw)
+				if (mask & env::file::rw)
 				{
-					fdbuf::setbufsiz(size, size);
+					rwbuf::setbufsiz(size, size);
 				}
 				else 
-				if (mask & sys::file::wr)
+				if (mask & env::file::wr)
 				{
-					fdbuf::setbufsiz(0, size);
+					rwbuf::setbufsiz(0, size);
 				}
 				else 
-				if (mask & sys::file::rd)
+				if (mask & env::file::rd)
 				{
-					fdbuf::setbufsiz(size, 0);
+					rwbuf::setbufsiz(size, 0);
 				}
 			}
 		};
@@ -94,7 +64,7 @@ namespace io
 	>
 	using basic_fdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, std::basic_iostream, sys::file::rw
+	 Char, Traits, Alloc, std::basic_iostream, env::file::rw
 	>;
 
 	using fdstream = basic_fdstream<char>;
@@ -108,7 +78,7 @@ namespace io
 	>
 	using basic_ifdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, std::basic_istream, sys::file::rd
+	 Char, Traits, Alloc, std::basic_istream, env::file::rd
 	>;
 
 	using ifdstream = basic_ifdstream<char>;
@@ -122,7 +92,7 @@ namespace io
 	>
 	using basic_ofdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, std::basic_ostream, sys::file::wr
+	 Char, Traits, Alloc, std::basic_ostream, env::file::wr
 	>;
 
 	using ofdstream = basic_ofdstream<char>;

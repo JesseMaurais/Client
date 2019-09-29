@@ -17,7 +17,12 @@ namespace
 {
 	auto extension(fmt::view base)
 	{
-		return fmt::join({ base, ".ini" });
+		return fmt::join({ base, "ini" }, ".");
+	}
+
+	auto directory(fmt::view base)
+	{
+		return fmt::dir::join({base, env::opt::application});
 	}
 
 	struct : env::span
@@ -62,22 +67,9 @@ namespace
 			static fmt::string s;
 			if (empty(s))
 			{
-				auto home = env::opt::dir(env::usr::config_home);
-				if (env::dir::fail(home))
-				{
-					fmt::span<fmt::view> const t = env::usr::config_dirs;
-					for (auto const u : t)
-					{
-						s = env::opt::dir(u);
-						auto const c = s.data();
-						if (env::dir::fail(c))
-						{
-							continue;
-						}
-						return s;
-					}
-					s = move(home);
-				}
+				using namespace env::dir;
+				auto const f = extension(env::opt::program);
+				env::dir::config(regx(f) || to(s) || stop);
 			}
 			return s;
 		}
@@ -88,21 +80,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			static fmt::string s;
-			if (empty(s))
-			{
-				s = env::opt::dir(env::usr::cache_home);
-			}
-			return s;
-		}
-
-	} CACHE;
-
-	struct : env::view
-	{
-		operator fmt::view() const final
-		{
-			static auto const s = env::opt::dir(env::usr::run_dir);
+			static auto const s = directory(env::usr::run_dir);
 			static auto const run = env::dir::tmp(s);
 			return s;
 		}
@@ -112,8 +90,9 @@ namespace
 	auto& open()
 	{
 		static doc::ini keys;
-		auto const path = extension(env::opt::config);
-		std::ifstream file(path);
+		fmt::view const path = env::opt::config;
+		auto const s = fmt::to_string(path);
+		std::ifstream file(s);
 		if (file) file >> keys;
 		return keys;
 	}
@@ -159,23 +138,12 @@ namespace
 	}
 }
 
-namespace env::sys
-{
-	using namespace ::sys;
-}
-
 namespace env::opt
 {
 	env::span const& arguments = ARGUMENTS;
 	env::view const& program = PROGRAM;
 	env::view const& config = CONFIG;
-	env::view const& cache = CACHE;
 	env::view const& run = RUN;
-
-	view dir(view stem)
-	{
-		return fmt::dir::join({stem, application});
-	}
 
 	void set(int argc, char** argv)
 	{
@@ -294,7 +262,7 @@ namespace env::opt
 			}
 		}
 
-		auto value = env::sys::get(key);
+		auto value = env::var::get(key);
 		if (empty(value))
 		{
 			auto const entry = make_pair(key);

@@ -7,7 +7,7 @@
 #include "file.hpp"
 #include "str.hpp"
 
-namespace sys::file
+namespace env::file
 {
 	using memory = std::unique_ptr<void, std::function<void(void*)>>;
 

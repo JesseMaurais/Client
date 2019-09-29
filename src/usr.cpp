@@ -20,7 +20,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get("XDG_CURRENT_DESKTOP");
+			auto u = env::var::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
 			{
 				u = env::desktop;
@@ -34,7 +34,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get("XDG_MENU_PREFIX");
+			auto u = env::var::get("XDG_MENU_PREFIX");
 			if (empty(u))
 			{
 				u = env::usr::current_desktop;
@@ -59,7 +59,7 @@ namespace
 				constexpr auto base = "applications.menu";
 				auto const menu = fmt::join({env::usr::menu_prefix, base});
 				path = fmt::dir::join({env::usr::config_home, "menus", menu});
-				if (sys::file::fail(path))
+				if (env::file::fail(path))
 				{
 					fmt::span<fmt::view> const dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
@@ -82,7 +82,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get("XDG_RUNTIME_DIR");
+			auto u = env::var::get("XDG_RUNTIME_DIR");
 			if (empty(u))
 			{
 				static auto const path = fmt::dir::join({env::tmpdir, "run", env::user});
@@ -97,7 +97,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get("XDG_DATA_HOME");
+			auto u = env::var::get("XDG_DATA_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -116,7 +116,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get("XDG_CONFIG_HOME");
+			auto u = env::var::get("XDG_CONFIG_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -135,7 +135,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get("XDG_CACHE_HOME");
+			auto u = env::var::get("XDG_CACHE_HOME");
 			if (empty(u))
 			{
 				static fmt::string s;
@@ -154,12 +154,12 @@ namespace
 	{
 		operator fmt::span<fmt::view>() const final
 		{
-			auto u = env::sys::get("XDG_DATA_DIRS");
+			auto u = env::var::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
 				#ifdef _WIN32
 				{
-					u = env::sys::get("ALLUSERSPROFILE");
+					u = env::var::get("ALLUSERSPROFILE");
 				}
 				#else
 				{
@@ -177,7 +177,7 @@ namespace
 		operator fmt::span<fmt::view>() const final
 		{
 			static std::vector<fmt::view> t;
-			auto u = env::sys::get("XDG_CONFIG_DIRS");
+			auto u = env::var::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
 				#ifdef _WIN32
@@ -185,8 +185,8 @@ namespace
 					static fmt::string s;
 					if (empty(s))
 					{
-						auto const appdata = fmt::to_string(env::sys::get("APPDATA"));
-						auto const local = fmt::to_string(env::sys::get("LOCALAPPDATA"));
+						auto const appdata = fmt::to_string(env::var::get("APPDATA"));
+						auto const local = fmt::to_string(env::var::get("LOCALAPPDATA"));
 						s = fmt::path::join(appdata, local);
 					}
 					u = s;
@@ -216,7 +216,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get(var);
+			auto u = env::var::get(var);
 			if (empty(u))
 			{
 				u = cached();
@@ -297,7 +297,7 @@ namespace
 					auto const second = line.find_first_of(quote, first);
 					line = line.substr(first, second);
 					auto entry = fmt::entry(line);
-					auto value = env::sys::value(entry.second);
+					auto value = env::var::value(entry.second);
 					env::opt::set(entry.first, value);
 				}
 				u = env::opt::get(var);

@@ -47,15 +47,20 @@ namespace sys::win
 		return _open_osfhandle(iptr, flags);
 	}
 
-	inline bool wait(HANDLE h, DWORD ms = INFINITE)
+	inline auto wait(HANDLE h, DWORD ms = INFINITE)
 	{
 		auto const dw = WaitForSingleObject(h, ms);
 		if (WAIT_FAILED == dw)
 		{
 			sys::win::err(here, ms);
-			return failure;
 		}
-		return success;
+		return dw;
+	}
+
+	inline bool ready(HANDLE h)
+	{
+		auto const dw = wait(h, 0);
+		return WAIT_TIMEOUT == dw;
 	}
 
 	template <class T> struct zero : T

@@ -45,18 +45,18 @@ template <typename T>
 using predicate = formula<T>;
 template <typename T, typename S> 
 using relation = formula<T, S>;
-template <bool P, typename... Q> struct property : formula<Q...>
-{
-	using basic = formula<Q...>;
-	using closure = std::function<void(Q...)>;
 
-	property(closure go) : basic(close(go)) { };
+template <bool P, typename... Q> struct proposition : formula<Q...>
+{
+	using base = formula<Q...>;
+	using closure = std::function<void(Q...)>;
+	using base::base;
+
+	proposition(closure go) : base(enclose(go)) { };
 
 private:
 
-	using basic::basic;
-
-	static auto close(closure go)
+	static auto enclose(closure go)
 	{
 		return [=](Q... q)
 		{
@@ -66,8 +66,8 @@ private:
 	}
 };
 
-template <typename... Q> using none = property<false, Q...>;
-template <typename... Q> using total = property<true, Q...>;
+template <typename... Q> using contra = proposition<false, Q...>;
+template <typename... Q> using taut = proposition<true, Q...>;
 
 template <typename... Q>
 constexpr auto never = [](Q...) { return false; };

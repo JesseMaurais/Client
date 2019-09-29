@@ -37,7 +37,7 @@ namespace doc
 			{
 				auto const t = s.find(c);
 				s = s.substr(0, t);
-				auto const u = fmt::trim(s);
+				fmt::view const u = fmt::trim(s);
 				if (not empty(u))
 				{
 					s = fmt::to_string(u);

@@ -10,23 +10,12 @@
 
 namespace
 {
-	struct : env::view
-	{
-		operator fmt::view() const final
-		{
-			static auto const rundir = env::opt::dir(env::usr::run_dir);
-			static auto tmp = env::dir::tmp(rundir);
-			return rundir;
-		}
-
-	} RUN;
-
 	struct : env::span
 	{
 		operator fmt::span<fmt::view>() const final
 		{
 			static std::vector<fmt::view> t;
-			auto u = env::sys::get("LIB");
+			auto u = env::opt::get("LIB");
 			t = fmt::dir::split(u);
 			return t;
 		}
@@ -35,23 +24,23 @@ namespace
 
 	struct : env::span
 	{
-		static auto get()
-		{
-			fmt::view value;
-			for (auto c : {"LD_LIBRARY_PATH", "LIBPATH", "LIB", "PATH"})
-			{
-				value = env::sys::get(c);
-				if (not empty(value)) break;
-			}
-			return value;
-		}
-
 		operator fmt::span<fmt::view>() const final
 		{
-			static std::vector<fmt::view> t;
-			auto const u = get();
-			t = fmt::path::split(u);
-			return t;
+			static fmt::array table;
+			if (empty(table))
+			{
+				fmt::view value;
+				for (auto c : {"LD_LIBRARY_PATH", "LIBPATH", "LIB", "PATH"})
+				{
+					value = env::var::get(c);
+					if (not empty(value))
+					{
+						break;
+					}
+				}
+				table = fmt::path::split(value);
+			}
+			return table;
 		}
 
 	} SHARE;
@@ -90,7 +79,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			auto u = env::sys::get("CXX");
+			auto u = env::opt::get("CXX");
 			if (empty(u))
 			{
 				u = "c++";
@@ -103,7 +92,6 @@ namespace
 
 namespace env::dev
 {
-	env::view const& run = RUN;
 	env::span const& lib = LIB;
 	env::span const& share = SHARE;
 	env::span const& include = INCLUDE;

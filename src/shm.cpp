@@ -15,12 +15,12 @@
 # include "uni/mman.hpp"
 #endif
 
-namespace sys::file
+namespace env::file
 {
 	memory make_shm(int fd, size_t sz, off_t off, mode mask, size_t *out)
 	{
-		assert(not sys::fail(fd));
-		assert(mask & sys::file::rwx);
+		assert(not fail(fd));
+		assert(mask & rwx);
 
 		if (nullptr == out) out = &sz;
 
@@ -33,13 +33,13 @@ namespace sys::file
 			{
 				flags |= FILE_MAP_EXECUTE;
 
-				if (mask & sys::file::wr)
+				if (mask & wr)
 				{
 					prot = PAGE_EXECUTE_READWRITE;
 					flags |= FILE_MAP_WRITE;
 				}
 				else
-				if (mask & sys::file::rd)
+				if (mask & rd)
 				{
 					prot = PAGE_EXECUTE_READ;
 					flags |= FILE_MAP_READ;
@@ -47,13 +47,13 @@ namespace sys::file
 			}
 			else
 			{
-				if (mask & sys::file::wr)
+				if (mask & wr)
 				{
 					prot = PAGE_READWRITE;
 					flags |= FILE_MAP_WRITE;
 				}
 				else
-				if (mask & sys::file::rd)
+				if (mask & rd)
 				{
 					prot = PAGE_READONLY;
 					flags |= FILE_MAP_READ;
@@ -87,7 +87,7 @@ namespace sys::file
 			if (0 == sz)
 			{
 				class sys::stat st(fd);
-				if (sys::fail(st))
+				if (fail(st))
 				{
 					sys::err(here, "stat");
 				}
@@ -96,9 +96,9 @@ namespace sys::file
 			*out = sz;
 
 			int prot = 0;
-			if (mask & sys::file::rd) prot |= PROT_READ;
-			if (mask & sys::file::wr) prot |= PROT_WRITE;
-			if (mask & sys::file::ex) prot |= PROT_EXEC;
+			if (mask & rd) prot |= PROT_READ;
+			if (mask & wr) prot |= PROT_WRITE;
+			if (mask & ex) prot |= PROT_EXEC;
 			return sys::uni::make_map(sz, prot, MAP_PRIVATE, fd, off);
 		}
 		#endif

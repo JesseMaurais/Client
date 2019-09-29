@@ -103,10 +103,9 @@ namespace sys
 
 	dll dll::find(fmt::view basename)
 	{
-		using namespace ::env::dev;
-		using namespace ::env::dir;
+		using namespace env::dir;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
-		::env::dir::find(share, regx(name) || copy(name) || stop);
+		env::dir::find(env::dev::share, regx(name) || to(name) || stop);
 		return fmt::view(name);
 	}
 }

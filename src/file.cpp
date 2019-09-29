@@ -8,7 +8,7 @@
 #include "fmt.hpp"
 #include <utility>
 
-namespace sys::file
+namespace env::file
 {
 	int check(mode am)
 	{
@@ -130,7 +130,7 @@ namespace sys::file
 		return flags;
 	}
 
-	size_t bufsiz(ssize_t n)
+	size_t width(ssize_t n)
 	{
 		static sys::rwlock lock;
 		static ssize_t sz = BUFSIZ;
@@ -152,13 +152,13 @@ namespace sys::file
 			return fail(s, am);
 		}
 
-		return sys::fail(sys::access(data(path), check(am)));
+		return fail(sys::access(data(path), check(am)));
 	}
 
 	ssize_t descriptor::write(const void* buf, size_t sz) const
 	{
 		auto const n = sys::write(fd, buf, sz);
-		if (sys::fail(n))
+		if (fail(n))
 		{
 			sys::err(here, fd, sz);
 		}
@@ -168,7 +168,7 @@ namespace sys::file
 	ssize_t descriptor::read(void* buf, size_t sz) const
 	{
 		auto const n = sys::read(fd, buf, sz);
-		if (sys::fail(n))
+		if (fail(n))
 		{
 			sys::err(here, fd, sz);
 		}
@@ -184,7 +184,7 @@ namespace sys::file
 		}
 
 		auto const fd = sys::open(data(path), convert(am), convert(pm));
-		if (sys::fail(fd))
+		if (fail(fd))
 		{
 			sys::err(here, path, am, pm);
 		}
@@ -198,7 +198,7 @@ namespace sys::file
 
 	bool descriptor::close()
 	{
-		if (sys::fail(sys::close(fd)))
+		if (fail(sys::close(fd)))
 		{
 			sys::err(here, fd);
 			return failure;
@@ -210,7 +210,7 @@ namespace sys::file
 	pipe::pipe()
 	{
 		int fd[2];
-		if (sys::fail(sys::pipe(fd)))
+		if (fail(sys::pipe(fd)))
 		{
 			sys::err(here);
 		}
