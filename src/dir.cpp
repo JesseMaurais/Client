@@ -12,6 +12,36 @@
 #include <regex>
 #include <stack>
 
+namespace
+{
+	struct : env::pair
+	{
+		operator fmt::span_pair() final
+		{
+			return { env::pwd, env::paths };
+		}
+		
+	} PATHS;
+	
+	struct : env::pair
+	{
+		operator fmt::span_pair() final
+		{
+			return { env::usr::config_home, env::usr::config_dirs };
+		}
+		
+	} CONFIG;
+
+	struct : env::pair
+	{
+		operator fmt::span_pair() final
+		{
+			return { env::usr::data_home, env::usr::data_dirs };
+		}
+		
+	} DATA;	
+}
+
 namespace fmt::dir
 {
 	string join(span_view p)
@@ -40,29 +70,13 @@ namespace fmt::path
 
 namespace env::dir
 {
+	env::pair const& paths = PATHS;
+	env::pair const& config = CONFIG;
+	env::pair const& data = DATA;
+	
 	using namespace ::env;
 	using namespace ::env::usr;
-
-	bool path(entry look)
-	{
-		return find(pwd, look) or find(paths, look);
-	}
-
-	bool config(entry look)
-	{
-		return find(config_home, look) or find(config_dirs, look);
-	}
-
-	bool data(entry look)
-	{
-		return find(data_home, look) or find(data_dirs, look);
-	}
-
-	bool cache(entry look)
-	{
-		return find(cache_home, look);
-	}
-
+	
 	bool find(fmt::view path, entry look)
 	{
 		if (not fmt::terminated(path))
@@ -92,6 +106,11 @@ namespace env::dir
 			}
 		}
 		return false;
+	}
+	
+	bool find(fmt::span_pair pair, entry look)
+	{
+		return find(pair.first, look) or find(pair.second, look);
 	}
 
 	entry mask(file::mode am)
