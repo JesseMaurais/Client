@@ -190,6 +190,9 @@ namespace fmt
 
 	using span_view = span<view>;
 	using wspan_view = span<wview>;
+	
+	using span_pair = std::pair<view, span_view>;
+	using wspan_pair = std::pair<wview, wspan_view>;
 
 	using list_view = std::vector<view>;
 	using wlist_view = std::vector<wview>;
