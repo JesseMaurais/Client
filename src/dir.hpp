@@ -47,9 +47,9 @@ namespace env::dir
 		return all(u, m, stop);
 	}
 
-	env::pair const& paths;
-	env::pair const& config;
-	env::pair const& data;
+	extern env::pair const& paths;
+	extern env::pair const& config;
+	extern env::pair const& data;
 
 	bool find(fmt::view, entry);
 	bool find(fmt::span_view, entry);
