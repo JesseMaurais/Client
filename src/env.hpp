@@ -29,6 +29,11 @@ namespace env
 	{
 		virtual operator fmt::span_view() const = 0;
 	};
+	
+	struct pair
+	{
+		virtual operator fmt::span_pair() const = 0;
+	};
 
 	extern span const& paths;
 	extern view const& home;
