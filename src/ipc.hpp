@@ -2,59 +2,51 @@
 #define ipc_hpp
 
 #include <initializer_list>
-#include "file.hpp"
+#include "form.hpp"
 #include "str.hpp"
 #include "ptr.hpp"
 
 namespace env::file
 {
+	template <size_t n = 3>
+	using console = std::pair<int, int[n]>;
 	using command = std::initializer_list<fmt::view>;
-	using console = std::pair<int, int[3]>;
 
-	console start(size_t argc, char const** argv) noexcept;
-	console start(command line) noexcept;
-	void close(console);
-	bool stop(console);
-	int wait(console);
-	int dup(console);
-
-	struct process : unique, form
+	struct process : unique, form, console
 	{
-		process() = default;
+		bool start(size_t argc, char const** argv) noexcept;
+		bool start(command line) noexcept;
+		void close();
+		bool stop();
+		int wait();
+		int dump();
 
 		explicit process(size_t argc, char const** argv)
-		: process(start(argc, argv))
-		{ }
-
-		explicit process(command line) 
-		: process(start(line))
-		{ }
-
-		explicit process(console com)
-		{
-			set(com.first, com.second);
+		{ 
+			(void) cmd.start(argc, argv);
 		}
 
-		operator console() const
+		explicit process(command line)
 		{
-			console pair;
-			pair.first = get(pair.second);
-			return pair;
+			(void) con.start(line);
 		}
 
 		ssize_t error(char *str, size_t sz) const
 		{
-			return fds[2].read(str, sz);
+			control buf = cmd.second[2];
+			return buf.read(str, sz);
 		}
 
 		ssize_t read(void *buf, size_t sz) const override
 		{
-			return fds[1].read(buf, sz);
+			control buf = cmd.second[1];
+			return buf.read(buf, sz);
 		}
 
 		ssize_t write(const void *buf, size_t sz) const override
 		{
-			return fds[0].write(buf, sz);
+			control buf = cmd.second[0];
+			return buf.write(buf, sz);
 		}
 
 		int get(int fd[3] = nullptr) const
@@ -63,40 +55,15 @@ namespace env::file
 			{
 				for (int n : { 0, 1, 2 })
 				{
-					fd[n] = fds[n].get();
+					fd[n] = cmd.second[n].get();
 				}
 			}
 			return pid;
 		}
 
-		int set(int id = invalid, int fd[3] = nullptr)
-		{
-			for (int n : { 0, 1, 2 }) if (fd)
-			{
-				int tmp = fds[n].get();
-				fds[n].set(fd[n]);
-				fd[n] = tmp;
-			}
-			else fds[n].set();
-			int tmp = pid;
-			pid = id;
-			return tmp;
-		}
-
 	protected:
 
-		descriptor fds[3];
-		int pid = invalid;
-	};
-
-	struct viewer : process
-	{
-		using process::process;
-
-		~viewer()
-		{
-			set(); // leave open
-		}
+		console cmd;
 	};
 }
 

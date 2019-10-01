@@ -185,33 +185,31 @@ namespace fmt
 	using view = string_view;
 	using wview = wstring_view;
 
-	using array = std::vector<view>;
-	using warray = std::vector<wview>;
+	using pair_view = pair<view>;
+	using wpair_view = pair<wview>;
 
-	using div = span<view>;
-	using wdiv = span<wview>;
+	using span_view = span<view>;
+	using wspan_view = span<wview>;
 
-	using alloc = std::vector<string>;
-	using walloc = std::vector<wstring>;
+	using list_view = std::vector<view>;
+	using wlist_view = std::vector<wview>;
 
-	using size = string::size_type;
-	constexpr size npos = string::npos;
-	constexpr size null = 0;
+	using string_list = std::vector<string>;
+	using wstring_list = std::vector<wstring>;
+
+	using view_matrix = span<span_view>;
+	using wview_matrix = span<wspan_view>;
+
+	using view_vector = std::vector<span_view>;
+	using wview_vector = std::vector<wspan_view>;
+
+	using size_type = string::size_type;
+	constexpr auto npos = string::npos;
+	constexpr auto null = size_type(0);
 	constexpr auto eol = '\n';
 	constexpr auto nil = "";
 
 	static_assert(null == ~npos);
-
-	inline auto nth(size n)
-	{
-		switch (n)
-		{
-			case 1: return "st";
-			case 2: return "nd";
-			case 3: return "rd";
-		}
-		return "th";
-	}
 }
 
 #endif // file

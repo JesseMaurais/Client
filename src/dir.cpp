@@ -14,12 +14,12 @@
 
 namespace fmt::dir
 {
-	string join(span<view> p)
+	string join(span_view p)
 	{
 		return fmt::lc.join(p, sys::sep::dir);
 	}
 
-	array split(view u)
+	list_view split(view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -27,12 +27,12 @@ namespace fmt::dir
 
 namespace fmt::path
 {
-	string join(span<view> p)
+	string join(span_view p)
 	{
 		return fmt::lc.join(p, sys::sep::path);
 	}
 
-	std::vector<view> split(view u)
+	list_view split(view u)
 	{
 		return fmt::split(u, sys::sep::path);
 	}
@@ -82,7 +82,7 @@ namespace env::dir
 		return failure;
 	}
 
-	bool find(fmt::span<fmt::view> list, entry look)
+	bool find(fmt::span_view list, entry look)
 	{
 		for (auto const path : list)
 		{

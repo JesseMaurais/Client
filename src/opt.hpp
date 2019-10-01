@@ -8,13 +8,13 @@
 namespace env::opt
 {
 	using fmt::string;
-	using fmt::view;
-	using cast = view(*)(view);	
-	using span = fmt::span<view>;
-	using list = std::vector<view>;
-	using pair = fmt::pair<view>;
+	using view = fmt::string_view;
+	using span = fmt::span_view;
+	using list = fmt::list_view;
+	using pair = fmt::pair_view;
 	using word = long long;
 	using quad = long double;
+	using cast = view(*)(view);
 
 	extern fmt::view const application;
 	extern env::span const& arguments;
@@ -32,7 +32,7 @@ namespace env::opt
 	struct description
 	{
 		word argn; // required arguments (or -1 for any number)
-		view nick; // short name with one dash
+		view dash; // short name with one dash
 		view name; // long name with dual dash
 		view text; // descriptive text for users
 	};
@@ -100,6 +100,9 @@ namespace env::opt
 
 	std::istream & get(std::istream &);
 	std::ostream & put(std::ostream &);
+
+	view directory(view);
+	view initials(view);
 };
 
 #endif // file

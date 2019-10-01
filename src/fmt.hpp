@@ -124,7 +124,7 @@ namespace fmt
 			{
 				base const* that;
 				char const* pos;
-				size size;
+				size_type size;
 
 				bool operator!=(iterator const& it) const
 				{
@@ -383,7 +383,7 @@ namespace fmt
 			auto i = u.find_first_of(v.front()), j = i;
 			if (i < npos)
 			{
-				size n = 1;
+				size_type n = 1;
 				do
 				{
 					j = u.find_first_of(v, j + 1);

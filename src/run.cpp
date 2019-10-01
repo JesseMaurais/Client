@@ -1,6 +1,5 @@
 #include "run.hpp"
 #include "env.hpp"
-#include "cli.hpp"
 #include "dir.hpp"
 #include "buf.hpp"
 
@@ -8,6 +7,40 @@ namespace env::run
 {
 	bool const cmd = ::env::var::got("ComSpec");
 	bool const sh = ::env::var::got("SHELL");
+
+	static process where(view program)
+	{
+		if (cmd)
+		{
+			return process { "where", program };
+		}
+		else 
+		if (sh)
+		{
+			return process { "which", program };
+		}
+		else
+		{
+			return { };
+		}
+	}
+
+	static process find(view pattern)
+	{
+		if (cmd)
+		{
+			return process { "findstr", pattern };
+		} 
+		else 
+		if (sh)
+		{
+			return process { "grep", pattern };
+		}
+		else
+		{
+			return { };
+		}
+	}
 
 	bool getline(process& go, string& s)
 	{
@@ -17,7 +50,7 @@ namespace env::run
 
 	bool where(view program, entry look)
 	{
-		auto go = cli::where(program);
+		auto go = where(program);
 		auto const id = go.get();
 		if (fail(id))
 		{
@@ -29,7 +62,7 @@ namespace env::run
 
 	bool find(fmt::view pattern, entry look)
 	{
-		auto go = cli::find(pattern);
+		auto go = find(pattern);
 		return with(go, look);
 	}
 }

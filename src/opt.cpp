@@ -15,21 +15,11 @@
 
 namespace
 {
-	auto extension(fmt::view base)
-	{
-		return fmt::join({ base, "ini" }, ".");
-	}
-
-	auto directory(fmt::view base)
-	{
-		return fmt::dir::join({base, env::opt::application});
-	}
-
 	struct : env::span
 	{
-		std::vector<fmt::view> list;
+		fmt::list_view list;
 
-		operator fmt::span<fmt::view>() const final
+		operator fmt::span_view() const final
 		{
 			return list;
 		}
@@ -38,9 +28,9 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
-			static fmt::view u;
+			static fmt::string_view u;
 			if (empty(u))
 			{
 				fmt::span<fmt::view> const args = env::opt::arguments;
@@ -68,8 +58,7 @@ namespace
 			if (empty(s))
 			{
 				using namespace env::dir;
-				auto const f = extension(env::opt::program);
-				env::dir::config(regx(f) || to(s) || stop);
+				env::dir::config(regx(".ini") || to(s) || stop);
 			}
 			return s;
 		}
@@ -80,7 +69,7 @@ namespace
 	{
 		operator fmt::view() const final
 		{
-			static auto const s = directory(env::usr::run_dir);
+			static auto const s = env::opt::directory(env::usr::run_dir);
 			static auto const run = env::dir::tmp(s);
 			return s;
 		}
@@ -144,6 +133,16 @@ namespace env::opt
 	env::view const& program = PROGRAM;
 	env::view const& config = CONFIG;
 	env::view const& run = RUN;
+
+	string directory(view base)
+	{
+		return fmt::dir::join({ base, application });
+	}
+
+	string initials(view base)
+	{
+		return fmt::dir::join({ base, application, ".ini" });
+	}
 
 	void set(int argc, char** argv)
 	{
@@ -308,7 +307,7 @@ namespace env::opt
 			}
 			if (not set.emplace(value).second)
 			{
-				sys::warn(here, "Cycle detected at", value);
+				sys::warn(here, "Cycle", value);
 				break;
 			}
 			key.second = value.substr(1);

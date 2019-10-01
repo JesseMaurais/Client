@@ -7,14 +7,14 @@
 
 namespace fmt::path
 {
-	array split(view);
-	string join(div);
+	list_view split(view);
+	string join(span_view);
 }
 
 namespace fmt::dir
 {
-	array split(view);
-	string join(div);
+	list_view split(view);
+	string join(span_view);
 }
 
 namespace env::dir
@@ -24,7 +24,7 @@ namespace env::dir
 	entry mask(file::mode);
 	entry regx(fmt::view);
 	entry to(fmt::string &);
-	entry to(fmt::alloc &);
+	entry to(fmt::string_list &);
 
 	constexpr auto stop = always<fmt::view>;
 	constexpr auto skip = never<fmt::view>;
@@ -53,7 +53,7 @@ namespace env::dir
 	bool cache(entry); // cache home
 
 	bool find(fmt::view, entry);
-	bool find(fmt::div, entry);
+	bool find(fmt::span_view, entry);
 
 	bool fail(fmt::view path, file::mode = file::ok);
 	fmt::view make(fmt::view path);

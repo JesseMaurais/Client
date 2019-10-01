@@ -17,24 +17,23 @@ namespace env
 
 	struct size
 	{
-		virtual operator fmt::size() const = 0;
+		virtual operator fmt::size_type() const = 0;
 	};
 
 	struct view
 	{
-		virtual operator fmt::view() const = 0;
+		virtual operator fmt::string_view() const = 0;
 	};
 
 	struct span
 	{
-		virtual operator fmt::span<fmt::view>() const = 0;
+		virtual operator fmt::span_view() const = 0;
 	};
 
 	extern span const& paths;
 	extern view const& home;
 	extern view const& user;
 	extern view const& host;
-	extern view const& domain;
 	extern view const& root;
 	extern view const& pwd;
 	extern view const& lang;
@@ -42,6 +41,7 @@ namespace env
 	extern view const& tmpdir;
 	extern view const& rootdir;
 	extern view const& desktop;
+	extern view const& domain;
 	extern view const& prompt;
 }
 
