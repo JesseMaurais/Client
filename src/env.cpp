@@ -102,7 +102,7 @@ namespace
 	{
 		operator fmt::span<fmt::view>() const final
 		{
-			static thread_local std::vector<fmt::view> t;
+			static thread_local fmt::list_view t;
 			auto u = env::var::get("PATH");
 			t = fmt::path::split(u);
 			return t;

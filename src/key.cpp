@@ -55,4 +55,34 @@ namespace env::opt
 		}
 		return to_word(index);
 	}
+
+	list get(words say)
+	{
+		list items;
+		for (view it : say)
+		{
+			items.emplace_back(get(it))
+		}
+		return items;
+	}
+
+	array set(span say)
+	{
+		array items;
+		for (view it : say)
+		{
+			items.emplace_back(set(it));
+		}
+		return items;
+	}
+
+	array put(span say)
+	{
+		array items;
+		for (view it : say)
+		{
+			items.emplace_back(put(it));
+		}
+		return items;
+	}
 }

@@ -58,7 +58,7 @@ namespace
 			if (empty(s))
 			{
 				using namespace env::dir;
-				env::dir::config(regx(".ini") || to(s) || stop);
+				env::dir::find(config, regx(".ini") || to(s) || stop));
 			}
 			return s;
 		}
@@ -254,7 +254,7 @@ namespace env::opt
 		span const args = env::opt::arguments;
 		for (auto const arg : args)
 		{
-			const auto e = fmt::entry(arg);
+			auto const e = fmt::entry(arg);
 			if (e.first == key)
 			{
 				return e.second;

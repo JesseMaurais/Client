@@ -12,8 +12,8 @@ namespace doc
 	{
 		using string = fmt::string;
 		using view = fmt::view;
-		using pair = fmt::pair<view>;
-		using span = fmt::span<view>;
+		using pair = fmt::pair_view;
+		using span = fmt::span_view;
 
 		static string join(span value);
 		static span split(view value);

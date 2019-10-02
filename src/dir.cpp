@@ -20,16 +20,16 @@ namespace
 		{
 			return { env::pwd, env::paths };
 		}
-		
+
 	} PATHS;
-	
+
 	struct : env::pair
 	{
 		operator fmt::span_pair() final
 		{
 			return { env::usr::config_home, env::usr::config_dirs };
 		}
-		
+
 	} CONFIG;
 
 	struct : env::pair
@@ -38,15 +38,15 @@ namespace
 		{
 			return { env::usr::data_home, env::usr::data_dirs };
 		}
-		
-	} DATA;	
+
+	} DATA;
 }
 
 namespace fmt::dir
 {
 	string join(span_view p)
 	{
-		return fmt::lc.join(p, sys::sep::dir);
+		return fmt::join(p, sys::sep::dir);
 	}
 
 	list_view split(view u)
@@ -59,7 +59,7 @@ namespace fmt::path
 {
 	string join(span_view p)
 	{
-		return fmt::lc.join(p, sys::sep::path);
+		return fmt::join(p, sys::sep::path);
 	}
 
 	list_view split(view u)
@@ -73,10 +73,10 @@ namespace env::dir
 	env::pair const& paths = PATHS;
 	env::pair const& config = CONFIG;
 	env::pair const& data = DATA;
-	
+
 	using namespace ::env;
 	using namespace ::env::usr;
-	
+
 	bool find(fmt::view path, entry look)
 	{
 		if (not fmt::terminated(path))
@@ -88,7 +88,7 @@ namespace env::dir
 		auto const c = path.data();
 		for (auto const name : sys::files(c))
 		{
-			if (look(name)) 
+			if (look(name))
 			{
 				return success;
 			}
@@ -107,7 +107,7 @@ namespace env::dir
 		}
 		return false;
 	}
-	
+
 	bool find(fmt::span_pair pair, entry look)
 	{
 		return find(pair.first, look) or find(pair.second, look);
