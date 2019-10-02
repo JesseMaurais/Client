@@ -41,9 +41,9 @@ template <typename... T> struct formula : std::function<bool(T...)>
 	}
 };
 
-template <typename T> 
+template <typename T>
 using predicate = formula<T>;
-template <typename T, typename S> 
+template <typename T, typename S>
 using relation = formula<T, S>;
 
 template <bool P, typename... Q> struct proposition : formula<Q...>
@@ -60,8 +60,8 @@ private:
 	{
 		return [=](Q... q)
 		{
-			go(q...); 
-			return P; 
+			go(q...);
+			return P;
 		};
 	}
 };
@@ -71,7 +71,17 @@ template <typename... Q> using taut = proposition<true, Q...>;
 
 template <typename... Q>
 constexpr auto never = [](Q...) { return false; };
-template <typename... Q> 
+template <typename... Q>
 constexpr auto always = [](Q...) { return true; };
+
+template <typename T> struct property
+{
+	virtual operator T() = 0;
+};
+
+template <typename T> struct attribute : property<T>
+{
+	virtual T operator=(T) = 0;
+};
 
 #endif // file

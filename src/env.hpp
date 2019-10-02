@@ -2,6 +2,7 @@
 #define env_hpp
 
 #include "str.hpp"
+#include "tmp.hpp"
 
 namespace env
 {
@@ -15,25 +16,10 @@ namespace env
 		fmt::string value(fmt::view);
 	}
 
-	struct size
-	{
-		virtual operator fmt::size_type() const = 0;
-	};
-
-	struct view
-	{
-		virtual operator fmt::string_view() const = 0;
-	};
-
-	struct span
-	{
-		virtual operator fmt::span_view() const = 0;
-	};
-	
-	struct pair
-	{
-		virtual operator fmt::span_pair() const = 0;
-	};
+	using size = property<fmt::size_type>;
+	using view = property<fmt::string_view>;
+	using span = property<fmt::span_view>;
+	using pair = property<fmt::view_span_pair>;
 
 	extern span const& paths;
 	extern view const& home;

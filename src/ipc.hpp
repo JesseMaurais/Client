@@ -5,31 +5,21 @@
 #include "form.hpp"
 #include "str.hpp"
 #include "ptr.hpp"
+#include "run.hpp"
 
 namespace env::file
 {
-	template <size_t n = 3>
-	using console = std::pair<int, int[n]>;
-	using command = std::initializer_list<fmt::view>;
+	using run::command;
+	using run::console;
 
-	struct process : unique, form, console
+	struct process : unique, form
 	{
-		bool start(size_t argc, char const** argv) noexcept;
-		bool start(command line) noexcept;
+		bool open(size_t argc, char const** argv) noexcept;
+		bool open(command line) noexcept;
 		void close();
 		bool stop();
 		int wait();
 		int dump();
-
-		explicit process(size_t argc, char const** argv)
-		{ 
-			(void) cmd.start(argc, argv);
-		}
-
-		explicit process(command line)
-		{
-			(void) con.start(line);
-		}
 
 		ssize_t error(char *str, size_t sz) const
 		{
@@ -49,6 +39,18 @@ namespace env::file
 			return buf.write(buf, sz);
 		}
 
+	protected:
+
+		console com;
+	};
+
+	struct work : process
+	{
+		~work()
+		{
+			(void) close();
+		}
+
 		int get(int fd[3] = nullptr) const
 		{
 			if (nullptr != fd)
@@ -60,10 +62,6 @@ namespace env::file
 			}
 			return pid;
 		}
-
-	protected:
-
-		console cmd;
 	};
 }
 

@@ -53,7 +53,7 @@ namespace env::dir
 
 	bool find(fmt::view, entry);
 	bool find(fmt::span_view, entry);
-	bool find(fmt::span_pair, entry);
+	bool find(fmt::view_span_pair, entry);
 
 	bool fail(fmt::view path, file::mode = file::ok);
 	fmt::view make(fmt::view path);

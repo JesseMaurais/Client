@@ -8,8 +8,32 @@
 #include "fmt.hpp"
 #include <utility>
 
+namespace
+{
+	struct : attribute<size_t>
+	{
+		sys::rwlock lock;
+		size_t sz = BUFSIZ;
+
+		operator size_t() final
+		{
+			auto const unlock = lock.read();
+			return sz;
+		}
+
+		size_t operator=(size_t n) final
+		{
+			auto const unlock = lock.write();
+			return sz = n;
+		}
+
+	} width;
+}
+
 namespace env::file
 {
+	attribute<size_t>& width = ::width;
+
 	int check(mode am)
 	{
 		int flags = 0;
@@ -42,12 +66,12 @@ namespace env::file
 		{
 			flags |= O_RDWR;
 		}
-		else 
+		else
 		if (am & wr)
 		{
 			flags |= O_WRONLY;
 		}
-		else 
+		else
 		if (am & rd)
 		{
 			flags |= O_RDONLY;
@@ -130,20 +154,6 @@ namespace env::file
 		return flags;
 	}
 
-	size_t width(ssize_t n)
-	{
-		static sys::rwlock lock;
-		static ssize_t sz = BUFSIZ;
-		if (n < 0)
-		{
-			auto unlock = lock.read();
-			return sz;
-		}
-		auto unlock = lock.write();
-		std::swap(n, sz);
-		return n;
-	}
-
 	bool fail(fmt::view path, mode am)
 	{
 		if (not fmt::terminated(path))
@@ -155,4 +165,3 @@ namespace env::file
 		return fail(sys::access(data(path), check(am)));
 	}
 }
-

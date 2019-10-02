@@ -51,10 +51,6 @@ namespace env::file
 		{
 			return fd;
 		}
-
-	protected:
-
-		int fd;
 	};
 
 	struct pipe : unique, form

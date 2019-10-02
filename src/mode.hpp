@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "str.hpp"
 #include "ptr.hpp"
+#include "tmp.hpp"
 
 namespace env::file
 {
@@ -85,8 +86,8 @@ namespace env::file
 	// Check for access to the file at path
 	bool fail(fmt::view path, mode = ok);
 
-	// Adjust default buffer size
-	size_t width(ssize_t = invalid);
+	// Adjustable file buffer size
+	extern attribute<size_t>& width;
 }
 
 #endif // file

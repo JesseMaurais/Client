@@ -16,7 +16,7 @@ namespace
 {
 	struct : env::pair
 	{
-		operator fmt::span_pair() final
+		operator fmt::view_span_pair() final
 		{
 			return { env::pwd, env::paths };
 		}
@@ -25,7 +25,7 @@ namespace
 
 	struct : env::pair
 	{
-		operator fmt::span_pair() final
+		operator fmt::view_span_pair() final
 		{
 			return { env::usr::config_home, env::usr::config_dirs };
 		}
@@ -34,7 +34,7 @@ namespace
 
 	struct : env::pair
 	{
-		operator fmt::span_pair() final
+		operator fmt::view_span_pair() final
 		{
 			return { env::usr::data_home, env::usr::data_dirs };
 		}
@@ -108,7 +108,7 @@ namespace env::dir
 		return false;
 	}
 
-	bool find(fmt::span_pair pair, entry look)
+	bool find(fmt::view_span_pair pair, entry look)
 	{
 		return find(pair.first, look) or find(pair.second, look);
 	}

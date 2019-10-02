@@ -14,7 +14,7 @@ namespace env::run
 		{
 			return process { "where", program };
 		}
-		else 
+		else
 		if (sh)
 		{
 			return process { "which", program };
@@ -30,8 +30,8 @@ namespace env::run
 		if (cmd)
 		{
 			return process { "findstr", pattern };
-		} 
-		else 
+		}
+		else
 		if (sh)
 		{
 			return process { "grep", pattern };
@@ -65,5 +65,17 @@ namespace env::run
 		auto go = find(pattern);
 		return with(go, look);
 	}
-}
 
+	bool with(console go, entry look)
+	{
+		string s;
+		while (getline(go, s)) if (look(s)) return true;
+		return false;
+	}
+
+	bool with(command line, entry look)
+	{
+		process go(line);
+		return with(go, look);
+	}
+}
