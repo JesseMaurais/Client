@@ -25,61 +25,57 @@ namespace
 		list.push_back(nullptr);
 		return s;
 	}
-
-	int execute(int fd[3], env::file::command line)
-	{
-		strings list;
-		auto str = repack(line, list);
-		return sys::execute(fd, list.size() - 1, list.data());
-	}
 }
 
 namespace env::file
 {
-	console start(size_t argc, char const **argv) noexcept
+	int process::start(size_t argc, char const **argv)
 	{
-		console com;
-		com.first = sys::execute(com.second, argc, argv);
-		return com;
+		return pid = sys::execute(fd, argc, argv);
 	}
 
-	console start(command line) noexcept
+	int process::start(fmt::span_view args)
 	{
-		console com;
-		com.first = ::execute(com.second, line);
-		return com;
+		strings list;
+		auto const s = repack(args, list);
+		return start(list.size() - 1, list.data());
 	}
 
-	void close(console com)
+	int close(int pfd)
 	{
-		[[maybe_unused]] process const off(com);
-	}
-
-	bool stop(console com)
-	{
-		return sys::kill(com.first);
-	}
-
-	int wait(console com)
-	{
-		return sys::wait(com.first);
-	}
-
-	int dup(console com)
-	{
-		int line = invalid;
-		int const err = com.second[2];
-		if (not fail(err))
+		for (int n : { 0, 1, 2 })
 		{
-			auto fd = descriptor(err);
+			if (fail(pfd) or n == fd)
+			{
+				[[maybe_unused]] descriptor(fd[n]);
+			}
+		}
+	}
+
+	bool process::stop()
+	{
+		return sys::kill(pid);
+	}
+
+	int process::wait()
+	{
+		return sys::wait(pid);
+	}
+
+	int process::dup()
+	{
+		auto line = invalid;
+		if (not fail(fd[2]))
+		{
+			auto err = descriptor(fd[2]);
 		
 			std::string s;
-			io::rstream in(fd);
+			io::rstream in(err);
 			for (line = 0; std::getline(in, s); ++line)
 			{
 				std::cerr << s;
 			}
-			fd.set();
+			err.set();
 		}
 		return line;
 	}

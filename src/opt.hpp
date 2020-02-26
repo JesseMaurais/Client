@@ -101,8 +101,8 @@ namespace env::opt
 	std::istream & get(std::istream &);
 	std::ostream & put(std::ostream &);
 
-	view directory(view);
-	view initials(view);
+	string directory(view);
+	string initials(view);
 };
 
 #endif // file

@@ -184,7 +184,7 @@ namespace env::opt
 				entry = fmt::entry(arg.substr(1));
 				next = find_if(begin, end, [&](auto const& desc)
 				{
-					return desc.nick == entry.first;
+					return desc.dash == entry.first;
 				});
 			}
 

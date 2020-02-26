@@ -12,10 +12,10 @@ namespace
 {
 	struct : attribute<size_t>
 	{
-		sys::rwlock lock;
+		mutable sys::rwlock lock;
 		size_t sz = BUFSIZ;
 
-		operator size_t() final
+		operator size_t() const final
 		{
 			auto const unlock = lock.read();
 			return sz;
