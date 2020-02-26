@@ -19,7 +19,7 @@ namespace env
 	using size = property<fmt::size_type>;
 	using view = property<fmt::string_view>;
 	using span = property<fmt::span_view>;
-	using pair = property<fmt::view_span_pair>;
+	using pair = property<fmt::pair_view_span>;
 
 	extern span const& paths;
 	extern view const& home;

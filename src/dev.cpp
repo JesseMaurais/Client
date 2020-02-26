@@ -12,9 +12,9 @@ namespace
 {
 	struct : env::span
 	{
-		operator fmt::span<fmt::view>() const final
+		operator fmt::span_view() const final
 		{
-			static std::vector<fmt::view> t;
+			static fmt::vector_view t;
 			auto u = env::opt::get("LIB");
 			t = fmt::dir::split(u);
 			return t;
@@ -24,9 +24,9 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span<fmt::view>() const final
+		operator fmt::span_view() const final
 		{
-			static fmt::array table;
+			static fmt::vector_view table;
 			if (empty(table))
 			{
 				fmt::view value;
@@ -47,9 +47,9 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span<fmt::view>() const final
+		operator fmt::span_view() const final
 		{
-			static std::vector<fmt::view> t;
+			static fmt::vector_view t;
 			auto const u = env::opt::get("INCLUDE");
 			t = fmt::path::split(u);
 			return t;

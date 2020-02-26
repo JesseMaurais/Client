@@ -17,7 +17,7 @@ namespace
 {
 	struct : env::span
 	{
-		fmt::list_view list;
+		env::opt::list list;
 
 		operator fmt::span_view() const final
 		{
@@ -58,7 +58,7 @@ namespace
 			if (empty(s))
 			{
 				using namespace env::dir;
-				env::dir::find(config, regx(".ini") || to(s) || stop));
+				env::dir::find(config, regx(".ini") || to(s) || stop);
 			}
 			return s;
 		}

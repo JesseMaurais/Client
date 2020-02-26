@@ -100,9 +100,9 @@ namespace
 {
 	struct : env::span
 	{
-		operator fmt::span<fmt::view>() const final
+		operator fmt::span_view() const final
 		{
-			static thread_local fmt::list_view t;
+			static thread_local fmt::vector_view t;
 			auto u = env::var::get("PATH");
 			t = fmt::path::split(u);
 			return t;

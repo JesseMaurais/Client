@@ -2,18 +2,19 @@
 #define dir_hpp
 
 #include "str.hpp"
+#include "env.hpp"
 #include "tmp.hpp"
 #include "file.hpp"
 
 namespace fmt::path
 {
-	list_view split(view);
+	vector_view split(view);
 	string join(span_view);
 }
 
 namespace fmt::dir
 {
-	list_view split(view);
+	vector_view split(view);
 	string join(span_view);
 }
 
@@ -24,7 +25,7 @@ namespace env::dir
 	entry mask(file::mode);
 	entry regx(fmt::view);
 	entry to(fmt::string &);
-	entry to(fmt::string_list &);
+	entry to(fmt::vector_string &);
 
 	constexpr auto stop = always<fmt::view>;
 	constexpr auto skip = never<fmt::view>;
@@ -53,7 +54,7 @@ namespace env::dir
 
 	bool find(fmt::view, entry);
 	bool find(fmt::span_view, entry);
-	bool find(fmt::view_span_pair, entry);
+	bool find(fmt::pair_view_span, entry);
 
 	bool fail(fmt::view path, file::mode = file::ok);
 	fmt::view make(fmt::view path);

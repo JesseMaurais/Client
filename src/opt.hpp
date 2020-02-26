@@ -10,7 +10,7 @@ namespace env::opt
 	using fmt::string;
 	using view = fmt::string_view;
 	using span = fmt::span_view;
-	using list = fmt::list_view;
+	using list = fmt::vector_view;
 	using pair = fmt::pair_view;
 	using word = long long;
 	using quad = long double;

@@ -7,10 +7,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-//
-// Include system interface
-//
-
 #ifdef _WIN32
 
 #include <process.h>

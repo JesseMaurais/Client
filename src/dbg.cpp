@@ -17,7 +17,7 @@ namespace dbg
 
 	namespace
 	{
-		size max_size = 0;
+		size_type max_size = 0;
 
 		auto& registry()
 		{

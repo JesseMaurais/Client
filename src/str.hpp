@@ -191,20 +191,14 @@ namespace fmt
 	using span_view = span<view>;
 	using wspan_view = span<wview>;
 
-	using view_span_pair = std::pair<view, span_view>;
-	using wview_span_pair = std::pair<wview, wspan_view>;
+	using pair_view_span = std::pair<view, span_view>;
+	using wpair_view_span = std::pair<wview, wspan_view>;
 
-	using list_view = std::vector<view>;
-	using wlist_view = std::vector<wview>;
+	using vector_view = std::vector<view>;
+	using wvector_view = std::vector<wview>;
 
-	using string_list = std::vector<string>;
-	using wstring_list = std::vector<wstring>;
-
-	using view_matrix = span<span_view>;
-	using wview_matrix = span<wspan_view>;
-
-	using view_vector = std::vector<span_view>;
-	using wview_vector = std::vector<wspan_view>;
+	using vector_string = std::vector<string>;
+	using wvector_string = std::vector<wstring>;
 
 	using size_type = string::size_type;
 	constexpr auto npos = string::npos;

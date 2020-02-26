@@ -16,7 +16,7 @@ namespace
 {
 	struct : env::pair
 	{
-		operator fmt::view_span_pair() final
+		operator fmt::pair_view_span() const final
 		{
 			return { env::pwd, env::paths };
 		}
@@ -25,7 +25,7 @@ namespace
 
 	struct : env::pair
 	{
-		operator fmt::view_span_pair() final
+		operator fmt::pair_view_span() const final
 		{
 			return { env::usr::config_home, env::usr::config_dirs };
 		}
@@ -34,7 +34,7 @@ namespace
 
 	struct : env::pair
 	{
-		operator fmt::view_span_pair() final
+		operator fmt::pair_view_span() const final
 		{
 			return { env::usr::data_home, env::usr::data_dirs };
 		}
@@ -49,7 +49,7 @@ namespace fmt::dir
 		return fmt::join(p, sys::sep::dir);
 	}
 
-	list_view split(view u)
+	vector_view split(view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -62,7 +62,7 @@ namespace fmt::path
 		return fmt::join(p, sys::sep::path);
 	}
 
-	list_view split(view u)
+	vector_view split(view u)
 	{
 		return fmt::split(u, sys::sep::path);
 	}
@@ -108,7 +108,7 @@ namespace env::dir
 		return false;
 	}
 
-	bool find(fmt::view_span_pair pair, entry look)
+	bool find(fmt::pair_view_span pair, entry look)
 	{
 		return find(pair.first, look) or find(pair.second, look);
 	}
@@ -149,7 +149,7 @@ namespace env::dir
 		};
 	}
 
-	entry to(fmt::alloc& t)
+	entry to(fmt::vector_string& t)
 	{
 		return [&](fmt::view u)
 		{

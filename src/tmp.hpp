@@ -1,5 +1,5 @@
 #ifndef tmp_hpp
-#define tmp_hpp
+#define tmp_hpp // Template Meta Programming
 
 #include <functional>
 
@@ -76,7 +76,7 @@ constexpr auto always = [](Q...) { return true; };
 
 template <typename T> struct property
 {
-	virtual operator T() = 0;
+	virtual operator T() const = 0;
 };
 
 template <typename T> struct attribute : property<T>
