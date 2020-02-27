@@ -9,7 +9,7 @@ namespace
 {
 	struct : env::size
 	{
-		operator fmt::size() const final
+		operator fmt::size_type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -36,7 +36,7 @@ namespace
 
 	struct : env::size
 	{
-		operator fmt::size() const final
+		operator fmt::size_type() const final
 		{
 			#ifdef _WIN32
 			{

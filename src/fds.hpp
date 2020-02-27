@@ -33,7 +33,7 @@ namespace io
 
 		public:
 
-			basic_fdstream(string_view path, mode mask = default_mode, size_type size = env::file::width())
+			basic_fdstream(string_view path, mode mask = default_mode, size_type size = env::file::width)
 			: rwbuf(buf), stream(this), buf(path, mode(mask | default_mode))
 			{
 				if (mask & env::file::rw)

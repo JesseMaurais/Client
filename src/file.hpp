@@ -10,7 +10,7 @@ namespace env::file
 {
 	struct control : unique, form
 	{
-		int open(fmt::view path, mode = rw, permit = owner(rw));
+		bool open(fmt::view path, mode = rw, permit = owner(rw));
 		ssize_t write(const void *buf, size_t sz) const override;
 		ssize_t read(void *buf, size_t sz) const override;
 		bool close();

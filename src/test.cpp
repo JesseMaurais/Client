@@ -120,7 +120,7 @@ namespace
 	TEST(fmt_brace)
 	{
 		using namespace fmt;
-		pair<size> pos;
+		pair<size_type> pos;
 		pos = embrace("<A<B>C>", "<>");
 		assert(0 == pos.first);
 		assert(6 == pos.second);
@@ -395,7 +395,7 @@ namespace
 		io::ifdstream in { __FILE__ };
 		assert(in);
 		fmt::string line;
-		fmt::size n = 0;
+		fmt::size_type n = 0;
 		while (std::getline(in, line))
 		{
 			assert(__LINE__ != ++n or line.find("assert") != fmt::npos);

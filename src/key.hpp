@@ -8,6 +8,7 @@ namespace env::opt
 {
 	using array = std::vector<word>;
 	using words = fmt::span<word>;
+	using list = fmt::vector_view;
 
 	bool got(word key);
 	view get(word key);

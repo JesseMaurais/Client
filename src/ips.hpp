@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <vector>
+#include "mode.hpp"
 #include "ipc.hpp"
 #include "buf.hpp"
 
@@ -32,9 +33,12 @@ namespace io
 			basic_pstream(env::file::command line) 
 			: rwbuf(buf), stream(this), buf(line)
 			{
-				auto const sz = env::file::width();
-				rwbuf::setbufsiz(sz);
+				rwbuf::setbufsiz(env::file::width);
 			}
+
+			basic_pstream(std::initializer_list<fmt::view> init)
+			: basic_pstream(fmt::span_view(init.begin(), init.end()))
+			{ }
 		};
 	}
 

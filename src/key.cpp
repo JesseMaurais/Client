@@ -6,9 +6,9 @@
 namespace
 {
 	sys::rwlock lock;
-	fmt::array array;
+	fmt::vector_string store;
 
-	auto to_word(fmt::size sz)
+	auto to_word(fmt::size_type sz)
 	{
 		return fmt::to<env::opt::word>(sz);
 	}
@@ -19,29 +19,29 @@ namespace env::opt
 	bool got(word key)
 	{
 		auto const unlock = lock.read();
-		ssize_t const size = array.size();
+		ssize_t const size = store.size();
 		return -1 < key and key < size;
 	}
 
 	view get(word key)
 	{
 		auto const unlock = lock.read();
-		return array.at(key);
+		return store.at(key);
 	}
 
 	word put(view value)
 	{
 		auto const unlock = lock.write();
-		auto const index = array.size();
-		array.emplace_back(value);
+		auto const index = store.size();
+		store.emplace_back(value);
 		return to_word(index);
 	}
 
 	word set(view value)
 	{
 		auto const unlock = lock.write();
-		auto const begin = array.begin();
-		auto const end = array.end();
+		auto const begin = store.begin();
+		auto const end = store.end();
 		auto const it = std::find(begin, end, value);
 		auto const index = std::distance(begin, it);
 		if (it == end)
@@ -51,7 +51,7 @@ namespace env::opt
 			auto const it = pair.first;
 			auto const ptr = it->data();
 			auto const sz = it->size();
-			array.emplace_back(ptr, sz);
+			store.emplace_back(ptr, sz);
 		}
 		return to_word(index);
 	}
@@ -59,9 +59,9 @@ namespace env::opt
 	list get(words say)
 	{
 		list items;
-		for (view it : say)
+		for (auto it : say)
 		{
-			items.emplace_back(get(it))
+			items.emplace_back(get(it));
 		}
 		return items;
 	}

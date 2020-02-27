@@ -7,6 +7,7 @@
 #include "fmt.hpp"
 #include "dig.hpp"
 #include "opt.hpp"
+#include "file.hpp"
 #include <vector>
 
 namespace
@@ -29,40 +30,41 @@ namespace
 
 namespace env::file
 {
-	int process::start(size_t argc, char const **argv)
+	int console::start(size_t argc, char const **argv)
 	{
 		return pid = sys::execute(fd, argc, argv);
 	}
 
-	int process::start(fmt::span_view args)
+	int console::start(fmt::span_view args)
 	{
 		strings list;
 		auto const s = repack(args, list);
 		return start(list.size() - 1, list.data());
 	}
 
-	int close(int pfd)
+	int console::close(int pfd)
 	{
 		for (int n : { 0, 1, 2 })
 		{
-			if (fail(pfd) or n == fd)
+			if (fail(pfd) or n == pfd)
 			{
-				[[maybe_unused]] descriptor(fd[n]);
+				[[maybe_unused]] descriptor const closed(fd[n]);
 			}
 		}
+		return 0;
 	}
 
-	bool process::stop()
+	int console::quit()
 	{
 		return sys::kill(pid);
 	}
 
-	int process::wait()
+	int console::wait()
 	{
 		return sys::wait(pid);
 	}
 
-	int process::dup()
+	int console::dump()
 	{
 		auto line = invalid;
 		if (not fail(fd[2]))
