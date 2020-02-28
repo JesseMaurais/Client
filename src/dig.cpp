@@ -1,5 +1,6 @@
 #include "dig.hpp"
 #include "fmt.hpp"
+#include <sstream>
 #include <charconv>
 #include <cstdlib>
 #include <cmath>
@@ -7,7 +8,7 @@
 namespace
 {
 	template <typename T, typename C>
-	T to_fp(fmt::view u, T nan, C* cast)
+	T to_fp(fmt::string_view u, T nan, C* cast)
 	{
 		char *it;
 		auto ptr = u.data();
@@ -21,7 +22,7 @@ namespace
 	}
 
 	template <typename T>
-	T to_base(fmt::view u, int base)
+	T to_base(fmt::string_view u, int base)
 	{
 		auto begin = u.data();
 		auto end = begin + u.size();
@@ -59,10 +60,10 @@ namespace
 		return s;
 	}
 
-	/* Not supported
 	template <typename T>
 	fmt::string from_fp(T value, int precision)
 	{
+		/* we somehow still have no compiler support
 		fmt::string s(20, '\0');
 		do
 		{
@@ -79,8 +80,11 @@ namespace
 		while (0);
 		s.shrink_to_fit();
 		return s;
+		*/
+		std::stringstream ss;
+		ss << std::fixed << std::setprecision(precision) << value;
+		return ss.str();
 	}
-	*/
 }
 
 namespace fmt
@@ -105,7 +109,6 @@ namespace fmt
 		return from_base<unsigned long long>(value, base);
 	}
 
-	/*
 	string to_string(float value, int precision)
 	{
 		return from_fp<float>(value, precision);
@@ -120,41 +123,40 @@ namespace fmt
 	{
 		return from_fp<long double>(value, precision);
 	}
-	*/
 
-	long to_long(view u, int base)
+	long to_long(string_view u, int base)
 	{
 		return to_base<long>(u, base);
 	}
 
-	long long to_llong(view u, int base)
+	long long to_llong(string_view u, int base)
 	{
 		return to_base<long long>(u, base);
 	}
 
-	unsigned long to_ulong(view u, int base)
+	unsigned long to_ulong(string_view u, int base)
 	{
 		return to_base<unsigned long>(u, base);
 	}
 
-	unsigned long long to_ullong(view u, int base)
+	unsigned long long to_ullong(string_view u, int base)
 	{
 		return to_base<unsigned long long>(u, base);
 	}
 
-	float to_float(view u)
+	float to_float(string_view u)
 	{
 		auto const nan = std::nanf("");
 		return to_fp(u, nan, std::strtof);
 	}
 
-	double to_double(view u)
+	double to_double(string_view u)
 	{
 		auto const nan = std::nan("");
 		return to_fp(u, nan, std::strtod);
 	}
 
-	long double to_quad(view u)
+	long double to_quad(string_view u)
 	{
 		auto const nan = std::nanl("");
 		return to_fp(u, nan, std::strtold);

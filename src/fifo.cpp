@@ -12,7 +12,7 @@
 
 namespace env::file
 {
-	fifo::fifo(fmt::view name, mode mask)
+	fifo::fifo(fmt::string_view name, mode mask)
 	: flags(convert(mask))
 	{
 		#ifdef _WIN32

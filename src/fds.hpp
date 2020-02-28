@@ -24,8 +24,8 @@ namespace io
 		{
 			using stream = basic_stream<Char, Traits<Char>>;
 			using rwbuf = basic_rwbuf<Char, Traits, Alloc>;
-			using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-			using string_view = fmt::basic_string_view<Char, Traits<Char>>;
+			using string = fmt::basic_string<Char, Traits, Alloc>;
+			using string_view = fmt::basic_string_view<Char, Traits>;
 			using mode = env::file::mode;
 			using size_type = std::size_t;
 

@@ -35,10 +35,6 @@ namespace io
 			{
 				rwbuf::setbufsiz(env::file::width);
 			}
-
-			basic_pstream(std::initializer_list<fmt::view> init)
-			: basic_pstream(fmt::span_view(init.begin(), init.end()))
-			{ }
 		};
 	}
 

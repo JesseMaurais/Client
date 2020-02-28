@@ -16,7 +16,7 @@ namespace env::opt
 	using quad = long double;
 	using cast = view(*)(view);
 
-	extern fmt::view const application;
+	extern view const application;
 	extern env::span const& arguments;
 	extern env::view const& program;
 	extern env::view const& config;
@@ -65,8 +65,8 @@ namespace env::opt
 	quad get(pair key, quad value);
 	bool put(view key, quad value);
 	bool put(pair key, quad value);
-	span get(view key, span value);
-	span get(pair key, span value);
+	list get(view key, span value);
+	list get(pair key, span value);
 	bool put(view key, span value);
 	bool put(pair key, span value);
 

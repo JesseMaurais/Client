@@ -8,12 +8,12 @@ namespace env
 {
 	namespace var
 	{
-		bool got(fmt::view);
-		fmt::view get(fmt::view);
-		bool set(fmt::view);
-		bool put(fmt::view);
-		bool put(fmt::view, fmt::view);
-		fmt::string value(fmt::view);
+		bool got(fmt::string_view);
+		fmt::string_view get(fmt::string_view);
+		bool set(fmt::string_view);
+		bool put(fmt::string_view);
+		bool put(fmt::string_view, fmt::string_view);
+		fmt::string value(fmt::string_view);
 	}
 
 	using size = property<fmt::size_type>;

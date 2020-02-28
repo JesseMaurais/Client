@@ -44,7 +44,7 @@ namespace env::file
 			return read(s.data(), s.size());
 		}
 
-		ssize_t write(fmt::view u) const
+		ssize_t write(fmt::string_view u) const
 		{
 			return write(u.data(), u.size());
 		}
@@ -55,7 +55,7 @@ namespace env::file
 			return read(w.data(), w.size() * sz) / sz;
 		}
 
-		ssize_t write(fmt::wview w) const
+		ssize_t write(fmt::wstring_view w) const
 		{
 			constexpr auto sz = sizeof (wchar_t);
 			return write(w.data(), w.size() * sz) / sz;

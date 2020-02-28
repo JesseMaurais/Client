@@ -6,12 +6,12 @@
 
 namespace doc::sax
 {
-	fmt::view const braces = "<>";
+	fmt::string_view const braces = "<>";
 
 	template <class Char, template <class> class Traits = std::char_traits>
-	auto getline(fmt::view in)
+	auto getline(fmt::string_view in)
 	{
-		fmt::view out = fmt::nil;
+		fmt::string_view out = fmt::nil;
 		auto const pos = fmt::embrace(in, braces);
 		if (fmt::npos != pos.first)
 		{

@@ -30,15 +30,35 @@ namespace
 
 namespace env::file
 {
+	ssize_t console::write(const void* buf, size_t sz) const
+	{
+		auto const n = sys::write(fd[0], buf, sz);
+		if (fail(n))
+		{
+			sys::err(here, fd[0], sz);
+		}
+		return n;
+	}
+
+	ssize_t console::read(void* buf, size_t sz) const
+	{
+		auto const n = sys::read(fd[1], buf, sz);
+		if (fail(n))
+		{
+			sys::err(here, fd[1], sz);
+		}
+		return n;
+	}
+
 	int console::start(size_t argc, char const **argv)
 	{
 		return pid = sys::execute(fd, argc, argv);
 	}
 
-	int console::start(fmt::span_view args)
+	int console::start(command line)
 	{
 		strings list;
-		auto const s = repack(args, list);
+		auto const s = repack(line, list);
 		return start(list.size() - 1, list.data());
 	}
 

@@ -10,7 +10,7 @@ namespace env::file
 {
 	struct control : unique, form
 	{
-		bool open(fmt::view path, mode = rw, permit = owner(rw));
+		bool open(fmt::string_view path, mode = rw, permit = owner(rw));
 		ssize_t write(const void *buf, size_t sz) const override;
 		ssize_t read(void *buf, size_t sz) const override;
 		bool close();
@@ -22,7 +22,7 @@ namespace env::file
 
 	struct descriptor : control
 	{
-		explicit descriptor(fmt::view path, mode am = rw, permit pm = owner(rw))
+		explicit descriptor(fmt::string_view path, mode am = rw, permit pm = owner(rw))
 		{
 			(void) open(path, am, pm);
 		}

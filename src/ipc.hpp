@@ -7,7 +7,7 @@
 
 namespace env::file
 {
-	using command = fmt::span_view;
+	using command = fmt::list_view;
 
 	struct console : unique, form
 	{

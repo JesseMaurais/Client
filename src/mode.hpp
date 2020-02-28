@@ -84,7 +84,7 @@ namespace env::file
 	int convert(permit); // permissions
 
 	// Check for access to the file at path
-	bool fail(fmt::view path, mode = ok);
+	bool fail(fmt::string_view path, mode = ok);
 
 	// Adjustable file buffer size
 	extern attribute<size_t>& width;

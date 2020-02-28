@@ -2,16 +2,17 @@
 #define fifo_hpp
 
 #include "file.hpp"
+#include "env.hpp"
 #include "str.hpp"
 
 namespace env::file
 {
-	struct fifo : descriptor
+	struct fifo : view, descriptor
 	{
-		fifo(fmt::view, mode = rd);
+		fifo(fmt::string_view, mode = rd);
 		~fifo();
 
-		operator fmt::view() const
+		operator fmt::string_view() const override
 		{
 			return path;
 		}

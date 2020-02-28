@@ -22,7 +22,7 @@ namespace doc
 		return fmt::join(value, list_separator);
 	}
 
-	ini::span ini::split(ini::view value)
+	ini::vector ini::split(ini::view value)
 	{
 		return fmt::split(value, list_separator);
 	}
@@ -37,7 +37,7 @@ namespace doc
 			{
 				auto const t = s.find(c);
 				s = s.substr(0, t);
-				fmt::view const u = fmt::trim(s);
+				fmt::string_view const u = fmt::trim(s);
 				if (not empty(u))
 				{
 					s = fmt::to_string(u);
@@ -80,14 +80,14 @@ namespace doc
 	std::ostream & operator<<(std::ostream & out, ini & keys)
 	{
 		view key;
-		for (auto const i : keys.map)
+		for (auto const &it : keys.map)
 		{
-			if (i.first.first != key)
+			if (it.first.first != key)
 			{
-				key = i.first.first;
+				key = it.first.first;
 				out << '[' << key << ']' << fmt::eol;
 			}
-			out << i.first.second << "=" << i.second;
+			out << it.first.second << "=" << it.second;
 		}
 		return out;
 	}

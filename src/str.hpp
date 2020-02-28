@@ -1,6 +1,7 @@
 #ifndef str_hpp
 #define str_hpp
 
+/*
 // Try to get the lightest of string containers: a span of string views.
 
 #include <string>
@@ -173,32 +174,95 @@ namespace fmt
 	};
 }
 #endif
+/*/
+#include <utility>
+#include <initializer_list>
+#include <string>
+#include <string_view>
+#include <vector>
+#include <span>
 
 namespace fmt
 {
-	using string_view = basic_string_view<char>;
-	using wstring_view = basic_string_view<wchar_t>;
+	template <class Type>
+	using pair = std::pair<Type, Type>;
 
+	template <class Char, template <class> class Traits = std::char_traits, template <class> class Alloc = std::allocator>
+	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
+
+	template <class Char, template <class> class Traits = std::char_traits>
+	using basic_string_view = std::basic_string_view<Char, Traits<Char>>;
+
+	template <class Type, template <class> class Alloc = std::allocator>
+	using vector = std::vector<Type, Alloc<Type>>;
+
+	template <class Type>
+	using span = std::span<Type>;
+
+	template <class Iterator> struct range : pair<Iterator>
+	{
+		using base = pair<Iterator>;
+		using base::base;
+		using iterator = Iterator;
+
+		auto begin() const
+		{
+			return base::first;
+		}
+
+		auto end() const
+		{
+			return base::second;
+		}
+
+		bool empty() const
+		{
+			return base::first == base::second;
+		}
+
+		bool operator()(iterator it) const
+		{
+			return it < end() and not it < begin();
+		}
+
+		auto distance(iterator it) const
+		{
+			return std::distance(base::first, it);
+		}
+
+		size_t size() const
+		{
+			return distance(base::second);
+		}
+	};
+}
+//*/
+
+namespace fmt
+{
 	using string = basic_string<char>;
 	using wstring = basic_string<wchar_t>;
 
-	using view = string_view;
-	using wview = wstring_view;
+	using string_view = basic_string_view<char>;
+	using wstring_view = basic_string_view<wchar_t>;
 
-	using pair_view = pair<view>;
-	using wpair_view = pair<wview>;
+	using pair_view = pair<string_view>;
+	using wpair_view = pair<wstring_view>;
 
-	using span_view = span<view>;
-	using wspan_view = span<wview>;
+	using span_view = span<string_view>;
+	using wspan_view = span<wstring_view>;
 
-	using pair_view_span = std::pair<view, span_view>;
-	using wpair_view_span = std::pair<wview, wspan_view>;
+	using pair_view_span = std::pair<string_view, span_view>;
+	using wpair_view_span = std::pair<wstring_view, wspan_view>;
 
-	using vector_view = std::vector<view>;
-	using wvector_view = std::vector<wview>;
+	using vector_view = vector<string_view>;
+	using wvector_view = vector<wstring_view>;
 
-	using vector_string = std::vector<string>;
-	using wvector_string = std::vector<wstring>;
+	using vector_string = vector<string>;
+	using wvector_string = vector<wstring>;
+
+	using list_view = std::initializer_list<string_view>;
+	using wlist_view = std::initializer_list<wstring_view>;
 
 	using size_type = string::size_type;
 	constexpr auto npos = string::npos;

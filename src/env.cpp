@@ -17,7 +17,7 @@ namespace
 
 namespace env::var
 {
-	bool got(fmt::view u)
+	bool got(fmt::string_view u)
 	{
 		if (not fmt::terminated(u))
 		{
@@ -30,7 +30,7 @@ namespace env::var
 		return nullptr == ptr;
 	}
 
-	fmt::view get(fmt::view u)
+	fmt::string_view get(fmt::string_view u)
 	{
 		if (not fmt::terminated(u))
 		{
@@ -43,7 +43,7 @@ namespace env::var
 		return nullptr == ptr ? fmt::nil : ptr;
 	}
 
-	bool set(fmt::view u)
+	bool set(fmt::string_view u)
 	{
 		if (not fmt::terminated(u))
 		{
@@ -55,7 +55,7 @@ namespace env::var
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::view u)
+	bool put(fmt::string_view u)
 	{
 		static std::set<fmt::string> buf;
 		auto const unlock = lock.write();
@@ -65,19 +65,19 @@ namespace env::var
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::view u, fmt::view v)
+	bool put(fmt::string_view u, fmt::string_view v)
 	{
 		return put(fmt::entry(u, v));
 	}
 
-	static auto evaluate(fmt::view u)
+	static auto evaluate(fmt::string_view u)
 	{
 		assert(u.front() == '$');
 		u = u.substr(1);
 		return empty(u) ? u : get(u);
 	}
 
-	fmt::string value(fmt::view u)
+	fmt::string value(fmt::string_view u)
 	{
 		static std::regex x { "\\$[A-Z_][A-Z_0-9]*" };
 		std::smatch m;
@@ -112,7 +112,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -129,7 +129,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -146,7 +146,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -169,7 +169,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -192,7 +192,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -209,7 +209,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -226,7 +226,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -244,7 +244,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
@@ -261,7 +261,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			for (auto u : { "TMPDIR", "TEMP", "TMP" })
 			{
@@ -291,7 +291,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -308,7 +308,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{
@@ -325,7 +325,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			#ifdef _WIN32
 			{

@@ -18,7 +18,7 @@ namespace
 {
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::var::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
@@ -32,7 +32,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::var::get("XDG_MENU_PREFIX");
 			if (empty(u))
@@ -51,7 +51,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			static fmt::string path;
 			if (empty(path))
@@ -61,7 +61,7 @@ namespace
 				path = fmt::dir::join({env::usr::config_home, "menus", menu});
 				if (env::file::fail(path))
 				{
-					fmt::span<fmt::view> const dirs = env::usr::config_dirs;
+					fmt::span<fmt::string_view> const dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
 					{
 						path = fmt::dir::join({dir, menu});
@@ -80,7 +80,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::var::get("XDG_RUNTIME_DIR");
 			if (empty(u))
@@ -95,7 +95,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::var::get("XDG_DATA_HOME");
 			if (empty(u))
@@ -114,7 +114,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::var::get("XDG_CONFIG_HOME");
 			if (empty(u))
@@ -133,7 +133,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::var::get("XDG_CACHE_HOME");
 			if (empty(u))
@@ -152,8 +152,9 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span<fmt::view>() const final
+		operator fmt::span_view() const final
 		{
+			static fmt::vector_view t;
 			auto u = env::var::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
@@ -167,16 +168,17 @@ namespace
 				}
 				#endif
 			}
-			return fmt::path::split(u);
+			t = fmt::path::split(u);
+			return t;
 		}
 
 	} DATA_DIRS;
 
 	struct : env::span
 	{
-		operator fmt::span<fmt::view>() const final
+		operator fmt::span_view() const final
 		{
-			static std::vector<fmt::view> t;
+			static fmt::vector_view t;
 			auto u = env::var::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
@@ -214,7 +216,7 @@ namespace
 
 	struct user_dir : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::var::get(var);
 			if (empty(u))
@@ -226,7 +228,7 @@ namespace
 			{
 				if (empty(u))
 				{
-					static std::map<fmt::view, KNOWNFOLDERID> map =
+					static std::map<fmt::string_view, KNOWNFOLDERID> map =
 					{
 						{ Desktop, FOLDERID_Desktop },
 						{ Documents, FOLDERID_Documents },
@@ -281,7 +283,7 @@ namespace
 
 		char const *var, *val;
 
-		fmt::view cached() const
+		fmt::string_view cached() const
 		{
 			auto u = env::opt::get(var);
 			if (empty(u))

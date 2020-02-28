@@ -29,7 +29,7 @@ namespace
 			static fmt::vector_view table;
 			if (empty(table))
 			{
-				fmt::view value;
+				fmt::string_view value;
 				for (auto c : {"LD_LIBRARY_PATH", "LIBPATH", "LIB", "PATH"})
 				{
 					value = env::var::get(c);
@@ -59,7 +59,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			return env::opt::get("CFLAGS");
 		}
@@ -68,7 +68,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			return env::opt::get("LDFLAGS");
 		}
@@ -77,7 +77,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			auto u = env::opt::get("CXX");
 			if (empty(u))

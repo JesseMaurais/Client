@@ -42,13 +42,13 @@ namespace sys
 		sys::mutex key;
 	}
 
-	void impl::warn(fmt::view u)
+	void impl::warn(fmt::string_view u)
 	{
 		auto const unlock = key.lock();
 		std::cerr << u << fmt::eol;
 	}
 
-	void impl::err(fmt::view u)
+	void impl::err(fmt::string_view u)
 	{
 		auto const unlock = key.lock();
 		auto const e = std::strerror(errno);

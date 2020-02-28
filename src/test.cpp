@@ -87,8 +87,8 @@ namespace
 	TEST(fmt_terminated)
 	{
 		using namespace fmt;
-		assert(terminated(view(HELLO_WORLD, 13)));
-		assert(not terminated(view(HELLO_WORLD, 5)));
+		assert(terminated(string_view(HELLO_WORLD, 13)));
+		assert(not terminated(string_view(HELLO_WORLD, 5)));
 	}
 
 	TEST(fmt_trim)
@@ -188,7 +188,7 @@ namespace
 		return f;
 	}
 
-	auto kv(fmt::view key, fmt::view value)
+	auto kv(fmt::string_view key, fmt::string_view value)
 	{
 		return fmt::entry(key, value) + fmt::eol;
 	}
@@ -381,7 +381,7 @@ namespace
 		auto const mem = env::file::make_shm(file.get(), 0, 0, env::file::rd, &sz);
 		assert(nullptr != mem);
 		auto const c = static_cast<char*>(mem.get());
-		fmt::view const view(c, sz);
+		fmt::string_view const view(c, sz);
 		auto pos = view.find("Self referencing find.");
 		assert(pos != fmt::npos);
 	}

@@ -16,12 +16,12 @@ namespace sys
 	public:
 
 		dll() = default;
-		dll(fmt::view path);
+		dll(fmt::string_view path);
 		~dll();
 
-		static dll find(fmt::view name);
+		static dll find(fmt::string_view name);
 	
-		template <typename S> auto sym(fmt::view name) const
+		template <typename S> auto sym(fmt::string_view name) const
 		{
 			S *addr = nullptr;
 			// see pubs.opengroup.org
@@ -37,7 +37,7 @@ namespace sys
 	private:
 
 		void *ptr = nullptr;
-		void *sym(fmt::view) const;
+		void *sym(fmt::string_view) const;
 	};
 }
 

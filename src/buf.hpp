@@ -20,8 +20,8 @@ namespace io
 	{
 		using base = std::basic_streambuf<Char, Traits<Char>>;
 		using ios = std::basic_ios<Char, Traits<Char>>;
-		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-		using string_view = fmt::basic_string_view<Char, Traits<Char>>;
+		using string = fmt::basic_string<Char, Traits, Alloc>;
+		using string_view = fmt::basic_string_view<Char, Traits>;
 
 	public:
 

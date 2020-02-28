@@ -8,27 +8,29 @@
 
 namespace fmt::path
 {
-	vector_view split(view);
+	vector_view split(string_view);
 	string join(span_view);
+	string join(list_view);
 }
 
 namespace fmt::dir
 {
-	vector_view split(view);
+	vector_view split(string_view);
 	string join(span_view);
+	string join(list_view);
 }
 
 namespace env::dir
 {
-	using entry = predicate<fmt::view>;
+	using entry = predicate<fmt::string_view>;
 
 	entry mask(file::mode);
-	entry regx(fmt::view);
+	entry regx(fmt::string_view);
 	entry to(fmt::string &);
 	entry to(fmt::vector_string &);
 
-	constexpr auto stop = always<fmt::view>;
-	constexpr auto skip = never<fmt::view>;
+	constexpr auto stop = always<fmt::string_view>;
+	constexpr auto skip = never<fmt::string_view>;
 
 	static auto // access
 		ex = mask(file::ex),
@@ -38,12 +40,12 @@ namespace env::dir
 		rw = mask(file::rw),
 		rwx = mask(file::rwx);
 
-	inline auto all(fmt::view u, file::mode m = file::ok, entry e = skip)
+	inline auto all(fmt::string_view u, file::mode m = file::ok, entry e = skip)
 	{
 		return mask(m) || regx(u) || e;
 	}
 
-	inline auto any(fmt::view u, file::mode m = file::ok)
+	inline auto any(fmt::string_view u, file::mode m = file::ok)
 	{
 		return all(u, m, stop);
 	}
@@ -52,21 +54,21 @@ namespace env::dir
 	extern env::pair const& config;
 	extern env::pair const& data;
 
-	bool find(fmt::view, entry);
+	bool find(fmt::string_view, entry);
 	bool find(fmt::span_view, entry);
 	bool find(fmt::pair_view_span, entry);
 
-	bool fail(fmt::view path, file::mode = file::ok);
-	fmt::view make(fmt::view path);
-	bool remove(fmt::view path);
+	bool fail(fmt::string_view path, file::mode = file::ok);
+	fmt::string_view make(fmt::string_view path);
+	bool remove(fmt::string_view path);
 
 	class tmp
 	{
-		fmt::view stem;
+		fmt::string_view stem;
 
 	public:
 
-		tmp(fmt::view path)
+		tmp(fmt::string_view path)
 		{
 			stem = env::dir::make(path);
 		}

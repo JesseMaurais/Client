@@ -30,7 +30,7 @@ namespace env::file
 		return n;
 	}
 
-	bool control::open(fmt::view path, mode am, permit pm)
+	bool control::open(fmt::string_view path, mode am, permit pm)
 	{
 		if (not fmt::terminated(path))
 		{

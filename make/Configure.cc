@@ -44,7 +44,7 @@ endif
 
 // Project
 .SUFFIXES: .cpp .hpp .mak .mk
-STD=c++17
+STD=c++20
 MAKDIR=make$(DIR)
 OBJDIR=obj$(DIR)
 SRCDIR=src$(DIR)
@@ -154,6 +154,11 @@ add(CXXFLAGS, $(CFLAGS))
 ifdef STD
 add(CFLAGS, -std=$(STD))
 endif
+
+#if defined(__llvm__) || defined(__clang__)
+add(CFLAGS, -stdlib=libc++)
+add(LDFLAGS, -lc++ -lc++abi)
+#endif
 
 // Debug
 ifndef NDEBUG

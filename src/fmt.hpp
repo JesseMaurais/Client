@@ -40,6 +40,7 @@ namespace fmt
 		using string_view_pair = pair<string_view>;
 		using string_view_vector = std::vector<string_view>;
 		using string_view_span = span<string_view>;
+		using initializer_list = std::initializer_list<string_view>;
 
 		template <typename S> static string from(S const& s);
 
@@ -347,6 +348,12 @@ namespace fmt
 			return s;
 		}
 
+		static auto join(initializer_list t, string_view u)
+		{
+			vector_view v(t.begin(), t.end());
+			return join(span_view(v), u);
+		}
+
 		static auto split(string_view u, string_view v)
 		/// Split strings in $u delimited by $v
 		{
@@ -494,7 +501,12 @@ namespace fmt
 		return lc.count(u, v);
 	}
 
-	inline auto join(span<view> t, string_view u = "")
+	inline auto join(span_view t, string_view u = "")
+	{
+		return lc.join(t, u);
+	}
+
+	inline auto join(list_view t, string_view u = "")
 	{
 		return lc.join(t, u);
 	}
@@ -521,7 +533,8 @@ namespace fmt
 
 	inline auto entry(string_view u, string_view v)
 	{
-		return lc.join({ u, v }, "=");
+		cc::string_view_vector w { u, v };
+		return lc.join(w, "=");
 	}
 
 	inline auto entry(pair<string_view> p)

@@ -17,7 +17,7 @@ namespace
 {
 	struct : env::span
 	{
-		env::opt::list list;
+		mutable env::opt::list list;
 
 		operator fmt::span_view() const final
 		{
@@ -33,7 +33,7 @@ namespace
 			static fmt::string_view u;
 			if (empty(u))
 			{
-				fmt::span<fmt::view> const args = env::opt::arguments;
+				fmt::span<fmt::string_view> const args = env::opt::arguments;
 				assert(not empty(args));
 				auto const path = args.front();
 				assert(not empty(path));
@@ -52,7 +52,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			static fmt::string s;
 			if (empty(s))
@@ -67,7 +67,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::view() const final
+		operator fmt::string_view() const final
 		{
 			static auto const s = env::opt::directory(env::usr::run_dir);
 			static auto const run = env::dir::tmp(s);
@@ -79,7 +79,7 @@ namespace
 	auto& open()
 	{
 		static doc::ini keys;
-		fmt::view const path = env::opt::config;
+		fmt::string_view const path = env::opt::config;
 		auto const s = fmt::to_string(path);
 		std::ifstream file(s);
 		if (file) file >> keys;
@@ -432,18 +432,18 @@ namespace env::opt
 		return set(key, fmt::to_string(value));
 	}
 
-	span get(view key, span value)
+	list get(view key, span value)
 	{
 		auto const entry = make_pair(key);
 		return get(entry, value);
 	}
 
-	span get(pair key, span value)
+	list get(pair key, span value)
 	{
 		view u = get(key);
 		if (empty(u))
 		{
-			return value;
+			return list(value.begin(), value.end());
 		}
 		return doc::ini::split(u);
 	}

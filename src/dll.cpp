@@ -15,7 +15,7 @@
 
 namespace sys
 {
-	dll::dll(fmt::view path)
+	dll::dll(fmt::string_view path)
 	{
 		auto const buf = fmt::to_string(path);
 		auto const s = data(buf);
@@ -62,7 +62,7 @@ namespace sys
 		#endif
 	}
 
-	void *dll::sym(fmt::view name) const
+	void *dll::sym(fmt::string_view name) const
 	{
 		auto const buf = fmt::to_string(name);
 		auto const s = data(buf);
@@ -101,12 +101,12 @@ namespace sys
 		#endif
 	}
 
-	dll dll::find(fmt::view basename)
+	dll dll::find(fmt::string_view basename)
 	{
 		using namespace env::dir;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
 		env::dir::find(env::dev::share, regx(name) || to(name) || stop);
-		return fmt::view(name);
+		return fmt::string_view(name);
 	}
 }
 
