@@ -3,12 +3,12 @@
 
 #include <cstring>
 #include <streambuf>
-#include "form.hpp"
+#include "file.hpp"
 #include "dig.hpp"
 #include "str.hpp"
 #include "tmp.hpp"
 
-namespace io
+namespace fmt
 {
 	template
 	<
@@ -131,7 +131,7 @@ namespace io
 	class basic_stringbuf : public basic_streambuf<Char, Traits, Alloc>
 	{
 		using base = basic_streambuf<Char, Traits>;
-		using string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
+		using string = basic_string<Char, Traits, Alloc>;
 
 	public:
 
@@ -171,32 +171,32 @@ namespace io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_rwbuf 
+	class basic_buf 
 	: public basic_stringbuf<Char, Traits, Alloc>
 	{
 		using base = basic_stringbuf<Char, Traits, Alloc>;
 
-		env::file::form const& form;
+		env::file::stream const& f;
 
 	public:
 
 		using size_type = typename base::size_type;
 		using char_type = typename base::char_type;
 
-		basic_rwbuf(env::file::form const& obj) : form(obj) { };
+		basic_buf(env::file::stream const& obj) : f(obj) { };
 
 	private:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return form.write(s, sz);
+			return f.write(s, sz);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
 			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return form.read(s, sz);
+			return f.read(s, sz);
 		}
 
 		using base::base;
@@ -209,29 +209,29 @@ namespace io
 	 template <class> class Traits = std::char_traits,
 	 template <class> class Alloc = std::allocator
 	>
-	class basic_rwstream : unique
-	, public basic_rwbuf<Char, Traits, Alloc>
+	class basic_stream : unique
+	, public basic_buf<Char, Traits, Alloc>
 	, public Stream<Char, Traits<Char>>
 	{
 		using stream = Stream<Char, Traits<Char>>;
-		using rwbuf = basic_rwbuf<Char, Traits, Alloc>;
+		using buf = basic_buf<Char, Traits, Alloc>;
 
 	public:
 
-		basic_rwstream(env::file::form const& f) 
-		: rwbuf(f), stream(this)
+		basic_stream(env::file::stream const& f) 
+		: buf(f), stream(this)
 		{ }
 
 	};
 
-	using rstream = basic_rwstream<std::basic_istream, char>;
-	using wrstream = basic_rwstream<std::basic_istream, wchar_t>;
+	using istream = basic_stream<std::basic_istream, char>;
+	using wistream = basic_stream<std::basic_istream, wchar_t>;
 
-	using wstream = basic_rwstream<std::basic_ostream, char>;
-	using wwstream = basic_rwstream<std::basic_ostream, wchar_t>;
+	using ostream = basic_stream<std::basic_ostream, char>;
+	using wostream = basic_stream<std::basic_ostream, wchar_t>;
 
-	using rwstream = basic_rwstream<std::basic_iostream, char>;
-	using wrwstream = basic_rwstream<std::basic_iostream, wchar_t>;
+	using iostream = basic_stream<std::basic_iostream, char>;
+	using wiostream = basic_stream<std::basic_iostream, wchar_t>;
 }
 
 #endif // file

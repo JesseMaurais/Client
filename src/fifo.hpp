@@ -1,7 +1,7 @@
 #ifndef fifo_hpp
 #define fifo_hpp
 
-#include "file.hpp"
+#include "pipe.hpp"
 #include "env.hpp"
 #include "str.hpp"
 

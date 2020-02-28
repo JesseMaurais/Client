@@ -7,6 +7,7 @@
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include "pipe.hpp"
 
 namespace sys::uni
 {

@@ -1,8 +1,7 @@
 #ifndef socket_hpp
 #define socket_hpp
 
-#include "file.hpp"
-#include "form.hpp"
+#include "pipe.hpp"
 
 namespace sys::net
 {
@@ -11,7 +10,7 @@ namespace sys::net
 
 namespace env::file
 {
-	struct socket : unique, form
+	struct socket : unique, stream
 	{
 		using address = sys::net::address;
 

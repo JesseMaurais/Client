@@ -6,7 +6,7 @@
 #include "str.hpp"  // String views and spans
 #include "fmt.hpp"  // Character string formatting
 #include "dig.hpp"  // Numeric conversions
-#include "ctl.hpp"  // Stream control sequences
+#include "sgr.hpp"  // Stream control sequences
 #include "ios.hpp"  // I/O stream tools
 #include "fds.hpp"  // File descriptor streams
 #include "ips.hpp"  // Inter process streams
@@ -366,7 +366,7 @@ namespace
 
 	TEST(sys_ipc)
 	{
-		io::pstream ps { env::opt::arg(0), "_sys_ipc_rev" };
+		fmt::pstream ps { env::opt::arg(0), "_sys_ipc_rev" };
 		ps << HELLO_WORLD << std::endl;
 		std::string s;
 		assert(std::getline(ps, s));
@@ -392,7 +392,7 @@ namespace
 
 	TEST(ios_fds)
 	{
-		io::ifdstream in { __FILE__ };
+		fmt::ifdstream in { __FILE__ };
 		assert(in);
 		fmt::string line;
 		fmt::size_type n = 0;

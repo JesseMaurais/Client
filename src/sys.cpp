@@ -4,7 +4,7 @@
 #include "sys.hpp"
 #include "err.hpp"
 #include "ptr.hpp"
-#include "file.hpp"
+#include "pipe.hpp"
 #include "thread.hpp"
 #include <vector>
 

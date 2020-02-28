@@ -1,5 +1,5 @@
-#ifndef ctl_hpp
-#define ctl_hpp
+#ifndef sgr_hpp
+#define sgr_hpp
 
 #include <ostream>
 #include "asc.hpp"

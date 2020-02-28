@@ -2,11 +2,11 @@
 #define fds_hpp
 
 #include <iostream>
-#include "file.hpp"
+#include "pipe.hpp"
 #include "buf.hpp"
 #include "str.hpp"
 
-namespace io
+namespace fmt
 {
 	namespace impl
 	{
@@ -15,40 +15,40 @@ namespace io
 		 class Char,
 		 template <class> class Traits,
 		 template <class> class Alloc,
-		 template <class, class> class basic_stream,
+		 template <class, class> class Stream,
 		 env::file::mode default_mode
 		>
 		class basic_fdstream
-		: public basic_rwbuf<Char, Traits, Alloc>
-		, public basic_stream<Char, Traits<Char>>
+		: public basic_buf<Char, Traits, Alloc>
+		, public Stream<Char, Traits<Char>>
 		{
-			using stream = basic_stream<Char, Traits<Char>>;
-			using rwbuf = basic_rwbuf<Char, Traits, Alloc>;
+			using stream = Stream<Char, Traits<Char>>;
+			using buf = basic_buf<Char, Traits, Alloc>;
 			using string = fmt::basic_string<Char, Traits, Alloc>;
 			using string_view = fmt::basic_string_view<Char, Traits>;
 			using mode = env::file::mode;
 			using size_type = std::size_t;
 
-			env::file::descriptor buf;
+			env::file::descriptor f;
 
 		public:
 
 			basic_fdstream(string_view path, mode mask = default_mode, size_type size = env::file::width)
-			: rwbuf(buf), stream(this), buf(path, mode(mask | default_mode))
+			: buf(f), stream(this), f(path, mode(mask | default_mode))
 			{
 				if (mask & env::file::rw)
 				{
-					rwbuf::setbufsiz(size, size);
+					buf::setbufsiz(size, size);
 				}
 				else 
 				if (mask & env::file::wr)
 				{
-					rwbuf::setbufsiz(0, size);
+					buf::setbufsiz(0, size);
 				}
 				else 
 				if (mask & env::file::rd)
 				{
-					rwbuf::setbufsiz(size, 0);
+					buf::setbufsiz(size, 0);
 				}
 			}
 		};

@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 
-#include "file.hpp"
+#include "mode.hpp"
 #include "str.hpp"
 
 namespace env::file

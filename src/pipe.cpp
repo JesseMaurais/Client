@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "file.hpp"
+#include "pipe.hpp"
 #include "thread.hpp"
 #include "sys.hpp"
 #include "err.hpp"
@@ -10,7 +10,7 @@
 
 namespace env::file
 {
-	ssize_t control::write(const void* buf, size_t sz) const
+	ssize_t descriptor::write(const void* buf, size_t sz) const
 	{
 		auto const n = sys::write(fd, buf, sz);
 		if (fail(n))
@@ -20,7 +20,7 @@ namespace env::file
 		return n;
 	}
 
-	ssize_t control::read(void* buf, size_t sz) const
+	ssize_t descriptor::read(void* buf, size_t sz) const
 	{
 		auto const n = sys::read(fd, buf, sz);
 		if (fail(n))
@@ -30,7 +30,7 @@ namespace env::file
 		return n;
 	}
 
-	bool control::open(fmt::string_view path, mode am, permit pm)
+	bool descriptor::open(fmt::string_view path, mode am, permit pm)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -47,7 +47,7 @@ namespace env::file
 		return success;
 	}
 
-	bool control::close()
+	bool descriptor::close()
 	{
 		if (fail(sys::close(fd)))
 		{

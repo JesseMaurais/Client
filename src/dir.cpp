@@ -7,7 +7,13 @@
 #include "usr.hpp"
 #include "opt.hpp"
 #include "sys.hpp"
-#include "direct.hpp"
+
+#ifdef _WIN32
+# include "win/file.hpp"
+#else
+# include "uni/dirent.hpp"
+#endif
+
 #include <algorithm>
 #include <regex>
 #include <stack>

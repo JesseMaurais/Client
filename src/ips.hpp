@@ -1,14 +1,14 @@
 #ifndef ips_hpp
-#define ips_hpp
+#define ips_hpp // Inter-Process Stream
 
 #include <initializer_list>
 #include <iostream>
 #include <vector>
 #include "mode.hpp"
-#include "ipc.hpp"
+#include "proc.hpp"
 #include "buf.hpp"
 
-namespace io
+namespace fmt
 {
 	namespace impl
 	{
@@ -17,23 +17,23 @@ namespace io
 		 class Char,
 		 template <class> class Traits,
 		 template <class> class Alloc,
-		 template <class, class> class basic_stream
+		 template <class, class> class Stream
 		>
 		class basic_pstream
-		: public basic_rwbuf<Char, Traits, Alloc>
-		, public basic_stream<Char, Traits<Char>>
+		: public basic_buf<Char, Traits, Alloc>
+		, public Stream<Char, Traits<Char>>
 		{
-			using stream = basic_stream<Char, Traits<Char>>;
-			using rwbuf = basic_rwbuf<Char, Traits, Alloc>;
+			using stream = Stream<Char, Traits<Char>>;
+			using buf = basic_buf<Char, Traits, Alloc>;
 
-			env::file::process buf;
+			env::file::process f;
 
 		public:
 
-			basic_pstream(env::file::command line) 
-			: rwbuf(buf), stream(this), buf(line)
+			basic_pstream(env::file::command line, size_type sz = env::file::width) 
+			: buf(f), stream(this), f(line)
 			{
-				rwbuf::setbufsiz(env::file::width);
+				buf::setbufsiz(sz, sz);
 			}
 		};
 	}

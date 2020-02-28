@@ -1,107 +1,63 @@
 #ifndef file_hpp
 #define file_hpp
 
+#include <cstddef>
+#include <cstdint>
 #include "str.hpp"
-#include "ptr.hpp"
-#include "form.hpp"
-#include "mode.hpp"
 
 namespace env::file
 {
-	struct control : unique, form
+	using size_t = std::size_t;
+	using ssize_t = std::ptrdiff_t;
+
+	struct reader
 	{
-		bool open(fmt::string_view path, mode = rw, permit = owner(rw));
-		ssize_t write(const void *buf, size_t sz) const override;
-		ssize_t read(void *buf, size_t sz) const override;
-		bool close();
+		virtual ssize_t read(void *buf, size_t sz) const = 0;
 
-	protected:
-
-		int fd;
-	};
-
-	struct descriptor : control
-	{
-		explicit descriptor(fmt::string_view path, mode am = rw, permit pm = owner(rw))
+		template <typename C>
+		ssize_t read(C *buf, size_t sz = sizeof(C)) const
 		{
-			(void) open(path, am, pm);
+			return read(static_cast<void*>(buf), sz);
 		}
 
-		explicit descriptor(int fd = invalid)
+		template <typename C>
+		ssize_t read(fmt::basic_string<C>& u) const
 		{
-			(void) set(fd);
+			return read(u.data(), u.size() * sizeof (C));
 		}
 
-		~descriptor()
+		template <typename C>
+		ssize_t read(fmt::vector<C>& t) const
 		{
-			if (not fail(fd))
-			{
-				(void) close();
-			}
-		}
-
-		int set(int value = invalid)
-		{
-			int const tmp = fd;
-			fd = value;
-			return tmp;
-		}
-
-		int get() const
-		{
-			return fd;
+			return read(t.data(), t.size() * sizeof (C));
 		}
 	};
 
-	struct pipe : unique, form
+	struct writer
 	{
-		explicit pipe();
+		virtual ssize_t write(const void *buf, size_t sz) const = 0;
 
-		explicit pipe(int fd[2])
+		template <typename C>
+		ssize_t write(const C *buf, size_t sz = sizeof(C)) const
 		{
-			set(fd);
+			return write(static_cast<const void*>(buf), sz);
 		}
 
-		void set(int fd[2] = nullptr)
+		template <typename C>
+		ssize_t write(fmt::basic_string_view<C> u) const
 		{
-			for (int n : { 0, 1 })
-			{
-				fds[n].set(fd ? fd[n] : invalid);
-			}
+			return write(u.data(), u.size() * sizeof (C));
 		}
 
-		void get(int fd[2]) const
+		template <typename C>
+		ssize_t write(fmt::span<C> p) const
 		{
-			for (int n : { 0, 1 })
-			{
-				fd[n] = fds[n].get();
-			}
+			return write(p.data(), p.size() * sizeof (C));
 		}
-
-		ssize_t read(void* buf, size_t sz) const override
-		{
-			return fds[0].read(buf, sz);
-		}
-
-		ssize_t write(const void* buf, size_t sz) const override
-		{
-			return fds[1].write(buf, sz);
-		}
-
-		const descriptor& operator[](size_t n) const
-		{
-			return fds[n];
-		}
-
-		descriptor& operator[](size_t n)
-		{
-			return fds[n];
-		}
-
-	protected:
-
-		descriptor fds[2];
 	};
+
+	struct stream : reader, writer 
+	{ };
 }
 
 #endif // file
