@@ -15,15 +15,18 @@ namespace fmt
 		 class Char,
 		 template <class> class Traits,
 		 template <class> class Alloc,
-		 template <class, class> class Stream,
+		 template 
+		 <
+		  class,
+		  template <class> class,
+		  template <class> class
+		 > class Stream,
 		 env::file::mode default_mode
 		>
 		class basic_fdstream
-		: public basic_buf<Char, Traits, Alloc>
-		, public Stream<Char, Traits<Char>>
+		: public Stream<Char, Traits, Alloc>
 		{
-			using stream = Stream<Char, Traits<Char>>;
-			using buf = basic_buf<Char, Traits, Alloc>;
+			using base = Stream<Char, Traits, Alloc>;
 			using string = fmt::basic_string<Char, Traits, Alloc>;
 			using string_view = fmt::basic_string_view<Char, Traits>;
 			using mode = env::file::mode;
@@ -34,21 +37,21 @@ namespace fmt
 		public:
 
 			basic_fdstream(string_view path, mode mask = default_mode, size_type size = env::file::width)
-			: buf(f), stream(this), f(path, mode(mask | default_mode))
+			: base(f), f(path, mode(mask | default_mode))
 			{
 				if (mask & env::file::rw)
 				{
-					buf::setbufsiz(size, size);
+					base::setbufsiz(size, size);
 				}
 				else 
 				if (mask & env::file::wr)
 				{
-					buf::setbufsiz(0, size);
+					base::setbufsiz(0, size);
 				}
 				else 
 				if (mask & env::file::rd)
 				{
-					buf::setbufsiz(size, 0);
+					base::setbufsiz(size, 0);
 				}
 			}
 		};
@@ -64,7 +67,7 @@ namespace fmt
 	>
 	using basic_fdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, std::basic_iostream, env::file::rw
+	 Char, Traits, Alloc, basic_iostream, env::file::rw
 	>;
 
 	using fdstream = basic_fdstream<char>;
@@ -78,7 +81,7 @@ namespace fmt
 	>
 	using basic_ifdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, std::basic_istream, env::file::rd
+	 Char, Traits, Alloc, basic_istream, env::file::rd
 	>;
 
 	using ifdstream = basic_ifdstream<char>;
@@ -92,7 +95,7 @@ namespace fmt
 	>
 	using basic_ofdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, std::basic_ostream, env::file::wr
+	 Char, Traits, Alloc, basic_ostream, env::file::wr
 	>;
 
 	using ofdstream = basic_ofdstream<char>;

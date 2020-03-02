@@ -221,17 +221,49 @@ namespace fmt
 		basic_stream(env::file::stream const& f) 
 		: buf(f), stream(this)
 		{ }
-
 	};
 
-	using istream = basic_stream<std::basic_istream, char>;
-	using wistream = basic_stream<std::basic_istream, wchar_t>;
+	template 
+	<
+	 class Char, 
+	 template <class> class Traits = std::char_traits,
+	 template <class> class Alloc = std::allocator
+	>
+	using basic_istream = basic_stream
+	<
+	 std::basic_istream, Char, Traits, Alloc
+	>;
 
-	using ostream = basic_stream<std::basic_ostream, char>;
-	using wostream = basic_stream<std::basic_ostream, wchar_t>;
+	using istream = basic_istream<char>;
+	using wistream = basic_istream<wchar_t>;
 
-	using iostream = basic_stream<std::basic_iostream, char>;
-	using wiostream = basic_stream<std::basic_iostream, wchar_t>;
+	template
+	<
+	 class Char,
+	 template <class> class Traits = std::char_traits,
+	 template <class> class Alloc = std::allocator
+	>
+	using basic_ostream = basic_stream
+	<
+	 std::basic_ostream, Char, Traits, Alloc
+	>;
+
+	using ostream = basic_ostream<char>;
+	using wostream = basic_ostream<wchar_t>;
+
+	template
+	<
+	 class Char,
+	 template <class> class Traits = std::char_traits,
+	 template <class> class Alloc = std::allocator
+	>
+	using basic_iostream = basic_stream
+	<
+	 std::basic_iostream, Char, Traits, Alloc
+	>;
+
+	using iostream = basic_iostream<char>;
+	using wiostream = basic_iostream<wchar_t>;
 }
 
 #endif // file

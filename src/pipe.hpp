@@ -10,9 +10,9 @@ namespace env::file
 {
 	struct descriptor : unique, stream
 	{
-		bool open(fmt::string_view path, mode = rw, permit = owner(rw));
-		ssize_t write(const void *buf, size_t sz) const override;
 		ssize_t read(void *buf, size_t sz) const override;
+		ssize_t write(const void *buf, size_t sz) const override;
+		bool open(fmt::string_view path, mode = rw, permit = owner(rw));
 		bool close();
 
 		explicit descriptor(fmt::string_view path, mode am = rw, permit pm = owner(rw))
@@ -61,7 +61,7 @@ namespace env::file
 
 		void set(int fd[2] = nullptr)
 		{
-			for (int n : { 0, 1 })
+			for (auto n : { 0, 1 })
 			{
 				fds[n].set(fd ? fd[n] : invalid);
 			}
@@ -69,7 +69,7 @@ namespace env::file
 
 		void get(int fd[2]) const
 		{
-			for (int n : { 0, 1 })
+			for (auto n : { 0, 1 })
 			{
 				fd[n] = fds[n].get();
 			}

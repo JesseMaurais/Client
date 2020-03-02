@@ -7,6 +7,7 @@
 #include "usr.hpp"
 #include "opt.hpp"
 #include "sys.hpp"
+#include "file.hpp"
 
 #ifdef _WIN32
 # include "win/file.hpp"

@@ -33,12 +33,12 @@ namespace fmt
 
 		using string = basic_string<Char>;
 		using string_pair = pair<string>;
-		using string_vector = std::vector<string>;
+		using string_vector = vector<string>;
 		using string_span = span<string>;
 
 		using string_view = basic_string_view<Char>;
 		using string_view_pair = pair<string_view>;
-		using string_view_vector = std::vector<string_view>;
+		using string_view_vector = vector<string_view>;
 		using string_view_span = span<string_view>;
 		using initializer_list = std::initializer_list<string_view>;
 

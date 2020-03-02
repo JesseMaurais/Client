@@ -30,8 +30,8 @@ namespace fmt
 
 		public:
 
-			basic_pstream(env::file::command line, size_type sz = env::file::width) 
-			: buf(f), stream(this), f(line)
+			basic_pstream(fmt::list_view args, size_type sz = env::file::width) 
+			: buf(f), stream(this), f(args)
 			{
 				buf::setbufsiz(sz, sz);
 			}

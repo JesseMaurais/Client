@@ -2,20 +2,11 @@
 #define mode_hpp
 
 #include <cstddef>
-#include <cstdint>
 #include "str.hpp"
-#include "ptr.hpp"
 #include "tmp.hpp"
 
 namespace env::file
 {
-	constexpr int invalid = -1;
-
-	inline bool fail(int value)
-	{
-		return invalid == value;
-	}
-
 	// Access modes
 	enum mode : int
 	{

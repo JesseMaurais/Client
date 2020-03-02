@@ -184,9 +184,6 @@ namespace fmt
 
 namespace fmt
 {
-	template <class Type>
-	using pair = std::pair<Type, Type>;
-
 	template <class Char, template <class> class Traits = std::char_traits, template <class> class Alloc = std::allocator>
 	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 
@@ -198,6 +195,9 @@ namespace fmt
 
 	template <class Type>
 	using span = std::span<Type>;
+
+	template <class Type>
+	using pair = std::pair<Type, Type>;
 
 	template <class Iterator> struct range : pair<Iterator>
 	{

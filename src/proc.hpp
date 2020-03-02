@@ -7,24 +7,26 @@
 
 namespace env::file
 {
-	using command = fmt::list_view;
-
 	struct process : unique, stream
 	{
-		int start(size_t argc, char const** argv);
-		int start(command line);
-		int quit();
-		int wait();
-		int dump();
+		bool start(fmt::list_view args);
+		bool start(size_t argc, char const** argv);
+		bool quit();
+		bool wait();
+
+		explicit process(fmt::list_view args)
+		{
+			(void) start(args);
+		}
 
 		explicit process(size_t argc, char const** argv)
 		{
 			(void) start(argc, argv);
 		}
 
-		explicit process(command line)
+		explicit process(int pid, int fd[3])
 		{
-			(void) start(line);
+			(void) set(pid, fd);
 		}
 
 		~process()
@@ -46,7 +48,7 @@ namespace env::file
 		{
 			if (fail(n)) 
 			{
-				for (int n : { 0, 1, 2 })
+				for (auto n : { 0, 1, 2 })
 				{
 					close(n);
 				}
@@ -54,11 +56,28 @@ namespace env::file
 			else fd[n].close();
 		}
 
-		int get(int fds[3]) const
+		int set(int pid = invalid, int fd[3] = nullptr)
 		{
-			for (int n : { 0, 1, 2 })
+			if (nullptr != fd)
 			{
-				fds[n] = fd[n].get();
+				for (auto n : { 0, 1, 2 })
+				{
+					fd[n] = this->fd[n].set(fd[n]);
+				}
+			}
+			auto tmp = this->pid;
+			this->pid = pid;
+			return tmp;
+		}
+
+		int get(int fd[3] = nullptr) const
+		{
+			if (nullptr != fd)
+			{
+				for (auto n : { 0, 1, 2 })
+				{
+					fd[n] = this->fd[n].get();
+				}
 			}
 			return pid;
 		}
