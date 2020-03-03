@@ -3,7 +3,11 @@
 
 #include "sig.hpp"
 #include "err.hpp"
-#include "pos.hpp"
+#ifdef _WIN32
+#include "win.hpp"
+#else
+#include "uni.hpp"
+#endif
 #include <map>
 
 namespace sys::sig

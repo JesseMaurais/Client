@@ -7,10 +7,11 @@
 #include "dir.hpp"
 #include "dev.hpp"
 #include "err.hpp"
-#include "pos.hpp"
-
-#ifndef _WIN32
-# include <dlfcn.h>
+#ifdef _WIN32
+#include "win.hpp"
+#else
+#include "uni.hpp"
+#include <dlfcn.h>
 #endif
 
 namespace sys
