@@ -181,6 +181,7 @@ namespace fmt
 #include <string_view>
 #include <vector>
 #include <span>
+#include <map>
 
 namespace fmt
 {
@@ -198,6 +199,9 @@ namespace fmt
 
 	template <class Type>
 	using pair = std::pair<Type, Type>;
+
+	template <class Type>
+	using map = std::map<Type, Type>;
 
 	template <class Iterator> struct range : pair<Iterator>
 	{

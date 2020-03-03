@@ -11,7 +11,7 @@
 #include <fstream>
 
 #ifdef _WIN32
-# include <shlobj.h>
+#include <shlobj.h>
 #endif
 
 namespace

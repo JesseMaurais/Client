@@ -58,7 +58,11 @@ namespace sys
 		char const* strerr(int no)
 		{
 			static thread_local char buf[64] = { '\0' };
-			(void) strerror_r(no, buf, sizeof buf);
+			no = strerror_r(no, buf, sizeof buf);
+			if (fail(no))
+			{
+				std::perror("strerror_r");
+			}
 			return buf;
 		}
 	}
