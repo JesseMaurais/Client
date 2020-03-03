@@ -1,0 +1,38 @@
+dbg_except      ok
+dbg_warn        ok
+fmt_narrow      ok
+fmt_unsigned    ok
+fmt_signed      ok
+fmt_dec         ok
+fmt_oct         ok
+fmt_hex         ok
+fmt_float       ok
+fmt_nan         ok
+fmt_inf         ok
+fmt_loss        ok
+fmt_loss_sign   ok
+fmt_loss_hex    ok
+fmt_terminated  ok
+fmt_trim        ok
+fmt_wide        ok
+fmt_case        ok
+fmt_brace       ok
+fmt_params      ok
+fmt_fg          ok
+doc_ini         ok
+env_path        ok
+env_dir_enum    ok
+env_dir_make    ok
+env_vars        ok
+env_dev         ok
+env_opt         ok
+usr_desktop     ok
+usr_data        ok
+usr_dir         ok
+sys_dll         ok
+sys_sig         ok
+sys_cpu         ok
+sys_ipc         src/pipe.cpp(18) write: -1 13: Bad file descriptor;src/test.cpp(372) run: std::getline(ps, s);src/test.cpp(373) run: DLROW_OLLEH == s;
+sys_map         src/shm.cpp(92) make_shm: stat: Bad file descriptor;src/uni/mman.hpp(19) make_map: mmap 0xffffffffffffffff 0 0: Bad file descriptor;src/test.cpp(382) run: nullptr != mem;src/test.cpp(386) run: pos != fmt::npos;src/pipe.cpp(54) close: 5245400: Bad file descriptor;
+ios_fds         src/pipe.cpp(28) read: 5245408 8192: Bad file descriptor;src/test.cpp(403) run: __LINE__ < n;src/pipe.cpp(54) close: 5245408: Bad file descriptor;
+3 errors detected.
