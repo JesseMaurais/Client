@@ -6,29 +6,23 @@
 #include "fmt.hpp"
 #include <vector>
 
-namespace
-{
-	auto repack(fmt::list_view args, fmt::string& buf)
-	{
-		std::vector<char const*> list;
-		fmt::string const z(1, '\0');
-		buf = fmt::join(args, z);
-		for (auto u : fmt::split(buf, z))
-		{
-			auto ptr = u.data();
-			list.push_back(ptr);
-		}
-		list.push_back(nullptr);
-		return list;
-	}
-}
-
 namespace env::file
 {
 	bool process::start(fmt::list_view args)
 	{
-		fmt::string buf;
-		auto list = repack(args, buf);
+		fmt::vector_view list(args);
+		return start(fmt::span_view(list));
+	}
+
+	bool process::start(fmt::span_view args)
+	{
+		fmt::vector<fmt::string::const_pointer> list;
+		auto s = fmt::join(args);
+		for (auto u : fmt::split(s))
+		{
+			list.push_back(data(u));
+		}
+		list.push_back(nullptr);
 		return start(list.size() - 1, list.data());
 	}
 

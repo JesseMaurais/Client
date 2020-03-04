@@ -262,6 +262,9 @@ namespace fmt
 	using vector_view = vector<string_view>;
 	using wvector_view = vector<wstring_view>;
 
+	using pair_string_vector = std::pair<string, vector_view>;
+	using wpair_string_vector = std::pair<wstring, wvector_view>;
+
 	using vector_string = vector<string>;
 	using wvector_string = vector<wstring>;
 

@@ -10,11 +10,17 @@ namespace env::file
 	struct process : unique, stream
 	{
 		bool start(fmt::list_view args);
+		bool start(fmt::span_view args);
 		bool start(size_t argc, char const** argv);
 		bool quit();
 		bool wait();
 
 		explicit process(fmt::list_view args)
+		{
+			(void) start(args);
+		}
+
+		explicit process(fmt::span_view args)
 		{
 			(void) start(args);
 		}

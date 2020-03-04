@@ -6,6 +6,13 @@
 
 namespace env::desktop
 {
+	bool is(fmt::string_view name)
+	{
+		auto const current = fmt::to_lower(env::usr::current_desktop);
+		auto const lower = fmt::to_lower(name);
+		return current.find(lower) != fmt::npos;
+	}
+
 	fmt::vector_string where(fmt::string_view name)
 	{
 		#ifdef _WIN32
@@ -23,12 +30,11 @@ namespace env::desktop
 		return list;
 	}
 
-	process open(fmt::string_view path)
+	open::open(fmt::string_view path)
 	{
-		process sub;
 		#ifdef _WIN32
 		{
-			if (fail(sub.start({ "start", "/d", path })))
+			if (fail(start({ "start", "/d", path })))
 			{
 				sys::err(here, path);
 			}
@@ -43,17 +49,16 @@ namespace env::desktop
 				{ "", "xdg-open" },
 			};
 
-			auto const current = fmt::to_lower(env::usr::current_desktop);
 			for (auto const& [desktop, program] : test)
 			{
-				if (empty(desktop) or desktop == current)
+				if (empty(desktop) or is(desktop))
 				{
 					if (empty(where(program)))
 					{
 						continue;
 					}
 					else
-					if (fail(sub.start({ program, path })))
+					if (fail(start({ program, path })))
 					{
 						sys::err(here, program, path);
 					}
@@ -62,10 +67,30 @@ namespace env::desktop
 			}
 		}
 		#endif
+	}
 
-		int fd[3], pid = sub.get(fd);
-		sub.set();
-		return process(pid, fd);
+	dialog::dialog(fmt::span_view args)
+	{
+		constexpr auto program = "zenity";
+
+		if (empty(where(program)))
+		{
+			return;
+		}
+
+		fmt::vector<fmt::string::const_pointer> list;
+
+		auto s = fmt::join(args);
+		for (auto u : fmt::split(s))
+		{
+			list.push_back(data(u));
+		}
+		list.push_back(nullptr);
+
+		if (fail(start(list.size() - 1, list.data())))
+		{
+			sys::err(here, program, s);
+		}
 	}
 }
 

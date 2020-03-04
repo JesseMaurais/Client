@@ -6,9 +6,31 @@
 
 namespace env::desktop
 {
-	using env::file::process;
-	process open(fmt::string_view path);
-	fmt::string which(fmt::string_view name);
+	bool is(fmt::string_view name);
+	/// Whether desktop session is $name
+
+	fmt::vector_string which(fmt::string_view name);
+	/// Paths to executables matching program $name
+
+	struct open : env::file::process
+	/// Start preferred application for $path
+	{
+		explicit open(fmt::string_view path);
+
+	private:
+
+		using process::process;
+	};
+
+	struct dialog : env::file::process
+	/// Start a basic dialog type
+	{
+		explicit dialog(fmt::span_view args);
+
+	private:
+
+		using process::process;
+	};
 }
 
 #endif // file

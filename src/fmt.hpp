@@ -32,15 +32,14 @@ namespace fmt
 		using mask = typename base::mask;
 
 		using string = basic_string<Char>;
-		using string_pair = pair<string>;
 		using string_vector = vector<string>;
 		using string_span = span<string>;
 
 		using string_view = basic_string_view<Char>;
-		using string_view_pair = pair<string_view>;
 		using string_view_vector = vector<string_view>;
 		using string_view_span = span<string_view>;
-		using initializer_list = std::initializer_list<string_view>;
+
+		using list_view = std::initializer_list<string_view>;
 
 		template <typename S> static string from(S const& s);
 
@@ -348,7 +347,7 @@ namespace fmt
 			return s;
 		}
 
-		static auto join(initializer_list t, string_view u)
+		static auto join(list_view t, string_view u)
 		{
 			vector_view v(t.begin(), t.end());
 			return join(span_view(v), u);
@@ -511,7 +510,7 @@ namespace fmt
 		return lc.join(t, u);
 	}
 
-	inline auto split(string_view u, string_view v)
+	inline auto split(string_view u, string_view v = "")
 	{
 		return lc.split(u, v);
 	}
