@@ -23,7 +23,7 @@ namespace
 			auto u = env::var::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
 			{
-				u = env::desktop;
+				u = env::session;
 			}
 			return u;
 		}

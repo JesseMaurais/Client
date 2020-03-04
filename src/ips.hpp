@@ -4,8 +4,8 @@
 #include <initializer_list>
 #include <iostream>
 #include <vector>
+#include "process.hpp"
 #include "mode.hpp"
-#include "proc.hpp"
 #include "buf.hpp"
 
 namespace fmt

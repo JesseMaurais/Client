@@ -31,7 +31,7 @@ namespace env
 	extern view const& shell;
 	extern view const& tmpdir;
 	extern view const& rootdir;
-	extern view const& desktop;
+	extern view const& session;
 	extern view const& domain;
 	extern view const& prompt;
 }

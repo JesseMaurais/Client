@@ -23,6 +23,7 @@
 #include "usr.hpp"  // User directories
 #include "opt.hpp"  // Query user options
 #include "ini.hpp"  // Desktop configuration parsing
+#include "desktop.hpp"
 
 #define HELLO_WORLD "Hello, World!"
 #define HELLO_WIDE L"Hello, World!"
@@ -249,7 +250,7 @@ namespace
 		<< kv("shell", env::shell)
 		<< kv("tmpdir", env::tmpdir)
 		<< kv("rootdir", env::rootdir)
-		<< kv("desktop", env::desktop)
+		<< kv("session", env::session)
 		<< kv("prompt", env::prompt)
 		<< std::endl;
 	}
@@ -401,5 +402,10 @@ namespace
 			assert(__LINE__ != ++n or line.find("assert") != fmt::npos);
 		}
 		assert(__LINE__ < n);
+	}
+
+	TEST(desktop_open)
+	{
+		auto const edit = env::desktop::open(__FILE__);
 	}
 }

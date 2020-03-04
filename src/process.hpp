@@ -24,7 +24,7 @@ namespace env::file
 			(void) start(argc, argv);
 		}
 
-		explicit process(int pid, int fd[3])
+		explicit process(int pid = invalid, int fd[3] = nullptr)
 		{
 			(void) set(pid, fd);
 		}
@@ -58,11 +58,15 @@ namespace env::file
 
 		int set(int pid = invalid, int fd[3] = nullptr)
 		{
-			if (nullptr != fd)
+			for (auto n : { 0, 1, 2 })
 			{
-				for (auto n : { 0, 1, 2 })
+				if (nullptr != fd)
 				{
 					fd[n] = this->fd[n].set(fd[n]);
+				}
+				else
+				{
+					this->fd[n].set();
 				}
 			}
 			auto tmp = this->pid;

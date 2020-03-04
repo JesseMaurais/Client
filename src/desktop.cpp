@@ -1,8 +1,10 @@
-#include "app.hpp"
+#include "desktop.hpp"
+#include "fmt.hpp"
+#include "usr.hpp"
 #include "ips.hpp"
 #include <map>
 
-namespace env::app
+namespace env::desktop
 {
 	fmt::vector_string where(fmt::string_view name)
 	{
@@ -33,7 +35,7 @@ namespace env::app
 		}
 		#else
 		{
-			fmt::map<fmt::string_view> const map
+			fmt::map<fmt::string_view> const test
 			{ 
 				{ "gnome", "gnome-open" },
 				{ "xfce", "exo-open" },
@@ -41,27 +43,29 @@ namespace env::app
 				{ "", "xdg-open" },
 			};
 
-			auto const desktop = fmt::to_lower(env::usr::current_desktop);
-			for (auto const pair : map)
+			auto const current = fmt::to_lower(env::usr::current_desktop);
+			for (auto const& [desktop, program] : test)
 			{
-				if (pair.first.empty() or desktop == pair.first)
+				if (empty(desktop) or desktop == current)
 				{
-					auto const tool = where(pair.second);
-					if (empty(tool))
+					if (empty(where(program)))
 					{
 						continue;
 					}
-
-					if (fail(sub.open({ pair.second, path })))
+					else
+					if (fail(sub.start({ program, path })))
 					{
-						sys::err(here, pair.second, path);	
+						sys::err(here, program, path);
 					}
 					else break;
 				}
 			}
 		}
 		#endif
-		return sub;
+
+		int fd[3], pid = sub.get(fd);
+		sub.set();
+		return process(pid, fd);
 	}
 }
 

@@ -338,7 +338,7 @@ namespace
 			#endif
 		}
 
-	} DESKTOP;
+	} SESSION;
 }
 
 namespace env
@@ -354,6 +354,6 @@ namespace env
 	view const& shell = SHELL;
 	view const& tmpdir = TMPDIR;
 	view const& rootdir = ROOTDIR;
-	view const& desktop = DESKTOP;
+	view const& session = SESSION;
 	view const& prompt = PROMPT;
 }

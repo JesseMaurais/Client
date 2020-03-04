@@ -1,10 +1,10 @@
-#ifndef app_hpp
-#define app_hpp
+#ifndef desktop_hpp
+#define desktop_hpp
 
 #include "str.hpp"
 #include "process.hpp"
 
-namespace env::app
+namespace env::desktop
 {
 	using env::file::process;
 	process open(fmt::string_view path);
