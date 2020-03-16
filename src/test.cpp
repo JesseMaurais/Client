@@ -7,7 +7,6 @@
 #include "fmt.hpp"  // Character string formatting
 #include "dig.hpp"  // Numeric conversions
 #include "sgr.hpp"  // Stream control sequences
-#include "ios.hpp"  // I/O stream tools
 #include "fds.hpp"  // File descriptor streams
 #include "ips.hpp"  // Inter process streams
 #include "sys.hpp"  // System interfaces
@@ -19,7 +18,6 @@
 #include "fifo.hpp" // Named pipes
 #include "env.hpp"  // Environment variables
 #include "dir.hpp"  // Directory operators
-#include "dev.hpp"  // Development variables
 #include "usr.hpp"  // User directories
 #include "opt.hpp"  // Query user options
 #include "ini.hpp"  // Desktop configuration parsing
@@ -252,16 +250,6 @@ namespace
 		<< kv("rootdir", env::rootdir)
 		<< kv("session", env::session)
 		<< kv("prompt", env::prompt)
-		<< std::endl;
-	}
-
-	TEST(env_dev)
-	{
-		sysini()
-		<< "[Development Directores]\n"
-		<< kv("lib", fmt::dir::join(env::dev::lib))
-		<< kv("share", fmt::dir::join(env::dev::share))
-		<< kv("include", fmt::dir::join(env::dev::include))
 		<< std::endl;
 	}
 

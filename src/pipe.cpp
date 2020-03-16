@@ -2,11 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "pipe.hpp"
-#include "thread.hpp"
 #include "sys.hpp"
 #include "err.hpp"
 #include "fmt.hpp"
 #include <utility>
+#ifdef _WIN32
+#include "win/sync.hpp"
+#else
+#include "uni/pthread.hpp"
+#endif
 
 namespace env::file
 {

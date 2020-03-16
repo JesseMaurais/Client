@@ -2,10 +2,10 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dll.hpp"
+#include "env.hpp"
 #include "sys.hpp"
 #include "fmt.hpp"
 #include "dir.hpp"
-#include "dev.hpp"
 #include "err.hpp"
 #ifdef _WIN32
 #include "win.hpp"
@@ -106,7 +106,7 @@ namespace sys
 	{
 		using namespace env::dir;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
-		env::dir::find(env::dev::share, regx(name) || to(name) || stop);
+		env::dir::find(env::paths, regx(name) || to(name) || stop);
 		return fmt::string_view(name);
 	}
 }

@@ -7,13 +7,13 @@
 namespace env::desktop
 {
 	bool is(fmt::string_view name);
-	/// Whether desktop session is $name
+	/// Whether $name of desktop session
 
 	fmt::vector_string which(fmt::string_view name);
-	/// Paths to executables matching program $name
+	/// Paths to executables with program $name
 
 	struct open : env::file::process
-	/// Start preferred application for $path
+	/// Preferred application at $path
 	{
 		explicit open(fmt::string_view path);
 

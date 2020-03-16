@@ -1,6 +1,10 @@
 #include "key.hpp"
 #include "dig.hpp"
-#include "thread.hpp"
+#ifdef _WIN32
+#include "win/sync.hpp"
+#else
+#include "uni/pthread.hpp"
+#endif
 #include <set>
 
 namespace

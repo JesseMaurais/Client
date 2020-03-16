@@ -6,9 +6,13 @@
 #include "dir.hpp"
 #include "sys.hpp"
 #include "err.hpp"
-#include "thread.hpp"
 #include <vector>
 #include <regex>
+#ifdef _WIN32
+#include "win/sync.hpp"
+#else
+#include "uni/pthread.hpp"
+#endif
 
 namespace
 {

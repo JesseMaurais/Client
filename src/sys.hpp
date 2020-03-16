@@ -115,6 +115,7 @@ namespace sys
 #else // POSIX
 
 #include <unistd.h>
+#include <sys/wait.h>
 
 #ifndef O_BINARY
 #define O_BINARY 0L

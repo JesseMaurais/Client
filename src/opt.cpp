@@ -6,7 +6,11 @@
 #include "dig.hpp"
 #include "err.hpp"
 #include "sys.hpp"
-#include "thread.hpp"
+#ifdef _WIN32
+#include "win/sync.hpp"
+#else
+#include "uni/pthread.hpp"
+#endif
 #include <algorithm>
 #include <iterator>
 #include <fstream>

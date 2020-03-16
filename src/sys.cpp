@@ -5,11 +5,11 @@
 #include "err.hpp"
 #include "ptr.hpp"
 #include "pipe.hpp"
-#include "thread.hpp"
 #include <vector>
-
-#ifndef _WIN32
-# include <sys/wait.h>
+#ifdef _WIN32
+#include "win/sync.hpp"
+#else
+#include "uni/pthread.hpp"
 #endif
 
 namespace sys

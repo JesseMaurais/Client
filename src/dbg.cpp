@@ -3,13 +3,36 @@
 
 #include "dbg.hpp"
 #include "sgr.hpp"
-#include "ios.hpp"
 #include "str.hpp"
+#include "ptr.hpp"
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 #include <cassert>
 #include <regex>
 #include <map>
+
+namespace
+{
+	struct eat : unique, std::stringstream
+	{
+		eat(std::ostream& o = std::cerr) : out(o)
+		{
+			buf = out.rdbuf();
+			out.rdbuf(rdbuf());
+		}
+
+		~eat()
+		{
+			out.rdbuf(buf);
+		}
+
+	private:
+
+		std::ostream& out;
+		std::streambuf* buf;
+	};
+}
 
 namespace dbg
 {
@@ -50,7 +73,7 @@ namespace dbg
 
 	void fail::run()
 	{
-		io::eat err;
+		eat err;
 		try
 		{
 			die();
@@ -84,7 +107,7 @@ namespace dbg
 				string const indent(max_size - name.size(), ' ');
 				out << faint << name << intense_off << indent;
 
-				io::eat err;
+				eat err;
 				that->run();
 				auto s = err.str();
 				if (not empty(s))
