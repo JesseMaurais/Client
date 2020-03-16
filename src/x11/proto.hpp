@@ -464,6 +464,146 @@ namespace x11
 	<
 		X_LookupColor, xLookupColorsReq, sz_xLookupColorsReq, xLookupColorReply, sz_xLookupColorReply
 	>;
+
+	using CreateCursor = Request
+	<
+		X_CreateCursor, xCreateCursorReq, sz_xCreateCursorReq
+	>;
+
+	using CreateCursor = Request
+	<
+		X_CreateGlyphCursor, xCreateGlyphCursorReq, sz_xCreateGlyphCursorReq
+	>;
+
+	using FreeCursor = Request
+	<
+		X_FreeCursor
+	>;
+
+	using RecolorCursor = Request
+	<
+		X_RecolorCursor, xRecolorCursorReq, sz_xRecolorCursorReq
+	>;
+
+	using QueryBestSize = Request
+	<
+		X_QueryBestSize, xQueryBestSizeReq, sz_xQueryBestSizeReq, xQueryBestSizeReply, sz_xQueryBestSizeReply
+	>;
+
+	using QueryExtension = Request
+	<
+		X_QueryExtension, xQueryExtensionReq, sz_xQueryExtensionReq, xQueryExtensionReply, sz_xQueryExtensionReply
+	>;
+
+	using ListExtensions = Reply
+	<
+		X_ListExtensions, xListExtensionsReply, sz_xListExtensionsReply
+	>;
+
+	using ChangeKeyboardMapping = Request
+	<
+		X_ChangeKeyboardMapping, xChangeKeyboardMappingReq, sz_xChangeKeyboardMappingReq
+	>;
+
+	using GetKeyboardMapping = Request
+	<
+		X_GetKeyboardMapping, xGetKeyboardMappingReq, sz_xGetKeyboardMappingReq, xGetKeyboardMappingReply, sz_GetKeyboardMappingReply
+	>;
+
+	using ChangeKeyboardControl = Request
+	<
+		X_ChangeKeyboardControl, xChangeKeyboardControlReq, sz_xChangeKeyboardControlReq
+	>;
+
+	using GetKeyboardControl = Reply
+	<
+		X_GetKeyboardControl, xGetKeyboardControlReply, sz_GetKeyboardControlReply
+	>;
+
+	using Bell = Request
+	<
+		X_Bell, xBellReq, sz_xBellReq
+	>;
+
+	using ChangePointerControl = Request
+	<
+		X_ChangePointerControl, xChangePointerControlReq, sz_xChangePointerControlReq
+	>;
+
+	using GetPointerControl = Reply
+	<
+		X_GetPointerControl, xGetPointerControlReply, sz_GetPoniterControlReply
+	>;
+
+	using SetScreenSaver = Request
+	<
+		X_SetScreenSaver, xSetScreenSaverReq, sz_xSetScreenSaverReq
+	>;
+
+	using GetScreenSaver = Reply
+	<
+		X_GetScreenSaver, xGetScreenSaverReply, sz_xGetScreenSaverReply
+	>;
+
+	using ChangeHosts = Request
+	<
+		X_ChangeHosts, xChangeHostsReq, sz_xChangeHostsReq
+	>;
+
+	using ListHosts = Reply
+	<
+		X_ListHosts, xListHostsReply, sz_xListHostsReply
+	>;
+
+	using SetAccessControl = Request
+	<
+		X_SetAccessControl, xSetAccessControlRep, sz_xSetAccessControlRep
+	>;
+
+	using SetCloseDownMode = Request
+	<
+		X_SetCloseDownMode, xSetCloseDownModeRep, sz_xSetCloseDownModeRep
+	>;
+
+	using KillClient = Request
+	<
+		X_KillClient
+	>;
+
+	using RotateProperties = Request
+	<
+		X_RotateProperties, xRotatePropertiesReq, sz_xRotatePropertiesReq
+	>;
+
+	using ForceScreenSaver = Request
+	<
+		X_ForceScreenSaver, xForceScreenSaverReq, sz_xForceScreenSaverReq
+	>;
+
+	using SetPointerMapping = Request
+	<
+		X_SetPointerMapping, xSetPointerMappingReq, sz_xSetPointerMappingReq, xSetPointerMappingReply, sz_xSetPointerMappingReply
+	>;
+
+	using GetPointerMapping = Reply
+	<
+		X_GetPointerMapping, xGetPointerMappingReply, sz_xGetPointerMappingReply
+	>;
+
+	using SetModifierMapping = Request
+	<
+		X_SetModifierMapping, xSetModifierMappingReq, sz_xSetModifierMappingReq, xSetModifierMappingReply, sz_xSetModifierMappingReply
+	>;
+
+	using GetModifierMapping = Reply
+	<
+		X_GetModifierMapping, xGetModifierMappingReply, sz_xGetModifierMappingReply
+	>;
+
+	using NoOperation = Request
+	<
+		X_NoOperation
+	>;
 }
 
 #endif // file
