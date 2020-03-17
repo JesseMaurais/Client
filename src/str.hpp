@@ -185,12 +185,6 @@ namespace fmt
 
 namespace fmt
 {
-	template <class Char, template <class> class Traits = std::char_traits, template <class> class Alloc = std::allocator>
-	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-
-	template <class Char, template <class> class Traits = std::char_traits>
-	using basic_string_view = std::basic_string_view<Char, Traits<Char>>;
-
 	template <class Type, template <class> class Alloc = std::allocator>
 	using vector = std::vector<Type, Alloc<Type>>;
 
@@ -203,41 +197,26 @@ namespace fmt
 	template <class Type>
 	using map = std::map<Type, Type>;
 
-	template <class Iterator> struct range : pair<Iterator>
+	template <class Char, template <class> class Traits = std::char_traits>
+	struct basic_string_view : std::basic_string_view<Char, Traits<Char>>
 	{
-		using base = pair<Iterator>;
-		using base::base;
-		using iterator = Iterator;
+		using string = std::basic_string<Char, Traits<Char>>;
+		using vector = vector<basic_string_view>;
+		using span = span<basic_string_view>;
+		using map = map<basic_string_view>;
+		using pair = pair<basic_string_view>;
+		using initials = std::initializer_list<basic_string_view>;
+	};
 
-		auto begin() const
-		{
-			return base::first;
-		}
-
-		auto end() const
-		{
-			return base::second;
-		}
-
-		bool empty() const
-		{
-			return base::first == base::second;
-		}
-
-		bool operator()(iterator it) const
-		{
-			return it < end() and not it < begin();
-		}
-
-		auto distance(iterator it) const
-		{
-			return std::distance(base::first, it);
-		}
-
-		size_t size() const
-		{
-			return distance(base::second);
-		}
+	template <class Char, template <class> class Traits = std::char_traits, template <class> class Alloc = std::allocator>
+	struct basic_string : std::basic_string<Char, Traits<Char>, Alloc<Char>>
+	{
+		using view = basic_string_view<Char, Traits>;
+		using vector = vector<basic_string>;
+		using span = span<basic_string>;
+		using map = map<basic_string>;
+		using pair = pair<basic_string>;
+		using initials = std::initializer_list<basic_string>;
 	};
 }
 //*/

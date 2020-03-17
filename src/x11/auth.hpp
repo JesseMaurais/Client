@@ -20,7 +20,7 @@ namespace x11::auth
 		fmt::string data;
 	};
 
-	std::istream& get(std::istream& in, info& out);
+	std::istream& operator>>(std::istream& in, info& out);
 };
 
 #endif

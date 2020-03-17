@@ -21,6 +21,8 @@ namespace env
 	using span = property<fmt::span_view>;
 	using pair = property<fmt::pair_view_span>;
 
+	// Use with fmt::dir
+	extern view const& os;
 	extern span const& paths;
 	extern view const& home;
 	extern view const& user;
