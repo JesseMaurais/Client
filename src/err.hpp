@@ -62,6 +62,18 @@ namespace fmt
 		}
 		return ss.str();
 	}
+
+	template <class Closure> struct closure
+	{
+		int fd;
+
+		closure(int n = invalid) : fd(n) = default;
+
+		~closure()
+		{
+			verify(fail(fd) or fail(Closure(fd)));
+		}
+	};
 }
 
 #define here ::fmt::where { __FILE__, __LINE__, __func__ }

@@ -11,7 +11,7 @@ namespace env::file
 	struct descriptor : unique, stream
 	{
 		ssize_t read(void *buf, size_t sz) const override;
-		ssize_t write(const void *buf, size_t sz) const override;
+		ssize_t write(void const *buf, size_t sz) const override;
 		bool open(fmt::string_view path, mode = rw, permit = owner(rw));
 		bool close();
 

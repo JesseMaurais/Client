@@ -17,6 +17,7 @@ namespace sys::net
 	typedef ::SOCKET descriptor;
 	typedef int size;
 	typedef ::WSAPOLLFD pollfd;
+	typedef ULONG nfds_t;
 
 	union address
 	{
@@ -107,6 +108,7 @@ namespace sys::net
 	typedef int descriptor;
 	typedef ::socklen_t size;
 	typedef ::pollfd pollfd;
+	typedef ::nfds_t nfds_t;
 
 	union address
 	{
