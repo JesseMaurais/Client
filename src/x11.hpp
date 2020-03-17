@@ -6,6 +6,7 @@
 #else
 #error Require X11 protocol header
 #endif
+#include <iosfwd>
 
 namespace x11
 {
@@ -38,6 +39,9 @@ namespace x11
 		CARD16 ReplySize = sz_xReply
 	>
 	using Reply = Request<ReqType, xReq, sz_xReq, Reply, ReplySize>;
+
+	std::ostream& operator<<(std::ostream& out, const xReq& request);
+	std::istream& operator>>(std::istream& in, xReply& reply);
 };
 
 #endif // file

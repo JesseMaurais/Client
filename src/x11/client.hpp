@@ -3,11 +3,17 @@
 
 #include "str.hpp"
 #include "x11.hpp"
+#include <iosfwd>
 
 namespace x11
 {
-	fmt::string socket(int screen);
-	int open(fmt::string_view dpy);
+	fmt::string setup
+	/// Server handshake, returns error message
+	(
+		std::iostream& io, 
+		fmt::string_view proto, 
+		fmt::string_view data
+	);
 }
 
 #endif
