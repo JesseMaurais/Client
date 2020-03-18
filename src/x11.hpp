@@ -27,18 +27,6 @@ namespace x11
 		using vector = std::vector<Structure>;
 
 		static_assert<sizeof (Structure) == Size>;
-
-		auto operator[](auto index) const
-		{
-			auto const ptr = reinterpret_cast<const_pointer>(this) + Size;
-			return reinterpret_cast<const int32_t*>(ptr)[index];
-		}
-
-		auto & operator[](auto index)
-		{
-			auto ptr = reinterpret_cast<pointer>(this) + Size;
-			return reinterpret_cast<int32_t*>(ptr)[index];
-		}
 	};
 
 	template

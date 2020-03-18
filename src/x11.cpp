@@ -78,7 +78,7 @@ namespace x11
 {
 	env::view const& authority = XAUTHORITY;
 
-	fmt::string setup(std::iostream& io, fmt::string_view proto, fmt::string_view author)
+	fmt::string setup(std::iostream& io, fmt::string_view proto, fmt::string_view string)
 	{
 		fmt::string reason;
 
@@ -89,13 +89,13 @@ namespace x11
 				.byteOrder = order(),
 				.majorVersion = 11,
 				.minorVersion = 0,
-				.nbytesAuthProto = fmt::to<CARD16>(size(proto)),
-				.nbytesAuthString = fmt::to<CARD16>(size(author))
+				.nbytesAuthProto = fmt::to<CARD16>(proto.size()),
+				.nbytesAuthString = fmt::to<CARD16>(string.size())
 			};
 
 			verify(io << client);
-			verify(io.write(data(proto), client.nbytesAuthProto));
-			verify(io.write(data(author), client.nbytesAuthString));
+			verify(io.write(proto.data(), client.nbytesAuthProto));
+			verify(io.write(string.data(), client.nbytesAuthString));
 		}
 
 		if (io) // read
