@@ -9,18 +9,18 @@ namespace env::file
 {
 	struct process : unique, stream
 	{
-		bool start(fmt::list_view args);
-		bool start(fmt::span_view args);
+		bool start(fmt::string::view::list args);
+		bool start(fmt::string::view::span args);
 		bool start(size_t argc, char const** argv);
 		bool quit();
 		bool wait();
 
-		explicit process(fmt::list_view args)
+		explicit process(fmt::string::view::list args)
 		{
 			(void) start(args);
 		}
 
-		explicit process(fmt::span_view args)
+		explicit process(fmt::string::view::span args)
 		{
 			(void) start(args);
 		}

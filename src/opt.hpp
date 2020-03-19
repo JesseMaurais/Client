@@ -8,15 +8,15 @@
 namespace env::opt
 {
 	using fmt::string;
-	using view = fmt::string_view;
-	using span = fmt::span_view;
-	using list = fmt::vector_view;
-	using pair = fmt::pair_view;
+	using string::view;
+	using view::span;
+	using view::vector;
+	using view::pair;
 	using word = long long;
 	using quad = long double;
 	using cast = view(*)(view);
 
-	extern view const application;
+	extern string::view const application;
 	extern env::span const& arguments;
 	extern env::view const& program;
 	extern env::view const& config;
@@ -37,9 +37,9 @@ namespace env::opt
 		view text; // descriptive text for users
 	};
 
-	using commands = std::vector<description>;
+	using commands = vector<description>;
 	void set(int argc, char** argv);
-	list parse(commands const& cmd);
+	vector parse(commands const& cmd);
 	string to(view, cast);
 
 	bool got(view key);
@@ -65,8 +65,8 @@ namespace env::opt
 	quad get(pair key, quad value);
 	bool put(view key, quad value);
 	bool put(pair key, quad value);
-	list get(view key, span value);
-	list get(pair key, span value);
+	vector get(view key, span value);
+	vector get(pair key, span value);
 	bool put(view key, span value);
 	bool put(pair key, span value);
 

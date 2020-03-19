@@ -1,39 +1,38 @@
 #ifndef x11_hpp
 #define x11_hpp
 
+#include "fmt.hpp"
 #if __has_include <X11/Xproto.h>
 #include <X11/Xproto.h>
 #else
 #error Require X11 protocol header
 #endif
-#include <ios>
-#include <span>
-#include <vector>
-#include <algorithm>
-#include <iterator>
 
 namespace x11
 {
-	using std::ostream::traits_type::const_pointer;
-	using std::istream::traits_type::pointer;
+	using bytes = fmt::bystring;
 
 	template
 	<
-		class Structure, short Size
+		class Structure, unsigned short Size
 	>
 	struct Protocol : Structure
 	{
 		using span = std::span<Structure>;
 		using vector = std::vector<Structure>;
+		using cptr = vector::const_pointer;
+		using ptr = vector::pointer;
+		using cref = vector::const_reference;
+		using ref = vector::reference;
 
 		static_assert<sizeof (Structure) == Size>;
 	};
 
 	template
 	<
-		class Structure, short Size
+		class Structure, unsigned short Size
 	>
-	auto& operator<<(std::ostream & out, Protocol<Structure, Size> const& obj)
+	bytes::out::ref operator<<(bytes::out::ref out, Protocol<Structure, Size>::cref obj)
 	{
 		auto const ptr = reinterpret_cast<const_pointer>(&obj);
 		return out.write(ptr, Size);
@@ -41,19 +40,19 @@ namespace x11
 
 	template
 	<
-		class Structure, short Size
+		class Structure, unsigned short Size
 	>
-	auto& operator>>(std::istream& in, Protocol<Structure, Size> const& obj)
+	bytes::in::ref operator>>(bytes::in::ref obj, Protocol<Structure, Size>::ref obj)
 	{
 		auto const ptr = reinterpret_cast<pointer>(&obj);
-		return in.read(ptr, Size);
+		return obj.read(ptr, Size);
 	}
 
 	template
 	<
-		class Structure, short Size
+		class Structure, unsigned short Size
 	>
-	auto& operator<<(std::ostream& out, Protocol<Structure, Size>::span buf)
+	bytes::out::ref operator<<(bytes::out::ref out, Protocol<Structure, Size>::span buf)
 	{
 		std::copy(buf.begin(), buf.end(), std::ostream_iterator {out});
 		return out;
@@ -61,11 +60,11 @@ namespace x11
 
 	template
 	<
-		class Structure, short Size
+		class Structure, unsigned short Size
 	>
-	auto& operator>>(std::istream& in, Protocol<Structure, Size>::span buf)
+	byte::in::ref operator>>(bytes::in::ref in, Protocol<Structure, Size>::span buf)
 	{
-		auto const begin = std::istream_iterator {out}, end { };
+		auto const begin = std::istream_iterator {in}, end { };
 		std::copy(begin, end, std::back_inserter(buf));
 		return in;
 	}
@@ -73,8 +72,8 @@ namespace x11
 	template 
 	<
 		char ReqType, 
-		class Req = xReq, short ReqSize = sz_xReq, 
-		class Reply = xGenericReply, short ReplySize = sz_xReply
+		class Req = xReq, unsigned short ReqSize = sz_xReq, 
+		class Reply = xGenericReply, unsigned short ReplySize = sz_xReply
 	>
 	struct Request : Protocol<Req, ReqSize>
 	{
@@ -92,7 +91,7 @@ namespace x11
 
 	template
 	<
-		char ReqType, class Reply = xGenericReply, short ReplySize = sz_xReply
+		char ReqType, class Reply = xGenericReply, unsigned short ReplySize = sz_xReply
 	>
 	using Reply = Request<ReqType, xReq, sz_xReq, Reply, ReplySize>;
 };

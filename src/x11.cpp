@@ -21,12 +21,12 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string:view() const final
+		operator type() const final
 		{
 			auto const u = env::var::get("XAUTHORITY");
 			if (empty(u))
 			{
-				fmt::vector_view const path { env::home, ".Xauthority" };
+				fmt::string::view::vector const path { env::home, ".Xauthority" };
 				static auto s = fmt::dir::join(path);
 				u = s;
 			}
@@ -38,14 +38,14 @@ namespace
 
 namespace x11::auth
 {
-	std::istream& operator>>(std::istream& in, info& out)
+	in::ref operator>>(in::ref str, info& out)
 	{
 		union {
 			unsigned char b[2];
 			unsigned short sz;
 		};
 
-		if (in.get(b, 2))
+		if (str.get(b, 2))
 		{
 			out.family = sz;
 		
@@ -57,12 +57,12 @@ namespace x11::auth
 				&out.data
 			};
 
-			for (auto str : ptr)
+			for (auto s : ptr)
 			{
-				if (in.get(b, 2))
+				if (str.get(b, 2))
 				{
-					str->resize(sz);
-					if (in.get(ptr->data(), sz))
+					s->resize(sz);
+					if (str.get(ptr->data(), sz))
 					{
 						continue;
 					}
@@ -70,19 +70,19 @@ namespace x11::auth
 				break;
 			}
 		}
-		return in;
+		return str;
 	}
 };
 
 namespace x11
 {
-	env::view const& authority = XAUTHORITY;
+	env::view::ref authority = XAUTHORITY;
 
-	fmt::string setup(std::iostream& io, fmt::string_view proto, fmt::string_view string)
+	fmt::string setup(io::ref str, fmt::string::view proto, fmt::string::view data)
 	{
 		fmt::string reason;
 
-		if (io) // write
+		if (str) // write
 		{
 			ClientPrefix client
 			{
@@ -90,21 +90,21 @@ namespace x11
 				.majorVersion = 11,
 				.minorVersion = 0,
 				.nbytesAuthProto = fmt::to<CARD16>(proto.size()),
-				.nbytesAuthString = fmt::to<CARD16>(string.size())
+				.nbytesAuthString = fmt::to<CARD16>(data.size())
 			};
 
-			verify(io << client);
-			verify(io.write(proto.data(), client.nbytesAuthProto));
-			verify(io.write(string.data(), client.nbytesAuthString));
+			verify(str << client);
+			verify(str.write(proto.data(), client.nbytesAuthProto));
+			verify(str.write(data.data(), client.nbytesAuthString));
 		}
 
-		if (io) // read
+		if (str) // read
 		{
 			SetupPrefix prefix;
-			if (io >> prefix and Success != prefix.success)
+			if (str >> prefix and Success != prefix.success)
 			{
 				reason.resize(prefix.lengthReason);
-				verify(io.read(data(reason), prefix.lengthReason));
+				verify(str.read(data(reason), prefix.lengthReason));
 			}
 		}
 

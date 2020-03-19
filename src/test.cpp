@@ -6,13 +6,12 @@
 #include "str.hpp"  // String views and spans
 #include "fmt.hpp"  // Character string formatting
 #include "dig.hpp"  // Numeric conversions
-#include "sgr.hpp"  // Stream control sequences
-#include "fds.hpp"  // File descriptor streams
-#include "ips.hpp"  // Inter process streams
+#include "gc.hpp"   // Stream control sequences
+#include "fd.hpp"   // File descriptor streams
+#include "pid.hpp"  // Inter process streams
 #include "sys.hpp"  // System interfaces
 #include "net.hpp"  // Network sockets
 #include "sig.hpp"  // Signal handling
-#include "cpu.hpp"  // CPU information
 #include "dll.hpp"  // Dynamic libraries
 #include "shm.hpp"  // Shared memory
 #include "fifo.hpp" // Named pipes

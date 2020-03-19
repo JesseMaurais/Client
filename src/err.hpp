@@ -21,6 +21,7 @@
 #include <system_error>
 #include <exception>
 #include <sstream>
+#include "io.hpp"
 #include "str.hpp"
 
 // Pessimistic boolean
@@ -30,16 +31,6 @@ enum : bool
 	success = false, failure = true
 };
 
-constexpr bool fail(bool ok)
-{
-	return failure == ok;
-}
-
-constexpr bool okay(bool ok)
-{
-	return success == ok;
-}
-
 namespace fmt
 {
 	struct where
@@ -47,9 +38,9 @@ namespace fmt
 		char const *file; int const line; char const *func;
 	};
 
-	std::ostream& operator<<(std::ostream&, where const &);
-	std::ostream& operator<<(std::ostream&, std::errc const &);
-	std::ostream& operator<<(std::ostream&, std::exception const &);
+	out operator<<(out, where const &);
+	out operator<<(out, std::errc const &);
+	out operator<<(out, std::exception const &);
 
 	template <typename Arg, typename... Args>
 	auto err(Arg arg, Args... args)
@@ -62,18 +53,6 @@ namespace fmt
 		}
 		return ss.str();
 	}
-
-	template <class Closure> struct closure
-	{
-		int fd;
-
-		closure(int n = invalid) : fd(n) = default;
-
-		~closure()
-		{
-			verify(fail(fd) or fail(Closure(fd)));
-		}
-	};
 }
 
 #define here ::fmt::where { __FILE__, __LINE__, __func__ }

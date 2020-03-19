@@ -1,10 +1,10 @@
 #include "cmd.hpp"
 #include "err.hpp"
-#include "ips.hpp"
+#include "pid.hpp"
 
 namespace env::cmd
 {
-	fmt::vector_string where(fmt::string_view name)
+	fmt::string::vector where(fmt::string::view name)
 	{
 		#ifdef _WIN32
 		fmt::ipstream sub { "where", name };
@@ -21,7 +21,7 @@ namespace env::cmd
 		return list;
 	}
 
-	open::open(fmt::string_view path)
+	open::open(fmt::string::view path)
 	{
 		#ifdef _WIN32
 		{
@@ -32,7 +32,7 @@ namespace env::cmd
 		}
 		#else
 		{
-			fmt::map<fmt::string_view> const test
+			fmt::string::view::map const test
 			{ 
 				{ "gnome", "gnome-open" },
 				{ "xfce", "exo-open" },

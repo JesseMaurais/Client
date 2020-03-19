@@ -6,13 +6,13 @@
 
 namespace env::cmd
 {
-	fmt::vector_string which(fmt::string_view name);
+	fmt::string::vector which(fmt::string::view name);
 	/// Paths to executables with program $name
 
 	struct open : env::file::process
 	/// Preferred application at $path
 	{
-		explicit open(fmt::string_view path);
+		explicit open(fmt::string::view path);
 
 	private:
 

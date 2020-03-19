@@ -18,7 +18,7 @@ namespace
 {
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			auto u = env::var::get("XDG_CURRENT_DESKTOP");
 			if (empty(u))
@@ -32,7 +32,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			auto u = env::var::get("XDG_MENU_PREFIX");
 			if (empty(u))
@@ -51,7 +51,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			static fmt::string path;
 			if (empty(path))
@@ -80,7 +80,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			auto u = env::var::get("XDG_RUNTIME_DIR");
 			if (empty(u))
@@ -95,7 +95,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			auto u = env::var::get("XDG_DATA_HOME");
 			if (empty(u))
@@ -114,7 +114,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			auto u = env::var::get("XDG_CONFIG_HOME");
 			if (empty(u))
@@ -133,7 +133,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			auto u = env::var::get("XDG_CACHE_HOME");
 			if (empty(u))
@@ -152,9 +152,9 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span_view() const final
+		operator type() const final
 		{
-			static fmt::vector_view t;
+			static fmt::string::view::vector t;
 			auto u = env::var::get("XDG_DATA_DIRS");
 			if (empty(u))
 			{
@@ -176,9 +176,9 @@ namespace
 
 	struct : env::span
 	{
-		operator fmt::span_view() const final
+		operator type() const final
 		{
-			static fmt::vector_view t;
+			static fmt::string::view::vector t;
 			auto u = env::var::get("XDG_CONFIG_DIRS");
 			if (empty(u))
 			{
@@ -216,7 +216,7 @@ namespace
 
 	struct user_dir : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			auto u = env::var::get(var);
 			if (empty(u))
@@ -228,7 +228,7 @@ namespace
 			{
 				if (empty(u))
 				{
-					static std::map<fmt::string_view, KNOWNFOLDERID> map =
+					static std::map<fmt::string::view, KNOWNFOLDERID> map =
 					{
 						{ Desktop, FOLDERID_Desktop },
 						{ Documents, FOLDERID_Documents },
@@ -283,7 +283,7 @@ namespace
 
 		char const *var, *val;
 
-		fmt::string_view cached() const
+		fmt::string::view cached() const
 		{
 			auto u = env::opt::get(var);
 			if (empty(u))
@@ -308,33 +308,33 @@ namespace
 		}
 	};
 
-	user_dir const DESKTOP_DIR("XDG_DESKTOP_DIR", Desktop);
-	user_dir const DOCUMENTS_DIR("XDG_DOCUMENTS_DIR", Documents);
-	user_dir const DOWNLOAD_DIR("XDG_DOWNLOAD_DIR", Downloads);
-	user_dir const MUSIC_DIR("XDG_MUSIC_DIR", Music);
-	user_dir const PICTURES_DIR("XDG_PICTURES_DIR", Pictures);
-	user_dir const PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR", PublicShare);
-	user_dir const TEMPLATES_DIR("XDG_TEMPLATES_DIR", Templates);
-	user_dir const VIDEOS_DIR("XDG_VIDEOS_DIR", Videos);
+	user_dir DESKTOP_DIR("XDG_DESKTOP_DIR", Desktop);
+	user_dir DOCUMENTS_DIR("XDG_DOCUMENTS_DIR", Documents);
+	user_dir DOWNLOAD_DIR("XDG_DOWNLOAD_DIR", Downloads);
+	user_dir MUSIC_DIR("XDG_MUSIC_DIR", Music);
+	user_dir PICTURES_DIR("XDG_PICTURES_DIR", Pictures);
+	user_dir PUBLICSHARE_DIR("XDG_PUBLICSHARE_DIR", PublicShare);
+	user_dir TEMPLATES_DIR("XDG_TEMPLATES_DIR", Templates);
+	user_dir VIDEOS_DIR("XDG_VIDEOS_DIR", Videos);
 }
 
 namespace env::usr
 {
-	env::view const& current_desktop = CURRENT_DESKTOP;
-	env::view const& menu_prefix = MENU_PREFIX;
-	env::view const& applications_menu = APPLICATIONS_MENU;
-	env::view const& run_dir = RUN_DIR;
-	env::view const& data_home = DATA_HOME;
-	env::view const& config_home = CONFIG_HOME;
-	env::view const& cache_home = CACHE_HOME;
-	env::span const& data_dirs = DATA_DIRS;
-	env::span const& config_dirs = CONFIG_DIRS;
-	env::view const& desktop_dir = DESKTOP_DIR;
-	env::view const& documents_dir = DOCUMENTS_DIR;
-	env::view const& download_dir = DOWNLOAD_DIR;
-	env::view const& music_dir = MUSIC_DIR;
-	env::view const& pictures_dir = PICTURES_DIR;
-	env::view const& publicshare_dir = PUBLICSHARE_DIR;
-	env::view const& templates_dir = TEMPLATES_DIR;
-	env::view const& videos_dir = VIDEOS_DIR;
+	view::ref current_desktop = CURRENT_DESKTOP;
+	view::ref menu_prefix = MENU_PREFIX;
+	view::ref applications_menu = APPLICATIONS_MENU;
+	view::ref run_dir = RUN_DIR;
+	view::ref data_home = DATA_HOME;
+	view::ref config_home = CONFIG_HOME;
+	view::ref cache_home = CACHE_HOME;
+	span::ref data_dirs = DATA_DIRS;
+	span::ref config_dirs = CONFIG_DIRS;
+	view::ref desktop_dir = DESKTOP_DIR;
+	view::ref documents_dir = DOCUMENTS_DIR;
+	view::ref download_dir = DOWNLOAD_DIR;
+	view::ref music_dir = MUSIC_DIR;
+	view::ref pictures_dir = PICTURES_DIR;
+	view::ref publicshare_dir = PUBLICSHARE_DIR;
+	view::ref templates_dir = TEMPLATES_DIR;
+	view::ref videos_dir = VIDEOS_DIR;
 }

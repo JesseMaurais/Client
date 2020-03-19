@@ -21,7 +21,7 @@ namespace
 
 namespace env::var
 {
-	bool got(fmt::string_view u)
+	bool got(fmt::string::view u)
 	{
 		if (not fmt::terminated(u))
 		{
@@ -34,7 +34,7 @@ namespace env::var
 		return nullptr == ptr;
 	}
 
-	fmt::string_view get(fmt::string_view u)
+	fmt::string::view get(fmt::string::view u)
 	{
 		if (not fmt::terminated(u))
 		{
@@ -47,7 +47,7 @@ namespace env::var
 		return nullptr == ptr ? fmt::nil : ptr;
 	}
 
-	bool set(fmt::string_view u)
+	bool set(fmt::string::view u)
 	{
 		if (not fmt::terminated(u))
 		{
@@ -59,9 +59,9 @@ namespace env::var
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::string_view u)
+	bool put(fmt::string::view u)
 	{
-		static std::set<fmt::string> buf;
+		static fmt::string::set buf;
 		auto const unlock = lock.write();
 		auto it = buf.emplace(u).first;
 		auto d = it->data();
@@ -69,19 +69,19 @@ namespace env::var
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::string_view u, fmt::string_view v)
+	bool put(fmt::string::view u, fmt::string::view v)
 	{
 		return put(fmt::entry(u, v));
 	}
 
-	static auto evaluate(fmt::string_view u)
+	static auto evaluate(fmt::string::view u)
 	{
 		assert(u.front() == '$');
 		u = u.substr(1);
 		return empty(u) ? u : get(u);
 	}
 
-	fmt::string value(fmt::string_view u)
+	fmt::string value(fmt::string::view u)
 	{
 		static std::regex x { "\\$[A-Z_][A-Z_0-9]*" };
 		std::smatch m;
@@ -104,9 +104,9 @@ namespace
 {
 	struct : env::span
 	{
-		operator fmt::span_view() const final
+		operator type() const final
 		{
-			static thread_local fmt::vector_view t;
+			static thread_local fmt::string::view::vector t;
 			auto u = env::var::get("PATH");
 			t = fmt::path::split(u);
 			return t;
@@ -116,7 +116,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -133,7 +133,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -150,7 +150,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -173,7 +173,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -196,7 +196,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -213,7 +213,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -230,7 +230,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -248,7 +248,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
 			{
@@ -265,7 +265,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			for (auto u : { "TMPDIR", "TEMP", "TMP" })
 			{
@@ -295,7 +295,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -312,7 +312,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -329,7 +329,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			#ifdef _WIN32
 			{
@@ -347,17 +347,17 @@ namespace
 
 namespace env
 {
-	span const& paths = PATH;
-	view const& user = USER;
-	view const& home = HOME;
-	view const& host = HOST;
-	view const& domain = DOMAIN_;
-	view const& root = ROOT;
-	view const& pwd = PWD;
-	view const& lang = LANG;
-	view const& shell = SHELL;
-	view const& tmpdir = TMPDIR;
-	view const& rootdir = ROOTDIR;
-	view const& session = SESSION;
-	view const& prompt = PROMPT;
+	span::ref paths = PATH;
+	view::ref user = USER;
+	view::ref home = HOME;
+	view::ref host = HOST;
+	view::ref domain = DOMAIN_;
+	view::ref root = ROOT;
+	view::ref pwd = PWD;
+	view::ref lang = LANG;
+	view::ref shell = SHELL;
+	view::ref tmpdir = TMPDIR;
+	view::ref rootdir = ROOTDIR;
+	view::ref session = SESSION;
+	view::ref prompt = PROMPT;
 }

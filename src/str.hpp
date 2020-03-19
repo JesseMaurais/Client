@@ -1,256 +1,280 @@
 #ifndef str_hpp
 #define str_hpp
-
-/*
-// Try to get the lightest of string containers: a span of string views.
-
-#include <string>
-#include <vector>
+#include <iosfwd>
 #include <utility>
-
-#if __has_include(<string_view>)
+#include <iterator>
+#include <algorithm>
+#include <type_traits>
+#include <initializer_list>
 #include <string_view>
-namespace fmt::impl
-{
-	template <class Char, class Traits = std::char_traits<Char>>
-	using basic_string_view = std::basic_string_view<Char, Traits>;
-}
-#elif __has_include(<experimental/string_view>)
-#include <experimental/string_view>
-namespace fmt::impl
-{
-	template <class Char, class Traits = std::char_traits<Char>>
-	using basic_string_view = std::experimental::basic_string_view<Char, Traits>;
-}
-#else
-#error Cannot find an implementation of string_view.
-#endif
-
-namespace fmt
-{
-	template <class Char, class Traits = std::char_traits<Char>>
-	struct basic_string_view : impl::basic_string_view<Char, Traits>
-	{
-		using string = std::basic_string<Char, Traits>;
-		using base = impl::basic_string_view<Char, Traits>;
-		using base::base;
-
-		#if __cplusplus <= 201703L
-		bool starts_with(basic_string_view u) const
-		{
-			return 0 == base::compare(0, u.size(), u);
-		}
-		bool ends_with(basic_string_view u) const
-		{
-			auto const n = u.size();
-			auto const m = base::size();
-			return n <= m and 0 == base::compare(m - n, n, u);
-		}
-		#endif
-
-		~basic_string_view() noexcept = default;
-
-		basic_string_view(string const& s) noexcept
-		: base(s.data(), s.size())
-		{ }
-
-		basic_string_view(base u) noexcept
-		: base(u.data(), u.size())
-		{ }
-	};
-
-	template <class Char, class Traits = std::char_traits<Char>, class Alloc = std::allocator<Char>>
-	struct basic_string : std::basic_string<Char, Traits, Alloc>
-	{
-		using view = impl::basic_string_view<Char, Traits>;
-		using base = std::basic_string<Char, Traits, Alloc>;
-		using base::base;
-
-		~basic_string() noexcept = default;
-
-		basic_string(base const& s) noexcept
-		: base(s)
-		{ }
-
-		basic_string(view u) noexcept
-		: base(u.data(), u.size())
-		{ }
-
-		auto& operator=(base const& s)
-		{
-			return base::operator=(s);
-		}
-
-		operator view() const
-		{
-			return view(base::data(), base::size());
-		}
-	};
-
-	template <class Type> using pair = std::pair<Type, Type>;
-
-	template <class Iterator> struct range : pair<Iterator>
-	{
-		using base = pair<Iterator>;
-		using base::base;
-		using iterator = Iterator;
-
-		auto begin() const
-		{
-			return base::first;
-		}
-
-		auto end() const
-		{
-			return base::second;
-		}
-
-		bool empty() const
-		{
-			return base::first == base::second;
-		}
-
-		bool operator()(iterator it) const
-		{
-			return it < end() and not it < begin();
-		}
-
-		auto distance(iterator it) const
-		{
-			return std::distance(base::first, it);
-		}
-
-		size_t size() const
-		{
-			return distance(base::second);
-		}
-	};
-}
-
-#if __has_include(<span>)
 #include <span>
-namespace fmt
-{
-	template <typename Type> using span = std::span<Type>;
-}
-#elif __has_include(<experimetal/span>)
-#include <experimental/span>
-namespace fmt
-{
-	template <typename Type> using span = std::experimental::span<Type>;
-}
-#else
-#include <initializer_list>
-namespace fmt
-{
-	template <typename Type> struct span : range<Type const*>
-	{
-		using base = range<Type const*>;
-		using base::base;
-		using const_iterator = Type const*;
-
-		span(std::vector<Type> const& list)
-		: base(data(list), data(list) + size(list))
-		{ }
-
-		span(std::initializer_list<Type> init)
-		: base(begin(init), end(init))
-		{ }
-
-		const auto& front() const
-		{
-			return *base::first;
-		}
-
-		const auto& back() const
-		{
-			return *(base::second - 1);
-		}
-
-		auto const& operator[](std::size_t index) const
-		{
-			return *(base::first + index);
-		}
-	};
-}
-#endif
-/*/
-#include <utility>
-#include <initializer_list>
 #include <string>
-#include <string_view>
-#include <vector>
-#include <span>
+#include <set>
 #include <map>
+#include <array>
+#include <vector>
+#include <variant>
 
 namespace fmt
 {
-	template <class Type, template <class> class Alloc = std::allocator>
-	using vector = std::vector<Type, Alloc<Type>>;
+	template
+	<
+		class First, class Second
+	>
+	constexpr bool synonym = std::is_same<First, Second>::value;
 
-	template <class Type>
+	template 
+	<
+		class Type
+	>
+	using pair = std::pair<const Type, Type>;
+
+	template
+	<
+		class Type,
+		template <class> class Sort = std::less,
+		template <class> class Alloc = std::allocator
+	>
+	using set = std::set<Type, Sort<Type>, Alloc<Type>>;
+
+	template 
+	<
+		class Type,
+		template <class> class Sort = std::less
+		template <class> class Alloc = std::allocator
+	>
+	using map = std::map<Type, Type, Sort<Type>, Alloc<pair<Type>>;
+
+	template 
+	<
+		class Type
+	>
+	using list = std::initializer_list<Type>;
+
+	template
+	<
+		class Type
+	>
 	using span = std::span<Type>;
 
-	template <class Type>
-	using pair = std::pair<Type, Type>;
+	template
+	<
+		class Type, size_t Size
+	>
+	using array = std::array<Type, Size>;
 
-	template <class Type>
-	using map = std::map<Type, Type>;
+	template 
+	<
+		class Type, 
+		template <class> class Alloc = std::allocator
+	>
+	using vector = std::vector<Type, Alloc<Type>>;
 
-	template <class Char, template <class> class Traits = std::char_traits>
-	struct basic_string_view : std::basic_string_view<Char, Traits<Char>>
+	template
+	<
+		class Type, size_t Size,
+		template <class> class Alloc = std::allocator
+	>
+	using variant = std::variant<array<Type, Size>, vector<Type, Alloc>>;
+
+	template 
+	<
+		class Char, 
+		template <class> class Traits = std::char_traits, 
+		template <class> class Alloc = std::allocator
+	>
+	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
+
+	template 
+	<
+		class Char, 
+		template <class> class Traits = std::char_traits
+	>
+	using basic_string_view = std::basic_string_view<Char, Traits<Char>>
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits
+	>
+	using basic_ios = std::basic_ios<Char, Traits<Char>>;
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits
+	>
+	using basic_istream = std::basic_istream<Char, Traits<Char>>;
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits
+	>
+	using basic_iostream = std::basic_iostream<Char, Traits<Char>>;
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits
+	>
+	using basic_ostream = std::basic_ostream<Char, Traits<Char>>;
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits
+	>
+	using basic_buf = std::basic_streambuf<Char, Traits<Char>>;
+
+	template
+	<
+		class Char
+		template <class> class Traits = std::char_traits
+	>
+	using basic_file = std::basic_filebuf<Char, Traits>;
+
+	template
+	<
+		class Type
+	>
+	struct memory_traits : std::iterator_traits<Type>
 	{
-		using string = std::basic_string<Char, Traits<Char>>;
-		using vector = vector<basic_string_view>;
-		using span = span<basic_string_view>;
-		using map = map<basic_string_view>;
-		using pair = pair<basic_string_view>;
-		using initials = std::initializer_list<basic_string_view>;
+		using base = std::iterator_traits<Type>;
+		using type = base::value_type;
+		using ref = base::references;
+		using cref = base::const_reference;
+		using ptr = base::pointer;
+		using cptr = base::const_pointer;
+		using pair = pair<Type>;
+		using list = list<Type>;
+		using span = span<Type>;
 	};
 
-	template <class Char, template <class> class Traits = std::char_traits, template <class> class Alloc = std::allocator>
-	struct basic_string : std::basic_string<Char, Traits<Char>, Alloc<Char>>
+	template
+	<
+		class Char,
+		template <class> Traits = std::char_traits
+	>
+	struct stream_traits : memory_traits<Char>;
 	{
-		using view = basic_string_view<Char, Traits>;
-		using vector = vector<basic_string>;
-		using span = span<basic_string>;
-		using map = map<basic_string>;
-		using pair = pair<basic_string>;
-		using initials = std::initializer_list<basic_string>;
+		using ios = basic_ios<Char, Traits>;
+		using in = basic_istream<Char, Traits>;
+		using out = basic_ostream<Char, Traits>;
+		using io = basic_iostream<Char, Traits>;
+		using buf = basic_buf<Char, Traits>;
+		using file = basic_file<Char, Traits>;
 	};
-}
-//*/
 
-namespace fmt
-{
-	using string = basic_string<char>;
-	using wstring = basic_string<wchar_t>;
+	template
+	<
+		class Type
+	>
+	struct struct_traits : stream_traits<Type>
+	{
+		template
+		<
+			template <class> Sort = std::less,
+			template <class> Alloc = std::allocator
+		>
+		using set = set<Type, Sort, Alloc>;
 
-	using string_view = basic_string_view<char>;
-	using wstring_view = basic_string_view<wchar_t>;
+		template
+		<
+			template <class> Sort = std::less,
+			template <class> Alloc = std::allocator
+		>
+		using map = map<Type, Sort, Alloc>;
 
-	using pair_view = pair<string_view>;
-	using wpair_view = pair<wstring_view>;
+		template
+		<
+			size_t Size
+		>
+		using array = array<Type, Size>;
 
-	using span_view = span<string_view>;
-	using wspan_view = span<wstring_view>;
+		template
+		<
+			template <class> Alloc = std::allocator
+		>
+		using vector = vector<Type, Alloc>;
 
-	using pair_view_span = std::pair<string_view, span_view>;
-	using wpair_view_span = std::pair<wstring_view, wspan_view>;
+		template
+		<
+			size_t Size,
+			template <class> Alloc = std::allocator
+		>
+		using variant = variant<Type, Size, Alloc>;
+	};
 
-	using vector_view = vector<string_view>;
-	using wvector_view = vector<wstring_view>;
+	template
+	<
+		class Char,
+		template <class> Traits = std::char_traits,
+		template <class> Alloc = std::allocator
+	>
+	struct character_traits
+	{
+		using string = struct_traits<basic_string<Char, Traits, Alloc>>;
+		using string_view = struct_traits<basic_string_view<Char, Traits>>;
+		using stream = stream_traits<Char, Traits>;
+		using ios = memory_traits<stream::ios>;
+		using in = memory_traits<stream::in>
+		using out = memory_traits<stream::out>;
+		using io = memory_traits<stream::io>;
+		using buf = memory_traits<stream::buf>;
+		using file = memory_traits<stream::file>;
+	};
 
-	using pair_string_vector = std::pair<string, vector_view>;
-	using wpair_string_vector = std::pair<wstring, wvector_view>;
+	template
+	<
+		class String,
+		template <class> Alloc = std::allocator
+	>
+	struct string_traits 
+	: struct_traits<String>, character_traits<String::char_type, String::char_traits, Alloc>
+	{ 
+		using traits = struct_traits<String>;
+		using traits::pair;
+		using traits::list;
+		using traits::span;
+		using vector = traits::vector<Alloc>;
+		template <class Sort = std::less> using map = traits::map<Sort, Alloc>;
+		template <size_t Size> using array = traits::array<Size>;
+		template <size_t Size> using variant = traits::variant<Size, Alloc>;
+	};
 
-	using vector_string = vector<string>;
-	using wvector_string = vector<wstring>;
+	template
+	<
+		class Char,
+		template <class> Traits = std::char_traits,
+		template <class> Sort = std::less,
+		template <class> Alloc = std::allocator
+	>
+	struct string_view_with_traits 
+	: string_traits<basic_view_string<Char, Traits, Alloc>, Sort, Alloc>
+	{ 
+		//
+	};
 
-	using list_view = std::initializer_list<string_view>;
-	using wlist_view = std::initializer_list<wstring_view>;
+	template
+	<
+		class Char,
+		template <class> Traits = std::char_traits,
+		template <class> Sort = std::less,
+		template <class> Alloc = std::allocator
+	>
+	struct string_with_traits 
+	: basic_string<Char, Traits, Alloc>
+	, string_traits<basic_string<Char, Traits, Alloc>, Char, Traits, Sort, Alloc>
+	{ 
+		using view = string_view_with_traits<Char, Traits, Sort, Alloc>;
+	};
 
-	using size_type = string::size_type;
+	using string = string_with_traits<char>;
+	using wstring = string_with_traits<wchar_t>;
+	using bystring = string_with_traits<std::byte>;
+
+	using string::size_type;
 	constexpr auto npos = string::npos;
 	constexpr auto null = size_type(0);
 	constexpr auto eol = '\n';

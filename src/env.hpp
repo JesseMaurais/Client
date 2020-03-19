@@ -16,26 +16,37 @@ namespace env
 		fmt::string value(fmt::string_view);
 	}
 
-	using size = property<fmt::size_type>;
-	using view = property<fmt::string_view>;
-	using span = property<fmt::span_view>;
-	using pair = property<fmt::pair_view_span>;
+	template 
+	<
+		template <class> class Access
+		class Type
+	>
+	struct variable : Access<Type>
+	{ 
+		using traits = fmt::memory_traits<Type>;
+		using type = traits::type;
+		using ref = traits::ref;
+	};
 
-	// Use with fmt::dir
-	extern view const& os;
-	extern span const& paths;
-	extern view const& home;
-	extern view const& user;
-	extern view const& host;
-	extern view const& root;
-	extern view const& pwd;
-	extern view const& lang;
-	extern view const& shell;
-	extern view const& tmpdir;
-	extern view const& rootdir;
-	extern view const& session;
-	extern view const& domain;
-	extern view const& prompt;
+	using size = variable<property, fmt::string::size_type>;
+	using view = variable<property, fmt::string::view>;
+	using span = variable<property, fmt::string::view::span>;
+	using pair = variable<property, fmt::pair_view_span>;
+
+	extern view::ref os;
+	extern span::ref paths;
+	extern view::ref home;
+	extern view::ref user;
+	extern view::ref host;
+	extern view::ref root;
+	extern view::ref pwd;
+	extern view::ref lang;
+	extern view::ref shell;
+	extern view::ref tmpdir;
+	extern view::ref rootdir;
+	extern view::ref session;
+	extern view::ref domain;
+	extern view::ref prompt;
 }
 
 #endif // file

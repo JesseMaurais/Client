@@ -5,23 +5,23 @@
 
 namespace env::usr
 {
-	extern env::view const& current_desktop;
-	extern env::view const& menu_prefix;
-	extern env::view const& applications_menu;
-	extern env::view const& run_dir;
-	extern env::view const& data_home;
-	extern env::view const& config_home;
-	extern env::view const& cache_home;
-	extern env::span const& data_dirs;
-	extern env::span const& config_dirs;
-	extern env::view const& desktop_dir;
-	extern env::view const& documents_dir;
-	extern env::view const& download_dir;
-	extern env::view const& music_dir;
-	extern env::view const& pictures_dir;
-	extern env::view const& publicshare_dir;
-	extern env::view const& templates_dir;
-	extern env::view const& videos_dir;
+	extern view::ref current_desktop;
+	extern view::ref menu_prefix;
+	extern view::ref applications_menu;
+	extern view::ref run_dir;
+	extern view::ref data_home;
+	extern view::ref config_home;
+	extern view::ref cache_home;
+	extern span::ref data_dirs;
+	extern span::ref config_dirs;
+	extern view::ref desktop_dir;
+	extern view::ref documents_dir;
+	extern view::ref download_dir;
+	extern view::ref music_dir;
+	extern view::ref pictures_dir;
+	extern view::ref publicshare_dir;
+	extern view::ref templates_dir;
+	extern view::ref videos_dir;
 }
 
 #endif // file

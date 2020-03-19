@@ -10,11 +10,11 @@ namespace doc
 {
 	struct ini
 	{
-		using string = fmt::string;
-		using view = fmt::string_view;
-		using pair = fmt::pair_view;
-		using span = fmt::span_view;
-		using vector = fmt::vector_view;
+		using fmt::string;
+		using string::view;
+		using view::pair;
+		using view::span;
+		using view::vector;
 
 		static string join(span value);
 		static vector split(view value);

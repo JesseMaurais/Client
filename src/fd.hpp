@@ -1,9 +1,9 @@
 #ifndef fds_hpp
 #define fds_hpp
 
-#include <iostream>
 #include "pipe.hpp"
 #include "buf.hpp"
+#include "io.hpp"
 #include "str.hpp"
 
 namespace fmt

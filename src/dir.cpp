@@ -51,17 +51,17 @@ namespace
 
 namespace fmt::dir
 {
-	string join(span_view p)
+	string join(string::view::span p)
 	{
 		return fmt::join(p, sys::sep::dir);
 	}
 
-	string join(list_view p)
+	string join(string::view::list p)
 	{
 		return fmt::join(p, sys::sep::dir);
 	}
 
-	vector_view split(string_view u)
+	string::view::vector split(string::view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -69,17 +69,17 @@ namespace fmt::dir
 
 namespace fmt::path
 {
-	string join(span_view p)
+	string join(string::view::span p)
 	{
 		return fmt::join(p, sys::sep::path);
 	}
 
-	string join(list_view p)
+	string join(string::view::list p)
 	{
 		return fmt::join(p, sys::sep::path);
 	}
 
-	vector_view split(string_view u)
+	string::view::vector split(string::view u)
 	{
 		return fmt::split(u, sys::sep::path);
 	}
@@ -94,7 +94,7 @@ namespace env::dir
 	using namespace ::env;
 	using namespace ::env::usr;
 
-	bool find(fmt::string_view path, entry look)
+	bool find(fmt::string::view path, entry look)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -113,7 +113,7 @@ namespace env::dir
 		return failure;
 	}
 
-	bool find(fmt::span_view list, entry look)
+	bool find(fmt::string::view::span list, entry look)
 	{
 		for (auto const path : list)
 		{
@@ -154,11 +154,11 @@ namespace env::dir
 		};
 	}
 
-	entry regx(fmt::string_view u)
+	entry regx(fmt::string::view u)
 	{
 		auto const s = fmt::to_string(u);
 		auto const x = std::regex(s);
-		return [x](fmt::string_view u)
+		return [x](fmt::string::view u)
 		{
 			std::cmatch cm;
 			auto const s = fmt::to_string(u);
@@ -166,7 +166,7 @@ namespace env::dir
 		};
 	}
 
-	entry to(fmt::vector_string& t)
+	entry to(fmt::string::vector::ref t)
 	{
 		return [&](fmt::string_view u)
 		{
@@ -176,7 +176,7 @@ namespace env::dir
 		};
 	}
 
-	entry to(fmt::string &s)
+	entry to(fmt::string::ref s)
 	{
 		return [&](fmt::string_view u)
 		{
@@ -185,7 +185,7 @@ namespace env::dir
 		};
 	}
 
-	bool fail(fmt::string_view path, file::mode am)
+	bool fail(fmt::string::view path, file::mode am)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -209,9 +209,9 @@ namespace env::dir
 		return st.st_mode & mask;
 	}
 
-	fmt::string_view make(fmt::string_view path)
+	fmt::string::view make(fmt::string::view path)
 	{
-		std::stack<fmt::string_view> stack;
+		std::stack<fmt::string::view> stack;
 		fmt::string buf;
 
 		auto folders = fmt::dir::split(path);
@@ -246,7 +246,7 @@ namespace env::dir
 		return stem;
 	}
 
-	bool remove(fmt::string_view dir)
+	bool remove(fmt::string::view dir)
 	{
 		std::deque<fmt::string> deque;
 		deque.emplace_back(dir);

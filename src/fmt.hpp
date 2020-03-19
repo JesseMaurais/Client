@@ -35,11 +35,11 @@ namespace fmt
 		using string_vector = vector<string>;
 		using string_span = span<string>;
 
-		using string_view = basic_string_view<Char>;
-		using string_view_vector = vector<string_view>;
-		using string_view_span = span<string_view>;
+		using string::view = basic_string::view<Char>;
+		using string::view_vector = vector<string::view>;
+		using string::view_span = span<string::view>;
 
-		using list_view = std::initializer_list<string_view>;
+		using list_view = std::initializer_list<string::view>;
 
 		template <typename S> static string from(S const& s);
 
@@ -49,7 +49,7 @@ namespace fmt
 			return base::is(x, c);
 		}
 
-		auto check(string_view u) const
+		auto check(string::view u) const
 		/// Classify all characters in a view
 		{
 			std::vector<mask> x(u.size());
@@ -79,7 +79,7 @@ namespace fmt
 			return base::scan_is(x, it, end);
 		}
 
-		auto next(string_view u, mask x = space) const
+		auto next(string::view u, mask x = space) const
 		/// Index of first character in view $u which is an $x
 		{
 			auto const from = begin(u);
@@ -109,7 +109,7 @@ namespace fmt
 			return base::scan_not(x, it, end);
 		}
 
-		auto skip(string_view u, mask x = space) const
+		auto skip(string::view u, mask x = space) const
 		/// Index of first character in view $u which is not $x
 		{
 			auto const from = begin(u);
@@ -117,7 +117,7 @@ namespace fmt
 			return distance(from, to);
 		}
 
-		auto widen(basic_string_view<char> u) const
+		auto widen(basic_string::view<char> u) const
 		/// Decode multibyte characters as wide type
 		{
 			struct iterator : utf
@@ -160,7 +160,7 @@ namespace fmt
 			return range<iterator>({ this, begin }, { nullptr, end });
 		}
 
-		auto narrow(basic_string_view<Char> u) const
+		auto narrow(basic_string::view<Char> u) const
 		/// Encode wide characters as multibyte type
 		{
 			struct iterator
@@ -196,19 +196,19 @@ namespace fmt
 			return range<iterator>({ this, begin }, { nullptr, end });
 		}
 
-		auto first(string_view u, mask x = space) const
+		auto first(string::view u, mask x = space) const
 		/// First iterator in view $u that is not $x
 		{
 			return skip(begin(u), end(u), x);
 		}
 
-		auto last(string_view u, mask x = space) const
+		auto last(string::view u, mask x = space) const
 		/// Last iterator in view $u that is not $x
 		{
 			return skip(rbegin(u), rend(u), x).base();
 		}
 
-		auto trim(string_view u, mask x = space) const
+		auto trim(string::view u, mask x = space) const
 		/// Trim $x off the front and back of $u
 		{
 			auto const before = last(u, x);
@@ -218,7 +218,7 @@ namespace fmt
 			return u.substr(pos, size);
 		}
 
-		auto divide(string_view u, mask x = space) const
+		auto divide(string::view u, mask x = space) const
 		/// Count the quotient in $u that are $x and remainder that are not
 		{
 			pair<size_t> n { 0, 0 };
@@ -236,43 +236,43 @@ namespace fmt
 			return n;
 		}
 
-		auto rem(string_view u, mask x = space) const
+		auto rem(string::view u, mask x = space) const
 		/// Count characters in $u that are not $x
 		{
 			return divide(u, x).second; 
 		}
 
-		auto quot(string_view u, mask x = space) const
+		auto quot(string::view u, mask x = space) const
 		/// Count characters in $u that are $x
 		{
 			return divide(u, x).first;
 		}
 
-		bool all_of(string_view u, mask x = space) const
+		bool all_of(string::view u, mask x = space) const
 		/// All decoded characters in $u are $x
 		{
 			return 0 == rem(u, x);
 		}
 
-		bool none_of(string_view u, mask x = space) const
+		bool none_of(string::view u, mask x = space) const
 		/// No decoded characters in $u are $x
 		{
 			return 0 == quot(u, x);
 		}
 
-		bool clear(string_view u) const
+		bool clear(string::view u) const
 		/// All of view is white space
 		{
 			return all_of(u);
 		}
 
-		bool flush(string_view u) const
+		bool flush(string::view u) const
 		/// None of view is white space
 		{
 			return none_of(u);
 		}
 
-		auto to_upper(string_view u) const
+		auto to_upper(string::view u) const
 		/// Recode characters in upper case
 		{
 			string s;
@@ -284,7 +284,7 @@ namespace fmt
 			return s;
 		}
 
-		auto to_lower(string_view u) const
+		auto to_lower(string::view u) const
 		/// Recode characters in lower case
 		{
 			string s;
@@ -296,13 +296,13 @@ namespace fmt
 			return s;
 		}
 
-		static bool terminated(string_view u)
+		static bool terminated(string::view u)
 		/// Check whether string is null terminated
 		{
 			return not empty(u) and not u[u.size()];
 		}
 
-		static auto count(string_view u)
+		static auto count(string::view u)
 		/// Count characters in view
 		{
 			auto n = null;
@@ -321,7 +321,7 @@ namespace fmt
 			return n;
 		}
 
-		static auto count(string_view u, string_view v)
+		static auto count(string::view u, string::view v)
 		/// Count occurances in $u of a substring $v
 		{
 			auto n = null;
@@ -334,7 +334,7 @@ namespace fmt
 			return n;
 		}
 
-		static auto join(string_view_span t, string_view u)
+		static auto join(string::view_span t, string::view u)
 		/// Join strings in $t with $u inserted between
 		{
 			string s;
@@ -347,16 +347,16 @@ namespace fmt
 			return s;
 		}
 
-		static auto join(list_view t, string_view u)
+		static auto join(string::view::list t, string::view u)
 		{
-			vector_view v(t.begin(), t.end());
-			return join(span_view(v), u);
+			string::view::vector v(t.begin(), t.end());
+			return join(string::view::span(v), u);
 		}
 
-		static auto split(string_view u, string_view v)
+		static auto split(string::view u, string::view v)
 		/// Split strings in $u delimited by $v
 		{
-			string_view_vector t;
+			string::view::vector t;
 			auto const uz = u.size(), vz = v.size();
 			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
 			{
@@ -368,7 +368,7 @@ namespace fmt
 			return t;
 		}
 
-		static auto replace(string_view u, string_view v, string_view w)
+		static auto replace(string::view u, string::view v, string::view w)
 		/// Replace in $u all occurrances of $v with $w
 		{
 			string s;
@@ -383,7 +383,7 @@ namespace fmt
 			return s;
 		}
 
-		static auto embrace(string_view u, string_view v)
+		static auto embrace(string::view u, string::view v)
 		// First matching braces $v front and $v back found in $u
 		{
 			auto i = u.find_first_of(v.front()), j = i;
@@ -417,7 +417,7 @@ namespace fmt
 			return std::pair{ i, j };
 		}
 
-		static auto to_pair(string_view u, string_view v)
+		static auto to_pair(string::view u, string::view v)
 		/// Divide view $u by first occurance of $v
 		{
 			auto const m = u.size();
@@ -450,98 +450,98 @@ namespace fmt
 		return lc.skip(it, end);
 	}
 
-	inline auto widen(string_view u)
+	inline auto widen(string::view u)
 	{
 		return lc.widen(u);
 	}
 
-	inline auto narrow(wstring_view u)
+	inline auto narrow(wstring::view u)
 	{
 		return lw.narrow(u);
 	}
 
-	inline auto first(string_view u)
+	inline auto first(string::view u)
 	{
 		return lc.first(u);
 	}
 
-	inline auto last(string_view u)
+	inline auto last(string::view u)
 	{
 		return lc.last(u);
 	}
 
-	inline auto trim(string_view u)
+	inline auto trim(string::view u)
 	{
 		return lc.trim(u);
 	}
 
-	inline auto to_upper(string_view u)
+	inline auto to_upper(string::view u)
 	{
 		return lc.to_upper(u);
 	}
 
-	inline auto to_lower(string_view u)
+	inline auto to_lower(string::view u)
 	{
 		return lc.to_lower(u);
 	}
 
-	inline bool terminated(string_view u)
+	inline bool terminated(string::view u)
 	{
 		return lc.terminated(u);
 	}
 
-	inline auto count(string_view u)
+	inline auto count(string::view u)
 	{
 		return lc.count(u);
 	}
 
-	inline auto count(string_view u, string_view v)
+	inline auto count(string::view u, string::view v)
 	{
 		return lc.count(u, v);
 	}
 
-	inline auto join(span_view t, string_view u = "")
+	inline auto join(span_view t, string::view u = "")
 	{
 		return lc.join(t, u);
 	}
 
-	inline auto join(list_view t, string_view u = "")
+	inline auto join(list_view t, string::view u = "")
 	{
 		return lc.join(t, u);
 	}
 
-	inline auto split(string_view u, string_view v = "")
+	inline auto split(string::view u, string::view v = "")
 	{
 		return lc.split(u, v);
 	}
 
-	inline auto replace(string_view u, string_view v, string_view w)
+	inline auto replace(string::view u, string::view v, string::view w)
 	{
 		return lc.replace(u, v, w);
 	}
 
-	inline auto embrace(string_view u, string_view v)
+	inline auto embrace(string::view u, string::view v)
 	{
 		return lc.embrace(u, v);
 	}
 
-	inline auto entry(string_view u)
+	inline auto entry(string::view u)
 	{
 		return lc.to_pair(u, "=");
 	}
 
-	inline auto entry(string_view u, string_view v)
+	inline auto entry(string::view u, string::view v)
 	{
-		cc::string_view_vector w { u, v };
+		cc::string::view_vector w { u, v };
 		return lc.join(w, "=");
 	}
 
-	inline auto entry(pair<string_view> p)
+	inline auto entry(pair<string::view> p)
 	{
 		return entry(p.first, p.second);
 	}
 
-	inline bool same(string_view u, string_view v)
+	inline bool same(string::view u, string::view v)
 	{
 		return u.empty() ? v.empty() : 
 			u.data() == v.data() and u.size() == v.size();
@@ -576,13 +576,13 @@ namespace fmt
 	}
 
 	template <>
-	inline string to_string(string_view const& s)
+	inline string to_string(string::view const& s)
 	{
 		return fmt::string(s.data(), s.size());
 	}
 
 	template <>
-	inline wstring to_wstring(wstring_view const& w)
+	inline wstring to_wstring(wstring::view const& w)
 	{
 		return wstring(w.data(), w.size());
 	}
@@ -628,7 +628,7 @@ namespace fmt
 	//
 
 	template <>
-	inline string to_string(wstring_view const& w)
+	inline string to_string(wstring::view const& w)
 	{
 		string s;
 		for (auto const c : narrow(w)) s += c;
@@ -636,7 +636,7 @@ namespace fmt
 	}
 
 	template <>
-	inline wstring to_wstring(string_view const& s)
+	inline wstring to_wstring(string::view const& s)
 	{
 		wstring w;
 		for (auto const c : widen(s)) w += c;
@@ -646,37 +646,37 @@ namespace fmt
 	template <>
 	inline string to_string(wstring const& w)
 	{
-		return to_string(wstring_view(w));
+		return to_string(wstring::view(w));
 	}
 
 	template <>
 	inline wstring to_wstring(string const& s)
 	{
-		return to_wstring(string_view(s));
+		return to_wstring(string::view(s));
 	}
 
 	template <>
 	inline string to_string(wchar_t const*const& w)
 	{
-		return to_string(wstring_view(w));
+		return to_string(wstring::view(w));
 	}
 
 	template <>
 	inline wstring to_wstring(char const*const& s)
 	{
-		return to_wstring(string_view(s));
+		return to_wstring(string::view(s));
 	}
 
 	template <>
 	inline string to_string(wchar_t *const& w)
 	{
-		return to_string(wstring_view(w));
+		return to_string(wstring::view(w));
 	}
 
 	template <>
 	inline wstring to_wstring(char *const& s)
 	{
-		return to_wstring(string_view(s));
+		return to_wstring(string::view(s));
 	}
 
 	template <>

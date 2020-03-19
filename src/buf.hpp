@@ -1,5 +1,5 @@
-#ifndef buf_hpp
-#define buf_hpp
+#ifndef io_hpp
+#define io_hpp
 
 #include <cstring>
 #include <streambuf>
