@@ -116,6 +116,25 @@ namespace fmt
 
 	template
 	<
+		class Iterator
+	>
+	struct range : pair<Iterator>
+	{
+		using base = pair<Iterator>;
+
+		auto begin() const
+		{
+			return base::first;
+		}
+
+		auto end() const
+		{
+			return base::second;
+		}
+	};
+
+	template
+	<
 		class Type
 	>
 	struct memory_traits : std::iterator_traits<Type>
@@ -126,7 +145,7 @@ namespace fmt
 		using cref = base::const_reference;
 		using ptr = base::pointer;
 		using cptr = base::const_pointer;
-		using range = pair<base::iterator>;
+		using range = range<ptr>;
 		using pair = pair<value>;
 		using list = list<value>;
 		using span = span<value>;

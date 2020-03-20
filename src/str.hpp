@@ -52,7 +52,7 @@ namespace fmt
 		auto check(string::view u) const
 		/// Classify all characters in a view
 		{
-			std::vector<mask> x(u.size());
+			vector<mask> x(u.size());
 			base::is(u.data(), u.data() + u.size(), x.data());
 			return x;
 		}
