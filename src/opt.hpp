@@ -1,9 +1,9 @@
 #ifndef opt_hpp
 #define opt_hpp
 
+// local headers
+#include "fmt.hpp"
 #include "env.hpp"
-#include <iosfwd>
-#include <vector>
 
 namespace env::opt
 {
@@ -12,16 +12,18 @@ namespace env::opt
 	using view::span;
 	using view::vector;
 	using view::pair;
-	using word = long long;
-	using quad = long double;
+	using string::in;
+	using string::out;
+	using word = short;
+	using quad = float;
 	using cast = view(*)(view);
 
 	extern string::view const application;
-	extern env::span const& arguments;
-	extern env::view const& program;
-	extern env::view const& config;
-	extern env::view const& cache;
-	extern env::view const& run;
+	extern env::span::ref arguments;
+	extern env::view::ref program;
+	extern env::view::ref config;
+	extern env::view::ref cache;
+	extern env::view::ref run;
 
 	inline auto arg(size_t argn)
 	{

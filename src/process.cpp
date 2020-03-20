@@ -11,12 +11,12 @@ namespace env::file
 	bool process::start(fmt::string::view::list args)
 	{
 		fmt::string::view::vector t(args);
-		return start(fmt::span_view(t));
+		return start(fmt::string::view::span(t));
 	}
 
 	bool process::start(fmt::string::view::span args)
 	{
-		fmt::vector<fmt::string::const_pointer> list;
+		fmt::vector<fmt::string::cptr> list;
 		auto s = fmt::join(args);
 		for (auto u : fmt::split(s))
 		{

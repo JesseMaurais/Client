@@ -1,37 +1,47 @@
 #ifndef env_hpp
 #define env_hpp
 
-#include "str.hpp"
+#include "fmt.hpp"
 #include "tmp.hpp"
 
 namespace env
 {
+	using fmt::string;
+
 	namespace var
 	{
-		bool got(fmt::string_view);
-		fmt::string_view get(fmt::string_view);
-		bool set(fmt::string_view);
-		bool put(fmt::string_view);
-		bool put(fmt::string_view, fmt::string_view);
-		fmt::string value(fmt::string_view);
+		using string::view;
+
+		bool got(view);
+		view get(view);
+		bool set(view);
+		bool put(view);
+		bool put(view, view);
+		string value(view);
 	}
 
 	template 
 	<
-		template <class> class Access
 		class Type
+		template <class> Access = attribute
 	>
 	struct variable : Access<Type>
 	{ 
 		using traits = fmt::memory_traits<Type>;
-		using type = traits::type;
-		using ref = traits::ref;
+		using traits::cref;
+		using traits::ref;
 	};
 
-	using size = variable<property, fmt::string::size_type>;
-	using view = variable<property, fmt::string::view>;
-	using span = variable<property, fmt::string::view::span>;
-	using pair = variable<property, fmt::pair_view_span>;
+	template
+	<
+		class Type
+	>
+	using constant = variable<Type, property>;
+
+	using size = constant<string::size_type>;
+	using view = constant<string::view>;
+	using span = constant<string::view::span>;
+	using pair = constant<std::pair<string::view, string::view::span>>;
 
 	extern view::ref os;
 	extern span::ref paths;

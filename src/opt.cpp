@@ -21,9 +21,9 @@ namespace
 {
 	struct : env::span
 	{
-		mutable env::opt::list list;
+		env::opt::list list;
 
-		operator fmt::span_view() const final
+		operator type() const final
 		{
 			return list;
 		}
@@ -32,12 +32,12 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
-			static fmt::string_view u;
+			static string::view u;
 			if (empty(u))
 			{
-				fmt::span<fmt::string_view> const args = env::opt::arguments;
+				fmt::string::view::span const args = env::opt::arguments;
 				assert(not empty(args));
 				auto const path = args.front();
 				assert(not empty(path));
@@ -56,7 +56,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			static fmt::string s;
 			if (empty(s))
@@ -71,7 +71,7 @@ namespace
 
 	struct : env::view
 	{
-		operator fmt::string_view() const final
+		operator type() const final
 		{
 			static auto const s = env::opt::directory(env::usr::run_dir);
 			static auto const run = env::dir::tmp(s);
@@ -83,10 +83,10 @@ namespace
 	auto& open()
 	{
 		static doc::ini keys;
-		fmt::string_view const path = env::opt::config;
+		fmt::string::view const path = env::opt::config;
 		auto const s = fmt::to_string(path);
 		std::ifstream file(s);
-		if (file) file >> keys;
+		while (file >> keys);
 		return keys;
 	}
 
@@ -133,10 +133,10 @@ namespace
 
 namespace env::opt
 {
-	env::span const& arguments = ARGUMENTS;
-	env::view const& program = PROGRAM;
-	env::view const& config = CONFIG;
-	env::view const& run = RUN;
+	env::span::ref arguments = ARGUMENTS;
+	env::view::ref program = PROGRAM;
+	env::view::ref config = CONFIG;
+	env::view::ref run = RUN;
 
 	string directory(view base)
 	{

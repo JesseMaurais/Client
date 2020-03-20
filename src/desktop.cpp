@@ -4,14 +4,14 @@
 
 namespace env::desktop
 {
-	bool is(fmt::string_view name)
+	bool is(fmt::string::view name)
 	{
 		auto const current = fmt::to_lower(env::usr::current_desktop);
 		auto const lower = fmt::to_lower(name);
 		return current.find(lower) != fmt::npos;
 	}
 
-	dialog::dialog(fmt::span_view args)
+	dialog::dialog(fmt::string::view::span args)
 	{
 		constexpr auto program = "zenity";
 
@@ -20,7 +20,7 @@ namespace env::desktop
 			return;
 		}
 
-		fmt::vector<fmt::string::const_pointer> list;
+		fmt::vector<fmt::string::cptr> list;
 
 		auto s = fmt::join(args);
 		for (auto u : fmt::split(s))

@@ -1,23 +1,24 @@
 #ifndef key_hpp
 #define key_hpp
 
+// local headers
+#include "fmt.hpp"
 #include "opt.hpp"
-#include <vector>
 
 namespace env::opt
 {
-	using array = std::vector<word>;
-	using words = fmt::span<word>;
-	using list = fmt::vector_view;
+	using vector = fmt::vector<word>;
+	using span = fmt::span<word>;
+	using view = fmt::string::view;
 
 	bool got(word key);
 	view get(word key);
 	word set(view key);
 	word put(view key);
 
-	list get(words say);
-	array set(span say);
-	array put(span say);
+	view::vector get(view::span say);
+	vector set(span say);
+	vector put(span say);
 }
 
 #endif // file

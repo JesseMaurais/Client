@@ -1,5 +1,6 @@
 #include "key.hpp"
 #include "dig.hpp"
+#include "file.hpp"
 #ifdef _WIN32
 #include "win/sync.hpp"
 #else
@@ -10,7 +11,7 @@
 namespace
 {
 	sys::rwlock lock;
-	fmt::vector_string store;
+	fmt::string::vector store;
 
 	auto to_word(fmt::size_type sz)
 	{
@@ -20,6 +21,9 @@ namespace
 
 namespace env::opt
 {
+	using file::size_t;
+	using file::ssize_t;
+
 	bool got(word key)
 	{
 		auto const unlock = lock.read();
@@ -46,23 +50,29 @@ namespace env::opt
 		auto const unlock = lock.write();
 		auto const begin = store.begin();
 		auto const end = store.end();
-		auto const it = std::find(begin, end, value);
-		auto const index = std::distance(begin, it);
+		auto it = std::find_if(begin, end, [value](auto u)
+		{
+			return value == u;
+		});
+
 		if (it == end)
 		{
-			static std::set<fmt::string> buf;
-			auto const& pair = buf.emplace(value);
-			auto const it = pair.first;
+			static fmt::string::set buf;
+			bool unique;
+			auto [it, unique] = buf.emplace(value);
+			verify(unique);
 			auto const ptr = it->data();
 			auto const sz = it->size();
 			store.emplace_back(ptr, sz);
 		}
+
+		auto const index = std::distance(begin, it);
 		return to_word(index);
 	}
 
-	list get(words say)
+	view::vector get(view::span say)
 	{
-		list items;
+		view::vector items;
 		for (auto it : say)
 		{
 			items.emplace_back(get(it));
@@ -70,9 +80,9 @@ namespace env::opt
 		return items;
 	}
 
-	array set(span say)
+	vector set(span say)
 	{
-		array items;
+		vector items;
 		for (view it : say)
 		{
 			items.emplace_back(set(it));
@@ -80,9 +90,9 @@ namespace env::opt
 		return items;
 	}
 
-	array put(span say)
+	vector put(span say)
 	{
-		array items;
+		vector items;
 		for (view it : say)
 		{
 			items.emplace_back(put(it));

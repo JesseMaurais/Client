@@ -7,13 +7,13 @@
 
 namespace env::desktop
 {
-	bool is(fmt::string_view name);
+	bool is(fmt::string::view name);
 	/// Whether $name of desktop session
 
 	struct dialog : env::file::process
 	/// Start a basic dialog type
 	{
-		explicit dialog(fmt::span_view args);
+		explicit dialog(fmt::string::view::span args);
 
 	private:
 
