@@ -21,8 +21,7 @@
 #include <system_error>
 #include <exception>
 #include <sstream>
-#include "io.hpp"
-#include "str.hpp"
+#include "fmt.hpp"
 
 // Pessimistic boolean
 
@@ -38,9 +37,9 @@ namespace fmt
 		char const *file; int const line; char const *func;
 	};
 
-	out operator<<(out, where const &);
-	out operator<<(out, std::errc const &);
-	out operator<<(out, std::exception const &);
+	fmt::string::out operator<<(fmt::string::out, where const &);
+	fmt::string::out operator<<(fmt::string::out, std::errc const &);
+	fmt::string::out operator<<(fmt::string::out, std::exception const &);
 
 	template <typename Arg, typename... Args>
 	auto err(Arg arg, Args... args)

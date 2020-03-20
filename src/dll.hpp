@@ -1,7 +1,7 @@
 #ifndef dll_hpp
 #define dll_hpp
 
-#include "str.hpp"
+#include "fmt.hpp"
 
 #ifdef _WIN32
 #define dynamic extern "C" __declspec(dllexport)
@@ -19,11 +19,15 @@ namespace sys
 		dll(fmt::string_view path);
 		~dll();
 
-		static dll find(fmt::string_view name);
+		static dll find(fmt::string::view name);
 	
-		template <typename S> auto sym(fmt::string_view name) const
+		template 
+		<
+			class Type
+		> 
+		auto sym(fmt::string::view name) const
 		{
-			S *addr = nullptr;
+			Type *addr = nullptr;
 			// see pubs.opengroup.org
 			*(void**)(&addr) = sym(name);
 			return addr;
@@ -37,7 +41,7 @@ namespace sys
 	private:
 
 		void *ptr = nullptr;
-		void *sym(fmt::string_view) const;
+		void *sym(fmt::string::view) const;
 	};
 }
 

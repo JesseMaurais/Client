@@ -24,40 +24,25 @@ namespace env::dir
 {
 	using fmt::string;
 	using entry = predicate<string::view>;
-	using pair = std::pair<string::view, string::view::span>;
+	using order = constant<string::view::node>;
 
+	extern order::ref paths;  // pwd, paths
+	extern order::ref config; // config_home, config_dirs
+	extern order::ref data;   // data_home, data_dirs
+
+	constexpr auto stop = always<string::view>;
+	constexpr auto next = never<string::view>;
 	entry mask(file::mode);
 	entry regx(string::view);
 	entry to(string::ref);
 	entry to(string::vector::ref);
-	constexpr auto stop = always<string::view>;
-	constexpr auto skip = never<string::view>;
+	entry all(string::view, file::mode = file::ok, entry = next);
+	entry any(string::view, file::mode = file::ok, entry = stop);
 
-	static auto
-		ex = mask(file::ex),
-		wr = mask(file::wr),
-		rd = mask(file::rd),
-		ok = mask(file::ok),
-		rw = mask(file::rw),
-		rwx = mask(file::rwx);
-
-	inline auto all(string::view u, file::mode m = file::ok, entry e = skip)
-	{
-		return mask(m) || regx(u) || e;
-	}
-
-	inline auto any(string::view u, file::mode m = file::ok)
-	{
-		return all(u, m, stop);
-	}
-
-	extern env::pair::ref paths;
-	extern env::pair::ref config;
-	extern env::pair::ref data;
-
-	bool find(string::view::span, entry);
 	bool find(string::view, entry);
-	bool find(pair, entry);
+	bool find(string::view::span, entry);
+	bool find(string::span, entry);
+	bool find(string::view::node, entry);
 
 	bool fail(string::view path, file::mode = file::ok);
 	string::view make(string::view path);

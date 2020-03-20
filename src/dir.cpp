@@ -8,46 +8,14 @@
 #include "opt.hpp"
 #include "sys.hpp"
 #include "file.hpp"
-
 #ifdef _WIN32
 # include "win/file.hpp"
 #else
 # include "uni/dirent.hpp"
 #endif
-
 #include <algorithm>
 #include <regex>
 #include <stack>
-
-namespace
-{
-	struct : env::pair
-	{
-		operator fmt::pair_view_span() const final
-		{
-			return { env::pwd, env::paths };
-		}
-
-	} PATHS;
-
-	struct : env::pair
-	{
-		operator fmt::pair_view_span() const final
-		{
-			return { env::usr::config_home, env::usr::config_dirs };
-		}
-
-	} CONFIG;
-
-	struct : env::pair
-	{
-		operator fmt::pair_view_span() const final
-		{
-			return { env::usr::data_home, env::usr::data_dirs };
-		}
-
-	} DATA;
-}
 
 namespace fmt::dir
 {
@@ -85,16 +53,43 @@ namespace fmt::path
 	}
 }
 
+namespace
+{
+	struct : env::pair
+	{
+		operator type() const final
+		{
+			return { env::pwd, env::paths };
+		}
+
+	} PATHS;
+
+	struct : env::pair
+	{
+		operator type() const final
+		{
+			return { env::usr::config_home, env::usr::config_dirs };
+		}
+
+	} CONFIG;
+
+	struct : env::pair
+	{
+		operator type() const final
+		{
+			return { env::usr::data_home, env::usr::data_dirs };
+		}
+
+	} DATA;
+}
+
 namespace env::dir
 {
-	env::pair const& paths = PATHS;
-	env::pair const& config = CONFIG;
-	env::pair const& data = DATA;
+	order::ref paths = PATHS;
+	order::ref config = CONFIG;
+	order::ref data = DATA;
 
-	using namespace ::env;
-	using namespace ::env::usr;
-
-	bool find(fmt::string::view path, entry look)
+	bool find(string::view path, entry look)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -113,9 +108,9 @@ namespace env::dir
 		return failure;
 	}
 
-	bool find(fmt::string::view::span list, entry look)
+	bool find(string::view::span paths, entry look)
 	{
-		for (auto const path : list)
+		for (auto const path : paths)
 		{
 			if (find(path, look))
 			{
@@ -125,9 +120,31 @@ namespace env::dir
 		return false;
 	}
 
-	bool find(fmt::pair_view_span pair, entry look)
+	bool find(string::span paths, entry look)
 	{
-		return find(pair.first, look) or find(pair.second, look);
+		for (auto const path : paths)
+		{
+			if (find(path, look))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool find(string::view::span paths, entry look)
+	{
+		return find(paths.first, look) or find(paths.second, look);
+	}
+
+	entry all(string::view u, file::mode m, entry e)
+	{
+		return mask(m) || regex(u) || e;
+	}
+
+	entry any(string::view u, file::mode m, entry e)
+	{
+		return all(u, m, e);
 	}
 
 	entry mask(file::mode am)

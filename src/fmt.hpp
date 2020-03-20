@@ -130,6 +130,7 @@ namespace fmt
 		using pair = pair<value>;
 		using list = list<value>;
 		using span = span<value>;
+		using node = std::pair<value, span>;
 		using size = std::size_t;
 		using diff = base::difference_type;
 	};
@@ -213,7 +214,18 @@ namespace fmt
 		using stream::io;
 		using stream::buf;
 		using stream::file;
+
 		using traits = struct_traits<String>;
+		using traits::ref;
+		using traits::cref;
+		using traits::ptr;
+		using traits::cptr;
+		using traits::range;
+		using traits::pair;
+		using traits::list;
+		using traits::span;
+		using traits::node;
+
 		using vector = traits::vector<Alloc>;
 
 		template

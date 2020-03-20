@@ -8,7 +8,7 @@
 namespace
 {
 	template <typename T, typename C>
-	T to_fp(fmt::string_view u, T nan, C* cast)
+	T to_fp(fmt::string::view u, T nan, C* cast)
 	{
 		char *it;
 		auto ptr = u.data();
@@ -22,7 +22,7 @@ namespace
 	}
 
 	template <typename T>
-	T to_base(fmt::string_view u, int base)
+	T to_base(fmt::string::view u, int base)
 	{
 		auto begin = u.data();
 		auto end = begin + u.size();

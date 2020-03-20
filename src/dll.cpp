@@ -16,10 +16,10 @@
 
 namespace sys
 {
-	dll::dll(fmt::string_view path)
+	dll::dll(fmt::string::view path)
 	{
 		auto const buf = fmt::to_string(path);
-		auto const s = data(buf);
+		auto const s = buf.data();
 
 		#ifdef _WIN32
 		{
@@ -63,10 +63,10 @@ namespace sys
 		#endif
 	}
 
-	void *dll::sym(fmt::string_view name) const
+	void *dll::sym(fmt::string::view name) const
 	{
 		auto const buf = fmt::to_string(name);
-		auto const s = data(buf);
+		auto const s = buf.data();
 
 		#ifdef _WIN32
 		{
