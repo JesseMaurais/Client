@@ -10,13 +10,13 @@
 
 namespace
 {
-	sys::rwlock lock;
-	fmt::string::vector store;
-
 	auto to_word(fmt::size_type sz)
 	{
 		return fmt::to<env::opt::word>(sz);
 	}
+
+	fmt::string::view::vector store;
+	sys::rwlock lock;
 }
 
 namespace env::opt
@@ -40,8 +40,14 @@ namespace env::opt
 	word put(view value)
 	{
 		auto const unlock = lock.write();
-		auto const index = store.size();
-		store.emplace_back(value);
+		auto const begin = store.begin();
+		auto const end = store.end();
+		auto const it = std::find_if(begin, end, std::bind(std::equal_to, value));
+		auto const index = std::distance(begin, it);
+		if (it == end)
+		{
+			store.emplace_back(value);
+		}
 		return to_word(index);
 	}
 
@@ -50,23 +56,17 @@ namespace env::opt
 		auto const unlock = lock.write();
 		auto const begin = store.begin();
 		auto const end = store.end();
-		auto it = std::find_if(begin, end, [value](auto u)
-		{
-			return value == u;
-		});
-
+		auto const it = std::find_if(begin, end, std::bind(std::equal_to, value));
+		auto const index = std::distance(begin, it);
 		if (it == end)
 		{
 			static fmt::string::set buf;
-			bool unique;
-			auto [it, unique] = buf.emplace(value);
+			auto const [that, unique] = buf.emplace(value);
 			verify(unique);
-			auto const ptr = it->data();
-			auto const sz = it->size();
+			auto const ptr = that->data();
+			auto const sz = that->size();
 			store.emplace_back(ptr, sz);
 		}
-
-		auto const index = std::distance(begin, it);
 		return to_word(index);
 	}
 

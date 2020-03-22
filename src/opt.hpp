@@ -100,8 +100,8 @@ namespace env::opt
 		T value;
 	};
 
-	std::istream & get(std::istream &);
-	std::ostream & put(std::ostream &);
+	in::ref get(in::ref);
+	out::ref put(out::ref);
 
 	string directory(view);
 	string initials(view);

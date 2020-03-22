@@ -10,7 +10,6 @@ namespace fmt::ascii
 	template <char Min, char Max> struct range : ::fmt::range<char>
 	{
 		using base = ::fmt::range<char>;
-		using base::base;
 		range() : base(Min, Max) { }
 	};
 

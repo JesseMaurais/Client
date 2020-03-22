@@ -74,6 +74,22 @@ namespace fmt
 
 	template
 	<
+		class Type,
+		template <class> class Sort = std::less,
+		template <class> class Alloc = std::allocator
+	>
+	using node = std::pair<Type, set<Type, Sort, Alloc>>;
+
+	template
+	<
+		class Type,
+		template <class> class Sort = std::less,
+		template <class> class Alloc = std::allocator
+	>
+	using graph = set<pair<Type>, Sort, Alloc>;
+
+	template
+	<
 		class Char,
 		template <class> class Traits = std::char_traits
 	>
@@ -149,7 +165,7 @@ namespace fmt
 		using pair = pair<value>;
 		using list = list<value>;
 		using span = span<value>;
-		using node = std::pair<value, span>;
+		using node = node<value>;
 		using size = std::size_t;
 		using diff = base::difference_type;
 	};
@@ -244,12 +260,12 @@ namespace fmt
 		using traits::list;
 		using traits::span;
 		using traits::node;
-
+		using graph = traits::graph<Alloc>;
 		using vector = traits::vector<Alloc>;
 
 		template
 		<
-			class sort = std::less
+			class Sort = std::less
 		>
 		using set = traits::set<Sort, Alloc>;
 
@@ -282,6 +298,7 @@ namespace fmt
 	struct basic_string_view : string_traits<basic_string_view<Char, Traits>, Sort, Alloc>
 	{ 
 		using base = string_traits<basic_string_view<Char, Traits>, Sort, Alloc>;
+		using base::base;
 	};
 
 	template
@@ -294,6 +311,7 @@ namespace fmt
 	struct basic_string : string_traits<basic_string<Char, Traits, Alloc>, Sort, Alloc>
 	{ 
 		using base = string_traits<basic_string<Char, Traits, Alloc>, Sort, Alloc>;
+		using base::base;
 		using view = basic_string_view<Char, Traits, Sort, Alloc>;
 	};
 
@@ -301,6 +319,7 @@ namespace fmt
 	using string = basic_string<char>;
 	using wstring = basic_string<wchar_t>;
 //	using binary = basic_string<byte>;
+//	using ustring = basic_string<wint_t>;
 
 	using string::size_type;
 	constexpr auto npos = string::npos;

@@ -384,7 +384,7 @@ namespace fmt
 		}
 
 		static auto embrace(string::view u, string::view v)
-		// First matching braces $v front and $v back found in $u
+		/// First matching braces $v front and $v back found in $u
 		{
 			auto i = u.find_first_of(v.front()), j = i;
 			if (i < npos)
@@ -522,20 +522,20 @@ namespace fmt
 		return str.embrace(u, v);
 	}
 
-	inline auto entry(string::view u)
+	inline auto to_pair(string::view u, string::view v = "=")
 	{
-		return str.to_pair(u, "=");
+		return str.to_pair(u, v);
 	}
 
-	inline auto entry(string::view u, string::view v)
+	inline auto to_pair(string::view u, string::view v, string::view w = "=")
 	{
-		string::view::vector w { u, v };
-		return str.join(w, "=");
+		string::view::vector x { u, v };
+		return str.join(x, w);
 	}
 
-	inline auto entry(string::view::pair p)
+	inline auto to_pair(string::view::pair p, string::view u = "=")
 	{
-		return entry(p.first, p.second);
+		return to_pair(p.first, p.second, u);
 	}
 
 	inline bool same(string::view u, string::view v)

@@ -8,33 +8,34 @@
 
 namespace doc
 {
-	struct ini
+	struct ini : fmt::struct_traits<ini>
 	{
 		using fmt::string;
 		using string::view;
 		using view::pair;
 		using view::span;
+		using view::list;
+		using view::node;
+		using view::graph;
 		using view::vector;
 		using string::in;
 		using string::out;
+		
+		std::map<view, graph> keys;
 
-		static string join(span value);
-		static vector split(view value);
-		static in::ref getline(in::ref, string &);
-		friend in::ref operator>>(in::ref, ini &);
-		friend out::ref operator<<(out::ref, ini &);
+		static in::ref getline(in::ref, string::ref);
+		friend in::ref operator>>(in::ref, ini::ref);
+		friend out::ref operator<<(out::ref, ini::cref);
 
-		bool got(pair key) const;
-		view get(pair key) const;
-		bool set(pair key, view value);
-		bool put(pair key, view value);
-		bool cut(pair key);
+		static string join(span);
+		static vector split(view);
+		static string join(list);
 
-	private:
-
-		std::map<pair, view> map;
-		string::set buf;
-		view store(view);
+		bool got(pair) const;
+		view get(pair) const;
+		bool set(pair, view);
+		bool put(pair, view);
+		bool cut(pair);
 	};
 }
 

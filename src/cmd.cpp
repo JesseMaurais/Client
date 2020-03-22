@@ -1,6 +1,6 @@
 #include "cmd.hpp"
 #include "err.hpp"
-#include "pid.hpp"
+#include "ps.hpp"
 
 namespace env::cmd
 {

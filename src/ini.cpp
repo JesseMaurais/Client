@@ -1,13 +1,11 @@
 #include "ini.hpp"
-#include "fmt.hpp"
+#include "key.hpp"
+#include "str.hpp"
 #include "err.hpp"
-
-using view = doc::ini::view;
-using pair = doc::ini::pair;
 
 namespace
 {
-	bool header(view u)
+	bool header(fmt::string::view u)
 	{
 		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}
@@ -17,17 +15,22 @@ namespace
 
 namespace doc
 {
-	ini::string ini::join(ini::span value)
+	auto ini::join(span p)
 	{
-		return fmt::join(value, list_separator);
+		return fmt::join(p, list_separator);
 	}
 
-	ini::vector ini::split(ini::view value)
+	auto ini::split(view u)
 	{
-		return fmt::split(value, list_separator);
+		return fmt::split(u, list_separator);
 	}
 
-	std::istream & ini::getline(std::istream & in, ini::string & s)
+	auto ini::join(list p)
+	{
+		return fmt::join(p, list_separator);
+	}
+
+	ini::in::ref ini::getline(in::ref in, string::ref s)
 	{
 		constexpr char c = '#';
 		while (std::getline(in, s))
@@ -37,7 +40,7 @@ namespace doc
 			{
 				auto const t = s.find(c);
 				s = s.substr(0, t);
-				fmt::string_view const u = fmt::trim(s);
+				auto const u = fmt::trim(s);
 				if (not empty(u))
 				{
 					s = fmt::to_string(u);
@@ -48,16 +51,16 @@ namespace doc
 		return in;
 	}
 
-	std::istream & operator>>(std::istream & in, ini & keys)
+	ini::in::ref operator>>(ini::in::ref in, ini::ref group)
 	{
-		fmt::string key;
-		fmt::string line;
+		ini::string key, line;
 		while (ini::getline(in, line))
 		{
 			if (header(line))
 			{
-				key = line.substr(1, size(line) - 2);
-				if ("---" == key) break;
+				auto const z = line.size();
+				key = line.substr(1, z - 2);
+				if (empty(key)) break;
 				continue;
 			}
 
@@ -67,7 +70,7 @@ namespace doc
 				break;
 			}
 
-			auto const p = fmt::entry(line);
+			auto const p = fmt::to_pair(line);
 			pair const e { key, p.first };
 			if (not keys.put(e, p.second))
 			{
@@ -77,7 +80,7 @@ namespace doc
 		return in;
 	}
 
-	std::ostream & operator<<(std::ostream & out, ini & keys)
+	ini::out::ref operator<<(ini::out::ref out, ini::cref keys)
 	{
 		view key;
 		for (auto const &it : keys.map)
@@ -94,30 +97,49 @@ namespace doc
 
 	bool ini::got(pair key) const
 	{
-		return map.find(key) != map.end();
+		auto const it = keys.find(key.first);
+		if (keys.end() != it)
+		{
+			for (auto const item : it->second)
+			{
+				if (item.first == key.second)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	view ini::get(pair key) const
 	{
-		auto const it = map.find(key);
-		if (map.end() != it)
+		auto const it = keys.find(key.first);
+		if (keys.end() != it)
 		{
-			return it->second;
+			for (auto const item : it->second)
+			{
+				if (item.first == key.second)
+				{
+					return item.second;
+				}
+			}
 		}
 		return fmt::nil;
 	}
 
 	bool ini::set(pair key, view value)
 	{
-		return map.insert_or_assign(key, value).second;
+		auto [it, unique] = keys.insert_or_assign(key.first);
+		it->second.emplace_back(fmt::to_pair(key.second, value));
+		return unique;
 	}
 
 	bool ini::cut(pair key)
 	{
-		auto it = map.find(key);
-		if (map.end() != it)
+		auto it = keys.find(key);
+		if (keys.end() != it)
 		{
-			map.erase(it);
+			keys.erase(it);
 			return true;
 		}
 		return false;
@@ -125,15 +147,10 @@ namespace doc
 
 	bool ini::put(pair key, view value)
 	{
-		key.first = store(key.first);
-		key.second = store(key.second);
-		value = store(value);
+		env::opt::dup(key.first);
+		env::opt::dup(key.second);
+		env::opt::dup(value);
 		return set(key, value);
-	}
-
-	view ini::store(view u)
-	{
-		return *buf.emplace(u).first;
 	}
 }
 
