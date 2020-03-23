@@ -14,7 +14,7 @@ namespace doc
 		using string::view;
 		using view::pair;
 		using view::span;
-		using view::list;
+		using view::init;
 		using view::node;
 		using view::graph;
 		using view::vector;

@@ -7,14 +7,17 @@
 
 namespace env::opt
 {
-	using vector = fmt::vector<word>;
-	using span = fmt::span<word>;
-	using view = fmt::string::view;
+	using traits = fmt::struct_traits<word>;
+	using traits::graph;
+	using traits::node;
+	using traits::range;
+	using fmt::string;
+	using string::view;
 
-	bool got(word key); /// Whether $key exists
-	view get(word key); /// Value at $key
-	word set(view key); /// Index for value of $key
-	word put(view key); /// Index for $key
+	bool got(word);
+	view get(word);
+	word set(view);
+	word put(view);
 
 	view::vector get(view::span say);
 	vector set(span say);

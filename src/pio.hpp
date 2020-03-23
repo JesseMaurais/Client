@@ -1,5 +1,5 @@
-#ifndef ips_hpp
-#define ips_hpp // Inter-Process Stream
+#ifndef pio_hpp
+#define pio_hpp // Process Input/Output
 
 #include <initializer_list>
 #include <iostream>

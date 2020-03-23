@@ -36,6 +36,13 @@ namespace fmt
 		using typename base::mask;
 		using traits = memory_traits<type>;
 		using string = basic_string<Char>;
+		using string::size_type;
+
+		constexpr auto npos = string::npos;
+		constexpr auto null = size_type(0);
+		constexpr Char eol = '\n';
+
+		static_assert(null == ~npos);
 
 		template 
 		<
@@ -347,7 +354,7 @@ namespace fmt
 			return s;
 		}
 
-		static auto join(string::view::list t, string::view u)
+		static auto join(string::view::init t, string::view u)
 		{
 			string::view::vector v(t.begin(), t.end());
 			return join(string::view::span(v), u);
@@ -430,8 +437,8 @@ namespace fmt
 
 	// Common characters
 
-	extern type<char>::ref str;
-	extern type<wchar_t>::ref wstr;
+	extern variable<type<char>::ref> str;
+	extern variable<type<wchar_t>::ref> wstr;
 
 	// C locale shims
 
@@ -502,7 +509,7 @@ namespace fmt
 		return str.join(t, u);
 	}
 
-	inline auto join(string::view::list t, string::view u = "")
+	inline auto join(string::view::init t, string::view u = "")
 	{
 		return str.join(t, u);
 	}

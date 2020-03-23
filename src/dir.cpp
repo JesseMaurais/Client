@@ -24,7 +24,7 @@ namespace fmt::dir
 		return fmt::join(p, sys::sep::dir);
 	}
 
-	string join(string::view::list p)
+	string join(string::view::init p)
 	{
 		return fmt::join(p, sys::sep::dir);
 	}
@@ -42,7 +42,7 @@ namespace fmt::path
 		return fmt::join(p, sys::sep::path);
 	}
 
-	string join(string::view::list p)
+	string join(string::view::init p)
 	{
 		return fmt::join(p, sys::sep::path);
 	}
