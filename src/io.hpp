@@ -5,26 +5,20 @@
 #include <streambuf>
 #include "file.hpp"
 #include "dig.hpp"
-#include "str.hpp"
+#include "fwd.hpp"
 #include "tmp.hpp"
 
 namespace fmt
 {
 	template
 	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
-	class basic_streambuf : public std::basic_streambuf<Char, Traits<Char>>
+	struct basic_streambuf : fwd::basic_streambuf<Char, Traits>
 	{
-		using base = std::basic_streambuf<Char, Traits<Char>>;
-		using ios = std::basic_ios<Char, Traits<Char>>;
-		using string = fmt::basic_string<Char, Traits, Alloc>;
-		using string_view = fmt::basic_string_view<Char, Traits>;
-
-	public:
-
+		using base = fwd::basic_streambuf<Char, Traits>;
 		using char_type = typename base::char_type;
 		using traits_type = typename base::traits_type;
 		using size_type = std::streamsize;
@@ -43,18 +37,6 @@ namespace fmt
 			base::setg(s, t, t);
 			base::setp(t, u);
 			return this;
-		}
-
-		string_view pview() const
-		{
-			auto const sz = base::pptr() - base::pbase();
-			return string_view(base::pbase(), fmt::to_size(sz));
-		}
-
-		string_view gview() const
-		{
-			auto const sz = base::egptr() - base::gptr();
-			return string_view(base::gptr(), sz);
 		}
 
 	protected:
@@ -124,17 +106,14 @@ namespace fmt
 
 	template
 	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
 	class basic_stringbuf : public basic_streambuf<Char, Traits, Alloc>
 	{
 		using base = basic_streambuf<Char, Traits>;
 		using string = basic_string<Char, Traits, Alloc>;
-
-	public:
-
 		using char_type = typename base::char_type;
 		using size_type = typename base::size_type;
 
@@ -167,36 +146,32 @@ namespace fmt
 
 	template
 	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
-	class basic_buf 
-	: public basic_stringbuf<Char, Traits, Alloc>
+	class basic_buf : public basic_stringbuf<Char, Traits, Alloc>
 	{
 		using base = basic_stringbuf<Char, Traits, Alloc>;
-
-		env::file::stream const& f;
-
-	public:
-
 		using size_type = typename base::size_type;
 		using char_type = typename base::char_type;
 
 		basic_buf(env::file::stream const& obj) : f(obj) { };
 
+	protected:
+
+		env::file::stream const& f;
+
 	private:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
-			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return f.write(s, sz);
+			return f.write(s, fmt::to_size(n));
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
-			auto const sz = fmt::to_size(sizeof (char_type) * n);
-			return f.read(s, sz);
+			return f.read(s, fmt::to_size(n));
 		}
 
 		using base::base;
@@ -204,19 +179,15 @@ namespace fmt
 
 	template
 	<
-	 template <class, class> class Stream,
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		template <class, class> class Stream,
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
-	class basic_stream : unique
-	, public basic_buf<Char, Traits, Alloc>
-	, public Stream<Char, Traits<Char>>
+	struct basic_stream : unique, Stream<Char, Traits>, basic_buf<Char, Traits, Alloc>
 	{
-		using stream = Stream<Char, Traits<Char>>;
+		using stream = Stream<Char, Traits>;
 		using buf = basic_buf<Char, Traits, Alloc>;
-
-	public:
 
 		basic_stream(env::file::stream const& f) 
 		: buf(f), stream(this)
@@ -225,13 +196,13 @@ namespace fmt
 
 	template 
 	<
-	 class Char, 
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char, 
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
 	using basic_istream = basic_stream
 	<
-	 std::basic_istream, Char, Traits, Alloc
+		fwd::basic_istream, Char, Traits, Alloc
 	>;
 
 	using istream = basic_istream<char>;
@@ -239,13 +210,13 @@ namespace fmt
 
 	template
 	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
 	using basic_ostream = basic_stream
 	<
-	 std::basic_ostream, Char, Traits, Alloc
+		fwd::basic_ostream, Char, Traits, Alloc
 	>;
 
 	using ostream = basic_ostream<char>;
@@ -253,13 +224,13 @@ namespace fmt
 
 	template
 	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
 	using basic_iostream = basic_stream
 	<
-	 std::basic_iostream, Char, Traits, Alloc
+		fwd::basic_iostream, Char, Traits, Alloc
 	>;
 
 	using iostream = basic_iostream<char>;

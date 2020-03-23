@@ -44,31 +44,25 @@ namespace fwd
 
 	template
 	<
-		class Type, 
-		size_t Index, 
+		class Type, size_t Index,
 		template <class> class Sort = std::less
 	>
-	struct indexical
+	struct indexical : Sort<Type>
 	{
-		operator bool(Type x, Type y) const
+		using base = Sort<Type>
+
+		template <class Tuple>
+		bool operator() (Tuple const& x, Type u) const
 		{
-			return Sort(std::get<Index>(x), std::get<Index>(y));
+			return base::operator()(std::get<Index>(x), u);
+		}
+
+		template <class Tuple>
+		bool operator() (Type u, Tuple const& x) const
+		{
+			return base::operator()(u, std::get<Index>(x));
 		}
 	};
-
-	template
-	<
-		class Type,
-		template <class> class Sort = std::less
-	>
-	using first = indexical<Type, 0, Sort>;
-
-	template
-	<
-		class Type,
-		template <class> class Sort = std::less
-	>
-	using second = indexical<Type, 1, Sort>;
 
 	template
 	<
@@ -134,22 +128,21 @@ namespace fwd
 		template <class> class Sort = std::less,
 		template <class> class Alloc = std::allocator
 	>
-	using node = std::pair<Type, range<graph<Type, Sort, Alloc>::const_iterator>>;
+	using node = std::pair<Type, set<Type, Sort, Alloc>>;
 
 	template
 	<
 		class Type,
 		template <class> class Sort = std::less,
-		template <class> class Alloc = std::allocator,
-		class Graph = graph<Type, Sort, Alloc>
+		template <class> class Alloc = std::allocator
 	>
-	auto edges(Graph::const_reference g, Type n, auto begin = g.begin(), auto end = g.end())
+	auto edges(graph<Type, Sort, Alloc>::const_reference g, Type n)
 	{
-		Sort hat;
-		return std::equal_range(begin, end, n, [&](auto p, auto n)
-		{
-			return hat(p.first, n);
-		});
+		indexical<Type, 0, Sort> hat;
+		return range<graph<Type, Sort, Alloc>::iterator>
+		(
+			std::equal_range(begin(g), end(g), n, hat)
+		);
 	}
 
 	// Input/Output
