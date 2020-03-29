@@ -148,7 +148,7 @@ namespace fmt
 	>
 	struct basic_string_view : string_traits<basic_string_view<Char, Traits>, Sort, Alloc>
 	{ 
-		using base = string_traits<basic_string_view<Char, Traits>, Sort, Alloc>;
+		using base = string_traits<fwd::basic_string_view<Char, Traits>, Sort, Alloc>;
 		using base::base;
 	};
 
@@ -161,7 +161,7 @@ namespace fmt
 	>
 	struct basic_string : string_traits<basic_string<Char, Traits, Alloc>, Sort, Alloc>
 	{ 
-		using base = string_traits<basic_string<Char, Traits, Alloc>, Sort, Alloc>;
+		using base = string_traits<fwd::basic_string<Char, Traits, Alloc>, Sort, Alloc>;
 		using base::base;
 		using view = basic_string_view<Char, Traits, Sort, Alloc>;
 	};

@@ -145,6 +145,23 @@ namespace fwd
 		);
 	}
 
+	// Strings
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits
+	>
+	using basic_string_view = std::basic_string_view<Char, Traits<Char>>;
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
+	>
+	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
+
 	// Input/Output
 
 	template
