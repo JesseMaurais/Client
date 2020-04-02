@@ -15,7 +15,7 @@ namespace
 		return fmt::to<env::opt::word>(sz);
 	}
 
-	fmt::string::view::vector store;
+	fmt::string::vector store;
 	sys::rwlock lock;
 }
 

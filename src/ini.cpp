@@ -32,9 +32,9 @@ namespace doc
 
 	ini::in::ref ini::getline(in::ref in, string::ref s)
 	{
-		constexpr char c = '#';
 		while (std::getline(in, s))
 		{
+			constexpr char c = '#';
 			auto const it = fmt::skip(begin(s), end(s));
 			if (it != end(s) and c != *it)
 			{

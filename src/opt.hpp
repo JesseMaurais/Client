@@ -14,11 +14,10 @@ namespace env::opt
 	using view::pair;
 	using string::in;
 	using string::out;
-	using word = short;
-	using quad = float;
-	using cast = view(*)(view);
+	using word = long long;
+	using quad = long double;
 
-	extern string::view const application;
+	extern view const application;
 	extern env::span::ref arguments;
 	extern env::view::ref program;
 	extern env::view::ref config;
