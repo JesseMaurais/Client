@@ -22,7 +22,7 @@ namespace env::opt
 	extern env::view::ref program;
 	extern env::view::ref config;
 	extern env::view::ref cache;
-	extern env::view::ref run;
+	extern env::view::ref rundir;
 
 	inline auto arg(size_t argn)
 	{
@@ -38,10 +38,10 @@ namespace env::opt
 		view text; // descriptive text for users
 	};
 
-	using commands = vector<description>;
+	using commands = std::vector<description>;
+
 	void set(int argc, char** argv);
-	vector parse(commands const& cmd);
-	string to(view, cast);
+	vector put(commands const& cmd);
 
 	bool got(view key);
 	view get(view key);

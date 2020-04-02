@@ -6,11 +6,7 @@
 #include "dig.hpp"
 #include "err.hpp"
 #include "sys.hpp"
-#ifdef _WIN32
-#include "win/sync.hpp"
-#else
-#include "uni/pthread.hpp"
-#endif
+#include "thread.hpp"
 #include <algorithm>
 #include <iterator>
 #include <fstream>
@@ -21,7 +17,7 @@ namespace
 {
 	struct : env::span
 	{
-		env::opt::list list;
+		fmt::string::view::vector list;
 
 		operator type() const final
 		{
@@ -78,25 +74,7 @@ namespace
 			return s;
 		}
 
-	} RUN;
-
-	auto& open()
-	{
-		static doc::ini keys;
-		fmt::string::view const path = env::opt::config;
-		auto const s = fmt::to_string(path);
-		std::ifstream file(s);
-		while (file >> keys);
-		return keys;
-	}
-
-	auto& registry()
-	{
-		static auto& keys = open();
-		return keys;
-	}
-
-	sys::rwlock lock;
+	} RUNDIR;
 
 	auto make_pair(env::opt::view key)
 	{
@@ -129,6 +107,20 @@ namespace
 		}
 		return value;
 	}
+
+	auto& registry()
+	{
+		static sys::exclusive<doc::ini> ini;
+		if (empty(ini.keys))
+		{
+			fmt::string::view const path = env::opt::config;
+			auto const s = fmt::to_string(path);
+			std::ifstream file(s);
+			doc::ini &slice = ini;
+			while (file >> slice);
+		}
+		return ini;
+	}
 }
 
 namespace env::opt
@@ -136,7 +128,7 @@ namespace env::opt
 	env::span::ref arguments = ARGUMENTS;
 	env::view::ref program = PROGRAM;
 	env::view::ref config = CONFIG;
-	env::view::ref run = RUN;
+	env::view::ref rundir = RUNDIR;
 
 	string directory(view base)
 	{
@@ -150,14 +142,14 @@ namespace env::opt
 
 	void set(int argc, char** argv)
 	{
-		auto const unlock = lock.write();
-		auto back = back_inserter(ARGUMENTS.list);
+		auto const lock = registry().write();
+		auto back = std::back_inserter(ARGUMENTS.list);
 		copy(argv, argv + argc, back);
 	}
 
-	list parse(commands const& cmd)
+	vector put(commands const& cmd)
 	{
-		auto const unlock = lock.write();
+		auto const ptr = registry().write();
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
 
@@ -166,8 +158,8 @@ namespace env::opt
 		pair entry;
 
 		word argn = 0;
-		list args;
-		list extra;
+		vector args;
+		vector extra;
 
 		span argv = arguments;
 		for (auto const arg : argv)
@@ -176,19 +168,19 @@ namespace env::opt
 
 			if (arg.starts_with("--"))
 			{
-				entry = fmt::entry(arg.substr(2));
-				next = find_if(begin, end, [&](auto const& desc)
+				entry = fmt::to_pair(arg.substr(2));
+				next = std::find_if(begin, end, [&](auto const& d)
 				{
-					return desc.name == entry.first;
+					return d.name == entry.first;
 				});
 			}
 			else
 			if (arg.starts_with("-"))
 			{
-				entry = fmt::entry(arg.substr(1));
-				next = find_if(begin, end, [&](auto const& desc)
+				entry = fmt::to_pair(arg.substr(1));
+				next = std::find_if(begin, end, [&](auto const& d)
 				{
-					return desc.dash == entry.first;
+					return d.dash == entry.first;
 				});
 			}
 
@@ -219,7 +211,7 @@ namespace env::opt
 					auto const key = make_pair(it->name);
 					if (empty(args))
 					{
-						(void) registry().put(key, entry.second);
+						(void) ptr->put(key, entry.second);
 					}
 				}
 
@@ -231,7 +223,7 @@ namespace env::opt
 				{
 					auto const key = make_pair(it->name);
 					auto const value = doc::ini::join(args);
-					(void) registry().put(key, value);
+					(void) ptr->put(key, value);
 				}
 			}
 		}
@@ -241,12 +233,12 @@ namespace env::opt
 			auto const key = make_pair(it->name);
 			if (empty(args))
 			{
-				(void) registry().put(key, entry.second);
+				(void) ptr->put(key, entry.second);
 			}
 			else
 			{
 				auto const value = doc::ini::join(args);
-				(void) registry().put(key, value);
+				(void) ptr->put(key, value);
 			}
 		}
 
@@ -255,10 +247,10 @@ namespace env::opt
 
 	view get(view key)
 	{
-		span const args = env::opt::arguments;
+		span const args = arguments;
 		for (auto const arg : args)
 		{
-			auto const e = fmt::entry(arg);
+			auto const e = fmt::to_pair(arg);
 			if (e.first == key)
 			{
 				return e.second;
@@ -300,11 +292,11 @@ namespace env::opt
 
 	view get(pair key)
 	{
-		auto const unlock = lock.read();
-		std::set<view> set;
+		auto const ptr = registry().read();
+		view::set set;
 		while (true)
 		{
-			view value = registry().get(key);
+			view value = ptr->get(key);
 			if (value.front() != '@')
 			{
 				return value;
@@ -321,26 +313,22 @@ namespace env::opt
 
 	bool got(pair key)
 	{
-		auto const unlock = lock.read();
-		return registry().got(key);
+		return registry().read()->got(key);
 	}
 
 	bool set(pair key, view value)
 	{
-		auto const unlock = lock.write();
-		return registry().set(key, value);
+		return registry().write()->set(key, value);
 	}
 
 	bool put(pair key, view value)
 	{
-		auto const unlock = lock.write();
-		return registry().put(key, value);
+		return registry().write()->put(key, value);
 	}
 
 	bool cut(pair key)
 	{
-		auto const unlock = lock.write();
-		return registry().cut(key);
+		return registry().write()->cut(key);
 	}
 
 	std::istream & get(std::istream & in)
@@ -367,14 +355,13 @@ namespace env::opt
 
 	bool put(pair key, bool value)
 	{
-		auto const unlock = lock.write();
 		if (value)
 		{
-			return registry().set(key, "enable");
+			return registry().write()->set(key, "enable");
 		}
 		else
 		{
-			return registry().cut(key);
+			return registry().write()->cut(key);
 		}
 	}
 
@@ -436,18 +423,18 @@ namespace env::opt
 		return set(key, fmt::to_string(value));
 	}
 
-	list get(view key, span value)
+	vector get(view key, span value)
 	{
 		auto const entry = make_pair(key);
 		return get(entry, value);
 	}
 
-	list get(pair key, span value)
+	vector get(pair key, span value)
 	{
 		view u = get(key);
 		if (empty(u))
 		{
-			return list(value.begin(), value.end());
+			return vector(value.begin(), value.end());
 		}
 		return doc::ini::split(u);
 	}
