@@ -1,24 +1,38 @@
-#include "cmd.hpp"
+#include "shell.hpp"
 #include "err.hpp"
-#include "ps.hpp"
+#include "desktop.hpp"
 
-namespace env::cmd
+namespace env::shell
 {
-	fmt::string::vector where(fmt::string::view name)
+	span get(in::ref input)
 	{
-		#ifdef _WIN32
-		fmt::ipstream sub { "where", name };
-		#else
-		fmt::ipstream sub { "which", "-a", name };
-		#endif
+		static thread_local string::vector list;
+		list.clear();
+		string line;
+		while (getline(input, line)) list.emplace_back(move(line));
+		return line;
+	}
 
-		fmt::string line;
-		fmt::vector_string list;
-		while (std::getline(sub, line))
-		{
-			list.emplace_back(move(line));
-		}
-		return list;
+	span dir(view name)
+	{
+		fmt::ipstream sub
+		#ifdef _WIN32
+			{ "dir", "/b", name };
+		#else
+			{ "ls" name };
+		#endif
+		return get(sub);
+	}
+
+	span where(view name)
+	{
+		fmt::ipstream sub
+		#ifdef _WIN32
+			{ "where", name };
+		#else
+			{ "which", "-a", name };
+		#endif
+		return get(sub);
 	}
 
 	open::open(fmt::string::view path)
@@ -34,13 +48,13 @@ namespace env::cmd
 		{
 			fmt::string::view::map const test
 			{ 
-				{ "gnome", "gnome-open" },
 				{ "xfce", "exo-open" },
+				{ "gnome", "gnome-open" },
 				{ "kde", "kde-open" },
 				{ "", "xdg-open" },
 			};
 
-			for (auto const& [desktop, program] : test)
+			for (auto [desktop, program] : test)
 			{
 				if (empty(desktop) or is(desktop))
 				{

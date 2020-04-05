@@ -5,7 +5,6 @@
 
 namespace x11
 {
-
 	using CreateWindow = Request
 	<
 		X_CreateWindow, xCreateWidowReq, sz_xCreateWindow

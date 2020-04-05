@@ -8,14 +8,19 @@ namespace doc::sax
 {
 	fmt::string_view const braces = "<>";
 
-	template <class Char, template <class> class Traits = std::char_traits>
-	auto getline(fmt::string_view in)
+	template 
+	<
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class, class> class View = fwd::basic_string_view
+	>
+	auto get(View<Char, Traits> in, View<Char, Traits> braces = { '<', '>'})
 	{
-		fmt::string_view out = fmt::nil;
 		auto const pos = fmt::embrace(in, braces);
+		View<Char, Traits> out;
 		if (fmt::npos != pos.first)
 		{
-			out = in.substr(
+			out = in.substr(pos.first, pos.second);
 		}
 		return out;
 	}

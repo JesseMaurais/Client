@@ -11,25 +11,38 @@ namespace env::desktop
 		return current.find(lower) != fmt::npos;
 	}
 
+	static view zenity()
+	{
+		return "zenity";
+	}
+
 	dialog::dialog(fmt::string::view::span args)
 	{
-		constexpr auto program = "zenity";
-
+		// Use toolkit command line launcher
+		static const auto program = zenity();
 		if (empty(where(program)))
 		{
 			return;
 		}
 
+		// Program is first command in line
 		fmt::vector<fmt::string::cptr> list;
+		list.push_back(program);
 
+		// Arguments null terminated
 		auto s = fmt::join(args);
 		for (auto u : fmt::split(s))
 		{
-			list.push_back(data(u));
+			list.push_back(u.data());
 		}
-		list.push_back(nullptr);
 
-		if (fail(start(list.size() - 1, list.data())))
+		// Command line null terminated
+		auto const argc = list.size();
+		list.push_back(nullptr);
+		auto const argv = list.data();
+
+		// Start process with command
+		if (fail(start(argc, argv)))
 		{
 			sys::err(here, program, s);
 		}

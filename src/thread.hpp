@@ -48,7 +48,7 @@ namespace sys
 			struct unlock : unique
 			{
 				wr const key;
-				object const *ptr;
+				object *ptr;
 
 				unlock(exclusive *that)
 				: ptr(that->ptr), key(that->lock.write())
