@@ -1,9 +1,9 @@
 #ifndef utf_hpp
-#define utf_hpp
+#define utf_hpp "Universal Transformation Format"
 
-#include <uchar.h>
-#include <wchar.h>
-#include <string.h>
+#include <cuchar>
+#include <cwchar>
+#include <cstring>
 
 namespace fmt
 {

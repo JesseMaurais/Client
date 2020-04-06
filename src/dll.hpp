@@ -1,5 +1,5 @@
 #ifndef dll_hpp
-#define dll_hpp
+#define dll_hpp "Dynamic Link Library"
 
 #include "fmt.hpp"
 

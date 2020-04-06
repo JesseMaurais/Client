@@ -1,5 +1,5 @@
 #ifndef shm_hpp
-#define shm_hpp
+#define shm_hpp "Shared Memory"
 
 #include <functional>
 #include <memory>

@@ -1,5 +1,5 @@
 #ifndef socket_hpp
-#define socket_hpp
+#define socket_hpp "Network Sockets"
 
 #include "pipe.hpp"
 

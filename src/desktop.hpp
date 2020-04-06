@@ -1,5 +1,5 @@
 #ifndef desktop_hpp
-#define desktop_hpp
+#define desktop_hpp "Desktop Utility"
 
 #include "str.hpp"
 #include "env.hpp"

@@ -1,17 +1,17 @@
 #ifndef asc_hpp
-#define asc_hpp
+#define asc_hpp "American Standard Code"
 
 #include "str.hpp"
 
 // https://www.ecma-international.org/publications/standards/Ecma-048.htm
 
-namespace fmt::ascii
+namespace fmt::asc
 {
-	template <char Min, char Max> struct range : ::fmt::range<char>
-	{
-		using base = ::fmt::range<char>;
-		range() : base(Min, Max) { }
-	};
+	template 
+	<
+		char Min, char Max
+	> 
+	using range = fwd::range<Min, Max>;
 
 	//
 	// Character Codes

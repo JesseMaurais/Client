@@ -1,5 +1,5 @@
 #ifndef sys_hpp
-#define sys_hpp
+#define sys_hpp "File System Interface"
 
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -1,5 +1,5 @@
 #ifndef sig_hpp
-#define sig_hpp
+#define sig_hpp "Signals and Sockets"
 
 #include "err.hpp"
 #include "ptr.hpp"

@@ -1,5 +1,5 @@
-#ifndef fpu_hpp
-#define fpu_hpp
+#ifndef fpe_hpp
+#define fpe_hpp "Floating Point Environment
 
 #include "env.hpp"
 #include <cfloat>
@@ -11,12 +11,12 @@ namespace env::fp
 	{
 		operator type() const final
 		{
-			return fegetround();
+			return std::fegetround();
 		}
 
 		type operator=(type value) final
 		{
-			return fesetround(value);
+			return std::fesetround(value);
 		}
 
 	} round;
@@ -25,22 +25,22 @@ namespace env::fp
 	{
 		int get() 
 		{
-			return fegetenv(this); 
+			return std::fegetenv(this); 
 		}
 
 		int set() const
 		{ 
-			return fesetenv(this); 
+			return std::fesetenv(this); 
 		}
 
 		int hold() 
 		{
-			return feholdexcept(this); 
+			return std::feholdexcept(this); 
 		}
 
 		int update() const 
 		{
-			return feupdateenv(this); 
+			return std::feupdateenv(this); 
 		}
 	};
 
@@ -72,20 +72,22 @@ namespace env::fp
 
 	struct except : fexcept_t
 	{
-		int get(int bits)
+		int bits;
+
+		except(int bitmask) : bits(bitmask)
 		{
-			return fegetexceptflag(this, bits);
+			(void) std::fegetexceptflag(this, bits);
 		}
 
-		int set(int bits) const
+		~except()
 		{
-			return fesetexceptflag(this, bits);
+			return std::fesetexceptflag(this, bits);
 		}
 	};
 
-	constexpr auto clear = feclearexcept;
-	constexpr auto raise = feraiseexcept;
-	constexpr auto check = fetestexcept;
+	constexpr auto clear = std::feclearexcept;
+	constexpr auto raise = std::feraiseexcept;
+	constexpr auto check = std::fetestexcept;
 }
 
 #endif // file

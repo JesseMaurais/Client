@@ -1,5 +1,5 @@
 #ifndef fifo_hpp
-#define fifo_hpp
+#define fifo_hpp "Serial Device"
 
 #include "pipe.hpp"
 #include "env.hpp"

@@ -1,8 +1,6 @@
 #ifndef opt_hpp
-#define opt_hpp
+#define opt_hpp "Environment Options"
 
-// local headers
-#include "fmt.hpp"
 #include "env.hpp"
 
 namespace env::opt

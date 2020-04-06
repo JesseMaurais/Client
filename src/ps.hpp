@@ -1,5 +1,5 @@
-#ifndef pd_hpp
-#define pd_hpp
+#ifndef ps_hpp
+#define ps_hpp "Process Stream"
 
 #include <initializer_list>
 #include <iostream>

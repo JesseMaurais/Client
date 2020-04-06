@@ -1,5 +1,5 @@
 #ifndef mode_hpp
-#define mode_hpp
+#define mode_hpp "File Access Mode"
 
 #include <cstddef>
 #include "str.hpp"

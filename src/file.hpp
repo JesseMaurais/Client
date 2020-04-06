@@ -1,5 +1,5 @@
 #ifndef file_hpp
-#define file_hpp
+#define file_hpp "File Object"
 
 #include <cstddef>
 

@@ -1,8 +1,8 @@
 #ifndef str_hpp
-#define str_hpp
+#define str_hpp "String Format"
 
 #include <locale>
-#include "str.hpp"
+#include "fmt.hpp"
 #include "utf.hpp"
 
 namespace fmt

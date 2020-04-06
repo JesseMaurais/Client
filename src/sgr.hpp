@@ -1,19 +1,25 @@
 #ifndef sgr_hpp
-#define sgr_hpp
+#define sgr_hpp "Select Graphic Rendition"
 
-#include <ostream>
+#include "fmt.hpp"
 #include "asc.hpp"
 
 namespace fmt
 {
-	template <char... Code>
-	inline std::ostream& encode(std::ostream& out)
+	template 
+	<
+		char... Code
+	>
+	string::out encode(string::out out)
 	{
 		return (out << ... << Code);
 	}
 
-	template <int Code, int... Params>
-	inline std::ostream& params(std::ostream& out)
+	template
+	<
+		int Code, int... Params
+	>
+	string::out params(string::out out)
 	{
 		if constexpr (0 < sizeof...(Params))
 		{
@@ -25,14 +31,17 @@ namespace fmt
 		}
 	}
 
-	template <int... Code>
-	inline std::ostream& set(std::ostream& out)
+	template 
+	<
+		int... Code
+	>
+	string::out set(string::out out)
 	{
-		using namespace fmt::ascii;
+		using namespace fmt::asc;
 		return out << encode<C0::ESC, G0::CSI> << params<Code...> << encode<CSI::SGR>;
 	}
 
-	using ascii::SGR;
+	using asc::SGR;
 
 	constexpr auto reset = set<SGR::reset>;
 	constexpr auto intense = set<SGR::intense>;

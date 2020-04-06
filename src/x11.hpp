@@ -1,5 +1,5 @@
 #ifndef x11_hpp
-#define x11_hpp
+#define x11_hpp "Window Protocol"
 
 #include "fmt.hpp"
 #if __has_include <X11/Xproto.h>

@@ -1,5 +1,5 @@
 #ifndef dir_hpp
-#define dir_hpp
+#define dir_hpp "System Directory"
 
 #include "fmt.hpp"
 #include "env.hpp"
@@ -23,38 +23,44 @@ namespace fmt::dir
 namespace env::dir
 {
 	using fmt::string;
+	using string::view;
+	using string::vector;
+	using view::span;
+	using view::node;
+	using file::mode;
+
 	using entry = predicate<string::view>;
-	using order = constant<string::view::node>;
 
-	extern order::ref paths; // pwd, paths
-	extern order::ref config; // config_home, config_dirs
-	extern order::ref data; // data_home, data_dirs
+	extern env::node::ref paths; // pwd, paths
+	extern env::node::ref config; // config_home, config_dirs
+	extern env::node::ref data; // data_home, data_dirs
 
-	constexpr auto stop = always<string::view>;
-	constexpr auto next = never<string::view>;
-	entry mask(file::mode);
-	entry regx(string::view);
+	constexpr auto stop = always<view>;
+	constexpr auto next = never<view>;
+
+	entry mask(mode);
+	entry regx(view);
 	entry to(string::ref);
-	entry to(string::vector::ref);
-	entry all(string::view, file::mode = file::ok, entry = next);
-	entry any(string::view, file::mode = file::ok, entry = stop);
+	entry to(vector::ref);
+	entry all(view, mode = file::ok, entry = next);
+	entry any(view, mode = file::ok, entry = stop);
 
-	bool find(string::view, entry);
-	bool find(string::view::span, entry);
-	bool find(string::span, entry);
-	bool find(string::view::node, entry);
+	bool find(view, entry);
+	bool find(span, entry);
+	bool find(span, entry);
+	bool find(node, entry);
 
-	bool fail(string::view path, file::mode = file::ok);
-	string::view make(string::view path);
-	bool remove(string::view path);
+	bool fail(view path, mode = file::ok);
+	view make(view path);
+	bool remove(view path);
 
 	class tmp
 	{
-		string::view stem;
+		view stem;
 
 	public:
 
-		tmp(string::view path)
+		tmp(view path)
 		{
 			stem = env::dir::make(path);
 		}

@@ -1,5 +1,5 @@
-#ifndef fds_hpp
-#define fds_hpp
+#ifndef fd_hpp
+#define fd_hpp "File Descriptor"
 
 #include "pipe.hpp"
 #include "buf.hpp"

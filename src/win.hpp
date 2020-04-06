@@ -1,5 +1,5 @@
 #ifndef win_hpp
-#define win_hpp
+#define win_hpp "WIN32 Utility"
 
 #ifndef _WIN32
 # error Win32 utility header included without feature macro.

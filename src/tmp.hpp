@@ -1,9 +1,31 @@
 #ifndef tmp_hpp
-#define tmp_hpp // Template Meta Programming
+#define tmp_hpp "Template Meta Programming"
 
 #include <functional>
 
-template <typename... T> struct formula : std::function<bool(T...)>
+template 
+<
+	typename T
+> 
+struct property
+{
+	virtual operator T() const = 0;
+};
+
+template 
+<
+	typename T
+> 
+struct attribute : property<T>
+{
+	virtual T operator=(T) = 0;
+};
+
+template 
+<
+	typename... T
+> 
+struct formula : std::function<bool(T...)>
 {
 	using base = std::function<bool(T...)>;
 	using base::base;
@@ -41,12 +63,23 @@ template <typename... T> struct formula : std::function<bool(T...)>
 	}
 };
 
-template <typename T>
+template 
+<
+	typename T
+>
 using predicate = formula<T>;
-template <typename T, typename S>
+
+template 
+<
+	typename T, typename S
+>
 using relation = formula<T, S>;
 
-template <bool P, typename... Q> struct proposition : formula<Q...>
+template 
+<
+	bool P, typename... Q
+> 
+struct proposition : formula<Q...>
 {
 	using base = formula<Q...>;
 	using closure = std::function<void(Q...)>;
@@ -66,22 +99,28 @@ private:
 	}
 };
 
-template <typename... Q> using contra = proposition<false, Q...>;
-template <typename... Q> using taut = proposition<true, Q...>;
+template 
+<
+	typename... Q
+> 
+using falsity = proposition<false, Q...>;
 
-template <typename... Q>
+template 
+<
+	typename... Q
+> 
+using truth = proposition<true, Q...>;
+
+template 
+<
+	typename... Q
+>
 constexpr auto never = [](Q...) { return false; };
-template <typename... Q>
+
+template 
+<
+	typename... Q
+>
 constexpr auto always = [](Q...) { return true; };
-
-template <typename T> struct property
-{
-	virtual operator T() const = 0;
-};
-
-template <typename T> struct attribute : property<T>
-{
-	virtual T operator=(T) = 0;
-};
 
 #endif // file

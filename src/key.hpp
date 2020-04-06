@@ -1,5 +1,5 @@
 #ifndef key_hpp
-#define key_hpp
+#define key_hpp "Option String Keys"
 
 // local headers
 #include "fmt.hpp"

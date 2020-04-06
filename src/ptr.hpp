@@ -1,5 +1,5 @@
 #ifndef ptr_hpp
-#define ptr_hpp
+#define ptr_hpp "Object Pointer"
 
 #include <memory>
 

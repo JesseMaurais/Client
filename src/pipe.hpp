@@ -1,5 +1,5 @@
 #ifndef pipe_hpp
-#define pipe_hpp
+#define pipe_hpp "Unnamed Pipes"
 
 #include "str.hpp"
 #include "ptr.hpp"

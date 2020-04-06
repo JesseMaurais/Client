@@ -1,5 +1,5 @@
 #ifndef usr_hpp
-#define usr_hpp
+#define usr_hpp "User Environment"
 
 #include "env.hpp"
 

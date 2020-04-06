@@ -1,5 +1,5 @@
 #ifndef err_hpp
-#define err_hpp
+#define err_hpp "Error Format"
 
 #ifdef assert
 # undef assert
@@ -7,8 +7,8 @@
 #endif
 
 #ifdef NDEBUG
-# define assert(x)
 # define verify(x) (x)
+# define assert(x)
 # define alert(x) 
 # define debug(x) if constexpr (false)
 #else
@@ -23,8 +23,6 @@
 #include <sstream>
 #include "fmt.hpp"
 
-// Pessimistic boolean
-
 enum : bool
 {
 	success = false, failure = true
@@ -37,9 +35,11 @@ namespace fmt
 		char const *file; int const line; char const *func;
 	};
 
-	fmt::string::out operator<<(fmt::string::out, where const &);
-	fmt::string::out operator<<(fmt::string::out, std::errc const &);
-	fmt::string::out operator<<(fmt::string::out, std::exception const &);
+	#define here { __FILE__, __LINE__, __func__ }
+
+	string::out operator<<(string::out, where const &);
+	string::out operator<<(string::out, std::errc const &);
+	string::out operator<<(string::out, std::exception const &);
 
 	template <typename Arg, typename... Args>
 	auto err(Arg arg, Args... args)
@@ -53,8 +53,6 @@ namespace fmt
 		return ss.str();
 	}
 }
-
-#define here ::fmt::where { __FILE__, __LINE__, __func__ }
 
 namespace sys
 {

@@ -1,5 +1,5 @@
 #ifndef ini_hpp
-#define ini_hpp
+#define ini_hpp "Initial Document"
 
 #include "fmt.hpp"
 #include <iosfwd>

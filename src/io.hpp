@@ -1,5 +1,5 @@
 #ifndef io_hpp
-#define io_hpp
+#define io_hpp "Standard Input/Output"
 
 #include <cstring>
 #include <streambuf>

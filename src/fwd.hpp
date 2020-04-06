@@ -1,5 +1,5 @@
 #ifndef fwd_hpp
-#define fwd_hpp
+#define fwd_hpp "Forward Declaration"
 
 #include <iosfwd>
 #include <utility>
@@ -13,6 +13,7 @@
 #include <array>
 #include <vector>
 #include <variant>
+#include <tuple>
 
 namespace fwd
 {
@@ -40,6 +41,35 @@ namespace fwd
 		{
 			return base::second;
 		}
+	};
+
+	template
+	<
+		auto Begin, auto End
+	>
+	struct range
+	{
+		constexpr auto first = Begin;
+		constexpr auto second = End;
+
+		constexpr auto begin() const
+		{
+			return first;
+		}
+
+		constexpr auto end() const
+		{
+			return second;
+		}
+	};
+
+	template
+	<
+		class... Base
+	>
+	struct compose : Base...
+	{
+		using base = std::tuple<Base...>;
 	};
 
 	template
@@ -124,11 +154,9 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		template <class> class Sort = std::less,
-		template <class> class Alloc = std::allocator
+		class Type
 	>
-	using node = std::pair<Type, set<Type, Sort, Alloc>>;
+	using node = std::pair<Type, span<Type>>;
 
 	template
 	<

@@ -1,5 +1,5 @@
 #ifndef net_hpp
-#define net_hpp
+#define net_hpp "Network Interface"
 
 #include "sys.hpp"
 #include "err.hpp"

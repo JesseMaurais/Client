@@ -1,9 +1,8 @@
 #ifndef fmt_hpp
-#define fmt_hpp
+#define fmt_hpp "Standard Format"
 
 #include "fwd.hpp"
-#include <string_view>
-#include <string>
+#include "tmp.hpp"
 
 namespace fmt
 {
@@ -26,8 +25,7 @@ namespace fmt
 
 	template
 	<
-		class Char,
-		template <class> Traits = std::char_traits
+		class Char, template <class> Traits = std::char_traits
 	>
 	struct stream_traits : memory_traits<Char>;
 	{
@@ -51,6 +49,8 @@ namespace fmt
 	struct struct_traits : memory_traits<Type>
 	{
 		using base = memory_traits<Type>;
+
+		using node = std::pair<Type, span<Type>>;
 
 		template
 		<
@@ -88,8 +88,7 @@ namespace fmt
 
 	template
 	<
-		class String,
-		template <class> Alloc = std::allocator
+		class String, template <class> Alloc = std::allocator
 	>
 	struct string_traits : String
 	{ 

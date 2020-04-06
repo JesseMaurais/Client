@@ -1,5 +1,5 @@
 #ifndef shell_hpp
-#define shell_hpp
+#define shell_hpp "Environment Shell"
 
 #include "str.hpp"
 #include "env.hpp"

@@ -1,5 +1,5 @@
 #ifndef api_hpp
-#define api_hpp
+#define api_hpp "Application Programming Interface"
 
 // https://sourceforge.net/p/predef/wiki/Standards/
 

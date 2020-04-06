@@ -1,5 +1,5 @@
 #ifndef dbg_hpp
-#define dbg_hpp
+#define dbg_hpp "Debug Tests"
 
 #include "err.hpp"
 

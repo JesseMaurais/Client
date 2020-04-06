@@ -1,5 +1,5 @@
 #ifndef process_hpp
-#define process_hpp
+#define process_hpp "File Process"
 
 #include "pipe.hpp"
 #include "str.hpp"
