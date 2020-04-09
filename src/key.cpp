@@ -2,7 +2,6 @@
 #include "dig.hpp"
 #include "file.hpp"
 #include "thread.hpp"
-#include <set>
 
 namespace
 {
@@ -25,7 +24,7 @@ namespace env::opt
 		auto const store = lock.read();
 		auto const begin = store->begin();
 		auto const end = store->end();
-		auto const it = std::find(begin, it, value);
+		auto const it = std::find(begin, end, value);
 		return it != end;
 	}
 
@@ -39,7 +38,7 @@ namespace env::opt
 		auto const store = lock.read();
 		auto const begin = store->begin();
 		auto const end = store->end();
-		auto const it = std::find(begin, it, value);
+		auto const it = std::find(begin, end, value);
 		auto const index = std::distance(begin, it);
 		return fmt::to<word>(index);
 	}

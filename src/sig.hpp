@@ -10,7 +10,11 @@
 
 namespace sig
 {
-	template <typename Slot, typename... Args> class socket : unique
+	template 
+	<
+		typename Slot, typename... Args
+	> 
+	class socket : unique
 	{
 	public:
 
@@ -70,7 +74,11 @@ namespace sig
 		container slots;
 	};
 
-	template <typename... Args> class slot
+	template 
+	<
+		typename... Args
+	> 
+	class slot
 	{
 	public:
 

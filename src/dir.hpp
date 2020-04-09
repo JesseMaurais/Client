@@ -1,5 +1,5 @@
 #ifndef dir_hpp
-#define dir_hpp "System Directory"
+#define dir_hpp "File Directory"
 
 #include "fmt.hpp"
 #include "env.hpp"
@@ -29,7 +29,7 @@ namespace env::dir
 	using view::node;
 	using file::mode;
 
-	using entry = predicate<string::view>;
+	using entry = predicate<view>;
 
 	extern env::node::ref paths; // pwd, paths
 	extern env::node::ref config; // config_home, config_dirs

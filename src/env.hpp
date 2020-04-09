@@ -22,8 +22,7 @@ namespace env
 
 	template 
 	<
-		class Type
-		template <class> Access = attribute
+		class Type, template <class> Access = attribute
 	>
 	struct variable : Access<Type>
 	{ 
@@ -41,7 +40,7 @@ namespace env
 	using size = constant<string::size_type>;
 	using view = constant<string::view>;
 	using span = constant<string::view::span>;
-	using pair = constant<std::pair<string::view, string::view::span>>;
+	using node = constant<string::view::node>;
 
 	extern view::ref os;
 	extern span::ref paths;

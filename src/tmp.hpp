@@ -3,6 +3,15 @@
 
 #include <functional>
 
+template
+<
+	typename T
+>
+struct evaluator
+{
+	virtual bool operator()(T) const = 0;
+};
+
 template 
 <
 	typename T
