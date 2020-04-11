@@ -1,9 +1,9 @@
 #ifndef str_hpp
 #define str_hpp "String Format"
 
-#include <locale>
 #include "fmt.hpp"
 #include "utf.hpp"
+#include <locale>
 
 namespace fmt
 {

@@ -17,6 +17,8 @@
 
 namespace fwd
 {
+	// Containers
+
 	template 
 	<
 		class Type
@@ -25,90 +27,19 @@ namespace fwd
 
 	template
 	<
-		class Iterator
-	>
-	struct range : pair<Iterator>
-	{
-		using base = pair<Iterator>;
-		using base::base;
-
-		auto begin() const
-		{
-			return base::first;
-		}
-
-		auto end() const
-		{
-			return base::second;
-		}
-	};
-
-	template
-	<
-		auto Begin, auto End
-	>
-	struct range
-	{
-		constexpr auto first = Begin;
-		constexpr auto second = End;
-
-		constexpr auto begin() const
-		{
-			return first;
-		}
-
-		constexpr auto end() const
-		{
-			return second;
-		}
-	};
-
-	template
-	<
-		class... Base
-	>
-	struct compose : Base...
-	{
-		using base = std::tuple<Base...>;
-	};
-
-	template
-	<
-		class Type, size_t Index,
-		template <class> class Sort = std::less
-	>
-	struct indexical : Sort<Type>
-	{
-		using base = Sort<Type>
-
-		template <class Tuple>
-		bool operator() (Tuple const& x, Type u) const
-		{
-			return base::operator()(std::get<Index>(x), u);
-		}
-
-		template <class Tuple>
-		bool operator() (Type u, Tuple const& x) const
-		{
-			return base::operator()(u, std::get<Index>(x));
-		}
-	};
-
-	template
-	<
 		class Type,
-		template <class> class Sort = std::less,
+		template <class> class Order = std::less,
 		template <class> class Alloc = std::allocator
 	>
-	using set = std::set<Type, Sort<Type>, Alloc<Type>>;
+	using set = std::set<Type, Order<Type>, Alloc<Type>>;
 
 	template 
 	<
 		class Type,
-		template <class> class Sort = std::less
+		template <class> class Order = std::less
 		template <class> class Alloc = std::allocator
 	>
-	using map = std::map<Type, Type, Sort<Type>, Alloc<pair<Type>>;
+	using map = std::map<Type, Type, Order<Type>, Alloc<pair<Type>>;
 
 	template 
 	<
@@ -141,37 +72,6 @@ namespace fwd
 		template <class> class Alloc = std::allocator
 	>
 	using variant = std::variant<array<Type, Size>, vector<Type, Alloc>>;
-
-	// Directed graphs
-
-	template
-	<
-		class Type,
-		template <class> class Sort = std::less,
-		template <class> class Alloc = std::allocator
-	>
-	using graph = set<pair<Type>, Sort, Alloc>;
-
-	template
-	<
-		class Type
-	>
-	using node = std::pair<Type, span<Type>>;
-
-	template
-	<
-		class Type,
-		template <class> class Sort = std::less,
-		template <class> class Alloc = std::allocator
-	>
-	auto edges(graph<Type, Sort, Alloc>::const_reference g, Type n)
-	{
-		indexical<Type, 0, Sort> hat;
-		return range<graph<Type, Sort, Alloc>::iterator>
-		(
-			std::equal_range(begin(g), end(g), n, hat)
-		);
-	}
 
 	// Strings
 
@@ -232,7 +132,7 @@ namespace fwd
 		class Char
 		template <class> class Traits = std::char_traits
 	>
-	using basic_file = std::basic_filebuf<Char, Traits>;
+	using basic_file = std::basic_filebuf<Char, Traits<Char>>;
 }
 
 #endif // file

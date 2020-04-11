@@ -1,5 +1,5 @@
 #ifndef ini_hpp
-#define ini_hpp "Initial Document"
+#define ini_hpp "Initial Options"
 
 #include "fmt.hpp"
 #include <iosfwd>
@@ -15,13 +15,12 @@ namespace doc
 		using view::pair;
 		using view::span;
 		using view::init;
-		using view::node;
-		using view::graph;
 		using view::vector;
 		using string::in;
 		using string::out;
 		
-		std::map<view, graph> keys;
+		view::group keys;
+		string::set values;
 
 		static in::ref getline(in::ref, string::ref);
 		friend in::ref operator>>(in::ref, ini::ref);

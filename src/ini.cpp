@@ -10,40 +10,40 @@ namespace
 		return not empty(u) and u.front() == '[' and u.back() == ']';
 	}
 
-	constexpr auto list_separator = ";";
+	constexpr auto separator = ";";
 }
 
 namespace doc
 {
-	auto ini::join(span p)
+	auto ini::join(span list)
 	{
-		return fmt::join(p, list_separator);
+		return fmt::join(list, separator);
 	}
 
-	auto ini::split(view u)
+	auto ini::split(view line)
 	{
-		return fmt::split(u, list_separator);
+		return fmt::split(line, separator);
 	}
 
-	auto ini::join(list p)
+	auto ini::join(init list)
 	{
-		return fmt::join(p, list_separator);
+		return fmt::join(list, separator);
 	}
 
-	ini::in::ref ini::getline(in::ref in, string::ref s)
+	ini::in::ref ini::getline(in::ref in, string::ref line)
 	{
-		while (std::getline(in, s))
+		while (std::getline(in, line))
 		{
-			constexpr char c = '#';
-			auto const it = fmt::skip(begin(s), end(s));
-			if (it != end(s) and c != *it)
+			constexpr char omit = '#';
+			auto const it = fmt::skip(begin(line), end(line));
+			if (it != end(s) and omit != *it)
 			{
-				auto const t = s.find(c);
-				s = s.substr(0, t);
-				auto const u = fmt::trim(s);
+				auto const t = line.find(omit);
+				line = line.substr(0, t);
+				auto const u = fmt::trim(line);
 				if (not empty(u))
 				{
-					s = fmt::to_string(u);
+					line = fmt::to_string(u);
 					break;
 				}
 			}
@@ -80,10 +80,10 @@ namespace doc
 		return in;
 	}
 
-	ini::out::ref operator<<(ini::out::ref out, ini::cref keys)
+	ini::out::ref operator<<(ini::out::ref out, ini::cref obj)
 	{
 		view key;
-		for (auto const &it : keys.map)
+		for (auto const& it : obj.keys)
 		{
 			if (it.first.first != key)
 			{
@@ -114,7 +114,8 @@ namespace doc
 	view ini::get(pair key) const
 	{
 		auto const it = keys.find(key.first);
-		if (keys.end() != it)
+		auto const end = keys.end();
+		if (end != it)
 		{
 			for (auto const item : it->second)
 			{
@@ -125,6 +126,14 @@ namespace doc
 			}
 		}
 		return fmt::nil;
+	}
+
+	bool ini::put(pair key, view value)
+	{
+		key.first = env::opt::get(key.first);
+		key.second = env::opt::get(key.second);
+		value = env::opt::get(value);
+		return set(key, value);
 	}
 
 	bool ini::set(pair key, view value)
@@ -143,14 +152,6 @@ namespace doc
 			return true;
 		}
 		return false;
-	}
-
-	bool ini::put(pair key, view value)
-	{
-		env::opt::dup(key.first);
-		env::opt::dup(key.second);
-		env::opt::dup(value);
-		return set(key, value);
 	}
 }
 

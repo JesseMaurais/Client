@@ -2,15 +2,16 @@
 #define fmt_hpp "Standard Format"
 
 #include "fwd.hpp"
-#include "tmp.hpp"
+#include "it.hpp"
 
 namespace fmt
 {
 	template
 	<
-		class Type
+		class Type, 
+		template <class> class Traits = sdt::iterator_traits
 	>
-	struct memory_traits : std::iterator_traits<Type>
+	struct memory_traits : Traits<Type>
 	{
 		using base = std::iterator_traits<Type>;
 		using ref = base::references;
@@ -25,21 +26,23 @@ namespace fmt
 
 	template
 	<
-		class Char, template <class> Traits = std::char_traits
+		class Char, 
+		template <class> Traits = std::char_traits
+		template <class> Iterator = std::iterator_traits
 	>
-	struct stream_traits : memory_traits<Char>;
+	struct stream_traits : memory_traits<Char, Iterator>;
 	{
 		template 
 		<
 			template <class, template <class> class> class Stream
 		>
-		using traits = memory_traits<Stream<Char, Traits>>;
-		using ios = traits<basic_ios>;
-		using in = traits<basic_istream>;
-		using out = traits<basic_ostream>;
-		using io = traits<basic_iostream>;
-		using buf = traits<basic_buf>;
-		using file = traits<basic_file>;
+		using memory = memory_traits<Stream<Char, Traits>, Iterator>;
+		using ios = memory<basic_ios>;
+		using in = memory<basic_istream>;
+		using out = memory<basic_ostream>;
+		using io = memory<basic_iostream>;
+		using buf = memory<basic_buf>;
+		using file = memory<basic_file>;
 	};
 
 	template

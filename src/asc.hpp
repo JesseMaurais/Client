@@ -1,7 +1,7 @@
 #ifndef asc_hpp
 #define asc_hpp "American Standard Code"
 
-#include "str.hpp"
+#include "fmt.hpp"
 
 // https://www.ecma-international.org/publications/standards/Ecma-048.htm
 
@@ -9,15 +9,15 @@ namespace fmt::asc
 {
 	template 
 	<
-		char Min, char Max
+		char First, char Last
 	> 
-	using range = fwd::range<Min, Max>;
+	using domain = fwd::domain<First, Last + 1>;
 
 	//
 	// Character Codes
 	//
 
-	struct C0 : range<'\x00', '\x1F'>
+	struct C0 : domain<'\x00', '\x1F'>
 	{
 		enum code : char
 		{
@@ -58,7 +58,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct G0 : range<'\x21', '\x7E'>
+	struct G0 : domain<'\x21', '\x7E'>
 	{
 		enum code : char
 		{
@@ -95,7 +95,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct C1 : range<'\x80', '\x9F'>
+	struct C1 : domain<'\x80', '\x9F'>
 	{
 		enum code : char
 		{
@@ -133,7 +133,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct G1 : range<'\xA0', '\xFF'>
+	struct G1 : domain<'\xA0', '\xFF'>
 	{
 		enum code : char
 		{
@@ -141,7 +141,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct CSI
+	struct CSI : domain<'\x40', '\x6F'>
 	{
 		enum code : char
 		{
@@ -240,7 +240,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct ICF
+	struct ICF : domain<'\x60', '\x7E'>
 	{
 		enum code : char
 		{
@@ -347,7 +347,7 @@ namespace fmt::asc
 		ideogram_off  = 65,
 	};
 
-	enum CTC
+	enum CTC : int
 	{
 		set_char        = 0, // char tab stop set at active position
 		set_line        = 1, // line tab stop set at active line

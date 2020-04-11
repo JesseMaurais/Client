@@ -5,7 +5,10 @@
 
 namespace
 {
-	sys::exclusive<fmt::string::view::vector> lock;
+	// Key storage indexed by word
+	sys::exclusive<fmt::string::view::vector> store;
+	// Common key persistent storage
+	sys::exclusive<fmt::string::set> cache;
 }
 
 namespace env::opt
@@ -13,67 +16,56 @@ namespace env::opt
 	using file::size_t;
 	using file::ssize_t;
 
-	bool got(word key)
+	bool got(word name)
 	{
-		ssize_t const size = lock.read()->size();
-		return -1 < key and key < size;
+		ssize_t const size = store.read()->size();
+		return -1 < name and name < size;
 	}
 
-	bool got(view value)
+	bool got(view name)
 	{
-		auto const store = lock.read();
-		auto const begin = store->begin();
-		auto const end = store->end();
-		auto const it = std::find(begin, end, value);
-		return it != end;
+		auto const read = cache.read();
+		auto const it = read->find(name);
+		auto const end = read->end();
+		return end != it;
 	}
 
-	view get(word key)
+	view get(word name)
 	{
-		return lock.read()->at(key);
+		auto const read = store.read();
+		return read->at(name);
 	}
 
-	word get(view value)
+	word get(view name)
 	{
-		auto const store = lock.read();
-		auto const begin = store->begin();
-		auto const end = store->end();
-		auto const it = std::find(begin, end, value);
-		auto const index = std::distance(begin, it);
+		return get(set(name));
+	}
+
+	word put(view name)
+	{
+		auto const write = store.write();
+		auto const index = write->size();
+		write->emplace_back(name);
 		return fmt::to<word>(index);
 	}
 
-	word put(view value)
+	word set(view name)
 	{
-		auto const store = lock.write();
-		auto const begin = store->begin();
-		auto const end = store->end();
-		auto const it = std::find(begin, end, value);
-		auto const index = std::distance(begin, it);
-		if (it == end)
+		auto const write = store.write();
+		auto index = write->size();
 		{
-			store->emplace_back(value);
+			auto it = cache.read()->find(name);
+			auto const end = cache.read()->end();
+			if (end == it)
+			{
+				bool unique;
+				tie(it, unique) = cache.write()->emplace(name);
+				verify(unique);
+				name = *it;
+			}
 		}
-		return fmt::to<word>(index);
-	}
-
-	word set(view value)
-	{
-		auto const store = lock.write();
-		auto const begin = store->begin();
-		auto const end = store->end();
-		auto const it = std::find(begin, end, value);
-		auto const index = std::distance(begin, it);
-		if (it == end)
-		{
-			static fmt::string::set buf;
-			auto const [that, unique] = buf.emplace(value);
-			verify(unique);
-			auto const ptr = that->data();
-			auto const sz = that->size();
-			store->emplace_back(ptr, sz);
-		}
-		return fmt::to<word>(index);
+		write->push_back(name);
+		return to<word>(index);
 	}
 }
 

@@ -1,54 +1,50 @@
 #ifndef key_hpp
-#define key_hpp "Option String Keys"
+#define key_hpp "Optimal String Store"
 
 #include "fmt.hpp"
 #include "opt.hpp"
+#include "tmp.hpp"
 
 namespace env::opt
 {
 	using fmt::string;
 	using string::view;
-	using view::span;
 
 	using vector = fmt::vector<word>;
+	using span = fmt::span<word>;
+	using init = fmt::init<word>;
 
-	bool got(word); // whether word is a string
-	bool got(view); // whether string exists
-	view get(word); // string for a word
-	word get(view); // word for a string
+	bool got(word); // whether word is stored
+	bool got(view); // whether string is cached
+	view get(word); // view for a word
+	view get(view); // unique in view cache
 	word put(view); // add string view
-	word set(view); // add string copy
+	word set(view); // new string view
 
-	inline auto dup(view::ref u)
-	// duplicate and return new
-	{
-		return u = get(set(u));
-	}
-
-	inline auto all(span say, auto to)
+	inline auto all(view::span line, auto to)
 	// convert many at once
 	{
-		vector items;
-		for (auto it : say) items.emplace_back(to(it));
-		return items;
+		vector words;
+		for (auto it : line) words.emplace_back(to(it));
+		return words;
 	}
 
-	inline auto gets(span say)
-	// get words in sentence
+	inline auto get(auto line)
+	// get all words in line
 	{
-		return all(say, get);
+		return all(line, get);
 	}
 
-	inline auto puts(span say)
-	// put words in sentence
+	inline auto put(auto line)
+	// put all words in line
 	{
-		return all(say, put);
+		return all(line, put);
 	}
 
-	inline auto sets(span say)
-	// set words in sentence
+	inline auto set(auto line)
+	// set all words in line
 	{
-		return all(say, set);
+		return all(line, set);
 	}
 }
 
