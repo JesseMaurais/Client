@@ -8,8 +8,7 @@ namespace fmt
 {
 	template
 	<
-		class Type, 
-		template <class> class Traits = sdt::iterator_traits
+		class Type, template <class> class Traits = fwd::iterator
 	>
 	struct memory_traits : Traits<Type>
 	{
@@ -18,17 +17,17 @@ namespace fmt
 		using cref = base::const_reference;
 		using ptr = base::pointer;
 		using cptr = base::const_pointer;
-		using pair = fwd::pair<value>;
-		using range = fwd::range<cptr>;
-		using init = fwd::init<value>;
-		using span = fwd::span<value>;
+		using pair = fwd::pair<Type>;
+		using range = fwd::range<ptr>;
+		using init = fwd::init<Type>;
+		using span = fwd::span<Type>;
 	};
 
 	template
 	<
 		class Char, 
-		template <class> Traits = std::char_traits
-		template <class> Iterator = std::iterator_traits
+		template <class> Traits = fwd::character
+		template <class> Iterator = fwd::iterator
 	>
 	struct stream_traits : memory_traits<Char, Iterator>;
 	{
@@ -53,7 +52,19 @@ namespace fmt
 	{
 		using base = memory_traits<Type>;
 
-		using node = std::pair<Type, span<Type>>;
+		using base::node;
+
+		template
+		<
+			template <class> Alloc = allocator
+		>
+		using edges = fwd::edges<Type, Alloc>;
+
+		template
+		<
+			template <class> Alloc = allocator
+		>
+		using matrix = fwd::matrix<Type, Alloc>;
 
 		template
 		<
@@ -91,19 +102,22 @@ namespace fmt
 
 	template
 	<
-		class String, template <class> Alloc = std::allocator
+		class String, template <class> Alloc = allocator
 	>
-	struct string_traits : String
+	struct string_type : String
 	{ 
-		using stream = stream_traits<String::char_type, String::char_traits>;
-		using stream::ios;
-		using stream::in;
-		using stream::out;
-		using stream::io;
-		using stream::buf;
-		using stream::file;
+		using traits = compose
+		<
+			stream_traits<String::char_type, String::char_traits>,
+			struct_traits<String>
+		>;
 
-		using traits = struct_traits<String>;
+		using traits::ios;
+		using traits::in;
+		using traits::out;
+		using traits::io;
+		using traits::buf;
+		using traits::file;
 		using traits::ref;
 		using traits::cref;
 		using traits::ptr;
@@ -113,7 +127,8 @@ namespace fmt
 		using traits::list;
 		using traits::span;
 		using traits::node;
-		using graph = traits::graph<Alloc>;
+		using matrix = traits::matrix<Alloc>;
+		using edges = traits::edges<Alloc>;
 		using vector = traits::vector<Alloc>;
 
 		template
@@ -144,12 +159,12 @@ namespace fmt
 	template
 	<
 		class Char,
-		template <class> Traits = std::char_traits,
-		template <class> Sort = std::less,
-		template <class> Alloc = std::allocator
+		template <class> Traits = character,
+		template <class> Order = ordering,
+		template <class> Alloc = allocator
 	>
-	struct basic_string_view : string_traits<basic_string_view<Char, Traits>, Sort, Alloc>
-	{ 
+	struct basic_string_view : string_type<basic_string_view<Char, Traits>, Sort, Alloc>
+	{
 		using base = string_traits<fwd::basic_string_view<Char, Traits>, Sort, Alloc>;
 		using base::base;
 	};
@@ -171,8 +186,8 @@ namespace fmt
 	using std::byte;
 	using string = basic_string<char>;
 	using wstring = basic_string<wchar_t>;
-//	using binary = basic_string<byte>;
-//	using ustring = basic_string<wint_t>;
+	using binary = basic_string<byte>;
+	using ustring = basic_string<wint_t>;
 }
 
 #endif // file

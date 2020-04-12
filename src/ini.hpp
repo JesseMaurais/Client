@@ -19,7 +19,7 @@ namespace doc
 		using string::in;
 		using string::out;
 		
-		view::group keys;
+		view::matrix keys;
 		string::set values;
 
 		static in::ref getline(in::ref, string::ref);

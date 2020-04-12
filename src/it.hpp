@@ -83,13 +83,14 @@ namespace fwd
 	template
 	<
 		class Iterator, int Size = 1, int Step = Size,
+		template <class> Range = range
 	>
-	struct segment : pair<Iterator>
+	struct interval : pair<Iterator>
 	// Iterate within a sub range
 	{
 		using pair::pair;
 
-		struct item : range<Iterator>
+		struct iterator : Range<Iterator>
 		{
 			using range::range;
 
@@ -102,7 +103,7 @@ namespace fwd
 
 		auto begin() const
 		{
-			return iterate<item>
+			return iterate<iterator>
 			{ 
 				this->first, std::next(this->first, Size)	
 			};
@@ -110,7 +111,7 @@ namespace fwd
 
 		auto end() const
 		{
-			return iterate<item>
+			return iterate<iterator>
 			{
 				std::prev(this->second, Size), this->second;
 			};
@@ -130,19 +131,15 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		template <class> class Order = std::less,
-		template <class> class Alloc = std::allocator
+		class Type, template <class> class Alloc = allocator
 	>
-	using edges = set<pair<Type>, Order, Alloc>;
+	using edges = vector<pair<Type>, Alloc>;
 
 	template
 	<
-		class Type,
-		template <class> class Order = std::less,
-		template <class> class Alloc = std::allocator
+		class Type, template <class> class Alloc = allocator
 	>
-	using graphs = map<Type, edges<Type, Order, Alloc>, Order, Alloc>;
+	using matrix = vector<span<pair<Type>>, Alloc>;
 
 	//
 	// Algorithms
@@ -150,19 +147,18 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		class Iterator
+		class Type, class Iterator
 	>
-	auto split(span<Type> s, predicate<Type> op, Iterator out)
-	// Split a span into disjoint segments by a predicate
+	auto split(span<Type> s, predicate<Type> p, Iterator out)
+	// Partition a span by predicate
 	{
 		auto begin = s.begin();
 		auto const end = s.end();
 		for (auto it = begin; it != end; ++it)
 		{
-			if (op(*it))
+			if (p(*it))
 			{
-				++out = std::make_pair(begin, it);
+				++out = Type(begin, it);
 				begin = std::next(it);
 			}
 		}
@@ -171,11 +167,10 @@ namespace fwd
 
 	template 
 	<
-		class Type,
-		template <class> class Alloc = std::allocator
+ 		class Type, template <class> class Alloc = allocator
 	>
-	auto split(span<Type> s, predicate<Type> op = std::empty<Type>)
-	// Split a span into disjoint segments by (empty) predicate
+	auto split(span<Type> s, predicate<Type> p = std::empty<Type>)
+	// Partition a span by (empty) predicate
 	{
 		vector<Type, Alloc> out;
 		auto const begin = std::back_inserter(out);
@@ -185,24 +180,23 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		class Iterator
+		class Type, class Iterator, class Identity = identity
 	>
 	auto split(span<Type> s, Type n, Iterator out)
-	// Split a span into disjoint segments by value
+	// Partition a span by value
 	{
-		std::equal_to const eq;
-		auto op = std::bind(eq, n);
-		return split(s, op, out);
+
+		static Identity const eq;
+		auto const p = std::bind(eq, n);
+		return split(s, p, out);
 	}
 
 	template
 	<
-		class Type,
-		template <class> class Alloc = std::allocator
+		class Type, template <class> class Alloc = allocator
 	>
 	auto split(span<Type> s, Type n)
-	// Split a span into disjoint segments by value
+	// Partition a span by value
 	{
 		vector<Type, Alloc> out;
 		auto const begin = std::back_inserter(out);
@@ -212,11 +206,10 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		class Iterator
+		class Type, class Iterator
 	>
 	auto join(span<span<Type>> s, Type n, Iterator out)
-	// Join spans with separator value
+	// Join spans with separator
 	{
 		for (auto i : s)
 		{
@@ -231,8 +224,7 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		template <class> class Alloc = std::allocator
+		class Type, template <class> class Alloc = allocator
 	>
 	auto join(span<span<Type>> s, Type n = { })
 	// Join spans with separator
