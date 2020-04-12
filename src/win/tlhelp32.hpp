@@ -5,7 +5,7 @@
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
-#include "str.hpp"
+#include "type.hpp"
 #include <tlhelp32.h>
 
 namespace sys::win

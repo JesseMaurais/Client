@@ -1,11 +1,11 @@
 #ifndef mode_hpp
-#define mode_hpp "File Access Mode"
+#define mode_hpp "Access Mode"
 
 #include <cstddef>
-#include "str.hpp"
+#include "type.hpp"
 #include "tmp.hpp"
 
-namespace env::file
+namespace env
 {
 	// Access modes
 	enum mode : int

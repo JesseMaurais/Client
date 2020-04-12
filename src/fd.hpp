@@ -1,105 +1,54 @@
 #ifndef fd_hpp
-#define fd_hpp "File Descriptor"
+#define fd_hpp
 
-#include "pipe.hpp"
-#include "buf.hpp"
-#include "io.hpp"
-#include "str.hpp"
+#include "type.hpp"
+#include "ptr.hpp"
+#include "file.hpp"
+#include "mode.hpp"
 
-namespace fmt
+namespace env::file
 {
-	namespace impl
+	struct descriptor : unique, stream
 	{
-		template
-		<
-		 class Char,
-		 template <class> class Traits,
-		 template <class> class Alloc,
-		 template 
-		 <
-		  class,
-		  template <class> class,
-		  template <class> class
-		 > class Stream,
-		 env::file::mode default_mode
-		>
-		class basic_fdstream
-		: public Stream<Char, Traits, Alloc>
+		ssize_t read(void *buf, size_t sz) const override;
+		ssize_t write(const void *buf, size_t sz) const override;
+		bool open(fmt::string::view path, mode = rw, permit = owner(rw));
+		bool close();
+
+		explicit descriptor(fmt::string_view path, mode am = rw, permit pm = owner(rw))
 		{
-			using base = Stream<Char, Traits, Alloc>;
-			using string = fmt::basic_string<Char, Traits, Alloc>;
-			using string_view = fmt::basic_string_view<Char, Traits>;
-			using mode = env::file::mode;
-			using size_type = std::size_t;
+			(void) open(path, am, pm);
+		}
 
-			env::file::descriptor f;
+		explicit descriptor(int fd = invalid)
+		{
+			(void) set(fd);
+		}
 
-		public:
-
-			basic_fdstream(string_view path, mode mask = default_mode, size_type size = env::file::width)
-			: base(f), f(path, mode(mask | default_mode))
+		~descriptor()
+		{
+			if (not fail(fd))
 			{
-				if (mask & env::file::rw)
-				{
-					base::setbufsiz(size, size);
-				}
-				else 
-				if (mask & env::file::wr)
-				{
-					base::setbufsiz(0, size);
-				}
-				else 
-				if (mask & env::file::rd)
-				{
-					base::setbufsiz(size, 0);
-				}
+				(void) close();
 			}
-		};
-	}
+		}
 
-	// Common alias types
+		int set(int value = invalid)
+		{
+			int const tmp = fd;
+			fd = value;
+			return tmp;
+		}
 
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
-	>
-	using basic_fdstream = impl::basic_fdstream
-	<
-	 Char, Traits, Alloc, basic_iostream, env::file::rw
-	>;
+		int get() const
+		{
+			return fd;
+		}
 
-	using fdstream = basic_fdstream<char>;
-	using wfdstream = basic_fdstream<wchar_t>;
+	protected:
 
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
-	>
-	using basic_ifdstream = impl::basic_fdstream
-	<
-	 Char, Traits, Alloc, basic_istream, env::file::rd
-	>;
-
-	using ifdstream = basic_ifdstream<char>;
-	using wifdstream = basic_ifdstream<wchar_t>;
-
-	template
-	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
-	>
-	using basic_ofdstream = impl::basic_fdstream
-	<
-	 Char, Traits, Alloc, basic_ostream, env::file::wr
-	>;
-
-	using ofdstream = basic_ofdstream<char>;
-	using wofdstream = basic_ofdstream<wchar_t>;
+		int fd;
+	};
 }
 
 #endif // file

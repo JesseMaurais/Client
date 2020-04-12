@@ -3,7 +3,7 @@
 
 #include "dbg.hpp"  // Debug and unit test tools
 #include "err.hpp"  // System error logging
-#include "str.hpp"  // String views and spans
+#include "type.hpp" // String views and spans
 #include "fmt.hpp"  // Character string formatting
 #include "dig.hpp"  // Numeric conversions
 #include "gc.hpp"   // Stream control sequences

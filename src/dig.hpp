@@ -4,7 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <type_traits>
-#include "str.hpp"
+#include "type.hpp"
 #include "err.hpp"
 
 namespace fmt
@@ -111,13 +111,14 @@ namespace fmt
 	> 
 	auto to_narrow(S s)
 	{
+		std::less<S> less;
 		static_assert(sizeof(T) < sizeof(S));
 		static_assert(is_integer<S> and is_integer<T>);
 		static_assert(is_signed<T> == is_signed<S>);
 		static_assert(S{minimum<T>} <= zero<S>);
 		static_assert(zero<S> <= S{maximum<T>});
-		assert(s <= S{maximum<T>});
-		assert(S{minimum<T>} <= s);
+		assert(not less(s, maximum<T>));
+		assert(not less(minimum<T>, s));
 		return static_cast<T>(s);
 	}
 
@@ -186,6 +187,37 @@ namespace fmt
 	float to_float(string::view);
 	double to_double(string::view);
 	long double to_quad(string::view);
+
+
+}
+
+namespace fmt::dig
+{
+	template
+	<
+		class Type
+	>
+	constexpr auto to(string::view line, int base = 10)
+	{
+		constexpr if (is_integer<Type>)
+		{
+			constexpr if (is_signed<Type>)
+			{
+				auto const number = to_llong(line, base);
+				return to_narrow<Type>(number);
+			}
+			else
+			{
+				auto const number = to_ullong(line, base);
+				return to_narrow<Type>(number);
+			}
+		}
+		else
+		{
+			auto const number = to_quad(line);
+			return to_narrow<Type>(number);
+		}
+	}
 }
 
 #endif // file

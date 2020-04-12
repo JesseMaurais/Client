@@ -1,55 +1,10 @@
 #ifndef pipe_hpp
-#define pipe_hpp "Unnamed Pipes"
+#define pipe_hpp
 
-#include "str.hpp"
-#include "ptr.hpp"
-#include "file.hpp"
-#include "mode.hpp"
+#include "fd.hpp"
 
 namespace env::file
 {
-	struct descriptor : unique, stream
-	{
-		ssize_t read(void *buf, size_t sz) const override;
-		ssize_t write(void const *buf, size_t sz) const override;
-		bool open(fmt::string_view path, mode = rw, permit = owner(rw));
-		bool close();
-
-		explicit descriptor(fmt::string_view path, mode am = rw, permit pm = owner(rw))
-		{
-			(void) open(path, am, pm);
-		}
-
-		explicit descriptor(int fd = invalid)
-		{
-			(void) set(fd);
-		}
-
-		~descriptor()
-		{
-			if (not fail(fd))
-			{
-				(void) close();
-			}
-		}
-
-		int set(int value = invalid)
-		{
-			int const tmp = fd;
-			fd = value;
-			return tmp;
-		}
-
-		int get() const
-		{
-			return fd;
-		}
-
-	protected:
-
-		int fd;
-	};
-
 	struct pipe : unique, stream
 	{
 		explicit pipe();

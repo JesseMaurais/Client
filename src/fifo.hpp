@@ -1,18 +1,17 @@
 #ifndef fifo_hpp
 #define fifo_hpp "Serial Device"
 
-#include "pipe.hpp"
+#include "fd.hpp"
 #include "env.hpp"
-#include "str.hpp"
 
 namespace env::file
 {
 	struct fifo : view, descriptor
 	{
-		fifo(fmt::string_view, mode = rd);
+		fifo(string::view, mode = rd);
 		~fifo();
 
-		operator fmt::string_view() const override
+		operator type() const final
 		{
 			return path;
 		}
@@ -21,7 +20,7 @@ namespace env::file
 
 	private:
 
-		fmt::string path;
+		string path;
 		int const flags;
 	};
 }

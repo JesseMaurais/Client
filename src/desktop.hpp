@@ -1,19 +1,19 @@
 #ifndef desktop_hpp
 #define desktop_hpp "Desktop Utility"
 
-#include "str.hpp"
 #include "env.hpp"
+#include "type.hpp"
 #include "process.hpp"
 
 namespace env::desktop
 {
-	bool is(fmt::string::view name);
+	bool is(string::view name);
 	/// Whether $name of desktop session
 
-	struct dialog : env::file::process
+	struct dialog : file::process
 	/// Start a basic dialog type
 	{
-		explicit dialog(fmt::string::view::span args);
+		explicit dialog(string::view::span args);
 
 	private:
 

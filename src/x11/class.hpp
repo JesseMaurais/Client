@@ -1,7 +1,4 @@
 #include "x11.hpp"
-#include "str.hpp"
-#include <iterator>
-#include <algorithm>
 
 namespace x11
 {

@@ -4,7 +4,7 @@
 #include "win.hpp"
 #include "sys.hpp"
 #include "err.hpp"
-#include "str.hpp"
+#include "type.hpp"
 
 namespace sys::win
 {

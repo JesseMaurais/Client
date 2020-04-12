@@ -3,8 +3,8 @@
 
 #include "dbg.hpp"
 #include "sgr.hpp"
-#include "str.hpp"
 #include "ptr.hpp"
+#include "type.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>

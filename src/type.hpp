@@ -1,5 +1,5 @@
-#ifndef str_hpp
-#define str_hpp "String Format"
+#ifndef type_hpp
+#define type_hpp "Character Types"
 
 #include "fmt.hpp"
 #include "utf.hpp"
@@ -40,7 +40,6 @@ namespace fmt
 
 		constexpr auto npos = string::npos;
 		constexpr auto null = size_type(0);
-		constexpr Char eol = '\n';
 
 		static_assert(null == ~npos);
 
@@ -341,7 +340,7 @@ namespace fmt
 			return n;
 		}
 
-		static auto join(string::view_span t, string::view u)
+		static auto join(string::view::span t, string::view u)
 		/// Join strings in $t with $u inserted between
 		{
 			string s;
@@ -440,7 +439,7 @@ namespace fmt
 	extern variable<type<char>::ref> str;
 	extern variable<type<wchar_t>::ref> wstr;
 
-	// C locale shims
+	// Multibyte shims
 
 	template <typename iterator>
 	inline auto next(iterator it, iterator end)

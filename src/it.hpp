@@ -9,7 +9,8 @@ namespace fwd
 	<
 		class Type
 	>
-	struct iterator : Type
+	struct iterate : Type
+	// Iterator pattern
 	{
 		using Type::Type;
 
@@ -27,33 +28,14 @@ namespace fwd
 
 	template
 	<
-		auto Begin, auto End
-	>
-	struct domain
-	{
-		constexpr auto first = Begin;
-		constexpr auto second = End;
-
-		constexpr auto begin()
-		{
-			return first;
-		}
-
-		constexpr auto end()
-		{
-			return second;
-		}
-	};
-
-	template
-	<
 		class Iterator
 	>
 	struct range : pair<Iterator>
+	// Iterator pair as range
 	{
 		using pair::pair;
 
-		auto length() const
+		auto size() const
 		{
 			return std::distance(this->first, this->second);
 		}
@@ -71,9 +53,38 @@ namespace fwd
 
 	template
 	<
-		class Iterator, int Over = 1, int Step = 1
+		auto Begin, auto End
 	>
-	struct pairwise : pair<Iterator>
+	struct domain
+	// Constant range expression
+	{
+		constexpr auto first = Begin;
+		constexpr auto second = End;
+
+		static_assert(first < second);
+
+		constexpr auto size()
+		{
+			return second - first;
+		}
+
+		constexpr auto begin()
+		{
+			return first;
+		}
+
+		constexpr auto end()
+		{
+			return second;
+		}
+	};
+
+	template
+	<
+		class Iterator, int Size = 1, int Step = Size,
+	>
+	struct segment : pair<Iterator>
+	// Iterate within a sub range
 	{
 		using pair::pair;
 
@@ -90,22 +101,22 @@ namespace fwd
 
 		auto begin() const
 		{
-			return iterator<item>
+			return iterate<item>
 			{ 
-				this->first, std::next(this->first, Over)	
+				this->first, std::next(this->first, Size)	
 			};
 		}
 
 		auto end() const
 		{
-			return iterator<item>
+			return iterate<item>
 			{
-				this->second, std::prev(this->second, Over) 
+				std::prev(this->second, Size), this->second;
 			};
 		}
 
-		static_assert(Over % Step == 0);
-		static_assert(0 < Over);
+		static_assert(Size % Step == 0);
+		static_assert(0 < Size);
 	};
 
 	// Directed graphs

@@ -1,26 +1,26 @@
 #ifndef process_hpp
 #define process_hpp "File Process"
 
-#include "pipe.hpp"
-#include "str.hpp"
+#include "fd.hpp"
 #include "ptr.hpp"
+#include "type.hpp"
 
 namespace env::file
 {
 	struct process : unique, stream
 	{
-		bool start(fmt::string::view::init args);
-		bool start(fmt::string::view::span args);
-		bool start(size_t argc, char const** argv);
+		bool start(string::view::init args);
+		bool start(string::view::span args);
+		bool start(size_t argc, char const **argv);
 		bool quit();
 		bool wait();
 
-		explicit process(fmt::string::view::init args)
+		explicit process(string::view::init args)
 		{
 			(void) start(args);
 		}
 
-		explicit process(fmt::string::view::span args)
+		explicit process(string::view::span args)
 		{
 			(void) start(args);
 		}

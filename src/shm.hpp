@@ -3,9 +3,7 @@
 
 #include <functional>
 #include <memory>
-
 #include "mode.hpp"
-#include "str.hpp"
 
 namespace env::file
 {
