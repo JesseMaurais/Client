@@ -60,7 +60,10 @@ namespace doc
 			{
 				auto const z = line.size();
 				key = line.substr(1, z - 2);
-				if (empty(key)) break;
+				if (empty(key)) 
+				{
+					break;
+				}
 				continue;
 			}
 
@@ -113,6 +116,7 @@ namespace doc
 
 	view ini::get(pair key) const
 	{
+		auto const first = env::opt::get(
 		auto const it = keys.find(key.first);
 		auto const end = keys.end();
 		if (end != it)
@@ -121,35 +125,27 @@ namespace doc
 			{
 				if (item.first == key.second)
 				{
-					return item.second;
+					return values.at(item.second);
 				}
 			}
 		}
 		return fmt::nil;
 	}
 
-	bool ini::put(pair key, view value)
-	{
-		key.first = env::opt::get(key.first);
-		key.second = env::opt::get(key.second);
-		value = env::opt::get(value);
-		return set(key, value);
-	}
-
 	bool ini::set(pair key, view value)
 	{
-		auto [it, unique] = keys.insert_or_assign(key.first);
-		it->second.emplace_back(fmt::to_pair(key.second, value));
-		return unique;
+		key.first = env::opt::set(key.first);
+		key.second = env::opt::set(key.second);
+		return put(key, value);
 	}
 
-	bool ini::cut(pair key)
+	bool ini::put(pair key, view value)
 	{
-		auto it = keys.find(key);
-		if (keys.end() != it)
+		auto const it = keys.find(key.first);
+		auto const end = keys.end();
+		if (end != it)
 		{
-			keys.erase(it);
-			return true;
+			
 		}
 		return false;
 	}

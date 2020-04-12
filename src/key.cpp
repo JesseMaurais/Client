@@ -36,9 +36,22 @@ namespace env::opt
 		return read->at(name);
 	}
 
-	word get(view name)
+	view get(view name)
 	{
-		return get(set(name));
+		// lookup
+		{
+			auto const read = cache.read();
+			auto const end = read->end();
+			auto const it = read->find(name);
+			if (end != it)
+			{
+				return *it;
+			}
+		}
+		// cache
+		auto const write = cache.write();
+		auto const it = write->emplace(name);
+		return *it;
 	}
 
 	word put(view name)
@@ -46,25 +59,14 @@ namespace env::opt
 		auto const write = store.write();
 		auto const index = write->size();
 		write->emplace_back(name);
-		return fmt::to<word>(index);
+		return to<word>(index);
 	}
 
 	word set(view name)
 	{
 		auto const write = store.write();
 		auto index = write->size();
-		{
-			auto it = cache.read()->find(name);
-			auto const end = cache.read()->end();
-			if (end == it)
-			{
-				bool unique;
-				tie(it, unique) = cache.write()->emplace(name);
-				verify(unique);
-				name = *it;
-			}
-		}
-		write->push_back(name);
+		write->push_back(get(name));
 		return to<word>(index);
 	}
 }

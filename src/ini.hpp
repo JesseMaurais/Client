@@ -1,10 +1,9 @@
 #ifndef ini_hpp
 #define ini_hpp "Initial Options"
 
+#include "it.hpp"
 #include "fmt.hpp"
 #include <iosfwd>
-#include <set>
-#include <map>
 
 namespace doc
 {
@@ -12,15 +11,20 @@ namespace doc
 	{
 		using fmt::string;
 		using string::view;
+		using string::set;
+		using string::in;
+		using string::out;
 		using view::pair;
 		using view::span;
 		using view::init;
 		using view::vector;
-		using string::in;
-		using string::out;
+
+		using pair = fmt::pair<word>;
+		using group = fmt::group<word>;
 		
-		view::matrix keys;
-		string::set values;
+		group keys;
+		vector values;
+		set cache;
 
 		static in::ref getline(in::ref, string::ref);
 		friend in::ref operator>>(in::ref, ini::ref);
@@ -34,7 +38,6 @@ namespace doc
 		view get(pair) const;
 		bool set(pair, view);
 		bool put(pair, view);
-		bool cut(pair);
 	};
 }
 

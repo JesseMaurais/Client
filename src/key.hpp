@@ -1,5 +1,5 @@
 #ifndef key_hpp
-#define key_hpp "Optimal String Store"
+#define key_hpp "Shared String Store"
 
 #include "fmt.hpp"
 #include "opt.hpp"
@@ -17,7 +17,7 @@ namespace env::opt
 	bool got(word); // whether word is stored
 	bool got(view); // whether string is cached
 	view get(word); // view for a word
-	view get(view); // unique in view cache
+	view get(view); // unique view in cache
 	word put(view); // add string view
 	word set(view); // new string view
 

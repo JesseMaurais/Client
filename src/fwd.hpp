@@ -1,5 +1,5 @@
 #ifndef fwd_hpp
-#define fwd_hpp "Forward Declaration
+#define fwd_hpp "Forward Declaration"
 
 #include <iosfwd>
 #include <utility>

@@ -82,15 +82,14 @@ namespace fwd
 
 	template
 	<
-		class Iterator, int Size = 1, int Step = Size,
-		template <class> Range = range
+		class Iterator, int Size = 1, int Step = Size
 	>
 	struct interval : pair<Iterator>
 	// Iterate within a sub range
 	{
 		using pair::pair;
 
-		struct iterator : Range<Iterator>
+		struct iterator : range<Iterator>
 		{
 			using range::range;
 
@@ -121,7 +120,7 @@ namespace fwd
 		static_assert(0 < Size);
 	};
 
-	// Directed graphs
+	// Structures
 
 	template
 	<
@@ -140,6 +139,12 @@ namespace fwd
 		class Type, template <class> class Alloc = allocator
 	>
 	using matrix = vector<span<pair<Type>>, Alloc>;
+
+	template
+	<
+		class Type, template <class> class Order ordering, template <class> class Alloc = allocator
+	>
+	using group = map<Type, span<pair<Type>>, Order, Alloc>;
 
 	//
 	// Algorithms
