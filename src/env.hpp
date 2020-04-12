@@ -22,7 +22,7 @@ namespace env
 
 	template 
 	<
-		class Type, template <class> Access = attribute
+		class Type, template <class> Access = fwd::variable
 	>
 	struct variable : Access<Type>
 	{ 
@@ -35,7 +35,7 @@ namespace env
 	<
 		class Type
 	>
-	using constant = variable<Type, property>;
+	using constant = variable<Type, fwd::constant>;
 
 	using size = constant<string::size_type>;
 	using view = constant<string::view>;

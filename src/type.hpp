@@ -374,6 +374,22 @@ namespace fmt
 			return t;
 		}
 
+		static auto split(string::view::span p, string::view v)
+		{
+			fwd::vector<string::view::span> t;
+			auto const end = p.end();
+			auto begin = p.begin();
+			for (auto it = begin; it != end; ++it)
+			{
+				if (*it == v)
+				{
+					t.emplace_back(begin, it);
+					begin = std::next(it);
+				}
+			}
+			return t;
+		}
+
 		static auto replace(string::view u, string::view v, string::view w)
 		/// Replace in $u all occurrances of $v with $w
 		{
@@ -436,8 +452,8 @@ namespace fmt
 
 	// Common characters
 
-	extern variable<type<char>::ref> str;
-	extern variable<type<wchar_t>::ref> wstr;
+	extern type<char> const &str;
+	extern type<wchar_t> const &wstr;
 
 	// Multibyte shims
 
@@ -516,6 +532,11 @@ namespace fmt
 	inline auto split(string::view u, string::view v = "")
 	{
 		return str.split(u, v);
+	}
+
+	inline auto split(string::view::span p, string::view v = "")
+	{
+		return str.split(p, v):
 	}
 
 	inline auto replace(string::view u, string::view v, string::view w)
