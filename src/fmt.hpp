@@ -12,13 +12,12 @@ namespace fmt
 	>
 	struct memory_traits : Traits<Type>
 	{
-		using base = std::iterator_traits<Type>;
+		using base = Traits<Type>;
 		using ref = base::references;
 		using cref = base::const_reference;
 		using ptr = base::pointer;
 		using cptr = base::const_pointer;
 		using pair = fwd::pair<Type>;
-		using range = fwd::range<ptr>;
 		using init = fwd::init<Type>;
 		using span = fwd::span<Type>;
 	};
@@ -36,12 +35,12 @@ namespace fmt
 			template <class, template <class> class> class Stream
 		>
 		using memory = memory_traits<Stream<Char, Traits>, Iterator>;
-		using ios = memory<basic_ios>;
-		using in = memory<basic_istream>;
-		using out = memory<basic_ostream>;
-		using io = memory<basic_iostream>;
-		using buf = memory<basic_buf>;
-		using file = memory<basic_file>;
+		using ios = memory<fwd::basic_ios>;
+		using in = memory<fwd::basic_istream>;
+		using out = memory<fwd::basic_ostream>;
+		using io = memory<fwd::basic_iostream>;
+		using buf = memory<fwd::basic_buf>;
+		using file = memory<fwd::basic_file>;
 	};
 
 	template
@@ -50,54 +49,53 @@ namespace fmt
 	>
 	struct struct_traits : memory_traits<Type>
 	{
-		using base = memory_traits<Type>;
-
-		using base::node;
+		using edges = fwd::edges<Type>;
 
 		template
 		<
 			template <class> Alloc = allocator
 		>
-		using edges = fwd::edges<Type, Alloc>;
+		using graph = fwd::graph<Type, Alloc>;
 
 		template
 		<
+			template <class> Order = ordering,
 			template <class> Alloc = allocator
 		>
-		using matrix = fwd::matrix<Type, Alloc>;
+		using group = fwd::group<Type, Order, Alloc>;
 
 		template
 		<
-			template <class> Sort = std::less,
-			template <class> Alloc = std::allocator
+			template <class> Order = ordering,
+			template <class> Alloc = allocator
 		>
-		using set = set<Type, Sort, Alloc>;
+		using set = fwd::set<Type, Order, Alloc>;
 
 		template
 		<
-			template <class> Sort = std::less,
-			template <class> Alloc = std::allocator
+			template <class> Order = ordering,
+			template <class> Alloc = allocator
 		>
-		using map = map<Type, Sort, Alloc>;
+		using map = fwd::map<Type, Order, Alloc>;
 
 		template
 		<
 			size_t Size
 		>
-		using array = array<Type, Size>;
+		using array = fwd::array<Type, Size>;
 
 		template
 		<
-			template <class> Alloc = std::allocator
+			template <class> Alloc = allocator
 		>
-		using vector = vector<Type, Alloc>;
+		using vector = fwd::vector<Type, Alloc>;
 
 		template
 		<
 			size_t Size,
-			template <class> Alloc = std::allocator
+			template <class> Alloc = allocator
 		>
-		using variant = variant<Type, Size, Alloc>;
+		using variant = fwd::variant<Type, Size, Alloc>;
 	};
 
 	template
@@ -108,8 +106,10 @@ namespace fmt
 	{ 
 		using traits = compose
 		<
-			stream_traits<String::char_type, String::char_traits>,
-			struct_traits<String>
+			struct_traits<String>, stream_traits
+			<
+				String::char_type, String::char_traits
+			>
 		>;
 
 		using traits::ios;
@@ -122,26 +122,25 @@ namespace fmt
 		using traits::cref;
 		using traits::ptr;
 		using traits::cptr;
-		using traits::range;
 		using traits::pair;
-		using traits::list;
+		using traits::init;
 		using traits::span;
-		using traits::node;
-		using matrix = traits::matrix<Alloc>;
-		using edges = traits::edges<Alloc>;
+		using traits::edges;
+		using graph = traits::graph<Alloc>;
+		using group = traits::group<Alloc>;
 		using vector = traits::vector<Alloc>;
 
 		template
 		<
-			class Sort = std::less
+			template <class> class Order = ordering
 		>
-		using set = traits::set<Sort, Alloc>;
+		using set = traits::set<Order, Alloc>;
 
 		template 
 		<
-			class Sort = std::less
+			template <class> class Order = ordering
 		> 
-		using map = traits::map<Sort, Alloc>;
+		using map = traits::map<Order, Alloc>;
 
 		template 
 		<
@@ -160,30 +159,41 @@ namespace fmt
 	<
 		class Char,
 		template <class> Traits = character,
-		template <class> Order = ordering,
 		template <class> Alloc = allocator
 	>
-	struct basic_string_view : string_type<basic_string_view<Char, Traits>, Sort, Alloc>
+	struct basic_string_view : string_type
+	<
+		fwd::basic_string_view<Char, Traits>, Alloc
+	>
 	{
-		using base = string_traits<fwd::basic_string_view<Char, Traits>, Sort, Alloc>;
+		using base = string_traits
+		<
+			fwd::basic_string_view<Char, Traits>, Alloc
+		>;
 		using base::base;
 	};
 
 	template
 	<
 		class Char,
-		template <class> Traits = std::char_traits,
-		template <class> Sort = std::less,
-		template <class> Alloc = std::allocator
+		template <class> Traits = character,
+		template <class> Alloc = allocator
 	>
-	struct basic_string : string_traits<basic_string<Char, Traits, Alloc>, Sort, Alloc>
-	{ 
-		using base = string_traits<fwd::basic_string<Char, Traits, Alloc>, Sort, Alloc>;
+	struct basic_string : string_type
+	<
+		fwd::basic_string<Char, Traits, Alloc>, Alloc
+	>
+	{
+		using view = basic_string_view<Char, Traits, Alloc>;
+		using base = string_traits
+		<
+			fwd::basic_string<Char, Traits, Alloc>, Alloc
+		>;
 		using base::base;
-		using view = basic_string_view<Char, Traits, Sort, Alloc>;
 	};
 
 	using std::byte;
+
 	using string = basic_string<char>;
 	using wstring = basic_string<wchar_t>;
 	using binary = basic_string<byte>;

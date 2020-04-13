@@ -120,31 +120,30 @@ namespace fwd
 		static_assert(0 < Size);
 	};
 
+	//
 	// Structures
+	//
 
 	template
 	<
-		class Type
+		class Node
 	>
-	using node = std::pair<Type, span<Type>>;
+	using edges = std::pair<const Node, span<Node>>;
 
 	template
 	<
-		class Type, template <class> class Alloc = allocator
+		class Node, 
+		template <class> class Alloc = allocator
 	>
-	using graph = vector<pair<Type>, Alloc>;
+	using graph = vector<pair<Node>, Alloc>;
 
 	template
 	<
-		class Type, template <class> class Alloc = allocator
+		class Node, 
+		template <class> class Order = ordering, 
+		template <class> class Alloc = allocator
 	>
-	using matrix = vector<span<pair<Type>>, Alloc>;
-
-	template
-	<
-		class Type, template <class> class Order ordering, template <class> class Alloc = allocator
-	>
-	using group = map<Type, span<pair<Type>>, Order, Alloc>;
+	using group = map<Type, span<pair<Node>>, Order, Alloc>;
 
 	//
 	// Algorithms

@@ -1,26 +1,24 @@
 #ifndef ini_hpp
 #define ini_hpp "Initial Options"
 
-#include "it.hpp"
 #include "fmt.hpp"
-#include <iosfwd>
 
 namespace doc
 {
 	struct ini : fmt::struct_traits<ini>
 	{
 		using fmt::string;
-		using string::view;
 		using string::in;
 		using string::out;
+		using string::view;
 		using view::pair;
 		using view::span;
 		using view::init;
 		using view::vector;
 		
-		fwd::group<view> keys;
-		fwd::edges<view> values;
-		fwd::vector<string> cache;
+		view::group keys;
+		view::graph values;
+		string::set cache;
 
 		static in::ref getline(in::ref, string::ref);
 		friend in::ref operator>>(in::ref, ini::ref);
