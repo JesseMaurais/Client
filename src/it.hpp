@@ -132,7 +132,7 @@ namespace fwd
 	<
 		class Type, template <class> class Alloc = allocator
 	>
-	using edges = vector<pair<Type>, Alloc>;
+	using graph = vector<pair<Type>, Alloc>;
 
 	template
 	<

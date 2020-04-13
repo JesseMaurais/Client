@@ -11,20 +11,16 @@ namespace doc
 	{
 		using fmt::string;
 		using string::view;
-		using string::set;
 		using string::in;
 		using string::out;
 		using view::pair;
 		using view::span;
 		using view::init;
 		using view::vector;
-
-		using pair = fmt::pair<word>;
-		using group = fmt::group<word>;
 		
-		group keys;
-		vector values;
-		set cache;
+		fwd::group<view> keys;
+		fwd::edges<view> values;
+		fwd::vector<string> cache;
 
 		static in::ref getline(in::ref, string::ref);
 		friend in::ref operator>>(in::ref, ini::ref);
@@ -32,7 +28,7 @@ namespace doc
 
 		static string join(span);
 		static vector split(view);
-		static string join(list);
+		static string join(init);
 
 		bool got(pair) const;
 		view get(pair) const;
