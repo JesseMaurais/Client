@@ -18,8 +18,8 @@ namespace env::opt
 	bool got(view); // whether string is cached
 	view get(word); // view for a word
 	view get(view); // unique view in cache
-	word put(view); // add string view
-	word set(view); // new string view
+	word put(view); // add this view to store
+	word set(view); // cache string to store
 
 	inline auto all(view::span line, auto to)
 	// convert many at once
