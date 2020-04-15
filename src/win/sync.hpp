@@ -1,5 +1,5 @@
 #ifndef win_thread_hpp
-#define win_thread_hpp
+#define win_thread_hpp "WIN32 Threads"
 
 #include "win.hpp"
 #include "sys.hpp"

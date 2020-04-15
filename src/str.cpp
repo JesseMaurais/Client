@@ -1,4 +1,4 @@
-#include "key.hpp"
+#include "str.hpp"
 #include "dig.hpp"
 #include "err.hpp"
 #include "file.hpp"
@@ -6,11 +6,12 @@
 
 namespace
 {
+	sys::exclusive<fmt::string::set> cache;
 	sys::exclusive<fmt::string::view::vector> store;
 	sys::exclusive<std::map<fmt::string::view, env::opt::word>> index;
 }
 
-namespace env::opt
+namespace fmt::str
 {
 	using file::size_t;
 	using file::ssize_t;
@@ -92,14 +93,52 @@ namespace env::opt
 		auto const size = write->size();
 		auto const id = to<word>(size);
 		{
-			static sys::exclusive<fmt::string::set> cache;
+			// Cache the string here
 			auto const p = cache.write()->emplace(name);
 			verify(p.second);
+			// Index a view to the string
 			auto const q = index.write()->emplace(*p.first, id);
 			verify(q.second);
+			
 			write->push_back(*q.first);
 		}
 		return id;
+	}
+
+	string::in::ref get(string::in::ref in)
+	{
+		auto const cache_write = cache.write();
+		auto const store_write = store.write();
+		auto const index_write = index.write();
+
+		string line;
+		while (std::getline(in, line))
+		{
+			auto const p = cache_write->emplace(move(line));
+			verify(p.second);
+
+			auto const size = store_write->size();
+			auto const id = to<word>(size);
+	
+			auto const q = store_write->emplace(*p.first, id);
+			verify(q.second);
+
+			index_write->emplace_back(*q.first);
+		}
+		return in;
+	}
+
+	string::out::ref put(string::out::ref out)
+	{
+		auto const read = cache.read();
+		auto const begin = read->begin();
+		auto const end = read->end();
+
+		for (auto it = begin; it != end; ++it)
+		{
+			out << it->first << eol;
+		}
+		return out;
 	}
 }
 

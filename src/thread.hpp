@@ -1,8 +1,8 @@
 #ifndef thread_hpp
-#define thread_hpp "System Threads"
+#define thread_hpp "Thread Sync"
 
 #ifdef _WIN32
-#include "win/threads.hpp"
+#include "win/sync.hpp"
 #else
 #include "uni/pthread.hpp"
 #endif

@@ -1,5 +1,5 @@
-#ifndef win_dir_hpp
-#define win_dir_hpp
+#ifndef win_file_hpp
+#define win_file_hpp "WIN32 Files"
 
 #include "win.hpp"
 #include "ptr.hpp"
