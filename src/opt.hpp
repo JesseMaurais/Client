@@ -1,7 +1,8 @@
 #ifndef opt_hpp
-#define opt_hpp "Environment Options"
+#define opt_hpp "Command Line Options"
 
 #include "env.hpp"
+#include "str.hpp"
 
 namespace env::opt
 {
@@ -12,7 +13,7 @@ namespace env::opt
 	using view::pair;
 	using string::in;
 	using string::out;
-	using word = long long;
+	using fmt::str::word;
 	using quad = long double;
 
 	extern view const application;

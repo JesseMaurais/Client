@@ -11,12 +11,12 @@ namespace fmt::str
 	using span = fwd::span<word>;
 	using init = fwd::init<word>;
 
-	bool got(word); // whether word names a string
-	bool got(view); // whether string is stored
-	view get(word); // view string for a word
-	view get(view); // unique view in store
-	word put(view); // add this view to store
-	word set(view); // cache string to store
+	bool got(word); // O (1)
+	bool got(view); // O log n : n is the cache size
+	view get(word); // O (1)
+	view get(view); // O log n
+	word put(view); // O log n
+	word set(view); // O log n
 
 	string::in::ref get(string::in::ref);
 	// read all file lines to cache

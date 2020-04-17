@@ -69,11 +69,12 @@ namespace doc
 				sys::warn(here, "no key");
 			}
 
-			auto pair = fmt::to_pair(line);
-			pair.first = env::opt::set(pair.first);
-			pair.second = env::opt::set(pair.second);
+			auto const pair = fmt::to_pair(line);
+			auto const first = fmt::str::get(pair.first);
+			auto const second = fmt::str::get(pair.second);
+			auto const section = fmt::str::get(key);
 			
-			if (not obj.set({ key, pair.first }, pair.second))
+			if (not obj.set({ section, first }, second))
 			{
 				sys::warn(here, "overwrite", key, "with", pair.second);
 			}

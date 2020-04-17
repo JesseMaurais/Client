@@ -107,23 +107,24 @@ namespace fmt::str
 
 	string::in::ref get(string::in::ref in)
 	{
-		auto const cache_write = cache.write();
-		auto const store_write = store.write();
-		auto const index_write = index.write();
+		// Block all threads at this point
+		auto const wcache = cache.write();
+		auto const wstore = store.write();
+		auto const windex = index.write();
 
 		string line;
 		while (std::getline(in, line))
 		{
-			auto const p = cache_write->emplace(move(line));
+			auto const p = wcache->emplace(move(line));
 			verify(p.second);
 
-			auto const size = store_write->size();
+			auto const size = wstore->size();
 			auto const id = to<word>(size);
 	
-			auto const q = store_write->emplace(*p.first, id);
+			auto const q = wstore->emplace(*p.first, id);
 			verify(q.second);
 
-			index_write->emplace_back(*q.first);
+			windex->emplace_back(*q.first);
 		}
 		return in;
 	}

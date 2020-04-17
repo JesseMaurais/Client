@@ -1,9 +1,37 @@
 #include "desktop.hpp"
 #include "fmt.hpp"
 #include "usr.hpp"
+#include "str.hpp"
 
 namespace env::desktop
 {
+	auto const wd = fmt::str::put("Desktop Entry");
+
+	entry::operator type() const final
+	{
+		return keys.at(wd);
+	}
+
+	auto entry::got(word ud) const
+	{
+		return ini::got({wd, ud});
+	}
+
+	auto entry::get(word ud) const
+	{
+		return ini::get({wd, ud});
+	}
+
+	auto entry::set(word ud, view vu)
+	{
+		return ini::set({wd, vu});
+	}
+
+	auto entry::put(word ud, view vu)
+	{
+		return ini::put({wd, ud}, vu);
+	}
+
 	bool is(fmt::string::view name)
 	{
 		auto const current = fmt::to_lower(env::usr::current_desktop);

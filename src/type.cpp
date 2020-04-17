@@ -49,15 +49,23 @@ namespace fmt
 		> 
 		static string from(Type const& s);
 
-		bool check(Char c, mask x = space) const;
-		// Check whether code w is an x
+		bool check(Char c, mask x = space) const
+		/// Check whether code $w is an $x
+		{
+			return base::is(x, c);
+		}
 
-		auto check(string::view u) const;
-		// Classify all characters in a view
+		auto check(string::view u) const
+		/// Classify all characters in a view
+		{
+			vector<mask> x(u.size());
+			base::is(u.data(), u.data() + u.size(), x.data());
+			return x;
+		}
 
 		template <class Iterator>
 		auto next(Iterator it, Iterator end, mask x = space) const
-		// Next iterator after it but before end which is an x
+		/// Next iterator after $it but before $end which is an $x
 		{
 			while (it != end) 
 			{
@@ -366,7 +374,7 @@ namespace fmt
 			return t;
 		}
 
-		static auto split(string::view::span p, string::view v);
+		static auto split(string::view::span p, string::view v)
 		{
 			fwd::vector<string::view::span> t;
 			auto const end = p.end();
@@ -382,19 +390,69 @@ namespace fmt
 			return t;
 		}
 
-		static auto replace(string::view u, string::view v, string::view w);
-		/// Replace in u all occurrances of v with w
+		static auto replace(string::view u, string::view v, string::view w)
+		/// Replace in $u all occurrances of $v with $w
+		{
+			string s;
+			auto const uz = u.size(), vz = v.size();
+			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
+			{
+				auto const k = uz < j ? uz : j;
+				s += u.substr(i, k - i);
+				if (j < uz) s += w;
+				i = k + vz;
+			}
+			return s;
+		}
 
-		static auto embrace(string::view u, string::view v);
-		// First matching braces v front and v back found in u
+		static auto embrace(string::view u, string::view v)
+		/// First matching braces $v front and $v back found in $u
+		{
+			auto i = u.find_first_of(v.front()), j = i;
+			if (i < npos)
+			{
+				size_type n = 1;
+				do
+				{
+					j = u.find_first_of(v, j + 1);
+					if (npos == j)
+					{
+						break;
+					}
+					else
+					if (u[j] == v.back())
+					{
+						-- n;
+					}
+					else
+					if (u[j] == v.front())
+					{
+						++ n;
+					}
+					else // $v interior
+					{
+						break;
+					}
+				}
+				while (0 < n);
+			}
+			return std::pair{ i, j };
+		}
 
-		static auto to_pair(string::view u, string::view v);
-		// Divide view u by first occurance of v
+		static auto to_pair(string::view u, string::view v)
+		/// Divide view $u by first occurance of $v
+		{
+			auto const m = u.size();
+			auto const n = u.find(v);
+			auto const p = u.substr(0, n);
+			auto const q = u.substr(n < m ? n + 1 : m);
+			return make_pair(p, q);
+		}
 	};
 
 	// Common characters
 
-	extern type<char> const &cstr;
+	extern type<char> const &str;
 	extern type<wchar_t> const &wstr;
 
 	// Multibyte shims
@@ -408,12 +466,12 @@ namespace fmt
 	template <typename iterator>
 	inline auto skip(iterator it, iterator end)
 	{
-		return cstr.skip(it, end);
+		return str.skip(it, end);
 	}
 
 	inline auto widen(string::view u)
 	{
-		return cstr.widen(u);
+		return str.widen(u);
 	}
 
 	inline auto narrow(wstring::view u)
@@ -423,83 +481,83 @@ namespace fmt
 
 	inline auto first(string::view u)
 	{
-		return cstr.first(u);
+		return str.first(u);
 	}
 
 	inline auto last(string::view u)
 	{
-		return cstr.last(u);
+		return str.last(u);
 	}
 
 	inline auto trim(string::view u)
 	{
-		return cstr.trim(u);
+		return str.trim(u);
 	}
 
 	inline auto to_upper(string::view u)
 	{
-		return cstr.to_upper(u);
+		return str.to_upper(u);
 	}
 
 	inline auto to_lower(string::view u)
 	{
-		return cstr.to_lower(u);
+		return str.to_lower(u);
 	}
 
 	inline bool terminated(string::view u)
 	{
-		return cstr.terminated(u);
+		return str.terminated(u);
 	}
 
 	inline auto count(string::view u)
 	{
-		return cstr.count(u);
+		return str.count(u);
 	}
 
 	inline auto count(string::view u, string::view v)
 	{
-		return cstr.count(u, v);
+		return str.count(u, v);
 	}
 
 	inline auto join(string::view::span t, string::view u = "")
 	{
-		return cstr.join(t, u);
+		return str.join(t, u);
 	}
 
 	inline auto join(string::view::init t, string::view u = "")
 	{
-		return cstr.join(t, u);
+		return str.join(t, u);
 	}
 
 	inline auto split(string::view u, string::view v = "")
 	{
-		return cstr.split(u, v);
+		return str.split(u, v);
 	}
 
 	inline auto split(string::view::span p, string::view v = "")
 	{
-		return cstr.split(p, v):
+		return str.split(p, v):
 	}
 
 	inline auto replace(string::view u, string::view v, string::view w)
 	{
-		return cstr.replace(u, v, w);
+		return str.replace(u, v, w);
 	}
 
 	inline auto embrace(string::view u, string::view v)
 	{
-		return cstr.embrace(u, v);
+		return str.embrace(u, v);
 	}
 
 	inline auto to_pair(string::view u, string::view v = "=")
 	{
-		return cstr.to_pair(u, v);
+		return str.to_pair(u, v);
 	}
 
 	inline auto to_pair(string::view u, string::view v, string::view w = "=")
 	{
 		string::view::vector x { u, v };
-		return cstr.join(x, w);
+		return str.join(x, w);
 	}
 
 	inline auto to_pair(string::view::pair p, string::view u = "=")

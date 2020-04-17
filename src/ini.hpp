@@ -1,11 +1,12 @@
 #ifndef ini_hpp
 #define ini_hpp "Initial Options"
 
+#include "fwd.hpp"
 #include "fmt.hpp"
 
 namespace doc
 {
-	struct ini : fmt::struct_traits<ini>
+	struct ini
 	{
 		using fmt::string;
 		using string::in;
@@ -16,9 +17,9 @@ namespace doc
 		using view::init;
 		using view::vector;
 		
-		view::group keys;
-		view::graph values;
-		string::set cache;
+		fmt::group<word> keys;
+		fmt::graph<word> values;
+		string::vector cache;
 
 		static in::ref getline(in::ref, string::ref);
 		friend in::ref operator>>(in::ref, ini::ref);
