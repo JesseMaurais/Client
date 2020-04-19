@@ -102,12 +102,12 @@ namespace sys
 		#endif
 	}
 
-	dll dll::find(fmt::string_view basename)
+	dll dll::find(fmt::string::view basename)
 	{
 		using namespace env::dir;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
 		env::dir::find(env::paths, regx(name) || to(name) || stop);
-		return fmt::string_view(name);
+		return fmt::string::view(name);
 	}
 }
 

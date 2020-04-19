@@ -1,36 +1,54 @@
 #ifndef shell_hpp
-#define shell_hpp "Environment Shell"
+#define shell_hpp "Command Shell"
 
-#include "env.hpp"
-#include "process.hpp"
+#include "fmt.hpp"
 
 namespace env
 {
-	using fmt::string;
-	using string::view;
-	using string::span;
-	using string::ref;
-	using string::in;
-	using string::out;
-
-	struct shell : file::process
-	// With desktop program for $path
+	struct shell
+	// Command execution shell
 	{
-		explicit shell(view line);
-		// Start command line
+		using fmt::string;
+		using string::view;
+		using string::vector;
+		using string::span;
+		using string::in;
+		using string::out;
+		using string::pair;
+		using string::edges;
 
-		static span get(in::ref);
-		// Lines read $in
+		vector cache;
+		string line;
 
-		static span dir(view path);
-		// Contents of directory given by $path
+		static constexpr auto current = ".";
+		static constexpr auto parent = "..";
+		static constexpr auto text = "*.txt";
+		static constexpr auto infinite = 0;
 
-		static span which(view name);
-		// Paths to executables with program $name
+		span each(pair pos) const
+		// Position to span in cache
+		{
+			auto const data = cache.data();
+			return { data + pos.first, data + pos.second };
+		}
 
-	private:
+		pair get(in, char end = '\n', int count = infinite);
+		// Cache all lines in to end, return indices
 
-		using process::process;
+		pair open(view path);
+		// Open preferred application
+
+		pair list(view directory = current);
+		// Contents of directory given by path
+
+		pair copy(view path);
+		// Contents of file given by path
+
+		pair find(view pattern = text, view directory = current);
+		// Paths to matching files in directory
+
+		pair which(view name);
+		// Paths to executables with program name
 	};
 }
 

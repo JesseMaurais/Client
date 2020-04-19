@@ -124,39 +124,39 @@ namespace fmt
 		return from_fp<long double>(value, precision);
 	}
 
-	long to_long(string_view u, int base)
+	long to_long(string::view u, int base)
 	{
 		return to_base<long>(u, base);
 	}
 
-	long long to_llong(string_view u, int base)
+	long long to_llong(string::view u, int base)
 	{
 		return to_base<long long>(u, base);
 	}
 
-	unsigned long to_ulong(string_view u, int base)
+	unsigned long to_ulong(string::view u, int base)
 	{
 		return to_base<unsigned long>(u, base);
 	}
 
-	unsigned long long to_ullong(string_view u, int base)
+	unsigned long long to_ullong(string::view u, int base)
 	{
 		return to_base<unsigned long long>(u, base);
 	}
 
-	float to_float(string_view u)
+	float to_float(string::view u)
 	{
 		auto const nan = std::nanf("");
 		return to_fp(u, nan, std::strtof);
 	}
 
-	double to_double(string_view u)
+	double to_double(string::view u)
 	{
 		auto const nan = std::nan("");
 		return to_fp(u, nan, std::strtod);
 	}
 
-	long double to_quad(string_view u)
+	long double to_quad(string::view u)
 	{
 		auto const nan = std::nanl("");
 		return to_fp(u, nan, std::strtold);

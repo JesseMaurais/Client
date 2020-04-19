@@ -8,7 +8,7 @@ namespace
 {
 	sys::exclusive<fmt::string::set> cache;
 	sys::exclusive<fmt::string::view::vector> store;
-	sys::exclusive<std::map<fmt::string::view, env::opt::word>> index;
+	sys::exclusive<map<fmt::string::view, env::opt::word>> index;
 }
 
 namespace fmt::str

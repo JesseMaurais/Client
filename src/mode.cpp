@@ -160,7 +160,7 @@ namespace env::file
 		return flags;
 	}
 
-	bool fail(fmt::string_view path, mode am)
+	bool fail(fmt::string::view path, mode am)
 	{
 		if (not fmt::terminated(path))
 		{

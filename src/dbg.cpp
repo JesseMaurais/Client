@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "dbg.hpp"
-#include "sgr.hpp"
+#include "esc.hpp"
 #include "ptr.hpp"
 #include "type.hpp"
 #include <stdexcept>
@@ -48,7 +48,7 @@ namespace dbg
 			return instance;
 		}
 
-		std::ostream& stream(fmt::string_view pattern)
+		std::ostream& stream(fmt::string::view pattern)
 		{
 			if (pattern.front() == '_')
 			{

@@ -150,7 +150,7 @@ namespace env::dir
 	entry mask(file::mode am)
 	{
 		auto const flags = file::convert(am);
-		return [=](fmt::string_view u)
+		return [=](fmt::string::view u)
 		{
 			auto const c = u.data();
 			if (file::fail(sys::access(c, flags)))
@@ -185,7 +185,7 @@ namespace env::dir
 
 	entry to(fmt::string::vector::ref t)
 	{
-		return [&](fmt::string_view u)
+		return [&](fmt::string::view u)
 		{
 			auto s = fmt::to_string(u);
 			t.emplace_back(move(s));
@@ -195,7 +195,7 @@ namespace env::dir
 
 	entry to(fmt::string::ref s)
 	{
-		return [&](fmt::string_view u)
+		return [&](fmt::string::view u)
 		{
 			s = fmt::to_string(u);
 			return success;
@@ -270,7 +270,7 @@ namespace env::dir
 
 		for (auto it = deque.begin(); it != deque.end(); ++it)
 		{
-			(void) find(*it, [&](fmt::string_view u)
+			(void) find(*it, [&](fmt::string::view u)
 			{
 				auto const path = fmt::dir::join({*it, u});
 				auto const c = path.data();

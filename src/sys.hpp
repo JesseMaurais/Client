@@ -1,5 +1,5 @@
 #ifndef sys_hpp
-#define sys_hpp "File System Interface"
+#define sys_hpp "System Interface"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,7 +16,7 @@
 #define F_OK 0
 #define W_OK 1
 #define R_OK 3
-#define X_OK 0
+#define X_OK 0 // no-op
 
 #define O_APPEND _O_APPEND
 #define O_BINARY _O_BINARY

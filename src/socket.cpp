@@ -7,6 +7,7 @@
 #include "sig.hpp"
 #include "dig.hpp"
 #include "err.hpp"
+#include "opt.hpp"
 
 namespace env::file
 {
@@ -19,8 +20,8 @@ namespace env::file
 	{
 		#ifdef _WIN32
 		{
-			constexpr WORD version = MAKEWORD(2, 2);
-			static sys::net::win::data ws(version);
+			static auto const ver = opt::get("WSA", MAKEWORD(2, 2));
+			static sys::net::win::data ws(ver);
 		}
 		#endif
 

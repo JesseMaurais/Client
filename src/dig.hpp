@@ -4,7 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <type_traits>
-#include "type.hpp"
+#include "fmt.hpp"
 #include "err.hpp"
 
 namespace fmt
@@ -203,19 +203,16 @@ namespace fmt::dig
 		{
 			constexpr if (is_signed<Type>)
 			{
-				auto const number = to_llong(line, base);
-				return to_narrow<Type>(number);
+				return to_narrow<Type>(to_llong(line, base));
 			}
 			else
 			{
-				auto const number = to_ullong(line, base);
-				return to_narrow<Type>(number);
+				return to_narrow<Type>(to_ullong(line, base));
 			}
 		}
 		else
 		{
-			auto const number = to_quad(line);
-			return to_narrow<Type>(number);
+			return to_narrow<Type>(to_quad(line));
 		}
 	}
 }

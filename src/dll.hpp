@@ -16,7 +16,7 @@ namespace sys
 	public:
 
 		dll() = default;
-		dll(fmt::string_view path);
+		dll(fmt::string::view path);
 		~dll();
 
 		static dll find(fmt::string::view name);

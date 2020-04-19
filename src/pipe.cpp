@@ -6,11 +6,6 @@
 #include "err.hpp"
 #include "fmt.hpp"
 #include <utility>
-#ifdef _WIN32
-#include "win/sync.hpp"
-#else
-#include "uni/pthread.hpp"
-#endif
 
 namespace env::file
 {
@@ -34,7 +29,7 @@ namespace env::file
 		return n;
 	}
 
-	bool descriptor::open(fmt::string_view path, mode am, permit pm)
+	bool descriptor::open(fmt::string::view path, mode am, permit pm)
 	{
 		if (not fmt::terminated(path))
 		{

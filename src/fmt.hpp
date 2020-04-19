@@ -2,7 +2,6 @@
 #define fmt_hpp "Standard Format"
 
 #include "fwd.hpp"
-#include "it.hpp"
 
 namespace fmt
 {
@@ -122,13 +121,13 @@ namespace fmt
 		using traits::cref;
 		using traits::ptr;
 		using traits::cptr;
-		using traits::pair;
 		using traits::init;
 		using traits::span;
 		using traits::edges;
 		using graph = traits::graph<Alloc>;
 		using group = traits::group<Alloc>;
 		using vector = traits::vector<Alloc>;
+		using pair = fwd::pair<typename String::size_type>;
 
 		template
 		<
@@ -158,8 +157,8 @@ namespace fmt
 	template
 	<
 		class Char,
-		template <class> Traits = character,
-		template <class> Alloc = allocator
+		template <class> Traits = fwd::character,
+		template <class> Alloc = fwd::allocator
 	>
 	struct basic_string_view : string_type
 	<
@@ -176,8 +175,8 @@ namespace fmt
 	template
 	<
 		class Char,
-		template <class> Traits = character,
-		template <class> Alloc = allocator
+		template <class> Traits = fwd::character,
+		template <class> Alloc = fwd::allocator
 	>
 	struct basic_string : string_type
 	<
@@ -192,12 +191,9 @@ namespace fmt
 		using base::base;
 	};
 
-	using std::byte;
-
-	using string = basic_string<char>;
-	using wstring = basic_string<wchar_t>;
-	using binary = basic_string<byte>;
-	using ustring = basic_string<wint_t>;
+	using string = basic_string<char>; // UTF-8
+	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 by OS
+	using ustring = basic_string<wint_t>; // at least UTF-32
 }
 
 #endif // file
