@@ -1,10 +1,9 @@
 #ifndef desktop_hpp
 #define desktop_hpp "Desktop Utility"
 
+
 #include "ini.hpp"
-#include "env.hpp"
-#include "type.hpp"
-#include "process.hpp"
+#include "dir.hpp"
 
 namespace env::desktop
 {
@@ -16,7 +15,7 @@ namespace env::desktop
 		bool put(word, view);
 	};
 
-	
+	entry find(dir::entry);
 
 	bool is(string::view name);
 	// Whether name of desktop session

@@ -1,8 +1,9 @@
-#ifndef sgr_hpp
-#define sgr_hpp "Select Graphic Rendition"
+#ifndef esc_hpp
+#define esc_hpp "Escape Control Codes"
 
+#include <iomanip>
 #include "fmt.hpp"
-#include "asc.hpp"
+#include "acs.hpp"
 
 namespace fmt
 {
@@ -10,38 +11,78 @@ namespace fmt
 	<
 		char... Code
 	>
-	string::out encode(string::out out)
+	string::out enc(string::out out)
 	{
 		return (out << ... << Code);
 	}
 
 	template
 	<
-		int Code, int... Params
+		int... Params
 	>
-	string::out params(string::out out)
+	auto par(int param, Params... params)
 	{
 		if constexpr (0 < sizeof...(Params))
 		{
-			return out << Code << ';' << params<Params...>;
+			return out << param << ';' << par(params...);
 		}
 		else
 		{
-			return out << Code;
+			return out << param;
 		}
+	}
+
+	template
+	<
+		char Code, char Escape, int... Params
+	>
+	auto esc(Params... params)
+	{
+		using begin = enc<C0::ESC, Code>;
+		using next = par<Params...>;
+		using end = enc<Escape>;
+
+		return out << begin << next(params) << end;
+	}
+
+	template
+	<
+		char Escape, int... Params
+	>
+	auto ctl(Params... params)
+	{
+		return [=](string::out out) -> string::out
+		{
+			return out << esc<G0::CSI, Escape>(params...);
+		};
+	}
+
+	namespace cursor
+	{
+		inline auto up       = ctl<CSI::CUU, int>; // up rows
+		inline auto down     = ctl<CSI::CUD, int>; // down rows
+		inline auto back     = ctl<CSI::CUB, int>; // back columns
+		inline auto next     = ctl<CSI::CNL, int>; // next line
+		inline auto previous = ctl<CSI::CPL, int>; // previous line
+		inline auto habs     = ctl<CSI::CHA, int>; // horizontal absolute
+		inline auto htab     = ctl<CSI::CHT, int>; // horizontal tab
+	}
+
+	namespace page
+	{
+		inline auto up   = ctl<CSI::SU> // scroll up
+		inline auto down = ctl<CSI::SD> // scroll down
+		inline auto 
 	}
 
 	template 
 	<
-		int... Code
+		int... Params
 	>
-	string::out set(string::out out)
+	string::out set(string::out out);
 	{
-		using namespace fmt::asc;
-		return out << encode<C0::ESC, G0::CSI> << params<Code...> << encode<CSI::SGR>;
+		return out << ctl<CSI::SGR>(Params...);
 	}
-
-	using asc::SGR;
 
 	constexpr auto reset = set<SGR::reset>;
 	constexpr auto intense = set<SGR::intense>;
@@ -53,7 +94,7 @@ namespace fmt
 	constexpr auto reverse = set<SGR::reverse>;
 	constexpr auto conceal = set<SGR::conceal>;
 	constexpr auto strike = set<SGR::strike>;
-	template <unsigned Font> constexpr auto font = set<SGR::first_font + Font>;
+	template <int N> constexpr auto font = set<SGR::first_font + N>;
 	constexpr auto fraktur = set<SGR::fraktur>;
 	constexpr auto underline2 = set<SGR::underline2>;
 	constexpr auto intense_off = set<SGR::intense_off>;

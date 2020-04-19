@@ -1,23 +1,17 @@
-#ifndef asc_hpp
-#define asc_hpp "American Standard Code"
+#ifndef acs_hpp
+#define acs_hpp "American Character Set"
 
-#include "fmt.hpp"
+#include "ucs.hpp"
 
 // https://www.ecma-international.org/publications/standards/Ecma-048.htm
 
-namespace fmt::asc
+namespace fmt::uni
 {
-	template 
-	<
-		char First, char Last
-	> 
-	using domain = fwd::domain<First, Last + 1>;
-
 	//
 	// Character Codes
 	//
 
-	struct C0 : domain<'\x00', '\x1F'>
+	struct C0 : plane<'\x00', '\x1F'>
 	{
 		enum code : char
 		{
@@ -58,7 +52,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct G0 : domain<'\x21', '\x7E'>
+	struct G0 : plane<'\x21', '\x7E'>
 	{
 		enum code : char
 		{
@@ -95,7 +89,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct C1 : domain<'\x80', '\x9F'>
+	struct C1 : plane<'\x80', '\x9F'>
 	{
 		enum code : char
 		{
@@ -133,7 +127,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct G1 : domain<'\xA0', '\xFF'>
+	struct G1 : plane<'\xA0', '\xFF'>
 	{
 		enum code : char
 		{
@@ -141,7 +135,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct CSI : domain<'\x40', '\x6F'>
+	struct CSI : plane<'\x40', '\x6F'>
 	{
 		enum code : char
 		{
@@ -240,7 +234,7 @@ namespace fmt::asc
 		};
 	};
 
-	struct ICF : domain<'\x60', '\x7E'>
+	struct ICF : plane<'\x60', '\x7E'>
 	{
 		enum code : char
 		{

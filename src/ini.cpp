@@ -1,6 +1,5 @@
 #include "ini.hpp"
-#include "key.hpp"
-#include "type.hpp"
+#include "str.hpp"
 #include "err.hpp"
 
 namespace

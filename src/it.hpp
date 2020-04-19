@@ -27,6 +27,10 @@ namespace fwd
 		}
 	};
 
+	//
+	// Run Time Types
+	//
+
 	template
 	<
 		class Iterator
@@ -50,33 +54,22 @@ namespace fwd
 		{
 			return this->second;
 		}
-	};
 
-	template
-	<
-		auto Begin, auto End
-	>
-	struct domain
-	// Constant range expression
-	{
-		constexpr auto first = Begin;
-		constexpr auto second = End;
-
-		static_assert(first < second);
-
-		constexpr auto size()
+		auto greater(auto digit) const
 		{
-			return second - first;
+			ordering<decltype(digit)> const part;
+			return not part(digit, this->second);
 		}
 
-		constexpr auto begin()
+		auto less(auto digit) const
 		{
-			return first;
+			ordering<decltype(digit)> const part;
+			return part(digit, this->first);
 		}
 
-		constexpr auto end()
+		auto at(auto digit) const
 		{
-			return second;
+			return not greater(digit) and not less(digit);
 		}
 	};
 
@@ -87,6 +80,9 @@ namespace fwd
 	struct interval : pair<Iterator>
 	// Iterate within a sub range
 	{
+		static_assert(0 < Size);
+		static_assert(0 == Size % Step);
+
 		using pair::pair;
 
 		struct iterator : range<Iterator>
@@ -115,129 +111,113 @@ namespace fwd
 				std::prev(this->second, Size), this->second;
 			};
 		}
-
-		static_assert(Size % Step == 0);
-		static_assert(0 < Size);
 	};
 
 	//
-	// Structures
+	// Compile Time Expressions
 	//
 
 	template
 	<
-		class Node
+		auto First, auto Last
 	>
-	using edges = std::pair<const Node, span<Node>>;
-
-	template
-	<
-		class Node, 
-		template <class> class Alloc = allocator
-	>
-	using graph = vector<pair<Node>, Alloc>;
-
-	template
-	<
-		class Node, 
-		template <class> class Order = ordering, 
-		template <class> class Alloc = allocator
-	>
-	using group = map<Type, span<pair<Node>>, Order, Alloc>;
-
-	//
-	// Algorithms
-	//
-
-	template
-	<
-		class Type, class Iterator
-	>
-	auto split(span<Type> s, predicate<Type> p, Iterator out)
-	// Partition a span by predicate
+	struct closure
+	// Closed range predicate
 	{
-		auto begin = s.begin();
-		auto const end = s.end();
-		for (auto it = begin; it != end; ++it)
+		static_assert(First < Last);
+
+		constexpr auto first = First;
+		constexpr auto second = Last;
+
+		constexpr auto begin()
 		{
-			if (p(*it))
-			{
-				++out = Type(begin, it);
-				begin = std::next(it);
-			}
+			return First;
 		}
-		return out;
-	}
 
-	template 
-	<
- 		class Type, template <class> class Alloc = allocator
-	>
-	auto split(span<Type> s, predicate<Type> p = std::empty<Type>)
-	// Partition a span by (empty) predicate
-	{
-		vector<Type, Alloc> out;
-		auto const begin = std::back_inserter(out);
-		auto const end = split(s, op, begin);
-		return out;
-	}
-
-	template
-	<
-		class Type, class Iterator, class Identity = identity
-	>
-	auto split(span<Type> s, Type n, Iterator out)
-	// Partition a span by value
-	{
-
-		static Identity const eq;
-		auto const p = std::bind(eq, n);
-		return split(s, p, out);
-	}
-
-	template
-	<
-		class Type, template <class> class Alloc = allocator
-	>
-	auto split(span<Type> s, Type n)
-	// Partition a span by value
-	{
-		vector<Type, Alloc> out;
-		auto const begin = std::back_inserter(out);
-		auto const end = split(s, n, begin);
-		return out;
-	}
-
-	template
-	<
-		class Type, class Iterator
-	>
-	auto join(span<span<Type>> s, Type n, Iterator out)
-	// Join spans with separator
-	{
-		for (auto i : s)
+		constexpr auto end()
 		{
-			for (auto j : i)
-			{
-				++out = j;
-			}
-			++out = n;
+			return Last + 1;
 		}
-		return out;
-	}
+
+		constexpr auto size()
+		{
+			return end() - begin();
+		}
+
+		constexpr auto greater(auto digit)
+		{
+			ordering<decltype(digit)> const part;
+			return part(Last, digit);
+		}
+
+		constexpr auto less(auto digit)
+		{
+			ordering<decltype(digit)> const part;
+			return part(digit, First);
+		}
+
+		constexpr auto at(auto digit)
+		{
+			return not greater(digit) and not less(digit);
+		}
+
+		constexpr operator range<decltype(first)>()
+		{
+			return { begin(), end() };
+		}
+	};
 
 	template
 	<
-		class Type, template <class> class Alloc = allocator
+		template <auto, auto> class Part,
+		template <auto, auto> class... Parts
 	>
-	auto join(span<span<Type>> s, Type n = { })
-	// Join spans with separator
+	struct compose
 	{
-		vector<Type, Alloc> out;
-		auto const begin = std::back_inserter(out);
-		auto const end = join(s, n, begin);
-		return out;
-	}
+		using Rest = compose<Parts...>;
+
+		constexpr auto any(auto digit)
+		{
+			return Part::at(digit) or ... Rest::any(digit);
+		}
+
+		constexpr auto all(auto digit)
+		{
+			return Part::at(digit) and ... Rest::all(digit);
+		}
+
+		constexpr auto size()
+		{
+			return 1 + sizeof ... Parts;
+		}
+
+		constexpr auto begin()
+		{
+			return Part::first < remainder::begin()
+			     ? Part::first : remainder::begin();
+		}
+
+		constexpr auto end()
+		{
+			return Part::second > remainder::end()
+			     ? Part::second : remainder::end();
+		}
+
+		constexpr operator range<decltype(Part::first)>()
+		{
+			return { begin(), end() };
+		}
+	};
+
+	struct
+	<
+		class Part
+	>
+	struct compose<Part> : Part
+	{
+		constexpr auto any(auto digit) { return Part::at(digit); }
+		constexpr auto all(auto digit) { return Part::at(digit); }
+	};
 }
 
 #endif // file
