@@ -102,6 +102,31 @@ namespace fwd
 
 	template
 	<
+		class Type, 
+		template <class> class Alloc = allocator,
+		template <class, class> class Vector = vector
+	>
+	struct subspan : pair<Vector<Type, Alloc>::size_type>
+	{
+		using Vector<Type, Alloc>::const_pointer;
+		subspan(const_pointer ptr, pair pos) : pair(pos), that(ptr) 
+		{ }
+
+		using Vector<Type, Alloc>::const_reference;
+		subspan(const_reference ref, pair pos) : subspan(&ref, pos)
+		{ }
+
+		const_pointer that;
+
+		auto begin() const { return that->data() + first; }
+
+		auto end() const { return that->data() + second; }
+
+		auto size() const { return second - first; }
+	};
+
+	template
+	<
 		class Type, size_t Size,
 		template <class> class Alloc = allocator
 	>

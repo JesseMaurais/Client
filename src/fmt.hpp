@@ -91,6 +91,13 @@ namespace fmt
 
 		template
 		<
+			template <class> class Alloc = allocator,
+			template <class, class> class Vector = vector
+		>
+		using subspan = fwd::subspan<Type, Alloc, Vector>;
+
+		template
+		<
 			size_t Size,
 			template <class> Alloc = allocator
 		>
@@ -127,6 +134,7 @@ namespace fmt
 		using graph = traits::graph<Alloc>;
 		using group = traits::group<Alloc>;
 		using vector = traits::vector<Alloc>;
+		using subspan = traits::subspan<Alloc>;
 		using pair = fwd::pair<typename String::size_type>;
 
 		template

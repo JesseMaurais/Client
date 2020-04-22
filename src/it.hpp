@@ -122,7 +122,6 @@ namespace fwd
 		auto First, auto Last
 	>
 	struct closure
-	// Closed range predicate
 	{
 		static_assert(First < Last);
 

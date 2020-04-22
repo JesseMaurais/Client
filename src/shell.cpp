@@ -7,7 +7,7 @@
 
 namespace env
 {
-	fmt::string::pair shell::get(in put, char end, unsigned count)
+	shell::subspan shell::get(in put, char end, int count)
 	{
 		// Result in span at back of cache
 		const auto first = cache.size();
@@ -24,10 +24,60 @@ namespace env
 		}
 		// Go up to the cache end
 		const auto second = cache.size();
-		return { first, second };
+		return { cache, { first, second } };
 	}
 
-	fmt::string::pair shell::open(view path)
+	shell::subspan shell::list(view name)
+	{
+		fmt::ipstream sub
+		#ifdef _WIN32
+			{ "dir", "/b", name };
+		#else
+			{ "ls" name };
+		#endif
+		return get(sub);
+	}
+
+	shell::subspan shell::copy(view name)
+	{
+		fmt::ipstream sub
+		#ifdef _WIN32
+			{ "type", name };
+		#else
+			{ "cat", name };
+		#endif
+		return get(sub);
+	}
+
+	shell::subspan shell::find(view pattern, view directory)
+	{
+		#ifdef _WIN32
+		{
+			return list(fmt::dir::join(directory, pattern));
+		}
+		#else
+		{
+			fmt::ipstream sub
+			{ 
+				"find", directory, "-type", "f", "-name", pattern 
+			};
+			return get(sub);
+		}
+		#endif
+	}
+
+	shell::subspan shell::which(view name)
+	{
+		fmt::ipstream sub
+		#ifdef _WIN32
+			{ "where", name };
+		#else
+			{ "which", "-a", name };
+		#endif
+		return get(sub);
+	}
+
+	shell::subspan shell::open(view path)
 	{
 		#ifdef _WIN32
 		{
@@ -57,59 +107,9 @@ namespace env
 					return get(sub);
 				}
 			}
-			return { 0, 0 };
+			return { cache, { 0, 0 } };
 		}
 		#endif
-	}
-
-	fmt::string::pair list(view name)
-	{
-		fmt::ipstream sub
-		#ifdef _WIN32
-			{ "dir", "/b", name };
-		#else
-			{ "ls" name };
-		#endif
-		return get(sub);
-	}
-
-	fmt::string::pair copy(view name)
-	{
-		fmt::ipstream sub
-		#ifdef _WIN32
-			{ "type", name };
-		#else
-			{ "cat", name };
-		#endif
-		return get(sub);
-	}
-
-	fmt::string::pair find(view pattern, view directory)
-	{
-		#ifdef _WIN32
-		{
-			return list(fmt::dir::join(directory, pattern));
-		}
-		#else
-		{
-			fmt::ipstream sub
-			{ 
-				"find", directory, "-type", "f", "-name", pattern 
-			};
-			return get(sub);
-		}
-		#endif
-	}
-
-	fmt::string::pair which(view name)
-	{
-		fmt::ipstream sub
-		#ifdef _WIN32
-			{ "where", name };
-		#else
-			{ "which", "-a", name };
-		#endif
-		return get(sub);
 	}
 }
 
