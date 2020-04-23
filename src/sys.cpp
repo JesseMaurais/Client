@@ -5,12 +5,8 @@
 #include "err.hpp"
 #include "ptr.hpp"
 #include "pipe.hpp"
+#include "sync.hpp"
 #include <vector>
-#ifdef _WIN32
-#include "win/sync.hpp"
-#else
-#include "uni/pthread.hpp"
-#endif
 
 namespace sys
 {

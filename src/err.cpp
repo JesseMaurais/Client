@@ -1,11 +1,7 @@
 #include "err.hpp"
 #include "api.hpp"
 #include "ptr.hpp"
-#ifdef _WIN32
-#include "win/sync.hpp"
-#else
-#include "uni/pthread.hpp"
-#endif
+#include "sync.hpp"
 #include <system_error>
 #include <exception>
 #include <iostream>

@@ -118,11 +118,11 @@ namespace fwd
 
 		const_pointer that;
 
-		auto begin() const { return that->data() + first; }
+		auto size() const { return this->second - this->first; }
 
-		auto end() const { return that->data() + second; }
+		auto begin() const { return that->data() + this->first; }
 
-		auto size() const { return second - first; }
+		auto end() const { return that->data() + this->second; }
 	};
 
 	template
@@ -132,7 +132,9 @@ namespace fwd
 	>
 	using variant = std::variant<array<Type, Size>, vector<Type, Alloc>>;
 
+	//
 	// Strings
+	//
 
 	template
 	<
@@ -149,7 +151,9 @@ namespace fwd
 	>
 	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 
+	//
 	// Input/Output
+	//
 
 	template
 	<
@@ -193,7 +197,9 @@ namespace fwd
 	>
 	using basic_file = std::basic_filebuf<Char, Traits<Char>>;
 
+	//
 	// Structures
+	//
 	
 	template
 	<
@@ -210,13 +216,15 @@ namespace fwd
 
 	template
 	<
-		class Node, 
-		template <class> class Order = ordering, 
-		template <class> class Alloc = allocator
+		class node, 
+		template <class> class order = ordering, 
+		template <class> class alloc = allocator
 	>
-	using group = map<Type, span<pair<Node>>, Order, Alloc>;
+	using group = map<type, subspan<pair<node>>, order, alloc>;
 
+	//
 	// Algorithms
+	//
 
 	template
 	<

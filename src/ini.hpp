@@ -8,10 +8,6 @@ namespace doc
 {
 	struct ini
 	{
-		fwd::group<word> keys;
-		fwd::graph<word> values;
-		fmt::string::vector cache;
-
 		using fmt::string;
 		using string::in;
 		using string::out;
@@ -21,7 +17,15 @@ namespace doc
 		using view::vector;
 
 		using word = unsigned short;
-		using pair = fwd::pair<word>;
+
+		fwd::group<word> keys;
+		fwd::graph<word> values;
+		string::vector cache;
+
+		bool got(pair) const;
+		view get(pair) const;
+		bool set(pair, view);
+		bool put(pair, view);
 
 		static in::ref getline(in::ref, string::ref);
 		// Parse a non-empty, non-comment line
@@ -35,11 +39,6 @@ namespace doc
 		static string join(span); // join list with separator
 		static vector split(view); // split list by separator
 		static string join(init); // join list with separator
-
-		bool got(pair) const;
-		view get(pair) const;
-		bool set(pair, view);
-		bool put(pair, view);
 	};
 }
 

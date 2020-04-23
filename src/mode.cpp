@@ -3,16 +3,12 @@
 
 #include "mode.hpp"
 #include "file.hpp"
+#include "sync.hpp"
 #include "sys.hpp"
 #include "err.hpp"
 #include "fmt.hpp"
 #include "tmp.hpp"
 #include <utility>
-#ifdef _WIN32
-#include "win/sync.hpp"
-#else
-#include "uni/pthread.hpp"
-#endif
 
 namespace
 {

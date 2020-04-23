@@ -2,7 +2,7 @@
 #include "dig.hpp"
 #include "err.hpp"
 #include "file.hpp"
-#include "thread.hpp"
+#include "sync.hpp"
 
 namespace
 {
