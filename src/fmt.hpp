@@ -91,22 +91,31 @@ namespace fmt
 
 		template
 		<
-			template <class> class Alloc = allocator,
-			template <class, class> class Vector = vector
-		>
-		using subspan = fwd::subspan<Type, Alloc, Vector>;
-
-		template
-		<
 			size_t Size,
 			template <class> Alloc = allocator
 		>
 		using variant = fwd::variant<Type, Size, Alloc>;
+
+		template
+		<
+			template <class> class Alloc = allocator,
+			template <class, class> class Vector = vector
+		>
+		using line = fwd::line<Type, Alloc, Vector>;
+
+		template
+		<
+			template <class> class Alloc = allocator,
+			template <class, class> class Vector = vector
+		>
+		using page = fwd::page<Type, Alloc, Vector>;
 	};
 
 	template
 	<
-		class String, template <class> Alloc = allocator
+		class String, 
+		template <class> Alloc = allocator,
+		template <class, class> Vector = vector
 	>
 	struct string_type : String
 	{ 
@@ -134,8 +143,9 @@ namespace fmt
 		using graph = traits::graph<Alloc>;
 		using group = traits::group<Alloc>;
 		using vector = traits::vector<Alloc>;
-		using subspan = traits::subspan<Alloc>;
-		using pair = fwd::pair<typename String::size_type>;
+		using line = traits::line<Alloc, Vector>;
+		using page = traits::page<Alloc, Vector>;
+		using pair = fwd::pair<String::size_type>;
 
 		template
 		<
@@ -157,9 +167,9 @@ namespace fmt
 
 		template
 		<
-			size_t Size
+			size_t Size = BUFSIZ
 		> 
-		using variant = traits::variant<Size, Alloc>;
+		using buffer = traits::variant<Size, Alloc>;
 	};
 
 	template

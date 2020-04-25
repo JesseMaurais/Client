@@ -1,8 +1,8 @@
 #ifndef opt_hpp
-#define opt_hpp "Command Line Options"
+#define opt_hpp "Program Options"
 
 #include "env.hpp"
-#include "str.hpp"
+#include "fmt.hpp"
 
 namespace env::opt
 {
@@ -13,45 +13,12 @@ namespace env::opt
 	using view::pair;
 	using string::in;
 	using string::out;
-	using fmt::str::word;
+	using word = short;
 	using quad = long double;
+	using vector = fwd::vector<word>;
 
-	extern view const application;
-	extern env::span::ref arguments;
-	extern env::view::ref program;
-	extern env::view::ref config;
-	extern env::view::ref cache;
-	extern env::view::ref rundir;
-
-	inline auto arg(size_t argn)
-	{
-		span const argv = arguments;
-		return argv[argn];
-	}
-
-	struct description
-	{
-		word argn; // required arguments (or -1 for any number)
-		view dash; // short name with one dash
-		view name; // long name with dual dash
-		view text; // descriptive text for users
-	};
-
-	using commands = std::vector<description>;
-
-	void set(int argc, char** argv);
-	vector put(commands const& cmd);
-
-	bool got(view key);
-	view get(view key);
-	bool set(view key, view value);
-	bool put(view key, view value);
-	bool cut(view key);
-	bool got(pair key);
-	view get(pair key);
-	bool set(pair key, view value);
-	bool put(pair key, view value);
-	bool cut(pair key);
+	in::ref get(in::ref);
+	out::ref put(out::ref);
 
 	bool get(view key, bool value);
 	bool get(pair key, bool value);
@@ -70,16 +37,21 @@ namespace env::opt
 	bool put(view key, span value);
 	bool put(pair key, span value);
 
-	template <typename T> struct meme
+	template <typename T> class meme
 	{
+		pair key;
+		T value;
+
+	public:
+
 		meme(pair k, T v) : key(k)
 		{
-			value = get(key, v);
+			value = get(k, v);
 		}
 
 		~meme()
 		{
-			(void) put(key, value);
+			put(key, value);
 		}
 
 		operator T() const
@@ -91,18 +63,7 @@ namespace env::opt
 		{
 			return value = v;
 		}
-
-	private:
-
-		pair key;
-		T value;
 	};
-
-	in::ref get(in::ref);
-	out::ref put(out::ref);
-
-	string directory(view);
-	string initials(view);
 };
 
 #endif // file

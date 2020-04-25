@@ -1,4 +1,4 @@
-#include "opt.hpp"
+#include "arg.hpp"
 #include "usr.hpp"
 #include "dir.hpp"
 #include "ini.hpp"
@@ -15,26 +15,101 @@
 
 namespace
 {
-	template 
-	<
-		class Key, class Value, class Cast
-	>
-	auto cast(Key key, Value value, Cast cast)
+	struct : env::span
 	{
-		auto const u = env::opt::get(key);
-		return empty(u) ? value : cast(u);
+		operator type() const final
+		{
+			static auto const wd = fmt::str::put("Application");
+			auto const s = fmt::str::get(wd);
+			return env::opt::get(s);
+		}
+
+	} APPLICATION;
+
+	struct : env::span
+	{
+		fmt::string::view::vector list;
+
+		operator type() const final
+		{
+			return list;
+		}
+
+	} ARGUMENTS;
+
+	struct : env::view
+	{
+		operator type() const final
+		{
+			static string::view u;
+			if (empty(u))
+			{
+				fmt::string::view::span const args = env::opt::arguments;
+				assert(not empty(args));
+				auto const path = args.front();
+				assert(not empty(path));
+				auto const dirs = fmt::dir::split(path);
+				assert(not empty(dirs));
+				auto const name = dirs.back();
+				assert(not empty(name));
+				auto const first = name.find_first_not_of("./");
+				auto const last = name.rfind(sys::ext::image);
+				u = name.substr(first, last);
+			}
+			return u;
+		}
+
+	} PROGRAM;
+
+	struct : env::view
+	{
+		operator type() const final
+		{
+			static fmt::string s;
+			if (empty(s))
+			{
+				using namespace env::dir;
+				env::dir::find(config, regx(".ini") || to(s) || stop);
+			}
+			return s;
+		}
+
+	} CONFIG;
+
+	struct : env::view
+	{
+		operator type() const final
+		{
+			static auto const s = env::opt::directory(env::usr::run_dir);
+			static auto const run = env::dir::tmp(s);
+			return s;
+		}
+
+	} RUNDIR;
+
+	auto make_pair(env::opt::view key)
+	{
+		return make_pair("Defaults", key);
 	}
 
-	template <class Key> bool convert(Key key, bool value)
+	template <typename K, typename V, typename C>
+	V convert(K key, V value, C converter)
+	{
+		auto const u = env::opt::get(key);
+		auto const n = converter(u);
+		return fmt::fail(n) ? value : n;
+	}
+
+	template <typename K>
+	bool convert(K key, bool value)
 	{
 		auto const check = { "0", "no", "off", "false", "disable" };
 		auto const u = env::opt::get(key);
 		if (not empty(u))
 		{
-			auto const s = fmt::to_lower(u);
 			for (auto const v : check)
 			{
-				if (s.starts_with(v))
+				if (u.starts_with(v))
 				{
 					return false;
 				}
@@ -44,28 +119,18 @@ namespace
 		return value;
 	}
 
-	sys::exclusive<doc::ini> ini;
-
 	auto& registry()
 	{
-		// try read
+		static sys::exclusive<doc::ini> ini;
+		if (empty(ini.keys))
 		{
-			auto reader = ini.read();
-			if (not empty(reader->keys))
-			{
-				return reader;
-			}
-		}
-		// else write
-		{
-			auto writer = ini.write();
-			auto const path = fmt::to_string(env::opt::config);
-			std::ifstream file(path);
-			doc::ini::ref slice = *writer;
-			slice.put("Application", env::opt::program);
+			fmt::string::view const path = env::opt::config;
+			auto const s = fmt::to_string(path);
+			std::ifstream file(s);
+			doc::ini &slice = ini;
 			while (file >> slice);
 		}
-		return ini.read();
+		return ini;
 	}
 }
 
@@ -86,62 +151,55 @@ namespace env::opt
 		return fmt::dir::join({ base, application, ".ini" });
 	}
 
-	vector put(int argc, char** argv, commands::const_reference cmd)
+	void set(int argc, char** argv)
 	{
-		auto const writer = registry().write();
-		// Push view to command line arguments
-		auto push = std::back_inserter(ARGUMENTS.list);
-		copy(argv, argv + argc, push);
-		// Boundary of commands list
+		auto const lock = registry().write();
+		auto back = std::back_inserter(ARGUMENTS.list);
+		copy(argv, argv + argc, back);
+	}
+
+	vector put(commands const& cmd)
+	{
+		auto const ptr = registry().write();
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
-		// Command iterators
+
 		auto next = end;
 		auto it = end;
-		// Current at
 		pair entry;
 
+		word argn = 0;
 		vector args;
 		vector extra;
 
-		for (int argn = 0; argn < argv[argn]; ++argn;
+		span argv = arguments;
+		for (auto const arg : argv)
 		{
-			const view arg = argv[argn];
-
-			constexpr auto dash = "-";
-			constexpr auto dash_sz = sizeof dash;
-
-			constexpr auto dual = "--";
-			constexpr auto dual_sz = sizeof dual;
-
-			const auto slash = (arg.first() == '/');
-			const auto slash_sz = slash ? dash_sz : dual_sz;
-
 			// Check whether this argument is a new command
 
-			if (slash or arg.starts_with(dual))
+			if (arg.starts_with("--"))
 			{
-				entry = fmt::to_pair(arg.substr(slash_sz));
-				next = find_if(begin, end, [&](auto const& d)
+				entry = fmt::to_pair(arg.substr(2));
+				next = std::find_if(begin, end, [&](auto const& d)
 				{
 					return d.name == entry.first;
 				});
 			}
-			if (end == next)
-			if (slash or arg.starts_with(dash))
+			else
+			if (arg.starts_with("-"))
 			{
-				entry = fmt::to_pair(arg.substr(slash_sz));
+				entry = fmt::to_pair(arg.substr(1));
 				next = std::find_if(begin, end, [&](auto const& d)
 				{
 					return d.dash == entry.first;
 				});
 			}
 
-			const bool same = (it == next) or (next == end);
+			bool const change = (it != next) and (next != end);
 
 			// Push it either to the command list or as an extra
 
-			if (same) 
+			if (not change)
 			{
 				if (0 != argn)
 				{
@@ -154,7 +212,10 @@ namespace env::opt
 					extra.push_back(arg);
 				}
 			}
-			else // Start parsing the next command if changing
+
+			// Start parsing the next command if changing
+
+			if (change)
 			{
 				if (end != it)
 				{
@@ -183,12 +244,12 @@ namespace env::opt
 			auto const key = make_pair(it->name);
 			if (empty(args))
 			{
-				(void) writer->put(key, entry.second);
+				(void) ptr->put(key, entry.second);
 			}
 			else
 			{
 				auto const value = doc::ini::join(args);
-				(void) writer->put(key, value);
+				(void) ptr->put(key, value);
 			}
 		}
 

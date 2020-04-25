@@ -2,11 +2,12 @@
 #define str_hpp "Shared String Store"
 
 #include "fmt.hpp"
+#include "opt.hpp"
 
 namespace fmt::str
 {
 	using string::view;
-	using word = unsigned short;
+	using word = env::opt::word;
 	using vector = fwd::vector<word>;
 	using span = fwd::span<word>;
 	using init = fwd::init<word>;

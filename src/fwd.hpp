@@ -102,31 +102,6 @@ namespace fwd
 
 	template
 	<
-		class Type, 
-		template <class> class Alloc = allocator,
-		template <class, class> class Vector = vector
-	>
-	struct subspan : pair<Vector<Type, Alloc>::size_type>
-	{
-		using Vector<Type, Alloc>::const_pointer;
-		subspan(const_pointer ptr, pair pos) : pair(pos), that(ptr) 
-		{ }
-
-		using Vector<Type, Alloc>::const_reference;
-		subspan(const_reference ref, pair pos) : subspan(&ref, pos)
-		{ }
-
-		const_pointer that;
-
-		auto size() const { return this->second - this->first; }
-
-		auto begin() const { return that->data() + this->first; }
-
-		auto end() const { return that->data() + this->second; }
-	};
-
-	template
-	<
 		class Type, size_t Size,
 		template <class> class Alloc = allocator
 	>
@@ -198,14 +173,76 @@ namespace fwd
 	using basic_file = std::basic_filebuf<Char, Traits<Char>>;
 
 	//
-	// Structures
+	// Structured Text
 	//
-	
+
+	template
+	<
+		class Type, 
+		template <class> class Alloc = allocator,
+		template <class, class> class Vector = vector
+	>
+	struct line : pair<const Vector<Type, Alloc>::size_type>
+	{
+		using Vector<Type, Alloc>::const_pointer;
+		line(const_pointer ptr, pair pos) : pair(pos), that(ptr) { }
+
+		using Vector<Type, Alloc>::const_reference;
+		line(const_reference ref, pair pos) : line(&ref, pos) { }
+
+		#ifdef assert
+		~line() { assert(this->first < this->second); }
+		#endif
+
+		auto size() const { return this->second - this->first; }
+
+		auto begin() const { return that->data() + this->first; }
+
+		auto end() const { return that->data() + this->second; }
+
+		auto operator[](auto index) const 
+		{ 
+			return that->at(this->first + index);
+		}
+
+		operator span<Type>() const
+		{
+			return { begin(), end() };
+		}
+
+		const_pointer that;
+	};
+
+	template
+	<
+		class Type,
+		template <class> class Alloc = allocator,
+		template <class, class> class Vector = vector
+	>
+	struct page : line<Type, Alloc, Vector>
+	{
+		using line<Type, Alloc, Vector>::first_type;
+		line<pair<first_type>, Alloc, Vector> index;
+
+		page(decltype(index) in, pair<first_type> at)
+		: index(in), page(at)
+		{ }
+
+		line operator()(auto at) const
+		{
+			return { this->that, index[at] };
+		}
+	};
+
+	//
+	// Directed Graph
+	//
+
 	template
 	<
 		class Node
 	>
-	using edges = std::pair<const Node, span<Node>>;
+	using edges = std::pair<const Node, line<Node>>;
 
 	template
 	<
@@ -216,11 +253,11 @@ namespace fwd
 
 	template
 	<
-		class node, 
-		template <class> class order = ordering, 
-		template <class> class alloc = allocator
+		class Node, 
+		template <class> class Order = ordering, 
+		template <class> class Alloc = allocator
 	>
-	using group = map<type, subspan<pair<node>>, order, alloc>;
+	using group = map<type, line<pair<Node>>, Order, Alloc>;
 
 	//
 	// Algorithms
@@ -248,14 +285,16 @@ namespace fwd
 
 	template 
 	<
- 		class Type, template <class> class Alloc = allocator
+ 		class Type, 
+		template <class> class Alloc = allocator,
+		template <class, class> class Vector = vector
 	>
 	auto split(span<Type> s, predicate<Type> p = std::empty<Type>)
 	// Partition a span by (empty) predicate
 	{
-		vector<Type, Alloc> out;
+		Vector<Type, Alloc> out;
 		auto const begin = std::back_inserter(out);
-		auto const end = split(s, op, begin);
+		auto const end = split(s, p, begin);
 		return out;
 	}
 
@@ -266,7 +305,6 @@ namespace fwd
 	auto split(span<Type> s, Type n, Iterator out)
 	// Partition a span by value
 	{
-
 		static Identity const eq;
 		auto const p = std::bind(eq, n);
 		return split(s, p, out);

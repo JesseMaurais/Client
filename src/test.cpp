@@ -19,6 +19,7 @@
 #include "dir.hpp"  // Directory operators
 #include "usr.hpp"  // User directories
 #include "opt.hpp"  // Query user options
+#include "arg.hpp"  // Command line arguments
 #include "ini.hpp"  // Desktop configuration parsing
 #include "desktop.hpp"
 
