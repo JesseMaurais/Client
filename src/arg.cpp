@@ -1,27 +1,22 @@
 #include "arg.hpp"
-#include "usr.hpp"
-#include "dir.hpp"
 #include "ini.hpp"
-#include "fmt.hpp"
-#include "dig.hpp"
-#include "err.hpp"
+#include "str.hpp"
+#include "dir.hpp"
+#include "usr.hpp"
 #include "sys.hpp"
 #include "sync.hpp"
-#include <algorithm>
 #include <iterator>
-#include <fstream>
-#include <cmath>
-#include <set>
+#include <algorithm>
 
 namespace
 {
-	struct : env::span
+	auto const app = fmt::str::put("Application");
+
+	struct : env::view
 	{
 		operator type() const final
 		{
-			static auto const wd = fmt::str::put("Application");
-			auto const s = fmt::str::get(wd);
-			return env::opt::get(s);
+			return env::opt::get(app);
 		}
 
 	} APPLICATION;
@@ -36,6 +31,19 @@ namespace
 		}
 
 	} ARGUMENTS;
+
+	struct : env::view
+	{
+		operator type() const final
+		{
+			static auto const u = fmt::dir::join
+			(
+				{ env::opt::config, env::opt::application, ".ini" }
+			);
+			return u;
+		}
+
+	} INITIALS;
 
 	struct : env::view
 	{
@@ -76,119 +84,153 @@ namespace
 
 	} CONFIG;
 
-	struct : env::view
+	auto make_pair(word key)
 	{
-		operator type() const final
-		{
-			static auto const s = env::opt::directory(env::usr::run_dir);
-			static auto const run = env::dir::tmp(s);
-			return s;
-		}
-
-	} RUNDIR;
-
-	auto make_pair(env::opt::view key)
-	{
-		return make_pair("Defaults", key);
-	}
-
-	template <typename K, typename V, typename C>
-	V convert(K key, V value, C converter)
-	{
-		auto const u = env::opt::get(key);
-		auto const n = converter(u);
-		return fmt::fail(n) ? value : n;
-	}
-
-	template <typename K>
-	bool convert(K key, bool value)
-	{
-		auto const check = { "0", "no", "off", "false", "disable" };
-		auto const u = env::opt::get(key);
-		if (not empty(u))
-		{
-			for (auto const v : check)
-			{
-				if (u.starts_with(v))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-		return value;
+		static auto const cmd = fmt::str::set("Command Line");
+		return std::make_pair(cmd, key);
 	}
 
 	auto& registry()
 	{
 		static sys::exclusive<doc::ini> ini;
-		if (empty(ini.keys))
+		// try read
 		{
-			fmt::string::view const path = env::opt::config;
-			auto const s = fmt::to_string(path);
-			std::ifstream file(s);
-			doc::ini &slice = ini;
-			while (file >> slice);
+			auto const reader = ini.read();
+			if (not empty(reader->keys))
+			{
+				return ini;
+			}
 		}
-		return ini;
+		// next write
+		{
+			auto const writer = ini.write();
+			fmt::string::view const path = env::opt::initials;
+			auto const s = fmt::to_string(path);
+			doc::ini::ref slice = *writer;
+			slice.put(make_pair(app), env::opt::program);
+			std::ifstream input(s);
+			while (input >> slice);
+			return ini;
+		}
 	}
 }
 
 namespace env::opt
 {
+	env::span::ref application = APPLICATION;
 	env::span::ref arguments = ARGUMENTS;
+	env::view::ref initials = INITIALS;
 	env::view::ref program = PROGRAM;
 	env::view::ref config = CONFIG;
 	env::view::ref rundir = RUNDIR;
 
-	string directory(view base)
+	in::ref get(in::ref input)
 	{
-		return fmt::dir::join({ base, application });
+		auto const writer = registry().write();
+		doc::ini::ref slice = *writer;
+		return input >> slice;
 	}
 
-	string initials(view base)
+	out::ref put(out::ref output)
 	{
-		return fmt::dir::join({ base, application, ".ini" });
+		auto const reader = registry().read();
+		doc::ini::ref slice = *reader;
+		return output << slice;
 	}
 
-	void set(int argc, char** argv)
+	bool got(word key)
 	{
-		auto const lock = registry().write();
-		auto back = std::back_inserter(ARGUMENTS.list);
-		copy(argv, argv + argc, back);
+		return not empty(get(key));
 	}
 
-	vector put(commands const& cmd)
+	view get(word key)
 	{
-		auto const ptr = registry().write();
+		// First look for argument
+		span const args = arguments;
+		for (auto const a : args)
+		{
+			auto const e = fmt::to_pair(a);
+			if (e.first == fmt::str::get(key))
+			{
+				return e.second;
+			}
+		}
+		// Second look in environment
+		auto value = env::var::get(key);
+		if (empty(value))
+		{
+			// Finally look in options table
+			value = env::opt::get(make_pair(key));
+		}
+		return value;
+	}
+
+	bool set(word key, view value)
+	{
+		return set(make_pair(key), value);
+	}
+
+	bool put(word key, view value)
+	{
+		return put(make_pair(key), value);
+	}
+
+	bool got(pair key)
+	{
+		return registry().read()->got(key);
+	}
+
+	view get(pair key)
+	{
+		return registry().read()->get(key);
+	}
+
+	bool set(pair key, view value)
+	{
+		return registry().write()->set(key, value);
+	}
+
+	bool put(pair key, view value)
+	{
+		return registry().write()->put(key, value);
+	}
+
+	vector put(int argc, char** argv, commands cmd)
+	{
+		auto const writer = registry().write();
+		// Push a view to command line arguments
+		auto push = std::back_inserter(ARGUMENTS.list);
+		std::copy(argv, argv + argc, push);
+		// Boundary of command line
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
-
+		// Command iterators
 		auto next = end;
 		auto it = end;
+		// Current at
 		pair entry;
 
-		word argn = 0;
 		vector args;
 		vector extra;
 
-		span argv = arguments;
-		for (auto const arg : argv)
+		for (int argn = 0; argv[argn]; ++argn)
 		{
+			view const argu = argv[argn];
+
 			// Check whether this argument is a new command
 
-			if (arg.starts_with("--"))
+			if (argu.starts_with("--"))
 			{
-				entry = fmt::to_pair(arg.substr(2));
+				entry = fmt::to_pair(argu.substr(2));
 				next = std::find_if(begin, end, [&](auto const& d)
 				{
 					return d.name == entry.first;
 				});
 			}
 			else
-			if (arg.starts_with("-"))
+			if (argu.starts_with("-"))
 			{
-				entry = fmt::to_pair(arg.substr(1));
+				entry = fmt::to_pair(argu.substr(1));
 				next = std::find_if(begin, end, [&](auto const& d)
 				{
 					return d.dash == entry.first;
@@ -204,12 +246,12 @@ namespace env::opt
 				if (0 != argn)
 				{
 					--argn;
-					args.push_back(arg);
+					args.push_back(argu);
 				}
 				else
-				if (not fmt::same(argv[0], arg))
+				if (not fmt::same(argv[0], argu))
 				{
-					extra.push_back(arg);
+					extra.push_back(argu);
 				}
 			}
 
@@ -222,7 +264,7 @@ namespace env::opt
 					auto const key = make_pair(it->name);
 					if (empty(args))
 					{
-						(void) ptr->put(key, entry.second);
+						writer->put(key, entry.second);
 					}
 				}
 
@@ -234,7 +276,7 @@ namespace env::opt
 				{
 					auto const key = make_pair(it->name);
 					auto const value = doc::ini::join(args);
-					(void) ptr->put(key, value);
+					writer->put(key, value);
 				}
 			}
 		}
@@ -254,211 +296,5 @@ namespace env::opt
 		}
 
 		return extra;
-	}
-
-	view get(view key)
-	{
-		span const args = arguments;
-		for (auto const arg : args)
-		{
-			auto const e = fmt::to_pair(arg);
-			if (e.first == key)
-			{
-				return e.second;
-			}
-		}
-
-		auto value = env::var::get(key);
-		if (empty(value))
-		{
-			auto const entry = make_pair(key);
-			value = env::opt::get(entry);
-		}
-		return value;
-	}
-
-	bool got(view key)
-	{
-		auto const entry = make_pair(key);
-		return got(entry);
-	}
-
-	bool set(view key, view value)
-	{
-		auto const entry = make_pair(key);
-		return set(entry, value);
-	}
-
-	bool put(view key, view value)
-	{
-		auto const entry = make_pair(key);
-		return put(entry, value);
-	}
-
-	bool cut(view key)
-	{
-		auto const entry = make_pair(key);
-		return cut(entry);
-	}
-
-	view get(pair key)
-	{
-		auto const ptr = registry().read();
-		view::set set;
-		while (true)
-		{
-			view value = ptr->get(key);
-			if (value.front() != '@')
-			{
-				return value;
-			}
-			if (not set.emplace(value).second)
-			{
-				sys::warn(here, "Cycle", value);
-				break;
-			}
-			key.second = value.substr(1);
-		}
-		return fmt::nil;
-	}
-
-	bool got(pair key)
-	{
-		return registry().read()->got(key);
-	}
-
-	bool set(pair key, view value)
-	{
-		return registry().write()->set(key, value);
-	}
-
-	bool put(pair key, view value)
-	{
-		return registry().write()->put(key, value);
-	}
-
-	bool cut(pair key)
-	{
-		return registry().write()->cut(key);
-	}
-
-	std::istream & get(std::istream & in)
-	{
-		auto const unlock = lock.write();
-		return in >> registry();
-	}
-
-	std::ostream & put(std::ostream & out)
-	{
-		auto const unlock = lock.read();
-		return out << registry();
-	}
-
-	bool get(view key, bool value)
-	{
-		return convert(key, value);
-	}
-
-	bool get(pair key, bool value)
-	{
-		return convert(key, value);
-	}
-
-	bool put(pair key, bool value)
-	{
-		if (value)
-		{
-			return registry().write()->set(key, "enable");
-		}
-		else
-		{
-			return registry().write()->cut(key);
-		}
-	}
-
-	bool put(view key, bool value)
-	{
-		auto const entry = make_pair(key);
-		return put(entry, value);
-	}
-
-	word get(view key, word value, int base)
-	{
-		return convert(key, value, [base](auto value)
-		{
-			return fmt::to_llong(value, base);
-		});
-	}
-
-	word get(pair key, word value, int base)
-	{
-		return convert(key, value, [base](auto value)
-		{
-			return fmt::to_llong(value, base);
-		});
-	}
-
-	bool put(view key, word value, int base)
-	{
-		return put(key, fmt::to_string(value, base));
-	}
-
-	bool put(pair key, word value, int base)
-	{
-		return put(key, fmt::to_string(value, base));
-	}
-
-	quad get(view key, quad value)
-	{
-		return convert(key, value, [](auto value)
-		{
-			return fmt::to_quad(value);
-		});
-	}
-
-	quad get(pair key, quad value)
-	{
-		return convert(key, value, [](auto value)
-		{
-			return fmt::to_quad(value);
-		});
-	}
-
-	bool put(view key, quad value)
-	{
-		return set(key, fmt::to_string(value));
-	}
-
-	bool put(pair key, quad value)
-	{
-		return set(key, fmt::to_string(value));
-	}
-
-	vector get(view key, span value)
-	{
-		auto const entry = make_pair(key);
-		return get(entry, value);
-	}
-
-	vector get(pair key, span value)
-	{
-		view u = get(key);
-		if (empty(u))
-		{
-			return vector(value.begin(), value.end());
-		}
-		return doc::ini::split(u);
-	}
-
-	bool put(view key, span value)
-	{
-		auto const entry = make_pair(key);
-		return put(entry, value);
-	}
-
-	bool put(pair key, span value)
-	{
-		auto const s = doc::ini::join(value);
-		return put(key, s);
 	}
 }

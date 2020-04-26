@@ -8,34 +8,35 @@ namespace env
 	struct shell
 	{
 		using fmt::string;
-		using string::view;
 		using string::vector;
 		using string::span;
 		using string::in;
 		using string::out;
 		using string::pair;
 		using string::edges;
-		using string::subspan;
+		using string::view;
+		using view::line;
+		using view::page;
 
 		vector cache;
-		string line;
+		string last;
 
-		subspan get(in, char end = '\n', int count = 0);
+		line get(in, char end = '\n', int count = 0);
 		// Cache all lines in to end, return indices
 
-		subspan list(view directory = ".");
+		line list(view directory = ".");
 		// Contents of directory given by path
 
-		subspan copy(view path);
+		line copy(view path);
 		// Contents of file given by path
 
-		subspan find(view pattern, view directory = ".");
+		line find(view pattern, view directory = ".");
 		// Paths to matching files in directory
 
-		subspan which(view name);
+		line which(view name);
 		// Paths to executables with program name
 
-		subspan open(view path);
+		line open(view path);
 		// Preferred application
 	};
 }

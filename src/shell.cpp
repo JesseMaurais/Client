@@ -7,27 +7,27 @@
 
 namespace env
 {
-	shell::subspan shell::get(in put, char end, int count)
+	shell::line shell::get(in put, char end, int count)
 	{
 		// Result in span at back of cache
 		const auto first = cache.size();
 		try // process can crash
 		{
-			while (count-- < 0 and getline(put, line, end))
+			while (--count < 0 and std::getline(put, last, end))
 			{
-				cache.emplace_back(move(line));
+				cache.emplace_back(std::move(last));
 			}
 		}
 		catch (std::exception const& err)
 		{
-			line = err.what();
+			last = err.what();
 		}
-		// Go up to the cache end
+		// Go one past the cache's end
 		const auto second = cache.size();
 		return { cache, { first, second } };
 	}
 
-	shell::subspan shell::list(view name)
+	shell::line shell::list(view name)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -38,7 +38,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::subspan shell::copy(view name)
+	shell::line shell::copy(view name)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -49,7 +49,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::subspan shell::find(view pattern, view directory)
+	shell::line shell::find(view pattern, view directory)
 	{
 		#ifdef _WIN32
 		{
@@ -66,7 +66,7 @@ namespace env
 		#endif
 	}
 
-	shell::subspan shell::which(view name)
+	shell::line shell::which(view name)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -77,7 +77,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::subspan shell::open(view path)
+	shell::line shell::open(view path)
 	{
 		#ifdef _WIN32
 		{

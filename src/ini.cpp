@@ -1,5 +1,6 @@
 #include "ini.hpp"
-#include "str.hpp"
+#include "key.hpp"
+#include "type.hpp"
 #include "err.hpp"
 
 namespace
@@ -29,9 +30,9 @@ namespace doc
 		return fmt::join(list, separator);
 	}
 
-	ini::in::ref ini::getline(in::ref in, string::ref line)
+	ini::in::ref ini::getline(in::ref input, string::ref line)
 	{
-		while (std::getline(in, line))
+		while (std::getline(input, line))
 		{
 			constexpr char omit = '#';
 			auto const it = fmt::skip(begin(line), end(line));
@@ -68,12 +69,11 @@ namespace doc
 				sys::warn(here, "no key");
 			}
 
-			auto const pair = fmt::to_pair(line);
-			auto const first = fmt::str::get(pair.first);
-			auto const second = fmt::str::get(pair.second);
-			auto const section = fmt::str::get(key);
+			auto pair = fmt::to_pair(line);
+			pair.first = fmt::str::get(pair.first);
+			pair.second = fmt::str::get(pair.second);
 			
-			if (not obj.set({ section, first }, second))
+			if (not obj.set({ key, pair.first }, pair.second))
 			{
 				sys::warn(here, "overwrite", key, "with", pair.second);
 			}

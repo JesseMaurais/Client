@@ -1,50 +1,57 @@
 #ifndef opt_hpp
 #define opt_hpp "Program Options"
 
-#include "env.hpp"
 #include "fmt.hpp"
 
 namespace env::opt
 {
 	using fmt::string;
 	using string::view;
-	using view::span;
-	using view::vector;
-	using view::pair;
-	using string::in;
-	using string::out;
-	using word = short;
+	using view::in;
+	using view::out;
+
+	using word = long long;
 	using quad = long double;
-	using vector = fwd::vector<word>;
+	using pair = fwd::pair<word>;
+	using line = fwd::vector<word>;
 
-	in::ref get(in::ref);
-	out::ref put(out::ref);
+	in::ref get(in::ref); // read options in
+	out::ref put(out::ref); // write options out
 
-	bool get(view key, bool value);
-	bool get(pair key, bool value);
-	bool put(view key, bool value);
-	bool put(pair key, bool value);
-	word get(view key, word value, int base = 10);
-	word get(pair key, word value, int base = 10);
-	bool put(view key, word value, int base = 10);
-	bool put(pair key, word value, int base = 10);
-	quad get(view key, quad value);
-	quad get(pair key, quad value);
-	bool put(view key, quad value);
-	bool put(pair key, quad value);
-	vector get(view key, span value);
-	vector get(pair key, span value);
-	bool put(view key, span value);
-	bool put(pair key, span value);
+	// Boolean
+	bool get(word, bool);
+	bool set(word, bool);
+	bool get(pair, bool);
+	bool set(pair, bool);
 
-	template <typename T> class meme
+	// Integer
+	word get(word, word, int base = 10);
+	bool set(word, word, int base = 10);
+	word get(pair, word, int base = 10);
+	bool set(pair, word, int base = 10);
+
+	// Pointed Decimal
+	quad get(word, quad);
+	bool set(word, quad, int digits = 6);
+	quad get(pair, quad);
+	bool set(pair, quad, int digits = 6);
+
+	template <class Key, class Type> auto set(Key key, span<Type> value)
+	{
+		line out;
+		for (const Type t : s) out.emplace_back
+		return out;
+	}
+
+	template <class Type> class meme
+	// Mnemonic device for options
 	{
 		pair key;
-		T value;
+		Type value;
 
 	public:
 
-		meme(pair k, T v) : key(k)
+		meme(pair k, Type v) : key(k)
 		{
 			value = get(k, v);
 		}
@@ -54,12 +61,12 @@ namespace env::opt
 			put(key, value);
 		}
 
-		operator T() const
+		operator Type() const
 		{
 			return value;
 		}
 
-		auto operator=(T v)
+		auto operator=(Type v)
 		{
 			return value = v;
 		}
