@@ -1,22 +1,14 @@
 #ifndef opt_hpp
 #define opt_hpp "Program Options"
 
-#include "fmt.hpp"
+#include "fwd.hpp"
 
 namespace env::opt
 {
-	using fmt::string;
-	using string::view;
-	using view::in;
-	using view::out;
-
 	using word = long long;
 	using quad = long double;
 	using pair = fwd::pair<word>;
 	using line = fwd::vector<word>;
-
-	in::ref get(in::ref); // read options in
-	out::ref put(out::ref); // write options out
 
 	// Boolean
 	bool get(word, bool);
@@ -35,13 +27,6 @@ namespace env::opt
 	bool set(word, quad, int digits = 6);
 	quad get(pair, quad);
 	bool set(pair, quad, int digits = 6);
-
-	template <class Key, class Type> auto set(Key key, span<Type> value)
-	{
-		line out;
-		for (const Type t : s) out.emplace_back
-		return out;
-	}
 
 	template <class Type> class meme
 	// Mnemonic device for options

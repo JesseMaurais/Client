@@ -1,5 +1,5 @@
 #include "ini.hpp"
-#include "key.hpp"
+#include "str.hpp"
 #include "type.hpp"
 #include "err.hpp"
 
@@ -30,68 +30,93 @@ namespace doc
 		return fmt::join(list, separator);
 	}
 
-	ini::in::ref ini::getline(in::ref input, string::ref line)
+	ini::in::ref ini::getline(in::ref input, string::ref output)
 	{
-		while (std::getline(input, line))
+		while (std::getline(input, output))
 		{
+			// Read past comment
 			constexpr char omit = '#';
-			auto const it = fmt::skip(begin(line), end(line));
-			if (it != end(s) and omit != *it)
+			auto const beign = output.begin();
+			auto const end = output.end();
+			auto const it = fmt::skip(begin, end);
+			if (it != end and omit != *it)
 			{
-				auto const t = line.find(omit);
-				line = line.substr(0, t);
-				auto const u = fmt::trim(line);
+				// Trim off whitespace
+				auto const t = output.find(omit);
+				output = output.substr(0, t);
+				auto const u = fmt::trim(output);
 				if (not empty(u))
 				{
-					line = fmt::to_string(u);
-					break;
+					output = fmt::to_string(u);
+					break; // done
 				}
 			}
 		}
 		return in;
 	}
 
-	ini::in::ref operator>>(ini::in::ref in, ini::ref obj)
+	ini::in::ref operator>>(ini::in::ref input, ini::ref output)
 	{
-		ini::view key;
-		ini::string line;
-		while (ini::getline(in, line))
+		word group = -1;
+		ini::string token;
+
+		while (ini::getline(input, token))
 		{
-			if (header(line))
+			// Check for new group
+			if (header(token))
 			{
-				auto const z = line.size();
-				auto const u = line.substr(1, z - 2);
-				key = env::opt::set(u);
+				auto const z = token.size();
+				token = token.substr(1, z - 2);
+				group = fmt::str::get(token);
+				continue;
 			}
 
-			if (empty(key))
+			#ifdef trace
+			if (group < 0)
 			{
-				sys::warn(here, "no key");
+				trace("no group");
 			}
+			#endif
 
-			auto pair = fmt::to_pair(line);
-			pair.first = fmt::str::get(pair.first);
-			pair.second = fmt::str::get(pair.second);
+			// Create key pair for value entry
+			auto const pair = fmt::to_pair(token);
+			word const key = fmt::str::get(pair.first);
+			view const value = pair.second;
+			if (empty(value))
+			{
+				break;
+			}
 			
-			if (not obj.set({ key, pair.first }, pair.second))
+			// Create a new entry in the key table
+			if (not output.set({ group, key }, value))
 			{
-				sys::warn(here, "overwrite", key, "with", pair.second);
+				#ifdef trace
+				trace("overwrite", key, "with", value);
+				#endif
 			}
 		}
 		return in;
 	}
 
-	ini::out::ref operator<<(ini::out::ref out, ini::cref obj)
+	ini::out::ref operator<<(ini::out::ref output, ini::cref input)
 	{
-		view key;
-		for (auto const& it : obj.keys)
+		for (auto it : input.keys)
 		{
-			if (it.first.first != key)
+			if (it.first < 0)
 			{
-				key = it.first.first;
-				out << '[' << key << ']' << fmt::eol;
+				continue;
 			}
-			out << it.first.second << "=" << it.second;
+
+			view const group = fmt::str::get(it.first);
+			out << '[' << group << ']' << fmt::eol;
+			
+			for (auto jt : it.second)
+			{
+				view const key = fmt::str::get(jt.first);
+				view const value = input.cache.at(jt.second);
+
+				out << key << "=" << value << fmt::eol;
+			}
 		}
 		return out;
 	}

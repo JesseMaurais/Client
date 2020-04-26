@@ -13,12 +13,9 @@ namespace
 
 namespace fmt::str
 {
-	using file::size_t;
-	using file::ssize_t;
-
 	bool got(word name)
 	{
-		ssize_t const size = store.read()->size();
+		env::file::ssize_t const size = store.read()->size();
 		return -1 < name and name < size;
 	}
 
@@ -105,7 +102,7 @@ namespace fmt::str
 		return id;
 	}
 
-	string::in::ref get(string::in::ref in)
+	string::in::ref get(string::in::ref in, char end)
 	{
 		// Block all threads at this point
 		auto const wcache = cache.write();
@@ -113,7 +110,7 @@ namespace fmt::str
 		auto const windex = index.write();
 
 		string line;
-		while (std::getline(in, line))
+		while (std::getline(in, line, end))
 		{
 			auto const p = wcache->emplace(move(line));
 			verify(p.second);
@@ -129,7 +126,7 @@ namespace fmt::str
 		return in;
 	}
 
-	string::out::ref put(string::out::ref out)
+	string::out::ref put(string::out::ref out, char end)
 	{
 		auto const read = cache.read();
 		auto const begin = read->begin();
@@ -137,7 +134,7 @@ namespace fmt::str
 
 		for (auto it = begin; it != end; ++it)
 		{
-			out << it->first << eol;
+			out << it->first << end;
 		}
 		return out;
 	}

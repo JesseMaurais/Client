@@ -7,10 +7,9 @@
 namespace fmt::str
 {
 	using string::view;
-	using word = env::opt::word;
-	using vector = fwd::vector<word>;
-	using span = fwd::span<word>;
-	using init = fwd::init<word>;
+	using view::span;
+	using env::opt::word;
+	using env::opt::vector;
 
 	bool got(word); // O (1)
 	bool got(view); // O log n : n is the cache size
@@ -19,35 +18,35 @@ namespace fmt::str
 	word put(view); // O log n
 	word set(view); // O log n
 
-	string::in::ref get(string::in::ref);
+	string::in::ref get(string::in::ref, char = eol);
 	// read all file lines to cache
-	string::out::ref put(string::out::ref);
+	string::out::ref put(string::out::ref, char = eol);
 	// write all cache lines to file
 
-	inline auto all(view::span line, auto to)
+	inline auto all(auto list, auto to)
 	// convert many at once
 	{
 		vector words;
-		for (auto it : line) words.emplace_back(put(it));
+		for (auto it : list) words.emplace_back(to(it));
 		return words;
 	}
 
-	inline auto get(auto line)
-	// get all words in line
+	inline auto get(auto list)
+	// get all words in list
 	{
-		return all(line, get);
+		return all(list, get);
 	}
 
-	inline auto put(auto line)
-	// put all words in line
+	inline auto put(auto list)
+	// put all words in list
 	{
-		return all(line, put);
+		return all(list, put);
 	}
 
-	inline auto set(auto line)
-	// set all words in line
+	inline auto set(auto list)
+	// set all words in list
 	{
-		return all(line, set);
+		return all(list, set);
 	}
 }
 

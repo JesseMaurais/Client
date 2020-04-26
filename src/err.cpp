@@ -1,23 +1,21 @@
 #include "err.hpp"
-#include "api.hpp"
-#include "ptr.hpp"
 #include "sync.hpp"
 #include <system_error>
 #include <exception>
 #include <iostream>
 #include <cstring>
 
-std::ostream& fmt::operator<<(std::ostream& out, fmt::where const& pos)
+fmt::string::out fmt::operator<<(string::out out, where const& at)
 {
-	return out << pos.file << "(" << pos.line << ") " << pos.func << ":";
+	return out << at.file << "(" << at.line << ") " << at.func << ":";
 }
 
-std::ostream& fmt::operator<<(std::ostream& out, std::errc const& errc)
+fmt::string::out fmt::operator<<(string::out, std::errc const& errc)
 {
 	return out << std::make_error_condition(errc).message();
 }
 
-std::ostream& fmt::operator<<(std::ostream& out, std::exception const& ex)
+fmt::string::out fmt::operator<<(string::out out, std::exception const& ex)
 {
 	return out << ex.what();
 }

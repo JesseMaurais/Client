@@ -3,18 +3,26 @@
 
 #ifdef assert
 # undef assert
-# warning You should not include assert. 
+# warning You should not include assert
 #endif
+
+#ifdef here
+# undef here
+# warning You should not define word here
+#endif
+#define here { __FILE__, __LINE__, __func__ }
 
 #ifdef NDEBUG
 # define verify(x) (x)
 # define assert(x)
 # define alert(x) 
+# define trace(...)
 # define debug(x) if constexpr (false)
 #else
 # define verify(x) assert(x)
 # define assert(x) if (not(x)) sys::warn(here, #x)
 # define alert(x) if (bool(x)) sys::err(here, #x)
+# define trace(...) sys::warn(here, __VA_ARGS__)
 # define debug(x) if (x)
 #endif
 
@@ -23,19 +31,12 @@
 #include <sstream>
 #include "fmt.hpp"
 
-enum : bool
-{
-	success = false, failure = true
-};
-
 namespace fmt
 {
-	struct where
+	struct where // the state of here
 	{
 		char const *file; int const line; char const *func;
 	};
-
-	#define here { __FILE__, __LINE__, __func__ }
 
 	string::out operator<<(string::out, where const &);
 	string::out operator<<(string::out, std::errc const &);
@@ -44,7 +45,7 @@ namespace fmt
 	template <typename Arg, typename... Args>
 	auto err(Arg arg, Args... args)
 	{
-		std::stringstream ss;
+		string::str ss;
 		ss << arg;
 		if constexpr (0 < sizeof...(args))
 		{
@@ -56,6 +57,8 @@ namespace fmt
 
 namespace sys
 {
+	enum : bool { success = false, failure = true };
+
 	extern bool debug;
 
 	inline std::errc const noerr { };

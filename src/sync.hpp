@@ -104,7 +104,7 @@ namespace sys
 	};
 
 	template <class object> class cache : object
-	// Copy on write
+	// Copy with read and write back
 	{
 		using exclusive = exclusive<object>;
 		using exclusive_ptr = exclusive_ptr<object>;

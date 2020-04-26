@@ -1,6 +1,7 @@
 #ifndef arg_hpp
 #define arg_hpp "Command Line Arguments"
 
+#include "env.hpp"
 #include "opt.hpp"
 
 namespace env::opt

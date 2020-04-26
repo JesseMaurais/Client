@@ -40,6 +40,7 @@ namespace fmt
 		using io = memory<fwd::basic_iostream>;
 		using buf = memory<fwd::basic_buf>;
 		using file = memory<fwd::basic_file>;
+		using str = memory<fwd::basic_stringstream>;
 	};
 
 	template
@@ -133,6 +134,7 @@ namespace fmt
 		using traits::io;
 		using traits::buf;
 		using traits::file;
+		using traits::str;
 		using traits::ref;
 		using traits::cref;
 		using traits::ptr;
@@ -164,12 +166,6 @@ namespace fmt
 			size_t Size
 		> 
 		using array = traits::array<Size>;
-
-		template
-		<
-			size_t Size = BUFSIZ
-		> 
-		using buffer = traits::variant<Size, Alloc>;
 	};
 
 	template
@@ -212,6 +208,13 @@ namespace fmt
 	using string = basic_string<char>; // UTF-8
 	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 by OS
 	using ustring = basic_string<wint_t>; // at least UTF-32
+
+	using tstring = 
+	#ifdef _T
+		basic_string<_T>;
+	#else
+		string;
+	#endif
 }
 
 #endif // file
