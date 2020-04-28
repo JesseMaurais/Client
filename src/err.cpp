@@ -20,8 +20,34 @@ fmt::string::out fmt::operator<<(string::out out, std::exception const& ex)
 	return out << ex.what();
 }
 
+namespace
+{
+	auto thread_id()
+	{
+		
+	}
+
+	struct : env::variable<fmt::string::view>
+	{
+		thread_local type id = thread_id();
+
+		operator type() const final
+		{
+			return id;
+		}
+
+		type operator=()(type value) final
+		{
+			return id = value;
+		}
+
+	} THREAD_ID;
+}
+
 namespace sys
 {
+	env::view:ref thread_id = THREAD_ID;
+
 	bool debug =
 	#ifdef NDEBUG
 		false;
@@ -35,22 +61,52 @@ namespace sys
 		return code.value() == errno;
 	}
 
-	namespace
+	int bug(fmt::string::view u, bool no)
 	{
-		sys::mutex key;
+		thread_local struct
+		{
+			fmt::string s;
+			int n = -1;
+		} local;
+		// Avoid spamming
+		if (u != local.s)
+		{
+			// reset
+			local.n = 0;
+			local.s = fmt::to_string(u);
+			// sync
+			static sys::mutex key;
+			auto const unlock = key.lock();
+			// format
+			std::cerr << u;
+			{
+				// number
+				if (not no)
+				{
+					const auto e = std::strerror(errno);
+					std::cerr << ": " << e;
+				}
+				// thread
+				view const id = thread_id;
+				if (not empty(id))
+				{
+					std::cerr << '[' << id << ']';
+				}
+			}
+			std::cerr << '\n';
+		}
+		else ++local.n;
+		return local.n;
 	}
 
-	void impl::warn(fmt::string::view u)
+	int impl::warn(fmt::string::view u)
 	{
-		auto const unlock = key.lock();
-		std::cerr << u << fmt::eol;
+		return bug(u, true);
 	}
 
-	void impl::err(fmt::string::view u)
+	int impl::err(fmt::string::view u)
 	{
-		auto const unlock = key.lock();
-		auto const e = std::strerror(errno);
-		std::cerr << u << ": " << e << fmt::eol;
+		return bug(u, false);
 	}
 }
 

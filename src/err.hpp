@@ -67,32 +67,30 @@ namespace sys
 
 	namespace impl
 	{
-		void warn(fmt::string::view);
-		void err(fmt::string::view);
+		int warn(fmt::string::view);
+		int err(fmt::string::view);
 	}
 
-	template <typename... Args> inline bool warn(Args... args)
+	template <typename... Args> inline int warn(Args... args)
 	{
 		#ifndef NDEBUG
 		if (debug)
 		{
-			impl::warn(fmt::err(args...));
-			return success;
+			return impl::warn(fmt::err(args...));
 		}
 		#endif
-		return failure;
+		return -1;
 	}
 
-	template <typename... Args> inline bool err(Args... args)
+	template <typename... Args> inline int err(Args... args)
 	{
 		#ifndef NDEBUG
 		if (debug)
 		{
-			impl::err(fmt::err(args...));
-			return success;
+			return impl::err(fmt::err(args...));
 		}
 		#endif
-		return failure;
+		return -1;
 	}
 }
 

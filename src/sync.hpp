@@ -1,6 +1,7 @@
 #ifndef sync_hpp
 #define sync_hpp "Thread Point Sync"
 
+#include "env.hpp"
 #ifdef _WIN32
 #include "win/sync.hpp"
 #else
@@ -9,6 +10,8 @@
 
 namespace sys
 {
+	extern env::variable<fmt::string::view> thread_id;
+
 	template <class object> class exclusive_ptr : unique
 	// Allow one writer but many reader (WORM pattern)
 	{

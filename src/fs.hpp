@@ -1,5 +1,5 @@
-#ifndef fdstream_hpp
-#define fdstream_hpp "File Descriptor Stream"
+#ifndef fs_hpp
+#define fs_hpp "File Descriptor Stream"
 
 #include "pipe.hpp"
 #include "buf.hpp"
