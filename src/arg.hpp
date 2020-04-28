@@ -35,12 +35,10 @@ namespace env::opt
 	bool got(word);
 	view get(word);
 	bool set(word, view);
-	bool put(word, view);
 
 	bool got(pair);
 	view get(pair);
 	bool set(pair, view);
-	bool put(pair, view);
 };
 
 #endif // file

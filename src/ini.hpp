@@ -17,12 +17,12 @@ namespace doc
 		using view::vector;
 		
 		fwd::group<word> keys;
-		fwd::graph<word> values;
+		view::vector values;
 		string::set cache;
 
+		friend in::ref operator>>(in::ref, ref);
+		friend out::ref operator<<(out::ref, cref);
 		static in::ref getline(in::ref, string::ref);
-		friend in::ref operator>>(in::ref, ini::ref);
-		friend out::ref operator<<(out::ref, ini::cref);
 
 		static string join(span);
 		static vector split(view);
@@ -31,7 +31,6 @@ namespace doc
 		bool got(pair) const;
 		view get(pair) const;
 		bool set(pair, view);
-		bool put(pair, view);
 	};
 }
 

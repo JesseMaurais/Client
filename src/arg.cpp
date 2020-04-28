@@ -138,6 +138,21 @@ namespace env::opt
 		return output << slice;
 	}
 
+	bool got(pair key)
+	{
+		return registry().read()->got(key);
+	}
+
+	view get(pair key)
+	{
+		return registry().read()->get(key);
+	}
+
+	bool set(pair key, view value)
+	{
+		return registry().write()->set(key, value);
+	}
+
 	bool got(word key)
 	{
 		return not empty(get(key));
@@ -168,31 +183,6 @@ namespace env::opt
 	bool set(word key, view value)
 	{
 		return set(make_pair(key), value);
-	}
-
-	bool put(word key, view value)
-	{
-		return put(make_pair(key), value);
-	}
-
-	bool got(pair key)
-	{
-		return registry().read()->got(key);
-	}
-
-	view get(pair key)
-	{
-		return registry().read()->get(key);
-	}
-
-	bool set(pair key, view value)
-	{
-		return registry().write()->set(key, value);
-	}
-
-	bool put(pair key, view value)
-	{
-		return registry().write()->put(key, value);
 	}
 
 	vector put(int argc, char** argv, commands cmd)

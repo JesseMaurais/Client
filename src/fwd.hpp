@@ -257,7 +257,7 @@ namespace fwd
 		template <class> class Order = ordering, 
 		template <class> class Alloc = allocator
 	>
-	using group = map<type, line<pair<Node>>, Order, Alloc>;
+	using group = map<pair<Node>, Node, Order, Alloc>;
 
 	//
 	// Algorithms

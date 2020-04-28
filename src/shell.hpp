@@ -5,7 +5,7 @@
 
 namespace env
 {
-	struct shell
+	struct shell : fmt::struct_traits<shell>
 	{
 		using fmt::string;
 		using string::vector;
@@ -39,6 +39,8 @@ namespace env
 		line open(view path);
 		// Preferred application
 	};
+
+	extern shell::ref cmd;
 }
 
 #endif // file

@@ -57,7 +57,7 @@ namespace doc
 
 	ini::in::ref operator>>(ini::in::ref input, ini::ref output)
 	{
-		word group = -1;
+		word group = 0;
 		ini::string token;
 
 		while (ini::getline(input, token))
@@ -72,7 +72,7 @@ namespace doc
 			}
 
 			#ifdef trace
-			if (group < 0)
+			if (not fmt::str::got(group))
 			{
 				trace("no group");
 			}
@@ -100,91 +100,50 @@ namespace doc
 
 	ini::out::ref operator<<(ini::out::ref output, ini::cref input)
 	{
-		for (auto it : input.keys)
+		word last = -1;
+		for (auto [k, v] : input.keys)
 		{
-			if (it.first < 0)
+			if (key.first != last)
 			{
-				continue;
-			}
+				last = key.first;
 
-			view const group = fmt::str::get(it.first);
-			out << '[' << group << ']' << fmt::eol;
+				view const group = fmt::str::get(k.first);
+				out << '[' << group << ']' << fmt::eol;
+			}
 			
-			for (auto jt : it.second)
-			{
-				view const key = fmt::str::get(jt.first);
-				view const value = input.cache.at(jt.second);
-
-				out << key << "=" << value << fmt::eol;
-			}
+			view const key = fmt::str::get(k.second);
+			view const value = input.values.at(v);
+			out << key << "=" << value << fmt::eol;
 		}
 		return out;
 	}
 
 	bool ini::got(pair key) const
 	{
-		auto const it = keys.find(key.first);
-		if (key.end() != it)
-		{
-			for (auto const item : it->second)
-			{
-				if (item.first == key.second)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
+		return keys.find(key) != keys.end();
 	}
 
 	view ini::get(pair key) const
 	{
-		auto const it = keys.find(key.first);
-		if (keys.end() != it)
-		{
-			for (auto const item : it->second)
-			{
-				if (item.first == key.second)
-				{
-					return item.second;
-				}
-			}
-		}
-		return fmt::nil;
+		auto const it = keys.find(key);
+		return it == keys.end() ? fmt::nil : it->second;
 	}
 
 	bool ini::set(pair key, view value)
 	{
-		auto const it = keys.find(key.first);
-		if (keys.end() != it)
-		{
-			for (auto const item : it->second)
-			{
-				if (item.first == key.second)
-				{
-					item.second = cache.emplace(value);
-					return true;
-				}
-			}
-		}
-		return false
-	}
-
-	bool ini::put(pair key, view value)
-	{
-		auto it = keys.find(key.first);
+		auto it = keys.find(key);
 		if (keys.end() == it)
 		{
-			for (auto const item : it->second)
-			{
-				if (item.first == key.second)
-				{
-					item.second = value;
-					return true;
-				}
-			}
+			auto const size = values.size();
+			keys.at(key) = to<word>(size);
+			values.emplace_back(value);
+			return true;
 		}
-		return false;
+		else
+		{
+			values.at(it->second) = value;
+			return false;
+		}
 	}
 }
 

@@ -205,16 +205,16 @@ namespace fmt
 		using base::base;
 	};
 
-	using string = basic_string<char>; // UTF-8
-	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 by OS
-	using ustring = basic_string<wint_t>; // at least UTF-32
-
-	using tstring = 
+	using string = 
 	#ifdef _T
 		basic_string<_T>;
 	#else
-		string;
+		basic_string<char>;
 	#endif
+
+	using astring = basic_string<char>; // UTF-8 or low 7
+	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 wide
+	using ustring = basic_string<wint_t>; // at least UTF-32 code point
 }
 
 #endif // file

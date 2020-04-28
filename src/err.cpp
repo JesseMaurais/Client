@@ -10,7 +10,7 @@ fmt::string::out fmt::operator<<(string::out out, where const& at)
 	return out << at.file << "(" << at.line << ") " << at.func << ":";
 }
 
-fmt::string::out fmt::operator<<(string::out, std::errc const& errc)
+fmt::string::out fmt::operator<<(string::out out, std::errc const& errc)
 {
 	return out << std::make_error_condition(errc).message();
 }

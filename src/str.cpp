@@ -15,31 +15,33 @@ namespace fmt::str
 {
 	bool got(word name)
 	{
+		word const index = ~name;
 		env::file::ssize_t const size = store.read()->size();
-		return -1 < name and name < size;
+		return -1 < index and index < size;
 	}
 
 	bool got(view name)
 	{
-		auto const read = index.read();
-		auto const end = read->end();
-		auto const it = read->find(name);
+		auto const reader = index.read();
+		auto const it = reader->find(name);
+		auto const end = reader->end();
 		return end != it;
 	}
 
 	view get(word name)
 	{
-		auto const read = store.read();
-		return read->at(name);
+		auto const reader = store.read();
+		word const index = ~name;
+		return reader->at(index);
 	}
 
 	view get(view name)
 	{
 		// Lookup extant
 		{
-			auto const read = index.read();
-			auto const end = read->end();
-			auto const it = read->find(name);
+			auto const reader = index.read();
+			auto const it = reader->find(name);
+			auto const end = reader->end();
 			if (end != it)
 			{
 				return it->first;
@@ -53,22 +55,24 @@ namespace fmt::str
 	{
 		// Lookup extant
 		{
-			auto const read = index.read();
-			auto const end = read->end();
-			auto const it = read->find(name);
+			auto const reader = index.read();
+			auto const end = reader->end();
+			auto const it = reader->find(name);
 			if (end != it)
 			{
 				return it->second;
 			}
 		}
 		// Create entry
-		auto const write = store.write();
-		auto const size = write->size();
+		auto const writer = store.write();
+		auto const size = writer->size();
 		auto const id = to<word>(size);
 		{
 			auto [it, unique] = index.write()->emplace(name, id);
+			#ifdef verify
 			verify(unique);
-			write->push_back(*it);
+			#endif
+			writer->push_back(*it);
 		}
 		return id;
 	}
@@ -128,9 +132,9 @@ namespace fmt::str
 
 	string::out::ref put(string::out::ref out, char end)
 	{
-		auto const read = cache.read();
-		auto const begin = read->begin();
-		auto const end = read->end();
+		auto const reader = cache.read();
+		auto const begin = reader->begin();
+		auto const end = reader->end();
 
 		for (auto it = begin; it != end; ++it)
 		{
