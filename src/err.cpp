@@ -1,6 +1,5 @@
 #include "err.hpp"
-#include <sstream>
-#include <cstring>
+#include "sync.hpp"
 #include <cassert> // overwrite assert
 
 fmt::string::out fmt::operator<<(string::out out, std::errc const& ec)
@@ -50,13 +49,25 @@ namespace sys
 		true;
 	#endif
 
-	fmt::string::out stream()
+	thread_local fmt::string::stream local;
+
+	fmt::string::out::ref out()
 	{
-		thread_local fmt::string::stream local;
 		return local;
 	}
 
-	int bug(fmt::string::view msg, bool no)
+	void flush() 
+	{
+		static sys::mutex key;
+		auto const unlock = key.lock();
+		fmt::string line;
+		while (std::getline(local, line))
+		{
+			std::cerr << line << std::endl;
+		}
+	}
+
+	int bug(fmt::string::view message, bool no)
 	{
 		thread_local struct
 		{
@@ -64,29 +75,29 @@ namespace sys
 			int counter = -1;
 		} local;
 		// Ouptut stream
-		auto & out = stream();
+		auto & put = out();
 		// Avoid spamming
-		if (msg != local.last)
+		if (message != local.last)
 		{
 			// reset
 			local.counter = 0;
-			local.last = fmt::to_string(msg);
+			local.last = fmt::to_string(message);
 			// format
 			{
 				// message
-				out << local.last;
+				put << local.last;
 				// number
 				if (view err = std::strerror(errno); no)
 				{
-					out << ':' << ' ' << err;
+					put << ':' << ' ' << err;
 				}
 				// thread
 				if (view id = thread_id; not std::empty(id))
 				{
-					out << '[' << id << ']';
+					put << '[' << id << ']';
 				}
 			}
-			out << '\n';
+			put << '\n';
 		}
 		else ++local.counter;
 		return local.counter;

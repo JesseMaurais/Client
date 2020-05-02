@@ -358,8 +358,8 @@ namespace env
 	view::ref prompt = PROMPT;
 }
 
-#ifndef NDEBUG
-void test::run<test::unit::env>() noexcept
+#ifdef test
+test(env)
 {
 	assert(env::var::get("PATH") == fmt::path::join(env::paths));
 	assert(env::var::get("PATH") == env::var::value("$PATH");

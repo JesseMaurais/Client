@@ -163,8 +163,8 @@ namespace fmt
 	}
 }
 
-#ifndef NDEBUG
-void test::run<test::unit::dig>() noexcept
+#ifdef test
+test(dig)
 {
 	assert('*' == fmt::to_narrow<char>(42));
 	assert(42u == fmt::to_unsigned(42));
@@ -175,6 +175,7 @@ void test::run<test::unit::dig>() noexcept
 	assert(0.42f == fmt::to_float("0.42f"));
 	assert(std::isnan(fmt::to_float("nan")));
 	assert(std::isinf(fmt::to_double("inf")));
+	// catch
 	except(256 == fmt::to_narrow<char>(256));
 	except(-1 == fmt::to_unsigned(-1));
 	except(0L == fmt::to_long("$"));

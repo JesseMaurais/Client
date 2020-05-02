@@ -1,6 +1,8 @@
 #ifndef bug_hpp
 #define bug_hpp "Debug Tests"
 
+#include "dll.hpp"
+
 #ifndef NDEBUG
 # warning You should compile unit tests in debug
 #endif
@@ -9,14 +11,6 @@
 #define except(expression)\
 	try { (void) expression; assert(not #expression); } catch(...) { }
 
-namespace test
-{
-	enum class unit
-	{
-		bug, fmt, dig, env, dir, usr, ini, sig, dll
-	};
-
-	template <unit Test> void run() noexcept;
-}
+#define TEST(name) dynamic test_##name() noexcept 
 
 #endif // file

@@ -1,12 +1,16 @@
-#ifndef dll_hpp
-#define dll_hpp "Dynamic Link Library"
+#ifndef sym_hpp
+#define sym_hpp "Dynamic Link Library"
 
 #include "fmt.hpp"
 
-#ifdef _WIN32
-#define dynamic extern "C" __declspec(dllexport)
+#ifndef dynamic
+# ifdef _WIN32
+#  define dynamic extern "C" __declspec(dllexport)
+# else
+#  define dynamic extern "C" 
+# endif
 #else
-#define dynamic extern "C" 
+# warning Using linkage dynamic // permitted
 #endif
 
 namespace sys
@@ -16,10 +20,10 @@ namespace sys
 	public:
 
 		dll() = default;
-		dll(fmt::string::view path);
+		dll(fmt::string::view);
 		~dll();
 
-		static dll find(fmt::string::view name);
+		static dll find(fmt::string::view);
 	
 		template 
 		<
@@ -44,7 +48,12 @@ namespace sys
 		void *sym(fmt::string::view) const;
 	};
 
-	extern dll::cref module;
+	extern dll::cref self;
+
+	template <class T> auto sym(auto name)
+	{
+		return self.sym<T>(name);
+	}
 }
 
 #endif // file

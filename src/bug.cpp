@@ -3,8 +3,8 @@
 
 #include "err.hpp"
 
-#ifndef NDEBUG
-void test::run<test::unit::bug>() noexcept
+#ifdef test
+test(bug)
 {
 	assert(true == true);
 	assert(true != false);

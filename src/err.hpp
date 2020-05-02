@@ -49,10 +49,14 @@ namespace fmt
 
 namespace sys
 {
-	extern bool debug;
+	extern bool debug; // Whether to warn on err
+	fmt::string::out::ref out(int); // Thread local output device
+	void flush(int); // Write out all at pipe to error
 
-	fmt::string::out stream();
-	int bug(fmt::string::view, bool);
+	namespace impl
+	{
+		int bug(fmt::string::view, bool);
+	}
 
 	template <typename... T> inline int warn(T... t)
 	{

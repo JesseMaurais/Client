@@ -2,8 +2,8 @@
 #include "esc.hpp"
 #include "err.hpp"
 
-#ifndef NDEBUG
-void test::run<test::unit::fmt>() noexcept
+#ifdef test
+test(fmt)
 {
 	using namespace fmt;
 

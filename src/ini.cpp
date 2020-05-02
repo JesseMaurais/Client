@@ -147,8 +147,8 @@ namespace doc
 	}
 }
 
-#ifndef NDEBUG
-void test::run<test::unit::ini>() noexcept
+#ifdef test
+test(ini)
 {
 	auto const path = fmt::dir::join({env::pwd, "Tools.ini"});
 	std::fstream file(path);

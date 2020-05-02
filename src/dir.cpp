@@ -312,8 +312,8 @@ namespace env::dir
 	}
 }
 
-#ifndef NDEBUG
-void test::run<test::unit::dir>() noexcept
+#ifdef test
+test(dir)
 {
 	auto const path = fmt::dir::split(__FILE__);
 	assert(not empty(path));
@@ -327,7 +327,8 @@ void test::run<test::unit::dir>() noexcept
 
 	auto const temp = fmt::dir::join({env::tmpdir, "my", "test", "dir"});
 	auto const stem = env::dir::make(temp);
-	assert(not empty(stem));
+	assert(not empty(stem.first));
+	assert(not empty(stem.second));
 	assert(not env::dir::remove(stem));
 }
 #endif

@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "dll.hpp"
+#include "sym.hpp"
 #include "env.hpp"
 #include "sys.hpp"
 #include "fmt.hpp"
@@ -111,15 +111,22 @@ namespace sys
 	}
 }
 
-#ifndef NDEBUG
+#ifdef test
 static int hidden() { return 42; }
 dynamic int visible() { return hidden(); }
 
-void test::run<test::unit::dll>() noexcept
+test(sym)
 {
-	sys::dll self
-	auto f = self.sym<int()>("visible");
-	assert(nullptr != f);
-	assert(f() == hidden());
+	sys::thread_id = sym_hpp; // header	
+	// Can see dynamic
+	auto f = sys::sym<int()>("visible");
+	assert(not empty(f));
+	// Cannot see static
+	auto g = sys::sym<int()>("hidden");
+	assert(empty(f));
+	// Callable object
+	accert(f() == hidden());
+	// Not callable
+	except(g() == hidden()):
 }
 #endif
