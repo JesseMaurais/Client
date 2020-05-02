@@ -1,29 +1,34 @@
-#ifndef dbg_hpp
-#define dbg_hpp "Debug Tests"
+#ifndef bug_hpp
+#define bug_hpp "Debug Tests"
 
 #include "err.hpp"
 
-#ifndef NDEBUG
-namespace dbg
+// throw just in case condition did not
+#define except(expression)\
+	try { assert(not(expression)); } catch(...) { }
+
+namespace test
 {
-	int run(char const *pattern);
-
-	struct test
+	enum class unit
 	{
-		virtual void run() = 0;
-		test(char const *name);
-		~test();
+		fmt, ini, env, usr, dig, opt, arg, dll, shell, desktop
 	};
 
-	struct fail : test
+	template <unit Type> struct entity
 	{
-		using test::test;
-		void run() final;
-		virtual void die() = 0;
+		static void run() noexcept;
 	};
+
+	template 
+	<
+		unit... Types
+	> 
+	auto& run(int argc, char** argv, auto capture)
+	{
+		thread_local int results[sizeof...(Types)];
+		((*results++ = entity<Types>(argc, argv)...);
+		return results;
+	}
 }
-#define TEST(unit) struct unit : dbg::test { unit():test(#unit) { } void run() final; } test_##unit; void unit::run()
-#define FAIL(unit) struct unit : dbg::fail { unit():fail(#unit) { } void die() final; } test_##unit; void unit::die()
-#endif
 
 #endif // file

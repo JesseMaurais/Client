@@ -1,8 +1,8 @@
 #include "shell.hpp"
 #include "desktop.hpp"
-#include "pstream.hpp"
 #include "err.hpp"
 #include "dir.hpp"
+#include "ps.hpp"
 #include <except>
 
 namespace env

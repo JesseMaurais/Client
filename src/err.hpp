@@ -42,14 +42,13 @@ namespace fmt
 	string::out operator<<(string::out, std::errc const &);
 	string::out operator<<(string::out, std::exception const &);
 
-	template <typename Arg, typename... Args>
-	auto err(Arg arg, Args... args)
+	template <typename T, typename... S> auto err(T t, S... s)
 	{
 		string::str ss;
-		ss << arg;
-		if constexpr (0 < sizeof...(args))
+		ss << t;
+		if constexpr (0 < sizeof...(s))
 		{
-			((ss << " " << args), ...);
+			((ss << " " << s), ...);
 		}
 		return ss.str();
 	}
@@ -71,23 +70,23 @@ namespace sys
 		int err(fmt::string::view);
 	}
 
-	template <typename... Args> inline int warn(Args... args)
+	template <typename... T> inline int warn(T... t)
 	{
 		#ifndef NDEBUG
 		if (debug)
 		{
-			return impl::warn(fmt::err(args...));
+			return impl::warn(fmt::err(t...));
 		}
 		#endif
 		return -1;
 	}
 
-	template <typename... Args> inline int err(Args... args)
+	template <typename... T> inline int err(T... t)
 	{
 		#ifndef NDEBUG
 		if (debug)
 		{
-			return impl::err(fmt::err(args...));
+			return impl::err(fmt::err(t...));
 		}
 		#endif
 		return -1;

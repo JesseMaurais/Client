@@ -1,9 +1,9 @@
 #include "desktop.hpp"
-#include "pstream.hpp"
 #include "fmt.hpp"
 #include "usr.hpp"
 #include "str.hpp"
 #include "sys.hpp"
+#include "ps.hpp"
 
 static auto const wd = fmt::str::put("Desktop Entry");
 

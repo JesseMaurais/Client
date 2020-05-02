@@ -28,7 +28,7 @@ namespace fmt
 		{
 			using base = Stream<Char, Traits, Alloc>;
 			using string = fmt::basic_string<Char, Traits, Alloc>;
-			using string_view = fmt::basic_string_view<Char, Traits>;
+			using view = fmt::basic_string_view<Char, Traits>;
 			using mode = env::file::mode;
 			using size_type = std::size_t;
 
@@ -36,7 +36,7 @@ namespace fmt
 
 		public:
 
-			basic_fdstream(string_view path, mode mask = default_mode, size_type size = env::file::width)
+			basic_fdstream(view path, mode mask = default_mode, size_type size = env::file::width)
 			: base(f), f(path, mode(mask | default_mode))
 			{
 				if (mask & env::file::rw)

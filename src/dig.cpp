@@ -162,3 +162,22 @@ namespace fmt
 		return to_fp(u, nan, std::strtold);
 	}
 }
+
+#ifndef NDEBUG
+#include "bug.hpp"
+void test::entity<test::unit::dig>::run() noexcept
+{
+	assert('*' == fmt::to_narrow<char>(42));
+	assert(42u == fmt::to_unsigned(42));
+	assert(42 == fmt::to_signed(42u));
+	assert(42 == fmt::to_long("42"));
+	assert(42 == fmt::to_long("52", 8));
+	assert(42 == fmt::to_long("2A", 16));
+	assert(0.42f == fmt::to_float("0.42f"));
+	assert(std::isnan(fmt::to_float("nan")));
+	assert(std::isinf(fmt::to_double("inf")));
+	except(fmt::to_narrow<char>(256));
+	except(fmt::to_unsigned(-1));
+	except(fmt::to_long("$"));
+}
+#endif

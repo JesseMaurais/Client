@@ -25,16 +25,22 @@ namespace fmt
 		{
 			using stream = Stream<Char, Traits<Char>>;
 			using buf = basic_buf<Char, Traits, Alloc>;
+			using fmt::string::init;
+			using fmt::string::span;
 
 			env::file::process f;
 
 		public:
 
-			basic_pstream(fmt::list_view args, size_type sz = env::file::width) 
+			basic_pstream(span args, size_type sz = env::file::width)
 			: buf(f), stream(this), f(args)
 			{
 				buf::setbufsiz(sz, sz);
 			}
+
+			basic_pstream(init args, size_type sz = env::file::width)
+			: basic_pstream({ args.begin(), args.end() }, sz)
+			{ }
 		};
 	}
 

@@ -11,7 +11,7 @@
 
 namespace sys
 {
-	class dll
+	class dll : fwd::struct_traits<dll>
 	{
 	public:
 
@@ -43,6 +43,8 @@ namespace sys
 		void *ptr = nullptr;
 		void *sym(fmt::string::view) const;
 	};
+
+	extern dll::cref module;
 }
 
 #endif // file
