@@ -164,8 +164,7 @@ namespace fmt
 }
 
 #ifndef NDEBUG
-#include "bug.hpp"
-void test::entity<test::unit::dig>::run() noexcept
+void test::run<test::unit::dig>() noexcept
 {
 	assert('*' == fmt::to_narrow<char>(42));
 	assert(42u == fmt::to_unsigned(42));
@@ -176,8 +175,8 @@ void test::entity<test::unit::dig>::run() noexcept
 	assert(0.42f == fmt::to_float("0.42f"));
 	assert(std::isnan(fmt::to_float("nan")));
 	assert(std::isinf(fmt::to_double("inf")));
-	except(fmt::to_narrow<char>(256));
-	except(fmt::to_unsigned(-1));
-	except(fmt::to_long("$"));
+	except(256 == fmt::to_narrow<char>(256));
+	except(-1 == fmt::to_unsigned(-1));
+	except(0L == fmt::to_long("$"));
 }
 #endif

@@ -111,3 +111,15 @@ namespace sys
 	}
 }
 
+#ifndef NDEBUG
+static int hidden() { return 42; }
+dynamic int visible() { return hidden(); }
+
+void test::run<test::unit::dll>() noexcept
+{
+	sys::dll self
+	auto f = self.sym<int()>("visible");
+	assert(nullptr != f);
+	assert(f() == hidden());
+}
+#endif

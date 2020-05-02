@@ -113,3 +113,15 @@ namespace env
 	}
 }
 
+#ifndef NDEBUG
+void test::run<test::unit::shell>() noexcept
+{
+	env::shell cmd;
+
+	auto const list = cmd.list(env::pwd);
+	assert(not empty(list));
+	auto const copy = cmd.copy(__FILE__);
+	assert(copy.cache.at(__LINE__).find("assert") != fmt::npos);
+}
+#endif
+

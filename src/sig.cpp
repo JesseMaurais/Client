@@ -27,3 +27,28 @@ namespace sys::sig
 	}
 }
 
+#ifndef NDEBUG
+void test::run<test::unit::sig>() noexcept
+{
+	std::vector<int> caught;
+	std::vector<int> raised = { SIGINT, SIGFPE, SIGILL };
+
+	for (int n : raised)
+	{
+		sys::sig::scope const after
+		(
+			n, [&](int on) 
+			{ 
+				caught.push_back(on); 
+			}
+		);
+		std::raise(n);
+	}
+
+	for (int n : raised)
+	{
+		auto it = caught.find(raised.at(n));
+		assert(caught.end() != it);
+	}
+}
+#endif

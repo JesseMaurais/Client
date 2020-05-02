@@ -311,3 +311,23 @@ namespace env::dir
 		return ok;
 	}
 }
+
+#ifndef NDEBUG
+void test::run<test::unit::dir>() noexcept
+{
+	auto const path = fmt::dir::split(__FILE__);
+	assert(not empty(path));
+	auto const name = path.back();
+	assert(not empty(name));
+
+	assert(env::dir::find(env::pwd, [&](auto entry)
+	{
+		return fmt::dir::split(entry).back() == name;
+	}));
+
+	auto const temp = fmt::dir::join({env::tmpdir, "my", "test", "dir"});
+	auto const stem = env::dir::make(temp);
+	assert(not empty(stem));
+	assert(not env::dir::remove(stem));
+}
+#endif

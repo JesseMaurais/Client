@@ -357,3 +357,11 @@ namespace env
 	view::ref session = SESSION;
 	view::ref prompt = PROMPT;
 }
+
+#ifndef NDEBUG
+void test::run<test::unit::env>() noexcept
+{
+	assert(env::var::get("PATH") == fmt::path::join(env::paths));
+	assert(env::var::get("PATH") == env::var::value("$PATH");
+}
+#endif

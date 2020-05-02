@@ -1,41 +1,44 @@
 #ifndef err_hpp
 #define err_hpp "Error Format"
 
+#include <system_error>
+#include <exception>
+#include <sstream>
+#include "fmt.hpp"
+
+// Pre condition
+
 #ifdef assert
 # undef assert
 # warning You should not include assert
 #endif
 
-#ifdef here
-# undef here
-# warning You should not define word here
-#endif
-#define here { __FILE__, __LINE__, __func__ }
+// Post conditions
 
 #ifdef NDEBUG
 # define verify(x) (x)
 # define assert(x)
 # define alert(x) 
 # define trace(...)
-# define debug(x) if constexpr (false)
 #else
 # define verify(x) assert(x)
 # define assert(x) if (not(x)) sys::warn(here, #x)
 # define alert(x) if (bool(x)) sys::err(here, #x)
 # define trace(...) sys::warn(here, __VA_ARGS__)
-# define debug(x) if (x)
+# include "bug.hpp"
 #endif
 
-#include <system_error>
-#include <exception>
-#include <sstream>
-#include "fmt.hpp"
+#define here { __FILE__, __LINE__, __func__ }
+
+// Error format
 
 namespace fmt
 {
 	struct where // the state of here
 	{
-		char const *file; int const line; char const *func;
+		char const *file; 
+		long const line; 
+		char const *call;
 	};
 
 	string::out operator<<(string::out, where const &);
@@ -44,25 +47,17 @@ namespace fmt
 
 	template <typename T, typename... S> auto err(T t, S... s)
 	{
-		string::str ss;
-		ss << t;
-		if constexpr (0 < sizeof...(s))
-		{
-			((ss << " " << s), ...);
-		}
+		string::str ss; ss << t;
+		if constexpr (0 < sizeof...(s)) ((ss << ' ' << s), ...);
 		return ss.str();
 	}
 }
 
+// Error pipe
+
 namespace sys
 {
-	enum : bool { success = false, failure = true };
-
 	extern bool debug;
-
-	inline std::errc const noerr { };
-
-	bool iserr(std::errc ec);
 
 	namespace impl
 	{
@@ -72,24 +67,20 @@ namespace sys
 
 	template <typename... T> inline int warn(T... t)
 	{
+		return
 		#ifndef NDEBUG
-		if (debug)
-		{
-			return impl::warn(fmt::err(t...));
-		}
+			debug ? impl::warn(fmt::err(t...)) :
 		#endif
-		return -1;
+			-1;
 	}
 
 	template <typename... T> inline int err(T... t)
 	{
+		return
 		#ifndef NDEBUG
-		if (debug)
-		{
-			return impl::err(fmt::err(t...));
-		}
+			debug ? impl::err(fmt::err(t...)) :
 		#endif
-		return -1;
+			-1;
 	}
 }
 

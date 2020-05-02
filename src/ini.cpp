@@ -147,3 +147,17 @@ namespace doc
 	}
 }
 
+#ifndef NDEBUG
+void test::run<test::unit::ini>() noexcept
+{
+	auto const path = fmt::dir::join({env::pwd, "Tools.ini"});
+	std::fstream file(path);
+	doc::ini init;
+	file >> init;
+
+	doc::ini::pair entry { "NMAKE", "MAKECONFIG" };
+	auto const value = key.get(entry);
+	assert(not empty(value));
+	assert(value.find("/D_NMAKE") != fmt::npos);
+}
+#endif
