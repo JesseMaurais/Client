@@ -172,6 +172,14 @@ namespace fwd
 	>
 	using basic_file = std::basic_filebuf<Char, Traits<Char>>;
 
+	template
+	<
+		class Char,
+		template <class> class Traits = character,
+		template <class> class Alloc = allocator
+	>
+	using basic_stringstream = std::basic_stringstream<Char, Traits<Char>, Alloc<Char>>;
+
 	//
 	// Structured Text
 	//

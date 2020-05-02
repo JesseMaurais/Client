@@ -1,5 +1,6 @@
 #include "bug.hpp"
-#include "opt.hpp"
+#include "arg.hpp"
+#include "esc.hpp"
 #include <cassert> // overwrite assert
 
 namespace
@@ -7,7 +8,7 @@ namespace
 	struct context
 	{
 		fmt::string::view name;
-		fmt::string::str errors;
+		fmt::string::stream errors;
 
 		context(fmt::string::view n) 
 			: name(n) 
@@ -29,22 +30,28 @@ namespace
 		{ test::desktop, "desktop" },
 	};
 
-	bool filter(fmt::string::view::span which, fmt::string::view name)
+	bool pass(fmt::string::view::span which, fmt::string::view name)
 	{
 		return which.empty() or which.find(name) != which.end();
 	}
 
-	template <unit Test> void capture(fmt::string::view::span which)
+	template <unit Test> void runner(fmt::string::view::span which) noexcept
 	{
+		extern template test::run<Test>();
 		try
 		{
-			auto& it = results.at(Test);
-			if (filter(which, it.name))
+			auto & item = results.at(Test); // throws
+			auto & local = sys::impl::stream(); // thread local
+			// Do test run?
+			if (pass(which, item.name))
 			{
-				auto buf = std::cerr.rdbuf();
-				std::cerr.rdbuf(it.errors.rdbuf());
+				// Local backing buffer
+				auto back = local.rdbuf();
+				auto read = item.errors.rdbuf();
+				// Capture error output
+				local.rdbuf(read);
 				test::run<Test>();
-				std::cerr.rdbuf(buf);
+				local.rdbuf(back);
 			}
 		}
 		catch (std::exception const& error)
@@ -53,17 +60,26 @@ namespace
 		}
 	}
 
-	template <unit... Tests> void capture(fmt::string::view::span which)
+	template <unit... Tests> 
+	void runner(fmt::string::view::span which, bool sync) noexcept
 	{
-		assert(sizeof...(Tests) == size(results));
-		((capture<Tests>(which))...);
+		assert(sizeof...(Tests) == std::size(results));
+		if (sync)
+		{
+			((runner<Tests>(which))...);
+		}
+		else
+		{
+			((std::async(std::bind(runner<Tests>, which)))...);
+		}
 	}
 }
 
 int main(int argc, char** argv)
 {
+	using namespace fmt;
 	using namespace test;
-	auto const execute = capture
+	auto const capture = runner
 	<
 		bug, 
 		fmt, 
@@ -78,26 +94,97 @@ int main(int argc, char** argv)
 		desktop
 	>;
 
-	const auto extra = env::opt::put(argc, argv, { }):
-	auto const results = execute(extra);
-	auto const begin = results.begin();
-	auto const end = results.end();
-
-	int counter = 0;
-	for (auto it = begin; it != end; ++it)
+	// Command line key words
+	namespace key
 	{
-		auto str = it->errors.str();
+	constexpr auto 
+		help = "help", 
+		color = "color", 
+		async = "async",
+		show = "show";
+	};
+
+	// Command line details
+	env::opt::commands const cmd
+	{
+	 { 0, "h", key::help, "Command line usage then quit" },
+	 { 0, "c", key::color, "Using graphic escape codes" },
+	 { 0, "a", key::async, "Run tests asynchronously" },
+	 { 0, "s", key::show, "Show all available tests" },
+	};
+
+	// Command line parsing
+	auto const which = env::opt::put(argc, argv, cmd):
+	auto const color = env::opt::get(key::color, true);
+	auto const async = env::opt::get(key::async, false);
+	auto const clean = std::empty(env::opt::arguments);
+
+	// Print the help menu and quit if no commands in line
+	if (env::opt::get(key::help, clean and empty(which)))
+	{
+		std::cerr 
+			<< "Commands to run named unit tests"
+			<< eol;
+
+		for (auto const & item : cmd)
+		{
+			std::cerr
+				<< tab
+				<< env::opt::dash << item.dash
+				<< tab
+				<< env::opt::dual << item.dual
+				<< tab
+				<< item.text
+				<< eol;
+		}
+		return EXIT_SUCCESS;
+	}
+
+	// Print the test unit names and quit
+	if (env::opt::get(key::show, false))
+	{
+		for (auto const & item : results)
+		{
+			std::cerr << item.name << eol;
+		}
+		return EXIT_SUCCESS;
+	}
+
+	// Capture error output in selected test runs
+	auto const results = capture(which, not async);
+
+	if (colored)
+	{
+		std::cerr << fg_yellow;
+	}
+
+	signed long int counter = 0;
+	for (auto & item : results)
+	{
+		auto str = item.errors.str();
+
 		if (not std::empty(str))
 		{
-			while (std::getline(it->errors, str))
+			while (std::getline(item.errors, str))
 			{
-				std::cerr << it-name << fmt::tab << str << fmt::eol;
+				std::cerr << item.name << tab << str << eol;
 				++counter;
 			}
 		}
 	}
 
-	std::cerr << "There were " << counter << " errors" << fmt::eol;
-	return 0 == counter ? EXIT_SUCCESS : EXIT_FAILURE ;
+	if (colored)
+	{
+		std::cerr << (counter ? fg_cyan : fg_magenta);
+	}
+
+	std::cerr << "There are " << counter << " errors" << eol;
+
+	if (colored)
+	{
+		std::cerr << reset;
+	}
+
+	return counter ? EXIT_SUCCESS : EXIT_FAILURE ;
 }
 

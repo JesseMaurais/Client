@@ -3,8 +3,10 @@
 
 #include <system_error>
 #include <exception>
-#include <sstream>
 #include "fmt.hpp"
+
+#define where { __FILE__, #__LINE__, __func__ }
+#define here fmt::string::view::init(where)
 
 // Pre condition
 
@@ -25,29 +27,19 @@
 # define assert(x) if (not(x)) sys::warn(here, #x)
 # define alert(x) if (bool(x)) sys::err(here, #x)
 # define trace(...) sys::warn(here, __VA_ARGS__)
-# include "bug.hpp"
 #endif
-
-#define here { __FILE__, __LINE__, __func__ }
 
 // Error format
 
 namespace fmt
 {
-	struct where // the state of here
-	{
-		char const *file; 
-		long const line; 
-		char const *call;
-	};
-
-	string::out operator<<(string::out, where const &);
 	string::out operator<<(string::out, std::errc const &);
 	string::out operator<<(string::out, std::exception const &);
+	string::out operator<<(string::out, string::view::init);
 
 	template <typename T, typename... S> auto err(T t, S... s)
 	{
-		string::str ss; ss << t;
+		string::stream ss; ss << t;
 		if constexpr (0 < sizeof...(s)) ((ss << ' ' << s), ...);
 		return ss.str();
 	}
@@ -59,17 +51,14 @@ namespace sys
 {
 	extern bool debug;
 
-	namespace impl
-	{
-		int warn(fmt::string::view);
-		int err(fmt::string::view);
-	}
+	fmt::string::out stream();
+	int bug(fmt::string::view, bool);
 
 	template <typename... T> inline int warn(T... t)
 	{
 		return
 		#ifndef NDEBUG
-			debug ? impl::warn(fmt::err(t...)) :
+			debug ? impl::bug(fmt::err(t...), false) :
 		#endif
 			-1;
 	}
@@ -78,10 +67,14 @@ namespace sys
 	{
 		return
 		#ifndef NDEBUG
-			debug ? impl::err(fmt::err(t...)) :
+			debug ? impl::bug(fmt::err(t...), true) :
 		#endif
 			-1;
 	}
 }
+
+#ifndef NDEBUG
+# include "bug.hpp"
+#endif
 
 #endif // file

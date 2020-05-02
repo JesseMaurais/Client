@@ -1,18 +1,11 @@
 #include "err.hpp"
-#include "sync.hpp"
-#include <system_error>
-#include <exception>
-#include <iostream>
+#include <sstream>
 #include <cstring>
+#include <cassert> // overwrite assert
 
-fmt::string::out fmt::operator<<(string::out out, where const& at)
+fmt::string::out fmt::operator<<(string::out out, std::errc const& ec)
 {
-	return out << at.file << "(" << at.line << ") " << at.func << ":";
-}
-
-fmt::string::out fmt::operator<<(string::out out, std::errc const& errc)
-{
-	return out << std::make_error_condition(errc).message();
+	return out << std::make_error_condition(ec).message();
 }
 
 fmt::string::out fmt::operator<<(string::out out, std::exception const& ex)
@@ -20,16 +13,18 @@ fmt::string::out fmt::operator<<(string::out out, std::exception const& ex)
 	return out << ex.what();
 }
 
+fmt::string::out fmt::operator<<(string::out out, fmt::string::view::init where)
+{
+	assert(where.size() == 3);
+	auto const at = where.begin();
+	return out << at[0] << '(' << at[1] << ')' << at[2] << ':';
+}
+
 namespace
 {
-	auto thread_id()
-	{
-		
-	}
-
 	struct : env::variable<fmt::string::view>
 	{
-		thread_local type id = thread_id();
+		thread_local type id = fmt::none;
 
 		operator type() const final
 		{
@@ -55,58 +50,46 @@ namespace sys
 		true;
 	#endif
 
-	bool iserr(std::errc ec)
+	fmt::string::out stream()
 	{
-		auto const code = std::make_error_code(ec);
-		return code.value() == errno;
+		thread_local fmt::string::stream local;
+		return local;
 	}
 
-	int bug(fmt::string::view u, bool no)
+	int bug(fmt::string::view msg, bool no)
 	{
 		thread_local struct
 		{
-			fmt::string s;
-			int n = -1;
+			fmt::string last;
+			int counter = -1;
 		} local;
+		// Ouptut stream
+		auto & out = stream();
 		// Avoid spamming
-		if (u != local.s)
+		if (msg != local.last)
 		{
 			// reset
-			local.n = 0;
-			local.s = fmt::to_string(u);
-			// sync
-			static sys::mutex key;
-			auto const unlock = key.lock();
+			local.counter = 0;
+			local.last = fmt::to_string(msg);
 			// format
-			std::cerr << u;
 			{
+				// message
+				out << local.last;
 				// number
-				if (not no)
+				if (view err = std::strerror(errno); no)
 				{
-					const auto e = std::strerror(errno);
-					std::cerr << ": " << e;
+					out << ':' << ' ' << err;
 				}
 				// thread
-				view const id = thread_id;
-				if (not empty(id))
+				if (view id = thread_id; not std::empty(id))
 				{
-					std::cerr << '[' << id << ']';
+					out << '[' << id << ']';
 				}
 			}
-			std::cerr << '\n';
+			out << '\n';
 		}
-		else ++local.n;
-		return local.n;
-	}
-
-	int impl::warn(fmt::string::view u)
-	{
-		return bug(u, true);
-	}
-
-	int impl::err(fmt::string::view u)
-	{
-		return bug(u, false);
+		else ++local.counter;
+		return local.counter;
 	}
 }
 

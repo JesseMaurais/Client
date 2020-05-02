@@ -340,65 +340,80 @@ namespace env::usr
 }
 
 #ifndef NDEBUG
-static auto hdr(fmt::string::view g)
+namespace
 {
-	return '[' + g + ']';
-}
+	constexpr auto eol = '\n';
 
-static auto kv(fmt::string::view k, fmt::string::view v)
-{
-	return fmt::to_pair(k, v) + fmt::eol;
+	struct hdr
+	{
+		fmt::string::view group
+
+		hdr(fmt::string::view g)
+			: group(g)
+		{ }
+
+		fmt::string::out operator()(fmt::string::out out)
+		{
+			return out << '[' << group << ']' << eol;
+		}
+	};
+
+	struct kv : fwd::pair<fmt::string::view>
+	{
+		using pair::pair
+
+		fmt::string::out operator()(fmt::string::out out)
+		{
+			return out << first << '=' << second << eol;
+		}
+	};
 }
 
 void test::run<test::unit::usr>() noexcept
 {
-	std::ofstream f { "Tests.ini" };
+	std::ofstream out { "Tests.ini" };
 
-	f 
-	<< hdr("Fake Environment")
-	<< kv("home", env::home)
-	<< kv("user", env::user)
-	<< kv("root", env::root)
-	<< kv("domain", env::domain)
-	<< kv("host", env::host)
-	<< kv("pwd", env::pwd)
-	<< kv("lang", env::lang)
-	<< kv("shell", env::shell)
-	<< kv("tmpdir", env::tmpdir)
-	<< kv("rootdir", env::rootdir)
-	<< kv("session", env::session)
-	<< kv("prompt", env::prompt)
-	<< std::endl;
+	out	<< hdr("Fake Environment")
+		<< kv("home", env::home)
+		<< kv("user", env::user)
+		<< kv("root", env::root)
+		<< kv("domain", env::domain)
+		<< kv("host", env::host)
+		<< kv("pwd", env::pwd)
+		<< kv("lang", env::lang)
+		<< kv("shell", env::shell)
+		<< kv("tmpdir", env::tmpdir)
+		<< kv("rootdir", env::rootdir)
+		<< kv("session", env::session)
+		<< kv("prompt", env::prompt)
+		<< std::endl;
 
-	f
-	<< hdr("Desktop")
-	<< kv("runtime-dir", env::usr::rundir)
-	<< kv("data-home", env::usr::data_home)
-	<< kv("config-home", env::usr::config_home)
-	<< kv("cache-home", env::usr::cache_home)
-	<< kv("data-dirs", fmt::path::join(env::usr::data_dirs))
-	<< kv("config-dirs", fmt::path::join(env::usr::config_dirs))
-	<< std::endl;
+	out	<< hdr("Desktop")
+		<< kv("runtime-dir", env::usr::rundir)
+		<< kv("data-home", env::usr::data_home)
+		<< kv("config-home", env::usr::config_home)
+		<< kv("cache-home", env::usr::cache_home)
+		<< kv("data-dirs", fmt::path::join(env::usr::data_dirs))
+		<< kv("config-dirs", fmt::path::join(env::usr::config_dirs))
+		<< std::endl;
 
-	f
-	<< hdr("User Directories")
-	<< kv("desktop-dir", env::usr::desktop_dir)
-	<< kv("documents-dir", env::usr::documents_dir)
-	<< kv("download-dir", env::usr::download_dir)
-	<< kv("music-dir", env::usr::music_dir)
-	<< kv("pictures-dir", env::usr::pictures_dir)
-	<< kv("publicshare-dir", env::usr::publicshare_dir)
-	<< kv("template-dir", env::usr::templates_dir)
-	<< kv("videos-dir", env::usr::videos_dir)
-	<< std::endl;
+	out	<< hdr("User Directories")
+		<< kv("desktop-dir", env::usr::desktop_dir)
+		<< kv("documents-dir", env::usr::documents_dir)
+		<< kv("download-dir", env::usr::download_dir)
+		<< kv("music-dir", env::usr::music_dir)
+		<< kv("pictures-dir", env::usr::pictures_dir)
+		<< kv("publicshare-dir", env::usr::publicshare_dir)
+		<< kv("template-dir", env::usr::templates_dir)
+		<< kv("videos-dir", env::usr::videos_dir)
+		<< std::endl;
 
-	f
-	<< hdr("Application Options")
-	<< kv("name", env::opt::application)
-	<< kv("program", env::opt::program)
-	<< kv("command-line", fmt::join(env::opt::arguments, " "));
-	<< kv("config", env::opt::config)
-	<< env::opt::put
-	<< std::endl;
+	out	<< hdr("Application Options")
+		<< kv("name", env::opt::application)
+		<< kv("program", env::opt::program)
+		<< kv("command-line", fmt::join(env::opt::arguments, " "));
+		<< kv("config", env::opt::config)
+		<< env::opt::put
+		<< std::endl;
 }
 #endif

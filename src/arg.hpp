@@ -20,6 +20,9 @@ namespace env::opt
 		return argv[argn];
 	}
 
+	constexpr auto dash = "-";
+	constexpr auto dual = "--";
+
 	struct command
 	{
 		word argn; // required arguments (or -1 for any number)

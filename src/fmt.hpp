@@ -128,6 +128,8 @@ namespace fmt
 			>
 		>;
 
+		using traits::char_type;
+		using traits::char_traits;
 		using traits::ios;
 		using traits::in;
 		using traits::out;
@@ -148,6 +150,7 @@ namespace fmt
 		using line = traits::line<Alloc, Vector>;
 		using page = traits::page<Alloc, Vector>;
 		using pair = fwd::pair<String::size_type>;
+		using stream = fwd::basic_stringstream<char_type, char_traits, Alloc>;
 
 		template
 		<
@@ -215,6 +218,10 @@ namespace fmt
 	using astring = basic_string<char>; // UTF-8 or low 7
 	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 wide
 	using ustring = basic_string<wint_t>; // at least UTF-32 code point
+
+	constexpr auto eol = '\n';
+	constexpr auto tab = '\t';
+	constexpr auto nil = '\0';
 }
 
 #endif // file
