@@ -10,6 +10,30 @@
 #endif
 #include <map>
 
+namespace
+{
+	auto value(int signo)
+	{
+		switch (signo)
+		{
+		case SIGILL:
+			return "Illegal";
+		case SIGINT:
+			return "Interrupt";
+		case SIGFPE:
+			return "Float";
+		case SIGABRT:
+			return "Abort";
+		case SIGTERM:
+			return "Terminate";
+		case SIGSEGV:
+			return "Segmented";
+		default:
+			return "Unknown";
+		}
+	}
+}
+
 namespace sys::sig
 {
 	socket &scope::event(int no)
@@ -25,10 +49,15 @@ namespace sys::sig
 			p.second(no);
 		});
 	}
+
+	void print(int signo)
+	{
+		sys::out() << value(signo);
+	}
 }
 
-#ifndef NDEBUG
-void test::run<test::unit::sig>() noexcept
+#ifdef test
+test(sig)
 {
 	std::vector<int> caught;
 	std::vector<int> raised = { SIGINT, SIGFPE, SIGILL };
@@ -52,3 +81,4 @@ void test::run<test::unit::sig>() noexcept
 	}
 }
 #endif
+

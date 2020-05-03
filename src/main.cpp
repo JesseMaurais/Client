@@ -13,11 +13,6 @@ namespace
 {
 	fmt::string::view const prefix = "test_";
 
-	auto sym(fmt::string::view name)
-	{
-		return sys::sym<void()>(name);
-	}
-
 	void runner(fmt::string::view name, fmt::string::buf::ref buf)
 	{
 		auto & out = sys::out();
@@ -25,10 +20,14 @@ namespace
 		try
 		{
 			out.rdbuf(buf);
+			auto scan = sys::sig::scan
+			(
+				{ SIGINT, SIGILL, SIGHUP, SIGFPE }
+			);
 			auto call = sym(name);
 			if (nullptr == call)
 			{
-				out << name << "is missing";
+				out << name << " is missing";
 			}
 			else
 			{
@@ -69,11 +68,11 @@ int main(int argc, char** argv)
 	// Command line details
 	env::opt::commands const cmd
 	{
-	 { 0, "h", key::help, "Print command line usage then quit" },
-	 { 0, "p", key::print, "Print all source tests then quit" },
-	 { 0, "c", key::color, "Print using color codes" },
-	 { 0, "a", key::serial, "Run tests asynchronously" },
-	 { 1, "t", key::tools, "Use instead of " _TOOLS },
+		{ 0, "h", key::help, "Print command line usage then quit" },
+		{ 0, "p", key::print, "Print all source tests then quit" },
+		{ 0, "c", key::color, "Print using color codes" },
+		{ 0, "a", key::serial, "Run tests asynchronously" },
+		{ 1, "t", key::tools, "Use instead of " _TOOLS },
 	};
 
 	// Command line parsing

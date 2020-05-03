@@ -151,6 +151,14 @@ namespace sys::sig
 			};
 		}
 	};
+
+	void print(int signo);
+	inline auto scan(fwd::init<int> in, observer go = print)
+	{
+		std::vector<scope> out;
+		for (auto no : in) out.emplace_back(go, in);
+		return out;
+	}
 }
 
 #endif // file

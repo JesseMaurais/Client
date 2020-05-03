@@ -11,36 +11,27 @@ namespace fmt
 	>
 	struct memory_traits : Traits<Type>
 	{
-		using base = Traits<Type>;
-		using ref = base::references;
-		using cref = base::const_reference;
-		using ptr = base::pointer;
-		using cptr = base::const_pointer;
-		using pair = fwd::pair<Type>;
-		using init = fwd::init<Type>;
-		using span = fwd::span<Type>;
+		using ref = typename Traits<Type>::reference;
+		using cref = typename Traits<Type>::const_reference;
+		using ptr = typename Traits<Type>::pointer;
+		using cptr = typename Traits<Type>::const_pointer;
 	};
 
 	template
 	<
 		class Char, 
-		template <class> Traits = fwd::character
-		template <class> Iterator = fwd::iterator
+		template <class> class Traits = fwd::character,
+		template <class> class Iterator = fwd::iterator
 	>
-	struct stream_traits : memory_traits<Char, Iterator>;
+	struct stream_traits : memory_traits<Char, Iterator>
 	{
-		template 
-		<
-			template <class, template <class> class> class Stream
-		>
-		using memory = memory_traits<Stream<Char, Traits>, Iterator>;
-		using ios = memory<fwd::basic_ios>;
-		using in = memory<fwd::basic_istream>;
-		using out = memory<fwd::basic_ostream>;
-		using io = memory<fwd::basic_iostream>;
-		using buf = memory<fwd::basic_buf>;
-		using file = memory<fwd::basic_file>;
-		using str = memory<fwd::basic_stringstream>;
+		using ios = memory_traits<fwd::basic_ios<Char, Traits>, Iterator>;
+		using in = memory_traits<fwd::basic_istream<Char, Traits>, Iterator>;
+		using out = memory_traits<fwd::basic_ostream<Char, Traits>, Iterator>;
+		using io = memory_traits<fwd::basic_iostream<Char, Traits>, Iterator>;
+		using buf = memory_traits<fwd::basic_buf<Char, Traits>, Iterator>;
+		using file = memory_traits<fwd::basic_file<Char, Traits>, Iterator>;
+		using str = memory_traits<fwd::basic_stringstream<Char, Traits>, Iterator>;
 	};
 
 	template
@@ -49,6 +40,9 @@ namespace fmt
 	>
 	struct struct_traits : memory_traits<Type>
 	{
+		using pair = fwd::pair<Type>;
+		using init = fwd::init<Type>;
+		using span = fwd::span<Type>;
 		using edges = fwd::edges<Type>;
 
 		template
