@@ -3,9 +3,11 @@
 #include "esc.hpp"
 #include "sym.hpp"
 #include "dev.hpp"
-#include <future>
 #include <fstream>
-#include <cassert> // overwrite assert
+#include <future>
+#include <vector>
+#include <set>
+#include <map>
 
 namespace
 {
@@ -53,11 +55,11 @@ int main(int argc, char** argv)
 	namespace key
 	{
 		constexpr auto 
-			help  = "help"  , 
-			color = "color" , 
-			async = "async" ,
-			tools = "tools" ,
-			show  = "show"  ;
+			help   = "help"  , 
+			color  = "color" , 
+			serial = "async" ,
+			tools  = "tools" ,
+			print  = "print" ;
 	};
 
 	#ifndef _TOOLS
@@ -68,18 +70,18 @@ int main(int argc, char** argv)
 	env::opt::commands const cmd
 	{
 	 { 0, "h", key::help, "Print command line usage then quit" },
-	 { 0, "p", key::show, "Print all source tests then quit" },
+	 { 0, "p", key::print, "Print all source tests then quit" },
 	 { 0, "c", key::color, "Print using color codes" },
 	 { 0, "a", key::serial, "Run tests asynchronously" },
 	 { 1, "t", key::tools, "Use instead of " _TOOLS },
 	};
 
 	// Command line parsing
-	auto const extra = env::opt::put(argc, argv, cmd):
+	auto const tests = env::opt::put(argc, argv, cmd):
 	auto const color = env::opt::get(key::color, true);
 	auto const serial = env::opt::get(key::serial, false);
 	auto const tools = env::opt::get(key::tools, _TOOLS);
-	auto const clear = std::empty(env::opt::arguments);
+	auto const clean = std::empty(env::opt::arguments);
 
 	// Initialize from tools
 	if (not empty(tools))
@@ -93,36 +95,33 @@ int main(int argc, char** argv)
 	}
 
 	// Use tool set
-	if (empty(extra))
+	if (empty(tests))
 	{
-		auto const tests = env::opt::get("TESTS");
-		extra = fmt::split(tests, ",");
+		tests = fmt::split(env::opt::get("TESTS"));
 	}
 
-	// Map test names to string buffer's backing error stream
-	std::map<fmt::string::view, fmt::string::stream> streams;
+	// Map test names to error buffers' string stream
+	map<fmt::string::view, fmt::string::stream> context;
 
-	// Create streams
-	if (empty(extra))
+	if (empty(tests))
 	{
-		env::dev::dump dmp; // program symbol table
 		view const program = env::opt::program;
+		env::dev::dump dump; // output cache
 
-		for (auto line : dmp.dyn(program))
+		// Parse this programs symbol table
+		for (auto line : dump.dyn(program))
 		{
-			// Separate by white space
-			auto begin = line.begin();
-			auto const end = line.end();
-			for (auto it = skip(begin); it != end; it = skip(begin))
+			// Separate lines by white space
+			for (auto name : fmt::split(line))
 			{
-				begin = next(it);
-				view word(it, begin);
-				if (npos != word.find(prefix))
+				// Match those with prefix
+				if (name.starts_with(prefix))
 				{
-					auto call = sym(word);
+					// Symbol must exist
+					auto call = sym(name);
 					if (nullptr != call)
 					{
-						streams.emplace(word, { });
+						context.emplace(name, { });
 					}
 				}
 			}
@@ -130,38 +129,56 @@ int main(int argc, char** argv)
 	}
 	else // copy
 	{
-		for (view word : which)
+		for (auto word : tests)
 		{
 			auto const name = prefix + word;
 			auto const call = sym(name);
 			if (nullptr == call)
 			{
-				#ifdef trace
-				trace("Cannot find", name, "in", program);
-				#endif
+				cerr << "Cannot find " << name << " in " << program;
 			}
 			else
 			{
-				streams.emplace(name, { });
+				context.emplace(name, { });
 			}
 		}
 	}
 
-	// Print the test units and quit
-	if (env::opt::get(key::show, false))
+	// Print the unit tests and quit
+	if (env::opt::get(key::print, false))
 	{
-		for (auto const & item : streams)
+		for (auto const & [name, error] : context)
 		{
-			cerr << item.first << eol;
+			cerr << name << eol;
 		}
 		return EXIT_SUCCESS;
 	}
 
+	bool const missing = clean and empty(context);
 	// Print the help menu and quit if missing
-	if (env::opt::get(key::help, clear and empty(streams))
+	if (env::opt::get(key::help, missing)
 	{
+		if (missing)
+		{
+			if (color) cerr << fg_yellow;
+
+			cerr << "No tests were found" << eol;
+
+			if (color) cerr << fg_off;
+		}
+
 		cerr 
-			<< "Commands to run named unit tests"
+			<< "Unit tests are found in order:"
+			<< eol << tab
+			<< "1. Free command line arguments"
+			<< eol << tab
+			<< "2. The TESTS environment variable"
+			<< eol << tab
+			<< "3. The TESTS variable in " _TOOLS
+			<< eol << tab
+			<< "4. The dump symbols for " << prefix << "*"
+			<< eol
+			<< "Commands for unit test runner:"
 			<< eol;
 
 		for (auto const & item : cmd)
@@ -180,28 +197,26 @@ int main(int argc, char** argv)
 
 	// Run all the selected unit tests 
 	{
-		std::vector<std::future<void>> threads;
+		std::set<std::future<void>> threads;
 
-		// Spin off tests either in serial or parallel
-		for (auto & [name, error] : streams)
+		// Run tests either in serial or parallel
+		for (auto & [name, error] : constext)
 		{
 			auto buf = error.rdbuf();
 			if (not serial)
 			{
-				threads.emplace_back(async(runner, name, buf));
+				threads.emplace(async(runner, name, buf));
 			}
 			else
 			{
 				runner(name, buf);
 			}
 		}
-		// Wait for tests to complete
-		if (not serial)
+
+		// Wait on test completion
+		for (auto & job : threads)
 		{
-			for (auto & job : threads)
-			{
-				job.wait();
-			}
+			job.wait();
 		}
 	}
 
@@ -211,13 +226,13 @@ int main(int argc, char** argv)
 	}
 
 	signed long int counter = 0;
-	for (auto & [name, buf] : streams)
+	for (auto & [name, error] : context)
 	{
-		auto str = buf.str();
+		auto str = error.str();
 
 		if (not empty(str))
 		{
-			while (getline(buf, str))
+			while (getline(error, str))
 			{
 				cerr << name << tab << str << eol;
 				++counter;
