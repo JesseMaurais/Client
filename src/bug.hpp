@@ -1,7 +1,7 @@
 #ifndef bug_hpp
 #define bug_hpp "Debug Tests"
 
-#include "dll.hpp"
+#include "sym.hpp"
 
 #ifndef NDEBUG
 # warning You should compile unit tests in debug
@@ -11,6 +11,7 @@
 #define except(expression)\
 	try { (void) expression; assert(not #expression); } catch(...) { }
 
-#define TEST(name) dynamic test_##name() noexcept 
+// supply the signature for a unit test callback
+#define test(name) dynamic test_##name() noexcept
 
 #endif // file

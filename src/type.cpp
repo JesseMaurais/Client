@@ -1,9 +1,9 @@
-#include "fmt.hpp"
+#include "type.hpp"
 #include "esc.hpp"
 #include "err.hpp"
 
 #ifdef test
-test(fmt)
+test(type)
 {
 	using namespace fmt;
 

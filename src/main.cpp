@@ -3,44 +3,30 @@
 #include "esc.hpp"
 #include "sym.hpp"
 #include "dev.hpp"
+#include <future>
 #include <fstream>
 #include <cassert> // overwrite assert
 
 namespace
 {
-	fwd::map<fmt::string::view, fmt::string::stream> results;
-
-	bool found(fmt::string::view::span which, fmt::string::view name)
-	{
-		return which.empty() or which.find(name) != which.end();
-	}
+	fmt::string::view const prefix = "test_";
 
 	auto sym(fmt::string::view name)
 	{
-		return sys::sym<void()>(name + "_test");
+		return sys::sym<void()>(name);
 	}
 
-	void runner(fmt::string::view::span which, fmt::string view name)
+	void runner(fmt::string::view name, fmt::string::buf::ref buf)
 	{
-		// Stream local to thread
-		fmt::string::out::ref out = sys::out(2);
-		// Store backing buffer
+		auto & out = sys::out();
 		auto back = out.rdbuf();
-		// Do test run?
-		if (found(which, name)) try
+		try
 		{
-			// Capture error output buffer
-			auto & str = results.at(name);
-			auto buf = str.rdbuf();
 			out.rdbuf(buf);
-			// Capture entry point
 			auto call = sym(name);
-			// Does test exist?
-			if (empty(call))
+			if (nullptr == call)
 			{
-				#ifdef trace
-				trace(name, "is missing");
-				#endif
+				out << name << "is missing";
 			}
 			else
 			{
@@ -55,8 +41,6 @@ namespace
 		{
 			out << "Unknown" << eol;
 		}
-
-		// Restore
 		out.rdbuf(back);
 	}
 }
@@ -76,8 +60,8 @@ int main(int argc, char** argv)
 			show  = "show"  ;
 	};
 
-	#ifndef TOOLS
-	# define TOOLS "Tools.ini"
+	#ifndef _TOOLS
+	# define _TOOLS "Tools.ini"
 	#endif
 
 	// Command line details
@@ -86,47 +70,103 @@ int main(int argc, char** argv)
 	 { 0, "h", key::help, "Print command line usage then quit" },
 	 { 0, "p", key::show, "Print all source tests then quit" },
 	 { 0, "c", key::color, "Print using color codes" },
-	 { 0, "a", key::async, "Run tests asynchronously" },
-	 { 1, "t", key::tools, "Use instead of " TOOLS },
+	 { 0, "a", key::serial, "Run tests asynchronously" },
+	 { 1, "t", key::tools, "Use instead of " _TOOLS },
 	};
 
 	// Command line parsing
-	auto const which = env::opt::put(argc, argv, cmd):
+	auto const extra = env::opt::put(argc, argv, cmd):
 	auto const color = env::opt::get(key::color, true);
-	auto const async = env::opt::get(key::async, false);
-	auto const tools = env::opt::get(key::tools, TOOLS);
+	auto const serial = env::opt::get(key::serial, false);
+	auto const tools = env::opt::get(key::tools, _TOOLS);
 	auto const clear = std::empty(env::opt::arguments);
 
 	// Initialize from tools
 	if (not empty(tools))
 	{
-		ifstream f { tools };
-		f >> env::opt::get;
-		#ifdef trace
-		if (f.fail())
+		ifstream in { tools };
+		in >> env::opt::get;
+		if (in.fail())
 		{
-			trace("Failed to read", tools);
+			cerr << "Failed to read" << tools;
 		}
-		#endif
 	}
 
-	// Default test set
-	if (empty(which))
+	// Use tool set
+	if (empty(extra))
 	{
 		auto const tests = env::opt::get("TESTS");
-		which = fmt::split(tests, ",");
+		extra = fmt::split(tests, ",");
 	}
 
-	// Print the help menu and quit if test set missing
-	if (env::opt::get(key::help, empty(which) and clear)
+	// Map test names to string buffer's backing error stream
+	std::map<fmt::string::view, fmt::string::stream> streams;
+
+	// Create streams
+	if (empty(extra))
 	{
-		std::cerr 
+		env::dev::dump dmp; // program symbol table
+		view const program = env::opt::program;
+
+		for (auto line : dmp.dyn(program))
+		{
+			// Separate by white space
+			auto begin = line.begin();
+			auto const end = line.end();
+			for (auto it = skip(begin); it != end; it = skip(begin))
+			{
+				begin = next(it);
+				view word(it, begin);
+				if (npos != word.find(prefix))
+				{
+					auto call = sym(word);
+					if (nullptr != call)
+					{
+						streams.emplace(word, { });
+					}
+				}
+			}
+		}
+	}
+	else // copy
+	{
+		for (view word : which)
+		{
+			auto const name = prefix + word;
+			auto const call = sym(name);
+			if (nullptr == call)
+			{
+				#ifdef trace
+				trace("Cannot find", name, "in", program);
+				#endif
+			}
+			else
+			{
+				streams.emplace(name, { });
+			}
+		}
+	}
+
+	// Print the test units and quit
+	if (env::opt::get(key::show, false))
+	{
+		for (auto const & item : streams)
+		{
+			cerr << item.first << eol;
+		}
+		return EXIT_SUCCESS;
+	}
+
+	// Print the help menu and quit if missing
+	if (env::opt::get(key::help, clear and empty(streams))
+	{
+		cerr 
 			<< "Commands to run named unit tests"
 			<< eol;
 
 		for (auto const & item : cmd)
 		{
-			std::cerr
+			cerr
 				<< tab
 				<< env::opt::dash << item.dash
 				<< tab
@@ -138,49 +178,68 @@ int main(int argc, char** argv)
 		return EXIT_SUCCESS;
 	}
 
-	// Print the test units and quit
-	if (env::opt::get(key::show, false))
+	// Run all the selected unit tests 
 	{
-		for (auto const & item : results)
+		std::vector<std::future<void>> threads;
+
+		// Spin off tests either in serial or parallel
+		for (auto & [name, error] : streams)
 		{
-			std::cerr << item.name << eol;
-		}
-		return EXIT_SUCCESS;
-	}
-
-	// Capture error output in selected test runs
-	auto const results = capture(which, not async);
-
-	if (color)
-	{
-		std::cerr << fg_yellow;
-	}
-
-	signed long int counter = 0;
-	for (auto & item : results)
-	{
-		auto str = item.errors.str();
-
-		if (not std::empty(str))
-		{
-			while (std::getline(item.errors, str))
+			auto buf = error.rdbuf();
+			if (not serial)
 			{
-				std::cerr << item.name << tab << str << eol;
-				++counter;
+				threads.emplace_back(async(runner, name, buf));
+			}
+			else
+			{
+				runner(name, buf);
+			}
+		}
+		// Wait for tests to complete
+		if (not serial)
+		{
+			for (auto & job : threads)
+			{
+				job.wait();
 			}
 		}
 	}
 
 	if (color)
 	{
-		std::cerr << (counter ? fg_cyan : fg_magenta);
+		cerr << fg_yellow;
 	}
 
-	std::cerr << "There are " << counter << " errors" << eol;
+	signed long int counter = 0;
+	for (auto & [name, buf] : streams)
+	{
+		auto str = buf.str();
+
+		if (not empty(str))
+		{
+			while (getline(buf, str))
+			{
+				cerr << name << tab << str << eol;
+				++counter;
+			}
+
+			if (buf.fail())
+			{
+				cerr << "Failed to read " << name;
+			}
+		}
+	}
 
 	if (color)
 	{
-		std::cerr << reset;
+		cerr << (counter ? fg_cyan : fg_magenta);
+	}
+
+	cerr << "There are " << counter << " errors" << eol;
+
+	if (color)
+	{
+		cerr << reset;
 	}
 
 	return counter ? EXIT_SUCCESS : EXIT_FAILURE ;
