@@ -1,7 +1,7 @@
 #ifndef utf_hpp
 #define utf_hpp "Universal Transformation Format"
 
-#include <cuchar>
+#include <uchar.h>
 #include <cwchar>
 #include <cstring>
 

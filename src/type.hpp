@@ -37,22 +37,20 @@ namespace fmt
 		using traits = memory_traits<type>;
 		using string = basic_string<Char>;
 		using string::size_type;
-
-		constexpr auto npos = string::npos;
-		constexpr auto null = size_type(0);
+		using string::view;
 
 		static_assert(null == ~npos);
 
 		template 
 		<
-			class Type
+			class Data
 		> 
-		static string from(Type const& s);
+		static string from(Data const& s);
 
 		bool check(Char c, mask x = space) const;
 		// Check whether code w is an x
 
-		auto check(string::view u) const;
+		auto check(view u) const;
 		// Classify all characters in a view
 
 		template <class Iterator>

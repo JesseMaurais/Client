@@ -3,7 +3,7 @@
 
 #include "sym.hpp"
 
-#ifndef NDEBUG
+#ifdef NDEBUG
 # warning You should compile unit tests in debug
 #endif
 

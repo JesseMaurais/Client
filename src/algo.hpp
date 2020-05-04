@@ -2,6 +2,7 @@
 #define algo_hpp "Algorithms"
 
 #include "fmt.hpp"
+#include "tmp.hpp"
 
 namespace fwd
 {
@@ -52,17 +53,16 @@ namespace fwd
 	template
 	<
 		class Type,
-		template <class, template <class> class> class Vector = vector,
 		template <class> class Alloc = allocator,
-		class Container = Vector<Type, Alloc>,
-		class Size = typename Container::size_type
+		template <class, template <class> class> class Vector = vector,
+		class Size = typename Vector<Type, Alloc>::size_type
 	>
-	struct page : line<Type, Vector, Alloc>
+	struct page : line<Type, Alloc, Vector>
 	{
-		using base = line<Type, Vector, Alloc>;
-		line<pair<size_t>, Vector, Alloc> index;
+		using base = line<Type, Alloc, Vector>;
+		line<pair<Size>, Alloc, Vector> index;
 
-		page(decltype(index) in, pair<size_t> at)
+		page(decltype(index) in, pair<Size> at)
 		: index(in), page(at)
 		{ }
 
@@ -87,7 +87,7 @@ namespace fwd
 		class Node, 
 		template <class> class Alloc = allocator
 	>
-	using graph = line<pair<Node>, Alloc>;
+	using graph = std::vector<pair<Node>, Alloc<Node>>;
 
 	template
 	<
@@ -95,7 +95,7 @@ namespace fwd
 		template <class> class Order = ordering,
 		template <class> class Alloc = allocator
 	>
-	using group = pag
+	using group = std::map<pair<Node>, Node, Order<Node>, Alloc<Node>>;
 
 	//
 	// Algorithms
@@ -125,7 +125,7 @@ namespace fwd
 	<
  		class Type, 
 		template <class> class Alloc = allocator,
-		template <class, class> class Vector = vector
+		template <class, template<class> class> class Vector = vector
 	>
 	auto split(span<Type> s, predicate<Type> p = std::empty<Type>)
 	// Partition a span by (empty) predicate
@@ -138,7 +138,9 @@ namespace fwd
 
 	template
 	<
-		class Type, class Iterator, class Identity = identity
+		class Type, 
+		class Iterator, 
+		template<class> class Identity = identity
 	>
 	auto split(span<Type> s, Type n, Iterator out)
 	// Partition a span by value
@@ -150,7 +152,8 @@ namespace fwd
 
 	template
 	<
-		class Type, template <class> class Alloc = allocator
+		class Type, 
+		template <class> class Alloc = allocator
 	>
 	auto split(span<Type> s, Type n)
 	// Partition a span by value

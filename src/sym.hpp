@@ -15,10 +15,8 @@
 
 namespace sys
 {
-	class dll : fwd::struct_traits<dll>
+	struct dll : fmt::struct_traits<dll>
 	{
-	public:
-
 		dll() = default;
 		dll(fmt::string::view);
 		~dll();

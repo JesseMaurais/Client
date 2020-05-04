@@ -17,7 +17,9 @@
 
 namespace fwd
 {
-	template <class... Types> struct compose : Types... { };
+	// Class union
+
+	template <class... Types> struct compose : virtual Types... { };
 
 	// Default Traits
 
