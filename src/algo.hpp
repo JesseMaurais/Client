@@ -11,19 +11,22 @@ namespace fwd
 
 	template
 	<
-		class Type, 
-		class Container = vector<Type>,
-		class Size = size_t
+		class Type,
+		template <class> class Alloc = allocator,
+		template <class, template<class> class> class Vector = vector,
+		class Container = Vector<Type, Alloc>,
+		class Size = typename Container::size_type
 	>
 	struct line : pair<Size>
 	{
 		using base = fwd::pair<Size>;
+		using container = Vector<Type, Alloc>;
 
-		Container const *that;
+		container const *that;
 
-		line(Container const *ptr, base pos) : that(ptr), base(pos) { }
+		line(container const *ptr, base pos) : that(ptr), base(pos) { }
 
-		line(Container const &ref, base pos) : line(&ref, pos) { }
+		line(container const &ref, base pos) : line(&ref, pos) { }
 
 		#ifdef assert
 		~line() { assert(this->first <= this->second); }
@@ -49,17 +52,21 @@ namespace fwd
 	template
 	<
 		class Type,
-		class Container = vector<Type>
+		template <class, template <class> class> class Vector = vector,
+		template <class> class Alloc = allocator,
+		class Container = Vector<Type, Alloc>,
+		class Size = typename Container::size_type
 	>
-	struct page : line<Type, Container>
+	struct page : line<Type, Vector, Alloc>
 	{
-		line<pair<size_t>> index;
+		using base = line<Type, Vector, Alloc>;
+		line<pair<size_t>, Vector, Alloc> index;
 
 		page(decltype(index) in, pair<size_t> at)
 		: index(in), page(at)
 		{ }
 
-		line operator()(auto at) const
+		base operator()(auto at) const
 		{
 			return { this->that, index[at] };
 		}
@@ -80,15 +87,15 @@ namespace fwd
 		class Node, 
 		template <class> class Alloc = allocator
 	>
-	using graph = vector<pair<Node>, Alloc>;
+	using graph = line<pair<Node>, Alloc>;
 
 	template
 	<
 		class Node, 
-		template <class> class Order = ordering, 
+		template <class> class Order = ordering,
 		template <class> class Alloc = allocator
 	>
-	using group = map<pair<Node>, Node, Order, Alloc>;
+	using group = pag
 
 	//
 	// Algorithms
