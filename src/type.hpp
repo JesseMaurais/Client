@@ -39,7 +39,6 @@ namespace fmt
 		using string::size_type;
 		using string::view;
 
-		static_assert(null == ~npos);
 
 		template 
 		<

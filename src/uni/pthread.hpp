@@ -11,7 +11,7 @@ namespace sys::uni
 {
 	using routine = void*(void*);
 
-	struct thread : unique
+	struct thread : fwd::unique
 	{
 		pthread_attr_t self;
 		mutable int no = 0;
@@ -96,7 +96,7 @@ namespace sys::uni
 		}
 	};
 
-	struct cond : unique
+	struct cond : fwd::unique
 	{
 		pthread_cond_t self;
 		mutable int no = 0;
@@ -175,7 +175,7 @@ namespace sys::uni
 		};
 	};
 
-	struct mutex : unique
+	struct mutex : fwd::unique
 	{
 		pthread_mutex_t self;
 		mutable int no = 0;
@@ -311,7 +311,7 @@ namespace sys::uni
 		};
 	};
 
-	struct rwlock : unique
+	struct rwlock : fwd::unique
 	{
 		pthread_rwlock_t self;
 		mutable int no = 0;
@@ -409,7 +409,7 @@ namespace sys
 	{
 		auto lock()
 		{
-			class unlock : unique
+			class unlock : fwd::unique
 			{
 				sys::uni::mutex* that;
 
@@ -434,7 +434,7 @@ namespace sys
 	{
 		auto read()
 		{
-			class unlock : unique
+			class unlock : fwd::unique
 			{
 				sys::uni::rwlock* that;
 
@@ -455,7 +455,7 @@ namespace sys
 
 		auto write()
 		{
-			class unlock : unique
+			class unlock : fwd::unique
 			{
 				sys::uni::rwlock* that;
 
@@ -476,7 +476,7 @@ namespace sys
 	};
 
 	template <typename Routine>
-	struct thread : unique
+	struct thread : fwd::unique
 	{
 		pthread_t id;
 

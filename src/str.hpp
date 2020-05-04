@@ -6,10 +6,10 @@
 
 namespace fmt::str
 {
-	using string::view;
-	using view::span;
-	using env::opt::word;
-	using env::opt::vector;
+	using view = string::view;
+	using span = view::span;
+	using word = env::opt::word;
+	using vector = env::opt::vector;
 
 	bool got(word); // O (1)
 	bool got(view); // O log n : n is the cache size

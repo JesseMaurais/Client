@@ -14,20 +14,19 @@ namespace fwd
 	<
 		class Type,
 		template <class> class Alloc = allocator,
-		template <class, template<class> class> class Vector = vector,
-		class Container = Vector<Type, Alloc>,
-		class Size = typename Container::size_type
+		template <class, template<class> class> class Store = vector,
+		// details
+		class Container = Store<Type, Alloc>,
+		class Size = typename Container::size_type,
+		class Pair = pair<Size>
 	>
-	struct line : pair<Size>
+	struct line : Pair
 	{
-		using base = fwd::pair<Size>;
-		using container = Vector<Type, Alloc>;
+		Container const *that;
 
-		container const *that;
+		line(Container const* ptr, Pair pos) : that(ptr), Pair(pos) { }
 
-		line(container const *ptr, base pos) : that(ptr), base(pos) { }
-
-		line(container const &ref, base pos) : line(&ref, pos) { }
+		line(Container const& ref, Pair pos) : line(&ref, pos) { }
 
 		#ifdef assert
 		~line() { assert(this->first <= this->second); }
@@ -54,19 +53,22 @@ namespace fwd
 	<
 		class Type,
 		template <class> class Alloc = allocator,
-		template <class, template <class> class> class Vector = vector,
-		class Size = typename Vector<Type, Alloc>::size_type
+		template <class, template <class> class> class Store = vector,
+		// details
+		class Container = Store<Type, Alloc>,
+		class Size = typename Container::size_type,
+		class Pair = pair<Size>,
+		class Base = line<Type, Alloc, Store>,
+		class Item = line<Pair, Alloc, Store>
 	>
-	struct page : line<Type, Alloc, Vector>
+	struct page : Base
 	{
-		using base = line<Type, Alloc, Vector>;
-		line<pair<Size>, Alloc, Vector> index;
+		Item index;
 
-		page(decltype(index) in, pair<Size> at)
-		: index(in), page(at)
+		page(Item in, Pair at) : index(in), Base(at)
 		{ }
 
-		base operator()(auto at) const
+		Base operator()(auto at) const
 		{
 			return { this->that, index[at] };
 		}

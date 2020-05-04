@@ -5,7 +5,7 @@
 #include <exception>
 #include "fmt.hpp"
 
-#define where { __FILE__, #__LINE__, __func__ }
+#define where { __FILE__, "__LINE__", __func__ }
 #define here fmt::string::view::init(where)
 
 // Pre condition
