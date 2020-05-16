@@ -10,6 +10,8 @@
 
 namespace sys
 {
+	using namespace env::file;
+
 	#ifdef _WIN32
 	namespace win
 	{
@@ -140,7 +142,7 @@ namespace sys
 				for (int n : { 0, 1, 2 })
 				{
 					int fd = p[n].get();
-					if (env::file::fail(fd))
+					if (fail(fd))
 					{
 						return sys::uni::invalid;
 					}

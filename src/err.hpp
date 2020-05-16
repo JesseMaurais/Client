@@ -5,41 +5,53 @@
 #include <exception>
 #include "fmt.hpp"
 
-#define where { __FILE__, "__LINE__", __func__ }
-#define here fmt::string::view::init(where)
-
 // Pre condition
 
 #ifdef assert
-# undef assert
-# warning You should not include assert
+#	undef assert
+#	warning You should not include assert
 #endif
 
 // Post conditions
 
-#ifdef NDEBUG
-# define verify(x) (x)
-# define assert(x)
-# define alert(x) 
-# define trace(...)
+#define here { __FILE__, __LINE__, __func__ }
+
+#ifndef NDEBUG
+#	define assert(x) if (not(x)) sys::warn(here, #x)
+#	define alert(x) if (bool(x)) sys::err(here, #x)
+#	define trace(...) sys::warn(where, __VA_ARGS__)
+#	define verify(x) assert(x)
+#	define debug(x) (not (x))
 #else
-# define verify(x) assert(x)
-# define assert(x) if (not(x)) sys::warn(here, #x)
-# define alert(x) if (bool(x)) sys::err(here, #x)
-# define trace(...) sys::warn(here, __VA_ARGS__)
+#	define assert(x)
+#	define alert(x) 
+#	define trace(...)
+#	define verify(x) (x)
+#	define debug(x) constexpr (false)
 #endif
+
+// if only(failure) out << "Only without NDEBUG";
+
+// Negative boolean
+
+enum : bool { success = false, failure = true };
+
+static_assert(failure != success);
 
 // Error format
 
 namespace fmt
 {
-	string::out operator<<(string::out, std::errc const &);
-	string::out operator<<(string::out, std::exception const &);
-	string::out operator<<(string::out, string::view::init);
+	struct where { const char* file; int line; const char* func; };
+
+	string::out::ref operator<<(string::out::ref, std::errc const &);
+	string::out::ref operator<<(string::out::ref, std::exception const &);
+	string::out::ref operator<<(string::out::ref, where);
 
 	template <typename T, typename... S> auto err(T t, S... s)
 	{
-		string::stream ss; ss << t;
+		string::stream ss;
+		ss << t;
 		if constexpr (0 < sizeof...(s)) ((ss << ' ' << s), ...);
 		return ss.str();
 	}
@@ -49,31 +61,24 @@ namespace fmt
 
 namespace sys
 {
-	extern bool debug; // Whether to warn on err
-	fmt::string::out::ref out(int); // Thread local output device
-	void flush(int); // Write out all at pipe to error
+	extern fmt::string::out::ref out; // Output device
+	extern fmt::string::in::ref in; // Input device
 
 	namespace impl
 	{
 		int bug(fmt::string::view, bool);
 	}
 
-	template <typename... T> inline int warn(T... t)
+	extern bool quiet; // Whether to warn on err
+
+	template <typename... T> int warn(T... t)
 	{
-		return
-		#ifndef NDEBUG
-			debug ? impl::bug(fmt::err(t...), false) :
-		#endif
-			-1;
+		return quiet ? -1 : impl::bug(fmt::err(t...), false);
 	}
 
-	template <typename... T> inline int err(T... t)
+	template <typename... T> int err(T... t)
 	{
-		return
-		#ifndef NDEBUG
-			debug ? impl::bug(fmt::err(t...), true) :
-		#endif
-			-1;
+		return quiet ? -1 : impl::bug(fmt::err(t...), true);
 	}
 }
 

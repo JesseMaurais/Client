@@ -18,10 +18,9 @@ namespace sys::uni
 		return invalid == value;
 	}
 
-	template <typename... Args>
-	inline void err(int no, Args... args)
+	template <typename... Args> int err(int no, Args... args)
 	{
-		sys::warn(args..., fmt::err(no));
+		return sys::warn(args..., fmt::err(no));
 	}
 }
 
