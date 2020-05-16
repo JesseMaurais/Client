@@ -75,7 +75,11 @@ namespace fwd
 
 	template
 	<
-		class Iterator, int Size = 1, int Step = Size, class Base = pair<Iterator>
+		class Iterator, 
+		int Size = 1, 
+		int Step = Size, 
+		class Range = range<Iterator>,
+		class Base = pair<Iterator>
 	>
 	struct interval : Base
 	// Iterate within a sub range
@@ -85,9 +89,9 @@ namespace fwd
 
 		using Base::Base;
 
-		struct iterator : range<Iterator>
+		struct iterator : Range
 		{
-			using range::range;
+			using Range::Range;
 
 			void next()
 			{
@@ -108,7 +112,7 @@ namespace fwd
 		{
 			return iterate<iterator>
 			{
-				std::prev(this->second, Size), this->second;
+				std::prev(this->second, Size), this->second
 			};
 		}
 	};
@@ -125,8 +129,8 @@ namespace fwd
 	{
 		static_assert(First < Last);
 
-		constexpr auto first = First;
-		constexpr auto second = Last;
+		static constexpr auto first = First;
+		static constexpr auto second = Last;
 
 		constexpr auto begin()
 		{
@@ -168,51 +172,45 @@ namespace fwd
 
 	template
 	<
-		template <auto, auto> class Part,
-		template <auto, auto> class... Parts
+		class Part, class... Parts
 	>
-	struct compose
+	struct closures
 	{
-		using Rest = compose<Parts...>;
+		using Rest = closures<Parts...>;
 
 		constexpr auto any(auto digit)
 		{
-			return Part::at(digit) or ... Rest::any(digit);
+			return Part::at(digit) or Rest::any(digit);
 		}
 
 		constexpr auto all(auto digit)
 		{
-			return Part::at(digit) and ... Rest::all(digit);
+			return Part::at(digit) and Rest::all(digit);
 		}
 
 		constexpr auto size()
 		{
-			return 1 + sizeof ... Parts;
+			return 1 + sizeof...(Parts);
 		}
 
 		constexpr auto begin()
 		{
-			return Part::first < remainder::begin()
-			     ? Part::first : remainder::begin();
+			return Part::first < Rest::begin()
+			     ? Part::first : Rest::begin();
 		}
 
 		constexpr auto end()
 		{
-			return Part::second > remainder::end()
-			     ? Part::second : remainder::end();
-		}
-
-		constexpr operator range<decltype(Part::first)>()
-		{
-			return { begin(), end() };
+			return Part::second > Rest::end()
+			     ? Part::second : Rest::end();
 		}
 	};
 
-	struct
+	template
 	<
 		class Part
 	>
-	struct compose<Part> : Part
+	struct closures<Part> : Part
 	{
 		constexpr auto any(auto digit) { return Part::at(digit); }
 		constexpr auto all(auto digit) { return Part::at(digit); }

@@ -15,26 +15,26 @@ namespace fwd
 	<
 		class Type,
 		template <class> class Alloc = allocator,
-		template <class, template<class> class> class Store = vector,
-		template <class> class Range = span
+		template <class, template<class> class> class Vector = vector,
+		template <class> class Span = span,
 		// details
-		class View = Range<Type>
-		class Container = Store<Type, Alloc>,
+		class View = Span<Type>,
+		class Container = Vector<Type, Alloc>,
 		class Size = typename Container::size_type,
 		class Pointer = typename Container::const_pointer,
 		class Reference = typename Container::const_reference,
 		class Base = pair<Size>
 	>
-	struct lines : Base
+	struct line : Base
 	{
 		Pointer that;
 
-		lines(Base pos, Pointer ptr) 
+		line(Base pos, Pointer ptr) 
 		: Base(pos), that(ptr)
 		{ }
 
-		lines(Base pos, Reference ref) 
-		: lines(pos, &ref) 
+		line(Base pos, Reference ref) 
+		: line(pos, &ref) 
 		{ }
 
 		auto size() const { return this->second - this->first; }
@@ -44,7 +44,7 @@ namespace fwd
 		auto end() const { return that->data() + this->second; }
 
 		#ifdef assert
-		~lines() { assert(this->first <= this->second); }
+		~line() { assert(this->first <= this->second); }
 		#endif
 
 		operator View() const
@@ -62,21 +62,21 @@ namespace fwd
 	<
 		class Type,
 		template <class> class Alloc = allocator,
-		template <class, template <class> class> class Store = vector,
-		template <class> class Range = span,
+		template <class, template <class> class> class Vector = vector,
+		template <class> class Span = span,
 		// details
-		class View = Range<Type>,
-		class Container = Store<Type, Alloc>,
+		class View = Span<Type>,
+		class Container = Vector<Type, Alloc>,
 		class Size = typename Container::size_type,
 		class Pair = pair<Size>,
-		class Index = line<Pair, Alloc, Store, Range>
-		class Base = line<Type, Alloc, Store, Range>,
+		class Index = line<Pair, Alloc, Vector, Span>,
+		class Base = line<Type, Alloc, Vector, Span>
 	>
-	struct pages : Base
+	struct page : Base
 	{
 		Index index;
 
-		pages(Base pos, Index in) 
+		page(Base pos, Index in) 
 		: Base(pos), index(in)
 		{ }
 
@@ -94,17 +94,17 @@ namespace fwd
 	<
 		class Node,
 		template <class> class Alloc = allocator,
-		template <class, template <class> class> class Store = vector,
-		template <class> class Range = span,
+		template <class, template <class> class> class Vector = vector,
+		template <class> class Span = span,
 		// details
-		class List = lines<Node, Alloc, Store, Range>,
+		class List = line<Node, Alloc, Vector, Span>
 	>
 	using edges = std::pair<const Node, List>;
 
 	template
 	<
 		class Node, 
-		template <class> class Alloc = allocator,
+		template <class> class Alloc = allocator
 	>
 	using graph = std::vector<pair<Node>, Alloc<Node>>;
 

@@ -39,6 +39,7 @@ namespace fmt
 		using view = typename string::view;
 		using init = typename view::init;
 		using span = typename view::span;
+		using pair = typename view::pair;
 		using vector = typename view::vector;
 		using size_type = typename view::size_type;
 
@@ -156,7 +157,10 @@ namespace fmt
 
 			auto const begin = u.data();
 			auto const end = begin + u.size();
-			return range({ this, begin }, { nullptr, end });
+			return fwd::range<iterator>
+			(
+				{ this, begin }, { nullptr, end }
+			);
 		}
 
 		auto narrow(fwd::basic_string_view<Char> u) const
@@ -192,7 +196,10 @@ namespace fmt
 
 			auto const begin = u.data();
 			auto const end = begin + u.size();
-			return range<iterator>({ this, begin }, { nullptr, end });
+			return fwd::range<iterator>
+			(
+				{ this, begin }, { nullptr, end }
+			);
 		}
 
 		auto first(view u, mask x = space) const
@@ -349,7 +356,7 @@ namespace fmt
 		static auto join(init t, view u)
 		{
 			span v(t.begin(), t.end());
-			return join(span(v), u);
+			return join(v, u);
 		}
 
 		static auto split(view u, view v)
@@ -469,7 +476,8 @@ namespace fmt
 
 	inline auto join(string::view::init t, string::view u = "")
 	{
-		return cstr.join(t, u);
+		string::view::span p(t.begin(), t.end());
+		return cstr.join(p, u);
 	}
 
 	inline auto split(string::view u, string::view v = "")
@@ -479,7 +487,7 @@ namespace fmt
 
 	inline auto split(string::view::span p, string::view v = "")
 	{
-		return cstr.split(p, v):
+		return cstr.split(p, v);
 	}
 
 	inline auto replace(string::view u, string::view v, string::view w)

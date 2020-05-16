@@ -37,8 +37,8 @@ namespace fmt
 	<
 		class Type, 
 		template <class> class Alloc = fwd::allocator,
-		template <class, template <class> class> class Store = fwd::vector,
-		template <class> class Range = fwd::span,
+		template <class, template <class> class> class Vector = fwd::vector,
+		template <class> class Span = fwd::span,
 		template <class> class Order = fwd::ordering
 	>
 	struct struct_brief : memory_brief<Type>
@@ -49,11 +49,11 @@ namespace fmt
 		using map    = fwd::map<Type, Order, Alloc>;
 		using span   = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
-		using lines  = fwd::line<Type, Alloc, Store, View>;
-		using pages  = fwd::page<Type, Alloc, Store, View>;
 		using edges  = fwd::edges<Type>;
 		using graph  = fwd::graph<Type, Alloc>;
 		using group  = fwd::group<Type, Alloc>;
+		using line   = fwd::line<Type, Alloc, Vector, Span>;
+		using page   = fwd::page<Type, Alloc, Vector, Span>;
 	};
 
 	template
@@ -113,8 +113,7 @@ namespace fmt
 		{ }
 	};
 
-	using string = :wq
-
+	using string =
 	#ifdef _T
 		basic_string<_T>;
 	#else
