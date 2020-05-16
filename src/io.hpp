@@ -14,29 +14,30 @@ namespace fmt
 	<
 		class Char,
 		template <class> class Traits = std::char_traits,
-		template <class> class Alloc = std::allocator
+		template <class> class Alloc = std::allocator,
+		// details
+		class Base = fwd::basic_buf<Char, Traits>
 	>
-	struct basic_streambuf : fwd::basic_streambuf<Char, Traits>
+	struct basic_streambuf : Base
 	{
-		using base = fwd::basic_streambuf<Char, Traits>;
-		using char_type = typename base::char_type;
-		using traits_type = typename base::traits_type;
+		using char_type = typename Base::char_type;
+		using traits_type = typename Base::traits_type;
 		using size_type = std::streamsize;
-		using int_type = typename base::int_type;
+		using int_type = typename Base::int_type;
 
-		base *setbuf(char_type *s, size_type n) override
-		{
-			size_type const m = n / 2;
-			return setbuf(s, n - m, m);
-		}
-
-		base *setbuf(char_type *s, size_type n, size_type m)
+		auto setbuf(char_type *s, size_type n, size_type m)
 		{
 			auto t = s + n;
 			auto u = t + m;
-			base::setg(s, t, t);
-			base::setp(t, u);
+			Base::setg(s, t, t);
+			Base::setp(t, u);
 			return this;
+		}
+		
+		auto setbuf(char_type *s, size_type n) override
+		{
+			size_type const m = n / 2;
+			return setbuf(s, n - m, m);
 		}
 
 	protected:
@@ -44,59 +45,59 @@ namespace fmt
 		int_type overflow(int_type c) override
 		{
 			constexpr int_type eof = traits_type::eof();
-			if (base::pptr() == base::epptr())
+			if (Base::pptr() == Base::epptr())
 			{
 				if (-1 == sync()) c = eof;
 			}
 			if (traits_type::eq_int_type(eof, c))
 			{
-				base::setp(nullptr, nullptr);
+				Base::setp(nullptr, nullptr);
 			}
 			else
 			{
-				*base::pptr() = traits_type::to_char_type(c);
+				*Base::pptr() = traits_type::to_char_type(c);
 			}
 			return traits_type::not_eof(c);
 		}
 
 		int_type underflow() override
 		{
-			if (base::gptr() == base::egptr())
+			if (Base::gptr() == Base::egptr())
 			{
-				auto const max = base::egptr() - base::eback();
-				auto const n = base::sgetn(base::eback(), max);
+				auto const max = Base::egptr() - Base::eback();
+				auto const n = Base::sgetn(Base::eback(), max);
 				if (0 < n)
 				{
 					auto const diff =  max - n;
 					auto const sz = n * sizeof (char_type);
-					std::memmove(base::eback() + diff, base::eback(), fmt::to_size(sz));
-					base::gbump((int) -n);
+					std::memmove(Base::eback() + diff, Base::eback(), fmt::to_size(sz));
+					Base::gbump((int) -n);
 				}
 				else
 				{
-					base::setg(nullptr, nullptr, nullptr);
+					Base::setg(nullptr, nullptr, nullptr);
 					return traits_type::eof();
 				}
 			}
-			return traits_type::to_int_type(*base::gptr());
+			return traits_type::to_int_type(*Base::gptr());
 		}
 
 		int sync() override
 		{
-			if (base::pbase() != base::pptr())
+			if (Base::pBase() != Base::pptr())
 			{
-				auto const off = base::pptr() - base::pbase();
-				auto const n = base::sputn(base::pbase(), off);
+				auto const off = Base::pptr() - Base::pBase();
+				auto const n = Base::sputn(Base::pBase(), off);
 				if (0 < n)
 				{
 					auto const diff = off - n;
 					auto const sz = diff * sizeof (char_type);
-					std::memmove(base::pbase(), base::pbase() + n, fmt::to_size(sz));
-					base::pbump((int) -n);
+					std::memmove(Base::pBase(), Base::pBase() + n, fmt::to_size(sz));
+					Base::pbump((int) -n);
 				}
 				return n < 0 ? -1 : 0;
 			}
-			return base::pptr() != base::epptr() ? 0 : -1;
+			return Base::pptr() != Base::epptr() ? 0 : -1;
 		}
 	};
 
@@ -112,10 +113,10 @@ namespace fmt
 	>
 	class basic_stringbuf : public basic_streambuf<Char, Traits, Alloc>
 	{
-		using base = basic_streambuf<Char, Traits>;
+		using Base = basic_streambuf<Char, Traits>;
 		using string = basic_string<Char, Traits, Alloc>;
-		using char_type = typename base::char_type;
-		using size_type = typename base::size_type;
+		using char_type = typename Base::char_type;
+		using size_type = typename Base::size_type;
 
 		basic_stringbuf() = default;
 		basic_stringbuf(size_type n)
@@ -126,13 +127,13 @@ namespace fmt
 		auto setbufsiz(size_type n)
 		{
 			buf.resize(fmt::to_size(n));
-			return base::setbuf(buf.data(), n);
+			return Base::setbuf(buf.data(), n);
 		}
 
 		auto setbufsiz(size_type n, size_type m)
 		{
 			buf.resize(fmt::to_size(n + m));
-			return base::setbuf(buf.data(), n, m);
+			return Base::setbuf(buf.data(), n, m);
 		}
 
 	private:
@@ -152,9 +153,9 @@ namespace fmt
 	>
 	class basic_buf : public basic_stringbuf<Char, Traits, Alloc>
 	{
-		using base = basic_stringbuf<Char, Traits, Alloc>;
-		using size_type = typename base::size_type;
-		using char_type = typename base::char_type;
+		using Base = basic_stringbuf<Char, Traits, Alloc>;
+		using size_type = typename Base::size_type;
+		using char_type = typename Base::char_type;
 
 		basic_buf(env::file::stream const& obj) : f(obj) { };
 
@@ -174,17 +175,17 @@ namespace fmt
 			return f.read(s, fmt::to_size(n));
 		}
 
-		using base::base;
+		using Base::Base;
 	};
 
 	template
 	<
-		template <class, class> class Stream,
+		template <class, template <class> class> class Stream,
 		class Char,
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator
 	>
-	struct basic_stream : unique, Stream<Char, Traits>, basic_buf<Char, Traits, Alloc>
+	struct basic_stream : fwd::unique, Stream<Char, Traits>, basic_buf<Char, Traits, Alloc>
 	{
 		using stream = Stream<Char, Traits>;
 		using buf = basic_buf<Char, Traits, Alloc>;

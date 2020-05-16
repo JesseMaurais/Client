@@ -7,7 +7,7 @@
 
 namespace env
 {
-	shell::lines shell::get(in put, char end, int count)
+	shell::line shell::get(in put, char end, int count)
 	{
 		// Result in span at cache end
 		const auto first = cache.size();
@@ -29,7 +29,7 @@ namespace env
 		return { { first, second }, cache };
 	}
 
-	shell::lines shell::list(view name)
+	shell::line shell::list(view name)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -40,7 +40,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::lines shell::copy(view path, int count)
+	shell::line shell::copy(view path, int count)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -51,7 +51,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::lines shell::find(view pattern, view directory)
+	shell::line shell::find(view pattern, view directory)
 	{
 		#ifdef _WIN32
 		{
@@ -68,7 +68,7 @@ namespace env
 		#endif
 	}
 
-	shell::lines shell::which(view name)
+	shell::line shell::which(view name)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -79,7 +79,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::lines shell::open(view path)
+	shell::line shell::open(view path)
 	{
 		#ifdef _WIN32
 		{

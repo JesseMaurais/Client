@@ -6,7 +6,7 @@
 #include <vector>
 #include "process.hpp"
 #include "mode.hpp"
-#include "buf.hpp"
+#include "io.hpp"
 
 namespace fmt
 {
@@ -25,8 +25,9 @@ namespace fmt
 		{
 			using stream = Stream<Char, Traits<Char>>;
 			using buf = basic_buf<Char, Traits, Alloc>;
-			using fmt::string::init;
-			using fmt::string::span;
+			using size_type = std::stringsize;
+			using init = fmt::string::init;
+			using span = fmt::string::span;
 
 			env::file::process f;
 

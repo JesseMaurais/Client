@@ -5,8 +5,8 @@
 
 namespace env::desktop
 {
-	using fmt::string;
-	using string::view;
+	using string = fmt::string;
+	using view = string::view;
 
 	bool got(view); // entry exists
 	view get(view); // entry value
@@ -24,7 +24,7 @@ namespace env::desktop
 		line open(view application);
 		// Start named application
 
-		line edit(view start, view label = "", bool hide = false);
+		line text(view start, view label = "", bool hide = false);
 		// User enters text into an edit box
 
 		line form(edges add, view text = "", view title = "");
@@ -33,7 +33,7 @@ namespace env::desktop
 		line notify(view text, view icon = "info");
 		// Show the user a desktop notification
 
-		line calendar(view text = "", view format = "", int day = 0, int month = 0, int year);
+		line calendar(view text = "", view format = "", int day = 0, int month = 0, int year = 0);
 		// User selects a calendar data
 
 		line color(view start = "", bool palette = true);
@@ -43,21 +43,21 @@ namespace env::desktop
 		{
 			error, info, query, warn
 		};
-		line message(msg, view text);
+		line message(view text, msg = msg::info);
 		// Show a message box with buttons
 
-		enum txt
+		enum class txt
 		{
-			none = 0, edit = 1, html = 2
+			none, edit, html
 		};
-		line text(view path, view check = "", view font = "", txt = none);
+		line text(view path, view check = "", view font = "", txt = txt::none);
 		// Show text file contents (like a EULA with checkbox)
 
-		enum sel
+		enum class sel
 		{
-			none = 0, many = 1, dir = 2, save = 4 
+			none, many, dir, save 
 		};
-		line select(view start = "", sel = none);
+		line select(view start = "", sel = sel::none);
 		// User selects file(s) from the system
 	};
 }
