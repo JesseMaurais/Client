@@ -8,12 +8,12 @@ namespace fwd
 {
 	template
 	<
-		class Type
+		class Base
 	>
-	struct iterate : Type
+	struct iterate : Base
 	// Iterator wrapper
 	{
-		using Type::Type;
+		using Base::Base;
 
 		auto operator*() const
 		{
@@ -33,12 +33,12 @@ namespace fwd
 
 	template
 	<
-		class Iterator
+		class Iterator, class Base = pair<Iterator>
 	>
-	struct range : pair<Iterator>
+	struct range : Base
 	// Iterator pair as range
 	{
-		using pair::pair;
+		using Base::Base;
 
 		auto size() const
 		{
@@ -75,15 +75,15 @@ namespace fwd
 
 	template
 	<
-		class Iterator, int Size = 1, int Step = Size
+		class Iterator, int Size = 1, int Step = Size, class Base = pair<Iterator>
 	>
-	struct interval : pair<Iterator>
+	struct interval : Base
 	// Iterate within a sub range
 	{
 		static_assert(0 < Size);
 		static_assert(0 == Size % Step);
 
-		using pair::pair;
+		using Base::Base;
 
 		struct iterator : range<Iterator>
 		{

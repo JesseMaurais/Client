@@ -10,31 +10,28 @@
 
 namespace sys
 {
-	extern env::variable<fmt::string::view> thread_id;
+	extern env::view::ref thread_id;
 
-	template <class object> class exclusive_ptr : unique
+	template <class object> struct exclusive_ptr : fwd::unique
 	// Allow one writer but many reader (WORM pattern)
 	{
 		rwlock lock;
 		object *that;
 
-		using reader = decltype(lock.read());
-		using writer = decltype(lock.write());
-
-	public:
-
-		exclusive(object *ptr) : that(ptr)
+		exclusive_ptr(object *ptr) : that(ptr)
 		{ }
 
 		auto read()
 		{
-			struct unlock : unique
+			using reader = decltype(lock.read());
+			struct unlock : fwd::unique
 			{
 				reader const key;
 				object const *that;
 
-				unlock(exclusive *ptr)
-				: that(ptr->that), key(that->lock.read())
+				unlock(exclusive_ptr* ptr)
+				: key(ptr->lock.read())
+				, that(ptr->that)
 				{ }
 
 				auto operator*() const
@@ -52,13 +49,15 @@ namespace sys
 
 		auto write()
 		{
-			struct unlock : unique
+			using writer = decltype(lock.write());
+			struct unlock : fwd::unique
 			{
 				writer const key;
 				object *that;
 
-				unlock(exclusive *ptr)
-				: that(ptr->that), key(that->lock.write())
+				unlock(exclusive_ptr *ptr)
+				: key(ptr->lock.write())
+				, that(ptr->that)
 				{ }
 
 				auto operator*() const
@@ -69,11 +68,6 @@ namespace sys
 				auto operator->() const
 				{
 					return that;
-				}
-
-				auto &operator*() const
-				{
-					return *that;
 				}
 
 				auto operator->()
@@ -88,21 +82,24 @@ namespace sys
 	template <class object> class exclusive : object
 	// Self exclusion object
 	{
-		friend class cache<object>;
-		exclusive_ptr<object> that(this);
+		template <class> friend class cache;
+		exclusive_ptr<object> that;
 
 	public:
 
 		using object::object;
 
+		exclusive() : that(this)
+		{ }
+
 		auto read()
 		{
-			return that->read();
+			return that.read();
 		}
 
 		auto write()
 		{
-			return that->write();
+			return that.write();
 		}
 	};
 
@@ -112,7 +109,7 @@ namespace sys
 		using exclusive = exclusive<object>;
 		using exclusive_ptr = exclusive_ptr<object>;
 
-		exclusion_ptr *that;
+		exclusive_ptr *that;
 
 		cache(exclusive *ptr) : cache(&ptr->that)
 		{ }

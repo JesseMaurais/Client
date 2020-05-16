@@ -18,8 +18,26 @@ namespace env::desktop
 
 	struct dialog : shell
 	{
-		line get(span command);
+		line get(line command);
 		// Open dialog by command
+
+		line open(view application);
+		// Start named application
+
+		line edit(view start, view label = "", bool hide = false);
+		// User enters text into an edit box
+
+		line form(edges add, view text = "", view title = "");
+		// User enters data in a form
+
+		line notify(view text, view icon = "info");
+		// Show the user a desktop notification
+
+		line calendar(view text = "", view format = "", int day = 0, int month = 0, int year);
+		// User selects a calendar data
+
+		line color(view start = "", bool palette = true);
+		// User selects a color value
 
 		enum class msg
 		{
@@ -41,21 +59,6 @@ namespace env::desktop
 		};
 		line select(view start = "", sel = none);
 		// User selects file(s) from the system
-
-		line enter(view start, view label = "", bool hide = false);
-		// User enters text into an edit box
-
-		line form(edges add, view text = "", view title = "");
-		// User enters data in a form
-
-		line notify(view text, view icon = "info");
-		// Show the user a desktop notification
-
-		line calendar(view text = "", view format = "", int day = 0, int month = 0, int year);
-		// User selects a calendar data
-
-		line color(view start = "", bool palette = true);
-		// User selects a color value
 	};
 }
 

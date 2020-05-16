@@ -38,18 +38,19 @@ namespace fmt
 		class Type, 
 		template <class> class Alloc = fwd::allocator,
 		template <class, template <class> class> class Store = fwd::vector,
+		template <class> class Range = fwd::span,
 		template <class> class Order = fwd::ordering
 	>
 	struct struct_brief : memory_brief<Type>
 	{
 		using pair   = fwd::pair<Type>;
 		using init   = fwd::init<Type>;
-		using span   = fwd::span<Type>;
-		using line   = fwd::line<Type, Alloc, Store>;
-		using page   = fwd::page<Type, Alloc, Store>;
 		using set    = fwd::set<Type, Order, Alloc>;
 		using map    = fwd::map<Type, Order, Alloc>;
+		using span   = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
+		using lines  = fwd::line<Type, Alloc, Store, View>;
+		using pages  = fwd::page<Type, Alloc, Store, View>;
 		using edges  = fwd::edges<Type>;
 		using graph  = fwd::graph<Type, Alloc>;
 		using group  = fwd::group<Type, Alloc>;
@@ -79,18 +80,13 @@ namespace fmt
 		class Char,
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
-		template <class, template <class> class> class Vector = fwd::vector,
-		// base class composition
-		class Type = string_brief
-		<
-			fwd::basic_string_view<Char, Traits>, Char, Traits, Alloc, Vector
-		>	
+		template <class, template <class> class> class Vector = fwd::vector
 	>
-	struct basic_string_view : Type
-	{
-		using Type::Type;
-	};
-
+	using basic_string_view = string_brief
+	<
+		fwd::basic_string_view<Char, Traits>, Char, Traits, Alloc, Vector
+	>;
+	
 	template
 	<
 		class Char,
@@ -98,18 +94,27 @@ namespace fmt
 		template <class> class Alloc = fwd::allocator,
 		template <class, template <class> class> class Vector = fwd::vector,
 		// base class composition
-		class Type = string_brief
+		class Base = string_brief
 		<
 			fwd::basic_string<Char, Traits>, Char, Traits, Alloc, Vector
 		>
 	>
-	struct basic_string : Type
+	struct basic_string : Base
 	{
-		using Type::Type;
+		using Base::Base;
 		using view = basic_string_view<Char, Traits, Alloc, Vector>;
+
+		basic_string(fwd::basic_string_view<Char, Traits> in)
+		: Base(data(in), size(in))
+		{ }
+
+		basic_string(fwd::basic_string<Char, Traits, Alloc>&& in)
+		: Base(std::move(in))
+		{ }
 	};
 
-	using string = 
+	using string = :wq
+
 	#ifdef _T
 		basic_string<_T>;
 	#else

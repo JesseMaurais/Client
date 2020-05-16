@@ -1,5 +1,5 @@
-#ifndef uni_thread_hpp
-#define uni_thread_hpp
+#ifndef uni_pthread_hpp
+#define uni_pthread_hpp
 
 #include "uni.hpp"
 #include "sys.hpp"
@@ -489,8 +489,8 @@ namespace sys
 		~thread()
 		{
 			void* that = nullptr;
-			int const no = pthread_join(id, &that);
-			if (fail(no))
+			int no = pthread_join(id, &that);
+			if (sys::uni::fail(no))
 			{
 				sys::uni::err(no, here, id);
 			}
@@ -517,7 +517,7 @@ namespace sys
 		bool wait(mutex& key)
 		{
 			cond::wait(&key.self);
-			return fail(no);
+			return sys::uni::fail(no);
 		}
 	};
 }

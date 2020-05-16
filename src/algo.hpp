@@ -3,6 +3,7 @@
 
 #include "fmt.hpp"
 #include "tmp.hpp"
+#include <memory>
 
 namespace fwd
 {
@@ -15,22 +16,26 @@ namespace fwd
 		class Type,
 		template <class> class Alloc = allocator,
 		template <class, template<class> class> class Store = vector,
+		template <class> class Range = span
 		// details
+		class View = Range<Type>
 		class Container = Store<Type, Alloc>,
 		class Size = typename Container::size_type,
-		class Pair = pair<Size>
+		class Pointer = typename Container::const_pointer,
+		class Reference = typename Container::const_reference,
+		class Base = pair<Size>
 	>
-	struct line : Pair
+	struct lines : Base
 	{
-		Container const *that;
+		Pointer that;
 
-		line(Container const* ptr, Pair pos) : that(ptr), Pair(pos) { }
+		lines(Base pos, Pointer ptr) 
+		: Base(pos), that(ptr)
+		{ }
 
-		line(Container const& ref, Pair pos) : line(&ref, pos) { }
-
-		#ifdef assert
-		~line() { assert(this->first <= this->second); }
-		#endif
+		lines(Base pos, Reference ref) 
+		: lines(pos, &ref) 
+		{ }
 
 		auto size() const { return this->second - this->first; }
 
@@ -38,14 +43,18 @@ namespace fwd
 
 		auto end() const { return that->data() + this->second; }
 
-		auto operator[](auto index) const 
-		{ 
-			return that->at(this->first + index);
-		}
+		#ifdef assert
+		~lines() { assert(this->first <= this->second); }
+		#endif
 
-		operator span<Type>() const
+		operator View() const
 		{
 			return { begin(), end() };
+		}
+
+		auto operator[](auto index) const 
+		{
+			return that->at(this->first + index);
 		}
 	};
 
@@ -54,23 +63,26 @@ namespace fwd
 		class Type,
 		template <class> class Alloc = allocator,
 		template <class, template <class> class> class Store = vector,
+		template <class> class Range = span,
 		// details
+		class View = Range<Type>,
 		class Container = Store<Type, Alloc>,
 		class Size = typename Container::size_type,
 		class Pair = pair<Size>,
-		class Base = line<Type, Alloc, Store>,
-		class Item = line<Pair, Alloc, Store>
+		class Index = line<Pair, Alloc, Store, Range>
+		class Base = line<Type, Alloc, Store, Range>,
 	>
-	struct page : Base
+	struct pages : Base
 	{
-		Item index;
+		Index index;
 
-		page(Item in, Pair at) : index(in), Base(at)
+		pages(Base pos, Index in) 
+		: Base(pos), index(in)
 		{ }
 
 		Base operator()(auto at) const
 		{
-			return { this->that, index[at] };
+			return { index[at], this->that };
 		}
 	};
 
@@ -80,14 +92,19 @@ namespace fwd
 
 	template
 	<
-		class Node
+		class Node,
+		template <class> class Alloc = allocator,
+		template <class, template <class> class> class Store = vector,
+		template <class> class Range = span,
+		// details
+		class List = lines<Node, Alloc, Store, Range>,
 	>
-	using edges = std::pair<const Node, line<Node>>;
+	using edges = std::pair<const Node, List>;
 
 	template
 	<
 		class Node, 
-		template <class> class Alloc = allocator
+		template <class> class Alloc = allocator,
 	>
 	using graph = std::vector<pair<Node>, Alloc<Node>>;
 
@@ -147,8 +164,8 @@ namespace fwd
 	auto split(span<Type> s, Type n, Iterator out)
 	// Partition a span by value
 	{
-		static Identity const eq;
-		auto const p = std::bind(eq, n);
+		static Identity const q;
+		auto const p = std::bind(q, n);
 		return split(s, p, out);
 	}
 
@@ -157,7 +174,7 @@ namespace fwd
 		class Type, 
 		template <class> class Alloc = allocator
 	>
-	auto split(span<Type> s, Type n)
+	auto split(span<Type> s, Type n = { })
 	// Partition a span by value
 	{
 		vector<Type, Alloc> out;

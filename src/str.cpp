@@ -8,7 +8,7 @@ namespace
 {
 	sys::exclusive<fmt::string::set> cache;
 	sys::exclusive<fmt::string::view::vector> store;
-	sys::exclusive<map<fmt::string::view, env::opt::word>> index;
+	sys::exclusive<std::map<fmt::string::view, env::opt::word>> table;
 }
 
 namespace fmt::str
@@ -22,7 +22,7 @@ namespace fmt::str
 
 	bool got(view name)
 	{
-		auto const reader = index.read();
+		auto const reader = table.read();
 		auto const it = reader->find(name);
 		auto const end = reader->end();
 		return end != it;
@@ -39,7 +39,7 @@ namespace fmt::str
 	{
 		// Lookup extant
 		{
-			auto const reader = index.read();
+			auto const reader = table.read();
 			auto const it = reader->find(name);
 			auto const end = reader->end();
 			if (end != it)
@@ -55,7 +55,7 @@ namespace fmt::str
 	{
 		// Lookup extant
 		{
-			auto const reader = index.read();
+			auto const reader = table.read();
 			auto const end = reader->end();
 			auto const it = reader->find(name);
 			if (end != it)
@@ -81,7 +81,7 @@ namespace fmt::str
 	{
 		// Lookup extant
 		{
-			auto const read = index.read();
+			auto const read = table.read();
 			auto const end = read->end();
 			auto const it = read->find(name);
 			if (end != it)
@@ -111,7 +111,7 @@ namespace fmt::str
 		// Block all threads at this point
 		auto const wcache = cache.write();
 		auto const wstore = store.write();
-		auto const windex = index.write();
+		auto const wtable = table.write();
 
 		string line;
 		while (std::getline(in, line, end))
@@ -125,7 +125,7 @@ namespace fmt::str
 			auto const q = wstore->emplace(*p.first, id);
 			verify(q.second);
 
-			windex->emplace_back(*q.first);
+			wtable->emplace_back(*q.first);
 		}
 		return in;
 	}
