@@ -302,6 +302,16 @@ namespace fmt
 			return s;
 		}
 
+		static auto to_pair(view u, view v)
+		// Divide view u by first occurance of v
+		{
+			auto const m = u.size();
+			auto const n = u.find(v);
+			auto const p = u.substr(0, n);
+			auto const q = u.substr(n < m ? n + 1 : m);
+			return pair { p, q };
+		}
+
 		static bool terminated(view u)
 		/// Check whether string is null terminated
 		{
@@ -392,12 +402,50 @@ namespace fmt
 
 		static auto replace(view u, view v, view w);
 		/// Replace in u all occurrances of v with w
+		{
+			string s;
+			auto const uz = u.size(), vz = v.size();
+			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
+			{
+				auto const k = std::min(j, uz);
+				s = u.substr(i, k - i);
+				if (j < uz) s += w;
+				i = k + vz;
+			}
+			return s;
+		}
 
-		static auto embrace(view u, view v);
-		// First matching braces v front and v back found in u
-
-		static auto to_pair(view u, view v);
-		// Divide view u by first occurance of v
+		static auto embrace(view u, view v)
+		// Position in u with matching braces front and back in v
+		{
+			auto i = u.find_first_of(v.front()), j = i;
+			if (i < npos)
+			{
+				while (int n = 1; 0 < n)
+				{
+					j = u.find_first_of(v, j + 1);
+					if (npos == j)
+					{
+						break; // missing
+					}
+					else
+					if (v.back() == u[j])
+					{
+						--n; // close brace
+					}
+					else
+					if (v.front() == u[j])
+					{
+						++n; // open brace
+					}
+					else
+					{
+						break; // interior
+					}
+				}
+			}
+			return pair { i, j };
+		}
 	};
 
 	// Common characters
