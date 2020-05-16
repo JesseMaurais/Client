@@ -140,7 +140,7 @@ namespace sys
 				for (int n : { 0, 1, 2 })
 				{
 					int fd = p[n].get();
-					if (fail(fd))
+					if (env::file::fail(fd))
 					{
 						return sys::uni::invalid;
 					}

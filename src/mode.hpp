@@ -2,7 +2,7 @@
 #define mode_hpp "Access Mode"
 
 #include <cstddef>
-#include "type.hpp"
+#include "fmt.hpp"
 #include "tmp.hpp"
 
 namespace env
@@ -78,7 +78,7 @@ namespace env
 	bool fail(fmt::string::view path, mode = ok);
 
 	// Adjustable file buffer size
-	extern attribute<size_t>& width;
+	extern fwd::variable<size_t>& width;
 }
 
 #endif // file

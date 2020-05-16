@@ -1,3 +1,5 @@
+#ifndef pipe_hpp
+#define pipe_hpp "Communication Pipes"
 
 #include "fmt.hpp"
 #include "ptr.hpp"

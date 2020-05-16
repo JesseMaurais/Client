@@ -73,6 +73,9 @@ namespace fmt
 	{ 
 		using String::String;
 		using stream = fwd::basic_stringstream<Char, Traits, Alloc>;
+
+		string_brief(String const& s) : String(s)
+		{ }
 	};
 
 	template

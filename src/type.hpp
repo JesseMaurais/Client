@@ -363,10 +363,11 @@ namespace fmt
 			return s;
 		}
 
-		static auto join(init t, view u)
+		static auto join(init n, view u)
 		{
-			span v(t.begin(), t.end());
-			return join(v, u);
+			vector v(n);
+			span t(v);
+			return join(t, u);
 		}
 
 		static auto split(view u, view v)
@@ -400,7 +401,7 @@ namespace fmt
 			return t;
 		}
 
-		static auto replace(view u, view v, view w);
+		static auto replace(view u, view v, view w)
 		/// Replace in u all occurrances of v with w
 		{
 			string s;
@@ -421,7 +422,8 @@ namespace fmt
 			auto i = u.find_first_of(v.front()), j = i;
 			if (i < npos)
 			{
-				while (int n = 1; 0 < n)
+				int n = 1;
+				do
 				{
 					j = u.find_first_of(v, j + 1);
 					if (npos == j)
@@ -431,20 +433,21 @@ namespace fmt
 					else
 					if (v.back() == u[j])
 					{
-						--n; // close brace
+						--n; // close
 					}
 					else
 					if (v.front() == u[j])
 					{
-						++n; // open brace
+						++n; // open
 					}
 					else
 					{
-						break; // interior
+						break; // other
 					}
 				}
+				while (0 < n);
 			}
-			return pair { i, j };
+			return std::pair { i, j };
 		}
 	};
 
@@ -524,8 +527,7 @@ namespace fmt
 
 	inline auto join(string::view::init t, string::view u = "")
 	{
-		string::view::span p(t.begin(), t.end());
-		return cstr.join(p, u);
+		return cstr.join(t, u);
 	}
 
 	inline auto split(string::view u, string::view v = "")
@@ -561,7 +563,8 @@ namespace fmt
 
 	inline auto to_pair(string::view::pair p, string::view u = "=")
 	{
-		return to_pair(p.first, p.second, u);
+		string::view::vector x { p.first, p.second };
+		return cstr.join(x, u);
 	}
 
 	inline bool same(string::view u, string::view v)
