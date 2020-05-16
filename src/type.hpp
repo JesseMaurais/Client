@@ -2,6 +2,7 @@
 #define type_hpp "Character Types"
 
 #include "fmt.hpp"
+#include "it.hpp"
 #include "utf.hpp"
 #include <locale>
 
@@ -34,10 +35,12 @@ namespace fmt
 	{
 		using base = Type<Char>;
 		using typename base::mask;
-		using traits = memory_traits<type>;
 		using string = basic_string<Char>;
-		using string::size_type;
-		using string::view;
+		using view = typename string::view;
+		using init = typename view::init;
+		using span = typename view::span;
+		using vector = typename view::vector;
+		using size_type = typename view::size_type;
 
 		static_assert(null == ~npos);
 
@@ -75,7 +78,7 @@ namespace fmt
 			return base::scan_is(x, it, end);
 		}
 
-		auto next(string::view u, mask x = space) const
+		auto next(view u, mask x = space) const
 		/// Index of first character in view $u which is an $x
 		{
 			auto const from = begin(u);
@@ -105,7 +108,7 @@ namespace fmt
 			return base::scan_not(x, it, end);
 		}
 
-		auto skip(string::view u, mask x = space) const
+		auto skip(view u, mask x = space) const
 		/// Index of first character in view $u which is not $x
 		{
 			auto const from = begin(u);
@@ -113,14 +116,14 @@ namespace fmt
 			return distance(from, to);
 		}
 
-		auto widen(basic_string<char>::view u) const
+		auto widen(basic_string_view<char> u) const
 		/// Decode multibyte characters as wide type
 		{
 			struct iterator : utf
 			{
 				base const* that;
 				char const* pos;
-				size_type size;
+				std::size_t size;
 
 				bool operator!=(iterator const& it) const
 				{
@@ -156,7 +159,7 @@ namespace fmt
 			return range({ this, begin }, { nullptr, end });
 		}
 
-		auto narrow(basic_string::view<Char> u) const
+		auto narrow(basic_string_view<Char> u) const
 		/// Encode wide characters as multibyte type
 		{
 			struct iterator
@@ -192,19 +195,19 @@ namespace fmt
 			return range<iterator>({ this, begin }, { nullptr, end });
 		}
 
-		auto first(string::view u, mask x = space) const
+		auto first(view u, mask x = space) const
 		/// First iterator in view $u that is not $x
 		{
 			return skip(begin(u), end(u), x);
 		}
 
-		auto last(string::view u, mask x = space) const
+		auto last(view u, mask x = space) const
 		/// Last iterator in view $u that is not $x
 		{
 			return skip(rbegin(u), rend(u), x).base();
 		}
 
-		auto trim(string::view u, mask x = space) const
+		auto trim(view u, mask x = space) const
 		/// Trim $x off the front and back of $u
 		{
 			auto const before = last(u, x);
@@ -214,7 +217,7 @@ namespace fmt
 			return u.substr(pos, size);
 		}
 
-		auto divide(string::view u, mask x = space) const
+		auto divide(view u, mask x = space) const
 		/// Count the quotient in $u that are $x and remainder that are not
 		{
 			pair<size_t> n { 0, 0 };
@@ -232,43 +235,43 @@ namespace fmt
 			return n;
 		}
 
-		auto rem(string::view u, mask x = space) const
+		auto rem(view u, mask x = space) const
 		/// Count characters in $u that are not $x
 		{
 			return divide(u, x).second; 
 		}
 
-		auto quot(string::view u, mask x = space) const
+		auto quot(view u, mask x = space) const
 		/// Count characters in $u that are $x
 		{
 			return divide(u, x).first;
 		}
 
-		bool all_of(string::view u, mask x = space) const
+		bool all_of(view u, mask x = space) const
 		/// All decoded characters in $u are $x
 		{
 			return 0 == rem(u, x);
 		}
 
-		bool none_of(string::view u, mask x = space) const
+		bool none_of(view u, mask x = space) const
 		/// No decoded characters in $u are $x
 		{
 			return 0 == quot(u, x);
 		}
 
-		bool clear(string::view u) const
+		bool clear(view u) const
 		/// All of view is white space
 		{
 			return all_of(u);
 		}
 
-		bool flush(string::view u) const
+		bool flush(view u) const
 		/// None of view is white space
 		{
 			return none_of(u);
 		}
 
-		auto to_upper(string::view u) const
+		auto to_upper(view u) const
 		/// Recode characters in upper case
 		{
 			string s;
@@ -280,7 +283,7 @@ namespace fmt
 			return s;
 		}
 
-		auto to_lower(string::view u) const
+		auto to_lower(view u) const
 		/// Recode characters in lower case
 		{
 			string s;
@@ -292,13 +295,13 @@ namespace fmt
 			return s;
 		}
 
-		static bool terminated(string::view u)
+		static bool terminated(view u)
 		/// Check whether string is null terminated
 		{
 			return not empty(u) and not u[u.size()];
 		}
 
-		static auto count(string::view u)
+		static auto count(view u)
 		/// Count characters in view
 		{
 			auto n = null;
@@ -317,7 +320,7 @@ namespace fmt
 			return n;
 		}
 
-		static auto count(string::view u, string::view v)
+		static auto count(view u, view v)
 		/// Count occurances in $u of a substring $v
 		{
 			auto n = null;
@@ -330,7 +333,7 @@ namespace fmt
 			return n;
 		}
 
-		static auto join(string::view::span t, string::view u)
+		static auto join(span t, view u)
 		/// Join strings in $t with $u inserted between
 		{
 			string s;
@@ -343,16 +346,16 @@ namespace fmt
 			return s;
 		}
 
-		static auto join(string::view::init t, string::view u)
+		static auto join(init t, view u)
 		{
-			string::view::vector v(t.begin(), t.end());
-			return join(string::view::span(v), u);
+			vector v(t.begin(), t.end());
+			return join(span(v), u);
 		}
 
-		static auto split(string::view u, string::view v)
+		static auto split(view u, view v)
 		/// Split strings in $u delimited by $v
 		{
-			string::view::vector t;
+			vector t;
 			auto const uz = u.size(), vz = v.size();
 			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
 			{
@@ -364,9 +367,9 @@ namespace fmt
 			return t;
 		}
 
-		static auto split(string::view::span p, string::view v);
+		static auto split(span p, view v)
 		{
-			fwd::vector<string::view::span> t;
+			fwd::vector<span> t;
 			auto const end = p.end();
 			auto begin = p.begin();
 			for (auto it = begin; it != end; ++it)
@@ -380,13 +383,13 @@ namespace fmt
 			return t;
 		}
 
-		static auto replace(string::view u, string::view v, string::view w);
+		static auto replace(view u, view v, view w);
 		/// Replace in u all occurrances of v with w
 
-		static auto embrace(string::view u, string::view v);
+		static auto embrace(view u, view v);
 		// First matching braces v front and v back found in u
 
-		static auto to_pair(string::view u, string::view v);
+		static auto to_pair(view u, view v);
 		// Divide view u by first occurance of v
 	};
 
