@@ -1,5 +1,3 @@
-#ifndef pipe_hpp
-#define pipe_hpp "File Descriptors"
 
 #include "fmt.hpp"
 #include "ptr.hpp"
@@ -8,7 +6,7 @@
 
 namespace env::file
 {
-	struct descriptor : unique, stream
+	struct descriptor : fwd::unique, stream
 	{
 		ssize_t read(void *buf, size_t sz) const override;
 		ssize_t write(const void *buf, size_t sz) const override;
@@ -50,7 +48,7 @@ namespace env::file
 		int fd;
 	};
 
-	struct pipe : unique, stream
+	struct pipe : fwd::unique, stream
 	{
 		explicit pipe();
 

@@ -6,11 +6,11 @@
 
 namespace env
 {
-	using fmt::string;
+	using string = fmt::string;
 
 	namespace var
 	{
-		using string::view;
+		using view = string::view;
 
 		bool got(view);
 		view get(view);
@@ -22,25 +22,24 @@ namespace env
 
 	template 
 	<
-		class Type, template <class> Access = fwd::variable
+		class Type,
+		template <class> class Traits = fmt::memory_brief,
+		template <class> class Access = fwd::variable
 	>
-	struct variable : Access<Type>
-	{ 
-		using traits = fmt::memory_traits<Type>;
-		using traits::cref;
-		using traits::ref;
-	};
+	using variable = fwd::compose<Access<Type>, Traits<Type>>;
 
 	template
 	<
-		class Type
+		class Type,
+		template <class> class Traits = fmt::memory_brief
 	>
-	using constant = variable<Type, fwd::constant>;
+	using constant = variable<Type, Traits, fwd::constant>;
 
 	using size = constant<string::size_type>;
 	using view = constant<string::view>;
 	using span = constant<string::view::span>;
-	using node = constant<string::view::node>;
+	using line = constant<string::view::line>;
+	using page = constant<string::view::page>;
 
 	extern view::ref os;
 	extern span::ref paths;

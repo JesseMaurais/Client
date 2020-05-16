@@ -19,25 +19,25 @@ namespace env
 		using view::page;
 
 		vector cache;
-		string last;
+		string line;
 
-		line get(in, char end = '\n', int count = 0);
+		lines get(in, char end = '\n', int count = 0);
 		// Cache all lines in to end, return indices
 
-		line list(view directory = ".");
-		// Contents of directory given by path
+		lines list(view directory = ".");
+		// Directory given by path
 
-		line copy(view path);
-		// Contents of file given by path
+		lines copy(view path);
+		// Lines in file given by path
 
-		line find(view pattern, view directory = ".");
+		lines find(view pattern, view directory = ".");
 		// Paths to matching files in directory
 
-		line which(view name);
+		lines which(view name);
 		// Paths to executables with program name
 
-		line open(view path);
-		// Preferred application
+		lines open(view path);
+		// Preferred application for file type at path
 	};
 
 	extern shell::ref cmd;

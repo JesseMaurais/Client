@@ -7,27 +7,29 @@
 
 namespace env
 {
-	shell::line shell::get(in put, char end, int count)
+	shell::lines shell::get(in put, char end, int count)
 	{
-		// Result in span at back of cache
+		// Result in span at cache end
 		const auto first = cache.size();
+		auto second = first;
 		try // process can crash
 		{
-			while (--count < 0 and std::getline(put, last, end))
+			while (--count and std::getline(put, last, end))
 			{
 				cache.emplace_back(std::move(last));
 			}
+			// One past the end
+			second = cache.size();
 		}
-		catch (std::exception const& err)
+		// Put exception message into line
+		catch (std::exception const& error)
 		{
-			last = err.what();
+			last = error.what();
 		}
-		// Go one past the cache's end
-		const auto second = cache.size();
-		return { cache, { first, second } };
+		return { { first, second }, cache };
 	}
 
-	shell::line shell::list(view name)
+	shell::lines shell::list(view name)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -38,18 +40,18 @@ namespace env
 		return get(sub);
 	}
 
-	shell::line shell::copy(view name)
+	shell::lines shell::copy(view path, int count)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
-			{ "type", name };
+			{ "type", path };
 		#else
-			{ "cat", name };
+			{ "cat", path };
 		#endif
 		return get(sub);
 	}
 
-	shell::line shell::find(view pattern, view directory)
+	shell::lines shell::find(view pattern, view directory)
 	{
 		#ifdef _WIN32
 		{
@@ -66,7 +68,7 @@ namespace env
 		#endif
 	}
 
-	shell::line shell::which(view name)
+	shell::lines shell::which(view name)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -77,11 +79,12 @@ namespace env
 		return get(sub);
 	}
 
-	shell::line shell::open(view path)
+	shell::lines shell::open(view path)
 	{
 		#ifdef _WIN32
 		{
-			fmt::ipstream sub { "start", "/d", path };
+			fmt::ipstream sub 
+				{ "start", "/d", path };
 			return get(sub);
 		}
 		#else
@@ -103,11 +106,12 @@ namespace env
 						continue;
 					}
 
-					fmt::ipstream sub { program, path };
+					fmt::ipstream sub 
+						{ program, path };
 					return get(sub);
 				}
 			}
-			return { cache, { 0, 0 } };
+			return { { 0, 0 }, cache };
 		}
 		#endif
 	}

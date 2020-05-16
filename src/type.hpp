@@ -116,7 +116,7 @@ namespace fmt
 			return distance(from, to);
 		}
 
-		auto widen(basic_string_view<char> u) const
+		auto widen(fwd::basic_string_view<char> u) const
 		/// Decode multibyte characters as wide type
 		{
 			struct iterator : utf
@@ -159,7 +159,7 @@ namespace fmt
 			return range({ this, begin }, { nullptr, end });
 		}
 
-		auto narrow(basic_string_view<Char> u) const
+		auto narrow(fwd::basic_string_view<Char> u) const
 		/// Encode wide characters as multibyte type
 		{
 			struct iterator
@@ -220,7 +220,7 @@ namespace fmt
 		auto divide(view u, mask x = space) const
 		/// Count the quotient in $u that are $x and remainder that are not
 		{
-			pair<size_t> n { 0, 0 };
+			pair n { 0, 0 };
 			for (auto const w : widen(u))
 			{
 				if (check(w, x))
@@ -348,7 +348,7 @@ namespace fmt
 
 		static auto join(init t, view u)
 		{
-			vector v(t.begin(), t.end());
+			span v(t.begin(), t.end());
 			return join(span(v), u);
 		}
 
@@ -403,7 +403,7 @@ namespace fmt
 	template <typename iterator>
 	inline auto next(iterator it, iterator end)
 	{
-		return str.next(it, end);
+		return cstr.next(it, end);
 	}
 
 	template <typename iterator>

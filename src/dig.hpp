@@ -65,7 +65,9 @@ namespace fmt
 	{
 		static_assert(is_integer<S>);
 		static_assert(is_signed<S>);
+		#ifdef assert
 		assert(zero<S> <= s);
+		#endif
 		using T = as_unsigned<S>;
 		return static_cast<T>(s);
 	}
@@ -80,7 +82,9 @@ namespace fmt
 		static_assert(is_unsigned<S>);
 		using T = as_signed<S>;
 		auto const t = static_cast<T>(s);
+		#ifdef assert
 		assert(zero<T> <= t);
+		#endif
 		return t;
 	}
 
@@ -117,8 +121,10 @@ namespace fmt
 		static_assert(is_signed<T> == is_signed<S>);
 		static_assert(S{minimum<T>} <= zero<S>);
 		static_assert(zero<S> <= S{maximum<T>});
+		#ifdef assert
 		assert(not less(s, maximum<T>));
 		assert(not less(minimum<T>, s));
+		#endif
 		return static_cast<T>(s);
 	}
 
@@ -197,11 +203,11 @@ namespace fmt::dig
 	<
 		class Type
 	>
-	constexpr auto to(string::view line, int base = 10)
+	auto to(string::view line, int base = 10)
 	{
-		constexpr if (is_integer<Type>)
+		if constexpr (is_integer<Type>)
 		{
-			constexpr if (is_signed<Type>)
+			if constexpr (is_signed<Type>)
 			{
 				return to_narrow<Type>(to_llong(line, base));
 			}
