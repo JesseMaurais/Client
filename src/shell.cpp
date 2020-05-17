@@ -3,7 +3,7 @@
 #include "err.hpp"
 #include "dir.hpp"
 #include "ps.hpp"
-#include <except>
+#include <exception>
 
 namespace env
 {
@@ -26,7 +26,7 @@ namespace env
 		{
 			last = error.what();
 		}
-		return { { first, second }, cache };
+		return { first, second, cache };
 	}
 
 	shell::line shell::list(view name)
@@ -35,7 +35,7 @@ namespace env
 		#ifdef _WIN32
 			{ "dir", "/b", name };
 		#else
-			{ "ls" name };
+			{ "ls", name };
 		#endif
 		return get(sub);
 	}
@@ -117,11 +117,10 @@ namespace env
 	}
 }
 
-#ifndef NDEBUG
-void test::run<test::unit::shell>() noexcept
+#ifndef test
+test(shell)
 {
 	env::shell cmd;
-
 	auto const list = cmd.list(env::pwd);
 	assert(not empty(list));
 	auto const copy = cmd.copy(__FILE__);

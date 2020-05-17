@@ -40,6 +40,7 @@ namespace env
 	using span = constant<string::view::span>;
 	using line = constant<string::view::line>;
 	using page = constant<string::view::page>;
+	using node = constant<string::view::edges>;
 
 	extern view::ref os;
 	extern span::ref paths;

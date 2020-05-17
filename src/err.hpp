@@ -67,16 +67,16 @@ namespace sys
 		int bug(fmt::string::view, bool);
 	}
 
-	extern bool quiet; // Whether to warn on err
+	extern bool debug; // Whether to write out
 
 	template <typename... T> int warn(T... t)
 	{
-		return quiet ? -1 : impl::bug(fmt::err(t...), false);
+		return debug ? impl::bug(fmt::err(t...), false) : -1;
 	}
 
 	template <typename... T> int err(T... t)
 	{
-		return quiet ? -1 : impl::bug(fmt::err(t...), true);
+		return debug ? impl::bug(fmt::err(t...), true) : -1;
 	}
 }
 

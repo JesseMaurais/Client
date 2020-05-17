@@ -22,35 +22,33 @@ namespace fmt::dir
 
 namespace env::dir
 {
-	using fmt::string;
-	using string::view;
-	using string::vector;
-	using view::span;
-	using view::node;
-	using file::mode;
-
-	using entry = predicate<view>;
+	using string = fmt::string;
+	using view   = string::view;
+	using vector = string::vector;
+	using edges  = view::edges;
+	using span   = view::span;
+	using entry  = fwd::predicate<view>;
 
 	extern env::node::ref paths; // pwd, paths
 	extern env::node::ref config; // config_home, config_dirs
 	extern env::node::ref data; // data_home, data_dirs
 
-	constexpr auto stop = always<view>;
-	constexpr auto next = never<view>;
+	constexpr auto stop = fwd::always<view>;
+	constexpr auto next = fwd::never<view>;
 
 	entry mask(mode);
 	entry regx(view);
-	entry to(string::ref);
-	entry to(vector::ref);
-	entry all(view, mode = file::ok, entry = next);
-	entry any(view, mode = file::ok, entry = stop);
+	entry to(string const &);
+	entry to(vector const &);
+	entry all(view, mode = ok, entry = next);
+	entry any(view, mode = ok, entry = stop);
 
 	bool find(view, entry);
 	bool find(span, entry);
 	bool find(span, entry);
-	bool find(node, entry);
+	bool find(edges, entry);
 
-	bool fail(view path, mode = file::ok);
+	bool fail(view path, mode = ok);
 	view make(view path);
 	bool remove(view path);
 
@@ -62,14 +60,14 @@ namespace env::dir
 
 		tmp(view path)
 		{
-			stem = env::dir::make(path);
+			stem = make(path);
 		}
 
 		~tmp()
 		{
 			if (not empty(stem))
 			{
-				env::dir::remove(stem);
+				remove(stem);
 			}
 		}
 	};

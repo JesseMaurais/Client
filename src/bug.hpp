@@ -4,7 +4,7 @@
 #include "sym.hpp"
 
 #ifdef NDEBUG
-# warning You should compile unit tests in debug
+#	warning You should compile unit tests in debug
 #endif
 
 // assert just in case expression did not throw

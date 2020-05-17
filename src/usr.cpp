@@ -339,7 +339,7 @@ namespace env::usr
 	view::ref videos_dir = VIDEOS_DIR;
 }
 
-#ifndef NDEBUG
+#ifndef test
 namespace
 {
 	constexpr auto eol = '\n';
@@ -369,7 +369,7 @@ namespace
 	};
 }
 
-void test::run<test::unit::usr>() noexcept
+test(usr)
 {
 	std::ofstream out { "Tests.ini" };
 

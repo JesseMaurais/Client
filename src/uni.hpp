@@ -18,7 +18,7 @@ namespace sys::uni
 
 	template <typename... Args> int err(int no, Args... args)
 	{
-		return quiet ? -1 : sys::warn(args..., strerr(no));
+		return debug ? sys::warn(args..., strerr(no)) : -1;
 	}
 }
 

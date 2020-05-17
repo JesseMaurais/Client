@@ -29,12 +29,12 @@ namespace fwd
 	{
 		Pointer that;
 
-		line(Base pos, Pointer ptr) 
-		: Base(pos), that(ptr)
+		line(Size begin, Size end, Pointer ptr) 
+		: Base(begin, end), that(ptr)
 		{ }
 
-		line(Base pos, Reference ref) 
-		: line(pos, &ref) 
+		line(Size begin, Size end, Reference ref) 
+		: line(begin, end, &ref)
 		{ }
 
 		bool empty() const { return this->second == this->first; }

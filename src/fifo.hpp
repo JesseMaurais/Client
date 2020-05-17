@@ -1,7 +1,7 @@
 #ifndef fifo_hpp
 #define fifo_hpp "Serial Device"
 
-#include "fd.hpp"
+#include "pipe.hpp"
 #include "env.hpp"
 
 namespace env::file
@@ -10,11 +10,6 @@ namespace env::file
 	{
 		fifo(string::view, mode = rd);
 		~fifo();
-
-		operator type() const final
-		{
-			return path;
-		}
 
 		bool connect();
 
