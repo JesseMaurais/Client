@@ -7,6 +7,8 @@ namespace env::desktop
 {
 	using string = fmt::string;
 	using view = string::view;
+	using span = view::span;
+	using edges = view::edges;
 
 	bool got(view); // entry exists
 	view get(view); // entry value
@@ -18,13 +20,13 @@ namespace env::desktop
 
 	struct dialog : shell
 	{
-		line get(line command);
+		line get(span command);
 		// Open dialog by command
 
 		line open(view application);
 		// Start named application
 
-		line text(view start, view label = "", bool hide = false);
+		line enter(view start, view label = "", bool hide = false);
 		// User enters text into an edit box
 
 		line form(edges add, view text = "", view title = "");
@@ -39,25 +41,16 @@ namespace env::desktop
 		line color(view start = "", bool palette = true);
 		// User selects a color value
 
-		enum class msg
-		{
-			error, info, query, warn
-		};
+		enum class msg { info, query, warn, error };
 		line message(view text, msg = msg::info);
 		// Show a message box with buttons
 
-		enum class txt
-		{
-			none, edit, html
-		};
+		enum class txt { none, edit, html };
 		line text(view path, view check = "", view font = "", txt = txt::none);
 		// Show text file contents (like a EULA with checkbox)
 
-		enum class sel
-		{
-			none, many, dir, save 
-		};
-		line select(view start = "", sel = sel::none);
+		enum class mode { none, many, dir, save };
+		line select(view start = "", mode = mode::none);
 		// User selects file(s) from the system
 	};
 }

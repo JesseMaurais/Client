@@ -6,6 +6,7 @@
 
 namespace fmt::str
 {
+	using string = fmt::string;
 	using view = string::view;
 	using span = view::span;
 	using word = env::opt::word;
@@ -23,30 +24,20 @@ namespace fmt::str
 	string::out::ref put(string::out::ref, char = eol);
 	// write all cache lines to file
 
-	inline auto all(auto list, auto to)
-	// convert many at once
+	inline auto put(span list)
+	// put all words in list
 	{
 		vector words;
-		for (auto it : list) words.emplace_back(to(it));
+		for (auto item : list) words.emplace_back(put(item));
 		return words;
 	}
 
-	inline auto get(auto list)
-	// get all words in list
-	{
-		return all(list, get);
-	}
-
-	inline auto put(auto list)
-	// put all words in list
-	{
-		return all(list, put);
-	}
-
-	inline auto set(auto list)
+	inline auto set(span list)
 	// set all words in list
 	{
-		return all(list, set);
+		vector words;
+		for (auto item : list) words.emplace_back(set(item));
+		return words;
 	}
 }
 

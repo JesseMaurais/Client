@@ -5,14 +5,15 @@
 
 namespace env
 {
-	struct shell : fmt::struct_brief<shell>
+	struct shell
 	{
 		using string = fmt::string;
 		using view   = string::view;
-		using vector = string::vector;
-		using line   = string::line;
-		using in     = string::in;
-		using out    = string::out;
+		using vector = view::vector;
+		using span   = view::span;
+		using line   = view::line;
+		using out    = view::out;
+		using in     = view::in;
 
 		vector cache;
 		string last;
@@ -36,7 +37,7 @@ namespace env
 		// Preferred application for file type at path
 	};
 
-	extern shell::ref cmd;
+	extern const shell& cmd;
 }
 
 #endif // file

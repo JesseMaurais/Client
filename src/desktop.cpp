@@ -1,7 +1,9 @@
 #include "desktop.hpp"
-#include "fmt.hpp"
+#include "type.hpp"
 #include "usr.hpp"
+#include "arg.hpp"
 #include "str.hpp"
+#include "algo.hpp"
 #include "sys.hpp"
 #include "ps.hpp"
 
@@ -9,7 +11,7 @@ static auto const wd = fmt::str::put("Desktop Entry");
 
 namespace env::desktop
 {
-	bool got(word ud)
+	bool got(view ud)
 	{
 		return opt::got({wd, fmt::str::set(ud)});
 	}
@@ -36,20 +38,21 @@ namespace env::desktop
 		return current.find(lower) != fmt::npos;
 	}
 
-	shell::subspan dialog::get(span command)
+	shell::line dialog::get(span command)
 	{
-		constexpr auto program = "zenity";
-		if (empty(where(program)))
+		// Look for the Zenity dialog utility program
+		constexpr auto program = env::opt::get("DIALOG", "zenity");
+		if (auto const path = which(program); empty(path))
 		{
-			return;
+			return path;
 		}
 
 		// Program is first command in paired
-		fmt::vector<fmt::string::cptr> list;
+		fwd::vector<char const*> list;
 		list.push_back(program);
 
 		// Arguments null terminated
-		auto s = fmt::join(command);
+		auto s = fwd::join(command);
 		for (auto u : fmt::split(s))
 		{
 			list.push_back(u.data());
@@ -67,10 +70,10 @@ namespace env::desktop
 
 	static auto param(view key, view value)
 	{
-		return fmt::to_pair(key, fmt::quote(value));
+		return fmt::to_pair(key, value);
 	}
 
-	shell::subspan dialog::select(view path, mode mask)
+	shell::line dialog::select(view path, mode mask)
 	{
 		vector command { "--file-selection" };
 
@@ -78,15 +81,15 @@ namespace env::desktop
 		{
 			command.emplace_back(param("--filename", path));
 		}
-		if (mask & many)
+		if (mask == mode::many)
 		{
 			command.emplace_back("--multiple");
 		}
-		if (mask & dir)
+		if (mask == mode::dir)
 		{
 			command.emplace_back("--directory");
 		}
-		if (mask & save)
+		if (mask == mode::save)
 		{
 			command.emplace_back("--save");
 		}
@@ -94,23 +97,23 @@ namespace env::desktop
 		return get(command);
 	}
 
-	static auto message_type(msg type)
+	static auto message_type(dialog::msg type)
 	{
 		switch (type)
 		{
 		default:
-		case msg::error:
+		case dialog::msg::error:
 			return "--error";
-		case msg::info:
+		case dialog::msg::info:
 			return "--info";
-		case msg::query:
+		case dialog::msg::query:
 			return "--question";
-		case msg::warn:
+		case dialog::msg::warn:
 			return "--warn";
 		}
 	};
 
-	shell::subspan dialog::message(msg type, view text)
+	shell::line dialog::message(view text, msg type)
 	{
 		vector command { message_type(type) };
 
@@ -122,13 +125,13 @@ namespace env::desktop
 		return get(command);
 	}
 
-	shell::subspan dialog::enter(view start, view label, bool hide)
+	shell::line dialog::enter(view start, view label, bool hide)
 	{
 		vector command { param("--entry-text", start) };
 
-		if (not empty(text))
+		if (not empty(label))
 		{
-			command.emplace_back(param("--text", value));
+			command.emplace_back(param("--text", label));
 		}
 		if (hide)
 		{
@@ -138,22 +141,22 @@ namespace env::desktop
 		return get(command);
 	}
 
-	shell::subspan dialog::text(view path, txt type, view box, view font)
+	shell::line dialog::text(view path, view box, view font, txt type)
 	{
 		vector command { "--text-info" };
 
-		if (type & html)
+		if (type == txt::html)
 		{
 			command.emplace_back("--html");
-			command.emplace_back(param("--url", value));
+			command.emplace_back(param("--url", path));
 		}
 		else
 		{
+			if (type == txt::edit)
+			{
+				command.emplace_back("--editable");
+			}
 			command.emplace_back(param("--filename", path));
-		}
-		if (type & edit)
-		{
-			command.emplace_back("--editable");
 		}
 		if (not empty(font))
 		{
@@ -167,7 +170,7 @@ namespace env::desktop
 
 	}
 
-	shell::subspan dialog::form(edges type, view text, view title)
+	shell::line dialog::form(edges type, view text, view title)
 	{
 		vector command { "--forms", newline };
 
@@ -188,7 +191,7 @@ namespace env::desktop
 		return get(command);
 	}
 
-	shell::subspan dialog::notify(view text, view icon)
+	shell::line dialog::notify(view text, view icon)
 	{
 		vector command { "--notification" };
 
@@ -204,7 +207,7 @@ namespace env::desktop
 		return get(command);
 	}
 
-	shell::subspan dialog::calendar(view text, view format, int day, int month, int year)
+	shell::line dialog::calendar(view text, view format, int day, int month, int year)
 	{
 		vector command { "--calendar" };
 

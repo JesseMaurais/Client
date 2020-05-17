@@ -22,7 +22,7 @@ namespace fmt
 	<
 		class Char, template <class> class Traits = fwd::character
 	>
-	struct stream_brief : memory_brief<Char>
+	struct stream_brief
 	{
 		using ios  = memory_brief<fwd::basic_ios<Char, Traits>>;
 		using in   = memory_brief<fwd::basic_istream<Char, Traits>>;

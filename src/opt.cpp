@@ -47,9 +47,9 @@ namespace env::opt
 		return cast(key, value);
 	}
 
-	bool put(word key, bool value)
+	bool set(word key, bool value)
 	{
-		return put(key, cast(value));
+		return set(key, cast(value));
 	}
 
 	bool get(pair key, bool value)
@@ -57,9 +57,9 @@ namespace env::opt
 		return cast(key, value);
 	}
 
-	bool put(pair key, bool value)
+	bool set(pair key, bool value)
 	{
-		return put(key, cast(value));
+		return set(key, cast(value));
 	}
 
 	// Integer
@@ -72,9 +72,9 @@ namespace env::opt
 		});
 	}
 
-	bool put(view key, word value, int base)
+	bool set(view key, word value, int base)
 	{
-		return put(key, fmt::to_string(value, base));
+		return set(key, fmt::to_string(value, base));
 	}
 
 	word get(pair key, word value, int base)
@@ -85,9 +85,9 @@ namespace env::opt
 		});
 	}
 
-	bool put(pair key, word value, int base)
+	bool set(pair key, word value, int base)
 	{
-		return put(key, fmt::to_string(value, base));
+		return set(key, fmt::to_string(value, base));
 	}
 
 	// Pointed Decimal
@@ -100,7 +100,7 @@ namespace env::opt
 		});
 	}
 
-	bool put(view key, quad value, int digits)
+	bool set(view key, quad value, int digits)
 	{
 		return set(key, fmt::to_string(value, digits));
 	}
@@ -113,7 +113,7 @@ namespace env::opt
 		});
 	}
 
-	bool put(pair key, quad value)
+	bool set(pair key, quad value)
 	{
 		return set(key, fmt::to_string(value));
 	}

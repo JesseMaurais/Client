@@ -16,7 +16,7 @@ namespace env::opt
 
 	inline auto arg(size_t argn)
 	{
-		span const argv = arguments;
+		fmt::string::view::span const argv = arguments;
 		return argv[argn];
 	}
 
@@ -25,11 +25,12 @@ namespace env::opt
 
 	struct command
 	{
-		word argn; // required arguments (or -1 for any number)
-		view dash; // short name with one dash
-		view name; // long name with dual dash
-		view text; // descriptive text for users
+		unsigned int argn; // required arguments (or -1 for any number)
+		string::view dash; // short name with one dash
+		string::view name; // long name with dual dash
+		string::view text; // descriptive text for users
 	};
+
 	using commands = fwd::span<command>;
 
 	vector put(int argc, char** argv, commands);
