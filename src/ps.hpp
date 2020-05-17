@@ -25,21 +25,21 @@ namespace fmt
 		{
 			using stream = Stream<Char, Traits<Char>>;
 			using buf = basic_buf<Char, Traits, Alloc>;
-			using size_type = std::stringsize;
-			using init = fmt::string::init;
-			using span = fmt::string::span;
+			using size_type = std::size_t;
+			using init = fmt::string::view::init;
+			using span = fmt::string::view::span;
 
 			env::file::process f;
 
 		public:
 
-			basic_pstream(span args, size_type sz = env::file::width)
+			basic_pstream(span args, size_type sz = env::width)
 			: buf(f), stream(this), f(args)
 			{
 				buf::setbufsiz(sz, sz);
 			}
 
-			basic_pstream(init args, size_type sz = env::file::width)
+			basic_pstream(init args, size_type sz = env::width)
 			: basic_pstream({ args.begin(), args.end() }, sz)
 			{ }
 		};
