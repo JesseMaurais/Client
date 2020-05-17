@@ -84,15 +84,15 @@ namespace fmt
 
 		int sync() override
 		{
-			if (Base::pBase() != Base::pptr())
+			if (Base::pbase() != Base::pptr())
 			{
-				auto const off = Base::pptr() - Base::pBase();
-				auto const n = Base::sputn(Base::pBase(), off);
+				auto const off = Base::pptr() - Base::pbase();
+				auto const n = Base::sputn(Base::pbase(), off);
 				if (0 < n)
 				{
 					auto const diff = off - n;
 					auto const sz = diff * sizeof (char_type);
-					std::memmove(Base::pBase(), Base::pBase() + n, fmt::to_size(sz));
+					std::memmove(Base::pbase(), Base::pbase() + n, fmt::to_size(sz));
 					Base::pbump((int) -n);
 				}
 				return n < 0 ? -1 : 0;
@@ -152,13 +152,15 @@ namespace fmt
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator
 	>
-	class basic_buf : public basic_stringbuf<Char, Traits, Alloc>
+	struct basic_buf : basic_stringbuf<Char, Traits, Alloc>
 	{
 		using Base = basic_stringbuf<Char, Traits, Alloc>;
 		using size_type = typename Base::size_type;
 		using char_type = typename Base::char_type;
 
-		basic_buf(env::file::stream const& obj) : f(obj) { };
+		basic_buf(env::file::stream const& obj) 
+		: f(obj) 
+		{ };
 
 	protected:
 

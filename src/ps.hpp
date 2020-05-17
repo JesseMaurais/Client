@@ -39,12 +39,16 @@ namespace fmt
 			}
 
 			basic_pstream(init args, size_t sz = env::width)
-			: basic_pstream({ args.begin(), args.end() }, sz)
-			{ }
+			: buf(f), stream(this), f(args)
+			{ 
+				buf::setbufsiz(sz, sz);
+			}
 
 			basic_pstream(size_t argc, char const** argv, size_t sz = env::width)
-			: basic_pstream({ argv, argv + argc }, sz)
-			{ }
+			: buf(f), stream(this), f(argc, argv)
+			{ 
+				buf::setbufsiz(sz, sz);
+			}
 		};
 	}
 

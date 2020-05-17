@@ -20,12 +20,6 @@ namespace env::desktop
 		line open(view application);
 		// Start named application
 
-		line enter(view start, view label = "", bool hide = false);
-		// User enters text into an edit box
-
-		line form(graph add, view text = "", view title = "");
-		// User enters data into a form
-
 		line notify(view text, view icon = "info");
 		// Show the user a desktop notification
 
@@ -34,6 +28,13 @@ namespace env::desktop
 
 		line color(view start = "", bool palette = true);
 		// User selects a color value
+
+		line enter(view start, view label = "", bool hide = false);
+		// User enters text into an edit box
+
+		using controls = fwd::span<fwd::pair<view>>;
+		line form(controls, view text = "", view title = "");
+		// User enters data into a form
 
 		enum class msg { info, query, warn, error };
 		line message(view text, msg = msg::info);

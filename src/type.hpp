@@ -388,14 +388,13 @@ namespace fmt
 		static auto split(span p, view v)
 		{
 			fwd::vector<span> t;
-			auto const end = p.end();
-			auto begin = p.begin();
-			for (auto it = begin; it != end; ++it)
+			auto const ptr = p.data();
+			for (size_t begin = 0, it = 0; it < p.size(); ++it)
 			{
-				if (*it == v)
+				if (p[it] == v)
 				{
-					t.emplace_back(begin, it);
-					begin = std::next(it);
+					t.emplace_back(ptr + it, it - begin);
+					begin = it + 1;
 				}
 			}
 			return t;

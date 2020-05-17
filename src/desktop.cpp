@@ -154,7 +154,7 @@ namespace env::desktop
 
 	}
 
-	shell::line dialog::form(graph add, view text, view title)
+	shell::line dialog::form(controls add, view text, view title)
 	{
 		vector command { "--forms" };
 
@@ -166,10 +166,12 @@ namespace env::desktop
 		{
 			command.emplace_back(param("--text", title));
 		}
-		for (auto const& edge : add)
+
+		std::string const prefix("--add-");
+		for (auto const& ctl : add)
 		{
-			auto const key = view("--add-") + add.second;
-			command.emplace_back(param(key, add.first));
+			auto const key = prefix + fmt::to_string(ctl.second);
+			command.emplace_back(param(key, ctl.first));
 		}
 
 		return with(command);
@@ -205,23 +207,23 @@ namespace env::desktop
 		}
 		if (0 < day)
 		{
-			command.empalce_back(param("--day", day));
+			command.emplace_back(param("--day", fmt::to_string(day)));
 		}
 		if (0 < month)
 		{
-			command.empalce_back(param("--month", month));
+			command.emplace_back(param("--month", fmt::to_string(month)));
 		}
 		if (0 < year)
 		{
-			command.empalce_back(param("--year", year));
+			command.emplace_back(param("--year", fmt::to_string(year)));
 		}
 
 		return with(command);
 	}
 
-	shell::span dialog::color(view start, bool palette)
+	shell::line dialog::color(view start, bool palette)
 	{
-		vector command { "--color-selection", newline };
+		vector command { "--color-selection" };
 
 		if (not empty(start))
 		{

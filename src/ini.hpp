@@ -2,22 +2,22 @@
 #define ini_hpp "Initial Options"
 
 #include "fmt.hpp"
+#include "opt.hpp"
+#include "algo.hpp"
 
 namespace doc
 {
-	struct ini : fmt::struct_traits<ini>
+	struct ini : fmt::struct_brief<ini>
 	{
-		using fmt::string;
-		using string::in;
-		using string::out;
-		using string::view;
-		using view::pair;
-		using view::span;
-		using view::init;
-		using view::vector;
+		using string = fmt::string;
+		using in     = string::in;
+		using out    = string::out;
+		using view   = string::view;
+		using pair   = view::pair;
+		using span   = view::span;
 		
-		fwd::group<word> keys;
-		view::vector values;
+		fwd::group<env::opt::word> keys;
+		string::view::vector values;
 		string::set cache;
 
 		friend in::ref operator>>(in::ref, ref);

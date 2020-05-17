@@ -106,11 +106,9 @@ namespace fwd
 	template
 	<
 		class Node, 
-		template <class> class Alloc = allocator,
-		template <class, template <class> class> class Vector = vector,
-		template <class> class Span = span
+		template <class> class Alloc = allocator
 	>
-	using graph = line<pair<Node>, Alloc, Vector, Span>;
+	using graph = std::vector<pair<Node>, Alloc<pair<Node>>>;
 
 	template
 	<
