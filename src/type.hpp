@@ -555,12 +555,6 @@ namespace fmt
 		return cstr.to_pair(u, v);
 	}
 
-	inline auto to_pair(string::view u, string::view v, string::view w = "=")
-	{
-		string::view::vector x { u, v };
-		return cstr.join(x, w);
-	}
-
 	inline auto to_pair(string::view::pair p, string::view u = "=")
 	{
 		string::view::vector x { p.first, p.second };

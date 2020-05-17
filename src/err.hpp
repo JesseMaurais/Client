@@ -14,20 +14,18 @@
 
 // Post conditions
 
-#define here { __FILE__, __LINE__, __func__ }
+#define here fmt::where { __FILE__, __LINE__, __func__ }
 
 #ifndef NDEBUG
 #	define assert(x) if (not(x)) sys::warn(here, #x)
 #	define alert(x) if (bool(x)) sys::err(here, #x)
 #	define trace(...) sys::warn(where, __VA_ARGS__)
 #	define verify(x) assert(x)
-#	define debug(x) (not (x))
 #else
 #	define assert(x)
 #	define alert(x) 
 #	define trace(...)
 #	define verify(x) (x)
-#	define debug(x) constexpr (false)
 #endif
 
 // if only(failure) out << "Only without NDEBUG";

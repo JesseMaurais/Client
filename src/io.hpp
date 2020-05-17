@@ -25,7 +25,7 @@ namespace fmt
 		using size_type = std::streamsize;
 		using int_type = typename Base::int_type;
 
-		auto setbuf(char_type *s, size_type n, size_type m)
+		Base* setbuf(char_type *s, size_type n, size_type m)
 		{
 			auto t = s + n;
 			auto u = t + m;
@@ -34,7 +34,7 @@ namespace fmt
 			return this;
 		}
 		
-		auto setbuf(char_type *s, size_type n) override
+		Base* setbuf(char_type *s, size_type n) override
 		{
 			size_type const m = n / 2;
 			return setbuf(s, n - m, m);
@@ -109,11 +109,12 @@ namespace fmt
 	<
 		class Char,
 		template <class> class Traits = std::char_traits,
-		template <class> class Alloc = std::allocator
+		template <class> class Alloc = std::allocator,
+		// details
+		class Base = basic_streambuf<Char, Traits, Alloc>
 	>
-	class basic_stringbuf : public basic_streambuf<Char, Traits, Alloc>
+	struct basic_stringbuf : Base
 	{
-		using Base = basic_streambuf<Char, Traits>;
 		using string = basic_string<Char, Traits, Alloc>;
 		using char_type = typename Base::char_type;
 		using size_type = typename Base::size_type;

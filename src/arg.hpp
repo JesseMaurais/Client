@@ -37,12 +37,26 @@ namespace env::opt
 	// Put command line arguments into options
 
 	bool got(word);
-	view get(word);
-	bool set(word, view);
+	string::view get(word);
+	bool set(word, string::view);
+	bool put(word, string::view);
+
+	inline auto get(word wd, string::view u)
+	{
+		auto v = get(wd);
+		return empty(v) ? u : v;
+	}
 
 	bool got(pair);
-	view get(pair);
-	bool set(pair, view);
+	string::view get(pair);
+	bool set(pair, string::view);
+	bool put(pair, string::view);
+
+	inline auto get(pair wd, string::view u)
+	{
+		auto v = get(wd);
+		return empty(v) ? u : v;
+	}
 };
 
 #endif // file

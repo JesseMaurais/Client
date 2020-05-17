@@ -1,5 +1,5 @@
 #ifndef uni_pthread_hpp
-#define uni_pthread_hpp
+#define uni_pthread_hpp "POSIX Threads"
 
 #include "uni.hpp"
 #include "sys.hpp"

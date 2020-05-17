@@ -2,26 +2,20 @@
 #define desktop_hpp "Desktop Utility"
 
 #include "shell.hpp"
+#include "opt.hpp"
 
 namespace env::desktop
 {
-	using string = fmt::string;
-	using view = string::view;
-	using span = view::span;
-	using edges = view::edges;
+	extern opt::word const group;
+	// Desktop settings group index
 
-	bool got(view); // entry exists
-	view get(view); // entry value
-	bool set(view, view); // copy to entry
-	bool put(view, view); // view in entry
-
-	bool current(view name);
-	// Whether named desktop
+	bool current(fmt::string::view name);
+	// Whether name matches current session
 
 	struct dialog : shell
 	{
-		line get(span command);
-		// Open dialog by command
+		line with(span command);
+		// Open dialog with command
 
 		line open(view application);
 		// Start named application
@@ -29,8 +23,8 @@ namespace env::desktop
 		line enter(view start, view label = "", bool hide = false);
 		// User enters text into an edit box
 
-		line form(edges add, view text = "", view title = "");
-		// User enters data in a form
+		line form(graph add, view text = "", view title = "");
+		// User enters data into a form
 
 		line notify(view text, view icon = "info");
 		// Show the user a desktop notification

@@ -83,12 +83,21 @@ namespace fmt
 		class Char,
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
-		template <class, template <class> class> class Vector = fwd::vector
+		template <class, template <class> class> class Vector = fwd::vector,
+		// details
+		class Base = string_brief
+		<
+			fwd::basic_string_view<Char, Traits>, Char, Traits, Alloc, Vector
+		>
 	>
-	using basic_string_view = string_brief
-	<
-		fwd::basic_string_view<Char, Traits>, Char, Traits, Alloc, Vector
-	>;
+	struct basic_string_view : Base
+	{
+		using Base::Base;
+
+		basic_string_view(fwd::basic_string<Char, Traits, Alloc> const& in)
+		: Base(data(in), size(in))
+		{ }
+	};
 	
 	template
 	<
@@ -109,10 +118,6 @@ namespace fmt
 
 		basic_string(fwd::basic_string_view<Char, Traits> in)
 		: Base(data(in), size(in))
-		{ }
-
-		basic_string(fwd::basic_string<Char, Traits, Alloc>&& in)
-		: Base(std::move(in))
 		{ }
 	};
 

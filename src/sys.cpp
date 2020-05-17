@@ -28,7 +28,7 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 			}
 			
-			static thread_local auto tls = null_ptr<HLOCAL>(LocalFree);
+			thread_local auto tls = null_ptr<HLOCAL>(LocalFree);
 
 			LPSTR str = nullptr;
 			auto addr = (LPSTR) &str;
@@ -43,7 +43,7 @@ namespace sys
 				nullptr // arguments
 			);
 		
-			if (0 < size)
+			if (0 < size) // replace
 			{
 				tls.reset((HLOCAL) str);
 			}
@@ -55,7 +55,7 @@ namespace sys
 	{
 		char const* strerr(int no)
 		{
-			static thread_local char buf[64] = { '\0' };
+			thread_local char buf[128] = { '\0' };
 			// POSIX and GNU differ on return value
 			(void) strerror_r(no, buf, sizeof buf);
 			return buf;

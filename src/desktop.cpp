@@ -7,29 +7,9 @@
 #include "sys.hpp"
 #include "ps.hpp"
 
-static auto const wd = fmt::str::put("Desktop Entry");
-
 namespace env::desktop
 {
-	bool got(view ud)
-	{
-		return opt::got({wd, fmt::str::set(ud)});
-	}
-
-	view get(view ud)
-	{
-		return opt::get({wd, fmt::str::set(ud)});
-	}
-
-	bool set(view ud, view vu)
-	{
-		return opt::set({wd, fmt::str::set(ud)}, vu);
-	}
-
-	bool put(view ud, view vu)
-	{
-		return opt::put({wd, fmt::str::set(ud)}, vu);
-	}
+	opt::word const entry = fmt::str::put("Desktop Entry");
 
 	bool is(fmt::string::view name)
 	{
@@ -38,21 +18,25 @@ namespace env::desktop
 		return current.find(lower) != fmt::npos;
 	}
 
-	shell::line dialog::get(span command)
+	shell::line dialog::with(span command)
 	{
+		static opt::word const key = fmt::str::put("DIALOG");
+		static opt::pair const entry { group, key };
+		static view const zenity = "zenity";
+
 		// Look for the Zenity dialog utility program
-		constexpr auto program = env::opt::get("DIALOG", "zenity");
-		if (auto const path = which(program); empty(path))
+		auto const program = env::opt::get(entry, zenity);
+		if (auto const path = which(program); path.empty())
 		{
 			return path;
 		}
 
 		// Program is first command in paired
 		fwd::vector<char const*> list;
-		list.push_back(program);
+		list.push_back(data(program));
 
 		// Arguments null terminated
-		auto s = fwd::join(command);
+		auto s = fmt::join(command);
 		for (auto u : fmt::split(s))
 		{
 			list.push_back(u.data());
@@ -68,9 +52,9 @@ namespace env::desktop
 		return get(sub);
 	}
 
-	static auto param(view key, view value)
+	static auto param(fmt::string::view key, fmt::string::view value)
 	{
-		return fmt::to_pair(key, value);
+		return fmt::join({key, value}, "=");
 	}
 
 	shell::line dialog::select(view path, mode mask)
@@ -94,7 +78,7 @@ namespace env::desktop
 			command.emplace_back("--save");
 		}
 
-		return get(command);
+		return with(command);
 	}
 
 	static auto message_type(dialog::msg type)
@@ -119,10 +103,10 @@ namespace env::desktop
 
 		if (not empty(text))
 		{
-			command.emplace_back(param("--text", value));
+			command.emplace_back(param("--text", text));
 		}
 
-		return get(command);
+		return with(command);
 	}
 
 	shell::line dialog::enter(view start, view label, bool hide)
@@ -138,10 +122,10 @@ namespace env::desktop
 			command.emplace_back("--hide-text");
 		}
 
-		return get(command);
+		return with(command);
 	}
 
-	shell::line dialog::text(view path, view box, view font, txt type)
+	shell::line dialog::text(view path, view check, view font, txt type)
 	{
 		vector command { "--text-info" };
 
@@ -166,13 +150,13 @@ namespace env::desktop
 		{
 			command.emplace_back(param("--checkbox", check));
 		}
-		return get(command);
+		return with(command);
 
 	}
 
-	shell::line dialog::form(edges type, view text, view title)
+	shell::line dialog::form(graph add, view text, view title)
 	{
-		vector command { "--forms", newline };
+		vector command { "--forms" };
 
 		if (not empty(text))
 		{
@@ -182,13 +166,13 @@ namespace env::desktop
 		{
 			command.emplace_back(param("--text", title));
 		}
-		for (auto const& add : type)
+		for (auto const& edge : add)
 		{
 			auto const key = view("--add-") + add.second;
 			command.emplace_back(param(key, add.first));
 		}
 
-		return get(command);
+		return with(command);
 	}
 
 	shell::line dialog::notify(view text, view icon)
@@ -204,7 +188,7 @@ namespace env::desktop
 			command.emplace_back(param("--icon", icon));
 		}
 
-		return get(command);
+		return with(command);
 	}
 
 	shell::line dialog::calendar(view text, view format, int day, int month, int year)
@@ -232,7 +216,7 @@ namespace env::desktop
 			command.empalce_back(param("--year", year));
 		}
 
-		return get(command);
+		return with(command);
 	}
 
 	shell::span dialog::color(view start, bool palette)
@@ -248,7 +232,7 @@ namespace env::desktop
 			command.emplace_back("--show-palette");
 		}
 
-		return get(command);
+		return with(command);
 	}
 }
 

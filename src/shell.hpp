@@ -11,9 +11,10 @@ namespace env
 		using view   = string::view;
 		using vector = view::vector;
 		using span   = view::span;
+		using graph  = view::graph;
 		using line   = view::line;
-		using out    = view::out;
-		using in     = view::in;
+		using out    = view::out::ref;
+		using in     = view::in::ref;
 
 		vector cache;
 		string last;

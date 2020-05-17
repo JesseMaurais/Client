@@ -37,6 +37,8 @@ namespace fwd
 		: line(pos, &ref) 
 		{ }
 
+		bool empty() const { return this->second == this->first; }
+
 		auto size() const { return this->second - this->first; }
 
 		auto begin() const { return that->data() + this->first; }
@@ -104,9 +106,11 @@ namespace fwd
 	template
 	<
 		class Node, 
-		template <class> class Alloc = allocator
+		template <class> class Alloc = allocator,
+		template <class, template <class> class> class Vector = vector,
+		template <class> class Span = span
 	>
-	using graph = std::vector<pair<Node>, Alloc<Node>>;
+	using graph = line<pair<Node>, Alloc, Vector, Span>;
 
 	template
 	<

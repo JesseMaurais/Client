@@ -15,22 +15,24 @@
 
 namespace sys::win
 {
+	const char* strerr(DWORD dw, void* h = nullptr);
+
+	template <typename... Args> int err(Args... args)
+	{
+		if (not quiet)
+		{
+			auto const no = GetLastError();
+			auto const s = strerr(no);
+			return warn(args..., s);
+		}
+		return -1;
+	}
+
 	inline auto invalid = INVALID_HANDLE_VALUE;
 
 	inline bool fail(HANDLE h)
 	{
 		return nullptr == h or invalid == h;
-	}
-
-	template <typename... Args>
-	inline void err(Args... args)
-	{
-		if (sys::debug)
-		{
-			auto const no = GetLastError();
-			auto const s = sys::win::strerr(no);
-			sys::warn(args..., s);
-		}
 	}
 
 	inline HANDLE get(int fd)
@@ -47,7 +49,7 @@ namespace sys::win
 		return _open_osfhandle(iptr, flags);
 	}
 
-	inline auto wait(HANDLE h, DWORD ms = INFINITE)
+	inline DWORD wait(HANDLE h, DWORD ms = INFINITE)
 	{
 		auto const dw = WaitForSingleObject(h, ms);
 		if (WAIT_FAILED == dw)
@@ -78,7 +80,7 @@ namespace sys::win
 	{
 		security_attributes(bool inherit = true)
 		{
-			bInheritHandle = inherit;
+			bInheritHandle = inherit ? TRUE : FALSE;
 		}
 	};
 

@@ -7,20 +7,18 @@
 
 #include "sys.hpp"
 #include "err.hpp"
+#include "file.hpp"
 #include <unistd.h>
 
 namespace sys::uni
 {
-	constexpr int invalid = -1;
+	using namespace env::file;
 
-	inline bool fail(int value)
-	{
-		return invalid == value;
-	}
+	const char* strerr(int no);
 
 	template <typename... Args> int err(int no, Args... args)
 	{
-		return sys::warn(args..., fmt::err(no));
+		return quiet ? -1 : sys::warn(args..., strerr(no));
 	}
 }
 
