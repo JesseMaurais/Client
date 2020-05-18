@@ -29,9 +29,9 @@ namespace env::dir
 	using span   = view::span;
 	using entry  = fwd::predicate<view>;
 
-	extern env::node::ref paths; // pwd, paths
-	extern env::node::ref config; // config_home, config_dirs
-	extern env::node::ref data; // data_home, data_dirs
+	extern const node & paths; // pwd, paths
+	extern const node & config; // config_home, config_dirs
+	extern const node & data; // data_home, data_dirs
 
 	constexpr auto stop = fwd::always<view>;
 	constexpr auto next = fwd::never<view>;
@@ -44,7 +44,6 @@ namespace env::dir
 	entry any(view, mode = ok, entry = stop);
 
 	bool find(view, entry);
-	bool find(span, entry);
 	bool find(span, entry);
 	bool find(edges, entry);
 

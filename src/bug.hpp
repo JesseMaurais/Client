@@ -9,7 +9,8 @@
 
 // assert just in case expression did not throw
 #define except(expression)\
-	try { expression; assert(not #expression); } catch(...) { }
+	try { (void)(expression); assert(not #expression); }\
+	catch(...) { }
 
 // supply the signature for a unit test callback
 #define test(name) dynamic void test_##name()

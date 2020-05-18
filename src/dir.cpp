@@ -85,11 +85,11 @@ namespace
 
 namespace env::dir
 {
-	node::ref paths = PATHS;
-	node::ref config = CONFIG;
-	node::ref data = DATA;
+	const node & paths = PATHS;
+	const node & config = CONFIG;
+	const node & data = DATA;
 
-	bool find(string::view path, entry look)
+	bool find(view path, entry look)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -108,9 +108,9 @@ namespace env::dir
 		return failure;
 	}
 
-	bool find(string::view::span paths, entry look)
+	bool find(span paths, entry look)
 	{
-		for (auto const path : paths)
+		for (view const path : paths)
 		{
 			if (find(path, look))
 			{
@@ -120,19 +120,7 @@ namespace env::dir
 		return false;
 	}
 
-	bool find(string::span paths, entry look)
-	{
-		for (auto const path : paths)
-		{
-			if (find(path, look))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool find(string::view::span paths, entry look)
+	bool find(edges paths, entry look)
 	{
 		return find(paths.first, look) or find(paths.second, look);
 	}

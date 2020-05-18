@@ -8,7 +8,7 @@
 
 namespace
 {
-	std::errc cibst noerr { };
+	std::errc const noerr { };
 
 	template <typename T, typename C>
 	T to_fp(fmt::string::view u, T nan, C* cast)

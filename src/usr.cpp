@@ -2,10 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "usr.hpp"
-#include "fmt.hpp"
+#include "type.hpp"
 #include "ini.hpp"
 #include "opt.hpp"
 #include "sys.hpp"
+#include "file.hpp"
 #include "dir.hpp"
 #include "err.hpp"
 #include <fstream>
@@ -59,9 +60,9 @@ namespace
 				constexpr auto base = "applications.menu";
 				auto const menu = fmt::join({env::usr::menu_prefix, base});
 				path = fmt::dir::join({env::usr::config_home, "menus", menu});
-				if (env::file::fail(path))
+				if (env::dir::fail(path))
 				{
-					fmt::span<fmt::string_view> const dirs = env::usr::config_dirs;
+					fmt::string::view::span const dirs = env::usr::config_dirs;
 					for (auto const dir : dirs)
 					{
 						path = fmt::dir::join({dir, menu});
@@ -281,7 +282,7 @@ namespace
 
 	private:
 
-		char const *var, *val;
+		fmt::string::view const var, val;
 
 		fmt::string::view cached() const
 		{
