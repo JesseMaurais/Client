@@ -2,11 +2,14 @@
 #include "fmt.hpp"
 #include <sstream>
 #include <charconv>
+#include <system_error>
 #include <cstdlib>
 #include <cmath>
 
 namespace
 {
+	std::errc cibst noerr { };
+
 	template <typename T, typename C>
 	T to_fp(fmt::string::view u, T nan, C* cast)
 	{
@@ -28,7 +31,7 @@ namespace
 		auto end = begin + u.size();
 		auto value = static_cast<T>(std::nan(""));
 		auto code = std::from_chars(begin, end, value, base);
-		if (sys::noerr != code.ec)
+		if (noerr != code.ec)
 		{
 			sys::warn(here, code.ec);
 		}
@@ -44,7 +47,7 @@ namespace
 			auto begin = data(s);
 			auto end = begin + size(s);
 			auto code = std::to_chars(begin, end, value, base);
-			if (sys::noerr != code.ec)
+			if (noerr != code.ec)
 			{
 				if (std::errc::value_too_large == code.ec)
 				{

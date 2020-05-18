@@ -59,7 +59,7 @@ namespace
 	{
 		operator type() const final
 		{
-			return std::pair { env::pwd, env::paths };
+			return { env::pwd, env::paths };
 		}
 
 	} PATHS;

@@ -28,7 +28,7 @@ namespace env
 		{
 			last = error.what();
 		}
-		return { first, second, cache };
+		return { first, second, &cache };
 	}
 
 	shell::line shell::list(view name)
@@ -113,19 +113,20 @@ namespace env
 					return get(sub);
 				}
 			}
-			return { 0, 0, cache };
+			return { 0, 0, &cache };
 		}
 		#endif
 	}
 }
 
-#ifndef test
+#ifdef test
 test(shell)
 {
 	auto const list = env::command.list(env::pwd);
 	assert(not empty(list));
 	auto const copy = env::command.copy(__FILE__);
-	assert(copy.cache.at(__LINE__).find("assert") != fmt::npos);
+	assert(not empty(copy));
+	assert(env::command.cache.at(__LINE__).find("assert") != fmt::npos);
 }
 #endif
 
