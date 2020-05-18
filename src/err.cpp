@@ -2,23 +2,6 @@
 #include "sync.hpp"
 #include <cassert> // overwrite assert
 
-fmt::string::out fmt::operator<<(string::out out, std::errc const& ec)
-{
-	return out << std::make_error_condition(ec).message();
-}
-
-fmt::string::out fmt::operator<<(string::out out, std::exception const& ex)
-{
-	return out << ex.what();
-}
-
-fmt::string::out fmt::operator<<(string::out out, fmt::string::view::init where)
-{
-	assert(where.size() == 3);
-	auto const at = where.begin();
-	return out << at[0] << '(' << at[1] << ')' << at[2] << ':';
-}
-
 namespace
 {
 	struct : env::variable<fmt::string::view>
@@ -50,21 +33,19 @@ namespace sys
 	#endif
 
 	thread_local fmt::string::stream local;
+	fmt::string::out::ref out = local;
 
-	fmt::string::out::ref out()
-	{
-		return local;
-	}
-
-	void flush() 
+	fmt::string::out::ref flush(fmt::string::out::ref put) 
 	{
 		static sys::mutex key;
 		auto const unlock = key.lock();
+
 		fmt::string line;
 		while (std::getline(local, line))
 		{
-			std::cerr << line << std::endl;
+			put << line << std::endl;
 		}
+		return put;
 	}
 
 	int bug(fmt::string::view message, bool no)

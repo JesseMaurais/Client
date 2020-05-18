@@ -22,7 +22,7 @@ namespace fwd
 		class Container = Vector<Type, Alloc>,
 		class Size = typename Container::size_type,
 		class Pointer = typename std::add_pointer<const Container>::type,
-		class Reference = typename std::add_lvalue_reference<const Container>::type,
+		class Reference = typename std::add_rvalue_reference<const Container>::type,
 		class Base = pair<Size>
 	>
 	struct line : Base
@@ -97,11 +97,9 @@ namespace fwd
 		class Node,
 		template <class> class Alloc = allocator,
 		template <class, template <class> class> class Vector = vector,
-		template <class> class Span = span,
-		// details
-		class List = line<Node, Alloc, Vector, Span>
+		template <class> class Span = span
 	>
-	using edges = std::pair<const Node, List>;
+	using edges = std::pair<const Node, Span<Node>>;
 
 	template
 	<

@@ -1,8 +1,6 @@
 #ifndef err_hpp
 #define err_hpp "Error Format"
 
-#include <system_error>
-#include <exception>
 #include "fmt.hpp"
 
 // Pre condition
@@ -19,7 +17,7 @@
 #ifndef NDEBUG
 #	define assert(x) if (not(x)) sys::warn(here, #x)
 #	define alert(x) if (bool(x)) sys::err(here, #x)
-#	define trace(...) sys::warn(where, __VA_ARGS__)
+#	define trace(...) sys::warn(here, __VA_ARGS__)
 #	define verify(x) assert(x)
 #else
 #	define assert(x)
@@ -27,8 +25,6 @@
 #	define trace(...)
 #	define verify(x) (x)
 #endif
-
-// if only(failure) out << "Only without NDEBUG";
 
 // Negative boolean
 
@@ -42,15 +38,11 @@ namespace fmt
 {
 	struct where { const char* file; int line; const char* func; };
 
-	string::out::ref operator<<(string::out::ref, std::errc const &);
-	string::out::ref operator<<(string::out::ref, std::exception const &);
-	string::out::ref operator<<(string::out::ref, where);
-
-	template <typename T, typename... S> auto err(T t, S... s)
+	template <typename... T> auto err(where const& w, T... t)
 	{
 		string::stream ss;
-		ss << t;
-		if constexpr (0 < sizeof...(s)) ((ss << ' ' << s), ...);
+		ss << w.file << "(" << w.line << ") " << w.func << ": ";
+		((ss << " " << t), ...);
 		return ss.str();
 	}
 }
@@ -80,8 +72,10 @@ namespace sys
 	}
 }
 
+// Unit tests
+
 #ifndef NDEBUG
-# include "bug.hpp"
+#	include "bug.hpp"
 #endif
 
 #endif // file
