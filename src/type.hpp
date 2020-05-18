@@ -350,24 +350,37 @@ namespace fmt
 			return n;
 		}
 
-		static auto join(span t, view u)
+		template <class Span> static auto join(Span t, view u)
 		/// Join strings in $t with $u inserted between
 		{
 			string s;
-			auto const z = t.size();
-			for (auto i = null; i < z; ++i)
+			for (view v : t)
 			{
-				if (i) s += u;
-				s += t[i];
+				if (not empty(s))
+				{
+					s += u;
+				}
+				s += v;
 			}
 			return s;
 		}
 
-		static auto join(init n, view u)
+		template <class Span> static auto split(Span t, view u)
+		/// Split strings in $p delimited by $v
 		{
-			vector v(n);
-			span t(v);
-			return join(t, u);
+			fwd::vector<Span> s;
+			auto p = t.data();
+			size_t i = 0, j = 0;
+			for (view v : t)
+			{
+				if (u == v)
+				{
+					s.emplace_back(p + i, j - i);
+					j = ++i;
+				}
+				else ++j;
+			}
+			return s;
 		}
 
 		static auto split(view u, view v)
@@ -381,21 +394,6 @@ namespace fmt
 				auto const w = u.substr(i, k - i);
 				if (i <= k) t.emplace_back(w);
 				i = k + vz;
-			}
-			return t;
-		}
-
-		static auto split(span p, view v)
-		{
-			fwd::vector<span> t;
-			auto const ptr = p.data();
-			for (size_t begin = 0, it = 0; it < p.size(); ++it)
-			{
-				if (p[it] == v)
-				{
-					t.emplace_back(ptr + it, it - begin);
-					begin = it + 1;
-				}
 			}
 			return t;
 		}
@@ -524,7 +522,17 @@ namespace fmt
 		return cstr.join(t, u);
 	}
 
+	inline auto join(string::span t, string::view u = "")
+	{
+		return cstr.join(t, u);
+	}
+
 	inline auto join(string::view::init t, string::view u = "")
+	{
+		return cstr.join(t, u);
+	}
+
+	inline auto join(string::init t, string::view u = "")
 	{
 		return cstr.join(t, u);
 	}
@@ -535,6 +543,11 @@ namespace fmt
 	}
 
 	inline auto split(string::view::span p, string::view v = "")
+	{
+		return cstr.split(p, v);
+	}
+
+	inline auto split(string::span p, string::view v = "")
 	{
 		return cstr.split(p, v);
 	}

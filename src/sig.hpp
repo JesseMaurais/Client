@@ -1,7 +1,6 @@
 #ifndef sig_hpp
 #define sig_hpp "Signals and Sockets"
 
-#include "err.hpp"
 #include "ptr.hpp"
 #include <csignal>
 #include <algorithm>
@@ -14,7 +13,7 @@ namespace sig
 	<
 		typename Slot, typename... Args
 	> 
-	class socket : unique
+	class socket : fwd::unique
 	{
 	public:
 
@@ -110,12 +109,14 @@ namespace sys::sig
 	using signature = slot::signature;
 	using observer = slot::observer;
 
-	struct scope : unique, slot
+	struct scope : fwd::unique, slot
 	{
 		scope(int no, observer ob) : slot(&event(no), ob)
 		{
 			old.ob = std::signal(no, raise);
+			#ifdef alert
 			alert(SIG_ERR == old.ob);
+			#endif
 		}
 
 		~scope()
@@ -151,14 +152,6 @@ namespace sys::sig
 			};
 		}
 	};
-
-	void print(int signo);
-	inline auto scan(fwd::init<int> in, observer go = print)
-	{
-		std::vector<scope> out;
-		for (auto no : in) out.emplace_back(go, in);
-		return out;
-	}
 }
 
 #endif // file

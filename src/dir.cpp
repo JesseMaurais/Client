@@ -3,7 +3,7 @@
 
 #include "dir.hpp"
 #include "err.hpp"
-#include "fmt.hpp"
+#include "type.hpp"
 #include "usr.hpp"
 #include "opt.hpp"
 #include "sys.hpp"
@@ -55,7 +55,7 @@ namespace fmt::path
 
 namespace
 {
-	struct : env::pair
+	struct : env::node
 	{
 		operator type() const final
 		{
@@ -64,7 +64,7 @@ namespace
 
 	} PATHS;
 
-	struct : env::pair
+	struct : env::node
 	{
 		operator type() const final
 		{
@@ -73,7 +73,7 @@ namespace
 
 	} CONFIG;
 
-	struct : env::pair
+	struct : env::node
 	{
 		operator type() const final
 		{
@@ -85,9 +85,9 @@ namespace
 
 namespace env::dir
 {
-	order::ref paths = PATHS;
-	order::ref config = CONFIG;
-	order::ref data = DATA;
+	node::ref paths = PATHS;
+	node::ref config = CONFIG;
+	node::ref data = DATA;
 
 	bool find(string::view path, entry look)
 	{
@@ -137,17 +137,17 @@ namespace env::dir
 		return find(paths.first, look) or find(paths.second, look);
 	}
 
-	entry all(string::view u, file::mode m, entry e)
+	entry all(string::view u, mode m, entry e)
 	{
 		return mask(m) || regex(u) || e;
 	}
 
-	entry any(string::view u, file::mode m, entry e)
+	entry any(string::view u, mode m, entry e)
 	{
 		return all(u, m, e);
 	}
 
-	entry mask(file::mode am)
+	entry mask(mode am)
 	{
 		auto const flags = file::convert(am);
 		return [=](fmt::string::view u)
@@ -202,7 +202,7 @@ namespace env::dir
 		};
 	}
 
-	bool fail(fmt::string::view path, file::mode am)
+	bool fail(fmt::string::view path, mode am)
 	{
 		if (not fmt::terminated(path))
 		{

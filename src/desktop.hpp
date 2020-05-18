@@ -4,16 +4,16 @@
 #include "shell.hpp"
 #include "opt.hpp"
 
-namespace env::desktop
+namespace env
 {
-	extern opt::word const group;
-	// Desktop settings group index
-
-	bool current(fmt::string::view name);
-	// Whether name matches current session
-
-	struct dialog : shell
+	extern struct desktop : shell
 	{
+		static opt::word const group;
+		// Desktop settings group index
+
+		static bool current(view name);
+		// Whether name matches current session
+
 		line with(span command);
 		// Open dialog with command
 
@@ -47,7 +47,8 @@ namespace env::desktop
 		enum class mode { none, many, dir, save };
 		line select(view start = "", mode = mode::none);
 		// User selects file(s) from the system
-	};
+
+	} &dialog;
 }
 
 #endif // file

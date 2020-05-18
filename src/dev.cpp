@@ -3,7 +3,7 @@
 
 namespace env::dev
 {
-	shell::line dev::sym(view path)
+	shell::line dump::sym(view path)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -14,7 +14,7 @@ namespace env::dev
 		return get(sub);
 	}
 
-	shell::line dev::dyn(view path)
+	shell::line dump::dyn(view path)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32

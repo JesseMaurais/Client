@@ -14,11 +14,20 @@ namespace fwd
 		virtual bool operator()(T) const = 0;
 	};
 
+	template
+	<
+		typename T
+	>
+	struct typeof
+	{
+		using type = T;
+	};
+
 	template 
 	<
 		typename T
 	> 
-	struct constant
+	struct constant : typeof<T>
 	{
 		virtual operator T() const = 0;
 	};

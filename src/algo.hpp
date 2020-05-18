@@ -21,8 +21,8 @@ namespace fwd
 		class View = Span<Type>,
 		class Container = Vector<Type, Alloc>,
 		class Size = typename Container::size_type,
-		class Pointer = typename Container::const_pointer,
-		class Reference = typename Container::const_reference,
+		class Pointer = typename std::add_pointer<const Container>::type,
+		class Reference = typename std::add_lvalue_reference<const Container>::type,
 		class Base = pair<Size>
 	>
 	struct line : Base

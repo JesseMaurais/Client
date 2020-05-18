@@ -1,7 +1,8 @@
 #ifndef socket_hpp
 #define socket_hpp "Network Sockets"
 
-#include "pipe.hpp"
+#include "file.hpp"
+#include "ptr.hpp"
 
 namespace sys::net
 {
@@ -10,7 +11,7 @@ namespace sys::net
 
 namespace env::file
 {
-	struct socket : unique, stream
+	struct socket : fwd::unique, stream
 	{
 		using address = sys::net::address;
 

@@ -5,16 +5,16 @@
 
 namespace env
 {
-	struct shell
+	extern struct shell
 	{
 		using string = fmt::string;
 		using view   = string::view;
-		using vector = view::vector;
-		using span   = view::span;
+		using vector = string::vector;
+		using span   = string::span;
 		using graph  = view::graph;
-		using line   = view::line;
-		using out    = view::out::ref;
-		using in     = view::in::ref;
+		using line   = string::line;
+		using out    = string::out::ref;
+		using in     = string::in::ref;
 
 		vector cache;
 		string last;
@@ -23,7 +23,7 @@ namespace env
 		// Cache all lines in to end, return indices
 
 		line list(view directory = ".");
-		// Directory given by path
+		// List files in directory
 
 		line copy(view path);
 		// Lines in file given by path
@@ -36,9 +36,8 @@ namespace env
 
 		line open(view path);
 		// Preferred application for file type at path
-	};
 
-	extern const shell& cmd;
+	} &command;
 }
 
 #endif // file

@@ -1,12 +1,14 @@
 #include "shell.hpp"
 #include "desktop.hpp"
-#include "err.hpp"
 #include "dir.hpp"
 #include "ps.hpp"
+#include "err.hpp"
 #include <exception>
 
 namespace env
 {
+	struct shell & command = dialog;
+
 	shell::line shell::get(in put, char end, int count)
 	{
 		// Result in span at cache end
@@ -40,7 +42,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::line shell::copy(view path, int count)
+	shell::line shell::copy(view path)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -89,7 +91,7 @@ namespace env
 		}
 		#else
 		{
-			constexpr auto test
+			string::view::pair const test [] =
 			{ 
 				{ "xfce", "exo-open" },
 				{ "gnome", "gnome-open" },
@@ -99,9 +101,9 @@ namespace env
 
 			for (auto [session, program] : test)
 			{
-				if (empty(session) or desktop::is(session))
+				if (empty(session) or desktop::current(session))
 				{
-					if (empty(where(program)))
+					if (auto path = which(program); not path.empty())
 					{
 						continue;
 					}
@@ -111,7 +113,7 @@ namespace env
 					return get(sub);
 				}
 			}
-			return { { 0, 0 }, cache };
+			return { 0, 0, cache };
 		}
 		#endif
 	}
@@ -120,10 +122,9 @@ namespace env
 #ifndef test
 test(shell)
 {
-	env::shell cmd;
-	auto const list = cmd.list(env::pwd);
+	auto const list = env::command.list(env::pwd);
 	assert(not empty(list));
-	auto const copy = cmd.copy(__FILE__);
+	auto const copy = env::command.copy(__FILE__);
 	assert(copy.cache.at(__LINE__).find("assert") != fmt::npos);
 }
 #endif

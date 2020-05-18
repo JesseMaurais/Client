@@ -5,11 +5,19 @@
 
 namespace fwd
 {
+	struct unique
+	{
+		unique(const unique &) = delete;
+		unique & operator = (unique const &) = delete;
+	protected:
+		unique() = default;
+	};
+
 	template 
 	<
 		class Type, class Remove
 	>
-	inline auto make_ptr(Type* ptr, Remove rm)
+	auto make_ptr(Type* ptr, Remove rm)
 	{
 		return std::unique_ptr<Type, Remove>(ptr, rm);
 	}
@@ -18,18 +26,10 @@ namespace fwd
 	<
 		class Type, class Remove
 	>
-	inline auto null_ptr(Remove rm)
+	auto null_ptr(Remove rm)
 	{
 		return make_ptr((Type) nullptr, rm);
 	}
-
-	class unique
-	{
-		unique(const unique &) = delete;
-		unique & operator = (unique const &) = delete;
-	protected:
-		unique() = default;
-	};
 }
 
 #endif // file

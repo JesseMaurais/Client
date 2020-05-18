@@ -8,7 +8,7 @@
 
 namespace sys::uni
 {
-	class directory : unique
+	class directory : fwd::unique
 	{
 		DIR *ptr;
 

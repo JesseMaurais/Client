@@ -7,8 +7,11 @@
 #include "sys.hpp"
 #include "ps.hpp"
 
-namespace env::desktop
+namespace env
 {
+	thread_local desktop local;
+	desktop & dialog = local;
+
 	opt::word const entry = fmt::str::put("Desktop Entry");
 
 	bool is(fmt::string::view name)
@@ -18,13 +21,13 @@ namespace env::desktop
 		return current.find(lower) != fmt::npos;
 	}
 
-	shell::line dialog::with(span command)
+	shell::line desktop::with(span command)
 	{
 		static opt::word const key = fmt::str::put("DIALOG");
 		static opt::pair const entry { group, key };
 		static view const zenity = "zenity";
 
-		// Look for the Zenity dialog utility program
+		// Look for the Zenity desktop utility program
 		auto const program = env::opt::get(entry, zenity);
 		if (auto const path = which(program); path.empty())
 		{
@@ -36,19 +39,22 @@ namespace env::desktop
 		list.push_back(data(program));
 
 		// Arguments null terminated
-		auto s = fmt::join(command);
-		for (auto u : fmt::split(s))
+		if (auto s = fmt::join(command); not empty(s))
 		{
-			list.push_back(u.data());
+			for (auto u : fmt::split(s))
+			{
+				list.push_back(data(u));
+			}
 		}
 
-		// Command paired null terminated
+		// Command list null terminated
 		auto const argc = list.size();
 		list.push_back(nullptr);
 		auto const argv = list.data();
 
-		// Start process with command
-		fmt::ipstream sub { argc, argv };
+		// Run process with command
+		fmt::ipstream sub 
+			{ argc, argv };
 		return get(sub);
 	}
 
@@ -57,7 +63,7 @@ namespace env::desktop
 		return fmt::join({key, value}, "=");
 	}
 
-	shell::line dialog::select(view path, mode mask)
+	shell::line desktop::select(view path, mode mask)
 	{
 		vector command { "--file-selection" };
 
@@ -81,23 +87,23 @@ namespace env::desktop
 		return with(command);
 	}
 
-	static auto message_type(dialog::msg type)
+	static auto message_type(desktop::msg type)
 	{
 		switch (type)
 		{
 		default:
-		case dialog::msg::error:
+		case desktop::msg::error:
 			return "--error";
-		case dialog::msg::info:
+		case desktop::msg::info:
 			return "--info";
-		case dialog::msg::query:
+		case desktop::msg::query:
 			return "--question";
-		case dialog::msg::warn:
+		case desktop::msg::warn:
 			return "--warn";
 		}
 	};
 
-	shell::line dialog::message(view text, msg type)
+	shell::line desktop::message(view text, msg type)
 	{
 		vector command { message_type(type) };
 
@@ -109,7 +115,7 @@ namespace env::desktop
 		return with(command);
 	}
 
-	shell::line dialog::enter(view start, view label, bool hide)
+	shell::line desktop::enter(view start, view label, bool hide)
 	{
 		vector command { param("--entry-text", start) };
 
@@ -125,7 +131,7 @@ namespace env::desktop
 		return with(command);
 	}
 
-	shell::line dialog::text(view path, view check, view font, txt type)
+	shell::line desktop::text(view path, view check, view font, txt type)
 	{
 		vector command { "--text-info" };
 
@@ -154,7 +160,7 @@ namespace env::desktop
 
 	}
 
-	shell::line dialog::form(controls add, view text, view title)
+	shell::line desktop::form(controls add, view text, view title)
 	{
 		vector command { "--forms" };
 
@@ -177,7 +183,7 @@ namespace env::desktop
 		return with(command);
 	}
 
-	shell::line dialog::notify(view text, view icon)
+	shell::line desktop::notify(view text, view icon)
 	{
 		vector command { "--notification" };
 
@@ -193,7 +199,7 @@ namespace env::desktop
 		return with(command);
 	}
 
-	shell::line dialog::calendar(view text, view format, int day, int month, int year)
+	shell::line desktop::calendar(view text, view format, int day, int month, int year)
 	{
 		vector command { "--calendar" };
 
@@ -221,7 +227,7 @@ namespace env::desktop
 		return with(command);
 	}
 
-	shell::line dialog::color(view start, bool palette)
+	shell::line desktop::color(view start, bool palette)
 	{
 		vector command { "--color-selection" };
 
