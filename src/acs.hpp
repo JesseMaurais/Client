@@ -468,8 +468,8 @@ namespace fmt::uni
 		Chinese_phonetic_annotation  = 4,
 		end_phonetic_annotations     = 5,
 	};
-	/*
-	enum QUAD
+
+	/*enum QUAD
 	{
 		flush_to_home            = 0,
 		flush_to_home_with_fill  = 1,
@@ -478,16 +478,16 @@ namespace fmt::uni
 		flush_to_limit           = 4,
 		flush_to_limit_with_fill = 5,
 		flush_to_both            = 6,
-	};
-	*/
+	};*/
+
 	//
 	// Utility Functions
 	//
 
-	using inter = range<'\x20', '\x2F'>;
-	using param = range<'\x30', '\x3F'>;
-	using close = range<'\x40', '\x7E'>;
-	using privy = range<'\x70', '\x7E'>;
+	using inter = plane<'\x20', '\x2F'>;
+	using param = plane<'\x30', '\x3F'>;
+	using close = plane<'\x40', '\x7E'>;
+	using privy = plane<'\x70', '\x7E'>;
 
 	constexpr unsigned column_width = 4;
 

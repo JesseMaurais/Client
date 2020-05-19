@@ -4,7 +4,6 @@
 #include "dir.hpp"
 #include "file.hpp"
 #include "x11/auth.hpp"
-#include "x11/client.hpp"
 
 namespace
 {
@@ -23,11 +22,11 @@ namespace
 	{
 		operator type() const final
 		{
-			auto const u = env::var::get("XAUTHORITY");
+			auto u = env::var::get("XAUTHORITY");
 			if (empty(u))
 			{
-				fmt::string::view::vector const path { env::home, ".Xauthority" };
-				static auto s = fmt::dir::join(path);
+				constexpr auto author = ".Xauthority";
+				static auto s = fmt::dir::join({ env::home, author });
 				u = s;
 			}
 			return u;
@@ -38,14 +37,14 @@ namespace
 
 namespace x11::auth
 {
-	in::ref operator>>(in::ref str, info& out)
+	bytes::in::ref operator>>(bytes::in::ref in, info::ref out)
 	{
 		union {
 			unsigned char b[2];
 			unsigned short sz;
 		};
 
-		if (str.get(b, 2))
+		if (in.get(b, 2))
 		{
 			out.family = sz;
 		
@@ -59,10 +58,10 @@ namespace x11::auth
 
 			for (auto s : ptr)
 			{
-				if (str.get(b, 2))
+				if (in.get(b, 2))
 				{
 					s->resize(sz);
-					if (str.get(ptr->data(), sz))
+					if (in.get(ptr->data(), sz))
 					{
 						continue;
 					}
@@ -70,7 +69,7 @@ namespace x11::auth
 				break;
 			}
 		}
-		return str;
+		return in;
 	}
 };
 

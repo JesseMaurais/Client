@@ -11,7 +11,7 @@ namespace x11
 
 namespace x11::auth
 {
-	struct info
+	struct info : fmt::struct_brief<info>
 	{
 		unsigned short family;
 		fmt::string address;
@@ -20,7 +20,7 @@ namespace x11::auth
 		fmt::string data;
 	};
 
-	std::istream& operator>>(std::istream& in, info& out);
+	bytes::in::ref operator>>(bytes::in::ref, info::ref);
 };
 
 #endif

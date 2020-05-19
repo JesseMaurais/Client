@@ -11,7 +11,7 @@ namespace fmt
 	<
 		char... Code
 	>
-	string::out enc(string::out out)
+	string::out::ref enc(string::out::ref out)
 	{
 		return (out << ... << Code);
 	}

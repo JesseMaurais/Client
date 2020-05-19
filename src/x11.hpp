@@ -10,7 +10,7 @@
 
 namespace x11
 {
-	using bytes = fmt::bystring;
+	using bytes = fmt::basic_string<std::byte>;
 
 	template
 	<

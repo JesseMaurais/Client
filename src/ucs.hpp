@@ -8,15 +8,9 @@ namespace fmt::uni
 {
 	template 
 	<
-		wint_t Min, wint_t Max
+		int Min, int Max
 	> 
 	using plane = fwd::closure<Min, Max>;
-
-	template
-	<
-		class... Planes
-	>
-	struct compose = fwd::compose<Planes...>;
 
 	using space = plane<0x000000, 0x10FFFF>;
 
@@ -48,18 +42,18 @@ namespace fmt::uni
 	using GSA_3 = plane<0x00A000, 0x00ABFF>; // general scripts area (Asia &Africa)
 	using HSA   = plane<0x00AC00, 0x00D7FF>; // Hangul syllables area
 	using SC    = plane<0x00D800, 0x00DFFF>; // surrogate codes
-	using PUA   = plane<0x00E000, 0x00F8FF>; // private use area
+	using PUA_0 = plane<0x00E000, 0x00F8FF>; // private use area
 	using CSA   = plane<0x00F900, 0x00FFFF>; // compatibility and specials area
 
 	// SMP plane
 
-	using GSA_5 = plane<0x010000, 0x0107FF>; // general scripts area
+	using GSA_4 = plane<0x010000, 0x0107FF>; // general scripts area
 	using RTL_1 = plane<0x010800, 0x010FFF>; // general scripts area (RTL)
-	using GSA_6 = plane<0x011000, 0x011FFF>; // general scripts area
+	using GSA_5 = plane<0x011000, 0x011FFF>; // general scripts area
 	using CHA   = plane<0x012000, 0x015FFF>; // cuneiform & hieroglyphic area
-	using GSA_7 = plane<0x016000, 0x016FFF>; // general scripts area
+	using GSA_6 = plane<0x016000, 0x016FFF>; // general scripts area
 	using ISA   = plane<0x017000, 0x01BBFF>; // ideographic scripts area
-	using GSA_8 = plane<0x01BC00, 0x01CFFF>; // general scripts area
+	using GSA_7 = plane<0x01BC00, 0x01CFFF>; // general scripts area
 	using SA_0  = plane<0x01D000, 0x01E7FF>; // symbols area
 	using RTL_2 = plane<0x01E800, 0x01EFFF>; // general scripts area
 	using SA_1  = plane<0x01F000, 0x01FFFF>; // symbols area
@@ -71,10 +65,10 @@ namespace fmt::uni
 
 	// Compound
 
-	using GSA  = compose<GSA_0, GSA_1, GSA_2, GSA_3, GSA_4, GSA_5, GSA_6, GSA_7, GSA_8>;
-	using RTL  = compose<RTL_0, RTL_1, RTL_2>;
-	using SA   = compose<SA_0, SA_1>;
-	using PUA  = compose<PUA_A, PUA_B>;
+	using GSA  = fwd::compose<GSA_0, GSA_1, GSA_2, GSA_3, GSA_4, GSA_5, GSA_6, GSA_7>;
+	using RTL  = fwd::compose<RTL_0, RTL_1, RTL_2>;
+	using SA   = fwd::compose<SA_0, SA_1>;
+	using PUA  = fwd::compose<PUA_0, PUA_A, PUA_B>;
 };
 
 #endif // file

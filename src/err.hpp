@@ -41,8 +41,15 @@ namespace fmt
 	template <typename... T> auto err(where const& w, T... t)
 	{
 		string::stream ss;
-		ss << w.file << "(" << w.line << ") " << w.func << ": ";
-		((ss << " " << t), ...);
+		ss 
+			<< w.file 
+			<< " (" 
+			<< w.line 
+			<< ") " 
+			<< w.func 
+			<< ": ";
+
+		(void) (ss << ...  << t);
 		return ss.str();
 	}
 }
