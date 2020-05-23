@@ -13,6 +13,7 @@ namespace doc
 		using in     = string::in;
 		using out    = string::out;
 		using view   = string::view;
+		using vector = view::vector;
 		using pair   = view::pair;
 		using span   = view::span;
 		

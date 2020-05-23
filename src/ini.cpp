@@ -15,17 +15,17 @@ namespace
 
 namespace doc
 {
-	auto ini::join(span list)
+	ini::string ini::join(span list)
 	{
 		return fmt::join(list, separator);
 	}
 
-	auto ini::split(view line)
+	ini::vector ini::split(view line)
 	{
 		return fmt::split(line, separator);
 	}
 
-	auto ini::join(init list)
+	ini::string ini::join(init list)
 	{
 		return fmt::join(list, separator);
 	}
@@ -36,7 +36,7 @@ namespace doc
 		{
 			// Read past comment
 			constexpr char omit = '#';
-			auto const beign = output.begin();
+			auto const begin = output.begin();
 			auto const end = output.end();
 			auto const it = fmt::skip(begin, end);
 			if (it != end and omit != *it)
@@ -52,12 +52,12 @@ namespace doc
 				}
 			}
 		}
-		return in;
+		return input;
 	}
 
 	ini::in::ref operator>>(ini::in::ref input, ini::ref output)
 	{
-		word group = 0;
+		env::opt::word group = 0;
 		ini::string token;
 
 		while (ini::getline(input, token))
@@ -80,8 +80,8 @@ namespace doc
 
 			// Create key pair for value entry
 			auto const pair = fmt::to_pair(token);
-			word const key = fmt::str::get(pair.first);
-			view const value = pair.second;
+			auto const key = fmt::str::get(pair.first);
+			auto const value = pair.second;
 			if (empty(value))
 			{
 				break;
@@ -95,27 +95,27 @@ namespace doc
 				#endif
 			}
 		}
-		return in;
+		return input;
 	}
 
 	ini::out::ref operator<<(ini::out::ref output, ini::cref input)
 	{
-		word last = -1;
+		env::opt::word last = -1;
 		for (auto [k, v] : input.keys)
 		{
 			if (key.first != last)
 			{
 				last = key.first;
 
-				view const group = fmt::str::get(k.first);
-				out << '[' << group << ']' << fmt::eol;
+				auto const group = fmt::str::get(k.first);
+				output << '[' << group << ']' << fmt::eol;
 			}
 			
-			view const key = fmt::str::get(k.second);
-			view const value = input.values.at(v);
-			out << key << "=" << value << fmt::eol;
+			auto const key = fmt::str::get(k.second);
+			ini::view const value = input.values.at(v);
+			output << key << "=" << value << fmt::eol;
 		}
-		return out;
+		return output;
 	}
 
 	bool ini::got(pair key) const
@@ -123,7 +123,7 @@ namespace doc
 		return keys.find(key) != keys.end();
 	}
 
-	view ini::get(pair key) const
+	ini::view ini::get(pair key) const
 	{
 		auto const it = keys.find(key);
 		return it == keys.end() ? fmt::nil : it->second;

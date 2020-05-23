@@ -20,7 +20,7 @@ namespace sys::uni
 			ptr = nullptr;
 		}
 
-		return make_ptr(ptr, [sz](auto ptr)
+		return fwd::make_ptr(ptr, [sz](auto ptr)
 		{
 			if (nullptr != ptr)
 			{
