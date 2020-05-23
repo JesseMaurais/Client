@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include "env.hpp"
+#include "x11.hpp"
 
 namespace x11
 {

@@ -18,17 +18,17 @@ namespace fmt
 
 	template
 	<
-		int... Params
+		int Param, int... Params
 	>
-	auto par(int param, Params... params)
+	string::out::ref par(string::out::ref out)
 	{
 		if constexpr (0 < sizeof...(Params))
 		{
-			return out << param << ';' << par(params...);
+			return out << Param << ';' << par<Params...>;
 		}
 		else
 		{
-			return out << param;
+			return out << Param;
 		}
 	}
 
@@ -42,7 +42,7 @@ namespace fmt
 		using next = par<Params...>;
 		using end = enc<Escape>;
 
-		return out << begin << next(params) << end;
+		return out << begin << next << end;
 	}
 
 	template
@@ -51,35 +51,17 @@ namespace fmt
 	>
 	auto ctl(Params... params)
 	{
-		return [=](string::out out) -> string::out
+		return [=](string::out::ref out) -> string::out::ref
 		{
 			return out << esc<G0::CSI, Escape>(params...);
 		};
-	}
-
-	namespace cursor
-	{
-		inline auto up       = ctl<CSI::CUU, int>; // up rows
-		inline auto down     = ctl<CSI::CUD, int>; // down rows
-		inline auto back     = ctl<CSI::CUB, int>; // back columns
-		inline auto next     = ctl<CSI::CNL, int>; // next line
-		inline auto previous = ctl<CSI::CPL, int>; // previous line
-		inline auto habs     = ctl<CSI::CHA, int>; // horizontal absolute
-		inline auto htab     = ctl<CSI::CHT, int>; // horizontal tab
-	}
-
-	namespace page
-	{
-		inline auto up   = ctl<CSI::SU> // scroll up
-		inline auto down = ctl<CSI::SD> // scroll down
-		inline auto 
 	}
 
 	template 
 	<
 		int... Params
 	>
-	string::out set(string::out out);
+	string::out::ref set(string::out::ref out);
 	{
 		return out << ctl<CSI::SGR>(Params...);
 	}
@@ -129,7 +111,6 @@ namespace fmt
 	constexpr auto overline = set<SGR::overline>;
 	constexpr auto frame_off = set<SGR::frame_off>;
 	constexpr auto overline_off = set<SGR::overline_off>;
-
 }
 
 #endif // file

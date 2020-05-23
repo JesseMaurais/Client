@@ -78,6 +78,7 @@ namespace fwd
 		class Iterator, 
 		int Size = 1, 
 		int Step = Size, 
+		// details
 		class Range = range<Iterator>,
 		class Base = pair<Iterator>
 	>
@@ -127,19 +128,19 @@ namespace fwd
 	>
 	struct closure
 	{
-		static_assert(First < Last);
+		static_assert(First < Last + 1);
 
 		static constexpr auto first = First;
 		static constexpr auto second = Last;
 
 		constexpr auto begin()
 		{
-			return First;
+			return first;
 		}
 
 		constexpr auto end()
 		{
-			return Last + 1;
+			return second + 1;
 		}
 
 		constexpr auto size()
@@ -147,26 +148,19 @@ namespace fwd
 			return end() - begin();
 		}
 
-		constexpr auto greater(auto digit)
-		{
-			ordering<decltype(digit)> const part;
-			return part(Last, digit);
-		}
-
 		constexpr auto less(auto digit)
 		{
-			ordering<decltype(digit)> const part;
-			return part(digit, First);
+			return digit < first;
 		}
 
-		constexpr auto at(auto digit)
+		constexpr auto more(auto digit)
 		{
-			return not greater(digit) and not less(digit);
+			return second < digit;
 		}
 
-		constexpr operator range<decltype(first)>()
+		constexpr auto over(auto digit)
 		{
-			return { begin(), end() };
+			return not more(digit) and not less(digit);
 		}
 	};
 
@@ -180,12 +174,12 @@ namespace fwd
 
 		constexpr auto any(auto digit)
 		{
-			return Part::at(digit) or Rest::any(digit);
+			return Part::over(digit) or Rest::any(digit);
 		}
 
 		constexpr auto all(auto digit)
 		{
-			return Part::at(digit) and Rest::all(digit);
+			return Part::over(digit) and Rest::all(digit);
 		}
 
 		constexpr auto size()
@@ -195,14 +189,12 @@ namespace fwd
 
 		constexpr auto begin()
 		{
-			return Part::first < Rest::begin()
-			     ? Part::first : Rest::begin();
+			return std::min(Part::begin(), Rest::begin());
 		}
 
 		constexpr auto end()
 		{
-			return Part::second > Rest::end()
-			     ? Part::second : Rest::end();
+			return std::max(Part::end(), Rest::end());
 		}
 	};
 
@@ -210,10 +202,10 @@ namespace fwd
 	<
 		class Part
 	>
-	struct closures<Part> : Part
+	struct closures<Part>
 	{
-		constexpr auto any(auto digit) { return Part::at(digit); }
-		constexpr auto all(auto digit) { return Part::at(digit); }
+		constexpr auto any(auto digit) { return Part::over(digit); }
+		constexpr auto all(auto digit) { return Part::over(digit); }
 	};
 }
 

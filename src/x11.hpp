@@ -2,7 +2,7 @@
 #define x11_hpp "Window Protocol"
 
 #include "fmt.hpp"
-#if __has_include <X11/Xproto.h>
+#if __has_include(<X11/Xproto.h>)
 #include <X11/Xproto.h>
 #else
 #error Require X11 protocol header
@@ -20,12 +20,12 @@ namespace x11
 	{
 		using span = std::span<Structure>;
 		using vector = std::vector<Structure>;
-		using cptr = vector::const_pointer;
-		using ptr = vector::pointer;
-		using cref = vector::const_reference;
-		using ref = vector::reference;
+		using cptr = typename vector::const_pointer;
+		using ptr = typename vector::pointer;
+		using cref = typename vector::const_reference;
+		using ref = typename vector::reference;
 
-		static_assert<sizeof (Structure) == Size>;
+		static_assert(sizeof (Structure) == Size);
 	};
 
 	template
