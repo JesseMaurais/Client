@@ -42,7 +42,7 @@ namespace x11::auth
 	bytes::in::ref operator>>(bytes::in::ref in, info::ref out)
 	{
 		union {
-			std::byte b[2];
+			char b[2];
 			unsigned short sz;
 		};
 
@@ -63,8 +63,7 @@ namespace x11::auth
 				if (in.get(b, 2))
 				{
 					s->resize(sz);
-					auto addr = reinterpret_cast<std::byte*>(s->data());
-					if (in.get(addr, sz))
+					if (in.get(s->data(), sz))
 					{
 						continue;
 					}
@@ -94,8 +93,8 @@ namespace x11
 			client.nbytesAuthString = fmt::to<CARD16>(data.size());
 
 			verify(io << client);
-			verify(io.write((std::byte*) proto.data(), client.nbytesAuthProto));
-			verify(io.write((std::byte*) data.data(), client.nbytesAuthString));
+			verify(io.write(proto.data(), client.nbytesAuthProto));
+			verify(io.write(data.data(), client.nbytesAuthString));
 		}
 
 		if (io) // read
@@ -104,7 +103,7 @@ namespace x11
 			if (io >> prefix and not prefix.success)
 			{
 				reason.resize(prefix.lengthReason);
-				verify(io.read((std::byte*) reason.data(), prefix.lengthReason));
+				verify(io.read(reason.data(), prefix.lengthReason));
 			}
 		}
 

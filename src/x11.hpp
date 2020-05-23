@@ -10,7 +10,7 @@
 
 namespace x11
 {
-	using bytes = fmt::basic_string<std::byte>;
+	using bytes = fmt::string;
 
 	template
 	<
@@ -41,7 +41,7 @@ namespace x11
 	>
 	bytes::out::ref operator<<(bytes::out::ref out, typename Protocol<Structure, Size>::cref obj)
 	{
-		auto const ptr = reinterpret_cast<std::byte const *>(&obj);
+		auto const ptr = reinterpret_cast<char const *>(&obj);
 		return out.write(ptr, Size);
 	}
 
@@ -51,7 +51,7 @@ namespace x11
 	>
 	bytes::in::ref operator>>(bytes::in::ref out, typename Protocol<Structure, Size>::ref obj)
 	{
-		auto const ptr = reinterpret_cast<std::byte *>(&obj);
+		auto const ptr = reinterpret_cast<char *>(&obj);
 		return out.read(ptr, Size);
 	}
 
