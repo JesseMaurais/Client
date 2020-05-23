@@ -52,7 +52,7 @@ namespace sys::sig
 
 	void print(int signo)
 	{
-		sys::out() << value(signo);
+		sys::out << value(signo);
 	}
 }
 
@@ -62,22 +62,24 @@ test(sig)
 	std::vector<int> caught;
 	std::vector<int> raised = { SIGINT, SIGFPE, SIGILL };
 
-	for (int n : raised)
+	for (int signo : raised)
 	{
 		sys::sig::scope const after
 		(
-			n, [&](int on) 
+			signo, [&caught](int signo) 
 			{ 
-				caught.push_back(on); 
+				caught.push_back(signo); 
 			}
 		);
-		std::raise(n);
+		std::raise(signo);
 	}
 
-	for (int n : raised)
+	auto const begin = caught.begin();
+	auto const end = caught.end();
+
+	for (int signo : raised)
 	{
-		auto it = caught.find(raised.at(n));
-		assert(caught.end() != it);
+		assert(end != std::find(begin, end, signo));
 	}
 }
 #endif

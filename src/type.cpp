@@ -8,7 +8,7 @@ test(type)
 	using namespace fmt;
 
 	string::view const Space = " \t\n";
-	assert(empty(trim(Space));
+	assert(empty(trim(Space)));
 
 	string::view const Hello = "Hello, World!";
 	assert(terminated(Hello));
