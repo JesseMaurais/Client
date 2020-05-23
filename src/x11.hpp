@@ -24,8 +24,15 @@ namespace x11
 		using ptr = typename span::pointer;
 		using cref = typename span::const_reference;
 		using ref = typename span::reference;
+		using in = bytes::in;
+		using out = bytes::out;
 
 		static_assert(sizeof (Structure) == Size);
+
+		friend out::ref operator<<(out::ref, cref);
+		friend in::ref operator>>(in::ref, ref);
+		friend out::ref operator<<(out::ref, span);
+		friend in::ref operator>>(in::ref, span);
 	};
 
 	template
@@ -62,7 +69,7 @@ namespace x11
 	<
 		class Structure, unsigned short Size
 	>
-	bytes::in::ref operator>>(bytes::in::ref in, typename Protocol<Structure, Size>::span& buf)
+	bytes::in::ref operator>>(bytes::in::ref in, typename Protocol<Structure, Size>::span buf)
 	{
 		std::istream_iterator<Structure> const begin {in}, end { };
 		std::copy_n(begin, end, buf.size(), buf.data());
