@@ -23,7 +23,7 @@ namespace fmt
 	string::out::ref par(string::out::ref out)
 	{
 		out << Param;
-		if constexpr (sizeof...(Params))
+		if constexpr (0 < sizeof...(Params))
 		{
 			return ((out << ';' << Params), ...);
 		}
@@ -49,7 +49,7 @@ namespace fmt
 	>
 	string::out::ref ctl(string::out::ref out)
 	{
-		return out << esc<uni::G0::CSI, Escape>(Params...);
+		return out << esc<uni::G0::CSI, Escape, Params...>;
 	}
 
 	template 

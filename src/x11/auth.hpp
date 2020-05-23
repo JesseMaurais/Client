@@ -7,7 +7,7 @@
 
 namespace x11
 {
-	extern env::view const& authority;
+	extern env::view::cref authority;
 }
 
 namespace x11::auth

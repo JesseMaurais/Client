@@ -15,15 +15,15 @@
 #define here fmt::where { __FILE__, __LINE__, __func__ }
 
 #ifndef NDEBUG
-#	define assert(x) if (not(x)) sys::warn(here, #x)
-#	define alert(x) if (bool(x)) sys::err(here, #x)
-#	define trace(...) sys::warn(here, __VA_ARGS__)
-#	define verify(x) assert(x)
+#	define assert(...) if (not(__VA_ARGS__)) sys::warn(here, #__VA_ARGS__)
+#	define alert(...) if (bool(__VA_ARGS__)) sys::err(here, #__VA_ARGS__)
+#	define trace(...) sys::warn(here, #__VA_ARGS__)
+#	define verify(...) assert(__VA_ARGS__)
 #else
-#	define assert(x)
-#	define alert(x) 
+#	define assert(...)
+#	define alert(...) 
 #	define trace(...)
-#	define verify(x) (x)
+#	define verify(...) (__VA_ARGS__)
 #endif
 
 // Negative boolean

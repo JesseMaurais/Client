@@ -14,7 +14,7 @@ test(type)
 	assert(terminated(Hello));
 	assert(not terminated(Hello.substr(0, 5)));
 
-	string const Filled = Space + Hello + Space;
+	string const Filled = to_string(Space) + to_string(Hello) + to_string(Space);
 	assert(not empty(trim(Filled)));
 	assert(Hello == trim(Filled));
 
@@ -28,22 +28,24 @@ test(type)
 	assert(to_wstring(Hello) == Wide);
 	assert(to_string(Wide) == Hello);
 
-	assert(embrace("<A<B>C>", "<>") == { 0, 6 });
-	assert(embrace("<A<B>C>", "<B>") == { 0, 3 });
-	assert(embrace("A[B]C[D]", "[D]") == { 1, 3 });
-	assert(embrace("{A<B}C}", "<>") == { 2, npos }):
-	assert(embrace("{A{B>C}", "<>") == { npos, npos });
-	assert(embrace("&amp;", "&;") == { 0, 4 });
+	using pos = std::pair<string::size_type, string::size_type>;
+
+	assert(embrace("<A<B>C>", "<>") == pos { 0, 6 });
+	assert(embrace("<A<B>C>", "<B>") == pos { 0, 3 });
+	assert(embrace("A[B]C[D]", "[D]") == pos { 1, 3 });
+	assert(embrace("{A<B}C}", "<>") == pos { 2, npos });
+	assert(embrace("{A{B>C}", "<>") == pos { npos, npos });
+	assert(embrace("&amp;", "&;") == pos { 0, 4 });
 
 	{
-		string::str ss;
-		ss << params<1, 2, 3, 4>;
+		string::stream ss;
+		ss << par<1, 2, 3, 4>;
 		assert(ss.str() == "1;2;3;4");
 	}
 
 	{
-		string::str ss;
-		ss << fg_grean << "GREEN" << fg_off;
+		string::stream ss;
+		ss << fg_green << "GREEN" << fg_off;
 		assert(ss.str() == "\x1b[32mGREEN\x1b[39m");
 	}
 }

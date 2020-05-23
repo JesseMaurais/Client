@@ -1,18 +1,20 @@
 #include <iostream>
 #include <fstream>
 #include "fmt.hpp"
+#include "dig.hpp"
 #include "dir.hpp"
 #include "file.hpp"
 #include "x11/auth.hpp"
+#include "x11/setup.hpp"
 
 namespace
 {
-	char order()
+	char byte_order()
 	{
 		union 
 		{
-		 char c[2];
-		 short s; 
+			char c[2];
+			short s; 
 		};
 		s = 1;
 		return *c ? 'l' : 'B';
@@ -40,7 +42,7 @@ namespace x11::auth
 	bytes::in::ref operator>>(bytes::in::ref in, info::ref out)
 	{
 		union {
-			unsigned char b[2];
+			std::byte b[2];
 			unsigned short sz;
 		};
 
@@ -61,7 +63,8 @@ namespace x11::auth
 				if (in.get(b, 2))
 				{
 					s->resize(sz);
-					if (in.get(ptr->data(), sz))
+					auto addr = reinterpret_cast<std::byte*>(s->data());
+					if (in.get(addr, sz))
 					{
 						continue;
 					}
@@ -75,35 +78,33 @@ namespace x11::auth
 
 namespace x11
 {
-	env::view::ref authority = XAUTHORITY;
+	env::view::cref authority = XAUTHORITY;
 
-	fmt::string setup(io::ref str, fmt::string::view proto, fmt::string::view data)
+	fmt::string setup(fmt::string::io::ref io, fmt::string::view proto, fmt::string::view data)
 	{
 		fmt::string reason;
 
-		if (str) // write
+		if (io) // write
 		{
-			ClientPrefix client
-			{
-				.byteOrder = order(),
-				.majorVersion = 11,
-				.minorVersion = 0,
-				.nbytesAuthProto = fmt::to<CARD16>(proto.size()),
-				.nbytesAuthString = fmt::to<CARD16>(data.size())
-			};
+			ClientPrefix client;
+			client.byteOrder = byte_order();
+			client.majorVersion = 11;
+			client.minorVersion = 0;
+			client.nbytesAuthProto = fmt::to<CARD16>(proto.size());
+			client.nbytesAuthString = fmt::to<CARD16>(data.size());
 
-			verify(str << client);
-			verify(str.write(proto.data(), client.nbytesAuthProto));
-			verify(str.write(data.data(), client.nbytesAuthString));
+			verify(io << client);
+			verify(io.write(proto.data(), client.nbytesAuthProto));
+			verify(io.write(data.data(), client.nbytesAuthString));
 		}
 
-		if (str) // read
+		if (io) // read
 		{
 			SetupPrefix prefix;
-			if (str >> prefix and Success != prefix.success)
+			if (io >> prefix and not prefix.success)
 			{
 				reason.resize(prefix.lengthReason);
-				verify(str.read(data(reason), prefix.lengthReason));
+				verify(io.read(data(reason), prefix.lengthReason));
 			}
 		}
 

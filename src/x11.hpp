@@ -20,10 +20,10 @@ namespace x11
 	{
 		using span = std::span<Structure>;
 		using vector = std::vector<Structure>;
-		using cptr = typename vector::const_pointer;
-		using ptr = typename vector::pointer;
-		using cref = typename vector::const_reference;
-		using ref = typename vector::reference;
+		using cptr = typename span::const_pointer;
+		using ptr = typename span::pointer;
+		using cref = typename span::const_reference;
+		using ref = typename span::reference;
 
 		static_assert(sizeof (Structure) == Size);
 	};
@@ -32,9 +32,9 @@ namespace x11
 	<
 		class Structure, unsigned short Size
 	>
-	bytes::out::ref operator<<(bytes::out::ref out, Protocol<Structure, Size>::cref obj)
+	bytes::out::ref operator<<(bytes::out::ref out, typename Protocol<Structure, Size>::cref obj)
 	{
-		auto const ptr = reinterpret_cast<const_pointer>(&obj);
+		auto const ptr = reinterpret_cast<std::byte const *>(&obj);
 		return out.write(ptr, Size);
 	}
 
@@ -42,19 +42,19 @@ namespace x11
 	<
 		class Structure, unsigned short Size
 	>
-	bytes::in::ref operator>>(bytes::in::ref obj, Protocol<Structure, Size>::ref obj)
+	bytes::in::ref operator>>(bytes::in::ref out, typename Protocol<Structure, Size>::ref obj)
 	{
-		auto const ptr = reinterpret_cast<pointer>(&obj);
-		return obj.read(ptr, Size);
+		auto const ptr = reinterpret_cast<std::byte *>(&obj);
+		return out.read(ptr, Size);
 	}
 
 	template
 	<
 		class Structure, unsigned short Size
 	>
-	bytes::out::ref operator<<(bytes::out::ref out, Protocol<Structure, Size>::span buf)
+	bytes::out::ref operator<<(bytes::out::ref out, typename Protocol<Structure, Size>::span buf)
 	{
-		std::copy(buf.begin(), buf.end(), std::ostream_iterator {out});
+		std::copy(buf.begin(), buf.end(), std::ostream_iterator<Structure> {out});
 		return out;
 	}
 
@@ -62,10 +62,10 @@ namespace x11
 	<
 		class Structure, unsigned short Size
 	>
-	byte::in::ref operator>>(bytes::in::ref in, Protocol<Structure, Size>::span buf)
+	bytes::in::ref operator>>(bytes::in::ref in, typename Protocol<Structure, Size>::span& buf)
 	{
-		auto const begin = std::istream_iterator {in}, end { };
-		std::copy(begin, end, std::back_inserter(buf));
+		std::istream_iterator<Structure> const begin {in}, end { };
+		std::copy_n(begin, end, buf.size(), buf.data());
 		return in;
 	}
 
@@ -77,16 +77,18 @@ namespace x11
 	>
 	struct Request : Protocol<Req, ReqSize>
 	{
-		constexpr auto requestType = ReqType;
-		using request = typename Req;
-		constexpr auto requestSize = ReqSize;
-		using reply = typename Reply;
-		constexpr auto replySize = ReplySize;
+		static constexpr auto requestType = ReqType;
+		using request = Req;
+		static constexpr auto requestSize = ReqSize;
+		using reply = Reply;
+		static constexpr auto replySize = ReplySize;
 
 		static_assert(sizeof (Req) == requestSize);
 		static_assert(sizeof (Reply) == replySize);
 
-		Request() : reqType(requestType), length(requestSize) = default;
+		Request() 
+		: Req::reqType(requestType), Req::length(requestSize) 
+		{ }
 	};
 
 	template
