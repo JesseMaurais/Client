@@ -1,5 +1,7 @@
 #include "ini.hpp"
 #include "str.hpp"
+#include "dir.hpp"
+#include "dig.hpp"
 #include "type.hpp"
 #include "err.hpp"
 
@@ -44,7 +46,7 @@ namespace doc
 				// Trim off whitespace
 				auto const t = output.find(omit);
 				output = output.substr(0, t);
-				auto const u = fmt::trim(output);
+				view const u = fmt::trim(output);
 				if (not empty(u))
 				{
 					output = fmt::to_string(u);
@@ -67,7 +69,7 @@ namespace doc
 			{
 				auto const z = token.size();
 				token = token.substr(1, z - 2);
-				group = fmt::str::get(token);
+				group = fmt::str::set(token);
 				continue;
 			}
 
@@ -80,13 +82,13 @@ namespace doc
 
 			// Create key pair for value entry
 			auto const pair = fmt::to_pair(token);
-			auto const key = fmt::str::get(pair.first);
+			auto const key = fmt::str::set(pair.first);
 			auto const value = pair.second;
 			if (empty(value))
 			{
 				break;
 			}
-			
+		
 			// Create a new entry in the key table
 			if (not output.set({ group, key }, value))
 			{
@@ -103,9 +105,9 @@ namespace doc
 		env::opt::word last = -1;
 		for (auto [k, v] : input.keys)
 		{
-			if (key.first != last)
+			if (k.first != last)
 			{
-				last = key.first;
+				last = k.first;
 
 				auto const group = fmt::str::get(k.first);
 				output << '[' << group << ']' << fmt::eol;
@@ -118,24 +120,24 @@ namespace doc
 		return output;
 	}
 
-	bool ini::got(pair key) const
+	bool ini::got(env::opt::pair key) const
 	{
 		return keys.find(key) != keys.end();
 	}
 
-	ini::view ini::get(pair key) const
+	ini::view ini::get(env::opt::pair key) const
 	{
 		auto const it = keys.find(key);
-		return it == keys.end() ? fmt::nil : it->second;
+		return it == keys.end() ? "" : values.at(it->second);
 	}
 
-	bool ini::set(pair key, view value)
+	bool ini::set(env::opt::pair key, view value)
 	{
 		auto it = keys.find(key);
 		if (keys.end() == it)
 		{
 			auto const size = values.size();
-			keys.at(key) = to<word>(size);
+			keys.at(key) = fmt::to<env::opt::word>(size);
 			values.emplace_back(value);
 			return true;
 		}
@@ -155,8 +157,9 @@ test(ini)
 	doc::ini init;
 	file >> init;
 
-	doc::ini::pair entry { "NMAKE", "MAKECONFIG" };
-	auto const value = key.get(entry);
+	auto const group = fmt::str::set("NMAKE");
+	auto const key = fmt::str::set("MAKECONFIG");
+	auto const value = init.get({group, key});
 	assert(not empty(value));
 	assert(value.find("/D_NMAKE") != fmt::npos);
 }

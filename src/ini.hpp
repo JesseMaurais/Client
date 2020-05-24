@@ -14,8 +14,8 @@ namespace doc
 		using out    = string::out;
 		using view   = string::view;
 		using vector = view::vector;
-		using pair   = view::pair;
 		using span   = view::span;
+		using init   = view::init;
 		
 		fwd::group<env::opt::word> keys;
 		string::view::vector values;
@@ -29,9 +29,9 @@ namespace doc
 		static vector split(view);
 		static string join(init);
 
-		bool got(pair) const;
-		view get(pair) const;
-		bool set(pair, view);
+		bool got(env::opt::pair) const;
+		view get(env::opt::pair) const;
+		bool set(env::opt::pair, view);
 	};
 }
 

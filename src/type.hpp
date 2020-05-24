@@ -350,17 +350,18 @@ namespace fmt
 			return n;
 		}
 
-		template <class Span> static auto join(Span t, view u)
+		template <class Iterator> 
+		static auto join(Iterator begin, Iterator end, view u)
 		/// Join strings in $t with $u inserted between
 		{
 			string s;
-			for (view v : t)
+			for (auto it = begin; it != end; ++it)
 			{
 				if (not empty(s))
 				{
 					s += u;
 				}
-				s += v;
+				s += *it;
 			}
 			return s;
 		}
@@ -519,22 +520,22 @@ namespace fmt
 
 	inline auto join(string::view::span t, string::view u = "")
 	{
-		return cstr.join(t, u);
+		return cstr.join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::span t, string::view u = "")
 	{
-		return cstr.join(t, u);
+		return cstr.join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::view::init t, string::view u = "")
 	{
-		return cstr.join(t, u);
+		return cstr.join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::init t, string::view u = "")
 	{
-		return cstr.join(t, u);
+		return cstr.join(t.begin(), t.end(), u);
 	}
 
 	inline auto split(string::view u, string::view v = "")
@@ -570,7 +571,7 @@ namespace fmt
 	inline auto to_pair(string::view::pair p, string::view u = "=")
 	{
 		string::view::vector x { p.first, p.second };
-		return cstr.join(x, u);
+		return fmt::join(x, u);
 	}
 
 	inline bool same(string::view u, string::view v)
