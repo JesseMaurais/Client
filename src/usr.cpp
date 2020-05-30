@@ -7,6 +7,8 @@
 #include "opt.hpp"
 #include "sys.hpp"
 #include "file.hpp"
+#include "str.hpp"
+#include "arg.hpp"
 #include "dir.hpp"
 #include "err.hpp"
 #include <fstream>
@@ -286,7 +288,8 @@ namespace
 
 		fmt::string::view cached() const
 		{
-			auto u = env::opt::get(var);
+			auto const w = fmt::str::put(var);
+			auto u = env::opt::get(w);
 			if (empty(u))
 			{
 				constexpr auto base = "user-dirs.dirs";
@@ -299,11 +302,12 @@ namespace
 					auto const first = line.find_first_not_of(quote);
 					auto const second = line.find_first_of(quote, first);
 					line = line.substr(first, second);
-					auto entry = fmt::entry(line);
-					auto value = env::var::value(entry.second);
-					env::opt::set(entry.first, value);
+					auto const entry = fmt::to_pair(line);
+					auto const value = env::var::value(entry.second);
+					auto const key = fmt::str::set(entry.first);
+					env::opt::set(key, value);
 				}
-				u = env::opt::get(var);
+				u = env::opt::get(w, val);
 			}
 			return u;
 		}

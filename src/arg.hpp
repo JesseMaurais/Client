@@ -33,8 +33,12 @@ namespace env::opt
 
 	using commands = fwd::span<command>;
 
-	vector put(int argc, char** argv, commands);
+	string::view::vector put(int argc, char** argv, commands);
 	// Put command line arguments into options
+	string::out::ref put(string::out::ref);
+	// Write options to output string
+	string::in::ref get(string::in::ref);
+	// Read options from input string
 
 	bool got(word);
 	string::view get(word);

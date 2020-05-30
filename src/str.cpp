@@ -64,15 +64,15 @@ namespace fmt::str
 			}
 		}
 		// Create entry
-		auto const writer = store.write();
+		auto writer = store.write();
 		auto const size = writer->size();
 		auto const id = to<word>(size);
 		{
-			auto [it, unique] = index.write()->emplace(name, id);
+			auto [it, unique] = table.write()->emplace(name, id);
 			#ifdef verify
 			verify(unique);
 			#endif
-			writer->push_back(*it);
+			writer->push_back(it->first);
 		}
 		return id;
 	}
@@ -81,27 +81,27 @@ namespace fmt::str
 	{
 		// Lookup extant
 		{
-			auto const read = table.read();
-			auto const end = read->end();
-			auto const it = read->find(name);
+			auto const reader = table.read();
+			auto const end = reader->end();
+			auto const it = reader->find(name);
 			if (end != it)
 			{
 				return it->second;
 			}
 		}
 		// Create entry
-		auto const write = store.write();
-		auto const size = write->size();
+		auto writer = store.write();
+		auto const size = writer->size();
 		auto const id = to<word>(size);
 		{
 			// Cache the string here
 			auto const p = cache.write()->emplace(name);
 			verify(p.second);
 			// Index a view to the string
-			auto const q = index.write()->emplace(*p.first, id);
+			auto const q = table.write()->emplace(*p.first, id);
 			verify(q.second);
 			
-			write->push_back(*q.first);
+			writer->push_back(q.first->first);
 		}
 		return id;
 	}
@@ -109,28 +109,31 @@ namespace fmt::str
 	string::in::ref get(string::in::ref in, char end)
 	{
 		// Block all threads at this point
-		auto const wcache = cache.write();
-		auto const wstore = store.write();
-		auto const wtable = table.write();
+		auto wcache = cache.write();
+		auto wstore = store.write();
+		auto wtable = table.write();
 
 		string line;
 		while (std::getline(in, line, end))
 		{
 			auto const p = wcache->emplace(move(line));
+			#ifdef verify
 			verify(p.second);
+			#endif
 
 			auto const size = wstore->size();
-			auto const id = to<word>(size);
-	
-			auto const q = wstore->emplace(*p.first, id);
-			verify(q.second);
+			auto const id = to<word>(size);	
+			wstore->emplace_back(*p.first);
 
-			wtable->emplace_back(*q.first);
+			auto const q = wtable->emplace(*p.first, id);
+			#ifdef verify
+			verify(q.second);
+			#endif
 		}
 		return in;
 	}
 
-	string::out::ref put(string::out::ref out, char end)
+	string::out::ref put(string::out::ref out, char eol)
 	{
 		auto const reader = cache.read();
 		auto const begin = reader->begin();
@@ -138,7 +141,7 @@ namespace fmt::str
 
 		for (auto it = begin; it != end; ++it)
 		{
-			out << it->first << end;
+			out << *it << eol;
 		}
 		return out;
 	}

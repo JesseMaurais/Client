@@ -38,7 +38,7 @@ namespace fmt
 {
 	struct where { const char* file; int line; const char* func; };
 
-	template <typename... T> auto err(where const& w, T... t)
+	template <typename... T> auto err(where const& w, T&&... t)
 	{
 		string::stream ss;
 		ss 
@@ -49,7 +49,10 @@ namespace fmt
 			<< w.func 
 			<< ": ";
 
-		(void) (ss << ...  << t);
+		if constexpr (0 < sizeof...(T))
+		{
+			(ss << ... << t);
+		}
 		return ss.str();
 	}
 }

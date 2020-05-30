@@ -1,5 +1,5 @@
 #ifndef sync_hpp
-#define sync_hpp "Thread Point Sync"
+#define sync_hpp "Thread Synchronize"
 
 #include "env.hpp"
 #ifdef _WIN32
@@ -13,7 +13,7 @@ namespace sys
 	extern env::view::ref thread_id;
 
 	template <class object> struct exclusive_ptr : fwd::unique
-	// Allow one writer but many reader (WORM pattern)
+	// Allow one writer but many readers (WORM pattern)
 	{
 		rwlock lock;
 		object *that;
@@ -34,7 +34,7 @@ namespace sys
 				, that(ptr->that)
 				{ }
 
-				auto operator*() const
+				auto const& operator*() const
 				{
 					return *that;
 				}
@@ -60,7 +60,12 @@ namespace sys
 				, that(ptr->that)
 				{ }
 
-				auto operator*() const
+				auto const& operator*() const
+				{
+					return *that;
+				}
+
+				auto& operator*()
 				{
 					return *that;
 				}

@@ -6,13 +6,13 @@
 #include "sync.hpp"
 #include "sys.hpp"
 #include "err.hpp"
-#include "fmt.hpp"
+#include "type.hpp"
 #include "tmp.hpp"
 #include <utility>
 
 namespace
 {
-	struct : attribute<size_t>
+	struct : fwd::variable<size_t>
 	{
 		mutable sys::rwlock lock;
 		size_t sz = BUFSIZ;
@@ -32,9 +32,9 @@ namespace
 	} width;
 }
 
-namespace env::file
+namespace env
 {
-	attribute<size_t>& width = ::width;
+	fwd::variable<size_t>& width = ::width;
 
 	int check(mode am)
 	{
@@ -161,9 +161,9 @@ namespace env::file
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return fail(s, am);
+			return env::fail(s, am);
 		}
 
-		return fail(sys::access(data(path), check(am)));
+		return env::file::fail(sys::access(data(path), check(am)));
 	}
 }

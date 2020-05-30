@@ -33,7 +33,7 @@ namespace env
 		class Type,
 		template <class> class Traits = fmt::memory_brief
 	>
-	using constant = variable<Type, Traits, fwd::constant>;
+	using constant = variable<const Type, Traits, fwd::constant>;
 
 	using size = constant<string::size_type>;
 	using view = constant<string::view>;

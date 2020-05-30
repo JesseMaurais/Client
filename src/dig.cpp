@@ -33,7 +33,9 @@ namespace
 		auto code = std::from_chars(begin, end, value, base);
 		if (noerr != code.ec)
 		{
-			sys::warn(here, code.ec);
+			auto const error = std::make_error_code(code.ec);
+			auto const message = error.message();
+			sys::warn(here, message);
 		}
 		return value;
 	}
@@ -54,7 +56,9 @@ namespace
 					s.resize(2*s.size(), '\0');
 					continue;
 				}
-				sys::warn(here, code.ec);
+				auto const error = std::make_error_code(code.ec);
+				auto const message = error.message();
+				sys::warn(here, message);
 			}
 			s.resize(code.ptr - begin);
 		}

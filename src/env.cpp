@@ -4,6 +4,7 @@
 #include "env.hpp"
 #include "fmt.hpp"
 #include "dir.hpp"
+#include "type.hpp"
 #include "sys.hpp"
 #include "err.hpp"
 #include "sync.hpp"
@@ -40,7 +41,7 @@ namespace env::var
 		auto const c = u.data();
 		auto const unlock = lock.read();
 		auto const ptr = std::getenv(c);
-		return nullptr == ptr ? fmt::nil : ptr;
+		return nullptr == ptr ? "" : ptr;
 	}
 
 	bool set(fmt::string::view u)
@@ -67,7 +68,7 @@ namespace env::var
 
 	bool put(fmt::string::view u, fmt::string::view v)
 	{
-		return put(fmt::entry(u, v));
+		return put(fmt::join({u, v}, "="));
 	}
 
 	static auto evaluate(fmt::string::view u)
@@ -89,7 +90,7 @@ namespace env::var
 			auto t = m.str();
 			auto v = evaluate(t);
 			r.append(v.data(), v.size());
-			s = m.suffix();
+			s = m.suffix().str();
 		}
 		r.shrink_to_fit();
 		return r;
@@ -155,7 +156,7 @@ namespace
 			#else
 			{
 				static thread_local char name[64];
-				if (fail(gethostname(name, sizeof name)))
+				if (sys::uni::fail(gethostname(name, sizeof name)))
 				{
 					sys::err(here, "gethostname");
 					name[0] = fmt::null;
@@ -178,7 +179,7 @@ namespace
 			#else
 			{
 				static thread_local char name[64];
-				if (fail(getdomainname(name, sizeof name)))
+				if (sys::uni::fail(getdomainname(name, sizeof name)))
 				{
 					sys::err(here, "getdomainname");
 					name[0] = fmt::null;
@@ -200,7 +201,7 @@ namespace
 			}
 			#else
 			{
-				return fmt::nil; // omit "/" for join
+				return ""; // omit "/" for join
 			}
 			#endif
 		}
@@ -254,7 +255,7 @@ namespace
 					return v;
 				}
 			}
-			return fmt::nil;
+			return "";
 		}
 
 	} LANG;
@@ -362,6 +363,6 @@ namespace env
 test(env)
 {
 	assert(env::var::get("PATH") == fmt::path::join(env::paths));
-	assert(env::var::get("PATH") == env::var::value("$PATH");
+	assert(env::var::get("PATH") == env::var::value("$PATH"));
 }
 #endif

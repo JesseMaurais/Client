@@ -7,6 +7,7 @@
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "err.hpp"
+#include "type.hpp"
 #ifdef _WIN32
 #include "win.hpp"
 #else
@@ -117,16 +118,15 @@ dynamic int visible() { return hidden(); }
 
 test(sym)
 {
-	sys::thread_id = sym_hpp; // header	
-	// Can see dynamic
+	// Can see dynamic)
 	auto f = sys::sym<int()>("visible");
-	assert(not empty(f));
+	assert(nullptr != f);
 	// Cannot see static
 	auto g = sys::sym<int()>("hidden");
-	assert(empty(f));
+	assert(nullptr != g);
 	// Callable object
-	accert(f() == hidden());
+	assert(f() == hidden());
 	// Not callable
-	except(g() == hidden()):
+	except(g() == hidden());
 }
 #endif

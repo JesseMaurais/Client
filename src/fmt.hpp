@@ -43,7 +43,7 @@ namespace fmt
 	>
 	struct struct_brief : memory_brief<Type>
 	{
-		using pair   = fwd::pair<Type>;
+		using pair   = std::pair<Type, Type>;
 		using init   = fwd::init<Type>;
 		using set    = fwd::set<Type, Order, Alloc>;
 		using map    = fwd::map<Type, Order, Alloc>;

@@ -1,6 +1,7 @@
 #include "arg.hpp"
 #include "ini.hpp"
 #include "str.hpp"
+#include "type.hpp"
 #include "dir.hpp"
 #include "usr.hpp"
 #include "sys.hpp"
@@ -21,13 +22,14 @@ namespace
 
 	} APPLICATION;
 
+	fmt::string::view::vector arg_list;
+
 	struct : env::span
 	{
-		fmt::string::view::vector list;
 
 		operator type() const final
 		{
-			return list;
+			return { arg_list.data(), arg_list.size() };
 		}
 
 	} ARGUMENTS;
@@ -49,7 +51,7 @@ namespace
 	{
 		operator type() const final
 		{
-			static string::view u;
+			static fmt::string::view u;
 			if (empty(u))
 			{
 				fmt::string::view::span const args = env::opt::arguments;
@@ -84,7 +86,7 @@ namespace
 
 	} CONFIG;
 
-	auto make_pair(word key)
+	auto make_pair(env::opt::word key)
 	{
 		static auto const cmd = fmt::str::set("Command Line");
 		return std::make_pair(cmd, key);
@@ -103,11 +105,11 @@ namespace
 		}
 		// next write
 		{
-			auto const writer = ini.write();
+			auto writer = ini.write();
 			fmt::string::view const path = env::opt::initials;
 			auto const s = fmt::to_string(path);
 			doc::ini::ref slice = *writer;
-			slice.put(make_pair(app), env::opt::program);
+			slice.set(make_pair(app), env::opt::program);
 			std::ifstream input(s);
 			while (input >> slice);
 			return ini;
@@ -117,24 +119,23 @@ namespace
 
 namespace env::opt
 {
-	env::span::ref application = APPLICATION;
+	env::view::ref application = APPLICATION;
 	env::span::ref arguments = ARGUMENTS;
 	env::view::ref initials = INITIALS;
 	env::view::ref program = PROGRAM;
 	env::view::ref config = CONFIG;
-	env::view::ref rundir = RUNDIR;
 
-	in::ref get(in::ref input)
+	string::in::ref get(string::in::ref input)
 	{
-		auto const writer = registry().write();
+		auto writer = registry().write();
 		doc::ini::ref slice = *writer;
 		return input >> slice;
 	}
 
-	out::ref put(out::ref output)
+	string::out::ref put(string::out::ref output)
 	{
 		auto const reader = registry().read();
-		doc::ini::ref slice = *reader;
+		doc::ini::cref slice = *reader;
 		return output << slice;
 	}
 
@@ -143,12 +144,12 @@ namespace env::opt
 		return registry().read()->got(key);
 	}
 
-	view get(pair key)
+	string::view get(pair key)
 	{
 		return registry().read()->get(key);
 	}
 
-	bool set(pair key, view value)
+	bool set(pair key, string::view value)
 	{
 		return registry().write()->set(key, value);
 	}
@@ -158,20 +159,21 @@ namespace env::opt
 		return not empty(get(key));
 	}
 
-	view get(word key)
+	string::view get(word key)
 	{
+		auto const u = fmt::str::get(key);
 		// First look for argument
-		span const args = arguments;
+		string::view::span const args = arguments;
 		for (auto const a : args)
 		{
 			auto const e = fmt::to_pair(a);
-			if (e.first == fmt::str::get(key))
+			if (e.first == u)
 			{
 				return e.second;
 			}
 		}
 		// Second look in environment
-		auto value = env::var::get(key);
+		auto value = env::var::get(u);
 		if (empty(value))
 		{
 			// Finally look in options table
@@ -180,16 +182,16 @@ namespace env::opt
 		return value;
 	}
 
-	bool set(word key, view value)
+	bool set(word key, string::view value)
 	{
 		return set(make_pair(key), value);
 	}
 
-	vector put(int argc, char** argv, commands cmd)
+	string::view::vector put(int argc, char** argv, commands cmd)
 	{
-		auto const writer = registry().write();
+		auto writer = registry().write();
 		// Push a view to command line arguments
-		auto push = std::back_inserter(ARGUMENTS.list);
+		auto push = std::back_inserter(arg_list);
 		std::copy(argv, argv + argc, push);
 		// Boundary of command line
 		auto const begin = cmd.begin();
@@ -197,15 +199,13 @@ namespace env::opt
 		// Command iterators
 		auto next = end;
 		auto it = end;
-		// Current at
-		pair entry;
 
-		vector args;
-		vector extra;
+		string::view::pair entry;
+		string::view::vector args, extra;
 
 		for (int argn = 0; argv[argn]; ++argn)
 		{
-			view const argu = argv[argn];
+			string::view const argu = argv[argn];
 
 			// Check whether this argument is a new command
 
@@ -251,10 +251,11 @@ namespace env::opt
 			{
 				if (end != it)
 				{
-					auto const key = make_pair(it->name);
+					auto const name = fmt::str::put(it->name);
+					auto const key = make_pair(name);
 					if (empty(args))
 					{
-						writer->put(key, entry.second);
+						writer->set(key, entry.second);
 					}
 				}
 
@@ -264,24 +265,26 @@ namespace env::opt
 
 				if (0 == argn)
 				{
-					auto const key = make_pair(it->name);
+					auto const name = fmt::str::put(it->name);
+					auto const key = make_pair(name);
 					auto const value = doc::ini::join(args);
-					writer->put(key, value);
+					writer->set(key, value);
 				}
 			}
 		}
 
 		if (end != it)
 		{
-			auto const key = make_pair(it->name);
+			auto const name = fmt::str::put(it->name);
+			auto const key = make_pair(name);
 			if (empty(args))
 			{
-				(void) ptr->put(key, entry.second);
+				writer->set(key, entry.second);
 			}
 			else
 			{
 				auto const value = doc::ini::join(args);
-				(void) ptr->put(key, value);
+				writer->set(key, value);
 			}
 		}
 

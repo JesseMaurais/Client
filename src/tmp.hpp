@@ -9,18 +9,18 @@ namespace fwd
 	<
 		typename T
 	>
-	struct evaluator
+	struct typeof
 	{
-		virtual bool operator()(T) const = 0;
+		using type = T;
 	};
 
 	template
 	<
 		typename T
 	>
-	struct typeof
+	struct evaluator : typeof<T>
 	{
-		using type = T;
+		virtual bool operator()(T) const = 0;
 	};
 
 	template 
@@ -123,13 +123,13 @@ namespace fwd
 	<
 		typename... Q
 	> 
-	using falsity = proposition<false, Q...>;
+	using truth = proposition<true, Q...>;
 
 	template 
 	<
 		typename... Q
 	> 
-	using truth = proposition<true, Q...>;
+	using falsity = proposition<false, Q...>;
 
 	template 
 	<
