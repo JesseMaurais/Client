@@ -17,13 +17,13 @@ namespace
 {
 	fmt::string const prefix = "test_";
 
-	void runner(fmt::string::view name, fmt::string::buf::ref buf)
+	void runner(fmt::string::view name, fmt::string::buf::ptr buf)
 	{
 		auto& out = std::cerr;
 		auto back = out.rdbuf();
 		try
 		{
-			out.rdbuf(&buf);
+			out.rdbuf(buf);
 			auto call = sys::sym<void()>(name);
 			if (nullptr == call)
 			{
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 					auto call = sys::sym<void()>(name);
 					if (nullptr != call)
 					{
-						context.emplace(name, sys::out);
+						verify(context[name].str().empty());
 					}
 				}
 			}
@@ -134,7 +134,8 @@ int main(int argc, char** argv)
 	{
 		for (auto word : tests)
 		{
-			auto const name = prefix + fmt::to_string(word);
+			auto const s = fmt::str::get(word);
+			auto const name = prefix + fmt::to_string(s);
 			auto const call = sys::sym<void()>(name);
 			if (nullptr == call)
 			{
@@ -142,7 +143,7 @@ int main(int argc, char** argv)
 			}
 			else
 			{
-				context.emplace(name, sys::out);
+				verify(context[name].str().empty());
 			}
 		}
 	}
@@ -200,7 +201,7 @@ int main(int argc, char** argv)
 
 	// Run all the selected unit tests 
 	{
-		std::set<std::future<void>> threads;
+		vector<future<void>> threads;
 
 		// Run tests either in serial or parallel
 		for (auto & [name, error] : context)
@@ -208,7 +209,7 @@ int main(int argc, char** argv)
 			auto buf = error.rdbuf();
 			if (not serial)
 			{
-				threads.emplace(async(runner, name, buf));
+				threads.emplace_back(async(launch::async, runner, name, buf));
 			}
 			else
 			{
@@ -241,7 +242,7 @@ int main(int argc, char** argv)
 				++counter;
 			}
 
-			if (buf.fail())
+			if (error.fail())
 			{
 				cerr << "Failed to read " << name;
 			}
@@ -253,7 +254,7 @@ int main(int argc, char** argv)
 		cerr << (counter ? fmt::fg_cyan : fmt::fg_magenta);
 	}
 
-	cerr << "There are " << counter << " errors" << eol;
+	cerr << "There are " << counter << " errors" << fmt::eol;
 
 	if (color)
 	{
