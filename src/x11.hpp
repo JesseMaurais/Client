@@ -5,7 +5,7 @@
 #if __has_include(<X11/Xproto.h>)
 #include <X11/Xproto.h>
 #else
-#error Require X11 protocol header
+#error Require protocol header
 #endif
 
 namespace x11
@@ -24,57 +24,19 @@ namespace x11
 		using ptr = typename span::pointer;
 		using cref = typename span::const_reference;
 		using ref = typename span::reference;
-		using in = bytes::in;
-		using out = bytes::out;
 
-		static_assert(sizeof (Structure) == Size);
+		friend bytes::out::ref operator<<(bytes::out::ref out, cref obj)
+		{
+			auto const ptr = reinterpret_cast<bytes::const_pointer>(&obj);
+			return out.write(ptr, Size);
+		}
 
-		friend out::ref operator<<(out::ref, cref);
-		friend in::ref operator>>(in::ref, ref);
-		friend out::ref operator<<(out::ref, span);
-		friend in::ref operator>>(in::ref, span);
+		friend bytes::in::ref operator>>(bytes::in::ref in, ref obj)
+		{
+			auto const ptr = reinterpret_cast<bytes::pointer>(&obj);
+			return in.read(ptr, Size);
+		}
 	};
-
-	template
-	<
-		class Structure, unsigned short Size
-	>
-	bytes::out::ref operator<<(bytes::out::ref out, typename Protocol<Structure, Size>::cref obj)
-	{
-		auto const ptr = reinterpret_cast<char const *>(&obj);
-		return out.write(ptr, Size);
-	}
-
-	template
-	<
-		class Structure, unsigned short Size
-	>
-	bytes::in::ref operator>>(bytes::in::ref out, typename Protocol<Structure, Size>::ref obj)
-	{
-		auto const ptr = reinterpret_cast<char *>(&obj);
-		return out.read(ptr, Size);
-	}
-
-	template
-	<
-		class Structure, unsigned short Size
-	>
-	bytes::out::ref operator<<(bytes::out::ref out, typename Protocol<Structure, Size>::span buf)
-	{
-		std::copy(buf.begin(), buf.end(), std::ostream_iterator<Structure> {out});
-		return out;
-	}
-
-	template
-	<
-		class Structure, unsigned short Size
-	>
-	bytes::in::ref operator>>(bytes::in::ref in, typename Protocol<Structure, Size>::span buf)
-	{
-		std::istream_iterator<Structure> const begin {in}, end { };
-		std::copy_n(begin, end, buf.size(), buf.data());
-		return in;
-	}
 
 	template 
 	<
