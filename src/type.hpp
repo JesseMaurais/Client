@@ -51,11 +51,19 @@ namespace fmt
 		> 
 		static string from(Data const& s);
 
-		bool check(Char c, mask x = space) const;
+		bool check(Char c, mask x = space) const
 		// Check whether code w is an x
+		{
+			return base::is(x, c);
+		}
 
-		auto check(view u) const;
+		auto check(view u) const
 		// Classify all characters in a view
+		{
+			std::vector<mask> x(u.size());
+			base::is(u.data(), u.data() + u.size(), x.data());
+			return x;
+		}
 
 		template <class Iterator>
 		auto next(Iterator it, Iterator end, mask x = space) const
@@ -74,13 +82,13 @@ namespace fmt
 		}
 
 		auto next(Char const* it, Char const* end, mask x = space) const
-		/// Next character after $it but before $end which is an $x
+		// Next character after $it but before $end which is an $x
 		{
 			return base::scan_is(x, it, end);
 		}
 
 		auto next(view u, mask x = space) const
-		/// Index of first character in view $u which is an $x
+		// Index of first character in view $u which is an $x
 		{
 			auto const from = begin(u);
 			auto const to = next(from, end(u), x);
@@ -89,11 +97,11 @@ namespace fmt
 
 		template <typename iterator>
 		auto skip(iterator it, iterator end, mask x = space) const
-		/// Next iterator after $it but before $end which is not $x
+		// Next iterator after $it but before $end which is not $x
 		{
 			while (it != end)
 			{
-				auto const w = *it;
+				Char const w = *it;
 				if (check(w, x))
 				{
 					++it;
@@ -104,13 +112,13 @@ namespace fmt
 		}
 
 		auto skip(Char const* it, Char const* end, mask x = space) const
-		/// Next character after $it but before $end which is not $x
+		// Next character after $it but before $end which is not $x
 		{
 			return base::scan_not(x, it, end);
 		}
 
 		auto skip(view u, mask x = space) const
-		/// Index of first character in view $u which is not $x
+		// Index of first character in view $u which is not $x
 		{
 			auto const from = begin(u);
 			auto const to = skip(from, end(u), x);
@@ -118,7 +126,7 @@ namespace fmt
 		}
 
 		auto widen(fwd::basic_string_view<char> u) const
-		/// Decode multibyte characters as wide type
+		// Decode multibyte characters as wide type
 		{
 			struct iterator : utf
 			{
@@ -164,7 +172,7 @@ namespace fmt
 		}
 
 		auto narrow(fwd::basic_string_view<Char> u) const
-		/// Encode wide characters as multibyte type
+		// Encode wide characters as multibyte type
 		{
 			struct iterator
 			{
@@ -203,19 +211,19 @@ namespace fmt
 		}
 
 		auto first(view u, mask x = space) const
-		/// First iterator in view $u that is not $x
+		// First iterator in view $u that is not $x
 		{
 			return skip(begin(u), end(u), x);
 		}
 
 		auto last(view u, mask x = space) const
-		/// Last iterator in view $u that is not $x
+		// Last iterator in view $u that is not $x
 		{
 			return skip(rbegin(u), rend(u), x).base();
 		}
 
 		auto trim(view u, mask x = space) const
-		/// Trim $x off the front and back of $u
+		// Trim $x off the front and back of $u
 		{
 			auto const before = last(u, x);
 			auto const after = first(u, x);
@@ -225,7 +233,7 @@ namespace fmt
 		}
 
 		auto divide(view u, mask x = space) const
-		/// Count the quotient in $u that are $x and remainder that are not
+		// Count the quotient in $u that are $x and remainder that are not
 		{
 			pair n { 0, 0 };
 			for (auto const w : widen(u))
@@ -243,43 +251,43 @@ namespace fmt
 		}
 
 		auto rem(view u, mask x = space) const
-		/// Count characters in $u that are not $x
+		// Count characters in $u that are not $x
 		{
 			return divide(u, x).second; 
 		}
 
 		auto quot(view u, mask x = space) const
-		/// Count characters in $u that are $x
+		// Count characters in $u that are $x
 		{
 			return divide(u, x).first;
 		}
 
 		bool all_of(view u, mask x = space) const
-		/// All decoded characters in $u are $x
+		// All decoded characters in $u are $x
 		{
 			return 0 == rem(u, x);
 		}
 
 		bool none_of(view u, mask x = space) const
-		/// No decoded characters in $u are $x
+		// No decoded characters in $u are $x
 		{
 			return 0 == quot(u, x);
 		}
 
 		bool clear(view u) const
-		/// All of view is white space
+		// All of view is white space
 		{
 			return all_of(u);
 		}
 
 		bool flush(view u) const
-		/// None of view is white space
+		// None of view is white space
 		{
 			return none_of(u);
 		}
 
 		auto to_upper(view u) const
-		/// Recode characters in upper case
+		// Recode characters in upper case
 		{
 			string s;
 			for (auto const w : widen(u))
@@ -291,7 +299,7 @@ namespace fmt
 		}
 
 		auto to_lower(view u) const
-		/// Recode characters in lower case
+		// Recode characters in lower case
 		{
 			string s;
 			for (auto const w : widen(u))
@@ -313,13 +321,13 @@ namespace fmt
 		}
 
 		static bool terminated(view u)
-		/// Check whether string is null terminated
+		// Check whether string is null terminated
 		{
 			return not empty(u) and not u[u.size()];
 		}
 
 		static auto count(view u)
-		/// Count characters in view
+		// Count characters in view
 		{
 			auto n = null;
 			auto m = null;
@@ -338,7 +346,7 @@ namespace fmt
 		}
 
 		static auto count(view u, view v)
-		/// Count occurances in $u of a substring $v
+		// Count occurances in $u of a substring $v
 		{
 			auto n = null;
 			auto const z = v.size();
@@ -352,7 +360,7 @@ namespace fmt
 
 		template <class Iterator> 
 		static auto join(Iterator begin, Iterator end, view u)
-		/// Join strings in $t with $u inserted between
+		// Join strings in $t with $u inserted between
 		{
 			string s;
 			for (auto it = begin; it != end; ++it)
@@ -367,7 +375,7 @@ namespace fmt
 		}
 
 		template <class Span> static auto split(Span t, view u)
-		/// Split strings in $p delimited by $v
+		// Split strings in $p delimited by $v
 		{
 			fwd::vector<Span> s;
 			auto p = t.data();
@@ -385,7 +393,7 @@ namespace fmt
 		}
 
 		static auto split(view u, view v)
-		/// Split strings in $u delimited by $v
+		// Split strings in $u delimited by $v
 		{
 			vector t;
 			auto const uz = u.size(), vz = v.size();
@@ -400,7 +408,7 @@ namespace fmt
 		}
 
 		static auto replace(view u, view v, view w)
-		/// Replace in u all occurrances of v with w
+		// Replace in u all occurrances of v with w
 		{
 			string s;
 			auto const uz = u.size(), vz = v.size();

@@ -26,7 +26,7 @@
 #	define verify(...) (__VA_ARGS__)
 #endif
 
-// Negative boolean
+// Pessimistic boolean
 
 enum : bool { success = false, failure = true };
 

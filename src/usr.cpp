@@ -344,34 +344,38 @@ namespace env::usr
 	view::ref videos_dir = VIDEOS_DIR;
 }
 
-#ifndef test
+#ifdef test
 namespace
 {
 	constexpr auto eol = '\n';
 
-	struct hdr
+	struct hdr : fmt::struct_brief<hdr>
 	{
-		fmt::string::view group
+		fmt::string::view group;
 
 		hdr(fmt::string::view g)
 			: group(g)
 		{ }
-
-		fmt::string::out operator()(fmt::string::out out)
-		{
-			return out << '[' << group << ']' << eol;
-		}
 	};
 
-	struct kv : fwd::pair<fmt::string::view>
+	fmt::string::out::ref operator<<(fmt::string::out::ref out, hdr::cref obj)
 	{
-		using pair::pair
+		return out << '[' << obj.group << ']' << eol;
+	}
 
-		fmt::string::out operator()(fmt::string::out out)
-		{
-			return out << first << '=' << second << eol;
-		}
+	struct kv : fmt::struct_brief<kv>
+	{
+		fwd::pair<fmt::string::view> entry;
+
+		kv(fmt::string::view key, fmt::string::view value)
+			: entry(key, value)
+		{ }
 	};
+
+	fmt::string::out::ref operator<<(fmt::string::out::ref out, kv::cref obj)
+	{
+		return out << obj.entry.first << '=' << obj.entry.second << eol;
+	}
 }
 
 test(usr)
@@ -394,7 +398,7 @@ test(usr)
 		<< std::endl;
 
 	out	<< hdr("Desktop")
-		<< kv("runtime-dir", env::usr::rundir)
+		<< kv("runtime-dir", env::usr::run_dir)
 		<< kv("data-home", env::usr::data_home)
 		<< kv("config-home", env::usr::config_home)
 		<< kv("cache-home", env::usr::cache_home)
@@ -416,7 +420,7 @@ test(usr)
 	out	<< hdr("Application Options")
 		<< kv("name", env::opt::application)
 		<< kv("program", env::opt::program)
-		<< kv("command-line", fmt::join(env::opt::arguments, " "));
+		<< kv("command-line", fmt::join(env::opt::arguments, " "))
 		<< kv("config", env::opt::config)
 		<< env::opt::put
 		<< std::endl;

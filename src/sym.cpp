@@ -15,8 +15,15 @@
 #include <dlfcn.h>
 #endif
 
+namespace
+{
+	sys::dll const current;
+}
+
 namespace sys
 {
+	dll::cref self = current;
+
 	dll::dll(fmt::string::view path)
 	{
 		auto const buf = fmt::to_string(path);

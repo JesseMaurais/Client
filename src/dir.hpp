@@ -38,8 +38,8 @@ namespace env::dir
 
 	entry mask(mode);
 	entry regx(view);
-	entry to(string const &);
-	entry to(vector const &);
+	entry to(string &);
+	entry to(vector &);
 	entry all(view, mode = ok, entry = next);
 	entry any(view, mode = ok, entry = stop);
 

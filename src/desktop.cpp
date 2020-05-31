@@ -12,9 +12,9 @@ namespace env
 	thread_local desktop local;
 	desktop & dialog = local;
 
-	opt::word const entry = fmt::str::put("Desktop Entry");
+	opt::word const desktop::group = fmt::str::put("Desktop Entry");
 
-	bool is(fmt::string::view name)
+	bool desktop::current(fmt::string::view name)
 	{
 		auto const lower = fmt::to_lower(name);
 		auto const current = fmt::to_lower(env::usr::current_desktop);

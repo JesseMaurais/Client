@@ -50,7 +50,7 @@ namespace sys
 		return put;
 	}
 
-	int bug(fmt::string::view message, bool no)
+	int impl::bug(fmt::string::view message, bool no)
 	{
 		thread_local struct
 		{

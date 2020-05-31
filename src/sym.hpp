@@ -5,13 +5,13 @@
 #include "env.hpp"
 
 #ifndef dynamic
-# ifdef _WIN32
-#  define dynamic extern "C" __declspec(dllexport)
-# else
-#  define dynamic extern "C" 
-# endif
+#	ifdef _WIN32
+#		define dynamic extern "C" __declspec(dllexport)
+#	else
+#		define dynamic extern "C" 
+#	endif
 #else
-# warning Using linkage dynamic // permitted
+#	warning Using linkage dynamic // permitted
 #endif
 
 namespace sys

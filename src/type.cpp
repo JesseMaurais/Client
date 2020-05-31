@@ -2,6 +2,18 @@
 #include "esc.hpp"
 #include "err.hpp"
 
+namespace
+{
+	fmt::type<char> const CSTR;
+	fmt::type<wchar_t> const WSTR;
+}
+
+namespace fmt
+{
+	type<char> const &cstr = CSTR;
+	type<wchar_t> const &wstr = WSTR;
+}
+
 #ifdef test
 test(type)
 {
