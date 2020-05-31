@@ -1,8 +1,12 @@
 #include "bug.hpp"
 #include "arg.hpp"
+#include "str.hpp"
+#include "type.hpp"
 #include "esc.hpp"
 #include "sym.hpp"
 #include "dev.hpp"
+#include "sig.hpp"
+#include "err.hpp"
 #include <fstream>
 #include <future>
 #include <vector>
@@ -11,20 +15,16 @@
 
 namespace
 {
-	fmt::string::view const prefix = "test_";
+	fmt::string const prefix = "test_";
 
 	void runner(fmt::string::view name, fmt::string::buf::ref buf)
 	{
-		auto & out = sys::out();
+		auto& out = std::cerr;
 		auto back = out.rdbuf();
 		try
 		{
-			out.rdbuf(buf);
-			auto scan = sys::sig::scan
-			(
-				{ SIGINT, SIGILL, SIGHUP, SIGFPE }
-			);
-			auto call = sym(name);
+			out.rdbuf(&buf);
+			auto call = sys::sym<void()>(name);
 			if (nullptr == call)
 			{
 				out << name << " is missing";
@@ -36,19 +36,14 @@ namespace
 		}
 		catch (std::exception const& error)
 		{
-			out << error.what() << eol;
+			out << error.what() << fmt::eol;
 		}
 		catch (...)
 		{
-			out << "Unknown" << eol;
+			out << "Unknown" << fmt::eol;
 		}
 		out.rdbuf(back);
 	}
-}
-
-int main(int argc, char** argv)
-{
-	using namespace std;
 
 	// Command line words
 	namespace key
@@ -60,13 +55,18 @@ int main(int argc, char** argv)
 			tools  = "tools" ,
 			print  = "print" ;
 	};
+}
+
+int main(int argc, char** argv)
+{
+	using namespace std;
 
 	#ifndef _TOOLS
 	# define _TOOLS "Tools.ini"
 	#endif
 
 	// Command line details
-	env::opt::commands const cmd
+	std::vector<env::opt::command> cmd
 	{
 		{ 0, "h", key::help, "Print command line usage then quit" },
 		{ 0, "p", key::print, "Print all source tests then quit" },
@@ -76,16 +76,16 @@ int main(int argc, char** argv)
 	};
 
 	// Command line parsing
-	auto const tests = env::opt::put(argc, argv, cmd):
-	auto const color = env::opt::get(key::color, true);
-	auto const serial = env::opt::get(key::serial, false);
-	auto const tools = env::opt::get(key::tools, _TOOLS);
-	auto const clean = std::empty(env::opt::arguments);
+	auto tests = env::opt::put(argc, argv, cmd);
+	auto const color = env::opt::get(fmt::str::set(key::color), true);
+	auto const serial = env::opt::get(fmt::str::set(key::serial), false);
+	auto const tools = env::opt::get(fmt::str::set(key::tools), fmt::string::view(_TOOLS));
+	auto const clean = std::empty(fmt::str::set(env::opt::arguments));
 
 	// Initialize from tools
 	if (not empty(tools))
 	{
-		ifstream in { tools };
+		ifstream in { tools.data() };
 		in >> env::opt::get;
 		if (in.fail())
 		{
@@ -96,15 +96,19 @@ int main(int argc, char** argv)
 	// Use tool set
 	if (empty(tests))
 	{
-		tests = fmt::split(env::opt::get("TESTS"));
+		const auto wd = fmt::str::set("TESTS");
+		for (const auto test : fmt::split(env::opt::get(wd)))
+		{
+			tests.emplace_back(test);
+		}
 	}
 
 	// Map test names to error buffers' string stream
 	map<fmt::string::view, fmt::string::stream> context;
+	fmt::string::view const program = env::opt::program;
 
 	if (empty(tests))
 	{
-		view const program = env::opt::program;
 		env::dev::dump dump; // output cache
 
 		// Parse this programs symbol table
@@ -117,10 +121,10 @@ int main(int argc, char** argv)
 				if (name.starts_with(prefix))
 				{
 					// Symbol must exist
-					auto call = sym(name);
+					auto call = sys::sym<void()>(name);
 					if (nullptr != call)
 					{
-						context.emplace(name, { });
+						context.emplace(name, sys::out);
 					}
 				}
 			}
@@ -130,66 +134,66 @@ int main(int argc, char** argv)
 	{
 		for (auto word : tests)
 		{
-			auto const name = prefix + word;
-			auto const call = sym(name);
+			auto const name = prefix + fmt::to_string(word);
+			auto const call = sys::sym<void()>(name);
 			if (nullptr == call)
 			{
 				cerr << "Cannot find " << name << " in " << program;
 			}
 			else
 			{
-				context.emplace(name, { });
+				context.emplace(name, sys::out);
 			}
 		}
 	}
 
 	// Print the unit tests and quit
-	if (env::opt::get(key::print, false))
+	if (env::opt::get(fmt::str::set(key::print), false))
 	{
 		for (auto const & [name, error] : context)
 		{
-			cerr << name << eol;
+			cerr << name << fmt::eol;
 		}
 		return EXIT_SUCCESS;
 	}
 
 	bool const missing = clean and empty(context);
 	// Print the help menu and quit if missing
-	if (env::opt::get(key::help, missing)
+	if (env::opt::get(fmt::str::set(key::help), missing))
 	{
 		if (missing)
 		{
-			if (color) cerr << fg_yellow;
+			if (color) cerr << fmt::fg_yellow;
 
-			cerr << "No tests were found" << eol;
+			cerr << "No tests were found" << fmt::eol;
 
-			if (color) cerr << fg_off;
+			if (color) cerr << fmt::fg_off;
 		}
 
 		cerr 
 			<< "Unit tests are found in order:"
-			<< eol << tab
+			<< fmt::eol << fmt::tab
 			<< "1. Free command line arguments"
-			<< eol << tab
+			<< fmt::eol << fmt::tab
 			<< "2. The TESTS environment variable"
-			<< eol << tab
+			<< fmt::eol << fmt::tab
 			<< "3. The TESTS variable in " _TOOLS
-			<< eol << tab
+			<< fmt::eol << fmt::tab
 			<< "4. The dump symbols for " << prefix << "*"
-			<< eol
+			<< fmt::eol
 			<< "Commands for unit test runner:"
-			<< eol;
+			<< fmt::eol;
 
 		for (auto const & item : cmd)
 		{
 			cerr
-				<< tab
+				<< fmt::tab
 				<< env::opt::dash << item.dash
-				<< tab
-				<< env::opt::dual << item.dual
-				<< tab
+				<< fmt::tab
+				<< env::opt::dual << item.name
+				<< fmt::tab
 				<< item.text
-				<< eol;
+				<< fmt::eol;
 		}
 		return EXIT_SUCCESS;
 	}
@@ -199,7 +203,7 @@ int main(int argc, char** argv)
 		std::set<std::future<void>> threads;
 
 		// Run tests either in serial or parallel
-		for (auto & [name, error] : constext)
+		for (auto & [name, error] : context)
 		{
 			auto buf = error.rdbuf();
 			if (not serial)
@@ -221,7 +225,7 @@ int main(int argc, char** argv)
 
 	if (color)
 	{
-		cerr << fg_yellow;
+		cerr << fmt::fg_yellow;
 	}
 
 	signed long int counter = 0;
@@ -233,7 +237,7 @@ int main(int argc, char** argv)
 		{
 			while (getline(error, str))
 			{
-				cerr << name << tab << str << eol;
+				cerr << name << fmt::tab << str << fmt::eol;
 				++counter;
 			}
 
@@ -246,14 +250,14 @@ int main(int argc, char** argv)
 
 	if (color)
 	{
-		cerr << (counter ? fg_cyan : fg_magenta);
+		cerr << (counter ? fmt::fg_cyan : fmt::fg_magenta);
 	}
 
 	cerr << "There are " << counter << " errors" << eol;
 
 	if (color)
 	{
-		cerr << reset;
+		cerr << fmt::reset;
 	}
 
 	return counter ? EXIT_SUCCESS : EXIT_FAILURE ;

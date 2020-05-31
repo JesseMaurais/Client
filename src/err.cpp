@@ -1,21 +1,23 @@
 #include "err.hpp"
 #include "sync.hpp"
+#include "type.hpp"
 #include <cassert> // overwrite assert
 
 namespace
 {
+	thread_local fmt::string::view id = "";
+
 	struct : env::variable<fmt::string::view>
 	{
-		thread_local type id = fmt::none;
-
 		operator type() const final
 		{
 			return id;
 		}
 
-		type operator=()(type value) final
+		type operator=(type value) final
 		{
-			return id = value;
+			id = value;
+			return id;
 		}
 
 	} THREAD_ID;
@@ -23,7 +25,7 @@ namespace
 
 namespace sys
 {
-	env::view:ref thread_id = THREAD_ID;
+	env::view::ref thread_id = THREAD_ID;
 
 	bool debug =
 	#ifdef NDEBUG
@@ -55,8 +57,6 @@ namespace sys
 			fmt::string last;
 			int counter = -1;
 		} local;
-		// Ouptut stream
-		auto & put = out();
 		// Avoid spamming
 		if (message != local.last)
 		{
@@ -66,19 +66,19 @@ namespace sys
 			// format
 			{
 				// message
-				put << local.last;
+				out << local.last;
 				// number
-				if (view err = std::strerror(errno); no)
+				if (no)
 				{
-					put << ':' << ' ' << err;
+					out << ':' << ' ' << std::strerror(errno);
 				}
 				// thread
-				if (view id = thread_id; not std::empty(id))
+				if (not empty(thread_id))
 				{
-					put << '[' << id << ']';
+					out << ' ' << '[' << thread_id << ']';
 				}
 			}
-			put << '\n';
+			out << fmt::eol;
 		}
 		else ++local.counter;
 		return local.counter;

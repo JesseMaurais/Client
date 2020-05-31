@@ -7,35 +7,34 @@
 
 namespace sys
 {
-	struct jmp : property<int>
+	struct jmp : fwd::variable<int>
 	// Signal discarding jump
 	{
-		jmp_buf buf;
+		mutable jmp_buf buf;
 
 		operator type() const final
 		// Jump value or else 0
 		{
-			return std::setjmp(buf);
+			return setjmp(buf); // macro, no std
 		}
 
 		[[noreturn]] type operator=(type value) final
 		// Jump without unwinding the stack
 		{
-			std::longjmp(buf);
-			return -1;
+			std::longjmp(buf, value);
 		}
-	}
+	};
 }
 
 namespace env
 {
-	struct jmp : variable<int>
+	struct jmp : fwd::variable<int>
 	// Signal preserving jump
 	{
 		operator type() const final;
 		[[noreturn]]
 		type operator=(type) final;
-	}
+	};
 }
 
 namespace env::sig

@@ -1,5 +1,7 @@
 #include "opt.hpp"
 #include "dig.hpp"
+#include "type.hpp"
+#include "arg.hpp"
 
 namespace
 {
@@ -49,7 +51,8 @@ namespace env::opt
 
 	bool set(word key, bool value)
 	{
-		return set(key, cast(value));
+		fmt::string::view u = cast(value);
+		return set(key, u);
 	}
 
 	bool get(pair key, bool value)
@@ -59,12 +62,13 @@ namespace env::opt
 
 	bool set(pair key, bool value)
 	{
-		return set(key, cast(value));
+		fmt::string::view u = cast(value);
+		return set(key, u);
 	}
 
 	// Integer
 
-	word get(view key, word value, int base)
+	word get(word key, word value, int base)
 	{
 		return cast(key, value, [base](auto value)
 		{
@@ -72,7 +76,7 @@ namespace env::opt
 		});
 	}
 
-	bool set(view key, word value, int base)
+	bool set(word key, word value, int base)
 	{
 		return set(key, fmt::to_string(value, base));
 	}
@@ -92,7 +96,7 @@ namespace env::opt
 
 	// Pointed Decimal
 
-	quad get(view key, quad value)
+	quad get(word key, quad value)
 	{
 		return cast(key, value, [](auto value)
 		{
@@ -100,7 +104,7 @@ namespace env::opt
 		});
 	}
 
-	bool set(view key, quad value, int digits)
+	bool set(word key, quad value, int digits)
 	{
 		return set(key, fmt::to_string(value, digits));
 	}

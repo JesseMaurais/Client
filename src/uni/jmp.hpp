@@ -6,10 +6,13 @@
 
 namespace sys::uni
 {
-	struct jmp : property<int>
+	struct jmp : fwd::variable<int>
 	{
-		sigjmp_buf buf;
-		int save = 0;
+		mutable sigjmp_buf buf;
+		int save;
+
+		jmp(int sigs = 0) : save(sigs)
+		{ }
 
 		operator type() const final
 		{
@@ -18,8 +21,7 @@ namespace sys::uni
 
 		[[noreturn]] type operator=(type value) final
 		{
-			siglongjmp(buf);
-			return -1;
+			siglongjmp(buf, value);
 		}
 	};
 }

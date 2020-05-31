@@ -12,13 +12,12 @@ namespace env
 
 	jmp::operator type() const
 	{
-		return type(jumper)
+		return type(jumper);
 	}
 
-	auto jmp::operator=(type value)
+	int jmp::operator=(type value)
 	{
-		jumper(value);
-		return -1;
+		jumper = value;
 	}
 }
 

@@ -1,7 +1,7 @@
 #ifndef algo_hpp
 #define algo_hpp "Algorithms"
 
-#include "fmt.hpp"
+#include "fwd.hpp"
 #include "tmp.hpp"
 #include <memory>
 
