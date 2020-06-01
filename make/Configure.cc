@@ -229,3 +229,7 @@ endif
 -include $(DEP)
 #endif
 
+// Analysis
+include make/PVS.mk
+analysis: pvs
+

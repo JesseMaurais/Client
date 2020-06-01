@@ -11,6 +11,9 @@ all: $(MAKEFILE)
 clean: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE) clean
 
+analysis: $(MAKEFILE)
+	$(MAKE) -f $(MAKEFILE) analysis
+
 config:
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
