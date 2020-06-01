@@ -62,7 +62,6 @@ namespace fmt
 namespace sys
 {
 	extern fmt::string::out::ref out; // Output device
-	extern fmt::string::in::ref in; // Input device
 
 	namespace impl
 	{
@@ -85,7 +84,7 @@ namespace sys
 // Unit tests
 
 #ifndef NDEBUG
-#	include "bug.hpp"
+#	include "test.hpp"
 #endif
 
 #endif // file

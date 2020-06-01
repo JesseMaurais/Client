@@ -12,8 +12,6 @@ namespace env
 	thread_local desktop local;
 	desktop & dialog = local;
 
-	opt::word const desktop::group = fmt::str::put("Desktop Entry");
-
 	bool desktop::current(fmt::string::view name)
 	{
 		auto const lower = fmt::to_lower(name);
@@ -23,6 +21,7 @@ namespace env
 
 	shell::line desktop::with(span command)
 	{
+		static opt::word const group = fmt::str::put("Desktop Entry");
 		static opt::word const key = fmt::str::put("DIALOG");
 		static opt::pair const entry { group, key };
 		static view const zenity = "zenity";

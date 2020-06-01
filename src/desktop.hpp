@@ -8,9 +8,6 @@ namespace env
 {
 	extern struct desktop : shell
 	{
-		static opt::word const group;
-		// Desktop settings group index
-
 		static bool current(view name);
 		// Whether name matches current session
 
