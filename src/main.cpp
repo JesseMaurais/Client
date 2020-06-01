@@ -14,9 +14,7 @@
 #include <map>
 
 namespace
-{
-	fmt::string const prefix = "test_";
-
+{	
 	void runner(fmt::string::view name, fmt::string::buf::ptr buf)
 	{
 		auto& out = std::cerr;
@@ -44,84 +42,89 @@ namespace
 		}
 		out.rdbuf(back);
 	}
-
-	// Command line words
-	namespace key
-	{
-		constexpr auto 
-			help   = "help"  , 
-			color  = "color" , 
-			serial = "async" ,
-			tools  = "tools" ,
-			print  = "print" ;
-	};
 }
 
 int main(int argc, char** argv)
 {
-	using namespace std;
-
 	#ifndef _TOOLS
 	# define _TOOLS "Tools.ini"
 	#endif
 
+	// Default options file
+	fmt::string::view const tools = _TOOLS;
+
+	// Command line words
+	struct
+	{
+		env::opt::word const
+			tests = fmt::str::put("TESTS"),
+			color = fmt::str::put("color"),
+			async = fmt::str::put("async"),
+			tools = fmt::str::put("tools"),
+			print = fmt::str::put("print"),
+			help  = fmt::str::put("help");
+
+	} key;
+
 	// Command line details
 	std::vector<env::opt::command> cmd
 	{
-		{ 0, "h", key::help, "Print command line usage then quit" },
-		{ 0, "p", key::print, "Print all source tests then quit" },
-		{ 0, "c", key::color, "Print using color codes" },
-		{ 0, "a", key::serial, "Run tests asynchronously" },
-		{ 1, "t", key::tools, "Use instead of " _TOOLS },
+		{ 0, "h", fmt::str::get(key.help), "Print command line usage then quit" },
+		{ 0, "p", fmt::str::get(key.print), "Print all source tests then quit" },
+		{ 0, "c", fmt::str::get(key.color), "Print using color codes" },
+		{ 0, "a", fmt::str::get(key.async), "Run tests asynchronously" },
+		{ 1, "t", fmt::str::get(key.tools), "Use instead of " _TOOLS },
 	};
 
 	// Command line parsing
 	auto tests = env::opt::put(argc, argv, cmd);
-	auto const color = env::opt::get(fmt::str::set(key::color), true);
-	auto const serial = env::opt::get(fmt::str::set(key::serial), false);
-	auto const tools = env::opt::get(fmt::str::set(key::tools), fmt::string::view(_TOOLS));
-	auto const clean = std::empty(fmt::str::set(env::opt::arguments));
+
+	// Command line options
+	auto const color = env::opt::get(key.color, true);
+	auto const async = env::opt::get(key.async, false);
+	auto const config = env::opt::get(key.tools, tools);
+	auto const clean = std::empty(env::opt::arguments);
 
 	// Initialize from tools
-	if (not empty(tools))
+	if (not std::empty(config))
 	{
-		ifstream in { tools.data() };
-		in >> env::opt::get;
-		if (in.fail())
+		std::ifstream in { config.data() };
+		if (not (in >> env::opt::get))
 		{
-			cerr << "Failed to read" << tools;
+			std::cerr << "Failed to read " << config;
 		}
 	}
 
-	// Use tool set
-	if (empty(tests))
+	// Default test options
+	if (std::empty(tests))
 	{
-		const auto wd = fmt::str::set("TESTS");
-		for (const auto test : fmt::split(env::opt::get(wd)))
+		const auto list = env::opt::get(key.tests);
+		for (const auto test : fmt::split(list))
 		{
 			tests.emplace_back(test);
 		}
 	}
 
 	// Map test names to error buffers' string stream
-	map<fmt::string::view, fmt::string::stream> context;
+	std::map<fmt::string::view, fmt::string::stream> context;
 	fmt::string::view const program = env::opt::program;
+	fmt::string const prefix = "test_";
 
-	if (empty(tests))
+	if (std::empty(tests))
 	{
 		env::dev::dump dump; // output cache
 
 		// Parse this programs symbol table
-		for (auto line : dump.dyn(program))
+		for (auto const& line : dump.dyn(program))
 		{
 			// Separate lines by white space
-			for (auto name : fmt::split(line))
+			for (auto const name : fmt::split(line))
 			{
 				// Match those with prefix
 				if (name.starts_with(prefix))
 				{
 					// Symbol must exist
-					auto call = sys::sym<void()>(name);
+					auto const call = sys::sym<void()>(name);
 					if (nullptr != call)
 					{
 						verify(context[name].str().empty());
@@ -132,14 +135,12 @@ int main(int argc, char** argv)
 	}
 	else // copy
 	{
-		for (auto word : tests)
+		for (fmt::string const name : tests)
 		{
-			auto const s = fmt::str::get(word);
-			auto const name = prefix + fmt::to_string(s);
-			auto const call = sys::sym<void()>(name);
+			auto const call = sys::sym<void()>(prefix + name);
 			if (nullptr == call)
 			{
-				cerr << "Cannot find " << name << " in " << program;
+				std::cerr << "Cannot find " << name << " in " << program;
 			}
 			else
 			{
@@ -149,29 +150,29 @@ int main(int argc, char** argv)
 	}
 
 	// Print the unit tests and quit
-	if (env::opt::get(fmt::str::set(key::print), false))
+	if (env::opt::get(key.print, false))
 	{
-		for (auto const & [name, error] : context)
+		for (auto const& [name, error] : context)
 		{
-			cerr << name << fmt::eol;
+			std::cerr << name << fmt::eol;
 		}
 		return EXIT_SUCCESS;
 	}
 
-	bool const missing = clean and empty(context);
+	bool const missing = clean and std::empty(context);
 	// Print the help menu and quit if missing
-	if (env::opt::get(fmt::str::set(key::help), missing))
+	if (env::opt::get(key.help, missing))
 	{
 		if (missing)
 		{
-			if (color) cerr << fmt::fg_yellow;
+			if (color) std::cerr << fmt::fg_yellow;
 
-			cerr << "No tests were found" << fmt::eol;
+			std::cerr << "No tests were found" << fmt::eol;
 
-			if (color) cerr << fmt::fg_off;
+			if (color) std::cerr << fmt::fg_off;
 		}
 
-		cerr 
+		std::cerr 
 			<< "Unit tests are found in order:"
 			<< fmt::eol << fmt::tab
 			<< "1. Free command line arguments"
@@ -187,7 +188,7 @@ int main(int argc, char** argv)
 
 		for (auto const & item : cmd)
 		{
-			cerr
+			std::cerr
 				<< fmt::tab
 				<< env::opt::dash << item.dash
 				<< fmt::tab
@@ -201,15 +202,18 @@ int main(int argc, char** argv)
 
 	// Run all the selected unit tests 
 	{
-		vector<future<void>> threads;
+		std::vector<std::future<void>> threads;
 
 		// Run tests either in serial or parallel
-		for (auto & [name, error] : context)
+		for (auto const& [name, error] : context)
 		{
 			auto buf = error.rdbuf();
-			if (not serial)
+			if (async)
 			{
-				threads.emplace_back(async(launch::async, runner, name, buf));
+				threads.emplace_back
+				(
+					std::async(std::launch::async, runner, name, buf)
+				);
 			}
 			else
 			{
@@ -218,7 +222,7 @@ int main(int argc, char** argv)
 		}
 
 		// Wait on test completion
-		for (auto & job : threads)
+		for (auto& job : threads)
 		{
 			job.wait();
 		}
@@ -226,41 +230,34 @@ int main(int argc, char** argv)
 
 	if (color)
 	{
-		cerr << fmt::fg_yellow;
+		std::cerr << fmt::fg_yellow;
 	}
 
-	signed long int counter = 0;
-	for (auto & [name, error] : context)
+	std::size_t counter = 0;
+	for (auto& [name, error] : context)
 	{
-		auto str = error.str();
-
-		if (not empty(str))
+		if (auto str = error.str(); not std::empty(str))
 		{
-			while (getline(error, str))
+			while (std::getline(error, str))
 			{
-				cerr << name << fmt::tab << str << fmt::eol;
-				++counter;
-			}
-
-			if (error.fail())
-			{
-				cerr << "Failed to read " << name;
+				std::cerr << name << fmt::tab << str << fmt::eol;
+				++ counter;
 			}
 		}
 	}
 
 	if (color)
 	{
-		cerr << (counter ? fmt::fg_cyan : fmt::fg_magenta);
+		std::cerr << (0 < counter ? fmt::fg_magenta : fmt::fg_cyan);
 	}
 
-	cerr << "There are " << counter << " errors" << fmt::eol;
+	std::cerr << "There are " << counter << " errors" << fmt::eol;
 
 	if (color)
 	{
-		cerr << fmt::reset;
+		std::cerr << fmt::reset;
 	}
 
-	return counter ? EXIT_SUCCESS : EXIT_FAILURE ;
+	return 0 < counter ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
