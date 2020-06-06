@@ -77,7 +77,7 @@ namespace x11::auth
 
 namespace x11
 {
-	env::view::cref authority = XAUTHORITY;
+	env::view::ref authority = XAUTHORITY;
 
 	fmt::string setup(bytes::io::ref io, fmt::string::view proto, fmt::string::view data)
 	{

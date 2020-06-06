@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	#endif
 
 	// Default options file
-	fmt::string::view const tools = _TOOLS;
+	fmt::string::view const config = _TOOLS;
 
 	// Command line words
 	struct
@@ -65,42 +65,45 @@ int main(int argc, char** argv)
 			tools = fmt::str::put("tools"),
 			print = fmt::str::put("print"),
 			help  = fmt::str::put("help");
-
-	} key;
+	} arg;
 
 	// Command line details
 	std::vector<env::opt::command> cmd
 	{
-		{ 0, "h", fmt::str::get(key.help), "Print command line usage then quit" },
-		{ 0, "p", fmt::str::get(key.print), "Print all source tests then quit" },
-		{ 0, "c", fmt::str::get(key.color), "Print using color codes" },
-		{ 0, "a", fmt::str::get(key.async), "Run tests asynchronously" },
-		{ 1, "t", fmt::str::get(key.tools), "Use instead of " _TOOLS },
+		{ 0, "h", fmt::str::get(arg.help), "Print command line usage then quit" },
+		{ 0, "p", fmt::str::get(arg.print), "Print all source tests then quit" },
+		{ 0, "c", fmt::str::get(arg.color), "Print using color codes" },
+		{ 0, "a", fmt::str::get(arg.async), "Run tests asynchronously" },
+		{ 1, "t", fmt::str::get(arg.tools), "Use instead of " _TOOLS },
 	};
 
 	// Command line parsing
 	auto tests = env::opt::put(argc, argv, cmd);
 
 	// Command line options
-	auto const color = env::opt::get(key.color, true);
-	auto const async = env::opt::get(key.async, false);
-	auto const config = env::opt::get(key.tools, tools);
+	auto const color = env::opt::get(arg.color, true);
+	auto const async = env::opt::get(arg.async, false);
+	auto const tools = env::opt::get(arg.tools, config);
 	auto const clean = std::empty(env::opt::arguments);
 
 	// Initialize from tools
-	if (not std::empty(config))
+	if (not std::empty(tools))
 	{
-		std::ifstream in { config.data() };
-		if (not (in >> env::opt::get))
+		auto const path = fmt::to_string(tools);
+		std::ifstream in { path };
+		if (in)
 		{
-			std::cerr << "Failed to read " << config;
+			if (not (in >> env::opt::get))
+			{
+				std::cerr << "Failed to read " << path;
+			}
 		}
 	}
 
 	// Default test options
 	if (std::empty(tests))
 	{
-		const auto list = env::opt::get(key.tests);
+		const auto list = env::opt::get(arg.tests);
 		for (const auto test : fmt::split(list))
 		{
 			tests.emplace_back(test);
@@ -152,7 +155,7 @@ int main(int argc, char** argv)
 	}
 
 	// Print the unit tests and quit
-	if (env::opt::get(key.print, false))
+	if (env::opt::get(arg.print, false))
 	{
 		for (auto const& [name, error] : context)
 		{
@@ -163,7 +166,7 @@ int main(int argc, char** argv)
 
 	bool const missing = clean and std::empty(context);
 	// Print the help menu and quit if missing
-	if (env::opt::get(key.help, missing))
+	if (env::opt::get(arg.help, missing))
 	{
 		if (missing)
 		{
