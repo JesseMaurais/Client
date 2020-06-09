@@ -1,7 +1,0 @@
-exclude-path = /usr/lib
-exclude-path = /usr/lib64
-skip-cl-exe = yes
-preprocessor = gcc
-platform = linux64
-analysis-mode = 4
-language = C++

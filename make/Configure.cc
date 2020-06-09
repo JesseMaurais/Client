@@ -133,7 +133,7 @@ ifdef COMSPEC
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
 endif
 {$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
-#else
+#else // GNU
 $(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXXCMD)
 #endif
 
@@ -228,8 +228,4 @@ endif
 #else // GNU
 -include $(DEP)
 #endif
-
-// Analysis
-include make/PVS.mk
-analysis: pvs
 
