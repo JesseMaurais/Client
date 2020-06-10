@@ -2,7 +2,7 @@
 # operating system and version of $(MAKE) used. Forward standard targets
 # to it.
 
-MAKEFILE=make/Configure.mak
+MAKEFILE=make/Configure.mk
 TEMPLATE=make/Configure.cc
 
 all: $(MAKEFILE)
@@ -11,14 +11,15 @@ all: $(MAKEFILE)
 clean: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE) clean
 
-analyze: $(MAKEFILE)
+$(MAKEFILE): $(TEMPLATE)
+	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
+
+analysis:
+	scan-build --use-c++=$(CXX) $(MAKE)
+
+pvs:
 	pvs-studio-analyzer trace -- $(MAKE)
 	pvs-studio-analyzer analyze -o make/PVS.log
 	plog-converter make/PVS.log -o make/PVS.html -t html -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2'
 
-configure:
-	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
-
-$(MAKEFILE): $(TEMPLATE)
-	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
