@@ -17,6 +17,9 @@ $(MAKEFILE): $(TEMPLATE)
 analysis:
 	scan-build --use-c++=$(CXX) $(MAKE)
 
+check:
+	cppcheck src
+
 pvs:
 	pvs-studio-analyzer trace -- $(MAKE)
 	pvs-studio-analyzer analyze -o make/PVS.log
