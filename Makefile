@@ -11,14 +11,17 @@ all: $(MAKEFILE)
 clean: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE) clean
 
-analyze: $(MAKEFILE)
-	pvs-studio-analyzer trace -- $(MAKE)
-	pvs-studio-analyzer analyze -o make/PVS.log
-	plog-converter make/PVS.log -o make/PVS.html -t html -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2'
-
 configure:
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
 $(MAKEFILE): $(TEMPLATE)
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
+
+scan: $(MAKEFILE)
+	scan-build --use-c++=$(CXX) -o make $(MAKE)
+
+verify: $(MAKEFILE)
+	pvs-studio-analyzer trace -- $(MAKE)
+	pvs-studio-analyzer analyze -o make/PVS.log
+	plog-converter make/PVS.log -o make/PVS.html -t html -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2'
 
