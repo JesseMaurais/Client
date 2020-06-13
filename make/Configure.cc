@@ -43,7 +43,6 @@ add(LDFLAGS, -lm -ldl -lrt -lpthread)
 endif
 
 // Project
-.SUFFIXES: .cpp .hpp .mak .mk
 STD=c++20
 MAKDIR=make$(DIR)
 OBJDIR=obj$(DIR)
@@ -52,19 +51,22 @@ HDRDIR=$(SRCDIR)
 PCH=pre
 SRCEXT=cpp
 HDREXT=hpp
+MAKEXT=mak
 ALLSRC=$(SRCDIR)*.$(SRCEXT)
 ALLHDR=$(SRCDIR)*.$(HDREXT)
+
+.SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
 
 all: test.$(OUTEXT)
 
 // Source
 #ifdef _NMAKE
 ifdef COMSPEC
-MAKHDR=$(MAKDIR)Header.mak
+MAKHDR=$(MAKDIR)Header.$(MAKEXT)
 !if ![(echo HDR=\>$(MAKHDR)) && for %i in ($(ALLHDR)) do @echo %i\>>$(MAKHDR)]
 !include $(MAKHDR)
 endif // HDR
-MAKSRC=$(MAKDIR)Source.mak
+MAKSRC=$(MAKDIR)Source.$(MAKEXT)
 !if ![(echo SRC=\>$(MAKSRC)) && for %i in ($(ALLSRC)) do @echo %i\>>$(MAKSRC)]
 !include $(MAKSRC)
 endif // SRC
@@ -197,11 +199,11 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
 // Outputs
 #ifdef _NMAKE
 ifdef COMSPEC
-MAKDEP=$(MAKDIR)Depend.mak
+MAKDEP=$(MAKDIR)Depend.$(MAKEXT)
 !if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
 !include $(MAKDEP)
 endif // DEP
-MAKOBJ=$(MAKDIR)Object.mak
+MAKOBJ=$(MAKDIR)Object.$(MAKEXT)
 !if ![(echo OBJ=\>$(MAKOBJ)) && for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ)]
 !include $(MAKOBJ)
 endif // OBJ
@@ -220,7 +222,7 @@ clean: ; $(RM) test.$(OUTEXT) $(OBJ) $(PCHOBJ) $(DEP)
 // Depend
 #ifdef _NMAKE
 ifdef COMSPEC
-MAKALLDEP=$(MAKDIR)All.mak
+MAKALLDEP=$(MAKDIR)All.$(MAKEXT)
 !if ![(for %i in ($(ALLDEP)) do @echo !include %i) > $(MAKALLDEP)]
 !include $(MAKALLDEP)
 endif
