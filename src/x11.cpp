@@ -28,12 +28,17 @@ namespace
 		operator type() const final
 		{
 			auto u = env::var::get("XAUTHORITY");
-			if (empty(u))
+			/*if (empty(u))
 			{
-				constexpr auto author = ".Xauthority";
-				static auto s = fmt::dir::join({ env::home, author });
+				static fmt::string s;
+				if (empty(s))
+				{
+					constexpr auto author = ".Xauthority";
+					fmt::string::view const home = env::home;
+					s = fmt::dir::join({ home, author });
+				}
 				u = s;
-			}
+			}*/
 			return u;
 		}
 
