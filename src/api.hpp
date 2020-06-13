@@ -10,7 +10,7 @@
 
 #	if defined(_WIN32_WINNT) && !defined(WINVER)
 #		define WINVER _WIN32_WINNT
-#	elif !defined(_WIN32_WINNT)
+#	elif !defined(_WIN32_WINNT) && defined(WINVER)
 #		define _WIN32_WINNT WINVER
 #	endif
 

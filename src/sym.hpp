@@ -51,7 +51,7 @@ namespace sys
 
 	extern dll::cref self;
 
-	template <class T> auto sym(auto name)
+	template <class T> auto sym(fmt::string::view name)
 	{
 		return self.sym<T>(name);
 	}

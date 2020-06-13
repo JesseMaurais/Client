@@ -74,7 +74,7 @@ namespace sys
 	using off_t = long;
 	using pid_t = intptr_t;
 	using mode_t = int;
-	using stat_t = struct _stat;
+	using stat_t = _stat;
 
 	constexpr auto access = ::_access;
 	constexpr auto chdir = ::_chdir;

@@ -54,7 +54,7 @@ namespace fwd
 			return { begin(), end() };
 		}
 
-		auto operator[](auto index) const 
+		auto operator[](std::size_t index) const 
 		{
 			return that->at(this->first + index);
 		}
@@ -82,7 +82,7 @@ namespace fwd
 		: Base(pos), index(in)
 		{ }
 
-		Base operator()(auto at) const
+		Base operator()(std::size_t at) const
 		{
 			return { index[at], this->that };
 		}
