@@ -1,6 +1,7 @@
 #ifndef sync_hpp
 #define sync_hpp "Thread Synchronize"
 
+#include "err.hpp"
 #include "env.hpp"
 #ifdef _WIN32
 #include "win/sync.hpp"
@@ -19,7 +20,9 @@ namespace sys
 		object *that;
 
 		exclusive_ptr(object *ptr) : that(ptr)
-		{ }
+		{ 
+			assert(that);
+		}
 
 		auto read()
 		{
@@ -32,7 +35,9 @@ namespace sys
 				unlock(exclusive_ptr* ptr)
 				: key(ptr->lock.read())
 				, that(ptr->that)
-				{ }
+				{ 
+					assert(that);
+				}
 
 				auto const& operator*() const
 				{
@@ -58,7 +63,9 @@ namespace sys
 				unlock(exclusive_ptr *ptr)
 				: key(ptr->lock.write())
 				, that(ptr->that)
-				{ }
+				{ 
+					assert(that);
+				}
 
 				auto const& operator*() const
 				{
@@ -87,7 +94,6 @@ namespace sys
 	template <class object> class exclusive : object
 	// Self exclusion object
 	{
-		template <class> friend class cache;
 		exclusive_ptr<object> that;
 
 	public:
@@ -95,7 +101,9 @@ namespace sys
 		using object::object;
 
 		exclusive() : that(this)
-		{ }
+		{ 
+			assert(this);
+		}
 
 		auto read()
 		{
@@ -105,30 +113,6 @@ namespace sys
 		auto write()
 		{
 			return that.write();
-		}
-	};
-
-	template <class object> class cache : object
-	// Copy with read and write back
-	{
-		using exclusive = exclusive<object>;
-		using exclusive_ptr = exclusive_ptr<object>;
-
-		exclusive_ptr *that;
-
-		cache(exclusive *ptr) : cache(&ptr->that)
-		{ }
-
-		cache(exclusive_ptr *ptr) : that(ptr)
-		{
-			// non-blocking read
-			*this = *that->read();
-		}
-
-		auto write()
-		{
-			// write blocking copy
-			*that->write() = *this;
 		}
 	};
 }
