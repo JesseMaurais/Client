@@ -140,8 +140,9 @@ namespace doc
 		if (keys.end() == it)
 		{
 			auto const size = values.size();
-			keys.at(key) = fmt::to<env::opt::word>(size);
+			auto const id = fmt::to<env::opt::word>(size);
 			values.emplace_back(value);
+			keys.emplace(key, id);
 			return true;
 		}
 		else

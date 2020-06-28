@@ -14,7 +14,7 @@
 
 namespace
 {
-	sys::exclusive<fmt::string::view::vector> list;
+	fmt::string::view::vector list;
 
 	auto make_key()
 	{
@@ -26,6 +26,11 @@ namespace
 	{
 		static auto const cmd = fmt::str::set("Command Line");
 		return std::make_pair(cmd, key);
+	}
+
+	auto make_ini()
+	{
+		return fmt::join({env::opt::program(), "ini"}, ".");
 	}
 
 	auto& registry()
@@ -62,17 +67,17 @@ namespace env::opt
 
 	fmt::string::view::span arguments()
 	{
-		auto const reader = list.read();
-		return { reader->data(), reader->size() };
+		return { list.data(), list.size() };
 	}
 
 	fmt::string::view initials()
 	{
-		static auto const u = fmt::dir::join
-		(
-			{ env::opt::config(), env::opt::application(), ".ini" }
-		);
-		return u;
+		static fmt::string s;
+		if (empty(s))
+		{
+			s = fmt::dir::join({config(), make_ini()});
+		}
+		return s;
 	}
 
 	fmt::string::view program()
@@ -100,24 +105,31 @@ namespace env::opt
 		static fmt::string s;
 		if (empty(s))
 		{
-			using namespace env::dir;
-			env::dir::find(env::dir::config(), regx(".ini") || to(s) || stop);
+			auto const filename = make_ini();
+			for (auto const dirs : { env::dir::config(), env::dir::paths() })
+			{
+				using namespace env::dir;
+				if (find(dirs, regx(filename) || to(s) || stop))
+				{
+					break;
+				}
+			}
 		}
 		return s;
 	}
 
-	fmt::string::in::ref get(fmt::string::in::ref input)
+	fmt::string::in::ref get(fmt::string::in::ref in)
 	{
 		auto writer = registry().write();
 		doc::ini::ref slice = *writer;
-		return input >> slice;
+		return in >> slice;
 	}
 
-	fmt::string::out::ref put(fmt::string::out::ref output)
+	fmt::string::out::ref put(fmt::string::out::ref out)
 	{
 		auto const reader = registry().read();
 		doc::ini::cref slice = *reader;
-		return output << slice;
+		return out << slice;
 	}
 
 	bool got(pair key)
@@ -171,11 +183,8 @@ namespace env::opt
 	fmt::string::view::vector put(int argc, char** argv, commands cmd)
 	{
 		// Push a view to command line arguments
-		{
-			auto writer = list.write();
-			fmt::string::view::vector& out = *writer;
-			std::copy(argv, argv + argc, std::back_inserter(out));
-		}
+		std::copy(argv, argv + argc, std::back_inserter(list));
+		// Lock after copy so we get program name for ini
 		auto writer = registry().write();
 		// Boundary of command line
 		auto const begin = cmd.begin();
