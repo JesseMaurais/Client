@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 	auto const color = env::opt::get(arg.color, true);
 	auto const async = env::opt::get(arg.async, false);
 	auto const tools = env::opt::get(arg.tools, config);
-	auto const clean = std::empty(env::opt::arguments);
+	auto const clean = std::empty(env::opt::arguments());
 
 	// Initialize from tools
 	if (not std::empty(tools))
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 
 	// Map test names to error buffers' string stream
 	std::map<fmt::string::view, fmt::string::stream> context;
-	fmt::string::view const program = env::opt::program;
+	auto const program = env::opt::program();
 	fmt::string const prefix = "test_";
 
 	if (std::empty(tests))

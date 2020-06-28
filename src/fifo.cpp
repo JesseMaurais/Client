@@ -48,7 +48,7 @@ namespace env::file
 		}
 		#else
 		{
-			auto const dir = fmt::dir::join({env::usr::run_dir, ".fifo"});
+			auto const dir = fmt::dir::join({env::usr::run_dir(), ".fifo"});
 			auto const s = dir.data();
 
 			constexpr mode_t rw = S_IRGRP | S_IWGRP;

@@ -29,9 +29,9 @@ namespace env::dir
 	using span   = view::span;
 	using entry  = fwd::predicate<view>;
 
-	extern const node & paths; // pwd, paths
-	extern const node & config; // config_home, config_dirs
-	extern const node & data; // data_home, data_dirs
+	fmt::string::view::edges paths(); // pwd, paths
+	fmt::string::view::edges config(); // config_home, config_dirs
+	fmt::string::view::edges data(); // data_home, data_dirs
 
 	constexpr auto stop = fwd::always<view>;
 	constexpr auto next = fwd::never<view>;

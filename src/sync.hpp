@@ -11,7 +11,7 @@
 
 namespace sys
 {
-	extern env::view::ref thread_id;
+	extern thread_local fmt::string::view thread_id;
 
 	template <class object> struct exclusive_ptr : fwd::unique
 	// Allow one writer but many readers (WORM pattern)

@@ -125,7 +125,7 @@ namespace env
 #ifdef test
 test(shell)
 {
-	auto const list = env::command.list(env::pwd);
+	auto const list = env::command.list(env::pwd());
 	assert(not empty(list));
 	auto const copy = env::command.copy(__FILE__);
 	assert(not empty(copy));

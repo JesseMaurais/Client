@@ -5,64 +5,63 @@
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include <signal.h>
+#include <pthread.h>
+#include <functional>
 
-namespace sys::uni
+namespace sys::uni::sig
 {
-	extern "C"
+	struct set
 	{
-		#include <pthread.h>
-		#include <signal.h>
-	}
+		sigset_t obj;
+	};
 
-	namespace sig
+	struct event : unique, sigevent
 	{
-		struct event : unique, sigevent
+		using signature = void();
+		using observer = std::function<signature>;
+
+		event(observer ob, int type, pthread_attr_t* attr = nullptr)
+		: go(ob)
 		{
-			using signature = void();
-			using observer = std::function<signature>;
+			sigev_notify = type;
+			sigev_notify_function = thunk;
+			sigev_notify_attributes = attr;
+			sigev_value.sival_ptr = this;
+		}
 
-			event(observer ob, int type, pthread_attr_t* attr = nullptr)
-			: go(ob)
-			{
-				sigev_notify = type;
-				sigev_value.sival_ptr = this;
-				sigev_notify_function = thunk;
-				sigev_notify_attributes = attr;
-			}
+	private:
 
-		private:
+		observer go;
 
-			observer go;
-
-			static void thunk(sigval sv)
-			{
-				auto that = reinterpret_cast<event*>(sv.sival_ptr);
-				that->go();
-			}
-		};
-
-		struct timer : event
+		static void thunk(sigval sv)
 		{
-			timer_t id;
+			auto that = reinterpret_cast<event*>(sv.sival_ptr);
+			that->go();
+		}
+	};
 
-			timer(observer ob, int type = SIGEV_THREAD, clockid_t clock = CLOCK_REALTIME)
-			: event(ob, type)
-			{
-				if (fail(timer_create(clock, this, &id)))
-				{
-					sys::err(here);
-				}
-			}
+	struct timer : event
+	{
+		timer_t id;
 
-			~timer()
+		timer(observer ob, int type = SIGEV_THREAD, clockid_t clock = CLOCK_REALTIME)
+		: event(ob, type)
+		{
+			if (fail(timer_create(clock, this, &id)))
 			{
-				if (fail(timer_delete(id)))
-				{
-					sys::err(here);
-				}
+				sys::err(here);
 			}
-		};
-	}
+		}
+
+		~timer()
+		{
+			if (fail(timer_delete(id)))
+			{
+				sys::err(here);
+			}
+		}
+	};
 }
 
 #endif // file

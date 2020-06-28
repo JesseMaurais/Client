@@ -114,7 +114,7 @@ namespace sys
 	{
 		using namespace env::dir;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
-		env::dir::find(env::paths, regx(name) || to(name) || stop);
+		env::dir::find(env::paths(), regx(name) || to(name) || stop);
 		return fmt::string::view(name);
 	}
 }

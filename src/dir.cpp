@@ -53,43 +53,24 @@ namespace fmt::path
 	}
 }
 
-namespace
-{
-	struct : env::node
-	{
-		operator type() const final
-		{
-			return { env::pwd, env::paths };
-		}
-
-	} PATHS;
-
-	struct : env::node
-	{
-		operator type() const final
-		{
-			return { env::usr::config_home, env::usr::config_dirs };
-		}
-
-	} CONFIG;
-
-	struct : env::node
-	{
-		operator type() const final
-		{
-			return { env::usr::data_home, env::usr::data_dirs };
-		}
-
-	} DATA;
-}
-
 namespace env::dir
 {
-	const node & paths = PATHS;
-	const node & config = CONFIG;
-	const node & data = DATA;
+	fmt::string::view::edges paths()
+	{
+		return { env::pwd(), env::paths() };
+	}
 
-	bool find(view path, entry look)
+	fmt::string::view::edges config()
+	{
+		return { env::usr::config_home(), env::usr::config_dirs() };
+	}
+
+	fmt::string::view::edges data()
+	{
+		return { env::usr::data_home(), env::usr::data_dirs() };
+	}
+
+	bool find(fmt::string::view path, entry look)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -108,7 +89,7 @@ namespace env::dir
 		return failure;
 	}
 
-	bool find(span paths, entry look)
+	bool find(fmt::string::view::span paths, entry look)
 	{
 		for (view const path : paths)
 		{
@@ -120,12 +101,12 @@ namespace env::dir
 		return false;
 	}
 
-	bool find(edges paths, entry look)
+	bool find(fmt::string::view::edges paths, entry look)
 	{
 		return find(paths.first, look) or find(paths.second, look);
 	}
 
-	entry all(string::view u, mode m, entry e)
+	entry all(fmt::string::view u, mode m, entry e)
 	{
 		return mask(m) || regx(u) || e;
 	}
@@ -308,12 +289,12 @@ test(dir)
 	auto const name = path.back();
 	assert(not empty(name));
 
-	assert(env::dir::find(env::pwd, [&](auto entry)
+	assert(env::dir::find(env::pwd(), [&](auto entry)
 	{
 		return fmt::dir::split(entry).back() == name;
 	}));
 
-	auto const temp = fmt::dir::join({env::tmpdir, "my", "test", "dir"});
+	auto const temp = fmt::dir::join({env::temp(), "my", "test", "dir"});
 	auto const stem = env::dir::make(temp);
 //	assert(not empty(stem.first));
 //	assert(not empty(stem.second));

@@ -7,7 +7,7 @@
 
 namespace x11
 {
-	extern env::view::ref authority;
+	fmt::string::view authority();
 }
 
 namespace x11::auth

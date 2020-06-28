@@ -1,27 +1,27 @@
 #ifndef usr_hpp
 #define usr_hpp "User Environment"
 
-#include "env.hpp"
+#include "fmt.hpp"
 
 namespace env::usr
 {
-	extern view::ref current_desktop;
-	extern view::ref menu_prefix;
-	extern view::ref applications_menu;
-	extern view::ref run_dir;
-	extern view::ref data_home;
-	extern view::ref config_home;
-	extern view::ref cache_home;
-	extern span::ref data_dirs;
-	extern span::ref config_dirs;
-	extern view::ref desktop_dir;
-	extern view::ref documents_dir;
-	extern view::ref download_dir;
-	extern view::ref music_dir;
-	extern view::ref pictures_dir;
-	extern view::ref publicshare_dir;
-	extern view::ref templates_dir;
-	extern view::ref videos_dir;
+	fmt::string::view current_desktop();
+	fmt::string::view menu_prefix();
+	fmt::string::view applications_menu();
+	fmt::string::view run_dir();
+	fmt::string::view data_home();
+	fmt::string::view config_home();
+	fmt::string::view cache_home();
+	fmt::string::view::span data_dirs();
+	fmt::string::view::span config_dirs();
+	fmt::string::view desktop_dir();
+	fmt::string::view documents_dir();
+	fmt::string::view download_dir();
+	fmt::string::view music_dir();
+	fmt::string::view pictures_dir();
+	fmt::string::view publicshare_dir();
+	fmt::string::view templates_dir();
+	fmt::string::view videos_dir();
 }
 
 #endif // file

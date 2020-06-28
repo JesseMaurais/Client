@@ -14,82 +14,15 @@
 
 namespace
 {
-	auto const app = fmt::str::put("Application");
+	sys::exclusive<fmt::string::view::vector> list;
 
-	struct : env::view
+	auto make_key()
 	{
-		operator type() const final
-		{
-			return env::opt::get(app);
-		}
+		static auto const app = fmt::str::put("Application");
+		return app;
+	}
 
-	} APPLICATION;
-
-	fmt::string::view::vector arg_list;
-
-	struct : env::span
-	{
-
-		operator type() const final
-		{
-			return { arg_list.data(), arg_list.size() };
-		}
-
-	} ARGUMENTS;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			static auto const u = fmt::dir::join
-			(
-				{ env::opt::config, env::opt::application, ".ini" }
-			);
-			return u;
-		}
-
-	} INITIALS;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			static fmt::string::view u;
-			if (empty(u))
-			{
-				fmt::string::view::span const args = env::opt::arguments;
-				assert(not empty(args));
-				auto const path = args.front();
-				assert(not empty(path));
-				auto const dirs = fmt::dir::split(path);
-				assert(not empty(dirs));
-				auto const name = dirs.back();
-				assert(not empty(name));
-				auto const first = name.find_first_not_of("./");
-				auto const last = name.rfind(sys::ext::image);
-				u = name.substr(first, last);
-			}
-			return u;
-		}
-
-	} PROGRAM;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			static fmt::string s;
-			if (empty(s))
-			{
-				using namespace env::dir;
-				env::dir::find(config, regx(".ini") || to(s) || stop);
-			}
-			return s;
-		}
-
-	} CONFIG;
-
-	auto make_pair(env::opt::word key)
+	auto make_pair(env::opt::word key = make_key())
 	{
 		static auto const cmd = fmt::str::set("Command Line");
 		return std::make_pair(cmd, key);
@@ -109,10 +42,10 @@ namespace
 		// next write
 		{
 			auto writer = ini.write();
-			fmt::string::view const path = env::opt::initials;
+			auto const path = env::opt::initials();
 			auto const s = fmt::to_string(path);
 			doc::ini::ref slice = *writer;
-			slice.set(make_pair(app), env::opt::program);
+			slice.set(make_pair(), env::opt::program());
 			std::ifstream input(s);
 			while (input >> slice);
 			return ini;
@@ -122,20 +55,65 @@ namespace
 
 namespace env::opt
 {
-	env::view::ref application = APPLICATION;
-	env::span::ref arguments = ARGUMENTS;
-	env::view::ref initials = INITIALS;
-	env::view::ref program = PROGRAM;
-	env::view::ref config = CONFIG;
+	fmt::string::view application()
+	{
+		return env::opt::get(make_key());
+	}
 
-	string::in::ref get(string::in::ref input)
+	fmt::string::view::span arguments()
+	{
+		auto const reader = list.read();
+		return { reader->data(), reader->size() };
+	}
+
+	fmt::string::view initials()
+	{
+		static auto const u = fmt::dir::join
+		(
+			{ env::opt::config(), env::opt::application(), ".ini" }
+		);
+		return u;
+	}
+
+	fmt::string::view program()
+	{
+		static fmt::string::view u;
+		if (empty(u))
+		{
+			auto const args = env::opt::arguments();
+			assert(not empty(args));
+			auto const path = args.front();
+			assert(not empty(path));
+			auto const dirs = fmt::dir::split(path);
+			assert(not empty(dirs));
+			auto const name = dirs.back();
+			assert(not empty(name));
+			auto const first = name.find_first_not_of("./");
+			auto const last = name.rfind(sys::ext::image);
+			u = name.substr(first, last);
+		}
+		return u;
+	}
+
+	fmt::string::view config()
+	{
+		static fmt::string s;
+		if (empty(s))
+		{
+			using namespace env::dir;
+			env::dir::find(env::dir::config(), regx(".ini") || to(s) || stop);
+		}
+		return s;
+	}
+
+	fmt::string::in::ref get(fmt::string::in::ref input)
 	{
 		auto writer = registry().write();
 		doc::ini::ref slice = *writer;
 		return input >> slice;
 	}
 
-	string::out::ref put(string::out::ref output)
+	fmt::string::out::ref put(fmt::string::out::ref output)
 	{
 		auto const reader = registry().read();
 		doc::ini::cref slice = *reader;
@@ -147,12 +125,12 @@ namespace env::opt
 		return registry().read()->got(key);
 	}
 
-	string::view get(pair key)
+	fmt::string::view get(pair key)
 	{
 		return registry().read()->get(key);
 	}
 
-	bool set(pair key, string::view value)
+	bool set(pair key, fmt::string::view value)
 	{
 		return registry().write()->set(key, value);
 	}
@@ -162,11 +140,11 @@ namespace env::opt
 		return not empty(get(key));
 	}
 
-	string::view get(word key)
+	fmt::string::view get(word key)
 	{
 		auto const u = fmt::str::get(key);
 		// First look for argument
-		string::view::span const args = arguments;
+		auto const args = arguments();
 		for (auto const a : args)
 		{
 			auto const e = fmt::to_pair(a);
@@ -185,17 +163,20 @@ namespace env::opt
 		return value;
 	}
 
-	bool set(word key, string::view value)
+	bool set(word key, fmt::string::view value)
 	{
 		return set(make_pair(key), value);
 	}
 
-	string::view::vector put(int argc, char** argv, commands cmd)
+	fmt::string::view::vector put(int argc, char** argv, commands cmd)
 	{
-		auto writer = registry().write();
 		// Push a view to command line arguments
-		auto push = std::back_inserter(arg_list);
-		std::copy(argv, argv + argc, push);
+		{
+			auto writer = list.write();
+			fmt::string::view::vector& out = *writer;
+			std::copy(argv, argv + argc, std::back_inserter(out));
+		}
+		auto writer = registry().write();
 		// Boundary of command line
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
@@ -203,12 +184,12 @@ namespace env::opt
 		auto next = end;
 		auto it = end;
 
-		string::view::pair entry;
-		string::view::vector args, extra;
+		fmt::string::view::pair entry;
+		fmt::string::view::vector args, extra;
 
 		for (int argn = 0; argv[argn]; ++argn)
 		{
-			string::view const argu = argv[argn];
+			fmt::string::view const argu = argv[argn];
 
 			// Check whether this argument is a new command
 

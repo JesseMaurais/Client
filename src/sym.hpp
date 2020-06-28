@@ -2,7 +2,6 @@
 #define sym_hpp "Dynamic Link Library"
 
 #include "fmt.hpp"
-#include "env.hpp"
 
 #ifndef dynamic
 #	ifdef _WIN32
@@ -16,8 +15,6 @@
 
 namespace sys
 {
-	extern env::view::ref thread_id;
-
 	struct dll : fmt::struct_brief<dll>
 	{
 		dll() = default;

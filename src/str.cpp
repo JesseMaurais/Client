@@ -66,7 +66,7 @@ namespace
 				auto const it = reader->find(name);
 				if (end != it)
 				{
-					return it->second;
+					return ~it->second;
 				}
 			}
 			// Create entry
@@ -80,7 +80,7 @@ namespace
 				#endif
 				writer->push_back(it->first);
 			}
-			return id;
+			return ~id;
 		}
 
 		env::opt::word set(fmt::string::view name)
@@ -92,7 +92,7 @@ namespace
 				auto const it = reader->find(name);
 				if (end != it)
 				{
-					return it->second;
+					return ~it->second;
 				}
 			}
 			// Create entry
@@ -109,7 +109,7 @@ namespace
 				
 				writer->push_back(q.first->first);
 			}
-			return id;
+			return ~id;
 		}
 
 		fmt::string::in::ref get(fmt::string::in::ref in, char end)

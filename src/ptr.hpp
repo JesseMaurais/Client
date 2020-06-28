@@ -30,6 +30,24 @@ namespace fwd
 	{
 		return make_ptr((Type) nullptr, rm);
 	}
+
+	template
+	<
+		class Type
+	>
+	class as_ptr
+	{
+		Type obj;
+	public:
+		operator const Type*() const
+		{
+			return &obj;
+		}
+		operator Type*()
+		{
+			return &obj;
+		}
+	};
 }
 
 #endif // file

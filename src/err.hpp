@@ -21,7 +21,7 @@
 #	define verify(...) assert(__VA_ARGS__)
 #else
 #	define assert(...)
-#	define alert(...) 
+#	define alert(...) (__VA_ARGS__)
 #	define trace(...)
 #	define verify(...) (__VA_ARGS__)
 #endif

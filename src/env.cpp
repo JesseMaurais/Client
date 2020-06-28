@@ -97,272 +97,190 @@ namespace env::var
 	}
 }
 
-namespace
-{
-	struct : env::span
-	{
-		operator type() const final
-		{
-			static thread_local fmt::string::view::vector t;
-			auto u = env::var::get("PATH");
-			t = fmt::path::split(u);
-			return t;
-		}
-
-	} PATH;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("USERNAME");
-			}
-			#else
-			{
-				return env::var::get("USER");
-			}
-			#endif
-		}
-
-	} USER;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("USERPROFILE");
-			}
-			#else
-			{
-				return env::var::get("HOME");
-			}
-			#endif
-		}
-
-	} HOME;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("COMPUTERNAME");
-			}
-			#else
-			{
-				static thread_local char name[64];
-				if (sys::uni::fail(gethostname(name, sizeof name)))
-				{
-					sys::err(here, "gethostname");
-					name[0] = fmt::null;
-				}
-				return name;
-			}
-			#endif
-		}
-
-	} HOST;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("USERDOMAIN");
-			}
-			#else
-			{
-				static thread_local char name[64];
-				if (sys::uni::fail(getdomainname(name, sizeof name)))
-				{
-					sys::err(here, "getdomainname");
-					name[0] = fmt::null;
-				}
-				return name;
-			}
-			#endif
-		}
-
-	} DOMAIN_;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("SYSTEMDRIVE");
-			}
-			#else
-			{
-				return ""; // omit "/" for join
-			}
-			#endif
-		}
-
-	} ROOT;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("SYSTEMROOT");
-			}
-			#else
-			{
-				return "/root";
-			}
-			#endif
-		}
-
-	} ROOTDIR;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				static thread_local char buf[FILENAME_MAX];
-				return sys::getcwd(buf, sizeof buf);
-			}
-			#else
-			{
-				return env::var::get("PWD");
-			}
-			#endif
-		}
-
-	} PWD;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
-			{
-				auto v = env::var::get(u);
-				if (not empty(v))
-				{
-					return v;
-				}
-			}
-			return "";
-		}
-
-	} LANG;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			for (auto u : { "TMPDIR", "TEMP", "TMP" })
-			{
-				auto v = env::var::get(u);
-				if (not empty(v))
-				{
-					return v;
-				}
-			}
-			static fmt::string s;
-			if (empty(s))
-			{
-				#ifdef _WIN32
-				{
-					s = fmt::dir::join({env::rootdir, "Temp"});
-				}
-				#else
-				{
-					s = fmt::dir::join({env::root, "tmp"});
-				}
-				#endif
-			}
-			return s;
-		}
-
-	} TMPDIR;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("COMSPEC");
-			}
-			#else
-			{
-				return env::var::get("SHELL");
-			}
-			#endif
-		}
-
-	} SHELL;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("PROMPT");
-			}
-			#else
-			{
-				return env::var::get("PS1");
-			}
-			#endif
-		}
-
-	} PROMPT;
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			#ifdef _WIN32
-			{
-				return env::var::get("OS");
-			}
-			#else
-			{
-				return env::var::get("DESKTOP_SESSION");
-			}
-			#endif
-		}
-
-	} SESSION;
-}
-
 namespace env
 {
-	span::ref paths = PATH;
-	view::ref user = USER;
-	view::ref home = HOME;
-	view::ref host = HOST;
-	view::ref domain = DOMAIN_;
-	view::ref root = ROOT;
-	view::ref pwd = PWD;
-	view::ref lang = LANG;
-	view::ref shell = SHELL;
-	view::ref tmpdir = TMPDIR;
-	view::ref rootdir = ROOTDIR;
-	view::ref session = SESSION;
-	view::ref prompt = PROMPT;
+	fmt::string::view::span paths()
+	{
+		static thread_local fmt::string::view::vector t;
+		auto u = env::var::get("PATH");
+		t = fmt::path::split(u);
+		return t;
+	}
+
+	fmt::string::view temp()
+	{
+		for (auto u : { "TMPDIR", "TEMP", "TMP" })
+		{
+			auto v = env::var::get(u);
+			if (not empty(v))
+			{
+				return v;
+			}
+		}
+		static fmt::string s;
+		if (empty(s))
+		{
+			#ifdef _WIN32
+			{
+				s = fmt::dir::join({env::root(), "Temp"});
+			}
+			#else
+			{
+				s = fmt::dir::join({env::base(), "tmp"});
+			}
+			#endif
+		}
+		return s;
+	}
+
+	fmt::string::view pwd()
+	{
+		#ifdef _WIN32
+		{
+			static thread_local char buf[FILENAME_MAX];
+			return sys::getcwd(buf, sizeof buf);
+		}
+		#else
+		{
+			return env::var::get("PWD");
+		}
+		#endif
+	}
+
+	fmt::string::view home()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("USERPROFILE");
+		}
+		#else
+		{
+			return env::var::get("HOME");
+		}
+		#endif
+	}
+
+	fmt::string::view user()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("USERNAME");
+		}
+		#else
+		{
+			return env::var::get("USER");
+		}
+		#endif
+	}
+
+	fmt::string::view host()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("COMPUTERNAME");
+		}
+		#else
+		{
+			static thread_local char name[64];
+			if (sys::uni::fail(gethostname(name, sizeof name)))
+			{
+				sys::err(here, "gethostname");
+				name[0] = fmt::null;
+			}
+			return name;
+		}
+		#endif
+	}
+
+	fmt::string::view domain()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("USERDOMAIN");
+		}
+		#else
+		{
+			static thread_local char name[64];
+			if (sys::uni::fail(getdomainname(name, sizeof name)))
+			{
+				sys::err(here, "getdomainname");
+				name[0] = fmt::null;
+			}
+			return name;
+		}
+		#endif
+	}
+
+	fmt::string::view base()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("SYSTEMDRIVE");
+		}
+		#else
+		{
+			return ""; // omit "/" for join
+		}
+		#endif
+	}
+
+	fmt::string::view root()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("SYSTEMROOT");
+		}
+		#else
+		{
+			return "/root";
+		}
+		#endif
+	}
+
+	fmt::string::view lang()
+	{
+		for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
+		{
+			auto v = env::var::get(u);
+			if (not empty(v))
+			{
+				return v;
+			}
+		}
+		return "";
+	}
+
+	fmt::string::view shell()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("COMSPEC");
+		}
+		#else
+		{
+			return env::var::get("SHELL");
+		}
+		#endif
+	}
+
+	fmt::string::view session()
+	{
+		#ifdef _WIN32
+		{
+			return env::var::get("OS");
+		}
+		#else
+		{
+			return env::var::get("DESKTOP_SESSION");
+		}
+		#endif
+	}
 }
 
 #ifdef test
 test(env)
 {
-	assert(env::var::get("PATH") == fmt::path::join(env::paths));
+	assert(env::var::get("PATH") == fmt::path::join(env::paths()));
 	assert(env::var::get("PATH") == env::var::value("$PATH"));
 }
 #endif

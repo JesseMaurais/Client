@@ -1,22 +1,22 @@
 #ifndef arg_hpp
 #define arg_hpp "Command Line Arguments"
 
-#include "env.hpp"
+#include "fmt.hpp"
 #include "opt.hpp"
 
 namespace env::opt
 {
-	extern env::view::ref application;
-	extern env::span::ref arguments;
-	extern env::view::ref initials;
-	extern env::view::ref program;
-	extern env::view::ref config;
-	extern env::view::ref cache;
-	extern env::view::ref rundir;
+	fmt::string::view application();
+	fmt::string::view::span arguments();
+	fmt::string::view initials();
+	fmt::string::view program();
+	fmt::string::view config();
+	fmt::string::view cache();
+	fmt::string::view rundir();
 
 	inline auto arg(size_t argn)
 	{
-		fmt::string::view::span const argv = arguments;
+		auto const argv = arguments();
 		return argv[argn];
 	}
 
@@ -26,37 +26,37 @@ namespace env::opt
 	struct command
 	{
 		unsigned int argn; // required arguments (or -1 for any number)
-		string::view dash; // short name with one dash
-		string::view name; // long name with dual dash
-		string::view text; // descriptive text for users
+		fmt::string::view dash; // short name with one dash
+		fmt::string::view name; // long name with dual dash
+		fmt::string::view text; // descriptive text for users
 	};
 
 	using commands = fwd::span<command>;
 
-	string::view::vector put(int argc, char** argv, commands);
+	fmt::string::view::vector put(int argc, char** argv, commands);
 	// Put command line arguments into options
-	string::out::ref put(string::out::ref);
+	fmt::string::out::ref put(fmt::string::out::ref);
 	// Write options to output string
-	string::in::ref get(string::in::ref);
+	fmt::string::in::ref get(fmt::string::in::ref);
 	// Read options from input string
 
 	bool got(word);
-	string::view get(word);
-	bool set(word, string::view);
-	bool put(word, string::view);
+	fmt::string::view get(word);
+	bool set(word, fmt::string::view);
+	bool put(word, fmt::string::view);
 
-	inline auto get(word wd, string::view u)
+	inline auto get(word wd, fmt::string::view u)
 	{
 		auto v = get(wd);
 		return empty(v) ? u : v;
 	}
 
 	bool got(pair);
-	string::view get(pair);
-	bool set(pair, string::view);
-	bool put(pair, string::view);
+	fmt::string::view get(pair);
+	bool set(pair, fmt::string::view);
+	bool put(pair, fmt::string::view);
 
-	inline auto get(pair wd, string::view u)
+	inline auto get(pair wd, fmt::string::view u)
 	{
 		auto v = get(wd);
 		return empty(v) ? u : v;

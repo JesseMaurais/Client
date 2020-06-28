@@ -22,27 +22,6 @@ namespace
 		s = 1;
 		return *c ? 'l' : 'B';
 	}
-
-	struct : env::view
-	{
-		operator type() const final
-		{
-			auto u = env::var::get("XAUTHORITY");
-			/*if (empty(u))
-			{
-				static fmt::string s;
-				if (empty(s))
-				{
-					constexpr auto author = ".Xauthority";
-					fmt::string::view const home = env::home;
-					s = fmt::dir::join({ home, author });
-				}
-				u = s;
-			}*/
-			return u;
-		}
-
-	} XAUTHORITY;
 }
 
 namespace x11::auth
@@ -85,7 +64,22 @@ namespace x11::auth
 
 namespace x11
 {
-	env::view::ref authority = XAUTHORITY;
+	fmt::string::view authority()
+	{
+		auto u = env::var::get("XAUTHORITY");
+		/*if (empty(u))
+		{
+			static fmt::string s;
+			if (empty(s))
+			{
+				constexpr auto author = ".Xauthority";
+				fmt::string::view const home = env::home;
+				s = fmt::dir::join({ home, author });
+			}
+			u = s;
+		}*/
+		return u;
+	}
 
 	fmt::string setup(bytes::io::ref io, fmt::string::view proto, fmt::string::view data)
 	{

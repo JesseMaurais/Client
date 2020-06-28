@@ -18,7 +18,7 @@ namespace env
 	bool desktop::current(fmt::string::view name)
 	{
 		auto const lower = fmt::to_lower(name);
-		auto const current = fmt::to_lower(env::usr::current_desktop);
+		auto const current = fmt::to_lower(env::usr::current_desktop());
 		return current.find(lower) != fmt::npos;
 	}
 

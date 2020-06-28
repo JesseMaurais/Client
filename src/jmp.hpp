@@ -37,12 +37,4 @@ namespace env
 	};
 }
 
-namespace env::sig
-{
-	struct jmp : constant<int>
-	{
-		jmp(int);
-	};
-}
-
 #endif // file

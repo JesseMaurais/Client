@@ -155,7 +155,7 @@ namespace doc
 #ifdef test
 test(ini)
 {
-	auto const path = fmt::dir::join({env::pwd, "Tools.ini"});
+	auto const path = fmt::dir::join({env::pwd(), "Tools.ini"});
 	std::fstream file(path);
 	doc::ini init;
 	file >> init;

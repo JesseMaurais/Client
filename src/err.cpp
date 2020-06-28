@@ -6,29 +6,9 @@
 #include "type.hpp"
 #include <cassert> // overwrite assert
 
-namespace
-{
-	thread_local fmt::string::view id = "";
-
-	struct : env::variable<fmt::string::view>
-	{
-		operator type() const final
-		{
-			return id;
-		}
-
-		type operator=(type value) final
-		{
-			id = value;
-			return id;
-		}
-
-	} THREAD_ID;
-}
-
 namespace sys
 {
-	env::view::ref thread_id = THREAD_ID;
+	thread_local fmt::string::view thread_id;
 
 	bool debug =
 	#ifdef NDEBUG
