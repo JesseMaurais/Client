@@ -11,8 +11,10 @@ all: $(MAKEFILE)
 clean: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE) clean
 
-$(MAKEFILE): $(TEMPLATE)
+config:
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
+
+$(MAKEFILE): $(TEMPLATE) config
 
 analysis:
 	scan-build --use-c++=$(CXX) $(MAKE)

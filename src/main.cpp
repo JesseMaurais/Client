@@ -93,10 +93,11 @@ int main(int argc, char** argv)
 		std::ifstream in { path };
 		if (in)
 		{
-			if (not (in >> env::opt::get))
-			{
-				std::cerr << "Failed to read " << path;
-			}
+			in >> env::opt::get;
+		}
+		else
+		{
+			std::cerr << "Failed to open " << path;
 		}
 	}
 
