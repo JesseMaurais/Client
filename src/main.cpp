@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 	if (std::empty(tests))
 	{
 		const auto list = env::opt::get(arg.tests);
-		for (const auto test : fmt::split(list))
+		for (const auto test : fmt::split(list, ";"))
 		{
 			tests.emplace_back(test);
 		}
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 		for (auto const& line : dump.dyn(program))
 		{
 			// Separate lines by white space
-			for (auto const name : fmt::split(line))
+			for (auto const name : fmt::split(line, " "))
 			{
 				// Match those with prefix
 				if (name.starts_with(prefix))
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
 			auto const call = sys::sym<void()>(prefix + name);
 			if (nullptr == call)
 			{
-				std::cerr << "Cannot find " << name << " in " << program;
+				std::cerr << "Cannot find " << name << " in " << program << fmt::eol;
 			}
 			else
 			{
@@ -197,7 +197,7 @@ int main(int argc, char** argv)
 			std::cerr
 				<< fmt::tab
 				<< env::opt::dash << item.dash
-				<< fmt::tab
+				<< ' '
 				<< env::opt::dual << item.name
 				<< fmt::tab
 				<< item.text

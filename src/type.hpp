@@ -546,17 +546,17 @@ namespace fmt
 		return cstr.join(t.begin(), t.end(), u);
 	}
 
-	inline auto split(string::view u, string::view v = "")
+	inline auto split(string::view u, string::view v)
 	{
 		return cstr.split(u, v);
 	}
 
-	inline auto split(string::view::span p, string::view v = "")
+	inline auto split(string::view::span p, string::view v)
 	{
 		return cstr.split(p, v);
 	}
 
-	inline auto split(string::span p, string::view v = "")
+	inline auto split(string::span p, string::view v)
 	{
 		return cstr.split(p, v);
 	}

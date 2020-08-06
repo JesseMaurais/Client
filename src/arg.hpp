@@ -26,8 +26,8 @@ namespace env::opt
 	struct command
 	{
 		unsigned int argn; // required arguments (or -1 for any number)
-		fmt::string::view dash; // short name with one dash
-		fmt::string::view name; // long name with dual dash
+		fmt::string::view dash; // short name with one dash (-c)
+		fmt::string::view name; // long name with dual dash (--config)
 		fmt::string::view text; // descriptive text for users
 	};
 

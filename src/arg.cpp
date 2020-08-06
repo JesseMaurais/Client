@@ -56,6 +56,47 @@ namespace
 			return ini;
 		}
 	}
+
+	auto find_next(char** argv, env::opt::commands cmd)
+	{
+		auto const begin = cmd.begin();
+		auto const end = cmd.end();
+
+		auto next = end;
+		unsigned argn = 0;
+
+		while (argv[argn] and end == next)
+		{
+			fmt::string::view argu(argv[argn]);
+
+			++argn;
+
+			if (argu.starts_with("--"))
+			{
+				auto const entry = argu.substr(2);
+				next = std::find_if
+				(
+					begin, end, [entry](auto const& d)
+					{
+						return d.name == entry;
+					}
+				);
+			}
+			else
+			if (argu.starts_with("-"))
+			{
+				auto const entry = argu.substr(1);
+				next = std::find_if
+				(
+					begin, end, [entry](auto const& d)
+					{
+						return d.dash == entry;
+					}
+				);
+			}
+		}
+		return std::pair { argn, next };
+	}
 }
 
 namespace env::opt
@@ -182,105 +223,47 @@ namespace env::opt
 
 	fmt::string::view::vector put(int argc, char** argv, commands cmd)
 	{
+		assert(nullptr == argv[argc]);
 		// Push a view to command line arguments
 		std::copy(argv, argv + argc, std::back_inserter(list));
-		// Lock after copy so we get program name for ini
-		auto writer = registry().write();
-		// Boundary of command line
-		auto const begin = cmd.begin();
+		// Arguments not part of a command
+		fmt::string::view::vector extra;
+		// Command line range
 		auto const end = cmd.end();
-		// Command iterators
-		auto next = end;
-		auto it = end;
-
-		fmt::string::view::pair entry;
-		fmt::string::view::vector args, extra;
-
-		for (int argn = 0; argv[argn]; ++argn)
+		auto current = end;
+		// Skip the path to the program image
+		for (int index = 1; index < argc; ++index)
 		{
-			fmt::string::view const argu = argv[argn];
+			auto const [argn, next] = find_next(argv + index, cmd);
 
-			// Check whether this argument is a new command
-
-			if (argu.starts_with("--"))
+			auto count = 0;
+			if (end != current)
 			{
-				entry = fmt::to_pair(argu.substr(2));
-				next = std::find_if(begin, end, [&](auto const& d)
-				{
-					return d.name == entry.first;
-				});
-			}
-			else
-			if (argu.starts_with("-"))
-			{
-				entry = fmt::to_pair(argu.substr(1));
-				next = std::find_if(begin, end, [&](auto const& d)
-				{
-					return d.dash == entry.first;
-				});
+            	// Set argument values as option
+				count = std::min(argn, current->argn);
+				auto const sub = fmt::string::view::span(list.data() + index, count);
+				auto const value = doc::ini::join(sub);
+				auto const key = fmt::str::set(current->name);
+				env::opt::set(key, value);
 			}
 
-			bool const change = (it != next) and (next != end);
-
-			// Push it either to the command list or as an extra
-
-			if (not change)
+			if (end != next)
 			{
-				if (0 != argn)
-				{
-					--argn;
-					args.push_back(argu);
-				}
-				else
-				if (not fmt::same(argv[0], argu))
-				{
-					extra.push_back(argu);
-				}
+				// Set value to some default value
+				auto const key = fmt::str::set(next->name);
+				env::opt::set(key, true);
 			}
 
-			// Start parsing the next command if changing
-
-			if (change)
+			if (1 < argn)
 			{
-				if (end != it)
-				{
-					auto const name = fmt::str::put(it->name);
-					auto const key = make_pair(name);
-					if (empty(args))
-					{
-						writer->set(key, entry.second);
-					}
-				}
-
-				it = next;
-				next = end;
-				argn = it->argn;
-
-				if (0 == argn)
-				{
-					auto const name = fmt::str::put(it->name);
-					auto const key = make_pair(name);
-					auto const value = doc::ini::join(args);
-					writer->set(key, value);
-				}
+				// Non-command arguments to be returned in single vector
+				auto const sub = fmt::string::view::span(list.data() + index + 1 + count, argn - count);
+				extra.insert(extra.end(), sub.begin(), sub.end());
 			}
+
+			index += argn;
+			current = next;
 		}
-
-		if (end != it)
-		{
-			auto const name = fmt::str::put(it->name);
-			auto const key = make_pair(name);
-			if (empty(args))
-			{
-				writer->set(key, entry.second);
-			}
-			else
-			{
-				auto const value = doc::ini::join(args);
-				writer->set(key, value);
-			}
-		}
-
 		return extra;
 	}
 }

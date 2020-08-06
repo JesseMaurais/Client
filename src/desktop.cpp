@@ -41,9 +41,10 @@ namespace env
 		list.push_back(data(program));
 
 		// Arguments null terminated
-		if (auto s = fmt::join(command); not empty(s))
+		constexpr auto del = " ";
+		if (auto s = fmt::join(command, del); not empty(s))
 		{
-			for (auto u : fmt::split(s))
+			for (auto u : fmt::split(s, del))
 			{
 				list.push_back(data(u));
 			}

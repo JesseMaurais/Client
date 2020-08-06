@@ -17,7 +17,7 @@ namespace env::file
 	bool process::start(fmt::string::view::span args)
 	{
 		std::vector<char const *> list;
-		constexpr auto del = ";";
+		constexpr auto del = " ";
 		auto s = fmt::join(args, del);
 		for (auto u : fmt::split(s, del))
 		{
