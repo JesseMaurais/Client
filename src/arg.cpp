@@ -57,45 +57,37 @@ namespace
 		}
 	}
 
-	auto find_next(char** argv, env::opt::commands cmd)
+	auto find_next(fmt::string::view argu, env::opt::commands cmd)
 	{
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
-
 		auto next = end;
-		unsigned argn = 0;
 
-		while (argv[argn] and end == next)
+		if (argu.starts_with("--"))
 		{
-			fmt::string::view argu(argv[argn]);
-
-			++argn;
-
-			if (argu.starts_with("--"))
-			{
-				auto const entry = argu.substr(2);
-				next = std::find_if
-				(
-					begin, end, [entry](auto const& d)
-					{
-						return d.name == entry;
-					}
-				);
-			}
-			else
-			if (argu.starts_with("-"))
-			{
-				auto const entry = argu.substr(1);
-				next = std::find_if
-				(
-					begin, end, [entry](auto const& d)
-					{
-						return d.dash == entry;
-					}
-				);
-			}
+			auto const entry = argu.substr(2);
+			next = std::find_if
+			(
+				begin, end, [entry](auto const& d)
+				{
+					return d.name == entry;
+				}
+			);
 		}
-		return std::pair { argn, next };
+		else
+		if (argu.starts_with("-"))
+		{
+			auto const entry = argu.substr(1);
+			next = std::find_if
+			(
+				begin, end, [entry](auto const& d)
+				{
+					return d.dash == entry;
+				}
+			);
+		}
+	
+		return next;
 	}
 }
 
@@ -228,41 +220,45 @@ namespace env::opt
 		std::copy(argv, argv + argc, std::back_inserter(list));
 		// Arguments not part of a command
 		fmt::string::view::vector extra;
+		fmt::string::view::vector args;
 		// Command line range
 		auto const end = cmd.end();
 		auto current = end;
-		// Skip the path to the program image
-		for (int index = 1; index < argc; ++index)
+
+		// Skip the program image path
+		for (int argn = 1; argn < argc; ++argn)
 		{
-			auto const [argn, next] = find_next(argv + index, cmd);
-
-			auto count = 0;
-			if (end != current)
-			{
-            	// Set argument values as option
-				count = std::min(argn, current->argn);
-				auto const sub = fmt::string::view::span(list.data() + index, count);
-				auto const value = doc::ini::join(sub);
-				auto const key = fmt::str::set(current->name);
-				env::opt::set(key, value);
-			}
-
+			fmt::string::view argu(argv[argn]);
+			// Check whether it is a new command
+			auto const next = find_next(argu, cmd);
 			if (end != next)
 			{
-				// Set value to some default value
-				auto const key = fmt::str::set(next->name);
+				// Replace current
+				current = next;
+				args.clear();
+				// Set as option
+				auto const key = fmt::str::set(current->name);
 				env::opt::set(key, true);
 			}
-
-			if (1 < argn)
+			else
+			if (end != current)
 			{
-				// Non-command arguments to be returned in single vector
-				auto const sub = fmt::string::view::span(list.data() + index + 1 + count, argn - count);
-				extra.insert(extra.end(), sub.begin(), sub.end());
+				args.emplace_back(argu);
+				// Set as option
+				auto const value = doc::ini::join(args);
+				auto const key = fmt::str::set(current->name);
+				(void) set(key, value);
+				// Clear if we accept no more
+				if (args.size() >= current->argn)
+				{
+					current = end;
+					args.clear();
+				}
 			}
-
-			index += argn;
-			current = next;
+			else
+			{
+				extra.emplace_back(argu);
+			}
 		}
 		return extra;
 	}

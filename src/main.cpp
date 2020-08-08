@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 	// Default test options
 	if (std::empty(tests))
 	{
-		const auto list = env::opt::get(arg.tests);
+		static const auto list = env::opt::get(arg.tests);
 		for (const auto test : fmt::split(list, ";"))
 		{
 			tests.emplace_back(test);
@@ -141,9 +141,10 @@ int main(int argc, char** argv)
 	}
 	else // copy
 	{
-		for (fmt::string const name : tests)
+		for (fmt::string const test : tests)
 		{
-			auto const call = sys::sym<void()>(prefix + name);
+			auto const name = prefix + test;
+			auto const call = sys::sym<void()>(name);
 			if (nullptr == call)
 			{
 				std::cerr << "Cannot find " << name << " in " << program << fmt::eol;
