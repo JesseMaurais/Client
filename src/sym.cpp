@@ -130,10 +130,10 @@ test(sym)
 	assert(nullptr != f);
 	// Cannot see static
 	auto g = sys::sym<int()>("hidden");
-	assert(nullptr != g);
+	assert(nullptr == g);
 	// Callable object
 	assert(f() == hidden());
 	// Not callable
-	except(g() == hidden());
+	//except(g() == hidden());
 }
 #endif

@@ -121,10 +121,10 @@ int main(int argc, char** argv)
 		env::dev::dump dump; // output cache
 
 		// Parse this programs symbol table
-		for (auto const& line : dump.dyn(program))
+		for (auto const& line : dump.dyn(argv[0]))
 		{
 			// Separate lines by white space
-			for (auto const name : fmt::split(line, " "))
+			for (auto const name : fmt::split(line))
 			{
 				// Match those with prefix
 				if (name.starts_with(prefix))
@@ -235,21 +235,30 @@ int main(int argc, char** argv)
 		}
 	}
 
-	if (color)
-	{
-		std::cerr << fmt::fg_yellow;
-	}
-
 	std::size_t counter = 0;
 	for (auto& [name, error] : context)
 	{
 		if (auto str = error.str(); not std::empty(str))
 		{
+			if (color)
+			{
+				std::cerr << fmt::fg_yellow;
+			}
+
 			while (std::getline(error, str))
 			{
 				std::cerr << name << fmt::tab << str << fmt::eol;
 				++ counter;
 			}
+		}
+		else
+		{
+			if (color)
+			{
+				std::cerr << fmt::fg_green;
+			}
+
+			std::cerr << name << fmt::tab << "ok" << fmt::eol;
 		}
 	}
 

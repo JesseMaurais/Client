@@ -26,8 +26,14 @@ test(type)
 	assert(empty(trim(Space)));
 
 	string::view const Hello = "Hello, World!";
-	assert(terminated(Hello));
-	assert(not terminated(Hello.substr(0, 5)));
+	{
+		assert(terminated(Hello));
+		auto substr = Hello.substr(0, 5);
+		assert(not terminated(substr));
+		auto termstr = string(substr.data(), substr.size());
+		substr = termstr.c_str();
+		assert(terminated(substr));
+	}
 
 	string const Filled = to_string(Space) + to_string(Hello) + to_string(Space);
 	assert(not empty(trim(Filled)));
@@ -51,6 +57,21 @@ test(type)
 	assert(embrace("{A<B}C}", "<>") == pos { 2, npos });
 	assert(embrace("{A{B>C}", "<>") == pos { npos, npos });
 	assert(embrace("&amp;", "&;") == pos { 0, 4 });
+
+	{
+		string::view::vector v  
+		{ 
+			"1 2 3", " 1 2 3", "1 2 3 ", " 1 2 3 ",
+			"\t1\n2\n\t3\t\n"
+		};
+		for (auto u : v)
+		{
+			auto const t = split(u);
+			assert(t.size() == 3);
+			assert(t.front() == "1");
+			assert(t.back() == "3");
+		}
+	}
 
 	{
 		string::stream ss;

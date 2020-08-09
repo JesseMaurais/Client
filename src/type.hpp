@@ -67,7 +67,7 @@ namespace fmt
 
 		template <class Iterator>
 		auto next(Iterator it, Iterator end, mask x = space) const
-		// Next iterator after it but before end which is an x
+		// Next iterator after $it but before $end which is an $x
 		{
 			while (it != end) 
 			{
@@ -123,6 +123,20 @@ namespace fmt
 			auto const from = begin(u);
 			auto const to = skip(from, end(u), x);
 			return distance(from, to);
+		}
+
+		auto split(view u, mask x = space) const
+		// Split strings in $u delimited by $x
+		{
+			vector t;
+			auto const begin = u.data(), end = begin + u.size();
+			for (auto i = skip(begin, end, x), j = end; i != end; i = skip(j, end, x))
+			{
+				j = next(i, end, x);
+				auto const n = std::distance(i, j);
+				t.emplace_back(i, n);
+			}
+			return t;
 		}
 
 		auto widen(fwd::basic_string_view<char> u) const
@@ -323,7 +337,7 @@ namespace fmt
 		static bool terminated(view u)
 		// Check whether string is null terminated
 		{
-			return not empty(u) and not u[u.size()];
+			return not empty(u) and (u.back() == '\0' or u[u.size()] == '\0');
 		}
 
 		static auto count(view u)
@@ -365,7 +379,7 @@ namespace fmt
 			string s;
 			for (auto it = begin; it != end; ++it)
 			{
-				if (not empty(s))
+				if (begin != it)
 				{
 					s += u;
 				}
@@ -544,6 +558,11 @@ namespace fmt
 	inline auto join(string::init t, string::view u = "")
 	{
 		return cstr.join(t.begin(), t.end(), u);
+	}
+
+	inline auto split(string::view u)
+	{
+		return cstr.split(u);
 	}
 
 	inline auto split(string::view u, string::view v)

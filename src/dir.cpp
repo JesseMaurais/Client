@@ -176,7 +176,9 @@ namespace env::dir
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return env::dir::fail(s);
+			path = fmt::string::view(s.c_str(), path.size());
+			assert(fmt::terminated(path));
+			return env::dir::fail(path, am);
 		}
 
 		auto const c = path.data();
@@ -284,6 +286,10 @@ namespace env::dir
 #ifdef test
 test(dir)
 {
+	assert(not env::dir::fail(env::temp()));
+	assert(not env::dir::fail(env::pwd()));
+	assert(not env::dir::fail(env::home()));
+
 	auto const path = fmt::dir::split(__FILE__);
 	assert(not empty(path));
 	auto const name = path.back();
@@ -295,6 +301,7 @@ test(dir)
 	}));
 
 	auto const temp = fmt::dir::join({env::temp(), "my", "test", "dir"});
+	if (std::empty(temp)) return;
 	auto const stem = env::dir::make(temp);
 //	assert(not empty(stem.first));
 //	assert(not empty(stem.second));

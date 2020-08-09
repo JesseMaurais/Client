@@ -16,15 +16,19 @@ namespace env::file
 
 	bool process::start(fmt::string::view::span args)
 	{
+		fmt::string::view const del("\0", 1);
 		std::vector<char const *> list;
-		constexpr auto del = " ";
 		auto s = fmt::join(args, del);
 		for (auto u : fmt::split(s, del))
 		{
 			list.push_back(data(u));
 		}
+
+		auto const argc = list.size();
 		list.push_back(nullptr);
-		return start(list.size() - 1, list.data());
+		auto const argv = list.data();
+
+		return start(argc, argv);
 	}
 
 	bool process::start(size_t argc, char const **argv)
