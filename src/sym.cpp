@@ -133,7 +133,5 @@ test(sym)
 	assert(nullptr == g);
 	// Callable object
 	assert(f() == hidden());
-	// Not callable
-	//except(g() == hidden());
 }
 #endif

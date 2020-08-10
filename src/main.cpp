@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 	}
 
 	// Map test names to error buffers' string stream
-	std::map<fmt::string::view, fmt::string::stream> context;
+	std::map<fmt::string, fmt::string::stream> context;
 	auto const program = env::opt::program();
 	fmt::string const prefix = "test_";
 
