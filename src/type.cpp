@@ -20,68 +20,91 @@ namespace fmt
 #ifdef test
 test(type)
 {
-	using namespace fmt;
+	fmt::string::view const Space = " \t\v\r\n\f";
+	fmt::string::view const Hello = "Hello, World!";
+	fmt::string::view const Upper = "HELLO, WORLD!";
+	fmt::string::view const Lower = "hello, world!";
+	fmt::wstring::view const Wide = L"Hello, World!";
+	auto const Filled = fmt::to_string(Space) + fmt::to_string(Hello) + fmt::to_string(Space);
 
-	string::view const Space = " \t\n";
-	assert(empty(trim(Space)));
-
-	string::view const Hello = "Hello, World!";
+	// Character class/whitespace iteration
 	{
-		assert(terminated(Hello));
-		auto substr = Hello.substr(0, 5);
-		assert(not terminated(substr));
-		auto termstr = string(substr.data(), substr.size());
-		substr = termstr.c_str();
-		assert(terminated(substr));
+		for (char c : Space)
+		{
+			assert(fmt::cstr.check(c));
+		}
+		assert(fmt::next(Space) == Space.begin());
+		assert(fmt::skip(Space) == Space.end());
+		assert('H' == *fmt::first(Filled));
+		assert('!' == *fmt::last(Filled));
 	}
 
-	string const Filled = to_string(Space) + to_string(Hello) + to_string(Space);
-	assert(not empty(trim(Filled)));
-	assert(Hello == trim(Filled));
-
-	string::view const Upper = "HELLO, WORLD!";
-	assert(to_upper(Hello) == Upper);
-
-	string::view const Lower = "hello, world!";
-	assert(to_lower(Hello) == Lower);
-
-	wstring::view const Wide = L"Hello, World!";
-	assert(to_wstring(Hello) == Wide);
-	assert(to_string(Wide) == Hello);
-
-	using pos = std::pair<string::size_type, string::size_type>;
-
-	assert(embrace("<A<B>C>", "<>") == pos { 0, 6 });
-	assert(embrace("<A<B>C>", "<B>") == pos { 0, 3 });
-	assert(embrace("A[B]C[D]", "[D]") == pos { 1, 3 });
-	assert(embrace("{A<B}C}", "<>") == pos { 2, npos });
-	assert(embrace("{A{B>C}", "<>") == pos { npos, npos });
-	assert(embrace("&amp;", "&;") == pos { 0, 4 });
-
+	// Triming whitespace
 	{
-		string::view::vector v  
+		assert(std::empty(fmt::trim(Space)));
+		assert(not std::empty(fmt::trim(Filled)));
+		assert(Hello == fmt::trim(Filled));
+	}
+
+	// Split by whitespace/characters
+	{
+		fmt::string::view::vector const v  
 		{ 
 			"1 2 3", " 1 2 3", "1 2 3 ", " 1 2 3 ",
 			"\t1\n2\n\t3\t\n"
 		};
+
 		for (auto u : v)
 		{
-			auto const t = split(u);
+			auto const t = fmt::split(u);
 			assert(t.size() == 3);
 			assert(t.front() == "1");
 			assert(t.back() == "3");
 		}
 	}
 
+	// String view null terminator
 	{
-		string::stream ss;
-		ss << par<1, 2, 3, 4>;
+		assert(fmt::terminated(Hello));
+		auto substr = Hello.substr(0, 5);
+		assert(not fmt::terminated(substr));
+	}
+
+	// Character case conversion
+	{
+		assert(fmt::to_upper(Hello) == Upper);
+		assert(fmt::to_lower(Hello) == Lower);
+	}
+
+	// Character encoding conversion
+	{
+		assert(fmt::to_wstring(Hello) == Wide);
+		assert(fmt::to_string(Wide) == Hello);
+	}
+
+	// Search matching braces
+	{
+		using pos = std::pair<fmt::string::size_type, fmt::string::size_type>;
+
+		assert(fmt::embrace("<A<B>C>", "<>") == pos { 0, 6 });
+		assert(fmt::embrace("<A<B>C>", "<B>") == pos { 0, 3 });
+		assert(fmt::embrace("A[B]C[D]", "[D]") == pos { 1, 3 });
+		assert(fmt::embrace("{A<B}C}", "<>") == pos { 2, fmt::npos });
+		assert(fmt::embrace("{A{B>C}", "<>") == pos { fmt::npos, fmt::npos });
+		assert(fmt::embrace("&amp;", "&;") == pos { 0, 4 });
+	}
+
+	// Escape parameter encoding
+	{
+		fmt::string::stream ss;
+		ss << fmt::par<1, 2, 3, 4>;
 		assert(ss.str() == "1;2;3;4");
 	}
 
+	// Set graphics rendition
 	{
-		string::stream ss;
-		ss << fg_green << "GREEN" << fg_off;
+		fmt::string::stream ss;
+		ss << fmt::fg_green << "GREEN" << fmt::fg_off;
 		assert(ss.str() == "\x1b[32mGREEN\x1b[39m");
 	}
 }

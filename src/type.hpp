@@ -90,9 +90,7 @@ namespace fmt
 		auto next(view u, mask x = space) const
 		// Index of first character in view $u which is an $x
 		{
-			auto const from = begin(u);
-			auto const to = next(from, end(u), x);
-			return distance(from, to);
+			return next(begin(u), end(u), x);
 		}
 
 		template <typename iterator>
@@ -120,9 +118,7 @@ namespace fmt
 		auto skip(view u, mask x = space) const
 		// Index of first character in view $u which is not $x
 		{
-			auto const from = begin(u);
-			auto const to = skip(from, end(u), x);
-			return distance(from, to);
+			return skip(begin(u), end(u), x);
 		}
 
 		auto split(view u, mask x = space) const
@@ -484,10 +480,20 @@ namespace fmt
 		return cstr.next(it, end);
 	}
 
+	inline auto next(string::view u)
+	{
+		return cstr.next(u);
+	}
+
 	template <typename iterator>
 	inline auto skip(iterator it, iterator end)
 	{
 		return cstr.skip(it, end);
+	}
+
+	inline auto skip(string::view u)
+	{
+		return cstr.skip(u);
 	}
 
 	inline auto widen(string::view u)
