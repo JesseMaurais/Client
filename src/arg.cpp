@@ -230,27 +230,28 @@ namespace env::opt
 		{
 			fmt::string::view argu(argv[argn]);
 			// Check whether it is a new command
-			auto const next = find_next(argu, cmd);
-			if (end != next)
+			if (auto next = find_next(argu, cmd); end != next)
 			{
-				// Replace current
-				current = next;
-				args.clear();
 				// Set as option
-				auto const key = fmt::str::set(current->name);
+				auto const key = fmt::str::set(next->name);
+				current = 0 < next->argn ? next : end;
 				env::opt::set(key, true);
+				args.clear();
 			}
 			else
 			if (end != current)
 			{
-				args.emplace_back(argu);
-				// Set as option
-				auto const value = doc::ini::join(args);
-				auto const key = fmt::str::set(current->name);
-				(void) set(key, value);
-				// Clear if we accept no more
-				if (args.size() >= current->argn)
+				if (args.size() < current->argn)
 				{
+					// Set as option
+					args.emplace_back(argu);
+					auto const value = doc::ini::join(args);
+					auto const key = fmt::str::set(current->name);
+					(void) set(key, value);
+				}
+				else
+				{
+					// Accept no more
 					current = end;
 					args.clear();
 				}

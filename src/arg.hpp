@@ -14,7 +14,7 @@ namespace env::opt
 	fmt::string::view cache();
 	fmt::string::view rundir();
 
-	inline auto arg(size_t argn)
+	inline auto arg(size_t argn = 0)
 	{
 		auto const argv = arguments();
 		return argv[argn];

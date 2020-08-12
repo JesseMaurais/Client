@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			std::cerr << "Failed to open " << path;
+			std::cerr << "Failed to open " << path << fmt::eol;
 		}
 	}
 
