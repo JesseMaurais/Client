@@ -136,18 +136,24 @@ namespace doc
 
 	bool ini::set(env::opt::pair key, view value)
 	{
-		auto it = keys.find(key);
+		auto const it = cache.emplace(value).first;
+		assert(cache.end() != it);	
+		return put(key, *it);
+	}
+
+	bool ini::put(env::opt::pair key, view value)
+	{
+		auto const it = keys.find(key);
 		if (keys.end() == it)
 		{
 			auto const size = values.size();
-			auto const id = fmt::to<env::opt::word>(size);
 			values.emplace_back(value);
-			keys.emplace(key, id);
+			keys[key] = fmt::to<env::opt::word>(size);
 			return true;
 		}
 		else
 		{
-			values.at(it->second) = value;
+			values[it->second] = value;
 			return false;
 		}
 	}

@@ -195,7 +195,7 @@ namespace sys
 
 namespace sys
 {
-	pid_t execute(int fd[3], size_t argc, char const **argv);
+	pid_t exec(int fd[3], size_t argc, char const **argv);
 	bool kill(pid_t);
 	int wait(pid_t);
 

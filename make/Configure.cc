@@ -43,7 +43,9 @@ add(LDFLAGS, -lm -ldl -lrt -lpthread)
 endif
 
 // Project
+ifndef STD
 STD=c++20
+endif
 MAKDIR=make$(DIR)
 OBJDIR=obj$(DIR)
 SRCDIR=src$(DIR)

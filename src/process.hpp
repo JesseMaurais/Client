@@ -54,39 +54,39 @@ namespace env::file
 		{
 			if (fail(n)) 
 			{
-				for (auto n : { 0, 1, 2 })
+				for (auto m : { 0, 1, 2 })
 				{
-					close(n);
+					close(m);
 				}
 			}
 			else fd[n].close();
 		}
 
-		int set(int pid = invalid, int fd[3] = nullptr)
+		int set(int p = invalid, int f[3] = nullptr)
 		{
 			for (auto n : { 0, 1, 2 })
 			{
-				if (nullptr != fd)
+				if (nullptr != f)
 				{
-					fd[n] = this->fd[n].set(fd[n]);
+					f[n] = fd[n].set(f[n]);
 				}
 				else
 				{
-					this->fd[n].set();
+					fd[n].set();
 				}
 			}
-			auto tmp = this->pid;
-			this->pid = pid;
+			auto tmp = p;
+			pid = p;
 			return tmp;
 		}
 
-		int get(int fd[3] = nullptr) const
+		int get(int f[3] = nullptr) const
 		{
-			if (nullptr != fd)
+			if (nullptr != f)
 			{
 				for (auto n : { 0, 1, 2 })
 				{
-					fd[n] = this->fd[n].get();
+					f[n] = fd[n].get();
 				}
 			}
 			return pid;

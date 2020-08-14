@@ -63,8 +63,10 @@ namespace sys
 	}
 	#endif
 
-	pid_t execute(int fd[3], size_t argc, char const **argv)
+	pid_t exec(int fd[3], size_t argc, char const **argv)
 	{
+		assert(nullptr != argv);
+		assert(nullptr != argv[0]);
 		assert(nullptr == argv[argc]);
 
 		#ifdef _WIN32
@@ -91,7 +93,8 @@ namespace sys
 			ZeroMemory(cmd, sizeof cmd);
 			for (size_t i = 0, j = 0; argv[i]; ++i, ++j)
 			{
-				int n = std::snprintf(cmd + j, sizeof cmd - j, "%s ", argv[i]);
+				constexpr auto max = sizeof cmd;
+				auto const n = std::snprintf(cmd + j, max - j, "%s ", argv[i]);
 				if (0 < n) j += n;
 				else return -1;
 			}
@@ -191,7 +194,7 @@ namespace sys
 			args.push_back(nullptr);
 
 			int const res = execvp(args.front(), args.data());
-			sys::err(here, "execvp", args.front());
+			sys::err(here, "execvp", res, args.front());
 			std::exit(res);
 		}
 		#endif

@@ -34,7 +34,7 @@ namespace env::file
 	bool process::start(size_t argc, char const **argv)
 	{
 		int fds[3];
-		pid = sys::execute(fds, argc, argv);
+		pid = sys::exec(fds, argc, argv);
 		if (not fail(pid))
 		{
 			for (auto n : { 0, 1, 2 })

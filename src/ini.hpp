@@ -32,6 +32,7 @@ namespace doc
 		bool got(env::opt::pair) const;
 		view get(env::opt::pair) const;
 		bool set(env::opt::pair, view);
+		bool put(env::opt::pair, view);
 	};
 }
 
