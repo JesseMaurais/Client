@@ -35,9 +35,9 @@ namespace env::file
 			(void) set(pid, fd);
 		}
 
-		~process()
+		ssize_t error(void *buf, size_t sz) const
 		{
-			(void) quit();
+			return fd[2].read(buf, sz);
 		}
 
 		ssize_t read(void *buf, size_t sz) const override

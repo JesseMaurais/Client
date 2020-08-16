@@ -34,6 +34,12 @@ namespace env
 		return { first, second, &cache };
 	}
 
+	shell::line shell::run(span arguments)
+	{
+		fmt::ipstream sub(arguments);
+		return get(sub);
+	}
+
 	shell::line shell::list(view name)
 	{
 		fmt::ipstream sub

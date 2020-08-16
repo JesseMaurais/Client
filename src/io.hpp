@@ -6,6 +6,7 @@
 #include "file.hpp"
 #include "dig.hpp"
 #include "fwd.hpp"
+#include "ptr.hpp"
 #include "tmp.hpp"
 
 namespace fmt
@@ -194,7 +195,7 @@ namespace fmt
 		using buf = basic_buf<Char, Traits, Alloc>;
 
 		basic_stream(env::file::stream const& f) 
-		: buf(f), stream(this)
+		: stream(this), buf(f)
 		{ }
 	};
 

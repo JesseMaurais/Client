@@ -115,15 +115,15 @@ namespace fmt
 	> 
 	auto to_narrow(S s)
 	{
-		std::less<S> less;
 		static_assert(sizeof(T) < sizeof(S));
 		static_assert(is_integer<S> and is_integer<T>);
 		static_assert(is_signed<T> == is_signed<S>);
 		static_assert(S{minimum<T>} <= zero<S>);
 		static_assert(zero<S> <= S{maximum<T>});
 		#ifdef assert
-		assert(not less(s, maximum<T>));
-		assert(not less(minimum<T>, s));
+		static std::less<S> less;
+		assert(less(s, maximum<T>));
+		assert(less(minimum<T>, s));
 		#endif
 		return static_cast<T>(s);
 	}

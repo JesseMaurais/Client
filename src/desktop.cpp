@@ -22,7 +22,7 @@ namespace env
 		return current.find(lower) != fmt::npos;
 	}
 
-	shell::line desktop::with(span command)
+	shell::line desktop::with(string::span command)
 	{
 		static opt::word const group = fmt::str::put("Desktop Entry");
 		static opt::word const key = fmt::str::put("DIALOG");

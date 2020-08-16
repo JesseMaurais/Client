@@ -2,10 +2,10 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "test.hpp"
 #include "arg.hpp"
+#include "shell.hpp"
 #include "str.hpp"
 #include "type.hpp"
 #include "esc.hpp"
-#include "ps.hpp"
 #include "sym.hpp"
 #include "dev.hpp"
 #include "sig.hpp"
@@ -15,30 +15,19 @@
 #include <vector>
 #include <set>
 #include <map>
+#ifndef _TOOLS
+# define _TOOLS "Tools.ini"
+#endif
 
 namespace
-{	
-	void runner(fmt::string::view name, fmt::string::buf::ptr buf, bool spawn)
+{
+	void runner(fmt::string::view name, fmt::string::buf::ptr buf, bool host)
 	{
 		auto back = sys::out.rdbuf();
 		try
 		{
 			sys::out.rdbuf(buf);
-			if (spawn)
-			{
-				fmt::pstream sub;
-				sub.rdbuf(buf);
-
-				if (sub.start({ env::opt::arg(), "-s", name }))
-				{
-					return;
-				}
-				if (sub.wait())
-				{
-					return;
-				}
-			}
-			else
+			if (host)
 			{
 				auto call = sys::sym<void()>(name);
 				if (nullptr == call)
@@ -48,6 +37,15 @@ namespace
 				else
 				{
 					call();
+				}
+			}
+			else
+			{
+				auto const image = env::opt::arg();
+				fmt::string::view::vector args { image, "-o", name };
+				for (auto line : env::command.run(args))
+				{
+					sys::out << line << fmt::eol;
 				}
 			}
 		}
@@ -65,12 +63,8 @@ namespace
 
 int main(int argc, char** argv)
 {
-	#ifndef _TOOLS
-	# define _TOOLS "Tools.ini"
-	#endif
-
 	// Default options file
-	fmt::string::view const config = _TOOLS;
+	fmt::string const config = _TOOLS;
 
 	// Command line words
 	struct
@@ -81,7 +75,8 @@ int main(int argc, char** argv)
 			async = fmt::str::put("async"),
 			tools = fmt::str::put("tools"),
 			print = fmt::str::put("print"),
-			same  = fmt::str::put("same"),
+			quiet = fmt::str::put("quiet"),
+			host  = fmt::str::put("host"),
 			help  = fmt::str::put("help");
 	} arg;
 
@@ -90,18 +85,19 @@ int main(int argc, char** argv)
 	{
 		{ 0, "h", fmt::str::get(arg.help), "Print command line usage then quit" },
 		{ 0, "p", fmt::str::get(arg.print), "Print all source tests then quit" },
+		{ 0, "q", fmt::str::get(arg.quiet), "Print less information" },
 		{ 0, "c", fmt::str::get(arg.color), "Print using color codes" },
 		{ 0, "a", fmt::str::get(arg.async), "Run tests asynchronously" },
-		{ 1, "t", fmt::str::get(arg.tools), "Use instead of " _TOOLS },
-		{ 0, "s", fmt::str::get(arg.same), "Run tests in single process" },
+		{ 1, "t", fmt::str::get(arg.tools), config + " is replaced with argument" },
+		{ 0, "o", fmt::str::get(arg.host), "Host tests in this process" },
 	};
 
 	// Command line parsing
 	auto tests = env::opt::put(argc, argv, cmd);
 
 	// Command line options
-	auto const same = env::opt::get(arg.same, false);
-	auto const color = env::opt::get(arg.color, true);
+	auto const host  = env::opt::get(arg.host, false);
+	auto const color = env::opt::get(arg.color, not host);
 	auto const async = env::opt::get(arg.async, false);
 	auto const tools = env::opt::get(arg.tools, config);
 	auto const clean = std::empty(env::opt::arguments());
@@ -117,7 +113,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			std::cerr << "Failed to open " << path << fmt::eol;
+			std::cout << "Failed to open " << path << fmt::eol;
 		}
 	}
 
@@ -133,8 +129,8 @@ int main(int argc, char** argv)
 
 	// Map test names to error buffers' string stream
 	std::map<fmt::string, fmt::string::stream> context;
+	fmt::string::view const prefix = "test_";
 	auto const program = env::opt::program();
-	fmt::string const prefix = "test_";
 
 	if (std::empty(tests))
 	{
@@ -161,13 +157,12 @@ int main(int argc, char** argv)
 	}
 	else // copy
 	{
-		for (fmt::string const test : tests)
+		for (fmt::string const name : tests)
 		{
-			auto const name = prefix + test;
 			auto const call = sys::sym<void()>(name);
 			if (nullptr == call)
 			{
-				std::cerr << "Cannot find " << name << " in " << program << fmt::eol;
+				std::cout << "Cannot find " << name << " in " << program << fmt::eol;
 			}
 			else
 			{
@@ -181,7 +176,7 @@ int main(int argc, char** argv)
 	{
 		for (auto const& [name, error] : context)
 		{
-			std::cerr << name << fmt::eol;
+			std::cout << name << fmt::eol;
 		}
 		return EXIT_SUCCESS;
 	}
@@ -192,14 +187,14 @@ int main(int argc, char** argv)
 	{
 		if (missing)
 		{
-			if (color) std::cerr << fmt::fg_yellow;
+			if (color) std::cout << fmt::fg_yellow;
 
-			std::cerr << "No tests were found" << fmt::eol;
+			std::cout << "No tests were found" << fmt::eol;
 
-			if (color) std::cerr << fmt::fg_off;
+			if (color) std::cout << fmt::fg_off;
 		}
 
-		std::cerr 
+		std::cout 
 			<< "Unit tests are found in order:"
 			<< fmt::eol << fmt::tab
 			<< "1. Free command line arguments"
@@ -215,7 +210,7 @@ int main(int argc, char** argv)
 
 		for (auto const & item : cmd)
 		{
-			std::cerr
+			std::cout
 				<< fmt::tab
 				<< env::opt::dash << item.dash
 				<< ' '
@@ -239,12 +234,12 @@ int main(int argc, char** argv)
 			{
 				threads.emplace_back
 				(
-					std::async(std::launch::async, runner, name, buf, not same)
+					std::async(std::launch::async, runner, name, buf, host)
 				);
 			}
 			else
 			{
-				runner(name, buf, not same);
+				runner(name, buf, host);
 			}
 		}
 
@@ -262,12 +257,12 @@ int main(int argc, char** argv)
 		{
 			if (color)
 			{
-				std::cerr << fmt::fg_yellow;
+				std::cout << fmt::fg_yellow;
 			}
 
 			while (std::getline(error, str))
 			{
-				std::cerr << name << fmt::tab << str << fmt::eol;
+				std::cout << name << fmt::tab << str << fmt::eol;
 				++ counter;
 			}
 		}
@@ -275,24 +270,29 @@ int main(int argc, char** argv)
 		{
 			if (color)
 			{
-				std::cerr << fmt::fg_green;
+				std::cout << fmt::fg_green;
 			}
 
-			std::cerr << name << fmt::tab << "ok" << fmt::eol;
+			std::cout << name << fmt::tab << "ok" << fmt::eol;
 		}
 	}
 
 	if (color)
 	{
-		std::cerr << (0 < counter ? fmt::fg_magenta : fmt::fg_cyan);
+		std::cout << (0 < counter ? fmt::fg_magenta : fmt::fg_cyan);
 	}
 
-	std::cerr << "There are " << counter << " errors" << fmt::eol;
+	if (not host)
+	{
+		std::cout << "There are " << counter << " errors" << fmt::eol;
+	}
 
 	if (color)
 	{
-		std::cerr << fmt::reset;
+		std::cout << fmt::reset;
 	}
+
+	std::cout << std::flush;
 
 	return 0 < counter ? EXIT_FAILURE : EXIT_SUCCESS;
 }

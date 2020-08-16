@@ -10,7 +10,8 @@ namespace env
 		using string = fmt::string;
 		using view   = string::view;
 		using vector = string::vector;
-		using span   = string::span;
+		using span   = view::span;
+		using init   = view::init;
 		using graph  = view::graph;
 		using line   = string::line;
 		using out    = string::out::ref;
@@ -21,6 +22,9 @@ namespace env
 
 		line get(in, char end = '\n', int count = 0);
 		// Cache all lines in to end, return indices
+
+		line run(span arguments);
+		// Run command as sub process
 
 		line list(view directory = ".");
 		// List files in directory

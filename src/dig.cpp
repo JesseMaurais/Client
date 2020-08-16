@@ -187,8 +187,8 @@ test(dig)
 	assert(std::isnan(fmt::to_float("nan")));
 	assert(std::isinf(fmt::to_double("inf")));
 	// catch
-	except(256 == (int) fmt::to_narrow<char>(256));
-	except(-1 == (signed) fmt::to_unsigned(-1));
-	except(0L == fmt::to_long("$"));
+	//except(256 == (int) fmt::to_narrow<char>(256));
+	//except(-1 == (signed) fmt::to_unsigned(-1));
+	//except(0L == fmt::to_long("$"));
 }
 #endif

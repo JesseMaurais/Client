@@ -11,7 +11,7 @@ namespace env
 		static bool current(view name);
 		// Whether name matches current session
 
-		line with(span command);
+		line with(string::span command);
 		// Open dialog with command
 
 		line open(view application);
