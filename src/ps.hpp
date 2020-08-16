@@ -32,6 +32,12 @@ namespace fmt
 
 		public:
 
+			basic_pstream(size_t sz = env::width)
+			: buf(f), stream(this)
+			{
+				buf::setbufsiz(sz, sz);
+			}
+
 			basic_pstream(span args, size_t sz = env::width)
 			: buf(f), stream(this), f(args)
 			{
@@ -48,6 +54,36 @@ namespace fmt
 			: buf(f), stream(this), f(argc, argv)
 			{ 
 				buf::setbufsiz(sz, sz);
+			}
+
+			bool start(span args)
+			{
+				return f.start(args);
+			}
+
+			bool start(init args)
+			{
+				return f.start(args);
+			}
+
+			bool start(size_t argc, char const** argv)
+			{
+				return f.start(argc, argv);
+			}
+
+			void close(int n = env::file::invalid)
+			{
+				f.close(n);
+			}
+
+			bool quit()
+			{
+				return f.quit();
+			}
+
+			bool wait()
+			{
+				return f.wait();
 			}
 		};
 	}

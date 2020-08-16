@@ -167,10 +167,46 @@ test(ini)
 	doc::ini init;
 	file >> init;
 
-	auto const group = fmt::str::set("NMAKE");
-	auto const key = fmt::str::set("MAKECONFIG");
-	auto const value = init.get({group, key});
-	assert(not empty(value));
-	assert(value.find("/D_NMAKE") != fmt::npos);
+	// Data from file
+	{
+		auto const group = fmt::str::set("NMAKE");
+		auto const key = fmt::str::set("MAKECONFIG");
+		auto const value = init.get({group, key});
+		assert(not empty(value));
+		assert(value.find("/D_NMAKE") != fmt::npos);
+	}
+	
+	// Data at runtime
+	{
+		auto const group = fmt::str::set("Group");
+		auto const key = fmt::str::set("Key");
+		constexpr auto value = "Value";
+		// Cache value with set
+		{
+			auto s = fmt::to_string(value);
+			bool unique = init.set({group, key}, s);
+			assert(unique);
+			s.clear();
+		}
+		// Check persistence
+		{
+			auto u = init.get({group, key});
+			assert(not empty(u));
+			assert(u == value);
+		}
+		// Reference with put
+		{
+			fmt::string::view u = value;
+			bool unique = init.put({group, key}, u);
+			assert(not unique);
+		}
+		// Check persistence
+		{
+			auto u = init.get({group, key});
+			assert(not empty(u));
+			assert(u == value);
+			assert(u.data() == value);
+		}
+	}
 }
 #endif

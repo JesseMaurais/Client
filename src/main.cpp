@@ -5,6 +5,7 @@
 #include "str.hpp"
 #include "type.hpp"
 #include "esc.hpp"
+#include "ps.hpp"
 #include "sym.hpp"
 #include "dev.hpp"
 #include "sig.hpp"
@@ -17,32 +18,48 @@
 
 namespace
 {	
-	void runner(fmt::string::view name, fmt::string::buf::ptr buf)
+	void runner(fmt::string::view name, fmt::string::buf::ptr buf, bool spawn)
 	{
-		auto& out = std::cerr;
-		auto back = out.rdbuf();
+		auto back = sys::out.rdbuf();
 		try
 		{
-			out.rdbuf(buf);
-			auto call = sys::sym<void()>(name);
-			if (nullptr == call)
+			sys::out.rdbuf(buf);
+			if (spawn)
 			{
-				out << name << " is missing";
+				fmt::pstream sub;
+				sub.rdbuf(buf);
+
+				if (sub.start({ env::opt::arg(), "-s", name }))
+				{
+					return;
+				}
+				if (sub.wait())
+				{
+					return;
+				}
 			}
 			else
 			{
-				call();
+				auto call = sys::sym<void()>(name);
+				if (nullptr == call)
+				{
+					sys::out << name << " is missing";
+				}
+				else
+				{
+					call();
+				}
 			}
 		}
 		catch (std::exception const& error)
 		{
-			out << error.what() << fmt::eol;
+			sys::out << error.what() << fmt::eol;
 		}
 		catch (...)
 		{
-			out << "Unknown" << fmt::eol;
+			sys::out << "Unknown" << fmt::eol;
 		}
-		out.rdbuf(back);
+		sys::out.rdbuf(back);
 	}
 }
 
@@ -64,6 +81,7 @@ int main(int argc, char** argv)
 			async = fmt::str::put("async"),
 			tools = fmt::str::put("tools"),
 			print = fmt::str::put("print"),
+			same  = fmt::str::put("same"),
 			help  = fmt::str::put("help");
 	} arg;
 
@@ -75,12 +93,14 @@ int main(int argc, char** argv)
 		{ 0, "c", fmt::str::get(arg.color), "Print using color codes" },
 		{ 0, "a", fmt::str::get(arg.async), "Run tests asynchronously" },
 		{ 1, "t", fmt::str::get(arg.tools), "Use instead of " _TOOLS },
+		{ 0, "s", fmt::str::get(arg.same), "Run tests in single process" },
 	};
 
 	// Command line parsing
 	auto tests = env::opt::put(argc, argv, cmd);
 
 	// Command line options
+	auto const same = env::opt::get(arg.same, false);
 	auto const color = env::opt::get(arg.color, true);
 	auto const async = env::opt::get(arg.async, false);
 	auto const tools = env::opt::get(arg.tools, config);
@@ -219,12 +239,12 @@ int main(int argc, char** argv)
 			{
 				threads.emplace_back
 				(
-					std::async(std::launch::async, runner, name, buf)
+					std::async(std::launch::async, runner, name, buf, not same)
 				);
 			}
 			else
 			{
-				runner(name, buf);
+				runner(name, buf, not same);
 			}
 		}
 

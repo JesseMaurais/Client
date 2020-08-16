@@ -36,6 +36,25 @@ namespace fmt
 
 		public:
 
+			basic_fdstream(size_type size = env::file::width)
+			: base(f)
+			{
+				if (mask & env::file::rw)
+				{
+					base::setbufsiz(size, size);
+				}
+				else 
+				if (mask & env::file::wr)
+				{
+					base::setbufsiz(0, size);
+				}
+				else 
+				if (mask & env::file::rd)
+				{
+					base::setbufsiz(size, 0);
+				}
+			}
+
 			basic_fdstream(view path, mode mask = default_mode, size_type size = env::file::width)
 			: base(f), f(path, mode(mask | default_mode))
 			{
@@ -53,6 +72,16 @@ namespace fmt
 				{
 					base::setbufsiz(size, 0);
 				}
+			}
+
+			bool open(view path, mode mask = default_mode)
+			{
+				return f.open(path, mode(mask | default_mode));
+			}
+
+			void close()
+			{
+				f.close();
 			}
 		};
 	}
