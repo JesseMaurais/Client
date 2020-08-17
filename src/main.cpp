@@ -42,7 +42,7 @@ namespace
 			else
 			{
 				auto const image = env::opt::arg();
-				fmt::string::view::vector args { image, "-o", name };
+				fmt::string::view::vector args { image, "-o", "-q", name };
 				for (auto line : env::command.run(args))
 				{
 					sys::out << line << fmt::eol;
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 	{
 		{ 0, "h", fmt::str::get(arg.help), "Print command line usage then quit" },
 		{ 0, "p", fmt::str::get(arg.print), "Print all source tests then quit" },
-		{ 0, "q", fmt::str::get(arg.quiet), "Print less information" },
+		{ 0, "q", fmt::str::get(arg.quiet), "Only print error messages" },
 		{ 0, "c", fmt::str::get(arg.color), "Print using color codes" },
 		{ 0, "a", fmt::str::get(arg.async), "Run tests asynchronously" },
 		{ 1, "t", fmt::str::get(arg.tools), config + " is replaced with argument" },
@@ -98,6 +98,7 @@ int main(int argc, char** argv)
 	// Command line options
 	auto const host  = env::opt::get(arg.host, false);
 	auto const color = env::opt::get(arg.color, not host);
+	auto const quiet = env::opt::get(arg.quiet, false);
 	auto const async = env::opt::get(arg.async, false);
 	auto const tools = env::opt::get(arg.tools, config);
 	auto const clean = std::empty(env::opt::arguments());
@@ -113,7 +114,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			std::cout << "Failed to open " << path << fmt::eol;
+			std::cerr << "Failed to open " << path << fmt::eol;
 		}
 	}
 
@@ -262,7 +263,14 @@ int main(int argc, char** argv)
 
 			while (std::getline(error, str))
 			{
-				std::cout << name << fmt::tab << str << fmt::eol;
+				if (not quiet)
+				{
+					std::cout << name << fmt::tab << str << fmt::eol;
+				}
+				else
+				{
+					std::cout << str << fmt::eol;
+				}
 				++ counter;
 			}
 		}
@@ -273,7 +281,10 @@ int main(int argc, char** argv)
 				std::cout << fmt::fg_green;
 			}
 
-			std::cout << name << fmt::tab << "ok" << fmt::eol;
+			if (not quiet)
+			{
+				std::cout << name << fmt::tab << "ok" << fmt::eol;
+			}
 		}
 	}
 
@@ -282,7 +293,7 @@ int main(int argc, char** argv)
 		std::cout << (0 < counter ? fmt::fg_magenta : fmt::fg_cyan);
 	}
 
-	if (not host)
+	if (not quiet)
 	{
 		std::cout << "There are " << counter << " errors" << fmt::eol;
 	}
