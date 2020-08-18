@@ -264,3 +264,22 @@ namespace env::opt
 		return extra;
 	}
 }
+
+#ifdef test
+test(arg)
+{
+	// Application name exists
+	{
+		auto const app = env::opt::application();
+		assert(not empty(app) and "Application is not named");
+		assert(env::opt::arg().find(app) != fmt::npos);
+	}
+	// Dump options into stream
+	{
+		fmt::string::stream ss;
+		ss << env::opt::put;
+		auto const s = ss.str();
+		assert(not empty(s) and "Cannot dump options");
+	}
+}
+#endif

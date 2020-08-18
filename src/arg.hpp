@@ -11,8 +11,6 @@ namespace env::opt
 	fmt::string::view initials();
 	fmt::string::view program();
 	fmt::string::view config();
-	fmt::string::view cache();
-	fmt::string::view rundir();
 
 	inline auto arg(size_t argn = 0)
 	{
