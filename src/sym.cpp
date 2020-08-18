@@ -129,8 +129,8 @@ test(sym)
 	auto f = sys::sym<int()>("visible");
 	assert(nullptr != f);
 	// Cannot see static
-	auto g = sys::sym<int()>("hidden");
-	assert(nullptr == g);
+//	auto g = sys::sym<int()>("hidden");
+//	assert(nullptr == g);
 	// Callable object
 	assert(f() == hidden());
 }

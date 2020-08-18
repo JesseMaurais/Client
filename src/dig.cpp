@@ -176,7 +176,6 @@ namespace fmt
 #ifdef test
 test(dig)
 {
-	assert(false);
 	assert('*' == fmt::to_narrow<char>(42));
 	assert(42u == fmt::to_unsigned(42));
 	assert(42 == fmt::to_signed(42u));

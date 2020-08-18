@@ -229,13 +229,13 @@ namespace fmt
 		auto last(view u, mask x = space) const
 		// Last iterator in view $u that is not $x
 		{
-			return skip(rbegin(u), rend(u), x).base();
+			return skip(rbegin(u), rend(u), x).base() - 1;
 		}
 
 		auto trim(view u, mask x = space) const
 		// Trim $x off the front and back of $u
 		{
-			auto const before = last(u, x);
+			auto const before = last(u, x) + 1;
 			auto const after = first(u, x);
 			auto const pos = std::distance(begin(u), after);
 			auto const size = std::distance(after, before);

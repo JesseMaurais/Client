@@ -131,11 +131,13 @@ namespace env
 #ifdef test
 test(shell)
 {
-	auto const list = env::command.list(env::pwd());
+	struct env::shell sh;
+	auto const list = sh.list(env::pwd());
 	assert(not empty(list));
-	auto const copy = env::command.copy(__FILE__);
+	auto const copy = sh.copy(__FILE__);
 	assert(not empty(copy));
-	assert(env::command.cache.at(__LINE__).find("assert") != fmt::npos);
+	// Copy range starts at 0, file numbering at 1
+	assert(copy[__LINE__-1].find("Recursive find me text") != fmt::npos);
 }
 #endif
 
