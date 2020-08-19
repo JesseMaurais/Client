@@ -5,7 +5,7 @@
 #include "err.hpp"
 
 #ifdef test
-test(bug)
+test(err)
 {
 	assert(true == true);
 	assert(true != false);

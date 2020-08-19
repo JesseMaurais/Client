@@ -167,3 +167,12 @@ namespace env
 		return env::file::fail(sys::access(data(path), check(am)));
 	}
 }
+
+#ifdef test
+#include "arg.hpp"
+test(mode)
+{
+	assert(not env::fail(__FILE__) and "Source file exists");
+	assert(not env::fail(env::opt::arg(), env::ex) and "Program is executable");
+}
+#endif
