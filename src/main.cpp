@@ -41,11 +41,17 @@ namespace
 			}
 			else
 			{
+				struct env::shell sh;
 				auto const image = env::opt::arg();
 				fmt::string::view::vector args { image, "-o", "-q", name };
-				for (auto line : env::command.run(args))
+				for (auto line : sh.run(args))
 				{
 					sys::out << line << fmt::eol;
+				}
+
+				if (sh.status)
+				{
+					sys::out << "Exit code " << sh.status << fmt::eol;
 				}
 			}
 		}

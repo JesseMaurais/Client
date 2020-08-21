@@ -37,29 +37,39 @@ namespace env
 	shell::line shell::run(span arguments)
 	{
 		fmt::ipstream sub(arguments);
-		return get(sub);
+		auto const line = get(sub);
+		status = sub.wait();
+		return line;
+	}
+
+	shell::line shell::run(init arguments)
+	{
+		view::vector s(arguments);
+		return run(s);
 	}
 
 	shell::line shell::list(view name)
 	{
-		fmt::ipstream sub
+		return run
+		(
 		#ifdef _WIN32
-			{ "dir", "/b", name };
+			{ "dir", "/b", name }
 		#else
-			{ "ls", name };
+			{ "ls", name }
 		#endif
-		return get(sub);
+		);
 	}
 
 	shell::line shell::copy(view path)
 	{
-		fmt::ipstream sub
+		return run
+		(
 		#ifdef _WIN32
-			{ "type", path };
+			{ "type", path }
 		#else
-			{ "cat", path };
+			{ "cat", path }
 		#endif
-		return get(sub);
+		);
 	}
 
 	shell::line shell::find(view pattern, view directory)
@@ -70,33 +80,28 @@ namespace env
 		}
 		#else
 		{
-			fmt::ipstream sub
-			{ 
-				"find", directory, "-type", "f", "-name", pattern 
-			};
-			return get(sub);
+			return run({ "find", directory, "-type", "f", "-name", pattern });
 		}
 		#endif
 	}
 
 	shell::line shell::which(view name)
 	{
-		fmt::ipstream sub
+		return run
+		(
 		#ifdef _WIN32
-			{ "where", name };
+			{ "where", name }
 		#else
-			{ "which", "-a", name };
+			{ "which", "-a", name }
 		#endif
-		return get(sub);
+		);
 	}
 
 	shell::line shell::open(view path)
 	{
 		#ifdef _WIN32
 		{
-			fmt::ipstream sub 
-				{ "start", "/d", path };
-			return get(sub);
+			return run({ "start", "/d", path });
 		}
 		#else
 		{
@@ -117,9 +122,7 @@ namespace env
 						continue;
 					}
 
-					fmt::ipstream sub 
-						{ program, path };
-					return get(sub);
+					return run({ program, path });
 				}
 			}
 			return { 0, 0, &cache };

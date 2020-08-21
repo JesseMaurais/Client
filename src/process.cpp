@@ -50,9 +50,9 @@ namespace env::file
 		return fail(sys::kill(pid));
 	}
 
-	bool process::wait()
+	int process::wait()
 	{
-		return fail(sys::wait(pid));
+		return sys::wait(pid);
 	}
 }
 

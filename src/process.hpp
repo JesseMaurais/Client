@@ -13,7 +13,7 @@ namespace env::file
 		bool start(fmt::string::view::span args);
 		bool start(size_t argc, char const **argv);
 		bool quit();
-		bool wait();
+		int wait();
 
 		explicit process(fmt::string::view::init args)
 		{

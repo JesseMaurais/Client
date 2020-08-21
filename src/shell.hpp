@@ -19,9 +19,13 @@ namespace env
 
 		vector cache;
 		string last;
+		int status;
 
 		line get(in, char end = '\n', int count = 0);
 		// Cache all lines in to end, return indices
+
+		line run(init arguments);
+		// Run command as sub process
 
 		line run(span arguments);
 		// Run command as sub process

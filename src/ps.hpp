@@ -76,12 +76,12 @@ namespace fmt
 				f.close(n);
 			}
 
-			bool quit()
+			auto quit()
 			{
 				return f.quit();
 			}
 
-			bool wait()
+			auto wait()
 			{
 				return f.wait();
 			}
