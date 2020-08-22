@@ -49,9 +49,15 @@ namespace
 					sys::out << line << fmt::eol;
 				}
 
-				if (sh.status)
+				if (0 < sh.status)
 				{
-					sys::out << "Exit code " << sh.status << fmt::eol;
+					auto const text = sys::sig::to_string(sh.status);
+					sys::out << "Signal: " << text << fmt::eol;
+				}
+				else
+				if (sh.status < 0)
+				{
+					sys::out << "Failed: " << sh.status << fmt::eol;
 				}
 			}
 		}

@@ -3,36 +3,13 @@
 
 #include "sig.hpp"
 #include "err.hpp"
+#include "type.hpp"
 #ifdef _WIN32
 #include "win.hpp"
 #else
 #include "uni.hpp"
 #endif
 #include <map>
-
-namespace
-{
-	auto value(int signo)
-	{
-		switch (signo)
-		{
-		case SIGILL:
-			return "Illegal";
-		case SIGINT:
-			return "Interrupt";
-		case SIGFPE:
-			return "Float";
-		case SIGABRT:
-			return "Abort";
-		case SIGTERM:
-			return "Terminate";
-		case SIGSEGV:
-			return "Segmented";
-		default:
-			return "Unknown";
-		}
-	}
-}
 
 namespace sys::sig
 {
@@ -50,9 +27,30 @@ namespace sys::sig
 		});
 	}
 
-	void print(int signo)
+	fmt::string to_string(int signo)
 	{
-		sys::out << value(signo);
+		switch (signo)
+		{
+		case SIGILL:
+			return "Illegal instruction";
+		case SIGINT:
+			return "Interruption";
+		case SIGFPE:
+			return "Float-point error";
+		case SIGABRT:
+			return "Abort";
+		case SIGTERM:
+			return "Terminate";
+		case SIGSEGV:
+			return "Segmentation fault";
+		#ifdef SIGKILL
+		case SIGKILL:
+			return "Killed";
+		#endif
+		default:
+			return fmt::to_string(signo);
+		}
+
 	}
 }
 
@@ -81,6 +79,8 @@ test(sig)
 	{
 		assert(end != std::find(begin, end, signo));
 	}
+
+	std::raise(SIGKILL);
 }
 #endif
 

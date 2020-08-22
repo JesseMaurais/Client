@@ -2,6 +2,7 @@
 #define sig_hpp "Signals and Sockets"
 
 #include "ptr.hpp"
+#include "fmt.hpp"
 #include <csignal>
 #include <algorithm>
 #include <functional>
@@ -108,6 +109,8 @@ namespace sys::sig
 	using socket = slot::socket;
 	using signature = slot::signature;
 	using observer = slot::observer;
+
+	fmt::string to_string(int);
 
 	struct scope : fwd::unique, slot
 	{
