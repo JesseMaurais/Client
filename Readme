@@ -4,7 +4,6 @@ Portable systems programming interfaces for modern C++
 
 Regularly tested on
 * Linux
-* Android
 * Windows
 * Cygwin
 Using the compilers

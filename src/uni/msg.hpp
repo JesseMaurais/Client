@@ -10,7 +10,7 @@
 
 namespace sys::uni::msg
 {
-	class get : file::ops
+	class get
 	{
 		int id;
 
