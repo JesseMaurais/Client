@@ -501,9 +501,19 @@ namespace fmt
 		return cstr.widen(u);
 	}
 
+	inline auto widen(char c)
+	{
+		return widen(string(1, c));
+	}
+
 	inline auto narrow(wstring::view u)
 	{
 		return wstr.narrow(u);
+	}
+
+	inline auto narrow(wchar_t c)
+	{
+		return narrow(wstring(1, c));
 	}
 
 	inline auto first(string::view u)

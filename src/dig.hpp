@@ -9,173 +9,107 @@
 
 namespace fmt
 {
-	template 
-	<
-		typename T
-	> 
-	constexpr auto zero = T { };
+	template <class N> constexpr auto zero = N { };
 
-	template 
-	<
-		typename T
-	>
-	constexpr auto maximum = std::numeric_limits<T>::max();
+	template <class N> constexpr auto maxi = std::numeric_limits<T>::max();
+	template <class N> constexpr auto mini = std::numeric_limits<T>::lowest();
 
-	template 
-	<
-		typename T
-	> 
-	constexpr auto minimum = std::numeric_limits<T>::lowest();
+	template <class N> constexpr bool is_integer = std::is_integral<T>::value;
+	template <class N> constexpr bool is_signed = std::is_signed<T>::value;
+	template <class N> constexpr bool is_unsigned = std::is_unsigned<T>::value;
 
-	template 
-	<
-		typename T
-	> 
-	constexpr bool is_integer = std::is_integral<T>::value;
+	template <class N> using as_signed = typename std::make_signed<T>::type;
+	template <class N> using as_unsigned = typename std::make_unsigned<T>::type;
 
-	template 
-	<
-		typename T
-	> 
-	constexpr bool is_signed = std::is_signed<T>::value;
-
-	template 
-	<
-		typename T
-	> 
-	constexpr bool is_unsigned = std::is_unsigned<T>::value;
-
-	template 
-	<
-		typename T
-	> 
-	using as_signed = typename std::make_signed<T>::type;
-
-	template 
-	<
-		typename T
-	> 
-	using as_unsigned = typename std::make_unsigned<T>::type;
-
-	template 
-	<
-		typename S
-	> 
-	auto to_unsigned(S s)
+	template <class N> auto to_unsigned(N n)
 	{
-		static_assert(is_integer<S>);
-		static_assert(is_signed<S>);
+		static_assert(is_integer<N>);
+		static_assert(is_signed<N>);
+		using M = as_unsigned<N>;
 		#ifdef assert
-		assert(zero<S> <= s);
+		assert(zero<N> <= n);
 		#endif
-		using T = as_unsigned<S>;
-		return static_cast<T>(s);
+		return static_cast<M>(n);
 	}
 
-	template 
-	<
-		typename S
-	>
-	auto to_signed(S s)
+	template <class N> auto to_signed(N n)
 	{
-		static_assert(is_integer<S>);
-		static_assert(is_unsigned<S>);
-		using T = as_signed<S>;
-		auto const t = static_cast<T>(s);
+		static_assert(is_integer<N>);
+		static_assert(is_unsigned<N>);
+		using M = as_signed<N>;
 		#ifdef assert
-		assert(zero<T> <= t);
+		assert(n <= static_cast<N>(maxi<M>));
 		#endif
-		return t;
+		return static_cast<M>(n);
 	}
 
-	template 
-	<
-		typename T, typename S
-	> 
-	auto to_sign_of(S s)
+	template <class N, class M> auto to_narrow(M n)
 	{
-		if constexpr (is_signed<S> and is_unsigned<T>)
-		{
-			return to_unsigned(s);
-		}
-		else
-		if constexpr (is_unsigned<S> and is_signed<T>)
-		{
-			return to_signed(s);
-		}
-		else
-		{
-			return s;
-		}
-	}
-
-	template 
-	<
-		typename T, typename S
-	> 
-	auto to_narrow(S s)
-	{
-		static_assert(sizeof(T) < sizeof(S));
-		static_assert(is_integer<S> and is_integer<T>);
-		static_assert(is_signed<T> == is_signed<S>);
-		static_assert(S{minimum<T>} <= zero<S>);
-		static_assert(zero<S> <= S{maximum<T>});
+		static_assert(sizeof(N) < sizeof(M));
+		static_assert(is_integer<N> and is_integer<M>);
+		static_assert(is_signed<N> == is_signed<M>);
 		#ifdef assert
-		static std::less<S> less;
-		assert(less(s, maximum<T>));
-		assert(less(minimum<T>, s));
+		assert(n <= static_assert<M>(maxi<N>));
+		assert(static_assert<M>(mini<N>) <= n);
 		#endif
-		return static_cast<T>(s);
+		return static_cast<N>(n);
 	}
 
-	template 
-	<
-		typename T, typename S
-	> 
-	auto to(S s)
+	template <class N, class M> auto to_wide(M n)
 	{
-		if constexpr (sizeof(T) < sizeof(S))
+		static_assert(sizeof(N) > sizeof(M));
+		static_assert(is_integer<N> and is_integer<M>);
+		static_assert(is_signed<N> == is_signed<M>);
+		return static_cast<N>(N);
+	}
+
+	template <class N, class M> auto to_sign_of(M n)
+	{
+		if constexpr (is_signed<M> and is_unsigned<N>)
 		{
-			return to_narrow<T>(to_sign_of<T>(s));
+			return to_unsigned(n);
+		}
+		else
+		if constexpr (is_unsigned<M> and is_signed<N>)
+		{
+			return to_signed(n);
 		}
 		else
 		{
-			return to_sign_of<T>(s);
+			return n;
 		}
 	}
 
-	template 
-	<
-		typename S
-	> 
-	auto to_size(S s)
+	template <class N, class M> auto to(M n)
 	{
-		return to<size_t>(s);
-	}
-
-	template 
-	<
-		typename S
-	> 
-	auto to_int(S s)
-	{
-		return to<int>(s);
-	}
-
-	template 
-	<
-		typename T
-	> 
-	bool fail(T t)
-	{
-		if constexpr (is_integer<T>)
+		if constexpr (sizeof(N) < sizeof(M))
 		{
-			return fail(static_cast<double>(t));
+			return to_narrow<N>(to_sign_of<N>(n));
 		}
 		else
 		{
-			return std::isnan(t);
+			return to_sign_of<N>(n);
 		}
+	}
+
+	template <class N> auto to_size(N n)
+	{
+		return to<size_t>(n);
+	}
+
+	template <class N> auto to_int(N n)
+	{
+		return to<int>(n);
+	}
+
+	template <class N> auto to_wint(N n)
+	{
+		return to<wint_t>(n);
+	}
+
+	template <class N> auto to_wchar(N n)
+	{
+		return to<wchar_t>(n);
 	}
 
 	string to_string(long value, int base);
@@ -194,31 +128,37 @@ namespace fmt
 	double to_double(string::view);
 	long double to_quad(string::view);
 
-
+	template <class N> bool fail(N n)
+	{
+		if constexpr (is_integer<N>)
+		{
+			return fail(static_cast<double>(t));
+		}
+		else
+		{
+			return std::isnan(t);
+		}
+	}
 }
 
 namespace fmt::dig
 {
-	template
-	<
-		class Type
-	>
-	auto to(string::view line, int base = 10)
+	template <class N> auto to(string::view line, int base = 10)
 	{
-		if constexpr (is_integer<Type>)
+		if constexpr (is_integer<N>)
 		{
-			if constexpr (is_signed<Type>)
+			if constexpr (is_signed<N>)
 			{
-				return to_narrow<Type>(to_llong(line, base));
+				return to_narrow<N>(to_llong(line, base));
 			}
 			else
 			{
-				return to_narrow<Type>(to_ullong(line, base));
+				return to_narrow<N>(to_ullong(line, base));
 			}
 		}
 		else
 		{
-			return to_narrow<Type>(to_quad(line));
+			return to_narrow<N>(to_quad(line));
 		}
 	}
 }
