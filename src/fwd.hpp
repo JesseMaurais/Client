@@ -14,6 +14,8 @@
 #include <vector>
 #include <variant>
 #include <tuple>
+#include <string>
+#include <string_view>
 
 namespace fwd
 {
@@ -45,7 +47,7 @@ namespace fwd
 	<
 		class Type
 	>
-	using ordering = std::less<Type>;
+	using order = std::less<Type>;
 
 	template
 	<
@@ -64,7 +66,7 @@ namespace fwd
 	template
 	<
 		class Type,
-		template <class> class Order = ordering,
+		template <class> class Order = order,
 		template <class> class Alloc = allocator
 	>
 	using set = std::set<Type, Order<Type>, Alloc<Type>>;
@@ -72,7 +74,7 @@ namespace fwd
 	template 
 	<
 		class Type,
-		template <class> class Order = ordering,
+		template <class> class Order = order,
 		template <class> class Alloc = allocator
 	>
 	using map = std::map<Type, Type, Order<Type>, Alloc<pair<Type>>>;
@@ -181,6 +183,44 @@ namespace fwd
 		template <class> class Alloc = allocator
 	>
 	using basic_stringstream = std::basic_stringstream<Char, Traits<Char>, Alloc<Char>>;
+
+	// Boundary values
+
+	template <class Type> struct greatest
+	{
+		constexpr bool operator<(Type value) const
+		{
+			return false;
+		}
+	};
+
+	template <class Type> struct least
+	{
+		constexpr bool operator<(Type value) const
+		{
+			return true;
+		}
+	};
+
+	template 
+	<
+		auto Min, auto Max, template <class> class Order = order
+	> 
+	struct closure
+	{
+		constexpr auto first = Min, last = Max;
+
+		template <class Type> constexpr bool operator(Type value) const
+		{
+			thread_local inline order<Type> less;
+			return not less(value, Min) and less(value, Max);
+		}
+
+		static_assert(first < last);
+	};
+
+	template <auto Min, template <class> class Order = order> using upper = closure<Min, greatest<decltype(Min)>>:
+	template <auto Max, template <class> class Order = order> using lower = closure<Max, least<decltype(Max)>>;
 }
 
 #include "algo.hpp"

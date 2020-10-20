@@ -127,10 +127,15 @@ namespace fmt
 	#else
 		basic_string<char>;
 	#endif
+	using view = string::view;
 
-	using astring = basic_string<char>; // UTF-8 or low 7
+	using bstring = basic_string<char>; // low 7 byte UTF-8
 	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 wide
-	using ustring = basic_string<wint_t>; // at least UTF-32 code point
+	using ustring = basic_string<wint_t>; // least UTF-32 code point
+
+	using bview = astring::view;
+	using wview = wstring::view;
+	using uview = ustring::view;
 
 	constexpr auto eol = '\n';
 	constexpr auto tab = '\t';

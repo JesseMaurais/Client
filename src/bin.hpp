@@ -3,12 +3,16 @@
 
 #include "dig.hpp"
 #include "type.hpp"
+#include "ucs.hpp"
 #include <tuple>
 
 namespace fmt
 {
 	template <class N> auto to_bytes(N n)
 	{
+		#ifdef assert
+		assert(n < to_sign_of<N>(uni::endpoint) and "data loss");
+		#endif
 		auto const w = to_wint(n);
 		auto const a = narrow(w);
 		auto const begin = a.begin();
@@ -16,7 +20,7 @@ namespace fmt
 		return string(begin, end);
 	}
 
-	template <class N> auto from_bytes(string::view u)
+	template <class N> auto from_bytes(view u)
 	{
 		auto const a = widen(u);
 		auto const begin = a.begin();
@@ -32,10 +36,10 @@ namespace fmt
 	{
 		const C* object;
 
-		template <class T, size_t... I> 
-		string::out print(string::out out, const T& members, std::index_sequence<I...>)
+		template <class Tuple, size_t... Index> 
+		string::out print(string::out out, const Tuple& record, std::index_sequence<Index...>)
 		{
-			return (..., (out << to_bytes(object->*std::get<I>(members))));
+			return (..., (out << to_bytes(object->*std::get<Index>(record))));
 		}
 
 	public:

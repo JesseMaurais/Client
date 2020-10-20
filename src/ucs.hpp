@@ -8,11 +8,15 @@ namespace fmt::uni
 {
 	template 
 	<
-		int Min, int Max
+		wint_t Min, wint_t Max
 	> 
 	using plane = fwd::closure<Min, Max>;
 
-	using space = plane<0x000000, 0x10FFFF>;
+	using codespace = plane<0x000000, 0x10FFFF>;
+
+	constexpr wint_t endpoint = 0x110000;
+
+	static_assert(codespace.last < endpoint);
 
 	// special chars
 
