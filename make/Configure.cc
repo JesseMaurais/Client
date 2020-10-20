@@ -44,7 +44,11 @@ endif
 
 // Project
 ifndef STD
+#ifdef _MSCVER
+STD=c++latest
+#else
 STD=c++20
+#endif
 endif
 MAKDIR=make$(DIR)
 OBJDIR=obj$(DIR)
