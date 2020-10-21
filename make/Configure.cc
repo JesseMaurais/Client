@@ -76,6 +76,10 @@ MAKSRC=$(MAKDIR)Source.$(MAKEXT)
 !if ![(echo SRC=\>$(MAKSRC)) && for %i in ($(ALLSRC)) do @echo %i\>>$(MAKSRC)]
 !include $(MAKSRC)
 endif // SRC
+MAKEXE=$(MAKDIR)Target.$(MAKEXT)
+!if ![(echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE)]
+!include $(MAKEXE)
+endif // EXE
 endif // COMSPEC
 #else // GNU
 HDR=$(wildcard $(ALLHDR))

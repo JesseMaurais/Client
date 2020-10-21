@@ -39,7 +39,7 @@ namespace fmt
 		template <class> class Alloc = fwd::allocator,
 		template <class, template <class> class> class Vector = fwd::vector,
 		template <class> class Span = fwd::span,
-		template <class> class Order = fwd::ordering
+		template <class> class Order = fwd::order
 	>
 	struct struct_brief : memory_brief<Type>
 	{
@@ -133,7 +133,7 @@ namespace fmt
 	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 wide
 	using ustring = basic_string<wint_t>; // least UTF-32 code point
 
-	using bview = astring::view;
+	using bview = bstring::view;
 	using wview = wstring::view;
 	using uview = ustring::view;
 

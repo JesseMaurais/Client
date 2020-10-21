@@ -11,15 +11,15 @@ namespace fmt
 {
 	template <class N> constexpr auto zero = N { };
 
-	template <class N> constexpr auto maxi = std::numeric_limits<T>::max();
-	template <class N> constexpr auto mini = std::numeric_limits<T>::lowest();
+	template <class N> constexpr auto maxi = std::numeric_limits<N>::max();
+	template <class N> constexpr auto mini = std::numeric_limits<N>::lowest();
 
-	template <class N> constexpr bool is_integer = std::is_integral<T>::value;
-	template <class N> constexpr bool is_signed = std::is_signed<T>::value;
-	template <class N> constexpr bool is_unsigned = std::is_unsigned<T>::value;
+	template <class N> constexpr bool is_integer = std::is_integral<N>::value;
+	template <class N> constexpr bool is_signed = std::is_signed<N>::value;
+	template <class N> constexpr bool is_unsigned = std::is_unsigned<N>::value;
 
-	template <class N> using as_signed = typename std::make_signed<T>::type;
-	template <class N> using as_unsigned = typename std::make_unsigned<T>::type;
+	template <class N> using as_signed = typename std::make_signed<N>::type;
+	template <class N> using as_unsigned = typename std::make_unsigned<N>::type;
 
 	template <class N> auto to_unsigned(N n)
 	{
@@ -49,8 +49,8 @@ namespace fmt
 		static_assert(is_integer<N> and is_integer<M>);
 		static_assert(is_signed<N> == is_signed<M>);
 		#ifdef assert
-		assert(n <= static_assert<M>(maxi<N>));
-		assert(static_assert<M>(mini<N>) <= n);
+		assert(n <= static_cast<M>(maxi<N>));
+		assert(static_cast<M>(mini<N>) <= n);
 		#endif
 		return static_cast<N>(n);
 	}
@@ -132,11 +132,11 @@ namespace fmt
 	{
 		if constexpr (is_integer<N>)
 		{
-			return fail(static_cast<double>(t));
+			return fail(static_cast<double>(n));
 		}
 		else
 		{
-			return std::isnan(t);
+			return std::isnan(n);
 		}
 	}
 }

@@ -111,7 +111,7 @@ namespace fwd
 	template
 	<
 		class Node, 
-		template <class> class Order = ordering,
+		template <class> class Order = order,
 		template <class> class Alloc = allocator
 	>
 	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;

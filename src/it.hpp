@@ -55,21 +55,21 @@ namespace fwd
 			return this->second;
 		}
 
-		auto greater(auto digit) const
+		template <class N> bool greater(N n) const
 		{
-			ordering<decltype(digit)> const part;
-			return not part(digit, this->second);
+			thread_local order<N> const sorted;
+			return not sorted(n, this->second);
 		}
 
-		auto less(auto digit) const
+		template <class N> bool less(N n) const
 		{
-			ordering<decltype(digit)> const part;
-			return part(digit, this->first);
+			thread_local order<N> const sorted;
+			return sorted(n, this->first);
 		}
 
-		auto at(auto digit) const
+		template <class N> bool at(N n) const
 		{
-			return not greater(digit) and not less(digit);
+			return not greater(n) and not less(n);
 		}
 	};
 
@@ -122,77 +122,69 @@ namespace fwd
 	// Compile Time Expressions
 	//
 
-	template
-	<
-		auto First, auto Last
-	>
-	struct closure
+	template <auto First, auto Last> struct closure
 	{
 		static_assert(First < Last + 1);
 
 		static constexpr auto first = First;
 		static constexpr auto second = Last;
 
-		constexpr auto begin()
+		constexpr auto begin() const
 		{
 			return first;
 		}
 
-		constexpr auto end()
+		constexpr auto end() const
 		{
 			return second + 1;
 		}
 
-		constexpr auto size()
+		constexpr auto size() const
 		{
 			return end() - begin();
 		}
 
-		constexpr auto less(auto digit)
+		template <class N> constexpr bool less(N digit) const
 		{
 			return digit < first;
 		}
 
-		constexpr auto more(auto digit)
+		template <class N> constexpr bool more(N digit) const
 		{
 			return second < digit;
 		}
 
-		constexpr auto over(auto digit)
+		template <class N> constexpr bool over(N digit) const
 		{
 			return not more(digit) and not less(digit);
 		}
 	};
 
-	template
-	<
-		class Part, class... Parts
-	>
-	struct closures
+	template <class Part, class... Parts> struct closures
 	{
 		using Rest = closures<Parts...>;
 
-		constexpr auto any(auto digit)
+		template <class N> constexpr bool any(N digit) const
 		{
 			return Part::over(digit) or Rest::any(digit);
 		}
 
-		constexpr auto all(auto digit)
+		template <class N> constexpr bool all(N digit) const
 		{
 			return Part::over(digit) and Rest::all(digit);
 		}
 
-		constexpr auto size()
+		constexpr auto size() const
 		{
 			return 1 + sizeof...(Parts);
 		}
 
-		constexpr auto begin()
+		constexpr auto begin() const
 		{
 			return std::min(Part::begin(), Rest::begin());
 		}
 
-		constexpr auto end()
+		constexpr auto end() const
 		{
 			return std::max(Part::end(), Rest::end());
 		}
@@ -204,8 +196,8 @@ namespace fwd
 	>
 	struct closures<Part>
 	{
-		constexpr auto any(auto digit) { return Part::over(digit); }
-		constexpr auto all(auto digit) { return Part::over(digit); }
+		template <class N> constexpr bool any(N digit) { return Part::over(digit); }
+		template <class N> constexpr bool all(N digit) { return Part::over(digit); }
 	};
 }
 
