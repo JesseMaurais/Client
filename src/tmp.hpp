@@ -5,47 +5,27 @@
 
 namespace fwd
 {
-	template
-	<
-		typename T
-	>
-	struct typeof
+	template <class T> struct type_of
 	{
 		using type = T;
 	};
 
-	template
-	<
-		typename T
-	>
-	struct evaluator : typeof<T>
+	template <class T> struct evaluator : type_of<T>
 	{
 		virtual bool operator()(T) const = 0;
 	};
 
-	template 
-	<
-		typename T
-	> 
-	struct constant : typeof<T>
+	template <class T> struct constant : type_of<T>
 	{
 		virtual operator T() const = 0;
 	};
 
-	template 
-	<
-		typename T
-	> 
-	struct variable : constant<T>
+	template <class T> struct variable : constant<T>
 	{
 		virtual T operator=(T) = 0;
 	};
 
-	template 
-	<
-		typename... T
-	> 
-	struct formula : std::function<bool(T...)>
+	template <class... T> struct formula : std::function<bool(T...)>
 	{
 		using base = std::function<bool(T...)>;
 		using base::base;
@@ -83,23 +63,11 @@ namespace fwd
 		}
 	};
 
-	template 
-	<
-		typename T
-	>
-	using predicate = formula<T>;
+	template <class T> using predicate = formula<T>;
 
-	template 
-	<
-		typename T, typename S
-	>
-	using relation = formula<T, S>;
+	template <class T, class S> using relation = formula<T, S>;
 
-	template 
-	<
-		bool P, typename... Q
-	> 
-	struct proposition : formula<Q...>
+	template <bool P, class... Q> struct proposition : formula<Q...>
 	{
 		using base = formula<Q...>;
 		using closure = std::function<void(Q...)>;
@@ -119,29 +87,11 @@ namespace fwd
 		}
 	};
 
-	template 
-	<
-		typename... Q
-	> 
-	using truth = proposition<true, Q...>;
+	template <class... Q> using truth = proposition<true, Q...>;
+	template <class... Q> using falsity = proposition<false, Q...>;
 
-	template 
-	<
-		typename... Q
-	> 
-	using falsity = proposition<false, Q...>;
-
-	template 
-	<
-		typename... Q
-	>
-	constexpr auto never = [](Q...) { return false; };
-
-	template 
-	<
-		typename... Q
-	>
-	constexpr auto always = [](Q...) { return true; };
+	template <class... Q> constexpr auto never = [](Q...) { return false; };
+	template <class... Q> constexpr auto always = [](Q...) { return true; };
 }
 
 #endif // file

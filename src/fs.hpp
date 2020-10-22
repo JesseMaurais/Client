@@ -2,7 +2,6 @@
 #define fs_hpp "File Descriptor Stream"
 
 #include "pipe.hpp"
-#include "buf.hpp"
 #include "io.hpp"
 #include "type.hpp"
 
@@ -36,7 +35,7 @@ namespace fmt
 
 		public:
 
-			basic_fdstream(size_type size = env::file::width)
+			basic_fdstream(mode mask = default_mode, size_type size = env::file::width)
 			: base(f)
 			{
 				if (mask & env::file::rw)

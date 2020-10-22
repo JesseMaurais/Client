@@ -13,16 +13,24 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		template <class> class Alloc = allocator,
-		template <class, template<class> class> class Vector = vector,
-		template <class> class Span = span,
-		// details
-		class View = Span<Type>,
-		class Container = Vector<Type, Alloc>,
-		class Size = typename Container::size_type,
-		class Pointer = typename std::add_pointer<const Container>::type,
-		class Reference = typename std::add_lvalue_reference<const Container>::type,
+		class Type
+		,
+		template <class> class Alloc = allocator
+		,
+		template <class, template<class> class> class Vector = vector
+		,
+		template <class> class Span = span
+		,
+		class View = Span<Type>
+		,
+		class Container = Vector<Type, Alloc>
+		,
+		class Size = typename Container::size_type
+		,
+		class Pointer = typename std::add_pointer<const Container>::type
+		,
+		class Reference = typename std::add_lvalue_reference<const Container>::type
+		,
 		class Base = pair<Size>
 	>
 	struct line : Base
@@ -62,16 +70,24 @@ namespace fwd
 
 	template
 	<
-		class Type,
-		template <class> class Alloc = allocator,
-		template <class, template <class> class> class Vector = vector,
-		template <class> class Span = span,
-		// details
-		class View = Span<Type>,
-		class Container = Vector<Type, Alloc>,
-		class Size = typename Container::size_type,
-		class Pair = pair<Size>,
-		class Index = line<Pair, Alloc, Vector, Span>,
+		class Type
+		,
+		template <class> class Alloc = allocator
+		,
+		template <class, template <class> class> class Vector = vector
+		,
+		template <class> class Span = span
+		,
+		class View = Span<Type>
+		,
+		class Container = Vector<Type, Alloc>
+		,
+		class Size = typename Container::size_type
+		,
+		class Pair = pair<Size>
+		,
+		class Index = line<Pair, Alloc, Vector, Span>
+		,
 		class Base = line<Type, Alloc, Vector, Span>
 	>
 	struct page : Base
@@ -94,24 +110,30 @@ namespace fwd
 
 	template
 	<
-		class Node,
-		template <class> class Alloc = allocator,
-		template <class, template <class> class> class Vector = vector,
+		class Node
+		,
+		template <class> class Alloc = allocator
+		,
+		template <class, template <class> class> class Vector = vector
+		,
 		template <class> class Span = span
 	>
 	using edges = std::pair<const Node, Span<Node>>;
 
 	template
 	<
-		class Node, 
+		class Node
+		, 
 		template <class> class Alloc = allocator
 	>
 	using graph = std::vector<pair<Node>, Alloc<pair<Node>>>;
 
 	template
 	<
-		class Node, 
-		template <class> class Order = order,
+		class Node
+		, 
+		template <class> class Order = order
+		,
 		template <class> class Alloc = allocator
 	>
 	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
@@ -122,7 +144,9 @@ namespace fwd
 
 	template
 	<
-		class Type, class Iterator
+		class Type
+		,
+		class Iterator
 	>
 	auto split(span<Type> s, predicate<Type> p, Iterator out)
 	// Partition a span by predicate
@@ -142,8 +166,10 @@ namespace fwd
 
 	template 
 	<
- 		class Type, 
-		template <class> class Alloc = allocator,
+ 		class Type
+		, 
+		template <class> class Alloc = allocator
+		,
 		template <class, template<class> class> class Vector = vector
 	>
 	auto split(span<Type> s, predicate<Type> p = std::empty<Type>)
@@ -157,9 +183,7 @@ namespace fwd
 
 	template
 	<
-		class Type, 
-		class Iterator, 
-		template<class> class Identity = identity
+		class Type, class Iterator, template<class> class Identity = identity
 	>
 	auto split(span<Type> s, Type n, Iterator out)
 	// Partition a span by value
@@ -171,8 +195,7 @@ namespace fwd
 
 	template
 	<
-		class Type, 
-		template <class> class Alloc = allocator
+		class Type, template <class> class Alloc = allocator
 	>
 	auto split(span<Type> s, Type n = { })
 	// Partition a span by value

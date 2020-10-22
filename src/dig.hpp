@@ -60,7 +60,7 @@ namespace fmt
 		static_assert(sizeof(N) > sizeof(M));
 		static_assert(is_integer<N> and is_integer<M>);
 		static_assert(is_signed<N> == is_signed<M>);
-		return static_cast<N>(N);
+		return static_cast<N>(n);
 	}
 
 	template <class N, class M> auto to_sign_of(M n)

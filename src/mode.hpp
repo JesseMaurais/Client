@@ -5,7 +5,7 @@
 #include "fmt.hpp"
 #include "tmp.hpp"
 
-namespace env
+namespace env::file
 {
 	// Access modes
 	enum mode : int

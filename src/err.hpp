@@ -2,6 +2,7 @@
 #define err_hpp "Error Format"
 
 #include "fmt.hpp"
+#include <sstream>
 
 // Pre condition
 

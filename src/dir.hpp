@@ -22,6 +22,8 @@ namespace fmt::dir
 
 namespace env::dir
 {
+	using namespace env::file;
+
 	using string = fmt::string;
 	using view   = string::view;
 	using vector = string::vector;
@@ -64,7 +66,7 @@ namespace env::dir
 
 		~tmp()
 		{
-			if (not empty(stem))
+			if (not stem.empty())
 			{
 				remove(stem);
 			}
