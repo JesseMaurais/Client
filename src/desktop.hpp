@@ -45,7 +45,7 @@ namespace env
 		line select(view start = "", mode = mode::none);
 		// User selects file(s) from the system
 
-	} &dialog;
+	} dialog;
 }
 
 #endif // file

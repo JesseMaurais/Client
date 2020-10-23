@@ -2,6 +2,7 @@
 #define win_thread_hpp "WIN32 Threads"
 
 #include "win.hpp"
+#include "ptr.hpp"
 #include "sys.hpp"
 
 namespace sys::win
@@ -137,7 +138,7 @@ namespace sys
 	{
 		auto lock()
 		{
-			class unlock : unique
+			class unlock : fwd::unique
 			{
 				sys::win::critical_section* that;
 
@@ -162,7 +163,7 @@ namespace sys
 	{
 		auto read()
 		{
-			class unlock : unique
+			class unlock : fwd::unique
 			{
 				sys::win::srwlock* that;
 
@@ -183,7 +184,7 @@ namespace sys
 
 		auto write()
 		{
-			class unlock : unique
+			class unlock : fwd::unique
 			{
 				sys::win::srwlock* that;
 

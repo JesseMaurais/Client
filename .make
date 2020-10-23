@@ -1,10 +1,7 @@
 # 1 ".make.cc"
-# 1 "<built-in>" 1
-# 1 "<built-in>" 3
-# 383 "<built-in>" 3
-# 1 "<command line>" 1
-# 1 "<built-in>" 2
-# 1 ".make.cc" 2
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 ".make.cc"
 # 59 ".make.cc"
 ifeq ($(OS),Windows_NT)
 OUTEXT=exe
@@ -52,7 +49,7 @@ ALLHDR=$(SRCDIR)*.$(HDREXT)
 # 120 ".make.cc"
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
-EXE=$(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))).$(OUTEXT)
+EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
 
 
 
@@ -75,8 +72,8 @@ CFLAGS+=-std=$(STD)
 endif
 
 
-CFLAGS+=-stdlib=libc++
-LDFLAGS+=-lc++ -lc++abi
+
+
 
 
 

@@ -255,7 +255,7 @@ namespace fmt::uni
 	// Device Modes
 	//
 
-	enum : int
+	enum mode : int
 	{
 		GATM =  1, // guarded area transfer mode
 		KAM  =  2, // keyboard action mode

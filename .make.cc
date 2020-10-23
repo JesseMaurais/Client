@@ -119,7 +119,7 @@ endif // COMSPEC
 #else // GNU
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
-EXE=$(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))).$(OUTEXT)
+EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
 #endif
 
 // Rules

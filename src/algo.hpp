@@ -110,21 +110,7 @@ namespace fwd
 
 	template
 	<
-		class Node
-		,
-		template <class> class Alloc = allocator
-		,
-		template <class, template <class> class> class Vector = vector
-		,
-		template <class> class Span = span
-	>
-	using edges = std::pair<const Node, Span<Node>>;
-
-	template
-	<
-		class Node
-		, 
-		template <class> class Alloc = allocator
+		class Node, template <class> class Alloc = allocator
 	>
 	using graph = std::vector<pair<Node>, Alloc<pair<Node>>>;
 
@@ -137,6 +123,18 @@ namespace fwd
 		template <class> class Alloc = allocator
 	>
 	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
+
+	template
+	<
+		class Node
+		,
+		template <class> class Alloc = allocator
+		,
+		template <class, template <class> class> class Vector = vector
+		,
+		template <class> class Span = span
+	>
+	using edges = std::pair<const Node, Span<Node>>;
 
 	//
 	// Algorithms

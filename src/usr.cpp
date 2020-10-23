@@ -32,7 +32,7 @@ namespace
 	{
 		auto const w = fmt::str::put(var);
 		auto u = env::opt::get(w);
-		if (empty(u))
+		if (u.empty())
 		{
 			constexpr auto base = "user-dirs.dirs";
 			auto const path = fmt::dir::join({env::usr::config_home(), base});
@@ -131,7 +131,7 @@ namespace env::usr
 		if (empty(u))
 		{
 			u = current_desktop();
-			if (not empty(u))
+			if (not u.empty())
 			{
 				static auto prefix = fmt::to_lower(u) + '-';
 				u = prefix;

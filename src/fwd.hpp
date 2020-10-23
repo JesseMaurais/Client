@@ -22,7 +22,7 @@ namespace fwd
 
 	template <class... Types> struct compose : virtual Types... { };
 
-	// Overloadable traits
+	// Overload traits
 
 	template <class Type> using allocator = std::allocator<Type>;
 	template <class Type> using iterator = std::iterator_traits<Type>;

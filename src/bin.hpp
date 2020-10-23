@@ -53,7 +53,7 @@ namespace fmt
 	template <class C> string::out operator<<(string::out out, write<C> data)
 	{
 		auto const tuple = serial<C>();
-		using type = decltype(tuple):
+		using type = decltype(tuple);
 		constexpr auto size = std::tuple_size<type>::value;
 		return data.print(out, tuple, std::make_index_sequence<size>());
 	}
