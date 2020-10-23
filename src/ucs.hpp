@@ -16,8 +16,6 @@ namespace fmt::uni
 
 	constexpr int endpoint = 0x110000;
 
-	static_assert(codespace::last < endpoint);
-
 	// special chars
 
 	constexpr wint_t BOM = 0x00FEFF; // byte order mark

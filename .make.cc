@@ -1,3 +1,40 @@
+/*
+	This C file is a Makefile template that will generate a valid Makefile
+	tailored for your compiler and operating system by running it through
+	the preprocessor of your compiler. By default the generated syntax
+	will be compatible with GNU Make. In order to make a Makefile that is
+	compatible with Microsoft NMake define the -D_NMAKE macro in CFLAGS
+	or CL or else write a Tools.ini file in the directory with
+
+		[NMAKE]
+		MAKECONFIG=-D_NMAKE
+
+	and a bootstrapping Makefile written in the portable Makefile syntax
+
+		MAKEFILE=.make
+		TEMPLATE=.make.cc
+		all: $(MAKEFILE)
+			$(MAKE) -f $(MAKEFILE)
+		clean: $(MAKEFILE)
+			$(MAKE) -f $(MAKEFILE) clean
+		$(MAKEFILE): $(TEMPLATE)
+			$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
+
+	where MAKEFILE can be named anything you want and here is a hidden file
+	and TEMPLATE is this file. In this case type `nmake` or `make` so that
+	your choice of make program generates its own Makefile. Both versions
+	of the make program have the same supported feature set in this file.
+		- pre compiled headers
+		- locating of source code
+		- source dependency generation
+		- detecting output program name
+		- uses CXX for the C++ compiler
+		- uses STD for language standard
+		- uses LIB for link libraries
+		- uses INCLUDE for headers
+		- uses WINVER for supported WIN32 target
+		- uses UNIVER for supported POSIX target
+*/
 
 // Macros
 #ifdef _NMAKE
@@ -50,7 +87,7 @@ STD=c++latest
 STD=c++20
 #endif
 endif
-MAKDIR=make$(DIR)
+MAKDIR=obj$(DIR)
 OBJDIR=obj$(DIR)
 SRCDIR=src$(DIR)
 HDRDIR=$(SRCDIR)
@@ -62,8 +99,6 @@ ALLSRC=$(SRCDIR)*.$(SRCEXT)
 ALLHDR=$(SRCDIR)*.$(HDREXT)
 
 .SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
-
-all: test.$(OUTEXT)
 
 // Source
 #ifdef _NMAKE
@@ -84,7 +119,11 @@ endif // COMSPEC
 #else // GNU
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
+EXE=$(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))).$(OUTEXT)
 #endif
+
+// Rules
+all: $(EXE)
 
 //
 // Compiler
@@ -224,9 +263,9 @@ OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 #endif
 
 // Rules
-all: $(EXE)
 clean: ; $(RM) $(EXE) $(OBJ) $(PCHOBJ) $(DEP) 
 $(EXE): $(LNKDEP); $(LNKCMD)
+$(OBJDIR): ; $(MKD) $(OBJDIR)
 
 // Depend
 #ifdef _NMAKE

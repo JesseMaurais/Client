@@ -50,7 +50,7 @@ namespace fwd
 			auto ptr = this->shared_from_this();
 			auto that = ptr.get();
 			ptr.reset();
-			return extern_ptr(that, free);
+			return make_ptr(that, free);
 		}
 	};
 }

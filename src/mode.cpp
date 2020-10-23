@@ -32,7 +32,7 @@ namespace
 	} width;
 }
 
-namespace env
+namespace env::file
 {
 	fwd::variable<size_t>& width = ::width;
 
@@ -161,7 +161,7 @@ namespace env
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return env::fail(s, am);
+			return fail(s, am);
 		}
 
 		return env::file::fail(sys::access(data(path), check(am)));
@@ -172,7 +172,7 @@ namespace env
 #include "arg.hpp"
 test(mode)
 {
-	assert(not env::fail(__FILE__) and "Source file exists");
-	assert(not env::fail(env::opt::arg(), env::ex) and "Program is executable");
+	assert(not env::file::fail(__FILE__) and "Source file exists");
+	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
 }
 #endif

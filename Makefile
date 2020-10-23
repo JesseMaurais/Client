@@ -2,19 +2,15 @@
 # operating system and version of $(MAKE) used. Forward standard targets
 # to it.
 
-MAKEFILE=make/Configure.mk
-TEMPLATE=make/Configure.cc
+MAKEFILE=.make
+TEMPLATE=.make.cc
 
 all: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE)
-
 clean: $(MAKEFILE)
 	$(MAKE) -f $(MAKEFILE) clean
-
-config:
+$(MAKEFILE): $(TEMPLATE)
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
-
-$(MAKEFILE): $(TEMPLATE) config
 
 analysis:
 	scan-build --use-c++=$(CXX) $(MAKE)

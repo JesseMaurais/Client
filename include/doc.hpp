@@ -1,6 +1,7 @@
 #ifndef doc_hpp
 #define doc_hpp
 
+#include <cmath>
 #include <cstdlib>
 #include "fwd.hpp"
 
@@ -36,7 +37,7 @@ namespace doc
 			id = begin(that);
 		}
 
-		object(object that)
+		object(object const& that)
 		{
 			id = assign(that.id);
 		}
@@ -47,7 +48,7 @@ namespace doc
 			that.id = assign(id);
 		}
 
-		auto const operator->() const
+		auto operator->() const
 		{
 			return &at(unsign(id));
 		}
@@ -69,9 +70,9 @@ namespace doc
 
 	private:
 
-		extern static Pointer begin(Record && that);
-		extern static Record & at(Pointer);
-		extern static void end(Pointer);
+		static Pointer begin(Record && that);
+		static Record & at(Pointer);
+		static void end(Pointer);
 	};
 
 	using path = object<long, fwd::span<fwd::pair<long>>>;

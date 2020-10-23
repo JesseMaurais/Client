@@ -4,9 +4,9 @@
 #include <cmath>
 #include <algorithm>
 
-namespace doc
+namespace 
 {
-	template <class Pointer, class Record> class
+	template <class Pointer, class Record> class impl
 	{
 		fwd::vector<Record> cache;
 		fwd::vector<Pointer> table;
@@ -73,6 +73,12 @@ namespace doc
 
 	public:
 
+		static auto & instance()
+		{
+			static impl self;
+			return self;
+		}
+
 		auto begin(Record && that)
 		{
 			auto it = insert(that);
@@ -91,15 +97,18 @@ namespace doc
 			reduce();
 		}
 	
-	} impl
+	};
+}
 
+namespace doc
+{
 	template
 	<
 		class Record, class Pointer
 	>
 	Pointer object::begin(Record && that)
 	{
-		impl<Pointer, Record>.begin(that);
+		impl<Pointer, Record>::instance().begin(that);
 	}
 
 	template
@@ -108,7 +117,7 @@ namespace doc
 	>
 	object<Record, Pointer>::reference object::at(Pointer id)
 	{
-		impl<Pointer, Record>.at(id);
+		impl<Pointer, Record>::instance().at(id);
 	}
 
 	template
@@ -117,8 +126,6 @@ namespace doc
 	>
 	void object::end(Pointer id)
 	{
-		impl<Pointer, Record>.end(id);
+		impl<Pointer, Record>::instance().end(id);
 	}
 }
-
-#endif
