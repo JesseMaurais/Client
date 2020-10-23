@@ -204,7 +204,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
 
 #endif // Compilers
 
-.SUFFIXES: .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
+.SUFFIXES: .$(OUTEXT) .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
 
 // Outputs
 #ifdef _NMAKE
@@ -224,10 +224,9 @@ OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 #endif
 
 // Rules
-test.$(OUTEXT): $(LNKDEP); $(LNKCMD)
-
-// Clean
-clean: ; $(RM) test.$(OUTEXT) $(OBJ) $(PCHOBJ) $(DEP) 
+all: $(EXE)
+clean: ; $(RM) $(EXE) $(OBJ) $(PCHOBJ) $(DEP) 
+$(EXE): $(LNKDEP); $(LNKCMD)
 
 // Depend
 #ifdef _NMAKE

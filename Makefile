@@ -22,7 +22,7 @@ analysis:
 check:
 	cppcheck src
 
-pvs:
+pvs-studio:
 	pvs-studio-analyzer trace -- $(MAKE)
 	pvs-studio-analyzer analyze -o make/PVS.log
 	plog-converter make/PVS.log -o make/PVS.html -t html -a 'GA:1,2;64:1;OP:1,2,3;CS:1;MISRA:1,2'
