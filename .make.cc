@@ -20,20 +20,22 @@
 		$(MAKEFILE): $(TEMPLATE)
 			$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
-	where MAKEFILE can be named anything you want and here is a hidden file
+	where MAKEFILE can be named anything you want but here is a hidden file
 	and TEMPLATE is this file. In this case type `nmake` or `make` so that
-	your choice of make program generates its own Makefile. Both versions
+	your choice of make program generates its own Makefile without any
+	additional arguments. It will then build your targets. Both versions
 	of the make program have the same supported feature set in this file.
 		- pre compiled headers
 		- locating of source code
 		- source dependency generation
-		- detecting output program name
+		- platform detection
+		- auto name target program
 		- uses CXX for the C++ compiler
 		- uses STD for language standard
 		- uses LIB for link libraries
-		- uses INCLUDE for headers
-		- uses WINVER for supported WIN32 target
-		- uses UNIVER for supported POSIX target
+		- uses INCLUDE for finding headers
+		- uses WINVER for supported WIN32 platform
+		- uses UNIVER for supported POSIX platform
 */
 
 // Macros
@@ -57,26 +59,26 @@
 
 // System
 ifeq($(OS),Windows_NT)
+add(CFLAGS, -D_WIN32)
+ifdef WINVER
+add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
+endif
 OUTEXT=exe
 RM=del /f
 MKD=md
 DIR=\ //
 ENT=;
-add(CFLAGS, -D_WIN32)
-ifdef WINVER
-add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
-endif
 else // POSIX
-OUTEXT=out
-RM=rm -f
-MKD=mkdir -p
-DIR=/
-ENT=:
 add(CFLAGS, -D_POSIX_SOURCE)
 ifdef UNIVER
 add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
 add(LDFLAGS, -lm -ldl -lrt -lpthread)
+OUTEXT=out
+RM=rm -f
+MKD=mkdir -p
+DIR=/
+ENT=:
 endif
 
 // Project
@@ -91,6 +93,7 @@ MAKDIR=obj$(DIR)
 OBJDIR=obj$(DIR)
 SRCDIR=src$(DIR)
 HDRDIR=$(SRCDIR)
+DEPDIR=$(OBJDIR)
 PCH=pre
 SRCEXT=cpp
 HDREXT=hpp
@@ -103,27 +106,28 @@ ALLHDR=$(SRCDIR)*.$(HDREXT)
 // Source
 #ifdef _NMAKE
 ifdef COMSPEC
-MAKHDR=$(MAKDIR)Header.$(MAKEXT)
+MAKHDR=$(MAKDIR)header.$(MAKEXT)
 !if ![(echo HDR=\>$(MAKHDR)) && for %i in ($(ALLHDR)) do @echo %i\>>$(MAKHDR)]
 !include $(MAKHDR)
 endif // HDR
-MAKSRC=$(MAKDIR)Source.$(MAKEXT)
+MAKSRC=$(MAKDIR)source.$(MAKEXT)
 !if ![(echo SRC=\>$(MAKSRC)) && for %i in ($(ALLSRC)) do @echo %i\>>$(MAKSRC)]
 !include $(MAKSRC)
 endif // SRC
-MAKEXE=$(MAKDIR)Target.$(MAKEXT)
+MAKEXE=$(MAKDIR)target.$(MAKEXT)
 !if ![(echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE)]
 !include $(MAKEXE)
 endif // EXE
+MAKINC=$(MAKDIR)include.$(MAKEXT)
+!if ![(echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo -I"%~i"\>>$(MAKINC)]
+!include $(MAKINC)
+endif // INC
 endif // COMSPEC
 #else // GNU
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
 EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
 #endif
-
-// Rules
-all: $(EXE)
 
 //
 // Compiler
@@ -178,7 +182,7 @@ LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 // Rules
 #ifdef _NMAKE
 ifdef COMSPEC
-{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(DEPEXT):
+{$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
 	@echo $< : \> $@
 	@set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
@@ -248,11 +252,11 @@ $(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
 // Outputs
 #ifdef _NMAKE
 ifdef COMSPEC
-MAKDEP=$(MAKDIR)Depend.$(MAKEXT)
+MAKDEP=$(MAKDIR)depend.$(MAKEXT)
 !if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
 !include $(MAKDEP)
 endif // DEP
-MAKOBJ=$(MAKDIR)Object.$(MAKEXT)
+MAKOBJ=$(MAKDIR)object.$(MAKEXT)
 !if ![(echo OBJ=\>$(MAKOBJ)) && for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ)]
 !include $(MAKOBJ)
 endif // OBJ
@@ -263,15 +267,16 @@ OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 #endif
 
 // Rules
-clean: ; $(RM) $(EXE) $(OBJ) $(PCHOBJ) $(DEP) 
+all: $(EXE)
 $(EXE): $(LNKDEP); $(LNKCMD)
 $(OBJDIR): ; $(MKD) $(OBJDIR)
+clean: ; $(RM) $(EXE) $(OBJ) $(PCHOBJ) $(DEP) 
 
 // Depend
 #ifdef _NMAKE
 ifdef COMSPEC
-MAKALLDEP=$(MAKDIR)All.$(MAKEXT)
-!if ![(for %i in ($(ALLDEP)) do @echo !include %i) > $(MAKALLDEP)]
+MAKALLDEP=$(MAKDIR)all.$(MAKEXT)
+!if ![(for %i in ($(DEPDIR)*.$(DEPEXT)) do @echo !include %i) > $(MAKALLDEP)]
 !include $(MAKALLDEP)
 endif
 endif
