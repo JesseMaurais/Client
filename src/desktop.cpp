@@ -12,8 +12,7 @@
 
 namespace env
 {
-	thread_local desktop local;
-	desktop & dialog = local;
+	desktop dialog;
 
 	bool desktop::current(fmt::string::view name)
 	{

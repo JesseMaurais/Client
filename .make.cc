@@ -119,22 +119,33 @@ MAKEXE=$(MAKDIR)target.$(MAKEXT)
 !include $(MAKEXE)
 endif // EXE
 MAKINC=$(MAKDIR)include.$(MAKEXT)
-!if ![(echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo -I"%~i"\>>$(MAKINC)]
+!if ![(echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo , -I"%~i"\>>$(MAKINC)]
 !include $(MAKINC)
+endif // INC
+#ifndef _MSC_VER
+MAKINC=$(MAKDIR)include.$(MAKEXT)
+!if ![(echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo , -I"%~i"\>>$(MAKINC)]
+!include $(MAKINC)
+endif // INC
+MAKLIB=$(MAKDIR)library.$(MAKEXT)
+!if ![(echo LIBRARY=\>$(MAKLIB)) && for %i in ("%LIB:$(ENT)=" "%") do @echo , -L"%~i"\>>$(MAKLIB)]
+!include $(MAKLIB)
+#endif
 endif // INC
 endif // COMSPEC
 #else // GNU
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
 EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
+#ifndef _MSC_VER
 INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
-#endif
+LIBRARY=$(addprefix -L, "$(LIB:$(ENT)=" ")")
+#endif // _MSC_VER
+#endif // _NMAKE
 
 //
 // Compiler
 //
-
-add(CFLAGS, $(INC))
 
 #ifdef _MSC_VER // Microsoft Visual C++
 
@@ -192,7 +203,7 @@ ifdef COMSPEC
 endif
 {$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
 #else // GNU
-$(OBJDIR)%.obj: $(SRCDIR)%.cpp; $(CXXCMD)
+$(OBJDIR)%.$(OBJEXT): $(SRCDIR)%.$(SRCEXT); $(CXXCMD)
 #endif
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
@@ -202,6 +213,13 @@ DEPEXT=d
 INLEXT=i
 LIBEXT=a
 PCHEXT=gch
+
+ifdef INC
+add(CFLAGS, $(INC))
+endif
+ifdef LIBRARY
+add(LDFLAGS, $(LIBRARY))
+endif
 
 // Flags
 add(CFLAGS, -MP -MMD)
