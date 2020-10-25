@@ -85,9 +85,9 @@ ENT=:
 
 !ifndef STD
 
+STD=c++latest
 
 
-STD=c++20
 #line 91 ".make.cc"
 !endif
 MAKDIR=obj$(DIR)
@@ -128,11 +128,14 @@ MAKINC=$(MAKDIR)include.$(MAKEXT)
 
 
 
-#line 131 ".make.cc"
+
+#line 132 ".make.cc"
 
 
 
 
+
+CFLAGS=$(CFLAGS) $(INC)
 
 
 
@@ -191,7 +194,7 @@ LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 {$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
 
 
-#line 194 ".make.cc"
+#line 197 ".make.cc"
 
 
 
@@ -246,7 +249,7 @@ LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 
 
 
-#line 249 ".make.cc"
+#line 252 ".make.cc"
 
 .SUFFIXES: .$(OUTEXT) .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
 
@@ -265,7 +268,7 @@ MAKOBJ=$(MAKDIR)object.$(MAKEXT)
 
 
 
-#line 268 ".make.cc"
+#line 271 ".make.cc"
 
 
 all: $(EXE)
@@ -283,5 +286,5 @@ MAKALLDEP=$(MAKDIR)all.$(MAKEXT)
 !endif
 
 
-#line 286 ".make.cc"
+#line 289 ".make.cc"
 

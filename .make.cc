@@ -83,7 +83,7 @@ endif
 
 // Project
 ifndef STD
-#ifdef _MSCVER
+#ifdef _MSC_VER
 STD=c++latest
 #else
 STD=c++20
@@ -127,11 +127,14 @@ endif // COMSPEC
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
 EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
+INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
 #endif
 
 //
 // Compiler
 //
+
+add(CFLAGS, $(INC))
 
 #ifdef _MSC_VER // Microsoft Visual C++
 
