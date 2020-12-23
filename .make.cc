@@ -2,7 +2,7 @@
 	This C file is a Makefile template that will generate a valid Makefile
 	tailored for your compiler and operating system by running it through
 	the preprocessor of your compiler. By default the generated syntax
-	will be compatible with GNU Make. In order to make a Makefile that is
+	will be compatible with GNU Make. In order to create a Makefile that is
 	compatible with Microsoft NMake define the -D_NMAKE macro in CFLAGS
 	or CL or else write a Tools.ini file in the directory with
 
@@ -118,28 +118,24 @@ MAKEXE=$(MAKDIR)target.$(MAKEXT)
 !if ![(echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE)]
 !include $(MAKEXE)
 endif // EXE
-MAKINC=$(MAKDIR)include.$(MAKEXT)
-!if ![(echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo , -I"%~i"\>>$(MAKINC)]
-!include $(MAKINC)
-endif // INC
 #ifndef _MSC_VER
+MAKLIB=$(MAKDIR)library.$(MAKEXT)
+!if ![(echo LIB=\>$(MAKLIB)) && for %i in ("%LIB:$(ENT)=" "%") do @echo , -L"%~i"\>>$(MAKLIB)]
+!include $(MAKLIB)
+endif // LIB
 MAKINC=$(MAKDIR)include.$(MAKEXT)
-!if ![(echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo , -I"%~i"\>>$(MAKINC)]
+!if ![(echo INCLUDE=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo , -I"%~i"\>>$(MAKINC)]
 !include $(MAKINC)
 endif // INC
-MAKLIB=$(MAKDIR)library.$(MAKEXT)
-!if ![(echo LIBRARY=\>$(MAKLIB)) && for %i in ("%LIB:$(ENT)=" "%") do @echo , -L"%~i"\>>$(MAKLIB)]
-!include $(MAKLIB)
-#endif
-endif // INC
+#endif // _MSC_VER
 endif // COMSPEC
 #else // GNU
 HDR=$(wildcard $(ALLHDR))
 SRC=$(wildcard $(ALLSRC))
 EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
 #ifndef _MSC_VER
-INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
-LIBRARY=$(addprefix -L, "$(LIB:$(ENT)=" ")")
+LIB=$(addprefix -L, "$(LIB:$(ENT)=" ")")
+INCLUDE=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
 #endif // _MSC_VER
 #endif // _NMAKE
 
@@ -198,8 +194,8 @@ LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 ifdef COMSPEC
 {$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
 	@echo $< : \> $@
-	@set CMD=$(CXX) $(CFLAGS) -showIncludes -Zs -c $<
-	@for /F "tokens=1,2,3,*" %%A in ('%CMD%') do @if not "%%D"=="" @echo "%%D" \>> $@
+	@set CMD=$(CXX) $(CFLAGS) -showIncludes -P -Fi"NUL" -c $<
+	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
 endif
 {$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
 #else // GNU
@@ -214,11 +210,11 @@ INLEXT=i
 LIBEXT=a
 PCHEXT=gch
 
-ifdef INC
-add(CFLAGS, $(INC))
+ifdef INCLUDE
+add(CFLAGS, $(INCLUDE))
 endif
-ifdef LIBRARY
-add(LDFLAGS, $(LIBRARY))
+ifdef LIB
+add(LDFLAGS, $(LIB))
 endif
 
 // Flags
@@ -259,15 +255,9 @@ CXXCMD=$(CXX) $(CXXFLAGS) -c $< -o $@
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
 LNKDEP=$(PCHOBJ) $(OBJ)
 
-// Rules
-#ifdef _NMAKE
-{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
-#else
-$(OBJDIR)%.o: $(SRCDIR)%.cpp; $(CXXCMD)
-#endif
-
 #endif // Compilers
 
+// Extensions on outputs
 .SUFFIXES: .$(OUTEXT) .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
 
 // Outputs
