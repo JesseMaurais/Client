@@ -92,9 +92,11 @@ namespace fmt
 	>
 	struct basic_string_view : Base
 	{
-		using Base::Base;
-
 		basic_string_view(fwd::basic_string<Char, Traits, Alloc> const& in)
+		: Base(data(in), size(in))
+		{ }
+
+		basic_string_view(fwd::basic_string_view<Char, Traits> in)
 		: Base(data(in), size(in))
 		{ }
 	};
@@ -113,10 +115,13 @@ namespace fmt
 	>
 	struct basic_string : Base
 	{
-		using Base::Base;
 		using view = basic_string_view<Char, Traits, Alloc, Vector>;
 
 		basic_string(fwd::basic_string_view<Char, Traits> in)
+		: Base(data(in), size(in))
+		{ }
+
+		basic_string(fwd::basic_string<Char, Traits, Alloc> const& in)
 		: Base(data(in), size(in))
 		{ }
 	};

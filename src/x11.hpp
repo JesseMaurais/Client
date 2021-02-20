@@ -1,12 +1,9 @@
 #ifndef x11_hpp
 #define x11_hpp "Window Protocol"
+#if __has_include(<X11/Xproto.h>)
 
 #include "fmt.hpp"
-#if __has_include(<X11/Xproto.h>)
 #include <X11/Xproto.h>
-#else
-#error Require protocol header
-#endif
 
 namespace x11
 {
@@ -67,4 +64,5 @@ namespace x11
 	using Reply = Request<ReqType, xReq, sz_xReq, Reply, ReplySize>;
 };
 
+#endif // Xproto
 #endif // file
