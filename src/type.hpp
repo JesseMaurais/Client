@@ -333,7 +333,7 @@ namespace fmt
 		static bool terminated(view u)
 		// Check whether string is null terminated
 		{
-			return not empty(u) and (u.back() == '\0' or u[u.size()] == '\0');
+			return not u.empty() and (u.back() == '\0' or u[u.size()] == '\0');
 		}
 
 		static auto count(view u)
@@ -390,7 +390,7 @@ namespace fmt
 			fwd::vector<Span> s;
 			auto p = t.data();
 			size_t i = 0, j = 0;
-			for (view v : t)
+			for (auto v : t)
 			{
 				if (u == v)
 				{
@@ -556,22 +556,22 @@ namespace fmt
 		return cstr.count(u, v);
 	}
 
-	inline auto join(string::view::span t, string::view u = "")
+	inline auto join(string::view::span t, string::view u = empty)
 	{
 		return cstr.join(t.begin(), t.end(), u);
 	}
 
-	inline auto join(string::span t, string::view u = "")
+	inline auto join(string::span t, string::view u = empty)
 	{
 		return cstr.join(t.begin(), t.end(), u);
 	}
 
-	inline auto join(string::view::init t, string::view u = "")
+	inline auto join(string::view::init t, string::view u = empty)
 	{
 		return cstr.join(t.begin(), t.end(), u);
 	}
 
-	inline auto join(string::init t, string::view u = "")
+	inline auto join(string::init t, string::view u = empty)
 	{
 		return cstr.join(t.begin(), t.end(), u);
 	}
@@ -606,12 +606,12 @@ namespace fmt
 		return cstr.embrace(u, v);
 	}
 
-	inline auto to_pair(string::view u, string::view v = "=")
+	inline auto to_pair(string::view u, string::view v = assign)
 	{
 		return cstr.to_pair(u, v);
 	}
 
-	inline auto to_pair(string::view::pair p, string::view u = "=")
+	inline auto to_pair(string::view::pair p, string::view u = assign)
 	{
 		string::view::vector x { p.first, p.second };
 		return fmt::join(x, u);

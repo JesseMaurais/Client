@@ -20,7 +20,7 @@ namespace fwd
 {
 	// Class union
 
-	template <class... Types> struct compose : virtual Types... { };
+	template <class... Types> struct compose : Types... { };
 
 	// Overload traits
 

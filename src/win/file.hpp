@@ -20,7 +20,7 @@ namespace sys::win
 		}
 	};
 
-	struct find_file : unique, WIN32_FIND_DATA
+	struct find_file : fwd::unique, WIN32_FIND_DATA
 	{
 		HANDLE h;
 

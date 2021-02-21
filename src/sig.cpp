@@ -79,8 +79,6 @@ test(sig)
 	{
 		assert(end != std::find(begin, end, signo));
 	}
-
-	std::raise(SIGKILL);
 }
 #endif
 

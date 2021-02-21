@@ -64,11 +64,6 @@ namespace sys
 		constexpr auto image = ".exe";
 	}
 
-	namespace win
-	{
-		char const* strerr(unsigned long dw, void* h = nullptr);
-	}
-
 	using size_t = unsigned int;
 	using ssize_t = signed int;
 	using off_t = long;
@@ -193,18 +188,27 @@ namespace sys
 // Common
 //
 
+using stat_t =
+#ifdef _WIN32
+	struct _stat;
+#else
+	struct stat;
+#endif
+
 namespace sys
 {
 	pid_t exec(int fd[3], size_t argc, char const **argv);
 	bool kill(pid_t);
 	int wait(pid_t);
 
-	class stat : public stat_t
+	constexpr int invalid = -1;
+	inline bool fail(int value)
 	{
-		int ok;
+		return invalid == value;
+	}
 
-	public:
-
+	struct stat : ::stat_t
+	{
 		stat(int fd)
 		{
 			ok = sys::fstat(fd, this);
@@ -219,14 +223,14 @@ namespace sys
 		{
 			return ok;
 		}
+
+	private:
+
+		int ok;
 	};
 
-	class mode
+	struct mode
 	{
-		mode_t um;
-
-	public:
-
 		operator mode_t() const
 		{
 			return um;
@@ -241,6 +245,10 @@ namespace sys
 		{
 			(void) sys::umask(um);
 		}
+
+	private:
+
+		mode_t um;
 	};
 }
 

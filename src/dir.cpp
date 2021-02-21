@@ -182,7 +182,7 @@ namespace env::dir
 		}
 
 		auto const c = path.data();
-		class sys::stat st(c);
+		struct sys::stat st(c);
 		if (file::fail(st))
 		{
 			return failure;
@@ -245,7 +245,7 @@ namespace env::dir
 			{
 				auto const path = fmt::dir::join({*it, u});
 				auto const c = path.data();
-				class sys::stat st(c);
+				struct sys::stat st(c);
 				if (file::fail(st))
 				{
 					sys::err(here, "stat", c);

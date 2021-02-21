@@ -3,6 +3,7 @@
 
 #include "fifo.hpp"
 #include "file.hpp"
+#include "mode.hpp"
 #include "sys.hpp"
 #include "arg.hpp"
 #include "fmt.hpp"
@@ -24,7 +25,7 @@ namespace env::file
 		{
 			path = fmt::join({ "\\\\.\\pipe\\", name });
 
-			auto const size = width();
+			size_t const size = width;
 			sys::win::handle h = CreateNamedPipe
 			(
 				path.c_str(),

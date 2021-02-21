@@ -18,9 +18,12 @@ namespace env
 		return type(jumper);
 	}
 
+	#pragma warning(push)
+	#pragma warning(disable: 4646)
 	int jmp::operator=(type value)
 	{
 		jumper = value;
 	}
+	#pragma warning(pop)
 }
 

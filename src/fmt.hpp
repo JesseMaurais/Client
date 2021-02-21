@@ -96,9 +96,7 @@ namespace fmt
 		: Base(data(in), size(in))
 		{ }
 
-		basic_string_view(fwd::basic_string_view<Char, Traits> in)
-		: Base(data(in), size(in))
-		{ }
+		using Base::Base;
 	};
 	
 	template
@@ -124,6 +122,8 @@ namespace fmt
 		basic_string(fwd::basic_string<Char, Traits, Alloc> const& in)
 		: Base(data(in), size(in))
 		{ }
+
+		using Base::Base;
 	};
 
 	using string =
@@ -141,6 +141,9 @@ namespace fmt
 	using bview = bstring::view;
 	using wview = wstring::view;
 	using uview = ustring::view;
+
+	inline view empty("");
+	inline view assign("=");
 
 	constexpr auto eol = '\n';
 	constexpr auto tab = '\t';

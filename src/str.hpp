@@ -28,7 +28,7 @@ namespace fmt::str
 	// put all words in list
 	{
 		vector words;
-		for (view item : list) words.emplace_back(put(item));
+		for (auto item : list) words.emplace_back(put(item));
 		return words;
 	}
 

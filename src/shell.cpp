@@ -76,7 +76,7 @@ namespace env
 	{
 		#ifdef _WIN32
 		{
-			return list(fmt::dir::join(directory, pattern));
+			return list(fmt::dir::join({directory, pattern}));
 		}
 		#else
 		{

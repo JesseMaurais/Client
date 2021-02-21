@@ -12,6 +12,7 @@
 #include "ptr.hpp"
 #include "err.hpp"
 #include "str.hpp"
+#include "sys.hpp"
 
 namespace sys::win
 {
@@ -19,7 +20,7 @@ namespace sys::win
 
 	template <typename... Args> int err(Args... args)
 	{
-		if (not quiet)
+		if (debug)
 		{
 			auto const no = GetLastError();
 			auto const s = strerr(no);
@@ -89,7 +90,7 @@ namespace sys::win
 		info() { GetSystemInfo(this); }
 	};
 
-	struct handle : unique
+	struct handle : fwd::unique
 	{
 		HANDLE h;
 

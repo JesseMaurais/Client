@@ -14,7 +14,7 @@ namespace sys::win
 			sys::win::err(here, "MapViewOfFileEx", dw, off, sz, ptr);
 		}
 
-		return make_ptr(ptr, [](auto ptr)
+		return fwd::make_ptr(ptr, [](auto ptr)
 		{
 			if (nullptr != ptr)
 			{
