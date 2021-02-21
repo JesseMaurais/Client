@@ -39,10 +39,10 @@ namespace fmt
 {
 	struct where { const char* file; int line; const char* func; };
 
-	template <typename... T> auto err(where const& w, T&&... t)
+	template <typename... T> auto err(where at, T&&... t)
 	{
 		string::stream ss;
-		ss << w.file << "(" << w.line << ")" << w.func << ":";
+		ss << at.file << "(" << at.line << ")" << at.func << ":";
 		if constexpr (0 < sizeof...(T))
 		{
 			((ss << ' ' << t), ...);
@@ -55,7 +55,7 @@ namespace fmt
 
 namespace sys
 {
-	extern fmt::string::out::ref out; // Output device
+	fmt::string::out::ref out(); // Output device
 
 	namespace impl
 	{
@@ -64,14 +64,14 @@ namespace sys
 
 	extern bool debug; // Whether to write out
 
-	template <typename... T> int warn(T... t)
+	template <typename... T> int warn(fmt::where at, T... t)
 	{
-		return debug ? impl::bug(fmt::err(t...), false) : -1;
+		return debug ? impl::bug(fmt::err(at, t...), false) : -1;
 	}
 
-	template <typename... T> int err(T... t)
+	template <typename... T> int err(fmt::where at, T... t)
 	{
-		return debug ? impl::bug(fmt::err(t...), true) : -1;
+		return debug ? impl::bug(fmt::err(at, t...), true) : -1;
 	}
 }
 

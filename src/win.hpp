@@ -18,13 +18,13 @@ namespace sys::win
 {
 	const char* strerr(DWORD dw, void* h = nullptr);
 
-	template <typename... Args> int err(Args... args)
+	template <typename... Args> int err(fmt::where at, Args... args)
 	{
 		if (debug)
 		{
 			auto const no = GetLastError();
 			auto const s = strerr(no);
-			return warn(args..., s);
+			return warn(at, args..., s);
 		}
 		return -1;
 	}

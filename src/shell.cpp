@@ -10,7 +10,11 @@
 
 namespace env
 {
-	struct shell & command = dialog;
+	struct shell& command()
+	{
+		thread_local struct shell sh;
+		return sh;
+	}
 
 	shell::line shell::get(in put, char end, int count)
 	{

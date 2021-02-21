@@ -17,8 +17,12 @@ namespace sys
 		true;
 	#endif
 
-	thread_local fmt::string::stream local;
-	fmt::string::out::ref out = local;
+	thread_local fmt::string::stream buf;
+
+	fmt::string::out::ref out()
+	{
+		return buf;
+	}
 
 	fmt::string::out::ref flush(fmt::string::out::ref put) 
 	{
@@ -26,7 +30,7 @@ namespace sys
 		auto const unlock = key.lock();
 
 		fmt::string line;
-		while (std::getline(local, line))
+		while (std::getline(buf, line))
 		{
 			put << line << std::endl;
 		}
@@ -49,19 +53,19 @@ namespace sys
 			// format
 			{
 				// message
-				out << local.last;
+				buf << local.last;
 				// number
 				if (no)
 				{
-					out << ':' << ' ' << std::strerror(errno);
+					buf << ':' << ' ' << std::strerror(errno);
 				}
 				// thread
 				if (not empty(thread_id))
 				{
-					out << ' ' << '[' << thread_id << ']';
+					buf << ' ' << '[' << thread_id << ']';
 				}
 			}
-			out << fmt::eol;
+			buf << fmt::eol;
 		}
 		else ++local.counter;
 		return local.counter;

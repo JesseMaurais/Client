@@ -28,7 +28,7 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 			}
 			
-			thread_local auto tls = null_ptr<HLOCAL>(LocalFree);
+			thread_local auto tls = fwd::null_ptr<HLOCAL>(LocalFree);
 
 			LPSTR str = nullptr;
 			auto addr = (LPSTR) &str;

@@ -5,7 +5,7 @@
 
 namespace env
 {
-	extern struct shell
+	struct shell
 	{
 		using string = fmt::string;
 		using view   = string::view;
@@ -45,7 +45,9 @@ namespace env
 		line open(view path);
 		// Preferred application for file type at path
 
-	} &command;
+	};
+
+	struct shell& command();
 }
 
 #endif // file

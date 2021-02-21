@@ -12,7 +12,11 @@
 
 namespace env
 {
-	desktop dialog;
+	desktop& dialog()
+	{
+		thread_local struct desktop dlg;
+		return dlg;
+	}
 
 	bool desktop::current(fmt::string::view name)
 	{

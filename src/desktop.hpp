@@ -6,7 +6,7 @@
 
 namespace env
 {
-	extern struct desktop : shell
+	struct desktop : shell
 	{
 		static bool current(view name);
 		// Whether name matches current session
@@ -45,7 +45,9 @@ namespace env
 		line select(view start = "", mode = mode::none);
 		// User selects file(s) from the system
 
-	} dialog;
+	};
+
+	desktop& dialog();
 }
 
 #endif // file

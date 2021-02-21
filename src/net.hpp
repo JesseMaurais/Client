@@ -7,6 +7,7 @@
 #ifdef _WIN32
 
 #include <winsock2.h>
+#include "win.hpp"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -44,22 +45,22 @@ namespace sys::net
 		}
 	}
 
-	constexpr auto close = ::closesocket;
-	constexpr auto accept = ::accept;
-	constexpr auto bind = ::bind;
-	constexpr auto connect = ::connect;
-	constexpr auto getsockname = ::getsockname;
-	constexpr auto getsockopt = ::getsockopt;
-	constexpr auto listen = ::listen;
-	constexpr auto poll = ::WSAPoll;
-	constexpr auto select = ::select;
-	constexpr auto setsockopt = ::setsockopt;
-	constexpr auto shutdown = ::shutdown;
-	constexpr auto socket = ::socket;
-	constexpr auto send = ::send;
-	constexpr auto sendto = ::sendto;
-	constexpr auto recv = ::recv;
-	constexpr auto recvfrom = ::recvfrom;
+	inline auto close = ::closesocket;
+	inline auto accept = ::accept;
+	inline auto bind = ::bind;
+	inline auto connect = ::connect;
+	inline auto getsockname = ::getsockname;
+	inline auto getsockopt = ::getsockopt;
+	inline auto listen = ::listen;
+	inline auto poll = ::WSAPoll;
+	inline auto select = ::select;
+	inline auto setsockopt = ::setsockopt;
+	inline auto shutdown = ::shutdown;
+	inline auto socket = ::socket;
+	inline auto send = ::send;
+	inline auto sendto = ::sendto;
+	inline auto recv = ::recv;
+	inline auto recvfrom = ::recvfrom;
 
 	namespace win
 	{
@@ -132,22 +133,22 @@ namespace sys::net
 		sys::err(args...);
 	}
 
-	constexpr auto close = ::sys::close;
-	constexpr auto accept = ::accept;
-	constexpr auto bind = ::bind;
-	constexpr auto connect = ::connect;
-	constexpr auto getsockname = ::getsockname;
-	constexpr auto getsockopt = ::getsockopt;
-	constexpr auto listen = ::listen;
-	constexpr auto poll = ::poll;
-	constexpr auto select = ::select;
-	constexpr auto setsockopt = ::setsockopt;
-	constexpr auto shutdown = ::shutdown;
-	constexpr auto socket = ::socket;
-	constexpr auto send = ::send;
-	constexpr auto sendto = ::sendto;
-	constexpr auto recv = ::recv;
-	constexpr auto recvfrom = ::recvfrom;
+	inline auto close = ::sys::close;
+	inline auto accept = ::accept;
+	inline auto bind = ::bind;
+	inline auto connect = ::connect;
+	inline auto getsockname = ::getsockname;
+	inline auto getsockopt = ::getsockopt;
+	inline auto listen = ::listen;
+	inline auto poll = ::poll;
+	inline auto select = ::select;
+	inline auto setsockopt = ::setsockopt;
+	inline auto shutdown = ::shutdown;
+	inline auto socket = ::socket;
+	inline auto send = ::send;
+	inline auto sendto = ::sendto;
+	inline auto recv = ::recv;
+	inline auto recvfrom = ::recvfrom;
 
 } // sys::net
 

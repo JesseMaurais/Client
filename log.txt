@@ -1,80 +1,22 @@
 	"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\bin\HostX86\x86\nmake.exe" -f .make all
-	cl  -D_WIN32 -nologo -DNOMINMAX -EHsc -permissive- -std:c++latest -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS -Isrc\ -FIpre.hpp -Fpsrc\pre.pch -Ycpre.hpp -c src\pre.cpp -Foobj\pre.obj
-pre.cpp
-	cl   -D_WIN32 -nologo -DNOMINMAX -EHsc -permissive- -std:c++latest -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS -Isrc\ -FIpre.hpp -Fpsrc\pre.pch -Yupre.hpp -c src\arg.cpp src\desktop.cpp src\dev.cpp src\dig.cpp src\dir.cpp src\env.cpp src\err.cpp src\fifo.cpp src\ini.cpp src\jmp.cpp src\mode.cpp src\opt.cpp src\pipe.cpp src\process.cpp src\shell.cpp src\shm.cpp src\sig.cpp src\socket.cpp src\str.cpp src\sym.cpp src\sys.cpp src\test.cpp src\type.cpp src\usr.cpp src\x11.cpp  -Foobj\
+	cl   -D_WIN32 -nologo -DNOMINMAX -EHsc -permissive- -std:c++latest -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS -Isrc\ -FIpre.hpp -Fpsrc\pre.pch -Yupre.hpp -c src\arg.cpp src\dir.cpp src\env.cpp src\err.cpp src\fifo.cpp src\jmp.cpp src\mode.cpp src\shm.cpp src\sig.cpp src\socket.cpp src\str.cpp src\sym.cpp src\sys.cpp src\test.cpp src\usr.cpp  -Foobj\
 arg.cpp
-desktop.cpp
-src\desktop.cpp(24): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(70): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(110): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(122): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(138): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(167): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(190): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(206): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-src\desktop.cpp(234): warning C4459: declaration of 'command' hides global declaration
-C:\Users\Jesse Maurais\Development\Oasys\src\shell.hpp(48): note: see declaration of 'env::command'
-dev.cpp
-dig.cpp
 dir.cpp
 env.cpp
 err.cpp
-src\err.cpp(42): warning C4459: declaration of 'local' hides global declaration
-src\err.cpp(20): note: see declaration of 'sys::local'
 fifo.cpp
-ini.cpp
-src\ini.cpp(120): warning C4244: 'argument': conversion from '__int64' to 'const unsigned int', possible loss of data
-src\ini.cpp(134): warning C4244: 'argument': conversion from 'const _Ty2' to 'const unsigned int', possible loss of data
-        with
-        [
-            _Ty2=env::opt::word
-        ]
-src\ini.cpp(156): warning C4244: 'argument': conversion from '_Ty2' to 'const unsigned int', possible loss of data
-        with
-        [
-            _Ty2=env::opt::word
-        ]
 jmp.cpp
 mode.cpp
-opt.cpp
-pipe.cpp
-src\pipe.cpp(40): warning C4458: declaration of 'fd' hides class member
-C:\Users\Jesse Maurais\Development\Oasys\src\pipe.hpp(50): note: see declaration of 'env::file::descriptor::fd'
-process.cpp
-shell.cpp
 shm.cpp
 sig.cpp
 socket.cpp
-C:\Users\Jesse Maurais\Development\Oasys\src\net.hpp(42): error C2039: 'win': is not a member of 'sys'
-C:\Users\Jesse Maurais\Development\Oasys\src\net.hpp(13): note: see declaration of 'sys'
-src\socket.cpp(23): error C2665: 'env::opt::get': none of the 6 overloads could convert all the argument types
-C:\Users\Jesse Maurais\Development\Oasys\src\opt.hpp(28): note: could be 'env::opt::quad env::opt::get(env::opt::pair,env::opt::quad)'
-C:\Users\Jesse Maurais\Development\Oasys\src\opt.hpp(26): note: or       'env::opt::quad env::opt::get(env::opt::word,env::opt::quad)'
-C:\Users\Jesse Maurais\Development\Oasys\src\opt.hpp(22): note: or       'env::opt::word env::opt::get(env::opt::pair,env::opt::word,int)'
-C:\Users\Jesse Maurais\Development\Oasys\src\opt.hpp(20): note: or       'env::opt::word env::opt::get(env::opt::word,env::opt::word,int)'
-C:\Users\Jesse Maurais\Development\Oasys\src\opt.hpp(16): note: or       'bool env::opt::get(env::opt::pair,bool)'
-C:\Users\Jesse Maurais\Development\Oasys\src\opt.hpp(14): note: or       'bool env::opt::get(env::opt::word,bool)'
-src\socket.cpp(23): note: while trying to match the argument list '(const char [4], WORD)'
-src\socket.cpp(23): error C2789: 'ver': an object of const-qualified type must be initialized
-src\socket.cpp(23): note: see declaration of 'ver'
-src\socket.cpp(24): error C3536: 'ver': cannot be used before it is initialized
-src\socket.cpp(24): warning C4244: 'argument': conversion from 'int' to 'WORD', possible loss of data
 str.cpp
 src\str.cpp(39): warning C4244: 'argument': conversion from 'const env::opt::word' to 'const unsigned int', possible loss of data
 sym.cpp
-Generating Code...
-C:\Users\Jesse Maurais\Development\Oasys\src\jmp.cpp(26) : error C4716: 'env::jmp::operator=': must return a value
-Compiling...
 sys.cpp
-src\sys.cpp(31): error C3861: 'null_ptr': identifier not found
+src\sys.cpp(87): error C2672: 'sys::win::err': no matching overloaded function found
+src\sys.cpp(87): error C2440: 'initializing': cannot convert from 'const char [21]' to 'fmt::where'
+src\sys.cpp(87): note: No constructor could take the source type, or constructor overload resolution was ambiguous
 test.cpp
 src\test.cpp(25): warning C4127: conditional expression is constant
 src\test.cpp(25): note: consider using 'if constexpr' statement instead
@@ -82,10 +24,71 @@ src\test.cpp(26): warning C4127: conditional expression is constant
 src\test.cpp(26): note: consider using 'if constexpr' statement instead
 src\test.cpp(27): warning C4127: conditional expression is constant
 src\test.cpp(27): note: consider using 'if constexpr' statement instead
-type.cpp
+src\test.cpp(36): error C2228: left of '.rdbuf' must have class/struct/union
+src\test.cpp(45): error C2678: binary '<<': no operator found which takes a left-hand operand of type 'overloaded-function' (or there is no acceptable conversion)
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\xstring(1797): note: could be 'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const std::basic_string_view<char,std::char_traits<char>>)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(653): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(697): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(733): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(778): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(895): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const signed char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(901): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,signed char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(906): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const unsigned char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(912): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,unsigned char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(920): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char8_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(926): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char8_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(934): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,wchar_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(937): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const wchar_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(941): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char16_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(943): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char32_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(951): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char16_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(953): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char32_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(998): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const std::error_code &)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\thread(229): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,std::thread::id)'
+src\test.cpp(45): note: while trying to match the argument list '(overloaded-function, fmt::basic_string_view<Char,Traits,Alloc,Vector,fmt::string_brief<std::basic_string_view<char,std::char_traits<char>>,Char,Traits,Alloc,Vector,fwd::compose<fmt::struct_brief<String,Alloc,Vector,fwd::span,fwd::order>,fmt::stream_brief<Char,Traits>>>>)'
+        with
+        [
+            Char=char,
+            Traits=fwd::character,
+            Alloc=fwd::allocator,
+            Vector=fwd::vector,
+            String=std::basic_string_view<char,std::char_traits<char>>
+        ]
+src\test.cpp(59): error C2678: binary '<<': no operator found which takes a left-hand operand of type 'overloaded-function' (or there is no acceptable conversion)
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\xstring(4724): note: could be 'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>,std::allocator<char>>(std::basic_ostream<char,std::char_traits<char>> &,const std::basic_string<char,std::char_traits<char>,std::allocator<char>> &)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(653): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(697): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(733): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(778): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(895): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const signed char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(901): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,signed char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(906): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const unsigned char *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(912): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,unsigned char)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(920): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char8_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(926): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char8_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(934): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,wchar_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(937): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const wchar_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(941): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char16_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(943): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,char32_t)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(951): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char16_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(953): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char32_t *)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(998): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const std::error_code &)'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\thread(229): note: or       'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<char,std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,std::thread::id)'
+src\test.cpp(59): note: while trying to match the argument list '(overloaded-function, _Ty)'
+        with
+        [
+            _Ty=std::basic_string<char,std::char_traits<char>,std::allocator<char>>
+        ]
+src\test.cpp(65): error C2296: '<<': illegal, left operand has type 'std::basic_ostream<char,std::char_traits<char>> &(__cdecl *)(void)'
+src\test.cpp(65): error C2297: '<<': illegal, right operand has type 'const char [9]'
+src\test.cpp(70): error C2296: '<<': illegal, left operand has type 'std::basic_ostream<char,std::char_traits<char>> &(__cdecl *)(void)'
+src\test.cpp(70): error C2297: '<<': illegal, right operand has type 'const char [9]'
+src\test.cpp(76): error C2296: '<<': illegal, left operand has type 'std::basic_ostream<char,std::char_traits<char>> &(__cdecl *)(void)'
+src\test.cpp(76): error C2297: '<<': illegal, right operand has type 'const char *'
+src\test.cpp(80): error C2296: '<<': illegal, left operand has type 'std::basic_ostream<char,std::char_traits<char>> &(__cdecl *)(void)'
+src\test.cpp(80): error C2297: '<<': illegal, right operand has type 'const char [8]'
+src\test.cpp(82): error C3536: 'back': cannot be used before it is initialized
 usr.cpp
 src\usr.cpp(256): error C2661: 'fmt::path::join': no overloaded function takes 2 arguments
-x11.cpp
 Generating Code...
-C:\Users\Jesse Maurais\Development\Oasys\src\esc.hpp(30) : warning C4702: unreachable code
-C:\Users\Jesse Maurais\Development\Oasys\src\test.cpp(28) : warning C4702: unreachable code
+C:\Users\Jesse Maurais\Development\Oasys\src\jmp.cpp(26) : error C4716: 'env::jmp::operator=': must return a value

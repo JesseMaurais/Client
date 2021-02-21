@@ -20,8 +20,10 @@ namespace env::file
 	{
 		#ifdef _WIN32
 		{
-			static auto const ver = opt::get("WSA", MAKEWORD(2, 2));
-			static sys::net::win::data ws(ver);
+			static auto const param = fmt::str::put("WSA");
+			static fmt::str::word const value = MAKEWORD(2, 2);
+			static auto const ver = opt::get(param, value);
+			static sys::net::win::data ws(fmt::to<WORD>(ver));
 		}
 		#endif
 
