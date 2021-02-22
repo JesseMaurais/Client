@@ -12,7 +12,7 @@ namespace
 {
 	bool header(fmt::string::view u)
 	{
-		return not empty(u) and u.front() == '[' and u.back() == ']';
+		return not u.empty() and u.front() == '[' and u.back() == ']';
 	}
 
 	constexpr auto separator = ";";
@@ -117,7 +117,7 @@ namespace doc
 			}
 			
 			auto const key = fmt::str::get(k.second);
-			ini::view const value = input.values.at(v);
+			auto const value = input.values.at(v);
 			output << key << "=" << value << fmt::eol;
 		}
 		return output;

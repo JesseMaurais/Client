@@ -15,7 +15,11 @@
 
 #ifdef _WIN32
 #include <shlobj.h>
-#endif
+#ifdef _MSC_VER
+#pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "ole32.lib")
+#endif // _MSC_VER
+#endif // _WIN32
 
 namespace
 {
@@ -253,7 +257,7 @@ namespace env::usr
 				{
 					auto const appdata = fmt::to_string(env::var::get("APPDATA"));
 					auto const local = fmt::to_string(env::var::get("LOCALAPPDATA"));
-					s = fmt::path::join(appdata, local);
+					s = fmt::path::join({appdata, local});
 				}
 				u = s;
 			}

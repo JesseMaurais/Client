@@ -23,6 +23,7 @@ namespace env
 	int jmp::operator=(type value)
 	{
 		jumper = value;
+		return -1;
 	}
 	#pragma warning(pop)
 }

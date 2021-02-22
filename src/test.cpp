@@ -22,10 +22,13 @@
 #ifdef test
 test(err)
 {
+	#pragma warning(push)
+	#pragma warning(disable : 4127)
 	assert(true == true);
 	assert(true != false);
 	assert(true and not false);
 	except(throw "Holy Cow!");
+	#pragma warning(pop)
 }
 #endif
 
@@ -33,16 +36,16 @@ namespace
 {
 	void runner(fmt::string::view name, fmt::string::buf::ptr buf, bool host)
 	{
-		auto back = sys::out.rdbuf();
+		auto back = sys::out().rdbuf();
 		try
 		{
-			sys::out.rdbuf(buf);
+			sys::out().rdbuf(buf);
 			if (host)
 			{
 				auto call = sys::sym<void()>(name);
 				if (nullptr == call)
 				{
-					sys::out << name << " is missing";
+					sys::out() << name << " is missing";
 				}
 				else
 				{
@@ -56,30 +59,30 @@ namespace
 				fmt::string::view::vector args { image, "-o", "-q", name };
 				for (auto line : sh.run(args))
 				{
-					sys::out << line << fmt::eol;
+					sys::out() << line << fmt::eol;
 				}
 
 				if (0 < sh.status)
 				{
 					auto const text = sys::sig::to_string(sh.status);
-					sys::out << "Signal: " << text << fmt::eol;
+					sys::out() << "Signal: " << text << fmt::eol;
 				}
 				else
 				if (sh.status < 0)
 				{
-					sys::out << "Failed: " << sh.status << fmt::eol;
+					sys::out() << "Failed: " << sh.status << fmt::eol;
 				}
 			}
 		}
 		catch (std::exception const& error)
 		{
-			sys::out << error.what() << fmt::eol;
+			sys::out() << error.what() << fmt::eol;
 		}
 		catch (...)
 		{
-			sys::out << "Unknown" << fmt::eol;
+			sys::out() << "Unknown" << fmt::eol;
 		}
-		sys::out.rdbuf(back);
+		sys::out().rdbuf(back);
 	}
 }
 

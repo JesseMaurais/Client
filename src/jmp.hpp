@@ -37,7 +37,6 @@ namespace env
 		operator type() const final;
 		#pragma warning(push)
 		#pragma warning(disable: 4646)
-		[[noreturn]]
 		type operator=(type) final;
 		#pragma warning(pop)
 	};
