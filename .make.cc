@@ -264,7 +264,7 @@ LNKDEP=$(PCHOBJ) $(OBJ)
 #ifdef _NMAKE
 ifdef COMSPEC
 MAKDEP=$(MAKDIR)depend.$(MAKEXT)
-!if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(ALLSRC)) do @echo $(DEBDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
+!if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(ALLSRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
 !include $(MAKDEP)
 endif // DEP
 MAKOBJ=$(MAKDIR)object.$(MAKEXT)

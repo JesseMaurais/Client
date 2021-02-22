@@ -1,5 +1,0 @@
-	"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\bin\HostX86\x86\nmake.exe" -f .make all
-	cl   -D_WIN32 -nologo -DNOMINMAX -EHsc -permissive- -std:c++latest -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS -Isrc\ -FIpre.hpp -Fpsrc\pre.pch -Yupre.hpp -c src\usr.cpp  -Foobj\
-usr.cpp
-	cl  -nologo -Z7 -Yupre.hpp  obj\arg.obj obj\desktop.obj obj\dev.obj obj\dig.obj obj\dir.obj obj\env.obj obj\err.obj obj\fifo.obj obj\ini.obj obj\jmp.obj obj\mode.obj obj\opt.obj obj\pipe.obj obj\pre.obj obj\process.obj obj\shell.obj obj\shm.obj obj\sig.obj obj\socket.obj obj\str.obj obj\sym.obj obj\sys.obj obj\test.obj obj\type.obj obj\usr.obj obj\x11.obj -Fetest.exe
-   Creating library test.lib and object test.exp

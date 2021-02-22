@@ -47,6 +47,14 @@ namespace sys
 			{
 				tls.reset((HLOCAL) str);
 			}
+
+			if (nullptr == str)
+			{
+				thread_local char buf[128] = { '\0' };
+				std::sprintf(buf, "Unknown error %lu", id);
+				str = buf;
+			}
+
 			return str;
 		}
 	}
