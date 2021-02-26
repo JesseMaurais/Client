@@ -55,96 +55,81 @@ namespace fmt::path
 
 namespace env::dir
 {
-	fmt::string::view::edges paths()
+	edges paths()
 	{
 		return { env::pwd(), env::paths() };
 	}
 
-	fmt::string::view::edges config()
+	edges config()
 	{
 		return { env::usr::config_home(), env::usr::config_dirs() };
 	}
 
-	fmt::string::view::edges data()
+	edges data()
 	{
 		return { env::usr::data_home(), env::usr::data_dirs() };
 	}
 
-	bool find(fmt::string::view path, entry look)
+	bool find(view path, entry check)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			return env::dir::find(s, look);
+			return env::dir::find(s, check);
 		}
-
 		auto const c = path.data();
-		for (auto const name : sys::files(c))
-		{
-			if (look(name))
-			{
-				return success;
-			}
-		}
-		return failure;
+
+		return fwd::any_of(sys::files(c), check);
 	}
 
-	bool find(fmt::string::view::span paths, entry look)
+	bool find(span paths, entry check)
 	{
-		for (view const path : paths)
+		return fwd::any_of(paths, [check](auto path)
 		{
-			if (find(path, look))
-			{
-				return true;
-			}
-		}
-		return false;
+			return find(path, check);
+		});
 	}
 
-	bool find(fmt::string::view::edges paths, entry look)
+	bool find(edges paths, entry look)
 	{
 		return find(paths.first, look) or find(paths.second, look);
-	}
-
-	entry all(fmt::string::view u, mode m, entry e)
-	{
-		return mask(m) || regx(u) || e;
-	}
-
-	entry any(string::view u, mode m, entry e)
-	{
-		return all(u, m, e);
 	}
 
 	entry mask(mode am)
 	{
 		auto const flags = convert(am);
-		return [=](fmt::string::view u)
+		entry m = [=, &m](view u)->bool
 		{
+			if (not fmt::terminated(u))
+			{
+				return m(fmt::to_string(u));
+			}
 			auto const c = u.data();
-			if (file::fail(sys::access(c, flags)))
+
+			if (sys::fail(sys::access(c, flags)))
 			{
 				return failure;
 			}
+
 			#ifdef _WIN32
+			if (am & file::ex)
 			{
-				if (am & file::ex)
-				{
-					DWORD dw;
-					return GetBinaryType(c, &dw)
-						? success : failure;
-				}
+				DWORD dw;
+				return GetBinaryType(c, &dw)
+					? success : failure;
 			}
 			#endif
+
 			return success;
 		};
+		return m;
 	}
 
-	entry regx(fmt::string::view u)
+	entry regx(view u)
 	{
 		auto const s = fmt::to_string(u);
 		auto const x = std::regex(s);
-		return [x](fmt::string::view u)
+		return [x](view u)
 		{
 			std::cmatch cm;
 			auto const s = fmt::to_string(u);
@@ -152,9 +137,9 @@ namespace env::dir
 		};
 	}
 
-	entry to(fmt::string::vector & t)
+	entry to(vector& t)
 	{
-		return [&](fmt::string::view u)
+		return [&](view u)
 		{
 			auto s = fmt::to_string(u);
 			t.emplace_back(move(s));
@@ -162,26 +147,34 @@ namespace env::dir
 		};
 	}
 
-	entry to(fmt::string & s)
+	entry to(string& s)
 	{
-		return [&](fmt::string::view u)
+		return [&](view u)
 		{
 			s = fmt::to_string(u);
 			return success;
 		};
 	}
 
-	bool fail(fmt::string::view path, mode am)
+	entry all(view u, mode m, entry e)
+	{
+		return mask(m) || regx(u) || e;
+	}
+
+	entry any(view u, mode m, entry e)
+	{
+		return all(u, m, e);
+	}
+
+	bool fail(view path, mode am)
 	{
 		if (not fmt::terminated(path))
 		{
 			auto const s = fmt::to_string(path);
-			path = fmt::string::view(s.c_str(), path.size());
-			assert(fmt::terminated(path));
-			return env::dir::fail(path, am);
+			return env::dir::fail(s, am);
 		}
-
 		auto const c = path.data();
+		
 		struct sys::stat st(c);
 		if (file::fail(st))
 		{
@@ -197,10 +190,10 @@ namespace env::dir
 		return st.st_mode & mask;
 	}
 
-	fmt::string::view make(fmt::string::view path)
+	view make(view path)
 	{
-		std::stack<fmt::string::view> stack;
-		fmt::string buf;
+		std::stack<view> stack;
+		string buf;
 
 		auto folders = fmt::dir::split(path);
 		auto stem = path;
@@ -234,14 +227,14 @@ namespace env::dir
 		return stem;
 	}
 
-	bool remove(fmt::string::view dir)
+	bool remove(view dir)
 	{
-		std::deque<fmt::string> deque;
+		std::deque<string> deque;
 		deque.emplace_back(dir);
 
 		for (auto it = deque.begin(); it != deque.end(); ++it)
 		{
-			(void) find(*it, [&](fmt::string::view u)
+			(void) find(*it, [&](view u)
 			{
 				auto const path = fmt::dir::join({*it, u});
 				auto const c = path.data();

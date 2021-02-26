@@ -31,12 +31,12 @@ namespace env::dir
 	using span   = view::span;
 	using entry  = fwd::predicate<view>;
 
-	fmt::string::view::edges paths(); // pwd, paths
-	fmt::string::view::edges config(); // config_home, config_dirs
-	fmt::string::view::edges data(); // data_home, data_dirs
-
 	constexpr auto stop = fwd::always<view>;
 	constexpr auto next = fwd::never<view>;
+
+	edges paths(); // pwd, paths
+	edges config(); // config_home, config_dirs
+	edges data(); // data_home, data_dirs
 
 	entry mask(mode);
 	entry regx(view);

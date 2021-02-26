@@ -20,16 +20,16 @@
 #endif
 
 #ifdef test
+#pragma warning(push)
+#pragma warning(disable : 4127 4702)
 test(err)
 {
-	#pragma warning(push)
-	#pragma warning(disable : 4127)
 	assert(true == true);
 	assert(true != false);
 	assert(true and not false);
 	except(throw "Holy Cow!");
-	#pragma warning(pop)
 }
+#pragma warning(pop)
 #endif
 
 namespace

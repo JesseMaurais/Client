@@ -117,7 +117,8 @@ namespace doc
 			}
 			
 			auto const key = fmt::str::get(k.second);
-			auto const value = input.values.at(v);
+			auto const index = fmt::to_size(v);
+			auto const value = input.values.at(index);
 			output << key << "=" << value << fmt::eol;
 		}
 		return output;
@@ -131,7 +132,8 @@ namespace doc
 	ini::view ini::get(env::opt::pair key) const
 	{
 		auto const it = keys.find(key);
-		return it == keys.end() ? "" : values.at(it->second);
+		auto const index = fmt::to_size(it->second);
+		return it == keys.end() ? "" : values.at(index);
 	}
 
 	bool ini::set(env::opt::pair key, view value)
@@ -153,7 +155,8 @@ namespace doc
 		}
 		else
 		{
-			values[it->second] = value;
+			auto const index = fmt::to_size(it->second);
+			values.at(index) = value;
 			return false;
 		}
 	}

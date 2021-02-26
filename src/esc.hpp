@@ -27,7 +27,10 @@ namespace fmt
 		{
 			return ((out << ';' << Params), ...);
 		}
-		return out;
+		else
+		{
+			return out;
+		}
 	}
 
 	template

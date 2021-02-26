@@ -229,8 +229,12 @@ namespace sys
 		int ok;
 	};
 
-	struct mode
+	class mode
 	{
+		mode_t um;
+
+	public:
+
 		operator mode_t() const
 		{
 			return um;
@@ -245,10 +249,6 @@ namespace sys
 		{
 			(void) sys::umask(um);
 		}
-
-	private:
-
-		mode_t um;
 	};
 }
 

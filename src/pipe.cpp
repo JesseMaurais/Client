@@ -36,8 +36,9 @@ namespace env::file
 			auto const s = fmt::to_string(path);
 			return open(s, am, pm);
 		}
+		auto const c = path.data();
 
-		auto const fd = sys::open(data(path), convert(am), convert(pm));
+		fd = sys::open(c, convert(am), convert(pm));
 		if (fail(fd))
 		{
 			sys::err(here, path, am, pm);

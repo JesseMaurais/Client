@@ -9,11 +9,11 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/test.exe",
-            "args": ["env_dir_enum"],
+            "args": [""],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false
         }
     ]
-} d
+} 

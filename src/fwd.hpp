@@ -137,6 +137,24 @@ namespace fwd
 		template <class> class Alloc = allocator
 	>
 	using basic_stringstream = std::basic_stringstream<Char, Traits<Char>, Alloc<Char>>;
+
+	template
+	<
+		class Range, class Predicate
+	>
+	inline bool all_of(Range&& range, Predicate&& check)
+	{
+		return std::all_of(range.begin(), range.end(), check);
+	}
+
+	template
+	<
+		class Range, class Predicate
+	>
+	inline bool any_of(Range&& range, Predicate&& check)
+	{
+		return std::any_of(range.begin(), range.end(), check);
+	}
 }
 
 #endif // file

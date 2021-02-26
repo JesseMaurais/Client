@@ -35,7 +35,7 @@ namespace
 		fmt::string::view get(env::opt::word name)
 		{
 			auto const reader = store.read();
-			env::opt::word const index = ~name;
+			auto const index = fmt::to_size(~name);
 			return reader->at(index);
 		}
 

@@ -275,25 +275,21 @@ namespace fmt
 		bool all_of(view u, mask x = space) const
 		// All decoded characters in $u are $x
 		{
-			return 0 == rem(u, x);
+			const auto wide = widen(u);
+			return std::all_of(wide.begin(), wide.end(), [this, x](auto w)
+			{
+				return this->check(w, x);
+			});
 		}
 
-		bool none_of(view u, mask x = space) const
-		// No decoded characters in $u are $x
+		bool any_of(view u, mask x = space) const
+		// Any decoded characters in $u are $x
 		{
-			return 0 == quot(u, x);
-		}
-
-		bool clear(view u) const
-		// All of view is white space
-		{
-			return all_of(u);
-		}
-
-		bool flush(view u) const
-		// None of view is white space
-		{
-			return none_of(u);
+			const auto wide = widen(u);
+			return std::any_of(wide.begin(), wide.end(), [this, x](auto w)
+			{
+				return this->check(w, x);
+			});
 		}
 
 		auto to_upper(view u) const
@@ -529,6 +525,16 @@ namespace fmt
 	inline auto trim(string::view u)
 	{
 		return cstr.trim(u);
+	}
+
+	inline auto all_of(string::view u, type<char>::mask m)
+	{
+		return cstr.all_of(u, m);
+	}
+
+	inline auto any_of(string::view u, type<char>::mask m)
+	{
+		return cstr.any_of(u, m);
 	}
 
 	inline auto to_upper(string::view u)

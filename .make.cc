@@ -167,11 +167,6 @@ add(CFLAGS, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
 add(LDFLAGS, -Z7)
 endif
 
-// Header
-ifdef HDRDIR
-add(CFLAGS, -I$(HDRDIR))
-endif
-
 // Precompile
 ifdef PCH
 PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
@@ -235,11 +230,6 @@ add(LDFLAGS, -lc++ -lc++abi)
 // Debug
 ifndef NDEBUG
 add(CFLAGS, -Wall -Wextra -Wpedantic -g)
-endif
-
-// Header
-ifdef HDRDIR
-add(CFLAGS, -I$(HDRDIR))
 endif
 
 // Precompile

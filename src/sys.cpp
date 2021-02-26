@@ -102,8 +102,10 @@ namespace sys
 			for (size_t i = 0, j = 0; argv[i]; ++i, ++j)
 			{
 				constexpr auto max = sizeof cmd;
-				auto const n = std::snprintf(cmd + j, max - j, "%s ", argv[i]);
-				if (0 < n) j += n;
+				bool const any_space = fmt::any_of(argv[i], fmt::space);
+				auto const format = any_space ? "\"%s\" " : "%s ";
+				auto const n = std::snprintf(cmd + j, max - j, format, argv[i]);
+				if (0 < n) j += n - 1;
 				else return -1;
 			}
 
