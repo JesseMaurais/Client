@@ -3,8 +3,8 @@
 	tailored for your compiler and operating system by running it through
 	the preprocessor of your compiler. By default the generated syntax
 	will be compatible with GNU Make. In order to create a Makefile that is
-	compatible with Microsoft NMake define the -D_NMAKE macro in CFLAGS
-	or CL or else write a Tools.ini file in the directory with
+	compatible with Microsoft NMake define the -D_NMAKE macro in the command
+	line or CFLAGS/CL or else write a Tools.ini file in the directory with
 
 		[NMAKE]
 		MAKECONFIG=-D_NMAKE
@@ -12,7 +12,7 @@
 	and a bootstrapping Makefile written in the portable Makefile syntax
 
 		MAKEFILE=.make
-		TEMPLATE=.make.cc
+		TEMPLATE=.make.cpp
 		all: $(MAKEFILE)
 			$(MAKE) -f $(MAKEFILE)
 		clean: $(MAKEFILE)
@@ -39,6 +39,7 @@
 */
 
 // Macros
+
 #ifdef _NMAKE
 # define ifdef !ifdef
 # define ifndef !ifndef
@@ -46,42 +47,24 @@
 # define ifneq(x,y) !if #x!=#y
 # define else !else
 # define endif !endif
-# define message(x) !message x
 # define error(x) !error x
+# define message(x) !message x
 # define add(x, y) x=$(x) y
+# define shell(x, y)\
+!if[echo x=\>%TMP%$(DIR)x && for /f %i in (`y`) do echo %i\>>%TMP%$(DIR)x]==0\
+!include %TMP%$(DIR)x\
+!endif
 #else // GNU
 # define ifeq(x,y) ifeq (x,y)
 # define ifneq(x,y) ifneq (x,y)
-# define message(x) $(message x)
 # define error(x) $(error x)
+# define message(x) $(message x)
 # define add(x, y) x+=y
+# define shell(x, y) x=$(shell y)
 #endif
 
-// System
-ifeq($(OS),Windows_NT)
-add(CFLAGS, -D_WIN32)
-ifdef WINVER
-add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
-endif
-OUTEXT=exe
-RM=del /f
-MKD=md
-DIR=\ //
-ENT=;
-else // POSIX
-add(CFLAGS, -D_POSIX_SOURCE)
-ifdef UNIVER
-add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
-endif
-add(LDFLAGS, -lm -ldl -lrt -lpthread)
-OUTEXT=out
-RM=rm -f
-MKD=mkdir -p
-DIR=/
-ENT=:
-endif
-
 // Project
+
 ifndef STD
 #ifdef _MSC_VER
 STD=c++latest
@@ -89,21 +72,81 @@ STD=c++latest
 STD=c++20
 #endif
 endif
-MAKDIR=obj$(DIR)
+ifndef OBJDIR
 OBJDIR=obj$(DIR)
+endif
+ifndef SRCDIR
 SRCDIR=src$(DIR)
+endif
+ifndef HDRDIR
 HDRDIR=$(SRCDIR)
-DEPDIR=$(OBJDIR)
-PCH=pre
-SRCEXT=cpp
-HDREXT=hpp
+endif
+ifndef MAKDIR
+MAKDIR=$(OBJDIR)
+endif
+ifndef DEPDIR
+DEPDIR=$(MAKDIR)
+endif
+ifndef MAKEXT
 MAKEXT=mak
-ALLSRC=$(SRCDIR)*.$(SRCEXT)
-ALLHDR=$(SRCDIR)*.$(HDREXT)
+endif
+ifndef SRCEXT
+SRCEXT=cpp
+endif
+ifndef HDREXT
+HDREXT=hpp
+endif
+ifndef PCH
+PCH=std
+endif
 
 .SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
 
+// Operating System
+
+ifeq($(OS), Windows_NT)
+add(CFLAGS, -D_WIN32)
+ifdef WINVER
+add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
+endif
+OUTEXT=exe
+CAT=type
+RM=del /f
+MKD=md
+LIST=dir /b
+RECURSE=$(LIST) /s 
+DIR=\ //
+ENT=;
+else // POSIX
+add(CFLAGS, -D_POSIX_SOURCE)
+ifdef UNIVER
+add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
+endif
+#ifdef __GNUC__
+add(CFLAGS, "-DPOSIXLY_CORRECT")
+#endif
+add(LDFLAGS, -lm -ldl -lrt -lpthread)
+OUTEXT=out
+CAT=cat
+RM=rm -f
+MKD=mkdir -p
+LIST=ls
+RECURSE=$(LIST) -R
+DIR=/
+ENT=:
+endif
+
 // Source
+
+shell(HDR, $(RECURSE) *.$(HDREXT))
+shell(SRC, $(RECURSE) *.$(SRCEXT))
+
+ifdef COMSPEC
+shell(EXE, findstr /s /m "\<main\>" $(SRC))
+else
+shell(EXE, )
+endif
+
 #ifdef _NMAKE
 ifdef COMSPEC
 MAKHDR=$(MAKDIR)header.$(MAKEXT)
@@ -267,11 +310,15 @@ DEP=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(DEPEXT), $(SRC))
 OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 #endif
 
-// Rules
-all: $(EXE)
 $(EXE): $(LNKDEP); $(LNKCMD)
 $(OBJDIR): ; $(MKD) $(OBJDIR)
+
+// Rules
+all: $(EXE)
+help: $(CAT) Readme
 clean: ; $(RM) $(EXE) $(OBJ) $(PCHOBJ) $(DEP) 
+cflags: ; echo $(CFLAGS) > compile_flags.txt
+ctags: ; ctags $(SRC) $(HDR)
 
 // Depend
 #ifdef _NMAKE

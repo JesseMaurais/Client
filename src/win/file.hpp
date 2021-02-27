@@ -4,6 +4,7 @@
 #include "win.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include "dir.hpp"
 #include <cstring>
 #include <string>
 
@@ -97,9 +98,9 @@ namespace sys
 			}
 		};
 
-		static auto sub(char const *path)
+		static auto sub(std::string path)
 		{
-			return std::string(path) + "\\*";
+			return path + path.ends_with(sys::sep::dir) ? "*" : "\\*";
 		}
 
 	public:
