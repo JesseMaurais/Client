@@ -32,13 +32,11 @@
 		- auto name target program
 		- uses CXX for the C++ compiler
 		- uses STD for language standard
-		- uses LIB for link libraries
+		- uses LIBPATH for link libraries
 		- uses INCLUDE for finding headers
 		- uses WINVER for supported WIN32 platform
 		- uses UNIVER for supported POSIX platform
 */
-
-// Macros
 
 #ifdef _NMAKE
 # define ifdef !ifdef
@@ -50,20 +48,17 @@
 # define error(x) !error x
 # define message(x) !message x
 # define add(x, y) x=$(x) y
-# define shell(x, y)\
-!if[echo x=\>%TMP%$(DIR)x && for /f %i in (`y`) do echo %i\>>%TMP%$(DIR)x]==0\
-!include %TMP%$(DIR)x\
-!endif
 #else // GNU
 # define ifeq(x,y) ifeq (x,y)
 # define ifneq(x,y) ifneq (x,y)
 # define error(x) $(error x)
 # define message(x) $(message x)
 # define add(x, y) x+=y
-# define shell(x, y) x=$(shell y)
 #endif
 
+//
 // Project
+//
 
 ifndef STD
 #ifdef _MSC_VER
@@ -102,7 +97,9 @@ endif
 
 .SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
 
+//
 // Operating System
+//
 
 ifeq($(OS), Windows_NT)
 add(CFLAGS, -D_WIN32)
@@ -114,7 +111,6 @@ CAT=type
 RM=del /f
 MKD=md
 LIST=dir /b
-RECURSE=$(LIST) /s 
 DIR=\ //
 ENT=;
 else // POSIX
@@ -131,54 +127,41 @@ CAT=cat
 RM=rm -f
 MKD=mkdir -p
 LIST=ls
-RECURSE=$(LIST) -R
 DIR=/
 ENT=:
 endif
 
-// Source
-
-shell(HDR, $(RECURSE) *.$(HDREXT))
-shell(SRC, $(RECURSE) *.$(SRCEXT))
-
-ifdef COMSPEC
-shell(EXE, findstr /s /m "\<main\>" $(SRC))
-else
-shell(EXE, )
-endif
+//
+// Sources
+//
 
 #ifdef _NMAKE
 ifdef COMSPEC
 MAKHDR=$(MAKDIR)header.$(MAKEXT)
-!if ![(echo HDR=\>$(MAKHDR)) && for %i in ($(ALLHDR)) do @echo %i\>>$(MAKHDR)]
+!if ![(echo HDR=\>$(MAKHDR)) && for %i in ($(HDRDIR)*.$(HDREXT)) do @echo %i\>>$(MAKHDR)]
 !include $(MAKHDR)
 endif // HDR
 MAKSRC=$(MAKDIR)source.$(MAKEXT)
-!if ![(echo SRC=\>$(MAKSRC)) && for %i in ($(ALLSRC)) do @echo %i\>>$(MAKSRC)]
+!if ![(echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*.$(SRCEXT)) do @echo %i\>>$(MAKSRC)]
 !include $(MAKSRC)
 endif // SRC
-MAKEXE=$(MAKDIR)target.$(MAKEXT)
-!if ![(echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE)]
-!include $(MAKEXE)
-endif // EXE
 #ifndef _MSC_VER
-MAKLIB=$(MAKDIR)library.$(MAKEXT)
-!if ![(echo LIB=\>$(MAKLIB)) && for %i in ("%LIB:$(ENT)=" "%") do @echo , -L"%~i"\>>$(MAKLIB)]
-!include $(MAKLIB)
-endif // LIB
 MAKINC=$(MAKDIR)include.$(MAKEXT)
-!if ![(echo INCLUDE=\>$(MAKINC)) && for %i in ("%INCLUDE:$(ENT)=" "%") do @echo , -I"%~i"\>>$(MAKINC)]
+!if ![(echo INC=\>$(MAKINC)) && for "delims=$(ENT)" %i in (%INCLUDE%) do @echo , -I"%~i"\>>$(MAKINC)]
 !include $(MAKINC)
 endif // INC
+MAKLIB=$(MAKDIR)library.$(MAKEXT)
+!if ![(echo LIB=\>$(MAKLIB)) && for "delims=$(ENT)" %i in (%LIBPATH%) do @echo , -L"%~i"\>>$(MAKLIB)]
+!include $(MAKLIB)
+endif // LIB
 #endif // _MSC_VER
 endif // COMSPEC
 #else // GNU
-HDR=$(wildcard $(ALLHDR))
-SRC=$(wildcard $(ALLSRC))
-EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
+HDR=$(wildcard $(HDRDIR)*.$(HDREXT))
+SRC=$(wildcard $(SRCDIR)*.$(SRCEXT))
 #ifndef _MSC_VER
-LIB=$(addprefix -L, "$(LIB:$(ENT)=" ")")
-INCLUDE=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
+INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
+LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 #endif // _MSC_VER
 #endif // _NMAKE
 
@@ -186,7 +169,7 @@ INCLUDE=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
 // Compiler
 //
 
-#ifdef _MSC_VER // Microsoft Visual C++
+#ifdef _MSC_VER 
 
 OBJEXT=obj
 DEPEXT=dep
@@ -194,40 +177,34 @@ INLEXT=inl
 LIBEXT=lib
 PCHEXT=pch
 
-// Flags
-add(CFLAGS, -nologo -DNOMINMAX -EHsc -permissive-)
-add(LDFLAGS, -nologo)
-add(CXXFLAGS, $(CFLAGS))
-
-// Standard
 ifdef STD
 add(CFLAGS, -std:$(STD))
 endif
 
-// Debug
+add(CFLAGS, -nologo -DNOMINMAX -EHsc -permissive-)
+add(LDFLAGS, -nologo)
+add(CXXFLAGS, $(CFLAGS))
+
 ifndef NDEBUG
 add(CFLAGS, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
 add(LDFLAGS, -Z7)
 endif
 
-// Precompile
 ifdef PCH
 PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
 PCHSRC=$(SRCDIR)$(PCH).$(SRCEXT)
 PCHOBJ=$(OBJDIR)$(PCH).$(OBJEXT)
-PCHOUT=$(SRCDIR)$(PCH).$(PCHEXT)
+PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
 add(CFLAGS, -FI$(PCH).$(HDREXT) -Fp$(PCHOUT))
 add(CXXFLAGS, -Yu$(PCH).$(HDREXT))
 add(LDFLAGS, -Yu$(PCH).$(HDREXT))
 $(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ)
 endif
 
-// Commands
 CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
 LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 
-// Rules
 #ifdef _NMAKE
 ifdef COMSPEC
 {$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
@@ -248,87 +225,76 @@ INLEXT=i
 LIBEXT=a
 PCHEXT=gch
 
-ifdef INCLUDE
-add(CFLAGS, $(INCLUDE))
-endif
-ifdef LIB
-add(LDFLAGS, $(LIB))
-endif
-
-// Flags
-add(CFLAGS, -MP -MMD)
-add(LDFLAGS, -rdynamic)
-add(CXXFLAGS, $(CFLAGS))
-
-// Standard
 ifdef STD
 add(CFLAGS, -std=$(STD))
 endif
+
+add(CFLAGS, -MP -MMD)
+add(LDFLAGS, -rdynamic)
+add(CXXFLAGS, $(CFLAGS))
 
 #if defined(__llvm__) || defined(__clang__)
 add(CFLAGS, -stdlib=libc++)
 add(LDFLAGS, -lc++ -lc++abi)
 #endif
 
-// Debug
 ifndef NDEBUG
 add(CFLAGS, -Wall -Wextra -Wpedantic -g)
 endif
 
-// Precompile
 ifdef PCH
 PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
-PCHOBJ=$(SRCDIR)$(PCH).$(PCHEXT)
+PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
 add(CXXFLAGS, -include $(PCHHDR))
-$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -c $< -o $@
+$(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) -c $< -o $@
 endif
 
-// Commands
 CXXCMD=$(CXX) $(CXXFLAGS) -c $< -o $@
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
-LNKDEP=$(PCHOBJ) $(OBJ)
+LNKDEP=$(PCHOUT) $(OBJ)
 
 #endif // Compilers
 
-// Extensions on outputs
+//
+// Outputs
+//
+
 .SUFFIXES: .$(OUTEXT) .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
 
-// Outputs
 #ifdef _NMAKE
 ifdef COMSPEC
-MAKDEP=$(MAKDIR)depend.$(MAKEXT)
-!if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(ALLSRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
-!include $(MAKDEP)
-endif // DEP
+MAKEXE=$(MAKDIR)target.$(MAKEXT)
+!if ![(echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE)]
+!include $(MAKEXE)
+endif // EXE
 MAKOBJ=$(MAKDIR)object.$(MAKEXT)
-!if ![(echo OBJ=\>$(MAKOBJ)) && for %I in ($(ALLSRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ)]
+!if ![(echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ)]
 !include $(MAKOBJ)
 endif // OBJ
+MAKDEP=$(MAKDIR)depend.$(MAKEXT)
+!if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
+!include $(MAKDEP)
+endif // DEP
+ALLDEP=$(MAKDIR)all.$(MAKEXT)
+!if ![(echo. >$(ALLDEP)) && for %I in ($(DEP)) do @if exist "%I" @echo !include %I >> $(ALLDEP)]
+!include $(ALLDEP)
+endif // ALL
 endif // COMSPEC
 #else // GNU
+EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
 DEP=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(DEPEXT), $(SRC))
 OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
-#endif
-
-$(EXE): $(LNKDEP); $(LNKCMD)
-$(OBJDIR): ; $(MKD) $(OBJDIR)
-
-// Rules
-all: $(EXE)
-help: $(CAT) Readme
-clean: ; $(RM) $(EXE) $(OBJ) $(PCHOBJ) $(DEP) 
-cflags: ; echo $(CFLAGS) > compile_flags.txt
-ctags: ; ctags $(SRC) $(HDR)
-
-// Depend
-#ifdef _NMAKE
-ifdef COMSPEC
-MAKALLDEP=$(MAKDIR)all.$(MAKEXT)
-!if ![(for %i in ($(DEPDIR)*.$(DEPEXT)) do @echo !include %i) > $(MAKALLDEP)]
-!include $(MAKALLDEP)
-endif
-endif
-#else // GNU
 -include $(DEP)
 #endif
 
+//
+// Targets
+//
+
+all: $(EXE)
+help: ; $(CAT) Readme
+clean: ; $(RM) $(PCHOUT) $(DEP) $(OBJ) $(EXE)
+cflags: ; echo $(CFLAGS) > compile_flags.txt
+ctags: ; ctags $(SRC) $(HDR)
+
+$(EXE): $(LNKDEP); $(LNKCMD)

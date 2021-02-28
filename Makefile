@@ -1,6 +1,5 @@
-# Use the C++ preprocessor to generate another Makefile tailored to the
-# operating system and version of $(MAKE) used. Forward standard targets
-# to it.
+# Uses the C++ preprocessor to generate another Makefile tailored to the
+# operating system, compiler and version of $(MAKE) used. 
 
 MAKEFILE=.make
 TEMPLATE=.make.cc

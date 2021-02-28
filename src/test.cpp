@@ -10,6 +10,7 @@
 #include "dev.hpp"
 #include "sig.hpp"
 #include "err.hpp"
+#include <iostream>
 #include <fstream>
 #include <future>
 #include <vector>

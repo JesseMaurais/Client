@@ -138,6 +138,10 @@ namespace fwd
 	>
 	using basic_stringstream = std::basic_stringstream<Char, Traits<Char>, Alloc<Char>>;
 
+	//
+	// Ranges
+	//
+
 	template
 	<
 		class Range, class Predicate

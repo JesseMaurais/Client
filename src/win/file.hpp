@@ -100,7 +100,7 @@ namespace sys
 
 		static auto sub(std::string path)
 		{
-			return path + path.ends_with(sys::sep::dir) ? "*" : "\\*";
+			return path.append(path.ends_with(sys::sep::dir) ? "*" : "\\*");
 		}
 
 	public:
