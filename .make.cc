@@ -41,10 +41,12 @@
 #ifdef _NMAKE
 # define ifdef !ifdef
 # define ifndef !ifndef
-# define ifeq(x,y) !if #x==#y
-# define ifneq(x,y) !if #x!=#y
 # define else !else
 # define endif !endif
+# define include !include
+# define if(x) !if ![x]
+# define ifeq(x,y) !if #x==#y
+# define ifneq(x,y) !if #x!=#y
 # define error(x) !error x
 # define message(x) !message x
 # define add(x, y) x=$(x) y
@@ -91,8 +93,8 @@ endif
 ifndef HDREXT
 HDREXT=hpp
 endif
-ifndef PCH
-PCH=std
+ifndef PCHSRC
+PCHSRC=std
 endif
 
 .SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
@@ -136,38 +138,49 @@ endif
 //
 
 #ifdef _NMAKE
-ifdef COMSPEC
 MAKHDR=$(MAKDIR)header.$(MAKEXT)
-!if ![(echo HDR=\>$(MAKHDR)) && for %i in ($(HDRDIR)*.$(HDREXT)) do @echo %i\>>$(MAKHDR)]
-!include $(MAKHDR)
-endif // HDR
-MAKSRC=$(MAKDIR)source.$(MAKEXT)
-!if ![(echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*.$(SRCEXT)) do @echo %i\>>$(MAKSRC)]
-!include $(MAKSRC)
-endif // SRC
-#ifndef _MSC_VER
-MAKINC=$(MAKDIR)include.$(MAKEXT)
-!if ![(echo INC=\>$(MAKINC)) && for "delims=$(ENT)" %i in (%INCLUDE%) do @echo , -I"%~i"\>>$(MAKINC)]
-!include $(MAKINC)
-endif // INC
-MAKLIB=$(MAKDIR)library.$(MAKEXT)
-!if ![(echo LIB=\>$(MAKLIB)) && for "delims=$(ENT)" %i in (%LIBPATH%) do @echo , -L"%~i"\>>$(MAKLIB)]
-!include $(MAKLIB)
-endif // LIB
-#endif // _MSC_VER
-endif // COMSPEC
+if((echo HDR=\>$(MAKHDR)) && for %i in ($(HDRDIR)*.$(HDREXT)) do @echo %i\>>$(MAKHDR))
+include $(MAKHDR)
+endif
 #else // GNU
 HDR=$(wildcard $(HDRDIR)*.$(HDREXT))
+#endif
+
+#ifdef _NMAKE
+MAKSRC=$(MAKDIR)source.$(MAKEXT)
+if((echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*.$(SRCEXT)) do @echo %i\>>$(MAKSRC))
+include $(MAKSRC)
+endif
+#else // GNU
 SRC=$(wildcard $(SRCDIR)*.$(SRCEXT))
+#endif
+
 #ifndef _MSC_VER
+#ifdef _NMAKE
+MAKINC=$(MAKDIR)include.$(MAKEXT)
+if((echo INC=\>$(MAKINC)) && for "delims=$(ENT)" %i in (%INCLUDE%) do @echo , -I"%~i"\>>$(MAKINC))
+include $(MAKINC)
+endif
+#else // GNU
 INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
+#endif
+
+#ifdef _NMAKE
+MAKLIB=$(MAKDIR)library.$(MAKEXT)
+if((echo LIB=\>$(MAKLIB)) && for "delims=$(ENT)" %i in (%LIBPATH%) do @echo , -L"%~i"\>>$(MAKLIB))
+include $(MAKLIB)
+endif
+#else // GNU
 LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
+#endif
 #endif // _MSC_VER
-#endif // _NMAKE
 
 //
 // Compiler
 //
+
+add(CFLAGS, $(INC))
+add(LDFLAGS, $(LIB))
 
 #ifdef _MSC_VER 
 
@@ -183,35 +196,32 @@ endif
 
 add(CFLAGS, -nologo -DNOMINMAX -EHsc -permissive-)
 add(LDFLAGS, -nologo)
-add(CXXFLAGS, $(CFLAGS))
 
 ifndef NDEBUG
-add(CFLAGS, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
+add(WARN, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
 add(LDFLAGS, -Z7)
 endif
 
-ifdef PCH
-PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
-PCHSRC=$(SRCDIR)$(PCH).$(SRCEXT)
-PCHOBJ=$(OBJDIR)$(PCH).$(OBJEXT)
-PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
-add(CFLAGS, -FI$(PCH).$(HDREXT) -Fp$(PCHOUT))
-add(CXXFLAGS, -Yu$(PCH).$(HDREXT))
-add(LDFLAGS, -Yu$(PCH).$(HDREXT))
-$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ)
+ifdef PCHSRC
+PCHHDR=$(SRCDIR)$(PCHSRC).$(HDREXT)
+PCHSRC=$(SRCDIR)$(PCHSRC).$(SRCEXT)
+PCHOBJ=$(OBJDIR)$(PCHSRC).$(OBJEXT)
+PCHOUT=$(OBJDIR)$(PCHSRC).$(PCHEXT)
+add(PCH, -Yu$(PCHSRC).$(HDREXT) -FI$(PCHSRC).$(HDREXT) -Fp$(PCHOUT))
+add(LDFLAGS, -Yu$(PCHSRC).$(HDREXT))
+$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -w -Yc$(PCHSRC).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ)
 endif
 
-CXXCMD=$(CXX) $(CXXFLAGS) -c $< -Fo$(OBJDIR)
+CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(PCH) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
 LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 
 #ifdef _NMAKE
-ifdef COMSPEC
 {$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
 	@echo $< : \> $@
-	@set CMD=$(CXX) $(CFLAGS:-W4=-w) -showIncludes -P -Fi"NUL" -c $<
+	@set CMD=$(CXX) $(CFLAGS) -showIncludes -P -Fi"NUL" -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
-endif
+
 {$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
 #else // GNU
 $(OBJDIR)%.$(OBJEXT): $(SRCDIR)%.$(SRCEXT); $(CXXCMD)
@@ -231,7 +241,6 @@ endif
 
 add(CFLAGS, -MP -MMD)
 add(LDFLAGS, -rdynamic)
-add(CXXFLAGS, $(CFLAGS))
 
 #if defined(__llvm__) || defined(__clang__)
 add(CFLAGS, -stdlib=libc++)
@@ -239,17 +248,17 @@ add(LDFLAGS, -lc++ -lc++abi)
 #endif
 
 ifndef NDEBUG
-add(CFLAGS, -Wall -Wextra -Wpedantic -g)
+add(WARN, -Wall -Wextra -Wpedantic -g)
 endif
 
-ifdef PCH
-PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
-PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
-add(CXXFLAGS, -include $(PCHHDR))
+ifdef PCHSRC
+PCHHDR=$(SRCDIR)$(PCHSRC).$(HDREXT)
+PCHOUT=$(OBJDIR)$(PCHSRC).$(PCHEXT)
+add(PCH, -include $(PCHHDR))
 $(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) -c $< -o $@
 endif
 
-CXXCMD=$(CXX) $(CXXFLAGS) -c $< -o $@
+CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(PCH) -c $< -o $@
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
 LNKDEP=$(PCHOUT) $(OBJ)
 
@@ -262,28 +271,38 @@ LNKDEP=$(PCHOUT) $(OBJ)
 .SUFFIXES: .$(OUTEXT) .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
 
 #ifdef _NMAKE
-ifdef COMSPEC
 MAKEXE=$(MAKDIR)target.$(MAKEXT)
-!if ![(echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE)]
-!include $(MAKEXE)
-endif // EXE
-MAKOBJ=$(MAKDIR)object.$(MAKEXT)
-!if ![(echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ)]
-!include $(MAKOBJ)
-endif // OBJ
-MAKDEP=$(MAKDIR)depend.$(MAKEXT)
-!if ![(echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP)]
-!include $(MAKDEP)
-endif // DEP
-ALLDEP=$(MAKDIR)all.$(MAKEXT)
-!if ![(echo. >$(ALLDEP)) && for %I in ($(DEP)) do @if exist "%I" @echo !include %I >> $(ALLDEP)]
-!include $(ALLDEP)
-endif // ALL
-endif // COMSPEC
+if((echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE))
+include $(MAKEXE)
+endif
 #else // GNU
 EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
-DEP=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(DEPEXT), $(SRC))
+#endif
+
+#ifdef _NMAKE
+MAKOBJ=$(MAKDIR)object.$(MAKEXT)
+if((echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ))
+include $(MAKOBJ)
+endif
+#else // GNU
 OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
+#endif
+
+#ifdef _NMAKE
+MAKDEP=$(MAKDIR)depend.$(MAKEXT)
+if((echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP))
+include $(MAKDEP)
+endif
+#else // GNU
+DEP=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(DEPEXT), $(SRC))
+#endif
+
+#ifdef _NMAKE
+ALLDEP=$(MAKDIR)all.$(MAKEXT)
+if((echo. >$(ALLDEP)) && for %I in ($(DEP)) do @if exist "%I" @echo include %I >> $(ALLDEP))
+include $(ALLDEP)
+endif
+#else // GNU
 -include $(DEP)
 #endif
 
