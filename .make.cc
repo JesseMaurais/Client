@@ -110,10 +110,6 @@ ifdef WINVER
 add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
 endif
 OUTEXT=exe
-CAT=type
-RM=del /f
-MKD=md
-LIST=dir /b
 DIR=\ //
 ENT=;
 else // POSIX
@@ -122,12 +118,26 @@ ifdef UNIVER
 add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
 OUTEXT=out
+DIR=/
+ENT=:
+endif
+
+//
+// Command Line
+//
+
+ifdef COMSPEC
+WHERE=where
+CAT=type
+RM=del /f
+MKD=md
+LIST=dir /b
+else // shell
+WHERE=which -a
 CAT=cat
 RM=rm -f
 MKD=mkdir -p
 LIST=ls
-DIR=/
-ENT=:
 endif
 
 //
@@ -194,7 +204,7 @@ add(CFLAGS, -nologo -DNOMINMAX -EHsc -permissive-)
 add(LDFLAGS, -nologo)
 
 ifndef NDEBUG
-add(WARN, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
+add(WARN, -Z7 -Wall -D_CRT_SECURE_NO_WARNINGS)
 add(LDFLAGS, -Z7)
 endif
 
@@ -203,27 +213,20 @@ PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
 PCHSRC=$(SRCDIR)$(PCH).$(SRCEXT)
 PCHOBJ=$(OBJDIR)$(PCH).$(OBJEXT)
 PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
-$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ) -Fp$(PCHOUT)
 add(HEADER, -Yu$(PCH).$(HDREXT) -FI$(PCH).$(HDREXT) -Fp$(PCHOUT))
 add(LDFLAGS, -Yu$(PCH).$(HDREXT))
+$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ) -Fp$(PCHOUT)
 endif
 
 CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
 LNKDEP=$(PCHOBJ) $(OBJ) 
 
-#ifdef _NMAKE
-{$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
-	@echo $< : \> $@
-	@set CMD=$(CXX) $(CFLAGS) -w -showIncludes -P -Fi"NUL" -c $<
-	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
-#endif
-
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 
 OBJEXT=o
 DEPEXT=d
-INLEXT=i
+INLEXT=in
 LIBEXT=a
 PCHEXT=gch
 
@@ -264,7 +267,7 @@ LNKDEP=$(PCHOUT) $(OBJ)
 
 #ifdef _NMAKE
 MAKEXE=$(MAKDIR)target.$(MAKEXT)
-if((echo EXE=\>$(MAKEXE)) && for /f %i in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~ni.$(OUTEXT)\>>$(MAKEXE))
+if((echo EXE=\>$(MAKEXE)) && for /f %I in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~nI.$(OUTEXT)\>>$(MAKEXE))
 include $(MAKEXE)
 endif
 #else // GNU

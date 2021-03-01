@@ -25,6 +25,7 @@
 #		define _WIN32_WINNT_VISTA    0x0600 // Windows Vista
 #		define _WIN32_WINNT_WIN7     0x0601 // Windows 7
 #		define _WIN32_WINNT_WIN8     0x0602 // Windows 8
+#		define _WIN32_WINNT_WIN81    0x0602 // Windows 8.1
 #		define _WIN32_WINNT_WINBLUE  0x0603 // Windows 8.1
 #		define _WIN32_WINNT_WIN10    0x0A00 // Windows 10
 #	endif

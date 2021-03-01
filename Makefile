@@ -25,6 +25,10 @@ config:
 $(MAKEFILE): $(TEMPLATE)
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
+tools:
+	echo [NMAKE] > Tools.ini
+	echo MAKECONFIG=-D_NMAKE >> Tools.ini
+
 scan:
 	scan-build --use-c++=$(CXX) $(MAKE)
 
