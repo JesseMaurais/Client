@@ -93,8 +93,8 @@ endif
 ifndef HDREXT
 HDREXT=hpp
 endif
-ifndef PCHSRC
-PCHSRC=std
+ifndef PCH
+PCH=std
 endif
 
 .SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
@@ -123,7 +123,6 @@ endif
 #ifdef __GNUC__
 add(CFLAGS, "-DPOSIXLY_CORRECT")
 #endif
-add(LDFLAGS, -lm -ldl -lrt -lpthread)
 OUTEXT=out
 CAT=cat
 RM=rm -f
@@ -179,9 +178,6 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 // Compiler
 //
 
-add(CFLAGS, $(INC))
-add(LDFLAGS, $(LIB))
-
 #ifdef _MSC_VER 
 
 OBJEXT=obj
@@ -202,24 +198,24 @@ add(WARN, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS)
 add(LDFLAGS, -Z7)
 endif
 
-ifdef PCHSRC
-PCHHDR=$(SRCDIR)$(PCHSRC).$(HDREXT)
-PCHSRC=$(SRCDIR)$(PCHSRC).$(SRCEXT)
-PCHOBJ=$(OBJDIR)$(PCHSRC).$(OBJEXT)
-PCHOUT=$(OBJDIR)$(PCHSRC).$(PCHEXT)
-add(PCH, -Yu$(PCHSRC).$(HDREXT) -FI$(PCHSRC).$(HDREXT) -Fp$(PCHOUT))
-add(LDFLAGS, -Yu$(PCHSRC).$(HDREXT))
-$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) -w -Yc$(PCHSRC).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ)
+ifdef PCH
+PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
+PCHSRC=$(SRCDIR)$(PCH).$(SRCEXT)
+PCHOBJ=$(OBJDIR)$(PCH).$(OBJEXT)
+PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
+$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ) -Fp$(PCHOUT)
+add(HEADER, -Yu$(PCH).$(HDREXT) -FI$(PCH).$(HDREXT) -Fp$(PCHOUT))
+add(LDFLAGS, -Yu$(PCH).$(HDREXT))
 endif
 
-CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(PCH) -c $< -Fo$(OBJDIR)
+CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
 LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 
 #ifdef _NMAKE
 {$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
 	@echo $< : \> $@
-	@set CMD=$(CXX) $(CFLAGS) -showIncludes -P -Fi"NUL" -c $<
+	@set CMD=$(CXX) $(CFLAGS) -w -showIncludes -P -Fi"NUL" -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
 
 {$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
@@ -254,11 +250,11 @@ endif
 ifdef PCHSRC
 PCHHDR=$(SRCDIR)$(PCHSRC).$(HDREXT)
 PCHOUT=$(OBJDIR)$(PCHSRC).$(PCHEXT)
-add(PCH, -include $(PCHHDR))
-$(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) -c $< -o $@
+add(HEADER, -include $(PCHHDR) -I$(OBJDIR))
+$(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -c $< -o $@
 endif
 
-CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(PCH) -c $< -o $@
+CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -o $@
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
 LNKDEP=$(PCHOUT) $(OBJ)
 
@@ -312,7 +308,7 @@ endif
 
 all: $(EXE)
 help: ; $(CAT) Readme
-clean: ; $(RM) $(PCHOUT) $(DEP) $(OBJ) $(EXE)
+clean: ; $(RM) $(OBJ) $(EXE) $(DEP) $(PCHOBJ) $(PCHOUT)
 cflags: ; echo $(CFLAGS) > compile_flags.txt
 ctags: ; ctags $(SRC) $(HDR)
 
