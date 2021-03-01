@@ -312,7 +312,7 @@ namespace env::usr
 	}
 }
 
-#ifdef test
+#ifdef test_unit
 namespace
 {
 	constexpr auto eol = '\n';
@@ -346,7 +346,7 @@ namespace
 	}
 }
 
-test(usr)
+test_unit(usr)
 {
 	std::ofstream out { "Tests.ini" };
 

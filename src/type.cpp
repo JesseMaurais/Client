@@ -17,8 +17,8 @@ namespace fmt
 	type<wchar_t> const &wstr = WSTR;
 }
 
-#ifdef test
-test(type)
+#ifdef test_unit
+test_unit(type)
 {
 	fmt::string::view const Space = " \t\v\r\n\f";
 	fmt::string::view const Hello = "Hello, World!";

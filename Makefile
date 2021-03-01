@@ -19,10 +19,11 @@ cflags: $(MAKEFILE)
 ctags: $(MAKEFILE)
 	$(MAKE) $(MAKEFLAGS) -f $(MAKEFILE) ctags
 
-config: $(TEMPLATE)
+config:
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
-$(MAKEFILE): config
+$(MAKEFILE): $(TEMPLATE)
+	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
 scan:
 	scan-build --use-c++=$(CXX) $(MAKE)

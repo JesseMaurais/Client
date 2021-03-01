@@ -9,6 +9,7 @@
 #include "usr.hpp"
 #include "sys.hpp"
 #include "sync.hpp"
+#include <fstream>
 #include <iterator>
 #include <algorithm>
 
@@ -265,8 +266,8 @@ namespace env::opt
 	}
 }
 
-#ifdef test
-test(arg)
+#ifdef test_unit
+test_unit(arg)
 {
 	// Application name exists
 	{

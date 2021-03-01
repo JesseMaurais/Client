@@ -7,6 +7,7 @@
 #include "dig.hpp"
 #include "type.hpp"
 #include "err.hpp"
+#include <fstream>
 
 namespace
 {
@@ -162,8 +163,8 @@ namespace doc
 	}
 }
 
-#ifdef test
-test(ini)
+#ifdef test_unit
+test_unit(ini)
 {
 	auto const path = fmt::dir::join({env::pwd(), "Tools.ini"});
 	std::fstream file(path);

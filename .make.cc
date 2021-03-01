@@ -120,9 +120,6 @@ add(CFLAGS, -D_POSIX_SOURCE)
 ifdef UNIVER
 add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
-#ifdef __GNUC__
-add(CFLAGS, "-DPOSIXLY_CORRECT")
-#endif
 OUTEXT=out
 CAT=cat
 RM=rm -f
@@ -178,6 +175,8 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 // Compiler
 //
 
+add(HEADER, -I$(HDRDIR))
+
 #ifdef _MSC_VER 
 
 OBJEXT=obj
@@ -217,10 +216,6 @@ LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 	@echo $< : \> $@
 	@set CMD=$(CXX) $(CFLAGS) -w -showIncludes -P -Fi"NUL" -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
-
-{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
-#else // GNU
-$(OBJDIR)%.$(OBJEXT): $(SRCDIR)%.$(SRCEXT); $(CXXCMD)
 #endif
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
@@ -313,3 +308,8 @@ cflags: ; echo $(CFLAGS) > compile_flags.txt
 ctags: ; ctags $(SRC) $(HDR)
 
 $(EXE): $(LNKDEP); $(LNKCMD)
+#ifdef _NMAKE
+{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
+#else // GNU
+$(OBJDIR)%.$(OBJEXT): $(SRCDIR)%.$(SRCEXT); $(CXXCMD)
+#endif

@@ -119,11 +119,11 @@ namespace sys
 	}
 }
 
-#ifdef test
+#ifdef test_unit
 static int hidden() { return 42; }
 dynamic int visible() { return hidden(); }
 
-test(sym)
+test_unit(sym)
 {
 	// Can see dynamic)
 	auto f = sys::sym<int()>("visible");

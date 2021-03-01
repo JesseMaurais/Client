@@ -20,17 +20,17 @@
 # define _TOOLS "Tools.ini"
 #endif
 
-#ifdef test
-#pragma warning(push)
-#pragma warning(disable : 4127 4702)
-test(err)
+#ifdef test_unit
+//#pragma warning(push)
+//#pragma warning(disable : 4127 4702)
+test_unit(err)
 {
 	assert(true == true);
 	assert(true != false);
 	assert(true and not false);
 	except(throw "Holy Cow!");
 }
-#pragma warning(pop)
+//#pragma warning(pop)
 #endif
 
 namespace

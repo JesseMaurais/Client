@@ -86,8 +86,8 @@ namespace env::file
 		{
 			if (0 == sz)
 			{
-				class sys::stat st(fd);
-				if (fail(st))
+				struct sys::stat st(fd);
+				if (sys::fail(st))
 				{
 					sys::err(here, "stat");
 				}

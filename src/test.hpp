@@ -12,6 +12,6 @@
 	try { (void)(expression); assert(not #expression); } catch(...) { }
 
 // Supply the signature for a unit test callback
-#define test(name) dynamic void test_##name()
+#define test_unit(name) dynamic void test_##name()
 
 #endif // file

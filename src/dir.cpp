@@ -276,8 +276,8 @@ namespace env::dir
 	}
 }
 
-#ifdef test
-test(dir)
+#ifdef test_unit
+test_unit(dir)
 {
 	assert(not env::dir::fail(env::temp()));
 	assert(not env::dir::fail(env::pwd()));

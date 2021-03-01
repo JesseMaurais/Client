@@ -15,10 +15,10 @@ namespace sys
 		operator type() const final
 		// Jump value or else 0
 		{
-			#pragma warning(push)
-			#pragma warning(disable : 4611)
+			//#pragma warning(push)
+			//#pragma warning(disable : 4611)
 			return setjmp(buf); // macro, no std
-			#pragma warning(pop)
+			//#pragma warning(pop)
 		}
 
 		[[noreturn]] type operator=(type value) final
@@ -35,10 +35,10 @@ namespace env
 	// Signal preserving jump
 	{
 		operator type() const final;
-		#pragma warning(push)
-		#pragma warning(disable: 4646)
+		//#pragma warning(push)
+		//#pragma warning(disable: 4646)
 		type operator=(type) final;
-		#pragma warning(pop)
+		//#pragma warning(pop)
 	};
 }
 

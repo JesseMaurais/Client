@@ -54,8 +54,8 @@ namespace sys::sig
 	}
 }
 
-#ifdef test
-test(sig)
+#ifdef test_unit
+test_unit(sig)
 {
 	std::vector<int> caught;
 	std::vector<int> raised = { SIGINT, SIGFPE, SIGILL };

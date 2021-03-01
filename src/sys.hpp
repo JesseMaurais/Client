@@ -229,17 +229,8 @@ namespace sys
 		int ok;
 	};
 
-	class mode
+	struct mode
 	{
-		mode_t um;
-
-	public:
-
-		operator mode_t() const
-		{
-			return um;
-		}
-
 		mode(mode_t mask = 0777)
 		{
 			um = sys::umask(mask);
@@ -249,6 +240,15 @@ namespace sys
 		{
 			(void) sys::umask(um);
 		}
+
+		operator mode_t() const
+		{
+			return um;
+		}
+
+	private:
+
+		mode_t um;
 	};
 }
 

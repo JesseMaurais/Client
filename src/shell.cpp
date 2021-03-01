@@ -135,8 +135,8 @@ namespace env
 	}
 }
 
-#ifdef test
-test(shell)
+#ifdef test_unit
+test_unit(shell)
 {
 	struct env::shell sh;
 	auto const list = sh.list(env::pwd());

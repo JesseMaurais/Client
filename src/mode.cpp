@@ -168,9 +168,9 @@ namespace env::file
 	}
 }
 
-#ifdef test
+#ifdef test_unit
 #include "arg.hpp"
-test(mode)
+test_unit(mode)
 {
 	assert(not env::file::fail(__FILE__) and "Source file exists");
 	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
