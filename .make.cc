@@ -26,14 +26,14 @@
 	additional arguments. It will then build your targets. Both versions
 	of the make program have the same supported feature set in this file.
 		- pre compiled headers
-		- locating of source code
 		- source dependency generation
 		- platform detection
+		- locating of source code
 		- auto name target program
 		- uses CXX for the C++ compiler
 		- uses STD for language standard
-		- uses LIBPATH for link libraries
 		- uses INCLUDE for finding headers
+		- uses LIBPATH for link libraries
 		- uses WINVER for supported WIN32 platform
 		- uses UNIVER for supported POSIX platform
 */
@@ -51,6 +51,7 @@
 # define message(x) !message x
 # define add(x, y) x=$(x) y
 #else // GNU
+# define if(x) ifeq(0, $(shell x 2>1; echo $$?))
 # define ifeq(x,y) ifeq (x,y)
 # define ifneq(x,y) ifneq (x,y)
 # define error(x) $(error x)
@@ -209,7 +210,7 @@ endif
 
 CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
-LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
+LNKDEP=$(PCHOBJ) $(OBJ) 
 
 #ifdef _NMAKE
 {$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):

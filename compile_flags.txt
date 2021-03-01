@@ -1,0 +1,1 @@
+-std:c++20 -stdlib=libc++ -Wall -Wextra -Wpedantic -I./src 

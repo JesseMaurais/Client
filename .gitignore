@@ -25,3 +25,4 @@ Tests.ini
 *.html
 *.plist
 strace_out
+compile_flags.txt
