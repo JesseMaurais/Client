@@ -177,7 +177,7 @@ test_unit(ini)
 		auto const key = fmt::str::set("MAKECONFIG");
 		auto const value = init.get({group, key});
 		assert(not empty(value));
-		assert(value.find("/D_NMAKE") != fmt::npos);
+		assert(value.find("-D_NMAKE") != fmt::npos);
 	}
 	
 	// Data at runtime

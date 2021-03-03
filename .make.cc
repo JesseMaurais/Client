@@ -117,6 +117,7 @@ add(CFLAGS, -D_POSIX_SOURCE)
 ifdef UNIVER
 add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
+add(LDFLAGS, -ldl -pthread)
 OUTEXT=out
 DIR=/
 ENT=:
@@ -200,7 +201,7 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 // Compiler
 //
 
-add(HEADER, -I$(HDRDIR) -I(OBJDIR))
+add(HEADER, -I$(HDRDIR) -I$(OBJDIR))
 
 #ifdef _MSC_VER
 
@@ -303,7 +304,6 @@ endif
 OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 #endif
 
-#if 0
 #ifdef _NMAKE
 MAKDEP=$(MAKDIR)depend.$(MAKEXT)
 if((echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP))
@@ -320,7 +320,6 @@ include $(ALLDEP)
 endif
 #else // GNU
 -include $(DEP)
-#endif
 #endif
 
 //
