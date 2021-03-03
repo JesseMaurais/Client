@@ -128,16 +128,22 @@ endif
 
 ifdef COMSPEC
 WHERE=where
-CAT=type
-RM=del /f
-MKD=md
 LIST=dir /b
+SHOW=type
+COPY=copy
+MOVE=move
+REMOVE=del /f
+MKDIR=md
+MKTEMP=mktemp
 else // shell
 WHERE=which -a
-CAT=cat
-RM=rm -f
-MKD=mkdir -p
 LIST=ls
+SHOW=cat
+COPY=cp
+MOVE=mv
+REMOVE=rm -f
+MKDIR=mkdir -p
+MKTEMP=mktemp
 endif
 
 //
@@ -148,6 +154,8 @@ endif
 MAKHDR=$(MAKDIR)header.$(MAKEXT)
 if((echo HDR=\>$(MAKHDR)) && for %i in ($(HDRDIR)*.$(HDREXT)) do @echo %i\>>$(MAKHDR))
 include $(MAKHDR)
+else
+error(Cannot locate header files)
 endif
 #else // GNU
 HDR=$(wildcard $(HDRDIR)*.$(HDREXT))
@@ -157,16 +165,20 @@ HDR=$(wildcard $(HDRDIR)*.$(HDREXT))
 MAKSRC=$(MAKDIR)source.$(MAKEXT)
 if((echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*.$(SRCEXT)) do @echo %i\>>$(MAKSRC))
 include $(MAKSRC)
+else
+error(Cannot locate source files)
 endif
 #else // GNU
 SRC=$(wildcard $(SRCDIR)*.$(SRCEXT))
 #endif
 
-#ifndef _MSC_VER
+#if 0
 #ifdef _NMAKE
 MAKINC=$(MAKDIR)include.$(MAKEXT)
 if((echo INC=\>$(MAKINC)) && for "delims=$(ENT)" %i in (%INCLUDE%) do @echo , -I"%~i"\>>$(MAKINC))
 include $(MAKINC)
+else
+error(Cannot parse include directories)
 endif
 #else // GNU
 INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
@@ -176,6 +188,8 @@ INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
 MAKLIB=$(MAKDIR)library.$(MAKEXT)
 if((echo LIB=\>$(MAKLIB)) && for "delims=$(ENT)" %i in (%LIBPATH%) do @echo , -L"%~i"\>>$(MAKLIB))
 include $(MAKLIB)
+else
+error(Cannot parse library directories)
 endif
 #else // GNU
 LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
@@ -186,9 +200,9 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 // Compiler
 //
 
-add(HEADER, -I$(HDRDIR))
+add(HEADER, -I$(HDRDIR) -I(OBJDIR))
 
-#ifdef _MSC_VER 
+#ifndef _MSC_VER
 
 OBJEXT=obj
 DEPEXT=dep
@@ -200,11 +214,11 @@ ifdef STD
 add(CFLAGS, -std:$(STD))
 endif
 
-add(CFLAGS, -nologo -DNOMINMAX -EHsc -permissive-)
+add(CFLAGS, -nologo -EHsc -permissive- -DNOMINMAX)
 add(LDFLAGS, -nologo)
 
 ifndef NDEBUG
-add(WARN, -Z7 -Wall -D_CRT_SECURE_NO_WARNINGS)
+add(WARN, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 add(LDFLAGS, -Z7)
 endif
 
@@ -246,9 +260,9 @@ ifndef NDEBUG
 add(WARN, -Wall -Wextra -Wpedantic -g)
 endif
 
-ifdef PCHSRC
-PCHHDR=$(SRCDIR)$(PCHSRC).$(HDREXT)
-PCHOUT=$(OBJDIR)$(PCHSRC).$(PCHEXT)
+ifdef PCH
+PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
+PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
 add(HEADER, -include $(PCHHDR) -I$(OBJDIR))
 $(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -c $< -o $@
 endif
@@ -257,7 +271,9 @@ CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -o $@
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
 LNKDEP=$(PCHOUT) $(OBJ)
 
-#endif // Compilers
+#else
+#error Cannot determine your compiler
+#endif
 
 //
 // Outputs
@@ -269,6 +285,8 @@ LNKDEP=$(PCHOUT) $(OBJ)
 MAKEXE=$(MAKDIR)target.$(MAKEXT)
 if((echo EXE=\>$(MAKEXE)) && for /f %I in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~nI.$(OUTEXT)\>>$(MAKEXE))
 include $(MAKEXE)
+else
+error(Cannot find program main)
 endif
 #else // GNU
 EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
@@ -278,11 +296,14 @@ EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\
 MAKOBJ=$(MAKDIR)object.$(MAKEXT)
 if((echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ))
 include $(MAKOBJ)
+else
+error(Cannot name object files)
 endif
 #else // GNU
 OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
 #endif
 
+#if 0
 #ifdef _NMAKE
 MAKDEP=$(MAKDIR)depend.$(MAKEXT)
 if((echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP))
@@ -300,15 +321,16 @@ endif
 #else // GNU
 -include $(DEP)
 #endif
+#endif
 
 //
 // Targets
 //
 
 all: $(EXE)
-help: ; $(CAT) Readme
-clean: ; $(RM) $(OBJ) $(EXE) $(DEP) $(PCHOBJ) $(PCHOUT)
-cflags: ; echo $(CFLAGS) > compile_flags.txt
+help: ; $(SHOW) Readme
+clean: ; $(REMOVE) $(OBJ) $(EXE) $(DEP) $(PCHOBJ) $(PCHOUT)
+cflags: ; echo $(CFLAGS) $(WARN) $(HEADER) > compile_flags.txt
 ctags: ; ctags $(SRC) $(HDR)
 
 $(EXE): $(LNKDEP); $(LNKCMD)
