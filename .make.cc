@@ -202,7 +202,7 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 
 add(HEADER, -I$(HDRDIR) -I(OBJDIR))
 
-#ifndef _MSC_VER
+#ifdef _MSC_VER
 
 OBJEXT=obj
 DEPEXT=dep
