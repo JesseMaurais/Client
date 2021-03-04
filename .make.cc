@@ -201,7 +201,7 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 // Compiler
 //
 
-add(HEADER, -I$(HDRDIR) -I$(OBJDIR))
+add(HEADER, -I$(HDRDIR) -I$(MAKDIR))
 
 #ifdef _MSC_VER
 
@@ -264,7 +264,7 @@ endif
 ifdef PCH
 PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
 PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
-add(HEADER, -include $(PCHHDR) -I$(OBJDIR))
+add(HEADER, -include $(PCHHDR))
 $(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -c $< -o $@
 endif
 
