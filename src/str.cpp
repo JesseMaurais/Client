@@ -20,7 +20,7 @@ namespace
 		bool got(env::opt::word name)
 		{
 			env::opt::word const index = ~name;
-			env::file::ssize_t const size = store.read()->size();
+			std::ptrdiff_t const size = store.read()->size();
 			return -1 < index and index < size;
 		}
 
@@ -36,13 +36,14 @@ namespace
 		{
 			auto const reader = store.read();
 			auto const index = fmt::to_size(~name);
+			assert(got(name) and "String is not stored");
 			return reader->at(index);
 		}
 
 		fmt::string::view get(fmt::string::view name)
 		{
 			assert(not empty(name));
-			// Lookup extant
+			// Lookup
 			{
 				auto const reader = table.read();
 				auto const it = reader->find(name);
@@ -52,14 +53,14 @@ namespace
 					return it->first;
 				}
 			}
-			// Create entry
+			// Create
 			return get(set(name));
 		}
 
 		env::opt::word put(fmt::string::view name)
 		{
 			assert(not empty(name));
-			// Lookup extant
+			// Lookup
 			{
 				auto const reader = table.read();
 				auto const end = reader->end();
@@ -69,15 +70,13 @@ namespace
 					return ~it->second;
 				}
 			}
-			// Create entry
+			// Create
 			auto writer = store.write();
 			auto const size = writer->size();
 			auto const id = fmt::to<env::opt::word>(size);
 			{
 				auto [it, unique] = table.write()->emplace(name, id);
-				#ifdef verify
-				verify(unique);
-				#endif
+				assert(unique);
 				writer->push_back(it->first);
 			}
 			return ~id;
@@ -85,7 +84,7 @@ namespace
 
 		env::opt::word set(fmt::string::view name)
 		{
-			// Lookup extant
+			// Lookup
 			{
 				auto const reader = table.read();
 				auto const end = reader->end();
@@ -95,7 +94,7 @@ namespace
 					return ~it->second;
 				}
 			}
-			// Create entry
+			// Create
 			auto writer = store.write();
 			auto const size = writer->size();
 			auto const id = fmt::to<env::opt::word>(size);
@@ -123,18 +122,14 @@ namespace
 			while (std::getline(in, line, end))
 			{
 				auto const p = wcache->emplace(move(line));
-				#ifdef verify
-				verify(p.second);
-				#endif
+				assert(p.second);
 
 				auto const size = wstore->size();
 				auto const id = fmt::to<env::opt::word>(size);	
 				wstore->emplace_back(*p.first);
 
 				auto const q = wtable->emplace(*p.first, id);
-				#ifdef verify
-				verify(q.second);
-				#endif
+				assert(q.second);
 			}
 			return in;
 		}

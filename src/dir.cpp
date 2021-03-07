@@ -6,6 +6,7 @@
 #include "type.hpp"
 #include "usr.hpp"
 #include "opt.hpp"
+#include "arg.hpp"
 #include "sys.hpp"
 #include "file.hpp"
 #ifdef _WIN32
@@ -287,10 +288,12 @@ test_unit(dir)
 	assert(not empty(path));
 	auto const name = path.back();
 	assert(not empty(name));
+	auto const program = env::opt::program();
+	assert(not empty(program));
 
-	assert(env::dir::find(env::pwd(), [&](auto entry)
+	assert(env::dir::find(env::pwd(), [program](auto entry)
 	{
-		return fmt::dir::split(entry).back() == name;
+		return fmt::dir::split(entry).back() == program;
 	}));
 
 	auto const temp = fmt::dir::join({env::temp(), "my", "test", "dir"});
