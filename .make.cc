@@ -50,6 +50,7 @@
 # define error(x) !error x
 # define message(x) !message x
 # define add(x, y) x=$(x) y
+# define S(x) %%x
 #else // GNU
 # define if(x) ifeq(0, $(shell x 2>1; echo $$?))
 # define ifeq(x,y) ifeq (x,y)
@@ -57,6 +58,7 @@
 # define error(x) $(error x)
 # define message(x) $(message x)
 # define add(x, y) x+=y
+# define S(x) $${x}
 #endif
 
 //

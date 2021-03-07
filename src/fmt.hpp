@@ -136,7 +136,7 @@ namespace fmt
 
 	using bstring = basic_string<char>; // low 7 byte UTF-8
 	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 wide
-	using ustring = basic_string<wint_t>; // least UTF-32 code point
+	using ustring = basic_string<wint_t>; // at least a UTF-32 code point
 
 	using bview = bstring::view;
 	using wview = wstring::view;

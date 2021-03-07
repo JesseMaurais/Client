@@ -13,7 +13,7 @@ namespace fmt::str
 	using vector = env::opt::vector;
 
 	bool got(word); // O (1)
-	bool got(view); // O log n : n is the cache size
+	bool got(view); // O log n
 	view get(word); // O (1)
 	view get(view); // O log n
 	word put(view); // O log n
