@@ -1,6 +1,7 @@
 Tests.ini
 Tools.ini
 compile_flags.txt
+strace_out
 .make
 *.mak
 *.mk
@@ -26,4 +27,3 @@ compile_flags.txt
 *.xml
 *.html
 *.plist
-strace_out

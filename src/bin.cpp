@@ -1,7 +1,10 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "bin.hpp"
 #include "err.hpp"
 
-#ifdef test
+#ifdef unit_test
 
 namespace
 {
@@ -39,11 +42,11 @@ namespace fmt
 	}
 }
 
-test(bin)
+test_unit(bin)
 {
 	//std::stringstream ss;
 	data raw;
-	sys::out << fmt::write(raw);
+	sys::out() << fmt::write(raw);
 }
 
 #endif
