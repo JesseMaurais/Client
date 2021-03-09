@@ -1,23 +1,13 @@
 #ifndef ini_hpp
 #define ini_hpp "Initial Options"
 
-#include "fmt.hpp"
-#include "opt.hpp"
-#include "algo.hpp"
+#include "doc.hpp"
 
 namespace doc
 {
-	struct ini : fmt::struct_brief<ini>
+	struct ini : brief<ini>
 	{
-		using string = fmt::string;
-		using in     = string::in;
-		using out    = string::out;
-		using view   = string::view;
-		using vector = view::vector;
-		using span   = view::span;
-		using init   = view::init;
-		
-		fwd::group<env::opt::word> keys;
+		group keys;
 		string::view::vector values;
 		string::set cache;
 

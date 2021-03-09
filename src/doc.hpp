@@ -1,15 +1,25 @@
 #ifndef doc_hpp
 #define doc_hpp "Document Structure"
 
-#include <tuple>
 #include "fmt.hpp"
 
 namespace doc
 {
-	template <class... T>
-	auto make(std::pair<fmt::string::view, T>... pairs)
+	template <class C> struct brief : fmt::struct_brief<C>
 	{
-		return std::tuple { std::pair { pairs }... };
+		using string = fmt::string;
+		using line   = string::line;
+		using init   = string::init;
+		using view   = string::view;
+		using span   = string::span;
+		using vector = string::vector;
+		using out    = string::out;
+		using in     = string::in;
+	};
+
+	template <class C> auto const& table(C* = nullptr)
+	{
+		return C::table;
 	}
 }
 

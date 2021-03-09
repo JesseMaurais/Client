@@ -1,5 +1,5 @@
-#ifndef str_hpp
-#define str_hpp "Shared String Store"
+#ifndef word_hpp
+#define word_hpp "Shared String Store"
 
 #include "fmt.hpp"
 #include "opt.hpp"
@@ -9,8 +9,8 @@ namespace fmt::str
 	using string = fmt::string;
 	using view = string::view;
 	using span = view::span;
-	using word = env::opt::word;
-	using vector = env::opt::vector;
+	using vector = view::vector;
+	using word = wint_t;
 
 	bool got(word); // O (1)
 	bool got(view); // O log n

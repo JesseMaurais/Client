@@ -8,7 +8,6 @@ namespace env::opt
 	using word = long long;
 	using quad = long double;
 	using pair = fwd::pair<word>;
-	using vector = fwd::vector<word>;
 
 	// Boolean
 	bool get(word, bool);

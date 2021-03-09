@@ -49,11 +49,10 @@ namespace fmt
 		using map    = fwd::map<Type, Order, Alloc>;
 		using span   = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
-		using edges  = fwd::edges<Type>;
 		using graph  = fwd::graph<Type, Alloc>;
-		using group  = fwd::group<Type, Alloc>;
-		using line   = fwd::line<Type, Alloc, Vector, Span>;
-		using page   = fwd::page<Type, Alloc, Vector, Span>;
+		using group  = fwd::group<Type, Order, Alloc>;
+		using edges  = fwd::edges<Type, Span>;
+		using line   = fwd::line<Type, span, vector>;
 	};
 
 	template
@@ -126,6 +125,13 @@ namespace fmt
 		using Base::Base;
 	};
 
+	// low 7 bit UTF-8
+	using bstring = basic_string<char>;
+	// UTF-16 or UTF-32 wide
+	using wstring = basic_string<wchar_t>;
+	// at least a UTF-32 code point
+	using ustring = basic_string<wint_t>;
+
 	using string =
 	#ifdef _T
 		basic_string<_T>;
@@ -133,14 +139,7 @@ namespace fmt
 		basic_string<char>;
 	#endif
 	using view = string::view;
-
-	using bstring = basic_string<char>; // low 7 byte UTF-8
-	using wstring = basic_string<wchar_t>; // UTF-16 or UTF-32 wide
-	using ustring = basic_string<wint_t>; // at least a UTF-32 code point
-
-	using bview = bstring::view;
-	using wview = wstring::view;
-	using uview = ustring::view;
+	using line = string::line;
 
 	inline view empty("");
 	inline view assign("=");
