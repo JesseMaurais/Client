@@ -16,13 +16,12 @@
 #include <vector>
 #include <set>
 #include <map>
+
 #ifndef _TOOLS
 # define _TOOLS "Tools.ini"
 #endif
 
 #ifdef test_unit
-#pragma warning(push)
-#pragma warning(disable : 4127 4702)
 test_unit(err)
 {
 	assert(true == true);
@@ -30,7 +29,6 @@ test_unit(err)
 	assert(true and not false);
 	except(throw "Holy Cow!");
 }
-#pragma warning(pop)
 #endif
 
 namespace

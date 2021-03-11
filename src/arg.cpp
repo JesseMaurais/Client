@@ -64,7 +64,7 @@ namespace
 		auto const end = cmd.end();
 		auto next = end;
 
-		if (argu.starts_with("--"))
+		if (argu.starts_with(env::opt::dual))
 		{
 			auto const entry = argu.substr(2);
 			next = std::find_if
@@ -76,7 +76,7 @@ namespace
 			);
 		}
 		else
-		if (argu.starts_with("-"))
+		if (argu.starts_with(env::opt::dash))
 		{
 			auto const entry = argu.substr(1);
 			next = std::find_if
