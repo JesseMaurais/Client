@@ -5,11 +5,19 @@
 
 namespace doc
 {
-	struct ini : brief<ini>
+	struct ini : fmt::struct_brief<ini>
 	{
-		group keys;
+		using string = fmt::string;
+		using view   = string::view;
+		using init   = view::init;
+		using vector = view::vector;
+		using span   = view::span;
+		using out    = string::out;
+		using in     = string::in;
+
 		string::view::vector values;
 		string::set cache;
+		doc::group keys;
 
 		friend in::ref operator>>(in::ref, ref);
 		friend out::ref operator<<(out::ref, cref);
@@ -19,10 +27,10 @@ namespace doc
 		static vector split(view);
 		static string join(init);
 
-		bool got(env::opt::pair) const;
-		view get(env::opt::pair) const;
-		bool set(env::opt::pair, view);
-		bool put(env::opt::pair, view);
+		bool got(doc::pair) const;
+		view get(doc::pair) const;
+		bool set(doc::pair, view);
+		bool put(doc::pair, view);
 	};
 }
 

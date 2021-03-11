@@ -1,16 +1,23 @@
 #ifndef arg_hpp
 #define arg_hpp "Command Line Arguments"
 
-#include "fmt.hpp"
 #include "opt.hpp"
 
 namespace env::opt
 {
-	fmt::string::view application();
-	fmt::string::view::span arguments();
-	fmt::string::view initials();
-	fmt::string::view program();
-	fmt::string::view config();
+	view application();
+	span arguments();
+	view initials();
+	view program();
+	view config();
+
+	bool got(name);
+	view get(name);
+	bool put(name, view);
+
+	bool got(pair);
+	view get(pair);
+	bool put(pair, view);
 
 	inline auto arg(size_t argn = 0)
 	{
@@ -23,42 +30,21 @@ namespace env::opt
 
 	struct command
 	{
-		unsigned int argn; // required arguments (or -1 for any number)
-		fmt::string::view dash; // short name with one dash (-c)
-		fmt::string::view name; // long name with dual dash (--config)
-		fmt::string::view text; // descriptive text for users
+		using vector = fwd::vector<command>;
+		using span = fwd::span<command>;
+		
+		word argn; // required arguments (or -1 for any number)
+		view dash; // short name with one dash (-c)
+		view name; // long name with dual dash (--config)
+		view text; // descriptive text for user help menu
 	};
 
-	using commands = fwd::span<command>;
-
-	fmt::string::view::vector put(int argc, char** argv, commands);
+	view::vector put(int argc, char** argv, command::span);
 	// Put command line arguments into options
 	fmt::string::out::ref put(fmt::string::out::ref);
 	// Write options to output string
 	fmt::string::in::ref get(fmt::string::in::ref);
 	// Read options from input string
-
-	bool got(word);
-	fmt::string::view get(word);
-	bool set(word, fmt::string::view);
-	bool put(word, fmt::string::view);
-
-	inline auto get(word wd, fmt::string::view u)
-	{
-		auto v = get(wd);
-		return empty(v) ? u : v;
-	}
-
-	bool got(pair);
-	fmt::string::view get(pair);
-	bool set(pair, fmt::string::view);
-	bool put(pair, fmt::string::view);
-
-	inline auto get(pair wd, fmt::string::view u)
-	{
-		auto v = get(wd);
-		return empty(v) ? u : v;
-	}
 };
 
 #endif // file

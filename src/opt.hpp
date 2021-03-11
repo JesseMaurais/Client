@@ -1,60 +1,40 @@
 #ifndef opt_hpp
 #define opt_hpp "Program Options"
 
-#include "fwd.hpp"
+#include "fmt.hpp"
 
 namespace env::opt
 {
 	using word = long long;
 	using quad = long double;
-	using pair = fwd::pair<word>;
+	using name = signed short;
+	using pair = fwd::pair<name>;
+	using view = fmt::string::view;
+	using span = view::span;
+
+	// String
+	view get(name, view);
+	bool set(name, view);
+	view get(pair, view);
+	bool set(pair, view);
 
 	// Boolean
-	bool get(word, bool);
-	bool set(word, bool);
+	bool get(name, bool);
+	bool set(name, bool);
 	bool get(pair, bool);
 	bool set(pair, bool);
 
 	// Integer
-	word get(word, word, int base = 10);
-	bool set(word, word, int base = 10);
+	word get(name, word, int base = 10);
+	bool set(name, word, int base = 10);
 	word get(pair, word, int base = 10);
 	bool set(pair, word, int base = 10);
 
-	// Pointed Decimal
-	quad get(word, quad);
-	bool set(word, quad, int digits = 6);
+	// Float
+	quad get(name, quad);
+	bool set(name, quad, int digits = 6);
 	quad get(pair, quad);
 	bool set(pair, quad, int digits = 6);
-
-	template <class Type> class meme
-	// Mnemonic device for options
-	{
-		pair key;
-		Type value;
-
-	public:
-
-		meme(pair k, Type v) : key(k)
-		{
-			value = get(k, v);
-		}
-
-		~meme()
-		{
-			put(key, value);
-		}
-
-		operator Type() const
-		{
-			return value;
-		}
-
-		auto operator=(Type v)
-		{
-			return value = v;
-		}
-	};
 };
 
 #endif // file

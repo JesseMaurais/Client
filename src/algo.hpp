@@ -2,6 +2,7 @@
 #define algo_hpp "Algorithms"
 
 #include "fwd.hpp"
+#include "tmp.hpp"
 #include <memory>
 
 namespace fwd
@@ -18,7 +19,7 @@ namespace fwd
 		,
 		class Container = vector<Type>
 		,
-		class Pointer = typename std::add_pointer<const Container>::value
+		class Pointer = typename std::add_pointer<const Container>::type
 		,
 		class Size = typename Container::size_type
 		,

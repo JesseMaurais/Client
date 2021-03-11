@@ -27,8 +27,8 @@ namespace env
 
 	shell::line desktop::with(string::span command)
 	{
-		static opt::word const group = fmt::str::put("Desktop Entry");
-		static opt::word const key = fmt::str::put("DIALOG");
+		static opt::name const group = fmt::str::put("Desktop Entry");
+		static opt::name const key = fmt::str::put("DIALOG");
 		static opt::pair const entry { group, key };
 		static view const zenity = "zenity";
 
