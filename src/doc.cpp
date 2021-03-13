@@ -14,6 +14,11 @@ test_unit(doc)
 
 	} dumb;
 
+	using obj = doc::field<&dummy::i>::object_type;
+	static_assert(std::is_same<obj, dummy>::value);
+	using ptr = doc::field<&dummy::i>::value_type;
+	static_assert(std::is_same<ptr, int>::value);
+
 	auto accessor = std::tuple 
 	{ 
 		std::pair{"i", &dummy::i}, 
