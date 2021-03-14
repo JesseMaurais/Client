@@ -98,32 +98,10 @@ namespace env::dir
 
 	entry mask(mode am)
 	{
-		auto const flags = convert(am);
-		entry m = [=, &m](view u)->bool
+		return [am](view u)
 		{
-			if (not fmt::terminated(u))
-			{
-				return m(fmt::to_string(u));
-			}
-			auto const c = u.data();
-
-			if (sys::fail(sys::access(c, flags)))
-			{
-				return failure;
-			}
-
-			#ifdef _WIN32
-			if (am & file::ex)
-			{
-				DWORD dw;
-				return GetBinaryType(c, &dw)
-					? success : failure;
-			}
-			#endif
-
-			return success;
+			return not env::dir::fail(u, am);
 		};
-		return m;
 	}
 
 	entry regx(view u)
@@ -175,20 +153,75 @@ namespace env::dir
 			return env::dir::fail(s, am);
 		}
 		auto const c = path.data();
-		
-		struct sys::stat st(c);
-		if (file::fail(st))
+
+		#ifdef _WIN32
+		if (am & ex)
+		{
+			DWORD dw;
+			return GetBinaryType(c, &dw)
+				? success : failure;
+		}
+		#endif
+
+		struct sys::stat state(c);
+		if (sys::fail(state))
 		{
 			return failure;
 		}
 
-		if (not S_ISDIR(st.st_mode))
+		if ((am & dirs) and not S_ISDIR(state.st_mode))
 		{
 			return failure;
+		}
+		if ((am & chr) and not S_ISCHR(state.st_mode))
+		{
+			return failure;
+		}
+		if ((am & reg) and not S_ISREG(state.st_mode))
+		{
+			return failure;
+		}
+		if (am & fifo)
+		{
+			#ifdef _WIN32
+			if (not path.starts_with(R"(\.\pipe\)"))
+			#endif
+			#ifdef S_ISFIFO
+			if (not S_ISFIFO(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (am & sock)
+		{
+			#ifdef S_IFSOCK
+			if (not S_ISSOCK(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (am & blk)
+		{
+			#ifdef S_ISFBLK
+			if (not S_ISFBLK(state.st_mode)
+			#endif
+				return failure;
+		}
+		if (am & reg)
+		{
+			#ifdef S_ISREG
+			if (not S_ISREG(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (am & lnk)
+		{
+			#ifdef S_ISLNK
+			if (not S_ISLNK(state.st_mode))
+			#endif
+				return failure;
 		}
 
 		auto const mask = check(am);
-		return st.st_mode & mask;
+		return state.st_mode & mask;
 	}
 
 	view make(view path)

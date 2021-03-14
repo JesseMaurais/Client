@@ -1,37 +1,45 @@
 #ifndef doc_hpp
 #define doc_hpp "Document Structure"
 
+#include "tmp.hpp"
 #include "opt.hpp"
+
+using namespace std::literals::string_view_literals;
 
 namespace doc
 {
-	template <auto f> class field
-	{
-		template <class C, class T> static auto make_pair(T C::*)
-		{
-			constexpr C* obj = nullptr;
-			constexpr T* ptr = nullptr;
-			return std::make_pair(*obj, *ptr);
-		}
-
-	public:
-
-		using pair_type = decltype(make_pair(f));
-		using value_type = typename pair_type::second_type;
-		using object_type = typename pair_type::first_type;
-	};
-
-
-	using name  = env::opt::name;
-	using pair  = env::opt::pair;
-	using graph = fwd::graph<name>;
-	using group = fwd::group<name>;
-	using edges = fwd::edges<name>;
+	using pair = fwd::pair<env::opt::name>;
+	using group = fwd::group<env::opt::name>;
 
 	template <class C> auto table(const C* = nullptr)
 	{
-		return C::table;
+		return C::table();
 	}
+
+	template <size_t N, class C> auto get(const C* = nullptr)
+	{
+		return std::get<N>(table<C>());
+	}
+
+	template <size_t M, size_t N, class C> auto get(const C* = nullptr)
+	{
+		return std::get<N>(get<M, C>());
+	}
+
+	template <size_t M, size_t N, class C> auto& value(const C* that)
+	{
+		return that->*get<M, N>(that);
+	}
+
+	template <size_t M, size_t N, class C> auto& value(C* that)
+	{
+		return that->*get<M, N>(that);
+	}
+
+	enum index : size_t
+	{
+		data, name
+	};
 }
 
 #endif // file

@@ -1,5 +1,4 @@
 Tests.ini
-Tools.ini
 compile_flags.txt
 strace_out
 .make

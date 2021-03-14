@@ -1,10 +1,35 @@
 #ifndef tmp_hpp
 #define tmp_hpp "Template Meta Programming"
 
+#include <utility>
+#include <type_traits>
 #include <functional>
+#include <cstddef>
 
 namespace fwd
 {
+	template <class C, class G> constexpr bool same = std::is_same<C, G>::value;
+
+	template <auto f> class offset_of
+	{
+		template <class C, class T> static auto null(T C::* = nullptr)
+		// f must match this function's signature
+		{
+			constexpr T* value = nullptr;
+			constexpr C* parent = nullptr;
+			return std::make_pair(*value, *parent);
+		}
+
+	public:
+	
+		// type deduction
+		using pair_type = decltype(null(f));
+		using value_type = typename pair_type::first_type;
+		using parent_type = typename pair_type::second_type;
+		// memory offset in parent
+		static constexpr auto size = offsetof(parent_type, f);
+	};
+
 	template <class T> struct type_of
 	{
 		using type = T;
@@ -31,7 +56,7 @@ namespace fwd
 		using base::base;
 
 		formula operator and(base const& that) const
-		{
+		{ 
 			return [&](T... x)
 			{
 				return (*this)(x...) and that(x...);

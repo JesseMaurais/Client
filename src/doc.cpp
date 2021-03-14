@@ -12,21 +12,25 @@ test_unit(doc)
 		int i;
 		float f;
 
+		static auto table()
+		{
+			return std::tuple
+			{ 
+				std::pair { &dummy::i, "i"sv }, 
+				std::pair { &dummy::f, "f"sv } 
+			};
+		}
+
 	} dumb;
 
-	using obj = doc::field<&dummy::i>::object_type;
-	static_assert(std::is_same<obj, dummy>::value);
-	using ptr = doc::field<&dummy::i>::value_type;
-	static_assert(std::is_same<ptr, int>::value);
+	using parent_type = fwd::offset_of<&dummy::i>::parent_type;
+	static_assert(fwd::same<parent_type, dummy>);
 
-	auto accessor = std::tuple 
-	{ 
-		std::pair{"i", &dummy::i}, 
-		std::pair{"f", &dummy::f} 
-	};
+	using value_type = fwd::offset_of<&dummy::i>::value_type;
+	static_assert(fwd::same<value_type, int>);
 
-	dumb.*std::get<0>(accessor).second = 42;
-	dumb.*std::get<1>(accessor).second = 4.2f;
+	doc::value<0, doc::data>(&dumb) = 42;
+	doc::value<1, doc::data>(&dumb) = 4.2f;
 
 	assert(42 == dumb.i);
 	assert(4.2f == dumb.f);

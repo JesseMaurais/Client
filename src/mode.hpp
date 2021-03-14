@@ -10,20 +10,27 @@ namespace env::file
 	// Access modes
 	enum mode : int
 	{
-		ex   = 1 << 0, // execute
-		wr   = 1 << 1, // write
-		rd   = 1 << 2, // read
-		ok   = 1 << 3, // exists
-		xu   = 1 << 4, // exclusive
-		sz   = 1 << 5, // truncate
-		app  = 1 << 6, // append
-		txt  = 1 << 7, // text
-		bin  = 1 << 8, // binary
-		rw   = rd | wr,
-		wo   = rw | ok,
-		rwx  = rw | ex,
-		oz   = wo | sz,
-		ox   = wo | ex,
+		ex   = 1 << 000, // execute
+		wr   = 1 << 001, // write
+		rd   = 1 << 002, // read
+		ok   = 1 << 003, // exists
+		xu   = 1 << 004, // exclusive
+		sz   = 1 << 005, // truncate
+		app  = 1 << 006, // append
+		txt  = 1 << 007, // text
+		bin  = 1 << 010, // binary
+		blk  = 1 << 011, // block device
+		chr  = 1 << 012, // character device
+		dirs = 1 << 013, // directory
+		fifo = 1 << 014, // byte stream
+		lnk  = 1 << 015, // symbolic link
+		reg  = 1 << 016, // regulare file
+		sock = 1 << 017, // domain socket
+
+		rw   = rd | wr, // read & write
+		wo   = rw | ok, // write & exists
+		rwx  = rw | ex, // read, write & execute
+		ov   = wo | sz, // overwrite
 	};
 
 	constexpr int owner(int am)
