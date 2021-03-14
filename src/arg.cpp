@@ -242,7 +242,7 @@ namespace env::opt
 			else
 			if (end != current)
 			{
-				size_t const size = current->argn;
+				auto const size = static_cast<size_t>(current->argn);
 				if (args.size() < size)
 				{
 					// Set as option

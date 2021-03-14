@@ -29,10 +29,16 @@ test_unit(doc)
 	using value_type = fwd::offset_of<&dummy::i>::value_type;
 	static_assert(fwd::same<value_type, int>);
 
-	doc::value<0, doc::data>(&dumb) = 42;
-	doc::value<1, doc::data>(&dumb) = 4.2f;
+	doc::value<0>(dumb) = 42;
+	doc::value<1>(dumb) = 4.2f;
 
 	assert(42 == dumb.i);
 	assert(4.2f == dumb.f);
+
+	assert(42 == doc::value<0>(dumb));
+	assert(4.2f == doc::value<1>(dumb));
+
+	assert(doc::key<0>(dumb) == "i"sv);
+	assert(doc::key<1>(dumb) == "f"sv);
 }
 #endif
