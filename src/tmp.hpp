@@ -8,12 +8,10 @@
 
 namespace fwd
 {
-	template <class C, class G> constexpr bool same = std::is_same<C, G>::value;
-
 	template <auto f> class offset_of
 	{
 		template <class C, class T> static auto null(T C::* = nullptr)
-		// f must match this function's signature
+		// must match this function's signature
 		{
 			constexpr T* value = nullptr;
 			constexpr C* parent = nullptr;
@@ -47,7 +45,7 @@ namespace fwd
 
 	template <class T> struct variable : constant<T>
 	{
-		virtual T operator=(T) = 0;
+		vi  rtual T operator=(T) = 0;
 	};
 
 	template <class... T> struct formula : std::function<bool(T...)>

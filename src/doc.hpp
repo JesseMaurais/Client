@@ -9,8 +9,11 @@ using namespace std::literals::string_view_literals;
 
 namespace doc
 {
-	using pair = fwd::pair<env::opt::name>;
-	using group = fwd::group<env::opt::name>;
+	struct node : fmt::struct_brief<env::opt::pair>
+	{
+		value index;
+		vector list;
+	};
 
 	template <class C> auto table(const C* = nullptr)
 	{

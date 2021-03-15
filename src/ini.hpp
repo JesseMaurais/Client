@@ -15,9 +15,9 @@ namespace doc
 		using out    = string::out;
 		using in     = string::in;
 
+		path::group::keys;
 		string::view::vector values;
 		string::set cache;
-		doc::group keys;
 
 		friend in::ref operator>>(in::ref, ref);
 		friend out::ref operator<<(out::ref, cref);
