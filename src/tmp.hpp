@@ -11,7 +11,7 @@ namespace fwd
 	template <auto f> class offset_of
 	{
 		template <class C, class T> static auto null(T C::* = nullptr)
-		// must match this function's signature
+		// argument f must match this function's signature
 		{
 			constexpr T* value = nullptr;
 			constexpr C* parent = nullptr;
