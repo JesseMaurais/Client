@@ -5,16 +5,8 @@
 #include "opt.hpp"
 #include <tuple>
 
-using namespace std::literals::string_view_literals;
-
 namespace doc
 {
-	struct node : fmt::struct_brief<env::opt::pair>
-	{
-		value index;
-		vector list;
-	};
-
 	template <class C> auto table(const C* = nullptr)
 	{
 		return C::table();
@@ -52,13 +44,19 @@ namespace doc
 
 	template <size_t N, class C> auto& value(const C& that)
 	{
-		return that.*get<N, 0, C>();
+		return that.*get<N, 0>(&that);
 	}
 
 	template <size_t N, class C> auto& value(C& that)
 	{
-		return that.*get<N, 0, C>();
+		return that.*get<N, 0>(&that);
 	}
+
+	struct node : fmt::struct_brief<env::opt::pair>
+	{
+		type index;
+		vector list;
+	};
 }
 
 #endif // file

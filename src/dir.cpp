@@ -8,7 +8,6 @@
 #include "opt.hpp"
 #include "arg.hpp"
 #include "sys.hpp"
-#include "file.hpp"
 #ifdef _WIN32
 # include "win/file.hpp"
 #else
@@ -54,36 +53,35 @@ namespace fmt::path
 	}
 }
 
-namespace env::dir
+namespace env::file
 {
-	edges paths()
+	fmt::string::view::edges paths()
 	{
 		return { env::pwd(), env::paths() };
 	}
 
-	edges config()
+	fmt::string::view::edges config()
 	{
 		return { env::usr::config_home(), env::usr::config_dirs() };
 	}
 
-	edges data()
+	fmt::string::view::edges data()
 	{
 		return { env::usr::data_home(), env::usr::data_dirs() };
 	}
 
-	bool find(view path, entry check)
+	bool find(fmt::string::view path, entry check)
 	{
 		if (not fmt::terminated(path))
 		{
-			auto const s = fmt::to_string(path);
-			return env::dir::find(s, check);
+			return find(fmt::to_string(path), check);
 		}
 		auto const c = path.data();
 
 		return fwd::any_of(sys::files(c), check);
 	}
 
-	bool find(span paths, entry check)
+	bool find(fmt::string::view::span paths, entry check)
 	{
 		return fwd::any_of(paths, [check](auto path)
 		{
@@ -91,24 +89,24 @@ namespace env::dir
 		});
 	}
 
-	bool find(edges paths, entry look)
+	bool find(fmt::string::view::edges paths, entry look)
 	{
 		return find(paths.first, look) or find(paths.second, look);
 	}
 
 	entry mask(mode am)
 	{
-		return [am](view u)
+		return [am](fmt::string::view u)
 		{
-			return not env::dir::fail(u, am);
+			return not env::file::fail(u, am);
 		};
 	}
 
-	entry regx(view u)
+	entry regx(fmt::string::view u)
 	{
 		auto const s = fmt::to_string(u);
 		auto const x = std::regex(s);
-		return [x](view u)
+		return [x](fmt::string::view u)
 		{
 			std::cmatch cm;
 			auto const s = fmt::to_string(u);
@@ -116,9 +114,9 @@ namespace env::dir
 		};
 	}
 
-	entry to(vector& t)
+	entry to(fmt::string::vector& t)
 	{
-		return [&](view u)
+		return [&](fmt::string::view u)
 		{
 			auto s = fmt::to_string(u);
 			t.emplace_back(move(s));
@@ -126,113 +124,34 @@ namespace env::dir
 		};
 	}
 
-	entry to(string& s)
+	entry to(fmt::string& s)
 	{
-		return [&](view u)
+		return [&](fmt::string::view u)
 		{
 			s = fmt::to_string(u);
 			return success;
 		};
 	}
 
-	entry all(view u, mode m, entry e)
+	entry all(fmt::string::view u, mode m, entry e)
 	{
 		return mask(m) || regx(u) || e;
 	}
 
-	entry any(view u, mode m, entry e)
+	entry any(fmt::string::view u, mode m, entry e)
 	{
 		return all(u, m, e);
 	}
 
-	bool fail(view path, mode am)
+	fmt::string::view make_dir(fmt::string::view path)
 	{
-		if (not fmt::terminated(path))
-		{
-			auto const s = fmt::to_string(path);
-			return env::dir::fail(s, am);
-		}
-		auto const c = path.data();
-
-		#ifdef _WIN32
-		if (am & ex)
-		{
-			DWORD dw;
-			return GetBinaryType(c, &dw)
-				? success : failure;
-		}
-		#endif
-
-		struct sys::stat state(c);
-		if (sys::fail(state))
-		{
-			return failure;
-		}
-
-		if ((am & dirs) and not S_ISDIR(state.st_mode))
-		{
-			return failure;
-		}
-		if ((am & chr) and not S_ISCHR(state.st_mode))
-		{
-			return failure;
-		}
-		if ((am & reg) and not S_ISREG(state.st_mode))
-		{
-			return failure;
-		}
-		if (am & fifo)
-		{
-			#ifdef _WIN32
-			if (not path.starts_with(R"(\.\pipe\)"))
-			#endif
-			#ifdef S_ISFIFO
-			if (not S_ISFIFO(state.st_mode))
-			#endif
-				return failure;
-		}
-		if (am & sock)
-		{
-			#ifdef S_IFSOCK
-			if (not S_ISSOCK(state.st_mode))
-			#endif
-				return failure;
-		}
-		if (am & blk)
-		{
-			#ifdef S_ISFBLK
-			if (not S_ISFBLK(state.st_mode)
-			#endif
-				return failure;
-		}
-		if (am & reg)
-		{
-			#ifdef S_ISREG
-			if (not S_ISREG(state.st_mode))
-			#endif
-				return failure;
-		}
-		if (am & lnk)
-		{
-			#ifdef S_ISLNK
-			if (not S_ISLNK(state.st_mode))
-			#endif
-				return failure;
-		}
-
-		auto const mask = check(am);
-		return state.st_mode & mask;
-	}
-
-	view make(view path)
-	{
-		std::stack<view> stack;
-		string buf;
+		std::stack<fmt::string::view> stack;
+		fmt::string buf;
 
 		auto folders = fmt::dir::split(path);
 		auto stem = path;
 
-		while (env::dir::fail(stem))
+		while (env::file::fail(stem))
 		{
 			stack.push(folders.back());
 			folders.pop_back();
@@ -261,14 +180,14 @@ namespace env::dir
 		return stem;
 	}
 
-	bool remove(view dir)
+	bool remove_dir(fmt::string::view dir)
 	{
-		std::deque<string> deque;
+		std::deque<fmt::string> deque;
 		deque.emplace_back(dir);
 
 		for (auto it = deque.begin(); it != deque.end(); ++it)
 		{
-			(void) find(*it, [&](view u)
+			(void) find(*it, [&](fmt::string::view u)
 			{
 				auto const path = fmt::dir::join({*it, u});
 				auto const c = path.data();
@@ -286,7 +205,7 @@ namespace env::dir
 					}
 				}
 				else
-				if (file::fail(sys::unlink(c)))
+				if (sys::fail(sys::unlink(c)))
 				{
 					sys::err(here, "unlink", c);
 				}
@@ -299,7 +218,7 @@ namespace env::dir
 		{
 			dir = deque.back();
 			auto const c = dir.data();
-			if (file::fail(sys::rmdir(c)))
+			if (sys::fail(sys::rmdir(c)))
 			{
 				sys::err(here, "rmdir", c);
 				ok = failure;
@@ -313,9 +232,9 @@ namespace env::dir
 #ifdef test_unit
 test_unit(dir)
 {
-	assert(not env::dir::fail(env::temp()));
-	assert(not env::dir::fail(env::pwd()));
-	assert(not env::dir::fail(env::home()));
+	assert(not env::file::fail(env::temp()));
+	assert(not env::file::fail(env::pwd()));
+	assert(not env::file::fail(env::home()));
 
 	auto const path = fmt::dir::split(__FILE__);
 	assert(not empty(path));
@@ -324,16 +243,16 @@ test_unit(dir)
 	auto const program = env::opt::program();
 	assert(not empty(program));
 
-	assert(env::dir::find(env::pwd(), [program](auto entry)
+	assert(env::file::find(env::pwd(), [program](auto entry)
 	{
 		return fmt::dir::split(entry).back() == program;
 	}));
 
 	auto const temp = fmt::dir::join({env::temp(), "my", "test", "dir"});
 	if (std::empty(temp)) return;
-	auto const stem = env::dir::make(temp);
+	auto const stem = env::file::make_dir(temp);
 //	assert(not empty(stem.first));
 //	assert(not empty(stem.second));
-	assert(not env::dir::remove(stem));
+	assert(not env::file::remove_dir(stem));
 }
 #endif

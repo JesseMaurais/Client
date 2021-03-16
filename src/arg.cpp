@@ -140,9 +140,9 @@ namespace env::opt
 		if (empty(s))
 		{
 			auto const filename = make_ini();
-			for (auto const dirs : { env::dir::config(), env::dir::paths() })
+			for (auto const dirs : { env::file::config(), env::file::paths() })
 			{
-				using namespace env::dir;
+				using namespace env::file;
 				if (find(dirs, regx(filename) || to(s) || stop))
 				{
 					break;

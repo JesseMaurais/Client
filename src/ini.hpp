@@ -15,7 +15,7 @@ namespace doc
 		using out    = string::out;
 		using in     = string::in;
 
-		path::group::keys;
+		fwd::group<env::opt::name> keys;
 		string::view::vector values;
 		string::set cache;
 
@@ -27,10 +27,10 @@ namespace doc
 		static vector split(view);
 		static string join(init);
 
-		bool got(doc::pair) const;
-		view get(doc::pair) const;
-		bool set(doc::pair, view);
-		bool put(doc::pair, view);
+		bool got(node::type) const;
+		view get(node::type) const;
+		bool set(node::type, view);
+		bool put(node::type, view);
 	};
 }
 

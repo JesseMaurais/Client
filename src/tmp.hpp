@@ -10,8 +10,10 @@ namespace fwd
 {
 	template <auto f> class offset_of
 	{
+		static_assert(std::is_member_object_pointer<decltype(f)>::value);
+
 		template <class C, class T> static auto null(T C::* = nullptr)
-		// must match this function's signature
+		// argument f must match this function's signature
 		{
 			constexpr T* value = nullptr;
 			constexpr C* parent = nullptr;
@@ -45,7 +47,7 @@ namespace fwd
 
 	template <class T> struct variable : constant<T>
 	{
-		vi  rtual T operator=(T) = 0;
+		virtual T operator=(T) = 0;
 	};
 
 	template <class... T> struct formula : std::function<bool(T...)>

@@ -21,7 +21,7 @@ namespace env::file
 		bin  = 1 << 010, // binary
 		blk  = 1 << 011, // block device
 		chr  = 1 << 012, // character device
-		dirs = 1 << 013, // directory
+		dir  = 1 << 013, // directory
 		fifo = 1 << 014, // byte stream
 		lnk  = 1 << 015, // symbolic link
 		reg  = 1 << 016, // regulare file

@@ -20,58 +20,31 @@ namespace fmt::dir
 	string join(string::view::init);
 }
 
-namespace env::dir
+namespace env::file
 {
-	using namespace env::file;
+	using entry  = fwd::predicate<fmt::string::view>;
 
-	using string = fmt::string;
-	using view   = string::view;
-	using vector = string::vector;
-	using edges  = view::edges;
-	using span   = view::span;
-	using entry  = fwd::predicate<view>;
+	constexpr auto stop = fwd::always<fmt::string::view>;
+	constexpr auto next = fwd::never<fmt::string::view>;
 
-	constexpr auto stop = fwd::always<view>;
-	constexpr auto next = fwd::never<view>;
+	fmt::string::view::edges paths(); // pwd, paths
+	fmt::string::view::edges config(); // config_home, config_dirs
+	fmt::string::view::edges data(); // data_home, data_dirs
 
-	edges paths(); // pwd, paths
-	edges config(); // config_home, config_dirs
-	edges data(); // data_home, data_dirs
+	bool find(fmt::string::view, entry);
+	// Iterate directory until predicate
+	bool find(fmt::string::view::span, entry);
+	bool find(fmt::string::view::edges, entry);
 
-	entry mask(mode);
-	entry regx(view);
-	entry to(string &);
-	entry to(vector &);
-	entry all(view, mode = ok, entry = next);
-	entry any(view, mode = ok, entry = stop);
+	entry mask(env::file::mode);
+	entry regx(fmt::string::view);
+	entry to(fmt::string &);
+	entry to(fmt::string::vector &);
+	entry all(fmt::string::view, mode = ok, entry = next);
+	entry any(fmt::string::view, mode = ok, entry = stop);
 
-	bool find(view, entry);
-	bool find(span, entry);
-	bool find(edges, entry);
-
-	bool fail(view path, mode = ok);
-	view make(view path);
-	bool remove(view path);
-
-	class tmp
-	{
-		view stem;
-
-	public:
-
-		tmp(view path)
-		{
-			stem = make(path);
-		}
-
-		~tmp()
-		{
-			if (not stem.empty())
-			{
-				remove(stem);
-			}
-		}
-	};
+	fmt::string::view make_dir(fmt::string::view path);
+	bool remove_dir(fmt::string::view path);
 }
 
 #endif // file

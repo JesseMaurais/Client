@@ -7,10 +7,12 @@
 #ifdef test_unit
 test_unit(doc)
 {
+	using namespace std::literals::string_view_literals;
+
 	struct dummy
 	{
-		int i;
-		float f;
+		int i = 0;
+		float f = 0.0f;
 
 		static auto table()
 		{
@@ -24,10 +26,10 @@ test_unit(doc)
 	} dumb;
 
 	using parent_type = fwd::offset_of<&dummy::i>::parent_type;
-	static_assert(fwd::same<parent_type, dummy>);
+	static_assert(std::is_same<parent_type, dummy>::value);
 
 	using value_type = fwd::offset_of<&dummy::i>::value_type;
-	static_assert(fwd::same<value_type, int>);
+	static_assert(std::is_same<value_type, int>::value);
 
 	doc::value<0>(dumb) = 42;
 	doc::value<1>(dumb) = 4.2f;

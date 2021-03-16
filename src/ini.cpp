@@ -125,26 +125,26 @@ namespace doc
 		return output;
 	}
 
-	bool ini::got(doc::pair key) const
+	bool ini::got(node::type key) const
 	{
 		return keys.find(key) != keys.end();
 	}
 
-	ini::view ini::get(doc::pair key) const
+	ini::view ini::get(node::type key) const
 	{
 		auto const it = keys.find(key);
 		auto const index = fmt::to_size(it->second);
 		return it == keys.end() ? "" : values.at(index);
 	}
 
-	bool ini::set(doc::pair key, view value)
+	bool ini::set(node::type key, view value)
 	{
 		auto const it = cache.emplace(value).first;
 		assert(cache.end() != it);	
 		return put(key, *it);
 	}
 
-	bool ini::put(doc::pair key, view value)
+	bool ini::put(node::type key, view value)
 	{
 		auto const it = keys.find(key);
 		if (keys.end() == it)
