@@ -9,7 +9,7 @@ namespace doc
 {
 	template <class Type> class instance : fwd::unique
 	{
-		fwd::vector<ptrdiff_t> index;
+		fwd::vector<ptrdiff_t> index, cross;
 		fwd::vector<Type> item;
 		instance() = default;
 
@@ -18,16 +18,12 @@ namespace doc
 		static instance& self();
 		size_t emplace(Type&&);
 		size_t erase(size_t);
+		Type* find(size_t);
 		Type& at(size_t);
-
-		inline auto items() const
-		{
-			return item.size();
-		}
 
 		inline auto gap() const
 		{
-			return index.size() - items();
+			return index.size() - item.size();
 		}
 	};
 
@@ -37,16 +33,16 @@ namespace doc
 		return instance<Type>::self();
 	}
 
-	template <class Type> class access_ptr
+	template <class Type> class access_ptr : fwd::unique
 	{
 		size_t const pos;
 
 	public:
 
-		object_ptr(Type&& type) : pos(access<Type>().emplace(type))
+		access_ptr(Type&& type) : pos(access<Type>().emplace(type))
 		{ }
 
-		~object_ptr()
+		~access_ptr()
 		{
 			access<Type>().erase(pos);
 		}
@@ -60,6 +56,12 @@ namespace doc
 		{
 			return &access<Type>().at(pos);
 		}
+	};
+
+	struct node : fmt::struct_brief<env::opt::pair>
+	{
+		type index;
+		vector list;
 	};
 
 	template <class C> auto table(const C* = nullptr)
@@ -106,12 +108,6 @@ namespace doc
 	{
 		return that.*get<N, 0>(&that);
 	}
-
-	struct node : fmt::struct_brief<env::opt::pair>
-	{
-		type index;
-		vector list;
-	};
 }
 
 #endif // file

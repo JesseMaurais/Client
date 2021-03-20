@@ -1,7 +1,7 @@
-#ifndef meta_hpp
-#define meta_hpp "Document Metadata"
+// Do not include from another header
 
 #include "doc.hpp"
+#include "dig.hpp"
 #include "sync.hpp"
 
 namespace doc
@@ -18,7 +18,28 @@ namespace doc
 
 	template <class Type> auto& instance<Type>::at(size_t pos)
 	{
-		return item.at(index.at(pos));
+		auto const offset = index.at(pos);
+		#ifdef assert
+		assert(cross.at(offset) == pos);
+		#endif
+		return item.at(offset);
+	}
+
+	template <class Type> auto instance<Type>::find(size_t pos)
+	{
+		Type* ptr = nullptr;
+		if (index.size() > pos)
+		{
+			auto const offset = index.at(pos);
+			if (-1 < offset and to_size(offset) < item.size())
+			{
+				#ifdef assert
+				assert(cross.at(offset) == pos);
+				#endif
+				ptr = item.data() + offset;
+			}
+		}
+		return ptr;
 	}
 
 	template <class Type> bool instance<Type>::erase(size_t pos)
@@ -31,15 +52,9 @@ namespace doc
 			item.at(offset) = move(item.back());
 			item.pop_back();
 			pos = item.size();
-			// point back at offset
-			for (auto& it : index)
-			{
-				if (pos == it)
-				{
-					it = offset;
-					break;
-				}
-			}
+			// point back at new offset
+			index.at(cross.at(pos)) = offset;
+			cross.at(pos) = offset;
 			offset = -1;
 		}
 		return offset;
@@ -75,5 +90,3 @@ namespace doc
 		return low;
 	}
 }
-
-#endif // file
