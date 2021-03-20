@@ -1,9 +1,10 @@
 #ifndef tmp_hpp
 #define tmp_hpp "Template Meta Programming"
 
-#include <utility>
 #include <type_traits>
 #include <functional>
+#include <iterator>
+#include <utility>
 #include <cstddef>
 
 namespace fwd
@@ -12,13 +13,7 @@ namespace fwd
 	{
 		static_assert(std::is_member_object_pointer<decltype(f)>::value);
 
-		template <class C, class T> static auto null(T C::* = nullptr)
-		// argument f must match this function's signature
-		{
-			constexpr T* value = nullptr;
-			constexpr C* parent = nullptr;
-			return std::make_pair(*value, *parent);
-		}
+		template <class C, class T> static std::pair<C, T> null(T C::*);
 
 	public:
 	
@@ -26,9 +21,82 @@ namespace fwd
 		using pair_type = decltype(null(f));
 		using value_type = typename pair_type::first_type;
 		using parent_type = typename pair_type::second_type;
-		// memory offset in parent
-		static constexpr auto size = offsetof(parent_type, f);
 	};
+
+	template <class T> struct iterator
+	{
+		using F = std::function<T(T)>;
+
+		iterator(T size, F it) 
+		: pos(size), next(it)
+		{ }
+
+		auto operator++()
+		{
+			return pos = next(pos);
+		}
+
+		auto operator*()
+		{
+			return pos;
+		}
+
+	private:
+
+		T pos;
+		F next;
+	};
+
+	template <class T> class range : std::pair<T, T>
+	{
+		using I = iterator<T, N>;
+
+		F next;
+
+	public:
+
+		range(T first, T second, I::F it)
+		: pair(first, second), next(it)
+		{ }
+
+		auto begin()
+		{
+			return I(first, next);
+		}
+
+		auto end()
+		{
+			return I(size, next);
+		}
+	};
+
+	template <class T> auto up_to(T size, T from = 0, T by = 1)
+	{
+		#ifdef assert
+		assert(0 == ((size - from) % by));
+		#endif
+		return range<T> 
+		{ 
+			from, size, [by](T pos)
+			{
+				return std::next(pos, by);
+			}
+		};
+	}
+
+	template <class T> auto down_from(T size, T to = 0, T by = 1)
+	{
+		#ifdef assert
+		assert(0 == ((size - to) % by));
+		#endif
+		return range<T> 
+		{
+			std::prev(to), std::prev(size), [by](T pos)
+			{
+				return std::prev(pos, by);
+			}
+		};
+	}
 
 	template <class T> struct type_of
 	{
