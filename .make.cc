@@ -173,7 +173,7 @@ endif
 SRC=$(wildcard $(SRCDIR)*.$(SRCEXT))
 #endif
 
-#if 0
+#ifndef _MSC_VER
 #ifdef _NMAKE
 MAKINC=$(MAKDIR)include.$(MAKEXT)
 if((echo INC=\>$(MAKINC)) && for "delims=$(ENT)" %i in (%INCLUDE%) do @echo , -I"%~i"\>>$(MAKINC))
@@ -241,7 +241,7 @@ LNKDEP=$(PCHOBJ) $(OBJ)
 
 OBJEXT=o
 DEPEXT=d
-INLEXT=in
+INLEXT=i
 LIBEXT=a
 PCHEXT=gch
 
