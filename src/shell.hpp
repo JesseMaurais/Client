@@ -12,7 +12,6 @@ namespace env
 		using vector = string::vector;
 		using span   = view::span;
 		using init   = view::init;
-		using graph  = view::graph;
 		using line   = string::line;
 		using out    = string::out::ref;
 		using in     = string::in::ref;

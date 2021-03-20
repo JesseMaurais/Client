@@ -1,7 +1,10 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#if __has_include(<X11/Xproto.h>)
+#if !__has_include(<X11/Xproto.h>)
+# error Cannot find X11 protocol header
+#endif
+
 #include <iostream>
 #include <fstream>
 #include "fmt.hpp"
@@ -113,5 +116,3 @@ namespace x11
 		return reason;
 	}
 }
-
-#endif // Xproto

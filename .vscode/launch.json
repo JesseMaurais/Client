@@ -9,7 +9,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/test.exe",
-            "args": [""],
+            "args": ["-o", "test_mode"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

@@ -63,7 +63,7 @@ namespace doc
 
 	ini::in::ref operator>>(ini::in::ref input, ini::ref output)
 	{
-		env::opt::word group = 0;
+		env::opt::name group = 0;
 		ini::string token;
 
 		while (ini::getline(input, token))
@@ -125,33 +125,33 @@ namespace doc
 		return output;
 	}
 
-	bool ini::got(env::opt::pair key) const
+	bool ini::got(node::type key) const
 	{
 		return keys.find(key) != keys.end();
 	}
 
-	ini::view ini::get(env::opt::pair key) const
+	ini::view ini::get(node::type key) const
 	{
 		auto const it = keys.find(key);
 		auto const index = fmt::to_size(it->second);
 		return it == keys.end() ? "" : values.at(index);
 	}
 
-	bool ini::set(env::opt::pair key, view value)
+	bool ini::set(node::type key, view value)
 	{
 		auto const it = cache.emplace(value).first;
 		assert(cache.end() != it);	
 		return put(key, *it);
 	}
 
-	bool ini::put(env::opt::pair key, view value)
+	bool ini::put(node::type key, view value)
 	{
 		auto const it = keys.find(key);
 		if (keys.end() == it)
 		{
 			auto const size = values.size();
 			values.emplace_back(value);
-			keys[key] = fmt::to<env::opt::word>(size);
+			keys[key] = fmt::to<env::opt::name>(size);
 			return true;
 		}
 		else

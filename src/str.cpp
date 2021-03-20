@@ -13,14 +13,14 @@ namespace
 	{
 		sys::exclusive<fmt::string::set> cache;
 		sys::exclusive<fmt::string::view::vector> store;
-		sys::exclusive<std::map<fmt::string::view, env::opt::word>> table;
+		sys::exclusive<std::map<fmt::string::view, env::opt::name>> table;
 
 	public:
 
-		bool got(env::opt::word name)
+		bool got(env::opt::name key)
 		{
-			env::opt::word const index = ~name;
-			env::file::ssize_t const size = store.read()->size();
+			env::opt::name const index = ~key;
+			std::ptrdiff_t const size = store.read()->size();
 			return -1 < index and index < size;
 		}
 
@@ -32,76 +32,75 @@ namespace
 			return end != it;
 		}
 
-		fmt::string::view get(env::opt::word name)
+		fmt::string::view get(env::opt::name key)
 		{
 			auto const reader = store.read();
-			auto const index = fmt::to_size(~name);
+			auto const index = fmt::to_size(~key);
+			assert(got(key) and "String is not stored");
 			return reader->at(index);
 		}
 
-		fmt::string::view get(fmt::string::view name)
+		fmt::string::view get(fmt::string::view key)
 		{
-			assert(not empty(name));
-			// Lookup extant
+			assert(not empty(key));
+			// Lookup
 			{
 				auto const reader = table.read();
-				auto const it = reader->find(name);
+				auto const it = reader->find(key);
 				auto const end = reader->end();
 				if (end != it)
 				{
 					return it->first;
 				}
 			}
-			// Create entry
-			return get(set(name));
+			// Create
+			return get(set(key));
 		}
 
-		env::opt::word put(fmt::string::view name)
+		env::opt::name put(fmt::string::view key)
 		{
-			assert(not empty(name));
-			// Lookup extant
+			assert(not empty(key));
+			// Lookup
 			{
 				auto const reader = table.read();
 				auto const end = reader->end();
-				auto const it = reader->find(name);
+				auto const it = reader->find(key);
 				if (end != it)
 				{
 					return ~it->second;
 				}
 			}
-			// Create entry
+			// Create
 			auto writer = store.write();
 			auto const size = writer->size();
-			auto const id = fmt::to<env::opt::word>(size);
+			auto const id = fmt::to<env::opt::name>(size);
 			{
-				auto [it, unique] = table.write()->emplace(name, id);
-				#ifdef verify
-				verify(unique);
-				#endif
+				auto [it, unique] = table.write()->emplace(key, id);
+				assert(unique);
 				writer->push_back(it->first);
 			}
 			return ~id;
 		}
 
-		env::opt::word set(fmt::string::view name)
+		env::opt::name set(fmt::string::view key)
 		{
-			// Lookup extant
+			// Lookup
 			{
 				auto const reader = table.read();
 				auto const end = reader->end();
-				auto const it = reader->find(name);
+				auto const it = reader->find(key);
 				if (end != it)
 				{
 					return ~it->second;
 				}
 			}
-			// Create entry
+			// Create
 			auto writer = store.write();
 			auto const size = writer->size();
-			auto const id = fmt::to<env::opt::word>(size);
+			auto const id = fmt::to<env::opt::name>(size);
 			{
 				// Cache the string here
-				auto const p = cache.write()->emplace(name);
+				auto const p = cache.write()->emplace(key);
 				verify(p.second);
 				// Index a view to the string
 				auto const q = table.write()->emplace(*p.first, id);
@@ -123,18 +122,14 @@ namespace
 			while (std::getline(in, line, end))
 			{
 				auto const p = wcache->emplace(move(line));
-				#ifdef verify
-				verify(p.second);
-				#endif
+				assert(p.second);
 
 				auto const size = wstore->size();
-				auto const id = fmt::to<env::opt::word>(size);	
+				auto const id = fmt::to<env::opt::name>(size);	
 				wstore->emplace_back(*p.first);
 
 				auto const q = wtable->emplace(*p.first, id);
-				#ifdef verify
-				verify(q.second);
-				#endif
+				assert(q.second);
 			}
 			return in;
 		}
@@ -162,34 +157,34 @@ namespace
 
 namespace fmt::str
 {
-	bool got(word name)
+	bool got(name n)
 	{
-		return registry().got(name);
+		return registry().got(n);
 	}
 
-	bool got(view name)
+	bool got(view n)
 	{
-		return registry().got(name);
+		return registry().got(n);
 	}
 
-	view get(word name)
+	view get(name n)
 	{
-		return registry().get(name);
+		return registry().get(n);
 	}
 
-	view get(view name)
+	view get(view n)
 	{
-		return registry().get(name);
+		return registry().get(n);
 	}
 
-	word put(view name)
+	name put(view n)
 	{
-		return registry().put(name);
+		return registry().put(n);
 	}
 
-	word set(view name)
+	name set(view n)
 	{
-		return registry().set(name);
+		return registry().set(n);
 	}
 
 	string::in::ref get(string::in::ref in, char end)

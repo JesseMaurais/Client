@@ -50,13 +50,15 @@
 # define error(x) !error x
 # define message(x) !message x
 # define add(x, y) x=$(x) y
+# define S(x) %%x
 #else // GNU
-# define if(x) ifeq(0, $(shell x 2>1; echo $$?))
+# define if(x) ifeq(0, $(shell x 1>$(NULL); echo $$?))
 # define ifeq(x,y) ifeq (x,y)
 # define ifneq(x,y) ifneq (x,y)
 # define error(x) $(error x)
 # define message(x) $(message x)
 # define add(x, y) x+=y
+# define S(x) $${x}
 #endif
 
 //
@@ -128,6 +130,7 @@ endif
 //
 
 ifdef COMSPEC
+NULL=nul
 WHERE=where
 LIST=dir /b
 SHOW=type
@@ -137,6 +140,7 @@ REMOVE=del /f
 MKDIR=md
 MKTEMP=mktemp
 else // shell
+NULL=/dev/null
 WHERE=which -a
 LIST=ls
 SHOW=cat
@@ -201,7 +205,7 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 // Compiler
 //
 
-add(HEADER, -I$(HDRDIR) -I$(OBJDIR))
+add(HEADER, -I$(HDRDIR) -I$(MAKDIR))
 
 #ifdef _MSC_VER
 
@@ -264,7 +268,7 @@ endif
 ifdef PCH
 PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
 PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
-add(HEADER, -include $(PCHHDR) -I$(OBJDIR))
+add(HEADER, -include $(PCHHDR))
 $(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -c $< -o $@
 endif
 

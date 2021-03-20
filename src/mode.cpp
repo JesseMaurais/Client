@@ -160,11 +160,78 @@ namespace env::file
 	{
 		if (not fmt::terminated(path))
 		{
-			auto const s = fmt::to_string(path);
-			return fail(s, am);
+			return fail(fmt::to_string(path), am);
+		}
+		auto const c = path.data();
+
+		#ifdef _WIN32
+		if (am & ex)
+		{
+			DWORD dw;
+			return GetBinaryType(c, &dw)
+				? success : failure;
+		}
+		#endif
+
+		struct sys::stat state(c);
+		if (sys::fail(state))
+		{
+			return failure;
 		}
 
-		return env::file::fail(sys::access(data(path), check(am)));
+		if ((am & dir) and not S_ISDIR(state.st_mode))
+		{
+			return failure;
+		}
+		if ((am & chr) and not S_ISCHR(state.st_mode))
+		{
+			return failure;
+		}
+		if ((am & reg) and not S_ISREG(state.st_mode))
+		{
+			return failure;
+		}
+		if (am & fifo)
+		{
+			#ifdef _WIN32
+			if (not path.starts_with(R"(\.\pipe\)"))
+			#endif
+			#ifdef S_ISFIFO
+			if (not S_ISFIFO(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (am & sock)
+		{
+			#ifdef S_IFSOCK
+			if (not S_ISSOCK(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (am & blk)
+		{
+			#ifdef S_ISFBLK
+			if (not S_ISFBLK(state.st_mode)
+			#endif
+				return failure;
+		}
+		if (am & reg)
+		{
+			#ifdef S_ISREG
+			if (not S_ISREG(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (am & lnk)
+		{
+			#ifdef S_ISLNK
+			if (not S_ISLNK(state.st_mode))
+			#endif
+				return failure;
+		}
+
+		auto const mask = check(am);
+		return state.st_mode & mask;
 	}
 }
 

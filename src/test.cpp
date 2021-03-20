@@ -16,13 +16,12 @@
 #include <vector>
 #include <set>
 #include <map>
+
 #ifndef _TOOLS
 # define _TOOLS "Tools.ini"
 #endif
 
 #ifdef test_unit
-#pragma warning(push)
-#pragma warning(disable : 4127 4702)
 test_unit(err)
 {
 	assert(true == true);
@@ -30,7 +29,6 @@ test_unit(err)
 	assert(true and not false);
 	except(throw "Holy Cow!");
 }
-#pragma warning(pop)
 #endif
 
 namespace
@@ -95,7 +93,7 @@ int main(int argc, char** argv)
 	// Command line words
 	struct
 	{
-		env::opt::word const
+		env::opt::name const
 			tests = fmt::str::put("TESTS"),
 			color = fmt::str::put("color"),
 			async = fmt::str::put("async"),
@@ -107,14 +105,14 @@ int main(int argc, char** argv)
 	} arg;
 
 	// Command line details
-	std::vector<env::opt::command> cmd
+	env::opt::command::vector cmd
 	{
 		{ 0, "h", fmt::str::get(arg.help), "Print command line usage then quit" },
 		{ 0, "p", fmt::str::get(arg.print), "Print all source tests then quit" },
 		{ 0, "q", fmt::str::get(arg.quiet), "Only print error messages" },
 		{ 0, "c", fmt::str::get(arg.color), "Print using color codes" },
 		{ 0, "a", fmt::str::get(arg.async), "Run tests asynchronously" },
-		{ 1, "t", fmt::str::get(arg.tools), config + " is replaced with argument" },
+		{ 1, "t", fmt::str::get(arg.tools), _TOOLS " is replaced with argument" },
 		{ 0, "o", fmt::str::get(arg.host), "Host tests in this process" },
 	};
 

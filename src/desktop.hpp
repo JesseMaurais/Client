@@ -44,7 +44,6 @@ namespace env
 		enum class mode { none, many, dir, save };
 		line select(view start = "", mode = mode::none);
 		// User selects file(s) from the system
-
 	};
 
 	desktop& dialog();

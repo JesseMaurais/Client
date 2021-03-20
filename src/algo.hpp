@@ -15,34 +15,24 @@ namespace fwd
 	<
 		class Type
 		,
-		template <class> class Alloc = allocator
+		class View = span<Type>
 		,
-		template <class, template<class> class> class Vector = vector
-		,
-		template <class> class Span = span
-		,
-		class View = Span<Type>
-		,
-		class Container = Vector<Type, Alloc>
-		,
-		class Size = typename Container::size_type
+		class Container = vector<Type>
 		,
 		class Pointer = typename std::add_pointer<const Container>::type
 		,
-		class Reference = typename std::add_lvalue_reference<const Container>::type
+		class Size = typename Container::size_type
 		,
 		class Base = pair<Size>
 	>
-	struct line : Base
+	class line : Base
 	{
 		Pointer that;
 
+	public:
+
 		line(Size begin, Size end, Pointer ptr) 
 		: Base(begin, end), that(ptr)
-		{ }
-
-		line(Size begin, Size end, Reference ref) 
-		: line(begin, end, &ref)
 		{ }
 
 		bool empty() const { return this->second == this->first; }
@@ -64,43 +54,10 @@ namespace fwd
 
 		auto operator[](std::size_t index) const 
 		{
+			#ifdef assert
+			assert(size() > (std::ptrdiff_t) index);
+			#endif
 			return that->at(this->first + index);
-		}
-	};
-
-	template
-	<
-		class Type
-		,
-		template <class> class Alloc = allocator
-		,
-		template <class, template <class> class> class Vector = vector
-		,
-		template <class> class Span = span
-		,
-		class View = Span<Type>
-		,
-		class Container = Vector<Type, Alloc>
-		,
-		class Size = typename Container::size_type
-		,
-		class Pair = pair<Size>
-		,
-		class Index = line<Pair, Alloc, Vector, Span>
-		,
-		class Base = line<Type, Alloc, Vector, Span>
-	>
-	struct page : Base
-	{
-		Index index;
-
-		page(Base pos, Index in) 
-		: Base(pos), index(in)
-		{ }
-
-		Base operator()(std::size_t at) const
-		{
-			return { index[at], this->that };
 		}
 	};
 
@@ -127,10 +84,6 @@ namespace fwd
 	template
 	<
 		class Node
-		,
-		template <class> class Alloc = allocator
-		,
-		template <class, template <class> class> class Vector = vector
 		,
 		template <class> class Span = span
 	>

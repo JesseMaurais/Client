@@ -152,12 +152,12 @@ namespace env::usr
 			constexpr auto base = "applications.menu";
 			auto const menu = fmt::join({menu_prefix(), base});
 			path = fmt::dir::join({config_home(), "menus", menu});
-			if (env::dir::fail(path))
+			if (env::file::fail(path))
 			{
 				for (auto const dir : config_dirs())
 				{
 					path = fmt::dir::join({dir, menu});
-					if (not env::dir::fail(path))
+					if (not env::file::fail(path))
 					{
 						break;
 					}

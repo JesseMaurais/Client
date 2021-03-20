@@ -23,7 +23,7 @@ namespace
 		return app;
 	}
 
-	auto make_pair(env::opt::word key = make_key())
+	auto make_pair(env::opt::name key = make_key())
 	{
 		static auto const cmd = fmt::str::set("Command Line");
 		return std::make_pair(cmd, key);
@@ -58,13 +58,13 @@ namespace
 		}
 	}
 
-	auto find_next(fmt::string::view argu, env::opt::commands cmd)
+	auto find_next(fmt::string::view argu, env::opt::command::span cmd)
 	{
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
 		auto next = end;
 
-		if (argu.starts_with("--"))
+		if (argu.starts_with(env::opt::dual))
 		{
 			auto const entry = argu.substr(2);
 			next = std::find_if
@@ -76,7 +76,7 @@ namespace
 			);
 		}
 		else
-		if (argu.starts_with("-"))
+		if (argu.starts_with(env::opt::dash))
 		{
 			auto const entry = argu.substr(1);
 			next = std::find_if
@@ -94,17 +94,17 @@ namespace
 
 namespace env::opt
 {
-	fmt::string::view application()
+	view application()
 	{
 		return env::opt::get(make_key());
 	}
 
-	fmt::string::view::span arguments()
+	span arguments()
 	{
 		return { list.data(), list.size() };
 	}
 
-	fmt::string::view initials()
+	view initials()
 	{
 		static fmt::string s;
 		if (empty(s))
@@ -114,7 +114,7 @@ namespace env::opt
 		return s;
 	}
 
-	fmt::string::view program()
+	view program()
 	{
 		static fmt::string::view u;
 		if (empty(u))
@@ -134,15 +134,15 @@ namespace env::opt
 		return u;
 	}
 
-	fmt::string::view config()
+	view config()
 	{
 		static fmt::string s;
 		if (empty(s))
 		{
 			auto const filename = make_ini();
-			for (auto const dirs : { env::dir::config(), env::dir::paths() })
+			for (auto const dirs : { env::file::config(), env::file::paths() })
 			{
-				using namespace env::dir;
+				using namespace env::file;
 				if (find(dirs, regx(filename) || to(s) || stop))
 				{
 					break;
@@ -171,22 +171,22 @@ namespace env::opt
 		return registry().read()->got(key);
 	}
 
-	fmt::string::view get(pair key)
+	view get(pair key)
 	{
 		return registry().read()->get(key);
 	}
 
-	bool set(pair key, fmt::string::view value)
+	bool set(pair key, view value)
 	{
 		return registry().write()->set(key, value);
 	}
 
-	bool got(word key)
+	bool got(name key)
 	{
 		return not empty(get(key));
 	}
 
-	fmt::string::view get(word key)
+	view get(name key)
 	{
 		auto const u = fmt::str::get(key);
 		// First look for argument
@@ -209,12 +209,12 @@ namespace env::opt
 		return value;
 	}
 
-	bool set(word key, fmt::string::view value)
+	bool set(name key, fmt::string::view value)
 	{
 		return set(make_pair(key), value);
 	}
 
-	fmt::string::view::vector put(int argc, char** argv, commands cmd)
+	fmt::string::view::vector put(int argc, char** argv, command::span cmd)
 	{
 		assert(nullptr == argv[argc]);
 		// Push a view to command line arguments
@@ -242,7 +242,8 @@ namespace env::opt
 			else
 			if (end != current)
 			{
-				if (args.size() < current->argn)
+				auto const size = static_cast<size_t>(current->argn);
+				if (args.size() < size)
 				{
 					// Set as option
 					args.emplace_back(argu);

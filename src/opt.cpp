@@ -2,9 +2,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "opt.hpp"
+#include "arg.hpp"
 #include "dig.hpp"
 #include "type.hpp"
-#include "arg.hpp"
 
 namespace
 {
@@ -47,12 +47,12 @@ namespace env::opt
 {
 	// Boolean
 
-	bool get(word key, bool value)
+	bool get(name key, bool value)
 	{
 		return cast(key, value);
 	}
 
-	bool set(word key, bool value)
+	bool set(name key, bool value)
 	{
 		fmt::string::view u = cast(value);
 		return set(key, u);
@@ -69,9 +69,21 @@ namespace env::opt
 		return set(key, u);
 	}
 
+	// String
+
+	view get(name key, view value)
+	{
+		return got(key) ? get(key) : value;
+	}
+
+	view get(pair key, view value)
+	{
+		return got(key) ? get(key) : value;
+	}
+
 	// Integer
 
-	word get(word key, word value, int base)
+	word get(name key, word value, int base)
 	{
 		return cast(key, value, [base](auto value)
 		{
@@ -79,7 +91,7 @@ namespace env::opt
 		});
 	}
 
-	bool set(word key, word value, int base)
+	bool set(name key, word value, int base)
 	{
 		return set(key, fmt::to_string(value, base));
 	}
@@ -99,7 +111,7 @@ namespace env::opt
 
 	// Pointed Decimal
 
-	quad get(word key, quad value)
+	quad get(name key, quad value)
 	{
 		return cast(key, value, [](auto value)
 		{
@@ -107,7 +119,7 @@ namespace env::opt
 		});
 	}
 
-	bool set(word key, quad value, int digits)
+	bool set(name key, quad value, int digits)
 	{
 		return set(key, fmt::to_string(value, digits));
 	}
