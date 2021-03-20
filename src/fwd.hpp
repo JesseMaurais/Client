@@ -25,7 +25,6 @@ namespace fwd
 	// Overload traits
 
 	template <class Type> using allocator = std::allocator<Type>;
-	template <class Type> using iterator = std::iterator_traits<Type>;
 	template <class Type> using order = std::less<Type>;
 	template <class Type> using identity = std::equal_to<Type>;
 	template <class Char> using character = std::char_traits<Char>;

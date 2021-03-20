@@ -27,8 +27,8 @@ namespace fwd
 	{
 		using F = std::function<T(T)>;
 
-		iterator(T size, F it) 
-		: pos(size), next(it)
+		iterator(T size, F step) 
+		: pos(size), next(step)
 		{ }
 
 		auto operator++()
@@ -49,24 +49,30 @@ namespace fwd
 
 	template <class T> class range : std::pair<T, T>
 	{
-		using I = iterator<T, N>;
+		using I = iterator<T>;
+		using F = typename I::F;
+		using P = std::pair<T, T>;
 
 		F next;
 
 	public:
 
-		range(T first, T second, I::F it)
-		: pair(first, second), next(it)
-		{ }
+		range(T start, T finish, F step)
+		: P(start, finish), next(step)
+		{ 
+			#ifdef assert
+			assert(start <= finish);
+			#endif
+		}
 
 		auto begin()
 		{
-			return I(first, next);
+			return I(this->first, next);
 		}
 
 		auto end()
 		{
-			return I(size, next);
+			return I(this->second, next);
 		}
 	};
 
