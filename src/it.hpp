@@ -1,23 +1,21 @@
 #ifndef it_hpp
 #define it_hpp "Iterator Types"
 
+#include <iterator>
 #include "fwd.hpp"
 #include "tmp.hpp"
 
 namespace fwd
 {
-	template
-	<
-		class Base
-	>
-	struct iterate : Base
-	// Iterator wrapper
+	template <class Base> class iterate : Base
 	{
+	public:
+
 		using Base::Base;
 
 		auto operator*() const
 		{
-			return *this;
+			return this->value();
 		}
 
 		auto operator++()
@@ -27,18 +25,11 @@ namespace fwd
 		}
 	};
 
-	//
-	// Run Time Types
-	//
-
-	template
-	<
-		class Iterator, class Base = pair<Iterator>
-	>
-	struct range : Base
-	// Iterator pair as range
+	template <class Iterator> class range : pair<Iterator>
 	{
-		using Base::Base;
+	public:
+
+		using pair<Iterator>::pair;
 
 		auto size() const
 		{
@@ -57,13 +48,13 @@ namespace fwd
 
 		template <class N> bool greater(N n) const
 		{
-			thread_local order<N> const sorted;
+			order<N> const sorted;
 			return not sorted(n, this->second);
 		}
 
 		template <class N> bool less(N n) const
 		{
-			thread_local order<N> const sorted;
+			order<N> const sorted;
 			return sorted(n, this->first);
 		}
 
@@ -73,54 +64,57 @@ namespace fwd
 		}
 	};
 
-	template
-	<
-		class Iterator, 
-		int Size = 1, 
-		int Step = Size, 
-		// details
-		class Range = range<Iterator>,
-		class Base = pair<Iterator>
-	>
-	struct interval : Base
-	// Iterate within a sub range
+	template <class Type> auto up_to(Type size, Type pos = 0, Type step = 1)
 	{
-		static_assert(0 < Size);
-		static_assert(0 == Size % Step);
-
-		using Base::Base;
-
-		struct iterator : Range
+		struct iterator : pair<Type>
 		{
-			using Range::Range;
+			using pair<Type>::pair;
 
-			void next()
+			auto operator*() const
 			{
-				std::advance(this->first, Step);
-				std::advance(this->second, Step);
+				return this->second;
+			}
+
+			void operator++()
+			{
+				this->second = std::next(this->second, this->first);
 			}
 		};
-
-		auto begin() const
+		#ifdef assert
+		assert(0 == ((size - pos) % step));
+		#endif
+		return range<iterate<iterator>>
 		{
-			return iterate<iterator>
-			{ 
-				this->first, std::next(this->first, Size)	
-			};
-		}
+			{ step, pos }, { step, size }
+		};
+	}
 
-		auto end() const
+	template <class Type> auto down_from(Type size, Type pos = 0, Type step = 1)
+	{
+		struct iterator : pair<Type>
 		{
-			return iterate<iterator>
+			using pair<Type>::pair;
+
+			auto operator*() const
 			{
-				std::prev(this->second, Size), this->second
-			};
-		}
-	};
+				return this->second;
+			}
 
-	//
-	// Compile Time Expressions
-	//
+			void operator++()
+			{
+				this->second = std::prev(this->second, this->first);
+			}
+		};
+		#ifdef assert
+		assert(0 == ((size - pos) % step));
+		#endif
+		return range<iterate<iterator>>
+		{
+			{ step, std::prev(size) }, { step, std::prev(pos) }
+		};
+	}
+
+	// Borel sets
 
 	template <auto First, auto Last> struct closure
 	{

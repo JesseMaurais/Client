@@ -14,11 +14,6 @@ namespace fwd
 		unique() = default;
 	};
 
-	class singleton : unique
-	{
-		singleton() = default;
-	};
-
 	template <class Type> using as_ptr = typename std::add_pointer<Type>::type;
 	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;

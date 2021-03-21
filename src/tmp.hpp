@@ -3,7 +3,6 @@
 
 #include <type_traits>
 #include <functional>
-#include <iterator>
 #include <utility>
 #include <cstddef>
 
@@ -13,96 +12,14 @@ namespace fwd
 	{
 		static_assert(std::is_member_object_pointer<decltype(f)>::value);
 
-		template <class C, class T> static std::pair<C, T> null(T C::*);
+		template <class C, class T> static std::pair<C, T> pair(T C::*);
 
 	public:
 	
-		// type deduction
-		using pair_type = decltype(null(f));
+		using pair_type = decltype(pair(f));
 		using value_type = typename pair_type::first_type;
 		using parent_type = typename pair_type::second_type;
 	};
-
-	template <class T> struct iterator
-	{
-		using F = std::function<T(T)>;
-
-		iterator(T size, F step) 
-		: pos(size), next(step)
-		{ }
-
-		auto operator++()
-		{
-			return pos = next(pos);
-		}
-
-		auto operator*()
-		{
-			return pos;
-		}
-
-	private:
-
-		T pos;
-		F next;
-	};
-
-	template <class T> class range : std::pair<T, T>
-	{
-		using I = iterator<T>;
-		using F = typename I::F;
-		using P = std::pair<T, T>;
-
-		F next;
-
-	public:
-
-		range(T start, T finish, F step)
-		: P(start, finish), next(step)
-		{ 
-			#ifdef assert
-			assert(start <= finish);
-			#endif
-		}
-
-		auto begin()
-		{
-			return I(this->first, next);
-		}
-
-		auto end()
-		{
-			return I(this->second, next);
-		}
-	};
-
-	template <class T> auto up_to(T size, T from = 0, T by = 1)
-	{
-		#ifdef assert
-		assert(0 == ((size - from) % by));
-		#endif
-		return range<T> 
-		{ 
-			from, size, [by](T pos)
-			{
-				return std::next(pos, by);
-			}
-		};
-	}
-
-	template <class T> auto down_from(T size, T to = 0, T by = 1)
-	{
-		#ifdef assert
-		assert(0 == ((size - to) % by));
-		#endif
-		return range<T> 
-		{
-			std::prev(to), std::prev(size), [by](T pos)
-			{
-				return std::prev(pos, by);
-			}
-		};
-	}
 
 	template <class T> struct type_of
 	{

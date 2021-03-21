@@ -1,8 +1,8 @@
 // Do not include from another header
 
 #include "doc.hpp"
+#include "it.hpp"
 #include "dig.hpp"
-#include "sync.hpp"
 
 namespace doc
 {
@@ -10,13 +10,13 @@ namespace doc
 	using namespace fwd;
 	using namespace fmt;
 
-	template <class Type> auto& instance<Type>::self()
+	template <class Type> instance<Type>& instance<Type>::self()
 	{
 		static instance singleton;
 		return singleton;
 	}
 
-	template <class Type> auto& instance<Type>::at(size_t pos)
+	template <class Type> Type& instance<Type>::at(size_t pos)
 	{
 		auto const offset = index.at(pos);
 		#ifdef assert
@@ -25,7 +25,7 @@ namespace doc
 		return item.at(offset);
 	}
 
-	template <class Type> auto instance<Type>::find(size_t pos)
+	template <class Type> Type* instance<Type>::find(size_t pos)
 	{
 		Type* ptr = nullptr;
 		if (index.size() > pos)
@@ -42,7 +42,7 @@ namespace doc
 		return ptr;
 	}
 
-	template <class Type> bool instance<Type>::erase(size_t pos)
+	template <class Type> ptrdiff_t instance<Type>::remove(size_t pos)
 	{
 		auto& offset = index.at(pos);
 		if (offset < 0) --offset;
@@ -60,13 +60,13 @@ namespace doc
 		return offset;
 	}
 	
-	template <class Type> size_t instance<Type>::emplace(Type&& type)
+	template <class Type> size_t instance<Type>::make(Type&& type)
 	{
 		// lowest free index
 		auto low = index.size();
 		if (gap() > 0)
 		{
-			for (auto count : up_to(size))
+			for (auto count : up_to(index.size()))
 			{
 				if (index.at(count) < 0)
 				{

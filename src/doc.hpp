@@ -2,6 +2,7 @@
 #define doc_hpp "Document Structure"
 
 #include "tmp.hpp"
+#include "ptr.hpp"
 #include "opt.hpp"
 #include <tuple>
 
@@ -16,8 +17,8 @@ namespace doc
 	public:
 
 		static instance& self();
-		size_t emplace(Type&&);
-		size_t erase(size_t);
+		ptrdiff_t remove(size_t);
+		size_t make(Type&&);
 		Type* find(size_t);
 		Type& at(size_t);
 
@@ -29,7 +30,6 @@ namespace doc
 
 	template <class Type> auto& access()
 	{
-		extern template class instance<Type>;
 		return instance<Type>::self();
 	}
 
@@ -39,22 +39,22 @@ namespace doc
 
 	public:
 
-		access_ptr(Type&& type) : pos(access<Type>().emplace(type))
+		access_ptr(Type&& type) : pos(access<Type>().make(type))
 		{ }
 
 		~access_ptr()
 		{
-			access<Type>().erase(pos);
+			access<Type>().remove(pos);
 		}
 
 		auto operator->() const
 		{
-			return &access<Type>().at(pos);
+			return access<Type>().find(pos);
 		}
 
 		auto operator->()
 		{
-			return &access<Type>().at(pos);
+			return access<Type>().find(pos);
 		}
 	};
 

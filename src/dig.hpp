@@ -102,16 +102,6 @@ namespace fmt
 		return to<int>(n);
 	}
 
-	template <class N> inline auto to_long(N n)
-	{
-		return to<long>(n);
-	}
-
-	template <class N> inline auto to_short(N n)
-	{
-		return to<short>(n);
-	}
-
 	template <class N> auto to_wint(N n)
 	{
 		return to<wint_t>(n);
