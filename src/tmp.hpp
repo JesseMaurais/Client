@@ -12,7 +12,7 @@ namespace fwd
 	{
 		static_assert(std::is_member_object_pointer<decltype(f)>::value);
 
-		template <class C, class T> static std::pair<C, T> pair(T C::*);
+		template <class T, class C> static std::pair<T, C> pair(T C::*);
 
 	public:
 	

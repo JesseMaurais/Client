@@ -8,19 +8,22 @@
 
 namespace doc
 {
+	using node = fmt::struct_brief<env::opt::pair>;
+
 	template <class Type> class instance : fwd::unique
 	{
-		fwd::vector<ptrdiff_t> index, cross;
-		fwd::vector<Type> item;
 		instance() = default;
+		fwd::vector<Type> item;
+		fwd::vector<size_t> cross;
+		fwd::vector<ptrdiff_t> index;
 
 	public:
 
 		static instance& self();
-		ptrdiff_t remove(size_t);
-		size_t make(Type&&);
-		Type* find(size_t);
-		Type& at(size_t);
+		ptrdiff_t free(size_t);
+		size_t make(Type &&);
+		Type * find(size_t);
+		Type & at(size_t);
 
 		inline auto gap() const
 		{
@@ -44,7 +47,7 @@ namespace doc
 
 		~access_ptr()
 		{
-			access<Type>().remove(pos);
+			access<Type>().free(pos);
 		}
 
 		auto operator->() const
@@ -56,12 +59,16 @@ namespace doc
 		{
 			return access<Type>().find(pos);
 		}
-	};
 
-	struct node : fmt::struct_brief<env::opt::pair>
-	{
-		type index;
-		vector list;
+		auto& operator*() const
+		{
+			return access<Type>().at(pos);
+		}
+
+		auto& operator*()
+		{
+			return access<Type>.at(pos);
+		}
 	};
 
 	template <class C> auto table(const C* = nullptr)
@@ -84,11 +91,6 @@ namespace doc
 		return get<N, 1, C>();
 	}
 
-	template <size_t N, class C> fmt::string::view key(const C&)
-	{
-		return get<N, 1, C>();
-	}
-
 	template <size_t N, class C> auto& value(const C* that)
 	{
 		return that->*get<N, 0>(that);
@@ -97,16 +99,6 @@ namespace doc
 	template <size_t N, class C> auto& value(C* that)
 	{
 		return that->*get<N, 0>(that);
-	}
-
-	template <size_t N, class C> auto& value(const C& that)
-	{
-		return that.*get<N, 0>(&that);
-	}
-
-	template <size_t N, class C> auto& value(C& that)
-	{
-		return that.*get<N, 0>(&that);
 	}
 }
 

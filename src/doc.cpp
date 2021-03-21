@@ -29,8 +29,9 @@ namespace
 
 	} dumb;
 
-	template class doc::instance<dummy>;
 }
+
+template class doc::instance<dummy>;
 
 #ifdef test_unit
 test_unit(doc)
@@ -41,7 +42,7 @@ test_unit(doc)
 	using value_type = fwd::offset_of<&dummy::i>::value_type;
 	static_assert(std::is_same<value_type, int>::value);
 
-	size_t const id = doc::access<dummy>().emplace();
+	size_t const id = doc::access<dummy>().make({});
 	assert(0 == id);
 	auto ptr = doc::access<dummy>().find(id);
 	assert(nullptr != ptr);
@@ -57,5 +58,7 @@ test_unit(doc)
 
 	assert(doc::key<0>(ptr) == "i"sv);
 	assert(doc::key<1>(ptr) == "f"sv);
+
+	doc::access<dummy>().free(id);
 }
 #endif

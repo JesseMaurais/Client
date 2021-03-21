@@ -1,16 +1,12 @@
 #ifndef it_hpp
 #define it_hpp "Iterator Types"
 
-#include <iterator>
 #include "fwd.hpp"
-#include "tmp.hpp"
 
 namespace fwd
 {
-	template <class Base> class iterate : Base
+	template <class Base> struct iterate : Base
 	{
-	public:
-
 		using Base::Base;
 
 		auto operator*() const
@@ -25,10 +21,8 @@ namespace fwd
 		}
 	};
 
-	template <class Iterator> class range : pair<Iterator>
+	template <class Iterator> struct range : pair<Iterator>
 	{
-	public:
-
 		using pair<Iterator>::pair;
 
 		auto size() const
@@ -66,24 +60,24 @@ namespace fwd
 
 	template <class Type> auto up_to(Type size, Type pos = 0, Type step = 1)
 	{
-		struct iterator : pair<Type>
+		struct forward : pair<Type>
 		{
 			using pair<Type>::pair;
 
-			auto operator*() const
+			auto value() const
 			{
 				return this->second;
 			}
 
-			void operator++()
+			void next()
 			{
-				this->second = std::next(this->second, this->first);
+				this->second += this->first;
 			}
 		};
 		#ifdef assert
 		assert(0 == ((size - pos) % step));
 		#endif
-		return range<iterate<iterator>>
+		return range<iterate<forward>>
 		{
 			{ step, pos }, { step, size }
 		};
@@ -91,26 +85,26 @@ namespace fwd
 
 	template <class Type> auto down_from(Type size, Type pos = 0, Type step = 1)
 	{
-		struct iterator : pair<Type>
+		struct backward : pair<Type>
 		{
 			using pair<Type>::pair;
 
-			auto operator*() const
+			auto value() const
 			{
 				return this->second;
 			}
 
-			void operator++()
+			void next()
 			{
-				this->second = std::prev(this->second, this->first);
+				this->second -= this->first;
 			}
 		};
 		#ifdef assert
 		assert(0 == ((size - pos) % step));
 		#endif
-		return range<iterate<iterator>>
+		return range<iterate<backward>>
 		{
-			{ step, std::prev(size) }, { step, std::prev(pos) }
+			{ step, size-1 }, { step, pos-1 }
 		};
 	}
 

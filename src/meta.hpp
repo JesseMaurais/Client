@@ -18,11 +18,11 @@ namespace doc
 
 	template <class Type> Type& instance<Type>::at(size_t pos)
 	{
-		auto const offset = index.at(pos);
+		auto const off = index.at(pos);
 		#ifdef assert
-		assert(cross.at(offset) == pos);
+		assert(cross.at(off) == pos);
 		#endif
-		return item.at(offset);
+		return item.at(off);
 	}
 
 	template <class Type> Type* instance<Type>::find(size_t pos)
@@ -30,32 +30,44 @@ namespace doc
 		Type* ptr = nullptr;
 		if (index.size() > pos)
 		{
-			auto const offset = index.at(pos);
-			if (-1 < offset and to_size(offset) < item.size())
+			ptrdiff_t const sz = item.size();
+			if (auto const off = index.at(pos); not signbit(off) and off < sz)
 			{
 				#ifdef assert
-				assert(cross.at(offset) == pos);
+				assert(cross.at(off) == pos);
 				#endif
-				ptr = item.data() + offset;
+				ptr = item.data() + off;
 			}
 		}
 		return ptr;
 	}
 
-	template <class Type> ptrdiff_t instance<Type>::remove(size_t pos)
+	template <class Type> ptrdiff_t instance<Type>::free(size_t pos)
 	{
-		auto& offset = index.at(pos);
-		if (offset < 0) --offset;
+		auto& off = index.at(pos);
+		if (off < 0) --off;
 		else
 		{
+			#ifdef assert
+			assert(cross.at(off) == pos);
+			#endif
+
 			// move back into position
-			item.at(offset) = move(item.back());
+			item.at(off) = move(item.back());
 			item.pop_back();
 			pos = item.size();
-			// point back at new offset
-			index.at(cross.at(pos)) = offset;
-			cross.at(pos) = offset;
-			offset = -1;
+
+			if (0 < pos)
+			{
+				// point back at new offset
+				index.at(cross.at(pos)) = offset;
+				cross.at(pos) = offset;
+				offset = -1;
+			}
+			else
+			{
+				
+			}
 		}
 		return offset;
 	}
