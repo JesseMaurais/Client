@@ -21,9 +21,9 @@ namespace doc
 
 		static instance& self();
 		ptrdiff_t free(size_t);
-		size_t make(Type &&);
-		Type * find(size_t);
-		Type & at(size_t);
+		size_t make(Type&&);
+		Type* find(size_t);
+		Type& at(size_t);
 
 		inline auto gap() const
 		{

@@ -44,9 +44,8 @@ namespace doc
 
 	template <class Type> ptrdiff_t instance<Type>::free(size_t pos)
 	{
-		auto& off = index.at(pos);
-		if (off < 0) --off;
-		else
+		auto const off = index.at(pos);
+		if (not signbit(off))
 		{
 			#ifdef assert
 			assert(cross.at(off) == pos);
@@ -55,21 +54,21 @@ namespace doc
 			// move back into position
 			item.at(off) = move(item.back());
 			item.pop_back();
+			index.at(off) = -1;
+			// point back at new offset
 			pos = item.size();
-
 			if (0 < pos)
 			{
-				// point back at new offset
-				index.at(cross.at(pos)) = offset;
-				cross.at(pos) = offset;
-				offset = -1;
+				cross.at(off) = cross.at(pos);
+				index.at(cross.at(pos)) = off;
 			}
-			else
-			{
-				
-			}
+			cross.pop_back();
+
+			#ifdef assert
+			assert(cross.size() == item.size());
+			#endif
 		}
-		return offset;
+		return off;
 	}
 	
 	template <class Type> size_t instance<Type>::make(Type&& type)
