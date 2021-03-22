@@ -20,8 +20,8 @@ namespace doc
 	public:
 
 		static instance& self();
-		ptrdiff_t free(size_t);
-		size_t make(Type&&);
+		size_t make(Type &&);
+		size_t free(size_t);
 		Type* find(size_t);
 		Type& at(size_t);
 

@@ -230,8 +230,8 @@ namespace env::file
 				return failure;
 		}
 
-		auto const mask = check(am);
-		return state.st_mode & mask;
+		unsigned const mask = check(am);
+		return mask != (state.st_mode & mask);
 	}
 }
 

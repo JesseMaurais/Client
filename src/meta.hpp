@@ -18,86 +18,86 @@ namespace doc
 
 	template <class Type> Type& instance<Type>::at(size_t pos)
 	{
-		auto const off = index.at(pos);
 		#ifdef assert
-		assert(cross.at(off) == pos);
+		assert(cross.at(index.at(pos)) == pos);
 		#endif
-		return item.at(off);
+
+		return item.at(index.at(pos));
 	}
 
 	template <class Type> Type* instance<Type>::find(size_t pos)
 	{
+		#ifdef assert
+		assert(cross.at(index.at(pos)) == pos);
+		#endif
+
 		Type* ptr = nullptr;
 		if (index.size() > pos)
 		{
 			ptrdiff_t const sz = item.size();
 			if (auto const off = index.at(pos); not signbit(off) and off < sz)
 			{
-				#ifdef assert
-				assert(cross.at(off) == pos);
-				#endif
 				ptr = item.data() + off;
 			}
 		}
 		return ptr;
 	}
 
-	template <class Type> ptrdiff_t instance<Type>::free(size_t pos)
+	template <class Type> size_t instance<Type>::free(size_t pos)
 	{
+		#ifdef assert
+		assert(cross.at(index.at(pos)) == pos);
+		#endif
+
 		auto const off = index.at(pos);
-		if (not signbit(off))
+		item.at(off) = move(item.back());
+		cross.at(off) = cross.back();
+		index.at(cross.back()) = off;
+		index.at(pos) = -1;
+
+		item.pop_back();
+		cross.pop_back();
+		while (index.back() < 0)
 		{
-			#ifdef assert
-			assert(cross.at(off) == pos);
-			#endif
-
-			// move back into position
-			item.at(off) = move(item.back());
-			item.pop_back();
-			index.at(off) = -1;
-			// point back at new offset
-			pos = item.size();
-			if (0 < pos)
-			{
-				cross.at(off) = cross.at(pos);
-				index.at(cross.at(pos)) = off;
-			}
-			cross.pop_back();
-
-			#ifdef assert
-			assert(cross.size() == item.size());
-			#endif
+			index.pop_back();
 		}
-		return off;
+
+		#ifdef assert
+		assert(cross.size() == item.size());
+		#endif
+
+		return item.size();
 	}
 	
 	template <class Type> size_t instance<Type>::make(Type&& type)
 	{
-		// lowest free index
-		auto low = index.size();
+		// find lowest free index
+		auto pos = index.size();
 		if (gap() > 0)
 		{
-			for (auto count : up_to(index.size()))
+			for (auto count : up_to(pos))
 			{
 				if (index.at(count) < 0)
 				{
-					low = count;
+					pos = count;
 					break;
 				}
 			}
 		}
 		// allocate a position
-		auto const pos = item.size();
-		if (index.size() == low)
+		auto const off = item.size();
+		if (index.size() == pos)
 		{
-			index.push_back(pos);
+			index.push_back(off);
 		}
 		else
 		{
-			index.at(low) = pos;
+			index.at(pos) = off;
 		}
 		// allocate an object
 		item.emplace_back(type);
-		return low;
+		cross.push_back(pos);
+		return pos;
 	}
 }
+

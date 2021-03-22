@@ -8,7 +8,7 @@ namespace
 {
 	using namespace std::literals::string_view_literals;
 
-	struct dummy
+	struct dumb
 	{
 		int i = 0;
 		long n = 0;
@@ -22,43 +22,46 @@ namespace
 		{
 			return std::tuple
 			{ 
-				std::pair { &dummy::i, "i"sv }, 
-				std::pair { &dummy::f, "f"sv } 
+				std::pair { &dumb::i, "i"sv }, 
+				std::pair { &dumb::f, "f"sv },
+				std::pair { &dumb::s, "s"sv },
 			};
 		}
-
-	} dumb;
-
+	};
 }
 
-template class doc::instance<dummy>;
+template class doc::instance<dumb>;
 
 #ifdef test_unit
 test_unit(doc)
 {
-	using parent_type = fwd::offset_of<&dummy::i>::parent_type;
-	static_assert(std::is_same<parent_type, dummy>::value);
+	using parent_type = fwd::offset_of<&dumb::i>::parent_type;
+	static_assert(std::is_same<parent_type, dumb>::value);
 
-	using value_type = fwd::offset_of<&dummy::i>::value_type;
+	using value_type = fwd::offset_of<&dumb::i>::value_type;
 	static_assert(std::is_same<value_type, int>::value);
 
-	size_t const id = doc::access<dummy>().make({});
+	size_t const id = doc::access<dumb>().make({});
 	assert(0 == id);
-	auto ptr = doc::access<dummy>().find(id);
+	auto ptr = doc::access<dumb>().find(id);
 	assert(nullptr != ptr);
 
 	doc::value<0>(ptr) = 42;
 	doc::value<1>(ptr) = 4.2f;
+	doc::value<2>(ptr) = "42";
 
 	assert(42 == ptr->i);
 	assert(4.2f == ptr->f);
+	assert(ptr->s == "42");
 
 	assert(42 == doc::value<0>(ptr));
 	assert(4.2f == doc::value<1>(ptr));
+	assert(doc::value<2>(ptr) == "42");
 
 	assert(doc::key<0>(ptr) == "i"sv);
 	assert(doc::key<1>(ptr) == "f"sv);
+	assert(doc::key<2>(ptr) == "s"sv);
 
-	doc::access<dummy>().free(id);
+	doc::access<dumb>().free(id);
 }
 #endif
