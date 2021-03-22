@@ -3,6 +3,7 @@
 
 #include "err.hpp"
 #include "env.hpp"
+#include "tmp.hpp"
 #ifdef _WIN32
 #include "win/sync.hpp"
 #else
@@ -113,6 +114,27 @@ namespace sys
 		auto write()
 		{
 			return that.write();
+		}
+	};
+
+	template <auto Value> class atomic : public fwd::variable<decltype(Value)>
+	{
+		using typename fwd::variable<decltype(Value)>::type;
+		mutable sys::rwlock lock;
+		type value = Value;
+
+	public:
+
+		operator type() const final
+		{
+			auto const unlock = lock.read();
+			return value;
+		}
+
+		type operator=(type n) final
+		{
+			auto const unlock = lock.write();
+			return value = n;
 		}
 	};
 }

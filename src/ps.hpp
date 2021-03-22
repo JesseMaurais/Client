@@ -32,25 +32,25 @@ namespace fmt
 
 		public:
 
-			basic_pstream(size_t sz = env::file::width)
+			basic_pstream(size_t sz = env::file::width())
 			: buf(f), stream(this)
 			{
 				buf::setbufsiz(sz, sz);
 			}
 
-			basic_pstream(span args, size_t sz = env::file::width)
+			basic_pstream(span args, size_t sz = env::file::width())
 			: buf(f), stream(this), f(args)
 			{
 				buf::setbufsiz(sz, sz);
 			}
 
-			basic_pstream(init args, size_t sz = env::file::width)
+			basic_pstream(init args, size_t sz = env::file::width())
 			: buf(f), stream(this), f(args)
 			{ 
 				buf::setbufsiz(sz, sz);
 			}
 
-			basic_pstream(size_t argc, char const** argv, size_t sz = env::file::width)
+			basic_pstream(size_t argc, char const** argv, size_t sz = env::file::width())
 			: buf(f), stream(this), f(argc, argv)
 			{ 
 				buf::setbufsiz(sz, sz);

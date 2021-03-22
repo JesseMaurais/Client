@@ -85,7 +85,7 @@ namespace env::file
 	bool fail(fmt::string::view path, mode = ok);
 
 	// Adjustable file buffer size
-	extern fwd::variable<size_t>& width;
+	fwd::variable<size_t>& width();
 }
 
 #endif // file

@@ -10,31 +10,14 @@
 #include "tmp.hpp"
 #include <utility>
 
-namespace
-{
-	struct : fwd::variable<size_t>
-	{
-		mutable sys::rwlock lock;
-		size_t sz = BUFSIZ;
-
-		operator size_t() const final
-		{
-			auto const unlock = lock.read();
-			return sz;
-		}
-
-		size_t operator=(size_t n) final
-		{
-			auto const unlock = lock.write();
-			return sz = n;
-		}
-
-	} width;
-}
-
 namespace env::file
 {
-	fwd::variable<size_t>& width = ::width;
+	fwd::variable<size_t>& width()
+	{
+		constexpr size_t Size = BUFSIZ;
+		static sys::atomic<Size> safe;
+		return safe;
+	}
 
 	int check(mode am)
 	{
