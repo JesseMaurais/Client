@@ -19,30 +19,6 @@ namespace env::file
 		return safe;
 	}
 
-	int check(mode am)
-	{
-		int flags = 0;
-
-		if (am & ok)
-		{
-			flags |= F_OK;
-		}
-		if (am & ex)
-		{
-			flags |= X_OK;
-		}
-		if (am & rd)
-		{
-			flags |= R_OK;
-		}
-		if (am & wr)
-		{
-			flags |= W_OK;
-		}
-
-		return flags;
-	}
-
 	int convert(mode am)
 	{
 		int flags = 0;
@@ -139,7 +115,7 @@ namespace env::file
 		return flags;
 	}
 
-	bool fail(fmt::string::view path, mode am)
+	bool fail(fmt::string::view path, mode am,)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -155,6 +131,33 @@ namespace env::file
 				? success : failure;
 		}
 		#endif
+
+		int flags;
+		if (am & ok)
+		{
+			flags |= F_OK;
+		}
+		if (am & ex)
+		{
+			flags |= X_OK;
+		}
+		if (am & rd)
+		{
+			flags |= R_OK;
+		}
+		if (am & wr)
+		{
+			flags |= W_OK;
+		}
+
+		if (sys::fail(sys::access(c, flags)))
+		{
+			return failure;
+		}
+		else if (0 == am & rwx)
+		{
+			return success;
+		}
 
 		struct sys::stat state(c);
 		if (sys::fail(state))
@@ -213,8 +216,7 @@ namespace env::file
 				return failure;
 		}
 
-		unsigned const mask = check(am);
-		return mask != (state.st_mode & mask);
+		return success;
 	}
 }
 

@@ -77,9 +77,8 @@ namespace env::file
 		return static_cast<permit>(other(static_cast<int>(am)));
 	}
 
-	int check(mode); // file access mode
 	int convert(mode); // file open mode
-	int convert(permit); // permissions
+	int convert(permit); // file access permissions
 
 	// Check for access to the file at path
 	bool fail(fmt::string::view path, mode = ok);
