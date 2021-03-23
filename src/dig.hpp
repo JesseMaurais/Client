@@ -112,6 +112,19 @@ namespace fmt
 		return to<wchar_t>(n);
 	}
 
+	template <class C, class N> bool in_range(const C& c, N n)
+	{
+		auto const sz = std::size(c);
+		if constexpr (is_signed<N>)
+		{
+			return not std::signbit(n) and to_unsigned(n) < sz;
+		}
+		else
+		{
+			return n < sz;
+		}
+	}
+
 	string to_string(long value, int base);
 	string to_string(long long value, int base);
 	string to_string(unsigned long value, int base);

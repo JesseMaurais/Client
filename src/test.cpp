@@ -5,7 +5,7 @@
 #include "shell.hpp"
 #include "str.hpp"
 #include "type.hpp"
-#include "esc.hpp"
+#include "char.hpp"
 #include "sym.hpp"
 #include "dev.hpp"
 #include "sig.hpp"
@@ -212,11 +212,11 @@ int main(int argc, char** argv)
 	{
 		if (missing)
 		{
-			if (color) std::cout << fmt::fg_yellow;
+			if (color) std::cout << fmt::io::fg_yellow;
 
 			std::cout << "No tests were found" << fmt::eol;
 
-			if (color) std::cout << fmt::fg_off;
+			if (color) std::cout << fmt::io::fg_off;
 		}
 
 		std::cout 
@@ -282,7 +282,7 @@ int main(int argc, char** argv)
 		{
 			if (color)
 			{
-				std::cout << fmt::fg_yellow;
+				std::cout << fmt::io::fg_yellow;
 			}
 
 			while (std::getline(error, str))
@@ -302,7 +302,7 @@ int main(int argc, char** argv)
 		{
 			if (color)
 			{
-				std::cout << fmt::fg_green;
+				std::cout << fmt::io::fg_green;
 			}
 
 			if (not quiet)
@@ -314,7 +314,7 @@ int main(int argc, char** argv)
 
 	if (color)
 	{
-		std::cout << (0 < counter ? fmt::fg_magenta : fmt::fg_cyan);
+		std::cout << (0 < counter ? fmt::io::fg_magenta : fmt::io::fg_cyan);
 	}
 
 	if (not quiet)
@@ -324,7 +324,7 @@ int main(int argc, char** argv)
 
 	if (color)
 	{
-		std::cout << fmt::reset;
+		std::cout << fmt::io::reset;
 	}
 
 	std::cout << std::flush;

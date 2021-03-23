@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "type.hpp"
-#include "esc.hpp"
+#include "char.hpp"
 #include "err.hpp"
 
 namespace
@@ -97,14 +97,14 @@ test_unit(type)
 	// Escape parameter encoding
 	{
 		fmt::string::stream ss;
-		ss << fmt::par<1, 2, 3, 4>;
+		ss << fmt::io::par<1, 2, 3, 4>;
 		assert(ss.str() == "1;2;3;4");
 	}
 
 	// Set graphics rendition
 	{
 		fmt::string::stream ss;
-		ss << fmt::fg_green << "GREEN" << fmt::fg_off;
+		ss << fmt::io::fg_green << "GREEN" << fmt::io::fg_off;
 		assert(ss.str() == "\x1b[32mGREEN\x1b[39m");
 	}
 }

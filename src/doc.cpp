@@ -21,8 +21,8 @@ namespace
 		static auto table()
 		{
 			return std::tuple
-			{ 
-				std::pair { &dumb::i, "i"sv }, 
+			{
+				std::pair { &dumb::i, "i"sv },
 				std::pair { &dumb::f, "f"sv },
 				std::pair { &dumb::s, "s"sv },
 			};

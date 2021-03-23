@@ -42,17 +42,15 @@ namespace fwd
 
 		template <class N> bool greater(N n) const
 		{
-			order<N> const sorted;
-			return not sorted(n, this->second);
+			return this->second <= n;
 		}
 
 		template <class N> bool less(N n) const
 		{
-			order<N> const sorted;
-			return sorted(n, this->first);
+			return n < this->first;
 		}
 
-		template <class N> bool at(N n) const
+		template <class N> bool any(N n) const
 		{
 			return not greater(n) and not less(n);
 		}
@@ -91,7 +89,7 @@ namespace fwd
 
 			auto value() const
 			{
-				return this->second;
+				return this->second - 1;
 			}
 
 			void next()
@@ -104,27 +102,20 @@ namespace fwd
 		#endif
 		return range<iterate<backward>>
 		{
-			{ step, size-1 }, { step, pos-1 }
+			{ step, size }, { step, pos }
 		};
 	}
 
-	// Borel sets
-
-	template <auto First, auto Last> struct closure
+	template <auto First, auto Last> struct interval
 	{
-		static_assert(First < Last + 1);
-
-		static constexpr auto first = First;
-		static constexpr auto second = Last;
-
 		constexpr auto begin() const
 		{
-			return first;
+			return First;
 		}
 
 		constexpr auto end() const
 		{
-			return second + 1;
+			return Last + 1;
 		}
 
 		constexpr auto size() const
@@ -132,34 +123,34 @@ namespace fwd
 			return end() - begin();
 		}
 
-		template <class N> constexpr bool less(N digit) const
+		template <class N> constexpr bool greater(N n) const
 		{
-			return digit < first;
+			return Last < n;
 		}
 
-		template <class N> constexpr bool more(N digit) const
+		template <class N> constexpr bool less(N n) const
 		{
-			return second < digit;
+			return n < First;
 		}
 
-		template <class N> constexpr bool over(N digit) const
+		template <class N> constexpr bool any(N n) const
 		{
-			return not more(digit) and not less(digit);
+			return not greater(n) and not less(n);
 		}
 	};
 
-	template <class Part, class... Parts> struct closures
+	template <class Part, class... Parts> struct intervals
 	{
-		using Rest = closures<Parts...>;
+		using Rest = intervals<Parts...>;
 
-		template <class N> constexpr bool any(N digit) const
+		template <class N> constexpr bool any(N n) const
 		{
-			return Part::over(digit) or Rest::any(digit);
+			return Part::any(n) or Rest::any(n);
 		}
 
-		template <class N> constexpr bool all(N digit) const
+		template <class N> constexpr bool all(N n) const
 		{
-			return Part::over(digit) and Rest::all(digit);
+			return Part::any(n) and Rest::all(n);
 		}
 
 		constexpr auto size() const
@@ -178,14 +169,10 @@ namespace fwd
 		}
 	};
 
-	template
-	<
-		class Part
-	>
-	struct closures<Part>
+	template <class Part> struct intervals<Part>
 	{
-		template <class N> constexpr bool any(N digit) { return Part::over(digit); }
-		template <class N> constexpr bool all(N digit) { return Part::over(digit); }
+		template <class N> constexpr bool any(N digit) { return Part::any(digit); }
+		template <class N> constexpr bool all(N digit) { return Part::any(digit); }
 	};
 }
 

@@ -27,26 +27,24 @@ namespace doc
 
 	template <class Type> Type* instance<Type>::find(size_t pos)
 	{
-		#ifdef assert
-		assert(cross.at(index.at(pos)) == pos);
-		#endif
-
-		Type* ptr = nullptr;
-		if (index.size() > pos)
+		if (in_range(index, pos))
 		{
-			ptrdiff_t const sz = item.size();
-			if (auto const off = index.at(pos); not signbit(off) and off < sz)
+			if (auto off = index.at(pos); in_range(item, off))
 			{
-				ptr = item.data() + off;
+				#ifdef assert
+				assert(cross.at(index.at(pos)) == pos);
+				#endif
+
+				return item.data() + off;
 			}
 		}
-		return ptr;
+		return nullptr;
 	}
 
 	template <class Type> size_t instance<Type>::free(size_t pos)
 	{
 		#ifdef assert
-		assert(cross.at(index.at(pos)) == pos);
+		assert(find(pos));
 		#endif
 
 		auto const off = index.at(pos);
@@ -54,16 +52,16 @@ namespace doc
 		cross.at(off) = cross.back();
 		index.at(cross.back()) = off;
 		index.at(pos) = -1;
-
-		item.pop_back();
-		cross.pop_back();
 		while (index.back() < 0)
 		{
 			index.pop_back();
 		}
+		cross.pop_back();
+		item.pop_back();
 
 		#ifdef assert
 		assert(cross.size() == item.size());
+		assert(cross.at(index.at(off)) == to_size(off));
 		#endif
 
 		return item.size();
@@ -94,9 +92,15 @@ namespace doc
 		{
 			index.at(pos) = off;
 		}
-		// allocate an object
+		// allocate an item
 		item.emplace_back(type);
 		cross.push_back(pos);
+
+		#ifdef assert
+		assert(cross.size() == item.size());
+		assert(cross.at(index.at(pos)) == pos);
+		#endif
+
 		return pos;
 	}
 }

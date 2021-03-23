@@ -18,6 +18,7 @@ namespace fwd
 	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using extern_ptr = std::unique_ptr<Type, deleter<Type>>;
+	template <class Type> constexpr auto null = static_cast<as_ptr<Type>>(nullptr);
 
 	template 
 	<

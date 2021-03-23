@@ -1,12 +1,76 @@
-#ifndef acs_hpp
-#define acs_hpp "American Character Set"
+#ifndef char_hpp
+#define char_hpp "Universal Character Set"
 
-#include "ucs.hpp"
+#include <iomanip>
+#include "it.hpp"
+#include "fmt.hpp"
 
-// https://www.ecma-international.org/publications/standards/Ecma-048.htm
-
-namespace fmt::uni
+namespace fmt
 {
+	using codepoint = int;
+
+	template <codepoint Min, codepoint Max> using plane = fwd::interval<Min, Max>;
+
+	using codespace = plane<0x000000, 0x10FFFF>;
+
+	constexpr codepoint endpoint = 0x110000;
+
+	// Special chars
+
+	constexpr codepoint BOM = 0x00FEFF; // byte order mark
+
+	// Plane allocations
+
+	using BMP   = plane<0x000000, 0x00FFFF>; // basic multilingual plane
+	using SMP   = plane<0x010000, 0x01FFFF>; // supplementary multilingual plane
+	using SIP   = plane<0x020000, 0x02FFFF>; // supplementary ideographic plane
+	using TIP   = plane<0x030000, 0x03FFFF>; // tertiary ideographic plane
+	using UNP   = plane<0x040000, 0x0DFFFF>; // unassigned planes
+	using SSP   = plane<0x0E0000, 0x0EFFFF>; // supplementary special purpose plane
+	using SPUA  = plane<0x0F0000, 0x10FFFF>; // supplementary private use area planes
+
+	// BMP plane
+
+	using ACA   = plane<0x000000, 0x0000FF>; // ASCII & Latin-1 compatibility area
+	using GSA_0 = plane<0x000100, 0x00058F>; // general scripts area
+	using RTL_0 = plane<0x000590, 0x0008FF>; // general scripts area (RTL)
+	using GSA_1 = plane<0x000900, 0x001FFF>; // general scripts area
+	using PSA   = plane<0x002000, 0x002BFF>; // punctuation and symbols area
+	using GSA_2 = plane<0x002C00, 0x002DFF>; // general scripts area
+	using SPA   = plane<0x002E00, 0x002E7F>; // supplemental punctuation area
+	using CJK   = plane<0x002E80, 0x0033FF>; // CJK miscellaneous area
+	using CJKV  = plane<0x003400, 0x009FFF>; // CJKV unified ideographs area
+	using GSA_3 = plane<0x00A000, 0x00ABFF>; // general scripts area (Asia &Africa)
+	using HSA   = plane<0x00AC00, 0x00D7FF>; // Hangul syllables area
+	using SC    = plane<0x00D800, 0x00DFFF>; // surrogate codes
+	using PUA_0 = plane<0x00E000, 0x00F8FF>; // private use area
+	using CSA   = plane<0x00F900, 0x00FFFF>; // compatibility and specials area
+
+	// SMP plane
+
+	using GSA_4 = plane<0x010000, 0x0107FF>; // general scripts area
+	using RTL_1 = plane<0x010800, 0x010FFF>; // general scripts area (RTL)
+	using GSA_5 = plane<0x011000, 0x011FFF>; // general scripts area
+	using CHA   = plane<0x012000, 0x015FFF>; // cuneiform & hieroglyphic area
+	using GSA_6 = plane<0x016000, 0x016FFF>; // general scripts area
+	using ISA   = plane<0x017000, 0x01BBFF>; // ideographic scripts area
+	using GSA_7 = plane<0x01BC00, 0x01CFFF>; // general scripts area
+	using SA_0  = plane<0x01D000, 0x01E7FF>; // symbols area
+	using RTL_2 = plane<0x01E800, 0x01EFFF>; // general scripts area
+	using SA_1  = plane<0x01F000, 0x01FFFF>; // symbols area
+
+	// SPUA planes
+
+	using PUA_A = plane<0x0F0000, 0x0FFFFF>; // private use area A
+	using PUA_B = plane<0x100000, 0x10FFFF>; // private use area B
+
+	// Compound
+
+	using GSA  = fwd::intervals<GSA_0, GSA_1, GSA_2, GSA_3, GSA_4, GSA_5, GSA_6, GSA_7>;
+	using RTL  = fwd::intervals<RTL_0, RTL_1, RTL_2>;
+	using SA   = fwd::intervals<SA_0, SA_1>;
+	using PUA  = fwd::intervals<PUA_0, PUA_A, PUA_B>;
+
 	//
 	// Character Codes
 	//
@@ -489,78 +553,110 @@ namespace fmt::uni
 	using close = plane<'\x40', '\x7E'>;
 	using privy = plane<'\x70', '\x7E'>;
 
-	constexpr unsigned column_width = 4;
-
-	constexpr char pos(char x, char y)
+	namespace io
 	{
-		return y | x << column_width;
-	}
-
-	constexpr char col(char byte)
-	{
-		return byte >> column_width;
-	}
-
-	constexpr char row(char byte)
-	{
-		return byte & 0xFF;
-	}
-
-	constexpr SGR off(SGR code)
-	{
-		switch (code)
+		template 
+		<
+			char... Code
+		>
+		string::out::ref enc(string::out::ref out)
 		{
-		default:
-			return reset;
-		case intense:
-		case faint:
-			return intense_off;
-		case italic:
-			return italic_off;
-		case underline:
-		case underline2:
-			return underline_off;
-		case blink_slow:
-		case blink_fast:
-			return blink_off;
-		case reverse:
-			return reverse;
-		case conceal:
-			return reveal;
-		case strike:
-			return strike_off;
-		case frame:
-		case encircle:
-			return frame_off;
-		case overline:
-			return overline_off;
-		case fg_black:
-		case fg_red:
-		case fg_green:
-		case fg_yellow:
-		case fg_blue:
-		case fg_magenta:
-		case fg_cyan:
-		case fg_white:
-		case fg:
-			return fg_off;
-		case bg_black:
-		case bg_red:
-		case bg_green:
-		case bg_yellow:
-		case bg_blue:
-		case bg_magenta:
-		case bg_cyan:
-		case bg_white:
-		case bg:
-			return bg_off;
-		case rightline:
-		case rightline2:
-		case leftline:
-		case leftline2:
-		case stress:
-			return ideogram_off;
+			return (out << ... << Code);
 		}
+
+		template
+		<
+			int Param, int... Params
+		>
+		string::out::ref par(string::out::ref out)
+		{
+			out << Param;
+			if constexpr (0 < sizeof...(Params))
+			{
+				return ((out << ';' << Params), ...);
+			}
+			else
+			{
+				return out;
+			}
+		}
+
+		template
+		<
+			char Code, char Escape, int... Params
+		>
+		string::out::ref esc(string::out::ref out)
+		{
+			auto begin = enc<C0::ESC, Code>;
+			auto next = par<Params...>;
+			auto end = enc<Escape>;
+
+			return out << begin << next << end;
+		}
+
+		template
+		<
+			char Escape, int... Params
+		>
+		string::out::ref ctl(string::out::ref out)
+		{
+			return out << esc<G0::CSI, Escape, Params...>;
+		}
+
+		template 
+		<
+			int... Params
+		>
+		string::out::ref set(string::out::ref out)
+		{
+			return out << ctl<CSI::SGR, Params...>;
+		}
+
+		constexpr auto reset = set<SGR::reset>;
+		constexpr auto intense = set<SGR::intense>;
+		constexpr auto faint = set<SGR::faint>;
+		constexpr auto italic = set<SGR::italic>;
+		constexpr auto underline = set<SGR::underline>;
+		constexpr auto blink_slow = set<SGR::blink_slow>;
+		constexpr auto blink_fast = set<SGR::blink_fast>;
+		constexpr auto reverse = set<SGR::reverse>;
+		constexpr auto conceal = set<SGR::conceal>;
+		constexpr auto strike = set<SGR::strike>;
+		template <int N> constexpr auto font = set<SGR::first_font + N>;
+		constexpr auto fraktur = set<SGR::fraktur>;
+		constexpr auto underline2 = set<SGR::underline2>;
+		constexpr auto intense_off = set<SGR::intense_off>;
+		constexpr auto italic_off = set<SGR::italic_off>;
+		constexpr auto underline_off = set<SGR::underline_off>;
+		constexpr auto blink_off = set<SGR::blink_off>;
+		constexpr auto inverse_off = set<SGR::inverse_off>;
+		constexpr auto reveal = set<SGR::reveal>;
+		constexpr auto strike_off = set<SGR::strike_off>;
+		constexpr auto fg_black = set<SGR::fg_black>;
+		constexpr auto fg_red = set<SGR::fg_red>;
+		constexpr auto fg_green = set<SGR::fg_green>;
+		constexpr auto fg_yellow = set<SGR::fg_yellow>;
+		constexpr auto fg_blue = set<SGR::fg_blue>;
+		constexpr auto fg_magenta = set<SGR::fg_magenta>;
+		constexpr auto fg_cyan = set<SGR::fg_cyan>;
+		constexpr auto fg_white = set<SGR::fg_white>;
+		template <int R, int G, int B> constexpr auto fg = set<SGR::fg, 2, R, G, B>;
+		constexpr auto fg_off = set<SGR::fg_off>;
+		constexpr auto bg_black = set<SGR::bg_black>;
+		constexpr auto bg_red = set<SGR::bg_red>;
+		constexpr auto bg_green = set<SGR::bg_green>;
+		constexpr auto bg_yellow = set<SGR::bg_yellow>;
+		constexpr auto bg_blue = set<SGR::bg_blue>;
+		constexpr auto bg_magenta = set<SGR::bg_magenta>;
+		constexpr auto bg_cyan = set<SGR::bg_cyan>;
+		constexpr auto bg_white = set<SGR::bg_white>;
+		template <int R, int G, int B> constexpr auto bg = set<SGR::bg, 2, R, G, B>;
+		constexpr auto bg_off = set<SGR::bg_off>;
+		constexpr auto frame = set<SGR::frame>;
+		constexpr auto encircle = set<SGR::encircle>;
+		constexpr auto overline = set<SGR::overline>;
+		constexpr auto frame_off = set<SGR::frame_off>;
+		constexpr auto overline_off = set<SGR::overline_off>;
 	}
 }
 

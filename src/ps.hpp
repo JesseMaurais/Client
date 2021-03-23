@@ -1,11 +1,7 @@
 #ifndef ps_hpp
 #define ps_hpp "Process Stream"
 
-#include <initializer_list>
-#include <iostream>
-#include <vector>
-#include "process.hpp"
-#include "mode.hpp"
+#include "pipe.hpp"
 #include "io.hpp"
 
 namespace fmt

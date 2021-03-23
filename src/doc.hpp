@@ -67,7 +67,7 @@ namespace doc
 
 		auto& operator*()
 		{
-			return access<Type>.at(pos);
+			return access<Type>().at(pos);
 		}
 	};
 

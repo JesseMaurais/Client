@@ -31,22 +31,149 @@ namespace sys::sig
 	{
 		switch (signo)
 		{
-		case SIGILL:
-			return "Illegal instruction";
-		case SIGINT:
-			return "Interruption";
-		case SIGFPE:
-			return "Float-point error";
 		case SIGABRT:
 			return "Abort";
-		case SIGTERM:
-			return "Terminate";
-		case SIGSEGV:
-			return "Segmentation fault";
+
+		#ifdef SIGALRM
+		case SIGALRM:
+			return "Alarm";
+		#endif
+
+		#ifdef SIGBUS
+		case SIGBUS:
+			return "Memory access violation";
+		#endif
+
+		#ifdef SIGCHLD
+		case SIGCHLD:
+			return "Child process stopped/continued";
+		#endif
+
+		#ifdef SIGCONT
+		case SIGCONT:
+			return "Continue processing";
+		#endif
+
+		case SIGFPE:
+			return "Float-point error";
+
+		#ifdef SIGHUP
+		case SIGHUP:
+			return "Hang up";
+		#endif
+
+		case SIGILL:
+			return "Illegal instruction";
+
+		case SIGINT:
+			return "Interrupt";
+
 		#ifdef SIGKILL
 		case SIGKILL:
-			return "Killed";
+			return "Kill";
 		#endif
+
+		#ifdef SIGPIPE
+		case SIGPIPE:
+			return "Broken pipe";
+		#endif
+
+		#ifdef SIGQUIT
+		case SIGQUIT:
+			return "Quit processing";
+		#endif
+
+		case SIGSEGV:
+			return "Segmentation fault";
+
+		#ifdef SIGSTOP
+		case SIGSTOP:
+			return "Stop processing";
+		#endif
+
+		case SIGTERM:
+			return "Terminate";
+
+		#ifdef SIGTSTP
+		case SIGTSTP:
+			return "Terminal stopped";
+		#endif
+
+		#ifdef SIGTIN
+		case SIGTIN:
+			return "Process reading";
+		#endif
+
+		#ifdef SIGTOU
+		case SIGTOU:
+			return "Process writing";
+		#endif
+
+		#ifdef SIGUSR1
+		case SIGUSR1:
+			return "User defined (1)";
+		#endif
+
+		#ifdef SIGUSR2
+		case SIGUSR2:
+			return "User defined (2)";
+		#endif
+
+		#ifdef SIGPOLL
+		case SIGPOLL:
+			return "Poll event";
+		#endif
+
+		#ifdef SIGPROF
+		case SIGPROF:
+			return "Profiling timer expired";
+		#endif
+
+		#ifdef SIGPWR
+		case SIGPWR:
+			return "Power limited";
+		#endif
+
+		#ifdef SIGSTKFLT
+		case SIGSTKFLT:
+			return "Stack fault";
+		#endif
+
+		#ifdef SIGSYS
+		case SIGSYS:
+			return "Bad system call";
+		#endif
+
+		#ifdef SIGTRAP
+		case SIGTRAP:
+			return "Trace or breakpoint trap";
+		#endif
+
+		#ifdef SIGURG
+		case SIGURG:
+			return "Urgent out of band data";
+		#endif
+
+		#ifdef SIGVTALRM
+		case SIGVTALRM:
+			return "Virtual timer expired";
+		#endif
+
+		#ifdef SIGWINCH
+		case SIGWINCH:
+			return "Window resized";
+		#endif
+
+		#ifdef SIGXCPU
+		case SIGXCPU:
+			return "CPU time limit exceeded";
+		#endif
+
+		#ifdef SIGXFSZ
+		case SIGXFSZ:
+			return "File size limit exceeded";
+		#endif
+
 		default:
 			return fmt::to_string(signo);
 		}
