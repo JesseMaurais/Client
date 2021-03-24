@@ -45,6 +45,7 @@ namespace doc
 	{
 		#ifdef assert
 		assert(find(pos));
+		assert(cross.at(index.at(pos)) == pos);
 		#endif
 
 		auto const off = index.at(pos);
@@ -61,7 +62,7 @@ namespace doc
 
 		#ifdef assert
 		assert(cross.size() == item.size());
-		assert(cross.at(index.at(off)) == to_size(off));
+		assert(item.empty() or cross.at(index.at(off)) == to_size(off));
 		#endif
 
 		return item.size();

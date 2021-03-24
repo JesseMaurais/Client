@@ -115,7 +115,7 @@ namespace env::file
 		return flags;
 	}
 
-	bool fail(fmt::string::view path, mode am,)
+	bool fail(fmt::string::view path, mode am)
 	{
 		if (not fmt::terminated(path))
 		{
@@ -132,7 +132,7 @@ namespace env::file
 		}
 		#endif
 
-		int flags;
+		int flags = 0;
 		if (am & ok)
 		{
 			flags |= F_OK;
@@ -154,7 +154,7 @@ namespace env::file
 		{
 			return failure;
 		}
-		else if (0 == am & rwx)
+		else if (0 == (am & rwx))
 		{
 			return success;
 		}
