@@ -117,7 +117,7 @@ namespace fmt
 		auto const sz = std::size(c);
 		if constexpr (is_signed<N>)
 		{
-			return not std::signbit(n) and to_unsigned(n) < sz;
+			return -1 < n and to_unsigned(n) < sz;
 		}
 		else
 		{

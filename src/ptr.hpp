@@ -20,6 +20,14 @@ namespace fwd
 	template <class Type> using extern_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> constexpr auto null = static_cast<as_ptr<Type>>(nullptr);
 
+	template <class Type, class Pointer> inline auto cast(Pointer ptr)
+	{
+		#ifdef assert
+		assert(nullptr != ptr);
+		#endif
+		return reinterpret_cast<as_ptr<Type>>(ptr);
+	}
+
 	template 
 	<
 		class Type, class Remove = deleter<Type>

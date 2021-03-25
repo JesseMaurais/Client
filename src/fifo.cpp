@@ -25,7 +25,7 @@ namespace env::file
 		{
 			path = fmt::join({ "\\\\.\\pipe\\", name });
 
-			size_t const size = width;
+			size_t const size = width();
 			sys::win::handle h = CreateNamedPipe
 			(
 				path.c_str(),

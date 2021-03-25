@@ -21,6 +21,7 @@
 # define _TOOLS "Tools.ini"
 #endif
 
+#ifndef _MSC_VER
 #ifdef test_unit
 test_unit(err)
 {
@@ -29,6 +30,7 @@ test_unit(err)
 	assert(true and not false);
 	except(throw "Holy Cow!");
 }
+#endif
 #endif
 
 namespace

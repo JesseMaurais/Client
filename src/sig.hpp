@@ -1,12 +1,12 @@
 #ifndef sig_hpp
 #define sig_hpp "Signals and Sockets"
 
-#include "ptr.hpp"
-#include "fmt.hpp"
+#include <map>
 #include <csignal>
 #include <algorithm>
 #include <functional>
-#include <map>
+#include "ptr.hpp"
+#include "fmt.hpp"
 
 namespace sig
 {

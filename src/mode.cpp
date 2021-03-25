@@ -132,31 +132,28 @@ namespace env::file
 		}
 		#endif
 
-		int flags = 0;
-		if (am & ok)
+		if (am == (am & rwx))
 		{
-			flags |= F_OK;
-		}
-		if (am & ex)
-		{
-			flags |= X_OK;
-		}
-		if (am & rd)
-		{
-			flags |= R_OK;
-		}
-		if (am & wr)
-		{
-			flags |= W_OK;
-		}
+			int flags = 0;
 
-		if (sys::fail(sys::access(c, flags)))
-		{
-			return failure;
-		}
-		else if (0 == (am & rwx))
-		{
-			return success;
+			if (am & ok)
+			{
+				flags |= F_OK;
+			}
+			if (am & ex)
+			{
+				flags |= X_OK;
+			}
+			if (am & rd)
+			{
+				flags |= R_OK;
+			}
+			if (am & wr)
+			{
+				flags |= W_OK;
+			}
+
+			return sys::fail(sys::access(c, flags));
 		}
 
 		struct sys::stat state(c);

@@ -5,11 +5,43 @@
 #include "err.hpp"
 #include "type.hpp"
 #ifdef _WIN32
-#include "win.hpp"
+#include "win/message.hpp"
 #else
-#include "uni.hpp"
+#include "uni/signal.hpp"
 #endif
-#include <map>
+
+#ifdef _WIN32
+namespace
+{
+	class registerclass : sys::win::registerclass
+	{
+		static constexpr auto classname = _T("Message Window");
+
+		registerclass()
+		{
+			hInstance = GetModuleHandle(nullptr);
+			lpszClassName = classname;
+			lpfnWndProc = wndproc;
+		}
+
+		static LRESULT CALLBACK wndproc(HWND hw, UINT msg, WPARAM wp, LPARAM lp)
+		{
+
+		}
+
+	public:
+
+		static auto create()
+		{
+			registerclass instance;
+			return CreateWindowEx
+			(
+				0, classname, _T(""), 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, nullptr, nullptr
+			);
+		}
+	};
+}
+#endif
 
 namespace sys::sig
 {

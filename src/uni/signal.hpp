@@ -11,12 +11,7 @@
 
 namespace sys::uni::sig
 {
-	struct set
-	{
-		sigset_t obj;
-	};
-
-	struct event : unique, sigevent
+	struct event : fwd::unique, sigevent
 	{
 		using signature = void();
 		using observer = std::function<signature>;
@@ -36,7 +31,7 @@ namespace sys::uni::sig
 
 		static void thunk(sigval sv)
 		{
-			auto that = reinterpret_cast<event*>(sv.sival_ptr);
+			auto that = fwd::cast<event>(sv.sival_ptr);
 			that->go();
 		}
 	};

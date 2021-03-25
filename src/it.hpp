@@ -21,7 +21,7 @@ namespace fwd
 		}
 	};
 
-	template <class Iterator> struct range : pair<Iterator>
+	template <class Iterator> struct range : fwd::pair<Iterator>
 	{
 		using pair<Iterator>::pair;
 
@@ -60,7 +60,7 @@ namespace fwd
 	{
 		struct forward : pair<Type>
 		{
-			using pair<Type>::pair;
+			using fwd::pair<Type>::pair;
 
 			auto value() const
 			{
@@ -85,7 +85,7 @@ namespace fwd
 	{
 		struct backward : pair<Type>
 		{
-			using pair<Type>::pair;
+			using fwd::pair<Type>::pair;
 
 			auto value() const
 			{
