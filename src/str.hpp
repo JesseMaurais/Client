@@ -2,13 +2,11 @@
 #define str_hpp "Shared String Store"
 
 #include "fmt.hpp"
-#include "opt.hpp"
 
-namespace fmt::str
+namespace fmt
 {
-	using name = env::opt::name;
-	using string = fmt::string;
-	using view = string::view;
+	using name = std::ptrdiff_t;
+	using pair = fwd::pair<name>;
 
 	bool got(name); // O (1)
 	bool got(view); // O log n

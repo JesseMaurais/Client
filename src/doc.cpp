@@ -73,12 +73,12 @@ namespace doc
 			{
 				auto const z = token.size();
 				token = token.substr(1, z - 2);
-				group = fmt::str::set(token);
+				group = fmt::set(token);
 				continue;
 			}
 
 			#ifdef trace
-			if (not fmt::str::got(group))
+			if (not fmt::got(group))
 			{
 				trace("no group");
 			}
@@ -86,7 +86,7 @@ namespace doc
 
 			// Create key pair for value entry
 			auto const pair = fmt::to_pair(token);
-			auto const key = fmt::str::set(pair.first);
+			auto const key = fmt::set(pair.first);
 			auto const value = pair.second;
 			if (empty(value))
 			{
@@ -113,11 +113,11 @@ namespace doc
 			{
 				last = k.first;
 
-				auto const group = fmt::str::get(k.first);
+				auto const group = fmt::get(k.first);
 				output << '[' << group << ']' << fmt::eol;
 			}
 			
-			auto const key = fmt::str::get(k.second);
+			auto const key = fmt::get(k.second);
 			auto const index = fmt::to_size(v);
 			auto const value = input.values.at(index);
 			output << key << "=" << value << fmt::eol;
@@ -235,8 +235,8 @@ test_unit(ini)
 
 	// Data from file
 	{
-		auto const group = fmt::str::set("NMAKE");
-		auto const key = fmt::str::set("MAKECONFIG");
+		auto const group = fmt::set("NMAKE");
+		auto const key = fmt::set("MAKECONFIG");
 		auto const value = init.get({group, key});
 		assert(not empty(value));
 		assert(value.find("-D_NMAKE") != fmt::npos);
@@ -244,8 +244,8 @@ test_unit(ini)
 	
 	// Data at runtime
 	{
-		auto const group = fmt::str::set("Group");
-		auto const key = fmt::str::set("Key");
+		auto const group = fmt::set("Group");
+		auto const key = fmt::set("Key");
 		constexpr auto value = "Value";
 		// Cache value with set
 		{

@@ -188,10 +188,10 @@ namespace env
 
 	shell::line desktop::with(string::span command)
 	{
-		static opt::name const group = fmt::str::put("Desktop Entry");
-		static opt::name const key = fmt::str::put("DIALOG");
-		static opt::pair const entry { group, key };
-		static view const zenity = "zenity";
+		static fmt::name const group = fmt::put("Desktop Entry");
+		static fmt::name const key = fmt::put("DIALOG");
+		static fmt::pair const entry { group, key };
+		static fmt::view const zenity = "zenity";
 
 		// Look for the Zenity desktop utility program
 		auto const program = env::opt::get(entry, zenity);

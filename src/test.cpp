@@ -96,26 +96,26 @@ int main(int argc, char** argv)
 	struct
 	{
 		env::opt::name const
-			tests = fmt::str::put("TESTS"),
-			color = fmt::str::put("color"),
-			async = fmt::str::put("async"),
-			tools = fmt::str::put("tools"),
-			print = fmt::str::put("print"),
-			quiet = fmt::str::put("quiet"),
-			host  = fmt::str::put("host"),
-			help  = fmt::str::put("help");
+			tests = fmt::put("TESTS"),
+			color = fmt::put("color"),
+			async = fmt::put("async"),
+			tools = fmt::put("tools"),
+			print = fmt::put("print"),
+			quiet = fmt::put("quiet"),
+			host  = fmt::put("host"),
+			help  = fmt::put("help");
 	} arg;
 
 	// Command line details
 	env::opt::command::vector cmd
 	{
-		{ 0, "h", fmt::str::get(arg.help), "Print command line usage then quit" },
-		{ 0, "p", fmt::str::get(arg.print), "Print all source tests then quit" },
-		{ 0, "q", fmt::str::get(arg.quiet), "Only print error messages" },
-		{ 0, "c", fmt::str::get(arg.color), "Print using color codes" },
-		{ 0, "a", fmt::str::get(arg.async), "Run tests asynchronously" },
-		{ 1, "t", fmt::str::get(arg.tools), _TOOLS " is replaced with argument" },
-		{ 0, "o", fmt::str::get(arg.host), "Host tests in this process" },
+		{ 0, "h", fmt::get(arg.help), "Print command line usage then quit" },
+		{ 0, "p", fmt::get(arg.print), "Print all source tests then quit" },
+		{ 0, "q", fmt::get(arg.quiet), "Only print error messages" },
+		{ 0, "c", fmt::get(arg.color), "Print using color codes" },
+		{ 0, "a", fmt::get(arg.async), "Run tests asynchronously" },
+		{ 1, "t", fmt::get(arg.tools), _TOOLS " is replaced with argument" },
+		{ 0, "o", fmt::get(arg.host), "Host tests in this process" },
 	};
 
 	// Command line parsing

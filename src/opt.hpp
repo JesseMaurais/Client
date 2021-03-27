@@ -7,7 +7,7 @@ namespace env::opt
 {
 	using word = long long;
 	using quad = long double;
-	using name = signed short;
+	using name = std::ptrdiff_t;
 	using pair = fwd::pair<name>;
 	using view = fmt::string::view;
 	using span = view::span;

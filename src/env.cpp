@@ -40,7 +40,7 @@ namespace
 
 	auto cached(fmt::string::view var, fmt::string::view val)
 	{
-		auto const w = fmt::str::put(var);
+		auto const w = fmt::put(var);
 		auto u = env::opt::get(w);
 		if (u.empty())
 		{
@@ -56,7 +56,7 @@ namespace
 				line = line.substr(first, second);
 				auto const entry = fmt::to_pair(line);
 				auto const value = env::var::value(entry.second);
-				auto const key = fmt::str::set(entry.first);
+				auto const key = fmt::set(entry.first);
 				env::opt::set(key, value);
 			}
 			u = env::opt::get(w, val);
@@ -130,7 +130,7 @@ namespace env::var
 		if (not fmt::terminated(u))
 		{
 			auto const s = fmt::to_string(u);
-			return got(s);
+			return env::var::got(s);
 		}
 		auto const c = u.data();
 		auto const unlock = lock.read();
@@ -143,7 +143,7 @@ namespace env::var
 		if (not fmt::terminated(u))
 		{
 			auto const s = fmt::to_string(u);
-			return get(s);
+			return env::var::get(s);
 		}
 		auto const c = u.data();
 		auto const unlock = lock.read();
@@ -155,7 +155,7 @@ namespace env::var
 	{
 		if (not fmt::terminated(u))
 		{
-			return put(u);
+			return env::var::put(u);
 		}
 		auto const unlock = lock.write();
 		auto const d = u.data();
@@ -175,14 +175,14 @@ namespace env::var
 
 	bool put(fmt::string::view u, fmt::string::view v)
 	{
-		return put(fmt::join({u, v}, "="));
+		return env::var::put(fmt::join({u, v}, "="));
 	}
 
 	static auto evaluate(fmt::string::view u)
 	{
 		assert(u.front() == '$');
 		u = u.substr(1);
-		return empty(u) ? u : get(u);
+		return empty(u) ? u : env::var::get(u);
 	}
 
 	fmt::string value(fmt::string::view u)

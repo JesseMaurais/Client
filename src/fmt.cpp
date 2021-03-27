@@ -2,9 +2,11 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "fmt.hpp"
+#include "dig.hpp"
+#include "str.hpp"
 #include "type.hpp"
 #include "char.hpp"
-#include "dig.hpp"
+#include "sync.hpp"
 #include "err.hpp"
 #include <sstream>
 #include <iomanip>
@@ -15,6 +17,153 @@
 
 namespace
 {
+	class strings : fwd::unique
+	{
+		strings() = default;
+
+		sys::exclusive<fmt::string::set> cache;
+		sys::exclusive<fmt::view::vector> store;
+		sys::exclusive<std::map<fmt::view, fmt::name>> table;
+
+	public:
+
+		bool got(fmt::name key)
+		{
+			fmt::name const index = ~key;
+			fmt::name const size = store.read()->size();
+			return -1 < index and index < size;
+		}
+
+		bool got(fmt::view key)
+		{
+			auto const reader = table.read();
+			auto const it = reader->find(key);
+			auto const end = reader->end();
+			return end != it;
+		}
+
+		fmt::view get(fmt::name key)
+		{
+			auto const reader = store.read();
+			auto const index = fmt::to_size(~key);
+			assert(got(key) and "String is not stored");
+			return reader->at(index);
+		}
+
+		fmt::view get(fmt::view key)
+		{
+			assert(not empty(key));
+			// Lookup
+			{
+				auto const reader = table.read();
+				auto const it = reader->find(key);
+				auto const end = reader->end();
+				if (end != it)
+				{
+					return it->first;
+				}
+			}
+			// Create
+			return get(set(key));
+		}
+
+		fmt::name put(fmt::view key)
+		{
+			assert(not empty(key));
+			// Lookup
+			{
+				auto const reader = table.read();
+				auto const end = reader->end();
+				auto const it = reader->find(key);
+				if (end != it)
+				{
+					return ~it->second;
+				}
+			}
+			// Create
+			auto writer = store.write();
+			auto const size = writer->size();
+			auto const id = fmt::to<fmt::name>(size);
+			{
+				auto [it, unique] = table.write()->emplace(key, id);
+				assert(unique);
+				writer->push_back(it->first);
+			}
+			return ~id;
+		}
+
+		fmt::name set(fmt::view key)
+		{
+			// Lookup
+			{
+				auto const reader = table.read();
+				auto const end = reader->end();
+				auto const it = reader->find(key);
+				if (end != it)
+				{
+					return ~it->second;
+				}
+			}
+			// Create
+			auto writer = store.write();
+			auto const size = writer->size();
+			auto const id = fmt::to<fmt::name>(size);
+			{
+				// Cache the string here
+				auto const p = cache.write()->emplace(key);
+				verify(p.second);
+				// Index a view to the string
+				auto const q = table.write()->emplace(*p.first, id);
+				verify(q.second);
+				
+				writer->push_back(q.first->first);
+			}
+			return ~id;
+		}
+
+		fmt::string::in::ref get(fmt::string::in::ref in, char end)
+		{
+			// Block all threads at this point
+			auto wcache = cache.write();
+			auto wstore = store.write();
+			auto wtable = table.write();
+
+			fmt::string line;
+			while (std::getline(in, line, end))
+			{
+				auto const p = wcache->emplace(move(line));
+				assert(p.second);
+
+				auto const size = wstore->size();
+				auto const id = fmt::to<fmt::name>(size);	
+				wstore->emplace_back(*p.first);
+
+				auto const q = wtable->emplace(*p.first, id);
+				assert(q.second);
+			}
+			return in;
+		}
+
+		fmt::string::out::ref put(fmt::string::out::ref out, char eol)
+		{
+			auto const reader = cache.read();
+			auto const begin = reader->begin();
+			auto const end = reader->end();
+
+			for (auto it = begin; it != end; ++it)
+			{
+				out << *it << eol;
+			}
+			return out;
+		}
+
+		static auto& registry()
+		{
+			static strings singleton;
+			return singleton;
+		}
+	};
+
 	std::errc const noerr { };
 
 	template <typename T, typename C>
@@ -109,7 +258,7 @@ namespace fmt
 	type<char> const &cstr = CSTR;
 	type<wchar_t> const &wstr = WSTR;
 
-		string to_string(long value, int base)
+	string to_string(long value, int base)
 	{
 		return from_base<long>(value, base);
 	}
@@ -180,6 +329,46 @@ namespace fmt
 	{
 		auto const nan = std::nanl("");
 		return to_fp(u, nan, std::strtold);
+	}
+
+	bool got(name n)
+	{
+		return strings::registry().got(n);
+	}
+
+	bool got(view n)
+	{
+		return strings::registry().got(n);
+	}
+
+	view get(name n)
+	{
+		return strings::registry().get(n);
+	}
+
+	view get(view n)
+	{
+		return strings::registry().get(n);
+	}
+
+	name put(view n)
+	{
+		return strings::registry().put(n);
+	}
+
+	name set(view n)
+	{
+		return strings::registry().set(n);
+	}
+
+	string::in::ref get(string::in::ref in, char end)
+	{
+		return strings::registry().get(in, end);
+	}
+
+	string::out::ref put(string::out::ref out, char end)
+	{
+		return strings::registry().put(out, end);
 	}
 }
 

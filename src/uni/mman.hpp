@@ -16,7 +16,7 @@ namespace sys::uni
 		ptr = mmap(ptr, sz, prot, flags, fd, off);
 		if (MAP_FAILED == ptr)
 		{
-			sys::err(here, "mmap", ptr, sz, off);
+			sys::err(here, "mmap", sz, prot, flags, fd, off);
 		}
 
 		return fwd::make_ptr(ptr, [sz](auto ptr)
