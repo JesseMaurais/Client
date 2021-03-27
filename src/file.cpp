@@ -18,18 +18,60 @@
 #include "sys.hpp"
 #include "sync.hpp"
 #include "net.hpp"
-#include <utility>
 #include <climits>
+#include <utility>
+#include <algorithm>
+#include <regex>
+#include <stack>
 
 #ifdef _WIN32
 # include "win/memory.hpp"
 # include "win/file.hpp"
 #else
+# include "uni/dirent.hpp"
 # include "uni/mman.hpp"
 #endif
 
+namespace fmt::dir
+{
+	string join(string::view::span p)
+	{
+		return fmt::join(p, sys::sep::dir);
+	}
+
+	string join(string::view::init p)
+	{
+		return fmt::join(p, sys::sep::dir);
+	}
+
+	string::view::vector split(string::view u)
+	{
+		return fmt::split(u, sys::sep::dir);
+	}
+}
+
+namespace fmt::path
+{
+	string join(string::view::span p)
+	{
+		return fmt::join(p, sys::sep::path);
+	}
+
+	string join(string::view::init p)
+	{
+		return fmt::join(p, sys::sep::path);
+	}
+
+	string::view::vector split(string::view u)
+	{
+		return fmt::split(u, sys::sep::path);
+	}
+}
+
 namespace env::file
 {
+	// mode.hpp
+
 	fwd::variable<size_t>& width()
 	{
 		constexpr size_t Size = BUFSIZ;
@@ -234,6 +276,183 @@ namespace env::file
 		return success;
 	}
 
+	// dir.hpp
+
+	fmt::string::view::edges paths()
+	{
+		return { env::pwd(), env::paths() };
+	}
+
+	fmt::string::view::edges config()
+	{
+		return { env::usr::config_home(), env::usr::config_dirs() };
+	}
+
+	fmt::string::view::edges data()
+	{
+		return { env::usr::data_home(), env::usr::data_dirs() };
+	}
+
+	bool find(fmt::string::view path, entry check)
+	{
+		if (not fmt::terminated(path))
+		{
+			return find(fmt::to_string(path), check);
+		}
+		auto const c = path.data();
+
+		return fwd::any_of(sys::files(c), check);
+	}
+
+	bool find(fmt::string::view::span paths, entry check)
+	{
+		return fwd::any_of(paths, [check](auto path)
+		{
+			return find(path, check);
+		});
+	}
+
+	bool find(fmt::string::view::edges paths, entry look)
+	{
+		return find(paths.first, look) or find(paths.second, look);
+	}
+
+	entry mask(mode am)
+	{
+		return [am](fmt::string::view u)
+		{
+			return not env::file::fail(u, am);
+		};
+	}
+
+	entry regx(fmt::string::view u)
+	{
+		auto const s = fmt::to_string(u);
+		auto const x = std::regex(s);
+		return [x](fmt::string::view u)
+		{
+			std::cmatch cm;
+			auto const s = fmt::to_string(u);
+			return std::regex_search(s.data(), cm, x);
+		};
+	}
+
+	entry to(fmt::string::vector& t)
+	{
+		return [&](fmt::string::view u)
+		{
+			auto s = fmt::to_string(u);
+			t.emplace_back(move(s));
+			return success;
+		};
+	}
+
+	entry to(fmt::string& s)
+	{
+		return [&](fmt::string::view u)
+		{
+			s = fmt::to_string(u);
+			return success;
+		};
+	}
+
+	entry all(fmt::string::view u, mode m, entry e)
+	{
+		return mask(m) || regx(u) || e;
+	}
+
+	entry any(fmt::string::view u, mode m, entry e)
+	{
+		return all(u, m, e);
+	}
+
+	fmt::string::view make_dir(fmt::string::view path)
+	{
+		std::stack<fmt::string::view> stack;
+		fmt::string buf;
+
+		auto folders = fmt::dir::split(path);
+		auto stem = path;
+
+		while (env::file::fail(stem))
+		{
+			stack.push(folders.back());
+			folders.pop_back();
+
+			buf = fmt::dir::join(folders);
+			stem = buf;
+		}
+
+		stem = path.substr(0, path.find(sys::sep::dir, stem.size() + 1));
+
+		while (not empty(stack))
+		{
+			folders.push_back(stack.top());
+			stack.pop();
+
+			buf = fmt::dir::join(folders);
+			auto const c = buf.data();
+			if (file::fail(sys::mkdir(c, S_IRWXU)))
+			{
+				sys::err(here, "mkdir", c);
+				stem = "";
+				break;
+			}
+		}
+
+		return stem;
+	}
+
+	bool remove_dir(fmt::string::view dir)
+	{
+		std::deque<fmt::string> deque;
+		deque.emplace_back(dir);
+
+		for (auto it = deque.begin(); it != deque.end(); ++it)
+		{
+			(void) find(*it, [&](fmt::string::view u)
+			{
+				auto const path = fmt::dir::join({*it, u});
+				auto const c = path.data();
+				struct sys::stat st(c);
+				if (file::fail(st))
+				{
+					sys::err(here, "stat", c);
+				}
+				else
+				if (S_ISDIR(st.st_mode))
+				{
+					if (u != "." and u != "..")
+					{
+						deque.emplace_back(move(path));
+					}
+				}
+				else
+				if (sys::fail(sys::unlink(c)))
+				{
+					sys::err(here, "unlink", c);
+				}
+				return success;
+			});
+		}
+
+		bool ok = success;
+		while (not empty(deque))
+		{
+			dir = deque.back();
+			auto const c = dir.data();
+			if (sys::fail(sys::rmdir(c)))
+			{
+				sys::err(here, "rmdir", c);
+				ok = failure;
+			}
+			deque.pop_back();
+		}
+		return ok;
+	}
+
+	// pipe.hpp
+
 	ssize_t descriptor::write(const void* buf, size_t sz) const
 	{
 		auto const n = sys::write(fd, buf, sz);
@@ -339,6 +558,8 @@ namespace env::file
 	{
 		return sys::wait(pid);
 	}
+
+	// fifo.hpp
 
 	fifo::fifo(fmt::string::view name, mode mask)
 	: flags(convert(mask))
@@ -460,6 +681,9 @@ namespace env::file
 		}
 		#endif
 	}
+
+	// socket.hpp
+
 	socket::socket(int fd)
 	{
 		this->fd = fd;
@@ -599,6 +823,8 @@ namespace env::file
 		return n;
 	}
 
+	// shm.hpp
+
 	memory make_shm(int fd, size_t sz, off_t off, mode mask, size_t *out)
 	{
 		assert(not fail(fd));
@@ -689,11 +915,39 @@ namespace env::file
 
 #ifdef test_unit
 #include "arg.hpp"
+
 test_unit(mode)
 {
 	assert(not env::file::fail(__FILE__) and "Source file exists");
 	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
 }
+
+test_unit(dir)
+{
+	assert(not env::file::fail(env::temp()));
+	assert(not env::file::fail(env::pwd()));
+	assert(not env::file::fail(env::home()));
+
+	auto const path = fmt::dir::split(__FILE__);
+	assert(not empty(path));
+	auto const name = path.back();
+	assert(not empty(name));
+	auto const program = env::opt::program();
+	assert(not empty(program));
+
+	assert(env::file::find(env::pwd(), [program](auto entry)
+	{
+		return fmt::dir::split(entry).back() == program;
+	}));
+
+	auto const temp = fmt::dir::join({env::temp(), "my", "test", "dir"});
+	if (std::empty(temp)) return;
+	auto const stem = env::file::make_dir(temp);
+//	assert(not empty(stem.first));
+//	assert(not empty(stem.second));
+	assert(not env::file::remove_dir(stem));
+}
+
 #endif
 
 #if 0

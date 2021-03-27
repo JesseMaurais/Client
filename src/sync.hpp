@@ -1,5 +1,5 @@
 #ifndef sync_hpp
-#define sync_hpp "Thread Synchronize"
+#define sync_hpp "Synchronize Threads"
 
 #include "err.hpp"
 #include "env.hpp"
