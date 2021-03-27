@@ -68,16 +68,22 @@ namespace sys::win
 
 	template <class T> struct zero : T
 	{
-		zero() { ZeroMemory(this, sizeof(T)); }
+		zero()
+		{
+			ZeroMemory(this, sizeof(T));
+		}
 	};
 
-	template <class T, DWORD T::*Size = &T::dwSize> struct size : zero<T>
+	template <auto S, class T = fwd::offset_of<S>> struct size : zero<typename T::parent_type>
 	{
-		size() { this->*Size = sizeof(T); }
+		size()
+		{
+			constexpr auto s = sizeof(typename T::parent_type);
+			this->*S = static_cast<typename T::value_type>(s);
+		}
 	};
 
-	struct security_attributes 
-	: size<SECURITY_ATTRIBUTES, &SECURITY_ATTRIBUTES::nLength>
+	struct security_attributes : size<&SECURITY_ATTRIBUTES::nLength>
 	{
 		security_attributes(bool inherit = true)
 		{

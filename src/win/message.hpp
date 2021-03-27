@@ -42,21 +42,21 @@ namespace sys::win
 		}
 	};
 
-	struct classinfo : size<WNDCLASSEX, &WNDCLASSEX::cbSize>
+	struct classinfo : size<&WNDCLASSEX::cbSize>
 	{
 		classinfo() = default;
-		
+
 		classinfo(LPCSTR c, HINSTANCE h = nullptr)
 		{
-			return GetClassInfoExA(h, c, this);
+			GetClassInfoExA(h, c, this);
 		}
 	};
 
 	struct registerclass : classinfo
 	{
-		~registerclass
+		~registerclass()
 		{
-			return RegisterClassEx(this);
+			RegisterClassEx(this);
 		}
 	};
 }

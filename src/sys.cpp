@@ -110,7 +110,7 @@ namespace sys
 			}
 
 			sys::win::zero<PROCESS_INFORMATION> pi;
-			sys::win::size<STARTUPINFO, &STARTUPINFO::cb> si;
+			sys::win::size<&STARTUPINFO::cb> si;
 
 			si.dwFlags = STARTF_USESTDHANDLES;
 			si.hStdInput = pair[0].read.h;

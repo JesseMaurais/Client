@@ -17,12 +17,11 @@ namespace sys::uni
 		if (MAP_FAILED == ptr)
 		{
 			sys::err(here, "mmap", ptr, sz, off);
-			ptr = nullptr;
 		}
 
 		return fwd::make_ptr(ptr, [sz](auto ptr)
 		{
-			if (nullptr != ptr)
+			if (MAP_FAILED != ptr)
 			{
 				if (fail(munmap(ptr, sz)))
 				{

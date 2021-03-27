@@ -19,7 +19,7 @@ namespace sys::uni
 			ptr = opendir(path);
 			if (nullptr == ptr)
 			{
-				sys::err(here, path);
+				sys::err(here, "opendir" path);
 			}
 		}
 
@@ -29,7 +29,7 @@ namespace sys::uni
 			{
 				if (fail(closedir(ptr)))
 				{
-					sys::err(here);
+					sys::err(here, "closedir");
 				}
 			}
 		}

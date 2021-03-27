@@ -1,26 +1,12 @@
 #ifndef tmp_hpp
 #define tmp_hpp "Template Meta Programming"
 
-#include <type_traits>
 #include <functional>
 #include <utility>
 #include <cstddef>
 
 namespace fwd
 {
-	template <auto f> class offset_of
-	{
-		static_assert(std::is_member_object_pointer<decltype(f)>::value);
-
-		template <class T, class C> static std::pair<T, C> pair(T C::*);
-
-	public:
-	
-		using pair_type = decltype(pair(f));
-		using value_type = typename pair_type::first_type;
-		using parent_type = typename pair_type::second_type;
-	};
-
 	template <class T> struct type_of
 	{
 		using type = T;

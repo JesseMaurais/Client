@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <functional>
+#include <type_traits>
 
 namespace fwd
 {
@@ -12,6 +13,20 @@ namespace fwd
 		unique & operator = (unique const &) = delete;
 	protected:
 		unique() = default;
+	};
+
+	template <auto f> class offset_of
+	{
+		static_assert(std::is_member_object_pointer<decltype(f)>::value);
+		template <class T, class C> static std::pair<T, C> pair(T C::*);
+
+	public:
+	
+		using pair_type = decltype(pair(f));
+		using value_type = typename pair_type::first_type;
+		using parent_type = typename pair_type::second_type;
+		static constexpr auto value_size = sizeof(value_type);
+		static constexpr auto parent_size = sizeof(parent_type);
 	};
 
 	template <class Type> using as_ptr = typename std::add_pointer<Type>::type;
