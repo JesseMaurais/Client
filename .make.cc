@@ -341,7 +341,7 @@ endif
 
 all: $(EXE)
 help: ; $(SHOW) Readme
-clean: ; $(REMOVE) $(OBJ) $(EXE) $(DEP) $(PCHOBJ) $(PCHOUT)
+clean: ; $(REMOVE) $(OUT)
 cflags: ; echo $(CFLAGS) $(WARN) $(HEADER) > compile_flags.txt
 ctags: ; ctags $(SRC) $(HDR)
 
