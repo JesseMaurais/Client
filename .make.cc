@@ -239,7 +239,16 @@ endif
 
 CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -Fo$(OBJDIR)
 LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
-LNKDEP=$(PCHOBJ) $(OBJ) 
+LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
+
+#ifdef _NMAKE
+ifdef COMSPEC
+{$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
+	@echo $< : \> $@
+	@set CMD=$(CXX) $(CFLAGS) -showIncludes -P -Fi"NUL" -c $<
+	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
+endif
+#endif
 
 #elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
 

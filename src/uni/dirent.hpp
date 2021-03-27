@@ -1,5 +1,5 @@
-#ifndef uni_files_hpp
-#define uni_files_hpp
+#ifndef uni_dirent_hpp
+#define uni_dirent_hpp "POSIX Directory Entry"
 
 #include "uni.hpp"
 #include "ptr.hpp"
@@ -8,22 +8,31 @@
 
 namespace sys::uni
 {
-	class directory : fwd::unique
+	class dir : fwd::unique
 	{
 		DIR *ptr;
 
 	public:
 
-		directory(char const *path)
+		dir(char const *path)
 		{
 			ptr = opendir(path);
 			if (nullptr == ptr)
 			{
-				sys::err(here, "opendir" path);
+				sys::err(here, "opendir", path);
 			}
 		}
 
-		~directory()
+		dir(int fd)
+		{
+			ptr = fdopendir(fd);
+			if (nullptr == ptr)
+			{
+				sys::err(here, "fdopendir", fd);
+			}
+		}
+
+		~dir()
 		{
 			if (nullptr != ptr)
 			{
@@ -43,16 +52,16 @@ namespace sys::uni
 
 namespace sys
 {
-	class files : sys::uni::directory
+	class files : sys::uni::dir
 	{
 		class iterator
 		{
-			sys::uni::directory *that;
+			sys::uni::dir *that;
 			struct dirent *ptr;
 
 		public:
 
-			iterator(sys::uni::directory *dir, struct dirent *ent)
+			iterator(sys::uni::dir *dir, struct dirent *ent)
 			: that(dir), ptr(ent)
 			{ }
 
@@ -80,7 +89,7 @@ namespace sys
 
 	public:
 
-		using directory::directory;
+		using dir::dir;
 
 		auto begin()
 		{

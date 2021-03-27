@@ -1,5 +1,5 @@
 #ifndef win_file_hpp
-#define win_file_hpp "WIN32 Files"
+#define win_file_hpp "WIN32 File API"
 
 #include "win.hpp"
 #include "ptr.hpp"
@@ -21,11 +21,11 @@ namespace sys::win
 		}
 	};
 
-	struct find_file : fwd::unique, WIN32_FIND_DATA
+	struct find_data : fwd::unique, WIN32_FIND_DATA
 	{
 		HANDLE h;
 
-		find_file(char const *path)
+		find_data(char const *path)
 		{
 			h = FindFirstFile(path, this);
 			if (sys::win::fail(h))
@@ -34,7 +34,7 @@ namespace sys::win
 			}
 		}
 
-		~find_file()
+		~find_data()
 		{
 			if (not sys::win::fail(h))
 			{
@@ -62,16 +62,16 @@ namespace sys::win
 
 namespace sys
 {
-	class files : sys::win::find_file
+	class files : sys::win::find_data
 	{
 		class iterator
 		{
-			sys::win::find_file *that;
+			sys::win::find_data *that;
 			bool flag;
 
 		public:
 
-			iterator(sys::win::find_file* ptr, bool end)
+			iterator(sys::win::find_data* ptr, bool end)
 			: that(ptr), flag(end)
 			{ }
 
@@ -105,7 +105,7 @@ namespace sys
 
 	public:
 
-		files(char const *path) : find_file(data(sub(path)))
+		files(char const *path) : find_data(data(sub(path)))
 		{ }
 
 		auto begin()
