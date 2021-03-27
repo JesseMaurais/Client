@@ -15,7 +15,7 @@
 
 namespace sys
 {
-	struct dll : fmt::struct_brief<dll>
+	struct dll
 	{
 		dll() = default;
 		dll(fmt::string::view);
@@ -23,11 +23,7 @@ namespace sys
 
 		static dll find(fmt::string::view);
 	
-		template 
-		<
-			class Type
-		> 
-		auto sym(fmt::string::view name) const
+		template <class Type> auto sym(fmt::string::view name) const
 		{
 			Type *addr = nullptr;
 			// see pubs.opengroup.org
@@ -46,11 +42,11 @@ namespace sys
 		void *sym(fmt::string::view) const;
 	};
 
-	extern dll::cref self;
+	dll & bin();
 
 	template <class T> auto sym(fmt::string::view name)
 	{
-		return self.sym<T>(name);
+		return bin().sym<T>(name);
 	}
 }
 

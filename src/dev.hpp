@@ -1,15 +1,18 @@
 #ifndef dev_hpp
 #define dev_hpp
 
-#include "shell.hpp"
+#include "cmd.hpp"
 
-namespace env::dev
+namespace env
 {
 	struct dump : shell
 	{
 		line sym(view path);
 		line dyn(view path);
+
 	};
+	
+	dump & dev();
 }
 
 #endif // file

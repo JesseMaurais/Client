@@ -1,8 +1,8 @@
-#ifndef desktop_hpp
-#define desktop_hpp "Desktop Utility"
+#ifndef dlg_hpp
+#define dlg_hpp "Desktop Utility Dialogs"
 
-#include "shell.hpp"
-#include "opt.hpp"
+#include "cmd.hpp"
+#include "fwd.hpp"
 
 namespace env
 {
@@ -45,8 +45,8 @@ namespace env
 		line select(view start = "", mode = mode::none);
 		// User selects file(s) from the system
 	};
-
-	desktop& dialog();
+	
+	desktop & dlg();
 }
 
 #endif // file

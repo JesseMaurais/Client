@@ -3,14 +3,84 @@
 
 #include "sys.hpp"
 #include "err.hpp"
+#include "sym.hpp"
+#include "sig.hpp"
 #include "ptr.hpp"
+#include "dir.hpp"
+#include "env.hpp"
 #include "pipe.hpp"
 #include "sync.hpp"
-#include <vector>
+#include "type.hpp"
+#ifdef _WIN32
+#include "win/message.hpp"
+#else
+#include "uni/signal.hpp"
+#include <dlfcn.h>
+#endif
 
 namespace sys
 {
-	using namespace env::file;
+	bool debug =
+	#ifdef NDEBUG
+		false;
+	#else
+		true;
+	#endif
+
+	thread_local fmt::string::view thread_id;
+	thread_local fmt::string::stream thread_buf;
+
+	fmt::string::out::ref out()
+	{
+		return thread_buf;
+	}
+
+	fmt::string::out::ref flush(fmt::string::out::ref put) 
+	{
+		static sys::mutex key;
+		auto const unlock = key.lock();
+
+		fmt::string line;
+		while (std::getline(thread_buf, line))
+		{
+			put << line << std::endl;
+		}
+		return put;
+	}
+
+	int impl::bug(fmt::string::view message, bool no)
+	{
+		thread_local struct
+		{
+			fmt::string last;
+			int counter = -1;
+		} local;
+		// Avoid spamming
+		if (message != local.last)
+		{
+			// reset
+			local.counter = 0;
+			local.last = fmt::to_string(message);
+			// format
+			{
+				// message
+				thread_buf << local.last;
+				// number
+				if (no)
+				{
+					thread_buf << ':' << ' ' << std::strerror(errno);
+				}
+				// thread
+				if (not empty(thread_id))
+				{
+					thread_buf << ' ' << '[' << thread_id << ']';
+				}
+			}
+			thread_buf << fmt::eol;
+		}
+		else ++local.counter;
+		return local.counter;
+	}
 
 	#ifdef _WIN32
 	namespace win
@@ -19,7 +89,7 @@ namespace sys
 		{
 			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
 			                    | FORMAT_MESSAGE_IGNORE_INSERTS
-		    	                | FORMAT_MESSAGE_FROM_HMODULE
+			                    | FORMAT_MESSAGE_FROM_HMODULE
 			                    | FORMAT_MESSAGE_FROM_SYSTEM;
 
 			auto h = static_cast<HANDLE>(ptr);
@@ -295,5 +365,320 @@ namespace sys
 		}
 		#endif
 	}
+
+	// sym.hpp
+
+	dll & bin()
+	{
+		static dll local;
+		return local;
+	}
+
+	dll::dll(fmt::string::view path)
+	{
+		auto const buf = fmt::to_string(path);
+		auto const s = buf.data();
+
+		#ifdef _WIN32
+		{
+			auto const h = LoadLibrary(s);
+			if (nullptr == h)
+			{
+				sys::win::err(here, "LoadLibrary", path);
+			}
+			else ptr = h;
+		}
+		#else
+		{
+			ptr = dlopen(s, RTLD_LAZY);
+			if (nullptr == ptr)
+			{
+				auto const e = dlerror();
+				sys::warn(here, "dlopen", path, e);
+			}
+		}
+		#endif
+	}
+
+	dll::~dll()
+	{
+		#ifdef _WIN32
+		{
+			auto const h = static_cast<HMODULE>(ptr);
+			if (nullptr != h and not FreeLibrary(h))
+			{
+				sys::win::err(here, "FreeLibrary");
+			}
+		}
+		#else
+		{
+			if (nullptr != ptr and dlclose(ptr))
+			{
+				auto const e = dlerror();
+				sys::warn(here, "dlclose", e);
+			}
+		}
+		#endif
+	}
+
+	void *dll::sym(fmt::string::view name) const
+	{
+		auto const buf = fmt::to_string(name);
+		auto const s = buf.data();
+
+		#ifdef _WIN32
+		{
+			auto h = static_cast<HMODULE>(ptr);
+			if (nullptr == h)
+			{
+				h = GetModuleHandle(nullptr);
+				if (nullptr == h)
+				{
+					sys::win::err(here, "GetModuleHandle");
+					return nullptr;
+				}
+			}
+
+			auto const f = GetProcAddress(h, s);
+			if (nullptr == f)
+			{
+				sys::win::err(here, "GetProcAddress", name);
+			}
+			return f;
+		}
+		#else
+		{
+			(void) dlerror();
+			auto f = dlsym(ptr, s);
+			auto const e = dlerror();
+			if (nullptr != e)
+			{
+				sys::warn(here, "dlsym", name, e);
+			}
+			return f;
+		}
+		#endif
+	}
+
+	dll dll::find(fmt::string::view basename)
+	{
+		using namespace env::file;
+		fmt::string name = fmt::to_string(basename) + sys::ext::share;
+		env::file::find(env::paths(), regx(name) || to(name) || stop);
+		return fmt::string::view(name);
+	}
 }
 
+namespace sys::sig
+{
+	socket &scope::event(int no)
+	{
+		static std::map<int, sys::sig::socket> map;
+		return map[no];
+	}
+
+	void scope::raise(int no)
+	{
+		event(no).raise([no](auto const &p)
+		{
+			p.second(no);
+		});
+	}
+
+	fmt::string to_string(int signo)
+	{
+		switch (signo)
+		{
+		case SIGABRT:
+			return "Abort";
+
+		#ifdef SIGALRM
+		case SIGALRM:
+			return "Alarm";
+		#endif
+
+		#ifdef SIGBUS
+		case SIGBUS:
+			return "Memory access violation";
+		#endif
+
+		#ifdef SIGCHLD
+		case SIGCHLD:
+			return "Child process stopped/continued";
+		#endif
+
+		#ifdef SIGCONT
+		case SIGCONT:
+			return "Continue processing";
+		#endif
+
+		case SIGFPE:
+			return "Float-point error";
+
+		#ifdef SIGHUP
+		case SIGHUP:
+			return "Hang up";
+		#endif
+
+		case SIGILL:
+			return "Illegal instruction";
+
+		case SIGINT:
+			return "Interrupt";
+
+		#ifdef SIGKILL
+		case SIGKILL:
+			return "Kill";
+		#endif
+
+		#ifdef SIGPIPE
+		case SIGPIPE:
+			return "Broken pipe";
+		#endif
+
+		#ifdef SIGQUIT
+		case SIGQUIT:
+			return "Quit processing";
+		#endif
+
+		case SIGSEGV:
+			return "Segmentation fault";
+
+		#ifdef SIGSTOP
+		case SIGSTOP:
+			return "Stop processing";
+		#endif
+
+		case SIGTERM:
+			return "Terminate";
+
+		#ifdef SIGTSTP
+		case SIGTSTP:
+			return "Terminal stopped";
+		#endif
+
+		#ifdef SIGTIN
+		case SIGTIN:
+			return "Process reading";
+		#endif
+
+		#ifdef SIGTOU
+		case SIGTOU:
+			return "Process writing";
+		#endif
+
+		#ifdef SIGUSR1
+		case SIGUSR1:
+			return "User defined (1)";
+		#endif
+
+		#ifdef SIGUSR2
+		case SIGUSR2:
+			return "User defined (2)";
+		#endif
+
+		#ifdef SIGPOLL
+		case SIGPOLL:
+			return "Poll event";
+		#endif
+
+		#ifdef SIGPROF
+		case SIGPROF:
+			return "Profiling timer expired";
+		#endif
+
+		#ifdef SIGPWR
+		case SIGPWR:
+			return "Power limited";
+		#endif
+
+		#ifdef SIGSTKFLT
+		case SIGSTKFLT:
+			return "Stack fault";
+		#endif
+
+		#ifdef SIGSYS
+		case SIGSYS:
+			return "Bad system call";
+		#endif
+
+		#ifdef SIGTRAP
+		case SIGTRAP:
+			return "Trace or breakpoint trap";
+		#endif
+
+		#ifdef SIGURG
+		case SIGURG:
+			return "Urgent out of band data";
+		#endif
+
+		#ifdef SIGVTALRM
+		case SIGVTALRM:
+			return "Virtual timer expired";
+		#endif
+
+		#ifdef SIGWINCH
+		case SIGWINCH:
+			return "Window resized";
+		#endif
+
+		#ifdef SIGXCPU
+		case SIGXCPU:
+			return "CPU time limit exceeded";
+		#endif
+
+		#ifdef SIGXFSZ
+		case SIGXFSZ:
+			return "File size limit exceeded";
+		#endif
+
+		default:
+			return fmt::to_string(signo);
+		}
+	}
+}
+
+#ifdef test_unit
+
+static int hidden() { return 42; }
+dynamic int visible() { return hidden(); }
+
+test_unit(sym)
+{
+	// Can see dynamic)
+	auto f = sys::sym<int()>("visible");
+	assert(nullptr != f);
+	// Cannot see static
+//	auto g = sys::sym<int()>("hidden");
+//	assert(nullptr == g);
+	// Callable object
+	assert(f() == hidden());
+}
+
+test_unit(sig)
+{
+	std::vector<int> caught;
+	std::vector<int> raised = { SIGINT, SIGFPE, SIGILL };
+
+	for (int signo : raised)
+	{
+		sys::sig::scope const after
+		(
+			signo, [&caught](int signo) 
+			{ 
+				caught.push_back(signo); 
+			}
+		);
+		std::raise(signo);
+	}
+
+	auto const begin = caught.begin();
+	auto const end = caught.end();
+
+	for (int signo : raised)
+	{
+		assert(end != std::find(begin, end, signo));
+	}
+}
+
+#endif

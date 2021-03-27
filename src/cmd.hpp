@@ -1,5 +1,5 @@
-#ifndef shell_hpp
-#define shell_hpp "Command Shell"
+#ifndef cmd_hpp
+#define cmd_hpp "Command Line Shell"
 
 #include "fmt.hpp"
 
@@ -43,10 +43,9 @@ namespace env
 
 		line open(view path);
 		// Preferred application for file type at path
-
 	};
 
-	struct shell& command();
+	shell & cmd();
 }
 
 #endif // file

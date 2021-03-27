@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "test.hpp"
 #include "arg.hpp"
-#include "shell.hpp"
+#include "cmd.hpp"
 #include "str.hpp"
 #include "type.hpp"
 #include "char.hpp"
@@ -161,10 +161,8 @@ int main(int argc, char** argv)
 
 	if (std::empty(tests))
 	{
-		env::dev::dump dump; // output cache
-
 		// Parse this programs symbol table
-		for (auto const& line : dump.dyn(argv[0]))
+		for (auto const& line : env::dev().dyn(argv[0]))
 		{
 			// Separate lines by white space
 			for (auto const name : fmt::split(line))

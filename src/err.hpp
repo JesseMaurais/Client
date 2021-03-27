@@ -62,6 +62,7 @@ namespace fmt
 namespace sys
 {
 	fmt::string::out::ref out(); // Output device
+	fmt::string::out::ref flush(fmt::string::out::ref);
 
 	namespace impl
 	{
