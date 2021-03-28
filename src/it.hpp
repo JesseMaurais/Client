@@ -21,7 +21,7 @@ namespace fwd
 		}
 	};
 
-	template <class Iterator> struct range : fwd::pair<Iterator>
+	template <class Iterator> struct range : pair<Iterator>
 	{
 		using pair<Iterator>::pair;
 

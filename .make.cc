@@ -245,7 +245,7 @@ LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
 ifdef COMSPEC
 {$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
 	@echo $< : \> $@
-	@set CMD=$(CXX) $(CFLAGS) -showIncludes -P -Fi"NUL" -c $<
+	@set CMD=$(CXX) $(CFLAGS) -showIncludes -w -P -Fi"NUL" -c $<
 	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
 endif
 #endif

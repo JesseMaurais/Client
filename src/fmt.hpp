@@ -150,7 +150,10 @@ namespace fmt
 	constexpr auto npos = string::npos;
 	constexpr auto null = size_t { };
 
-	static_assert(null == ~npos, "Need two's complement");
+	static_assert(null == ~npos, "2's complement required");
+
+	using size = fmt::struct_brief<std::size_t>;
+	using diff = fmt::struct_brief<std::ptrdiff_t>;
 }
 
 #endif // file

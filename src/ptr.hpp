@@ -49,11 +49,11 @@ namespace fwd
 
 	template 
 	<
-		class Type, class Free = deleter<Type>
+		class Pointer, class Free = deleter<Pointer>
 	>
-	auto null_ptr(Free del = std::default_delete<Type>())
+	auto null_ptr(Free del = std::default_delete<Pointer>())
 	{
-		return make_ptr(null<Type>, del);
+		return make_ptr((Pointer) nullptr, del);
 	}
 
 	template

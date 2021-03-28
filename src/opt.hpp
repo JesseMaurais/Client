@@ -5,8 +5,8 @@
 
 namespace env::opt
 {
-	using name = std::ptrdiff_t;
-	using pair = fwd::pair<name>;
+	using name = fmt::diff::type;
+	using pair = fmt::diff::pair;
 	using view = fmt::string::view;
 	using span = view::span;
 

@@ -694,8 +694,8 @@ namespace env::file
 		#ifdef _WIN32
 		{
 			static auto const param = fmt::put("WSA");
-			static env::opt::word const value = MAKEWORD(2, 2);
-			static auto const ver = opt::get(param, value);
+			static long const value = MAKEWORD(2, 2);
+			static auto const ver = env::opt::get(param, value);
 			static sys::net::win::data ws(fmt::to<WORD>(ver));
 		}
 		#endif

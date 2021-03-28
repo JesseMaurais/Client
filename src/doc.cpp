@@ -106,7 +106,7 @@ namespace doc
 
 	ini::out::ref operator<<(ini::out::ref output, ini::cref input)
 	{
-		env::opt::word last = -1;
+		env::opt::name last = -1;
 		for (auto [k, v] : input.keys)
 		{
 			if (k.first != last)

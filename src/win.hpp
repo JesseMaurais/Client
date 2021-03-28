@@ -8,6 +8,7 @@
 #include <windows.h>
 #include "type.hpp"
 #include "file.hpp"
+#include "mode.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
 #include "str.hpp"
@@ -134,7 +135,7 @@ namespace sys::win
 		pipe()
 		{
 			security_attributes sa;
-			auto const sz = env::file::width();
+			std::size_t const sz = env::file::width();
 			if (not CreatePipe(&read.h, &write.h, &sa, sz))
 			{
 				sys::win::err(here, "CreatePipe");

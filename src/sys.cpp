@@ -115,7 +115,7 @@ namespace sys
 		
 			if (0 < size) // replace
 			{
-				tls.reset((HLOCAL) str);
+				tls.reset(reinterpret_cast<HLOCAL>(str));
 			}
 
 			if (nullptr == str)

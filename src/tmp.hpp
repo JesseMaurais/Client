@@ -33,7 +33,7 @@ namespace fwd
 		using base::base;
 
 		formula operator and(base const& that) const
-		{ 
+		{
 			return [&](T... x)
 			{
 				return (*this)(x...) and that(x...);
