@@ -102,16 +102,6 @@ namespace fmt
 		return to<int>(n);
 	}
 
-	template <class N> auto to_wint(N n)
-	{
-		return to<wint_t>(n);
-	}
-
-	template <class N> auto to_wchar(N n)
-	{
-		return to<wchar_t>(n);
-	}
-
 	template <class C, class N> bool in_range(const C& c, N n)
 	{
 		auto const sz = std::size(c);
@@ -150,28 +140,6 @@ namespace fmt
 		else
 		{
 			return std::isnan(n);
-		}
-	}
-}
-
-namespace fmt::dig
-{
-	template <class N> auto to(string::view line, int base = 10)
-	{
-		if constexpr (is_integer<N>)
-		{
-			if constexpr (is_signed<N>)
-			{
-				return to_narrow<N>(to_llong(line, base));
-			}
-			else
-			{
-				return to_narrow<N>(to_ullong(line, base));
-			}
-		}
-		else
-		{
-			return to_narrow<N>(to_quad(line));
 		}
 	}
 }

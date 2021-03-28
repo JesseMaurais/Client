@@ -2,7 +2,6 @@
 #define err_hpp "Error Format"
 
 #include "fmt.hpp"
-#include <sstream>
 
 // Pre condition
 
@@ -61,15 +60,15 @@ namespace fmt
 
 namespace sys
 {
-	fmt::string::out::ref out(); // Output device
-	fmt::string::out::ref flush(fmt::string::out::ref);
+	fmt::string::out::ref out(); // thread-safe buffered output device
+	fmt::string::out::ref put(fmt::string::out::ref); // flush out
 
 	namespace impl
 	{
 		int bug(fmt::string::view, bool);
 	}
 
-	extern bool debug; // Whether to write out
+	extern bool debug; // whether to write out
 
 	template <typename... T> int warn(fmt::where at, T... t)
 	{

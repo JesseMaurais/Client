@@ -3,7 +3,7 @@
 
 #include "fwd.hpp"
 #include "tmp.hpp"
-#include <memory>
+#include "ptr.hpp"
 
 namespace fwd
 {
@@ -19,7 +19,7 @@ namespace fwd
 		,
 		class Container = vector<Type>
 		,
-		class Pointer = typename std::add_pointer<const Container>::type
+		class Pointer = as_ptr<const Container>
 		,
 		class Size = typename Container::size_type
 		,
@@ -43,19 +43,16 @@ namespace fwd
 
 		auto end() const { return that->data() + this->second; }
 
-		#ifdef assert
-		~line() { assert(this->first <= this->second); }
-		#endif
-
 		operator View() const
 		{
 			return { begin(), end() };
 		}
 
-		auto operator[](std::size_t index) const 
+		auto operator[](std::ptrdiff_t index) const 
 		{
 			#ifdef assert
-			assert(size() > (std::ptrdiff_t) index);
+			assert(size() > index)
+			assert(index > -1);
 			#endif
 			return that->at(this->first + index);
 		}
@@ -64,6 +61,8 @@ namespace fwd
 	//
 	// Directed Graph
 	//
+
+	template <class Node> using edges = std::pair<Node, span<Node>>;
 
 	template
 	<
@@ -79,15 +78,7 @@ namespace fwd
 		,
 		template <class> class Alloc = allocator
 	>
-	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
-
-	template
-	<
-		class Node
-		,
-		template <class> class Span = span
-	>
-	using edges = std::pair<const Node, Span<Node>>;
+	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<pair<Node>>>;
 
 	//
 	// Algorithms
@@ -95,9 +86,7 @@ namespace fwd
 
 	template
 	<
-		class Type
-		,
-		class Iterator
+		class Type, class Iterator
 	>
 	auto split(span<Type> s, predicate<Type> p, Iterator out)
 	// Partition a span by predicate
@@ -186,6 +175,28 @@ namespace fwd
 		auto const begin = std::back_inserter(out);
 		auto const end = join(s, n, begin);
 		return out;
+	}
+
+	//
+	// Ranges
+	//
+
+	template
+	<
+		class Range, class Predicate
+	>
+	inline bool all_of(Range&& range, Predicate&& check)
+	{
+		return std::all_of(range.begin(), range.end(), check);
+	}
+
+	template
+	<
+		class Range, class Predicate
+	>
+	inline bool any_of(Range&& range, Predicate&& check)
+	{
+		return std::any_of(range.begin(), range.end(), check);
 	}
 }
 

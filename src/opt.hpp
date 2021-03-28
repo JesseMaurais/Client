@@ -5,8 +5,6 @@
 
 namespace env::opt
 {
-	using word = long long;
-	using quad = long double;
 	using name = std::ptrdiff_t;
 	using pair = fwd::pair<name>;
 	using view = fmt::string::view;
@@ -25,16 +23,16 @@ namespace env::opt
 	bool set(pair, bool);
 
 	// Integer
-	word get(name, word, int base = 10);
-	bool set(name, word, int base = 10);
-	word get(pair, word, int base = 10);
-	bool set(pair, word, int base = 10);
+	long get(name, long, int base = 10);
+	bool set(name, long, int base = 10);
+	long get(pair, long, int base = 10);
+	bool set(pair, long, int base = 10);
 
 	// Float
-	quad get(name, quad);
-	bool set(name, quad, int digits = 6);
-	quad get(pair, quad);
-	bool set(pair, quad, int digits = 6);
+	float get(name, float);
+	bool set(name, float, int digits = 6);
+	float get(pair, float);
+	bool set(pair, float, int digits = 6);
 };
 
 #endif // file

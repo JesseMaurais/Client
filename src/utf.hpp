@@ -11,7 +11,7 @@ namespace fmt
 	{
 		utf()
 		{
-			std::memset(this, 0, sizeof(utf));
+			std::memset(this, 0, sizeof(mbstate_t));
 		}
 
 		operator bool() const

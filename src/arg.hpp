@@ -33,7 +33,7 @@ namespace env::opt
 		using vector = fwd::vector<command>;
 		using span = fwd::span<command>;
 		
-		word argn; // required arguments (or -1 for any number)
+		long argn; // required arguments (or -1 for any number)
 		view dash; // short name with one dash (-c)
 		view name; // long name with dual dash (--config)
 		view text; // descriptive text for user help menu

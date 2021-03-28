@@ -31,7 +31,7 @@ namespace sys::uni::sig
 
 		static void thunk(sigval sv)
 		{
-			auto that = fwd::cast<event>(sv.sival_ptr);
+			auto that = fwd::cast_as<event>(sv.sival_ptr);
 			that->go();
 		}
 	};

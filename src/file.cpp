@@ -825,7 +825,7 @@ namespace env::file
 
 	// shm.hpp
 
-	memory make_shm(int fd, size_t sz, off_t off, mode mask, size_t *out)
+	shm_ptr make_shm(int fd, size_t sz, off_t off, mode mask, size_t *out)
 	{
 		assert(not fail(fd));
 		assert(mask & rwx);
@@ -907,6 +907,7 @@ namespace env::file
 			if (mask & rd) prot |= PROT_READ;
 			if (mask & wr) prot |= PROT_WRITE;
 			if (mask & ex) prot |= PROT_EXEC;
+			
 			return sys::uni::make_map(sz, prot, MAP_PRIVATE, fd, off);
 		}
 		#endif

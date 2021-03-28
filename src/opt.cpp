@@ -89,7 +89,7 @@ namespace
 		return next;
 	}
 
-	template 
+	template
 	<
 		class Key, class Value, class Cast
 	>
@@ -161,54 +161,54 @@ namespace env::opt
 		return got(key) ? get(key) : value;
 	}
 
-	word get(name key, word value, int base)
+	long get(name key, long value, int base)
 	{
 		return cast(key, value, [base](auto value)
 		{
-			return fmt::to_llong(value, base);
+			return fmt::to_long(value, base);
 		});
 	}
 
-	bool set(name key, word value, int base)
+	bool set(name key, long value, int base)
 	{
 		return set(key, fmt::to_string(value, base));
 	}
 
-	word get(pair key, word value, int base)
+	long get(pair key, long value, int base)
 	{
 		return cast(key, value, [base](auto value)
 		{
-			return fmt::to_llong(value, base);
+			return fmt::to_long(value, base);
 		});
 	}
 
-	bool set(pair key, word value, int base)
+	bool set(pair key, long value, int base)
 	{
 		return set(key, fmt::to_string(value, base));
 	}
 
-	quad get(name key, quad value)
+	float get(name key, float value)
 	{
 		return cast(key, value, [](auto value)
 		{
-			return fmt::to_quad(value);
+			return fmt::to_float(value);
 		});
 	}
 
-	bool set(name key, quad value, int digits)
+	bool set(name key, float value, int digits)
 	{
 		return set(key, fmt::to_string(value, digits));
 	}
 
-	quad get(pair key, quad value)
+	float get(pair key, float value)
 	{
 		return cast(key, value, [](auto value)
 		{
-			return fmt::to_quad(value);
+			return fmt::to_float(value);
 		});
 	}
 
-	bool set(pair key, quad value)
+	bool set(pair key, float value)
 	{
 		return set(key, fmt::to_string(value));
 	}

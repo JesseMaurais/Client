@@ -2,10 +2,9 @@
 #define win_hpp "WIN32 Utility"
 
 #ifndef _WIN32
-# error Win32 utility header included without feature macro.
+# error WIN32 utility header included without feature macro.
 #endif
 
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "type.hpp"
 #include "file.hpp"
@@ -62,8 +61,7 @@ namespace sys::win
 
 	inline bool ready(HANDLE h)
 	{
-		auto const dw = wait(h, 0);
-		return WAIT_TIMEOUT == dw;
+		return WAIT_TIMEOUT == wait(h, 0);
 	}
 
 	template <class T> struct zero : T
@@ -74,7 +72,11 @@ namespace sys::win
 		}
 	};
 
-	template <auto S, class T = fwd::offset_of<S>> struct size : zero<typename T::parent_type>
+	template
+	<
+		auto S, class T = fwd::offset_of<S>
+	>
+	struct size : zero<typename T::parent_type>
 	{
 		size()
 		{
@@ -111,7 +113,7 @@ namespace sys::win
 			{
 				if (not CloseHandle(h))
 				{
-					sys::win::err(here);
+					sys::win::err(here, "CloseHandle");
 				}
 			}
 		}
@@ -132,9 +134,10 @@ namespace sys::win
 		pipe()
 		{
 			security_attributes sa;
-			if (not CreatePipe(&read.h, &write.h, &sa, BUFSIZ))
+			auto const sz = env::file::width();
+			if (not CreatePipe(&read.h, &write.h, &sa, sz))
 			{
-				sys::win::err(here);
+				sys::win::err(here, "CreatePipe");
 			}
 		} 
 	};

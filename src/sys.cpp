@@ -35,7 +35,7 @@ namespace sys
 		return thread_buf;
 	}
 
-	fmt::string::out::ref flush(fmt::string::out::ref put) 
+	fmt::string::out::ref put(fmt::string::out::ref buf) 
 	{
 		static sys::mutex key;
 		auto const unlock = key.lock();
@@ -43,9 +43,9 @@ namespace sys
 		fmt::string line;
 		while (std::getline(thread_buf, line))
 		{
-			put << line << std::endl;
+			buf << line << std::endl;
 		}
-		return put;
+		return buf;
 	}
 
 	int impl::bug(fmt::string::view message, bool no)
@@ -645,7 +645,7 @@ dynamic int visible() { return hidden(); }
 
 test_unit(sym)
 {
-	// Can see dynamic)
+	// Can see dynamic
 	auto f = sys::sym<int()>("visible");
 	assert(nullptr != f);
 	// Cannot see static

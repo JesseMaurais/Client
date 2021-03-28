@@ -37,8 +37,6 @@ namespace fmt
 	<
 		class Type, 
 		template <class> class Alloc = fwd::allocator,
-		template <class, template <class> class> class Vector = fwd::vector,
-		template <class> class Span = fwd::span,
 		template <class> class Order = fwd::order
 	>
 	struct struct_brief : memory_brief<Type>
@@ -52,24 +50,24 @@ namespace fmt
 		using vector = fwd::vector<Type, Alloc>;
 		using graph  = fwd::graph<Type, Alloc>;
 		using group  = fwd::group<Type, Order, Alloc>;
-		using edges  = fwd::edges<Type, Span>;
-		using line   = fwd::line<Type, span, vector>;
+		using edges  = fwd::edges<Type>;
+		using line   = fwd::line<Type>;
 	};
 
 	template
 	<
-		class String, 
+		class String,
 		class Char,
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
-		template <class, template <class> class> class Vector = fwd::vector,
+		template <class> class Order = fwd::order,
 		// base class composition
-		class Type = fwd::compose
+		class Base = fwd::compose
 		<
-			struct_brief<String, Alloc, Vector>, stream_brief<Char, Traits>
+			struct_brief<String, Alloc, Order>, stream_brief<Char, Traits>
 		>
 	>
-	struct string_brief : String, Type
+	struct string_brief : String, Base
 	{ 
 		using String::String;
 		using stream = fwd::basic_stringstream<Char, Traits, Alloc>;
@@ -83,11 +81,11 @@ namespace fmt
 		class Char,
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
-		template <class, template <class> class> class Vector = fwd::vector,
+		template <class> class Order = fwd::order,
 		// details
 		class Base = string_brief
 		<
-			fwd::basic_string_view<Char, Traits>, Char, Traits, Alloc, Vector
+			fwd::basic_string_view<Char, Traits>, Char, Traits, Alloc, Order
 		>
 	>
 	struct basic_string_view : Base
@@ -98,22 +96,22 @@ namespace fmt
 
 		using Base::Base;
 	};
-	
+
 	template
 	<
 		class Char,
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
-		template <class, template <class> class> class Vector = fwd::vector,
+		template <class> class Order = fwd::order,
 		// base class composition
 		class Base = string_brief
 		<
-			fwd::basic_string<Char, Traits>, Char, Traits, Alloc, Vector
+			fwd::basic_string<Char, Traits>, Char, Traits, Alloc, Order
 		>
 	>
 	struct basic_string : Base
 	{
-		using view = basic_string_view<Char, Traits, Alloc, Vector>;
+		using view = basic_string_view<Char, Traits, Alloc, Order>;
 
 		basic_string(fwd::basic_string_view<Char, Traits> in)
 		: Base(data(in), size(in))
