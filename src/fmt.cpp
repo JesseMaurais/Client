@@ -248,15 +248,18 @@ namespace
 		ss << std::fixed << std::setprecision(precision) << value;
 		return ss.str();
 	}
-
-	fmt::type<char> const CSTR;
-	fmt::type<wchar_t> const WSTR;
 }
 
 namespace fmt
 {
-	type<char> const &cstr = CSTR;
-	type<wchar_t> const &wstr = WSTR;
+	template <class Char> type<Char> const & type<Char>::instance()
+	{
+		static type<Char> const local;
+		return local;
+	}
+
+	template struct type<char>;
+	template struct type<wchar_t>;
 
 	string to_string(long value, int base)
 	{
@@ -402,10 +405,6 @@ test_unit(type)
 
 	// Character class/whitespace iteration
 	{
-		for (char c : Space)
-		{
-			assert(fmt::cstr.check(c));
-		}
 		assert(fmt::next(Space) == Space.begin());
 		assert(fmt::skip(Space) == Space.end());
 		assert('H' == *fmt::first(Filled));

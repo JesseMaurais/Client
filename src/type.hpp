@@ -8,10 +8,6 @@
 
 namespace fmt
 {
-	//
-	// Character class injection
-	//
-
 	constexpr auto
 		space  = std::ctype_base::space,
 		print  = std::ctype_base::print,
@@ -26,14 +22,9 @@ namespace fmt
 		graph  = std::ctype_base::graph,
 		xdigit = std::ctype_base::xdigit;
 
-	template 
-	<
-		class Char,
-		template <class> class Type = std::ctype
-	>
-	struct type : Type<Char>
+	template <class Char> struct type : std::ctype<Char>
 	{
-		using base = Type<Char>;
+		using base = std::ctype<Char>;
 		using typename base::mask;
 		using string = basic_string<Char>;
 		using view = typename string::view;
@@ -44,6 +35,8 @@ namespace fmt
 		using size_type = typename view::size_type;
 
 		static_assert(null == ~npos);
+
+		static type const & instance();
 
 		template 
 		<
@@ -181,6 +174,11 @@ namespace fmt
 			);
 		}
 
+		auto widen(fwd::basic_string_view<wchar_t> u) const
+		{
+			return u;
+		}
+
 		auto narrow(fwd::basic_string_view<Char> u) const
 		// Encode wide characters as multibyte type
 		{
@@ -220,6 +218,11 @@ namespace fmt
 			);
 		}
 
+		auto narrow(fmt::basic_string_view<char> u) const
+		{
+			return u;
+		}
+
 		auto first(view u, mask x = space) const
 		// First iterator in view $u that is not $x
 		{
@@ -242,41 +245,10 @@ namespace fmt
 			return u.substr(pos, size);
 		}
 
-		auto divide(view u, mask x = space) const
-		// Count the quotient in $u that are $x and remainder that are not
-		{
-			pair n { 0, 0 };
-			for (auto const w : widen(u))
-			{
-				if (check(w, x))
-				{
-					++ n.first; 
-				}
-				else
-				{
-					++ n.second;
-				}
-			}
-			return n;
-		}
-
-		auto rem(view u, mask x = space) const
-		// Count characters in $u that are not $x
-		{
-			return divide(u, x).second; 
-		}
-
-		auto quot(view u, mask x = space) const
-		// Count characters in $u that are $x
-		{
-			return divide(u, x).first;
-		}
-
 		bool all_of(view u, mask x = space) const
 		// All decoded characters in $u are $x
 		{
-			const auto wide = widen(u);
-			return std::all_of(wide.begin(), wide.end(), [this, x](auto w)
+			return fwd::all_of(widen(u), [this, x](auto w)
 			{
 				return this->check(w, x);
 			});
@@ -285,8 +257,7 @@ namespace fmt
 		bool any_of(view u, mask x = space) const
 		// Any decoded characters in $u are $x
 		{
-			const auto wide = widen(u);
-			return std::any_of(wide.begin(), wide.end(), [this, x](auto w)
+			return fwd::any_of(widen(u), [this, x](auto w)
 			{
 				return this->check(w, x);
 			});
@@ -330,25 +301,6 @@ namespace fmt
 		// Check whether string is null terminated
 		{
 			return not u.empty() and (u.back() == '\0' or u[u.size()] == '\0');
-		}
-
-		static auto count(view u)
-		// Count characters in view
-		{
-			auto n = null;
-			auto m = null;
-			utf mb;
-			while (u.size() > m)
-			{
-				auto const k = mb.len(u.data() + m);
-				if (k < 0)
-				{
-					return npos;
-				}
-				m += k;
-				++ n;
-			}
-			return n;
 		}
 
 		static auto count(view u, view v)
@@ -465,36 +417,36 @@ namespace fmt
 
 	// Common characters
 
-	extern type<char> const &cstr;
-	extern type<wchar_t> const &wstr;
+	extern template struct type<char>;
+	extern template struct type<wchar_t>;
 
 	// Multibyte shims
 
 	template <typename iterator>
 	inline auto next(iterator it, iterator end)
 	{
-		return cstr.next(it, end);
+		return type<char>::instance().next(it, end);
 	}
 
 	inline auto next(string::view u)
 	{
-		return cstr.next(u);
+		return type<char>::instance().next(u);
 	}
 
 	template <typename iterator>
 	inline auto skip(iterator it, iterator end)
 	{
-		return cstr.skip(it, end);
+		return type<char>::instance().skip(it, end);
 	}
 
 	inline auto skip(string::view u)
 	{
-		return cstr.skip(u);
+		return type<char>::instance().skip(u);
 	}
 
 	inline auto widen(string::view u)
 	{
-		return cstr.widen(u);
+		return type<char>::instance().widen(u);
 	}
 
 	inline auto widen(char c)
@@ -504,7 +456,7 @@ namespace fmt
 
 	inline auto narrow(wstring::view u)
 	{
-		return wstr.narrow(u);
+		return type<wchar_t>::instance().narrow(u);
 	}
 
 	inline auto narrow(wchar_t c)
@@ -514,107 +466,102 @@ namespace fmt
 
 	inline auto first(string::view u)
 	{
-		return cstr.first(u);
+		return type<char>::instance().first(u);
 	}
 
 	inline auto last(string::view u)
 	{
-		return cstr.last(u);
+		return type<char>::instance().last(u);
 	}
 
 	inline auto trim(string::view u)
 	{
-		return cstr.trim(u);
+		return type<char>::instance().trim(u);
 	}
 
 	inline auto all_of(string::view u, type<char>::mask m)
 	{
-		return cstr.all_of(u, m);
+		return type<char>::instance().all_of(u, m);
 	}
 
 	inline auto any_of(string::view u, type<char>::mask m)
 	{
-		return cstr.any_of(u, m);
+		return type<char>::instance().any_of(u, m);
 	}
 
 	inline auto to_upper(string::view u)
 	{
-		return cstr.to_upper(u);
+		return type<char>::instance().to_upper(u);
 	}
 
 	inline auto to_lower(string::view u)
 	{
-		return cstr.to_lower(u);
+		return type<char>::instance().to_lower(u);
 	}
 
 	inline bool terminated(string::view u)
 	{
-		return cstr.terminated(u);
-	}
-
-	inline auto count(string::view u)
-	{
-		return cstr.count(u);
+		return type<char>::instance().terminated(u);
 	}
 
 	inline auto count(string::view u, string::view v)
 	{
-		return cstr.count(u, v);
+		return type<char>::instance().count(u, v);
 	}
 
 	inline auto join(string::view::span t, string::view u = empty)
 	{
-		return cstr.join(t.begin(), t.end(), u);
+		return type<char>::instance().join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::span t, string::view u = empty)
 	{
-		return cstr.join(t.begin(), t.end(), u);
+		return type<char>::instance().join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::view::init t, string::view u = empty)
 	{
-		return cstr.join(t.begin(), t.end(), u);
+		return type<char>::instance().join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::init t, string::view u = empty)
 	{
-		return cstr.join(t.begin(), t.end(), u);
+		return type<char>::instance().join(t.begin(), t.end(), u);
 	}
 
 	inline auto split(string::view u)
 	{
-		return cstr.split(u);
+		return type<char>::instance().split(u);
 	}
 
 	inline auto split(string::view u, string::view v)
 	{
-		return cstr.split(u, v);
+		return type<char>::instance().split(u, v);
 	}
 
 	inline auto split(string::view::span p, string::view v)
 	{
-		return cstr.split(p, v);
+		return type<char>::instance().split(p, v);
 	}
 
 	inline auto split(string::span p, string::view v)
 	{
-		return cstr.split(p, v);
+		return type<char>::instance().split(p, v);
 	}
 
 	inline auto replace(string::view u, string::view v, string::view w)
 	{
-		return cstr.replace(u, v, w);
+		return type<char>::instance().replace(u, v, w);
 	}
 
 	inline auto embrace(string::view u, string::view v)
 	{
-		return cstr.embrace(u, v);
+		return type<char>::instance().embrace(u, v);
 	}
 
 	inline auto to_pair(string::view u, string::view v = assign)
 	{
-		return cstr.to_pair(u, v);
+		return type<char>::instance().to_pair(u, v);
 	}
 
 	inline auto to_pair(string::view::pair p, string::view u = assign)
