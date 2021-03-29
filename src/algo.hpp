@@ -185,7 +185,7 @@ namespace fwd
 	<
 		class Range, class Predicate
 	>
-	inline bool all_of(Range&& range, Predicate&& check)
+	bool all_of(Range&& range, Predicate&& check)
 	{
 		return std::all_of(range.begin(), range.end(), check);
 	}
@@ -194,9 +194,39 @@ namespace fwd
 	<
 		class Range, class Predicate
 	>
-	inline bool any_of(Range&& range, Predicate&& check)
+	bool any_of(Range&& range, Predicate&& check)
 	{
 		return std::any_of(range.begin(), range.end(), check);
+	}
+
+	template
+	<
+		class Range, class Predicate
+	>
+	auto find_if(Range&& range, Predicate p)
+	{
+		return std::find_if(range.begin(), range.end(), p);
+	}
+
+	template
+	<
+		class Range, class Type
+	>
+	auto find(Range&& range, Type value)
+	{
+		return std::find(range.begin(), range.end(), value);
+	}
+
+	template
+	<
+		class Range, class Offset, class Type
+	>
+	auto find(Range&& range, Offset field, Type value)
+	{
+		return find_if(range, [=](auto const& object)
+		{
+			return value == object.*field;
+		});
 	}
 }
 

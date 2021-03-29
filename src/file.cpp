@@ -70,6 +70,19 @@ namespace fmt::path
 
 namespace env::file
 {
+	// file.hpp
+
+	io_ptr make_ptr(fwd::as_ptr<FILE> fp)
+	{
+		return fwd::make_ptr(fp, [](auto fp)
+		{
+			if (std::fclose(fp))
+			{
+				sys::err(here, "fclose");
+			}
+		});
+	}
+
 	// mode.hpp
 
 	fwd::variable<size_t>& width()
@@ -825,10 +838,10 @@ namespace env::file
 
 	// shm.hpp
 
-	shm_ptr make_shm(int fd, size_t sz, off_t off, mode mask, size_t *out)
+	map_ptr make_map(int fd, size_t sz, off_t off, mode am, size_t *out)
 	{
 		assert(not fail(fd));
-		assert(mask & rwx);
+		assert(am & rwx);
 
 		if (nullptr == out) out = &sz;
 
@@ -837,17 +850,17 @@ namespace env::file
 			DWORD flags = 0;
 			DWORD prot = 0;
 
-			if (mask & ex)
+			if (am & ex)
 			{
 				flags |= FILE_MAP_EXECUTE;
 
-				if (mask & wr)
+				if (am & wr)
 				{
 					prot = PAGE_EXECUTE_READWRITE;
 					flags |= FILE_MAP_WRITE;
 				}
 				else
-				if (mask & rd)
+				if (am & rd)
 				{
 					prot = PAGE_EXECUTE_READ;
 					flags |= FILE_MAP_READ;
@@ -855,13 +868,13 @@ namespace env::file
 			}
 			else
 			{
-				if (mask & wr)
+				if (am & wr)
 				{
 					prot = PAGE_READWRITE;
 					flags |= FILE_MAP_WRITE;
 				}
 				else
-				if (mask & rd)
+				if (am & rd)
 				{
 					prot = PAGE_READONLY;
 					flags |= FILE_MAP_READ;
