@@ -67,6 +67,9 @@ namespace sys::win
 
 	template <class T> struct zero : T
 	{
+		static_assert(std::is_trivial<T>::value);
+		static_assert(std::is_standard_layout<T>::value);
+
 		zero()
 		{
 			ZeroMemory(this, sizeof(T));
@@ -135,7 +138,7 @@ namespace sys::win
 		pipe()
 		{
 			security_attributes sa;
-			std::size_t const sz = env::file::width();
+			env::file::size_t const sz = env::file::width();
 			if (not CreatePipe(&read.h, &write.h, &sa, sz))
 			{
 				sys::win::err(here, "CreatePipe");

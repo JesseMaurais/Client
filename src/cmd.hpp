@@ -45,7 +45,7 @@ namespace env
 		// Preferred application for file type at path
 	};
 
-	shell & cmd();
+	struct shell & cmd();
 }
 
 #endif // file
