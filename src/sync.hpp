@@ -117,24 +117,28 @@ namespace sys
 		}
 	};
 
-	template <auto Value> class atomic : public fwd::variable<decltype(Value)>
+	template <class Type> class atomic : public fwd::variable<Type>
 	{
-		using typename fwd::variable<decltype(Value)>::type;
 		mutable sys::rwlock lock;
-		type value = Value;
+		Type value;
 
 	public:
 
-		operator type() const final
+		operator Type() const final
 		{
 			auto const unlock = lock.read();
 			return value;
 		}
 
-		type operator=(type n) final
+		Type operator=(Type n) final
 		{
 			auto const unlock = lock.write();
 			return value = n;
+		}
+
+		atomic(Type n)
+		{
+			operator=(n);
 		}
 	};
 }

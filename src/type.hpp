@@ -1,6 +1,7 @@
 #ifndef type_hpp
 #define type_hpp "Character Types"
 
+#include "algo.hpp"
 #include "fmt.hpp"
 #include "it.hpp"
 #include "utf.hpp"

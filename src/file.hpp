@@ -1,6 +1,7 @@
 #ifndef file_hpp
 #define file_hpp "File Object"
 
+#include "fwd.hpp"
 #include "ptr.hpp"
 #include <cstddef>
 #include <cstdio>
@@ -14,8 +15,8 @@ namespace env::file
 		return invalid == value;
 	}
 
-	using io_ptr = fwd::extern_ptr<FILE>;
-	io_ptr make_ptr(fwd::as_ptr<FILE>);
+	using file_ptr = fwd::extern_ptr<FILE>;
+	file_ptr make_ptr(fwd::as_ptr<FILE>);
 
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
@@ -40,7 +41,7 @@ namespace env::file
 		}
 	};
 
-	using stream = fwd::compose<reader, wrtier>;
+	using stream = fwd::compose<reader, writer>;
 }
 
 #endif // file

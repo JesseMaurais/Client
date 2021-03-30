@@ -72,7 +72,7 @@ namespace env::file
 {
 	// file.hpp
 
-	io_ptr make_ptr(fwd::as_ptr<FILE> fp)
+	file_ptr make_ptr(fwd::as_ptr<FILE> fp)
 	{
 		return fwd::make_ptr(fp, [](auto fp)
 		{
@@ -87,8 +87,7 @@ namespace env::file
 
 	fwd::variable<size_t>& width()
 	{
-		constexpr size_t Size = BUFSIZ;
-		static sys::atomic<Size> safe;
+		static sys::atomic<size_t> safe = BUFSIZ;
 		return safe;
 	}
 
@@ -917,9 +916,9 @@ namespace env::file
 			*out = sz;
 
 			int prot = 0;
-			if (mask & rd) prot |= PROT_READ;
-			if (mask & wr) prot |= PROT_WRITE;
-			if (mask & ex) prot |= PROT_EXEC;
+			if (am & rd) prot |= PROT_READ;
+			if (am & wr) prot |= PROT_WRITE;
+			if (am & ex) prot |= PROT_EXEC;
 			
 			return sys::uni::make_map(sz, prot, MAP_PRIVATE, fd, off);
 		}

@@ -17,7 +17,6 @@ namespace fwd
 	{
 		#ifdef assert
 		assert(nullptr != ptr);
-		assert(nullptr != dynamic_cast<as_ptr<Type>>(ptr));
 		#endif
 		return reinterpret_cast<as_ptr<Type>>(ptr);
 	}
