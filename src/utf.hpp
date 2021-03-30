@@ -2,7 +2,7 @@
 #define utf_hpp "Universal Transformation Format"
 
 #include <uchar.h>
-#include <cwchar>
+#include <wchar.h>
 #include <cstring>
 
 namespace fmt

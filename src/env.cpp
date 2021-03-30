@@ -89,7 +89,6 @@ namespace
 				};
 
 				PWSTR pws = nullptr;
-				auto const id = map.at(val);
 				auto const ok = SHGetKnownFolderPath
 				(
 					map.at(val),
