@@ -9,12 +9,12 @@ namespace sys::win
 {
 	struct process : handle
 	{
-		process(DWORD pid, DWORD dw = PROCESS_ALL_ACCESS)
+		process(DWORD id, DWORD dw = PROCESS_ALL_ACCESS)
 		{
-			h = OpenProcess(dw, false, pid);
+			h = OpenProcess(dw, false, id);
 			if (sys::win::fail(h))
 			{
-				sys::win::err(here, "OpenProcess", pid);
+				sys::win::err(here, "OpenProcess", id);
 			}
 		}
 	};
@@ -204,8 +204,7 @@ namespace sys
 		}
 	};
 
-	template <typename Routine>
-	struct thread : sys::win::handle
+	template <typename Routine> struct thread : sys::win::handle
 	{
 		using base = sys::win::handle;
 
