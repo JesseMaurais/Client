@@ -6,14 +6,11 @@
 #endif
 
 #include <unistd.h>
-#include "file.hpp"
 #include "err.hpp"
 #include "sys.hpp"
 
 namespace sys::uni
 {
-	using namespace env::file;
-
 	const char* strerr(int no);
 
 	template <typename... Args> int err(int no, Args... args)

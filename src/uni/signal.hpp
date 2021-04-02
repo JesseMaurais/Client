@@ -2,9 +2,8 @@
 #define uni_signal_hpp
 
 #include "uni.hpp"
-#include "sys.hpp"
-#include "ptr.hpp"
 #include "err.hpp"
+#include <time.h>
 #include <signal.h>
 #include <pthread.h>
 #include <functional>
@@ -13,47 +12,48 @@ namespace sys::uni::sig
 {
 	struct event : fwd::unique, sigevent
 	{
-		using signature = void();
-		using observer = std::function<signature>;
+		using function = std::function<void()>;
 
-		event(observer ob, int type, pthread_attr_t* attr = nullptr)
-		: go(ob)
+		event(function f, pthread_attr_t* attr = nullptr)
+		: work(f)
 		{
-			sigev_notify = type;
+			sigev_value.sival_ptr = this;
+			sigev_notify = SEGEV_THREAD;
 			sigev_notify_function = thunk;
 			sigev_notify_attributes = attr;
-			sigev_value.sival_ptr = this;
 		}
 
 	private:
 
-		observer go;
+		function work;
 
 		static void thunk(sigval sv)
 		{
-			auto that = fwd::cast_as<event>(sv.sival_ptr);
-			that->go();
+			auto that = static_cast<event*>(sv.sival_ptr);
+			that->work();
 		}
 	};
+}
 
-	struct timer : event
+namespace sys::uni::time
+{
+	struct event : sys::uni::sig::event
 	{
 		timer_t id;
 
-		timer(observer ob, int type = SIGEV_THREAD, clockid_t clock = CLOCK_REALTIME)
-		: event(ob, type)
+		event(function f, clockid_t clock = CLOCK_REALTIME) : event(f)
 		{
 			if (fail(timer_create(clock, this, &id)))
 			{
-				sys::err(here);
+				sys::uni::err(here, "timer_create");
 			}
 		}
 
-		~timer()
+		~event()
 		{
 			if (fail(timer_delete(id)))
 			{
-				sys::err(here);
+				sys::uni::err(here, "timer_delete");
 			}
 		}
 	};
