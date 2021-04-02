@@ -1,5 +1,5 @@
 #ifndef uni_signal_hpp
-#define uni_signal_hpp
+#define uni_signal_hpp "POSIX Signals"
 
 #include "uni.hpp"
 #include "err.hpp"
@@ -41,7 +41,8 @@ namespace sys::uni::time
 	{
 		timer_t id;
 
-		event(function f, clockid_t clock = CLOCK_REALTIME) : event(f)
+		event(function f, clockid_t clock = CLOCK_REALTIME, pthread_attr_t* attr = nullptr) 
+		: event(f, attr)
 		{
 			if (fail(timer_create(clock, this, &id)))
 			{

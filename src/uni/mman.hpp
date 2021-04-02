@@ -1,24 +1,18 @@
 #ifndef uni_mman_hpp
-#define uni_mman_hpp
+#define uni_mman_hpp "POSIX Shared Memory"
 
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
 #include "pipe.hpp"
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 namespace sys::uni::shm
 {
-	static auto map(size_t sz, int prot, int flags, int fd, off_t off = 0, void* ptr = nullptr)
+	template <class Type> auto make_ptr(Type* ptr)
 	{
-		ptr = mmap(ptr, sz, prot, flags, fd, off);
-		if (MAP_FAILED == ptr)
-		{
-			sys::uni::err(here, "mmap", sz, prot, flags, fd, off);
-		}
-
 		return fwd::make_ptr(ptr, [sz](auto ptr)
 		{
 			if (MAP_FAILED != ptr)
@@ -31,14 +25,24 @@ namespace sys::uni::shm
 		});
 	}
 
-	static env::file::descriptor open(const char* name, int flag, mode_t mode)
+	template <class Type = void> auto map(size_t sz, int prot, int flags, int fd, off_t off = 0, Type* ptr = nullptr)
+	{
+		ptr = mmap(ptr, sz, prot, flags, fd, off);
+		if (MAP_FAILED == ptr)
+		{
+			sys::uni::err(here, "mmap", sz, prot, flags, fd, off);
+		}
+		return make_ptr(ptr);
+	}
+
+	static auto open(const char* name, int flag, mode_t mode)
 	{
 		auto const fd = shm_open(name, flag, mode);
 		if (sys::fail(fd))
 		{
 			sys::uni::err(here, "shm_open");
 		}
-		return fd;
+		return env::file::descriptor(fd);
 	}
 }
 

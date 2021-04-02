@@ -1,6 +1,7 @@
 #ifndef uni_mqueue_hpp
 #define uni_mqueue_hpp "POSIX Message Queue"
 
+#include "uni.hpp"
 #include "signal.hpp"
 #include <mqueue.h>
 
@@ -10,7 +11,8 @@ namespace sys::uni::msg
 	{
 		int err = invalid;
 
-		event(function f, mqd_t mqd) : event(f)
+		event(function f, mqd_t mqd, pthread_attr_t* attr = nullptr) 
+		: event(f, attr)
 		{
 			err = mq_notify(mqd, this);
 			if (sys::fail(err))
@@ -42,9 +44,9 @@ namespace sys::uni::msg
 			return err;
 		}
 
-		int set(mqd_t mqd)
+		int set(mqd_t mqd) const
 		{
-			auto const err = mq_setattr(mqd, this, this);
+			auto const err = mq_setattr(mqd, this, nullptr);
 			if (sys::fail(err))
 			{
 				sys::uni::err(here, "mq_setattr");

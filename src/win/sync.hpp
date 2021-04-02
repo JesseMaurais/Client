@@ -1,5 +1,5 @@
-#ifndef win_thread_hpp
-#define win_thread_hpp "WIN32 Threads"
+#ifndef win_sync_hpp
+#define win_sync_hpp "WIN32 Synchronization"
 
 #include "win.hpp"
 #include "ptr.hpp"
@@ -31,9 +31,33 @@ namespace sys::win
 		}
 	};
 
+	struct timer : handle
+	{
+		timer(LPSTR name = nullptr, DWORD dw = TIMER_ALL_ACCESS)
+		{
+			h = OpenWaitableTimer(dw, false, name);
+			if (sys::win::fail(h))
+			{
+				sys::win::err(here, "OpenWaitableTimer", name);
+			}
+		}
+	};
+
+	struct file_map : handle
+	{
+		file_map(LPSTR name = nullptr, DWORD dw = PROCESS_ALL_ACCESS)
+		{
+			h = OpenFileMapping(dw, false, name);
+			if (sys::win::fail(h))
+			{
+				sys::win::err(here, "OpenFileMapping", name);
+			}
+		}
+	};
+
 	struct event : handle
 	{
-		event(char const *name = nullptr, DWORD dw = EVENT_ALL_ACCESS)
+		event(LPSTR name = nullptr, DWORD dw = EVENT_ALL_ACCESS)
 		{
 			h = OpenEvent(dw, false, name);
 			if (sys::win::fail(h))
@@ -45,12 +69,24 @@ namespace sys::win
 
 	struct mutex : handle
 	{
-		mutex(char const *name = nullptr, DWORD dw = MUTEX_ALL_ACCESS)
+		mutex(LPSTR name = nullptr, DWORD dw = MUTEX_ALL_ACCESS)
 		{
 			h = OpenMutex(dw, false, name);
 			if (sys::win::fail(h))
 			{
 				sys::win::err(here, "OpenMutex", name);
+			}
+		}
+	};
+
+	struct semaphore : handle
+	{
+		semaphore(LPSTR name = nullptr, DWORD dw = SEMAPHORE_ALL_ACCESS)
+		{
+			h = OpenSemaphore(dw, false, name);
+			if (sys::win::fail(h))
+			{
+				sys::win::err(here, "OpenSemaphore", name);
 			}
 		}
 	};

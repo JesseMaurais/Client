@@ -900,7 +900,7 @@ namespace env::file
 			*out <<= CHAR_BIT * sizeof info.nFileSizeHigh;
 			*out |= info.nFileSizeLow;
 
-			return sys::win::make_map(h, flags, off, sz);
+			return sys::win::mem::map(h, flags, off, sz);
 		}
 		#else
 		{
@@ -920,7 +920,7 @@ namespace env::file
 			if (am & wr) prot |= PROT_WRITE;
 			if (am & ex) prot |= PROT_EXEC;
 			
-			return sys::uni::make_map(sz, prot, MAP_PRIVATE, fd, off);
+			return sys::uni::shm::map(sz, prot, MAP_PRIVATE, fd, off);
 		}
 		#endif
 	}
