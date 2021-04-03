@@ -14,8 +14,7 @@ namespace sys::uni::sig
 	{
 		using function = std::function<void()>;
 
-		event(function f, pthread_attr_t* attr = nullptr)
-		: work(f)
+		event(function f, pthread_attr_t* attr = nullptr) : work(f)
 		{
 			sigev_value.sival_ptr = this;
 			sigev_notify = SEGEV_THREAD;

@@ -12,7 +12,8 @@ namespace fwd
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using extern_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> constexpr auto null = static_cast<as_ptr<Type>>(nullptr);
-
+	constexpr auto void_ptr = null<void>;
+	
 	template <class Type, class Pointer> inline auto cast_as(Pointer ptr)
 	{
 		#ifdef assert

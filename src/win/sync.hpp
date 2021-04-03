@@ -4,18 +4,43 @@
 #include "win.hpp"
 #include "ptr.hpp"
 #include "sys.hpp"
+#include <functional>
 
 namespace sys::win
 {
-	struct process : handle
+	struct start : handle
 	{
-		process(DWORD id, DWORD dw = PROCESS_ALL_ACCESS)
+		using function = std::function<void()>;
+
+		unsigned id;
+
+		start(function f, LPSECURITY_ATTRIBUTES attr = nullptr) : work(f)
 		{
-			h = OpenProcess(dw, false, id);
-			if (sys::win::fail(h))
+			h = _beginthreadex(attr, 0, thunk, this, 0, &id);
+			if (fail(h))
 			{
-				sys::win::err(here, "OpenProcess", id);
+				err(here, "_beginthreadex");
 			}
+		}
+
+		~start()
+		{
+			if (wait(h))
+			{
+				warn(here, id);
+			}
+		}
+
+	private:
+
+		function work;
+
+		static unsigned thunk(void *ptr)
+		{
+			auto that = fwd::cast_as<start>(ptr);
+			if (that) that->work();
+			_endthreadex(that->id);
+			return that->id;
 		}
 	};
 
@@ -24,9 +49,21 @@ namespace sys::win
 		thread(DWORD id, DWORD dw = THREAD_ALL_ACCESS)
 		{
 			h = OpenThread(dw, false, id);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::err(here, "OpenThread", id);
+				err(here, "OpenThread", id);
+			}
+		}
+	};
+
+	struct process : handle
+	{
+		process(DWORD id, DWORD dw = PROCESS_ALL_ACCESS)
+		{
+			h = OpenProcess(dw, false, id);
+			if (fail(h))
+			{
+				err(here, "OpenProcess", id);
 			}
 		}
 	};
@@ -36,9 +73,9 @@ namespace sys::win
 		timer(LPSTR name = nullptr, DWORD dw = TIMER_ALL_ACCESS)
 		{
 			h = OpenWaitableTimer(dw, false, name);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::err(here, "OpenWaitableTimer", name);
+				err(here, "OpenWaitableTimer", name);
 			}
 		}
 	};
@@ -48,9 +85,9 @@ namespace sys::win
 		file_map(LPSTR name = nullptr, DWORD dw = PROCESS_ALL_ACCESS)
 		{
 			h = OpenFileMapping(dw, false, name);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::err(here, "OpenFileMapping", name);
+				err(here, "OpenFileMapping", name);
 			}
 		}
 	};
@@ -60,9 +97,9 @@ namespace sys::win
 		event(LPSTR name = nullptr, DWORD dw = EVENT_ALL_ACCESS)
 		{
 			h = OpenEvent(dw, false, name);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::err(here, "OpenEvent", name);
+				err(here, "OpenEvent", name);
 			}
 		}
 	};
@@ -72,9 +109,9 @@ namespace sys::win
 		mutex(LPSTR name = nullptr, DWORD dw = MUTEX_ALL_ACCESS)
 		{
 			h = OpenMutex(dw, false, name);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::err(here, "OpenMutex", name);
+				err(here, "OpenMutex", name);
 			}
 		}
 	};
@@ -84,10 +121,58 @@ namespace sys::win
 		semaphore(LPSTR name = nullptr, DWORD dw = SEMAPHORE_ALL_ACCESS)
 		{
 			h = OpenSemaphore(dw, false, name);
-			if (sys::win::fail(h))
+			if (fail(h))
 			{
-				sys::win::err(here, "OpenSemaphore", name);
+				err(here, "OpenSemaphore", name);
 			}
+		}
+	};
+
+	struct security : size<&SECURITY_ATTRIBUTES::nLength>
+	{
+		security(bool inherit = true)
+		{
+			bInheritHandle = inherit ? TRUE : FALSE;
+		}
+
+		auto thread(start::function f) const
+		{
+			return start(f, this);
+		}
+
+		auto pipes() const
+		{
+			return pipe(this);
+		}
+
+		handle mutex(LPCSTR name, bool owner = false)
+		{
+			return CreateMutex(name, owner, this);
+		}
+
+		handle semaphore(LPCSTR name, long size = 8, long init = 0)
+		{
+			return CreateSempahore(this, init, size, name);
+		}
+
+		handle event(LPCSTR name, bool init = false, bool manual = false)
+		{
+			return CreateEvent(this, manual, init, name);
+		}
+
+		handle job(LPCSTR name)
+		{
+			return CreateJobObject(this, name);
+		}
+
+		handle timer(LPCSTR name, bool manual = false)
+		{
+			return CreateWaitableTimer(this, manual, name);
+		}
+
+		handle map(LPCSTR name, HANDLE h, int prot, size_t sz)
+		{
+			return CreateFileMapping(h, this, prot, HIWORD(sz), LOWORD(sz), name);
 		}
 	};
 
@@ -170,6 +255,8 @@ namespace sys::win
 
 namespace sys
 {
+	using thread = sys::win::start;
+
 	struct mutex : sys::win::critical_section
 	{
 		auto lock()
@@ -239,121 +326,6 @@ namespace sys
 			return unlock(this);
 		}
 	};
-
-	template <typename Routine> struct thread : sys::win::handle
-	{
-		unsigned id;
-
-		thread(Routine start, LPSECURITY_ATTRIBUTES attr = nullptr) 
-		: work(start)
-		{
-			auto const ptr = _beginthreadex(attr, 0, thunk, this, 0, &id);
-			this->h = reinterpret_cast<HANDLE>(ptr);
-			if (sys::win::fail(base::h))
-			{
-				sys::win::err(here);
-			}
-		}
-
-		~thread()
-		{
-			if (fail(sys::win::wait(base::h)))
-			{
-				sys::warn(here, id);
-			}
-		}
-
-	private:
-
-		Routine work;
-
-		static unsigned thunk(void *ptr)
-		{
-			auto that = reinterpret_cast<thread*>(ptr);
-			that->work();
-			_endthreadex(that->id);
-			return that->id;
-		}
-	};
-
-	struct event : sys::win::handle
-	{
-		event()
-		{
-			h = CreateEvent(nullptr, false, false, nullptr);
-			if (sys::win::fail(h))
-			{
-				sys::win::err(here, "CreateEvent");
-			}
-		}
-
-		bool signal()
-		{
-			if (not SetEvent(h))
-			{
-				sys::win::err(here, "SetEvent");
-				return failure;
-			}
-			return success;
-		}
-
-		bool wait(mutex& key)
-		{
-			(void) key;
-			if (fail(sys::win::wait(h)))
-			{
-				sys::warn(here);
-				return failure;
-			}
-			return success;
-		}
-	};
 }
-
-namespace sys::win
-{
-	struct security : sys::win::size<&SECURITY_ATTRIBUTES::nLength>
-	{
-		security(bool inherit = true)
-		{
-			bInheritHandle = inherit ? TRUE : FALSE;
-		}
-
-		template <class Routine> auto thread(Routine work) const
-		{
-			return sys::win::thread(work, this);
-		}
-
-		auto pipe() const
-		{
-			return sys::win::pipe(this);
-		}
-
-		handle mutex(LPCSTR name = nullptr, bool owner = false)
-		{
-			return CreateMutex(name, owner, this);
-		}
-
-		handle semaphore(LPCSTR name = nullptr, long init = 0, long size = 1)
-		{
-			return CreateSempahore(this, init, size, name);
-		}
-
-		handle event(LPCSTR name = nullptr, bool init = false, bool manual = false)
-		{
-			return CreateEvent(this, manual, init, name);
-		}
-
-		handle job(LPCSTR name = nullptr)
-		{
-			return CreateJobObject(this, name);
-		}
-
-		handle timer(LPCSTR name = nullptr, bool manual = false)
-		{
-			return CreateWaitableTimer(this, manual, name);
-		}
-	};
-};
 
 #endif // file
