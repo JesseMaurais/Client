@@ -242,14 +242,13 @@ namespace sys
 
 	template <typename Routine> struct thread : sys::win::handle
 	{
-		using base = sys::win::handle;
-
 		unsigned id;
 
-		thread(Routine start) : work(start)
+		thread(Routine start, LPSECURITY_ATTRIBUTES attr = nullptr) 
+		: work(start)
 		{
-			auto const ptr = _beginthreadex(nullptr, 0, thunk, this, 0, &id);
-			base::h = reinterpret_cast<HANDLE>(ptr);
+			auto const ptr = _beginthreadex(attr, 0, thunk, this, 0, &id);
+			this->h = reinterpret_cast<HANDLE>(ptr);
 			if (sys::win::fail(base::h))
 			{
 				sys::win::err(here);
@@ -307,6 +306,52 @@ namespace sys
 				return failure;
 			}
 			return success;
+		}
+	};
+}
+
+namespace sys::win
+{
+	struct security : sys::win::size<&SECURITY_ATTRIBUTES::nLength>
+	{
+		security(bool inherit = true)
+		{
+			bInheritHandle = inherit ? TRUE : FALSE;
+		}
+
+		template <class Routine> auto thread(Routine work) const
+		{
+			return sys::win::thread(work, this);
+		}
+
+		auto pipe() const
+		{
+			return sys::win::pipe(this);
+		}
+
+		handle mutex(LPCSTR name = nullptr, bool owner = false)
+		{
+			return CreateMutex(name, owner, this);
+		}
+
+		handle semaphore(LPCSTR name = nullptr, long init = 0, long size = 1)
+		{
+			return CreateSempahore(this, init, size, name);
+		}
+
+		handle event(LPCSTR name = nullptr, bool init = false, bool manual = false)
+		{
+			return CreateEvent(this, manual, init, name);
+		}
+
+		handle job(LPCSTR name = nullptr)
+		{
+			return CreateJobObject(this, name);
+		}
+
+		handle timer(LPCSTR name = nullptr, bool manual = false)
+		{
+			return CreateWaitableTimer(this, manual, name);
 		}
 	};
 };

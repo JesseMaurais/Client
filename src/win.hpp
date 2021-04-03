@@ -89,14 +89,6 @@ namespace sys::win
 		}
 	};
 
-	struct security_attributes : size<&SECURITY_ATTRIBUTES::nLength>
-	{
-		security_attributes(bool inherit = true)
-		{
-			bInheritHandle = inherit ? TRUE : FALSE;
-		}
-	};
-
 	struct info : SYSTEM_INFO
 	{
 		info() { GetSystemInfo(this); }
@@ -135,11 +127,11 @@ namespace sys::win
 		handle read;
 		handle write;
 
-		pipe()
+		pipe(LPSECURITY_ATTRIBUTES lp = nullptr)
 		{
 			security_attributes sa;
 			env::file::size_t const sz = env::file::width();
-			if (not CreatePipe(&read.h, &write.h, &sa, sz))
+			if (not CreatePipe(&read.h, &write.h, lp, sz))
 			{
 				sys::win::err(here, "CreatePipe");
 			}

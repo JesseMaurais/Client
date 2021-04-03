@@ -5,399 +5,426 @@
 #include "sys.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
+#include "tmp.hpp"
+#include "signal.hpp"
+#include "mqueue.hpp"
 #include <pthread.h>
 
 namespace sys::uni
 {
-	using routine = void*(void*);
-
-	struct thread : fwd::unique
+	template <class Routine> struct thread : fwd::unique
 	{
-		pthread_attr_t self;
-		mutable int no = 0;
-		
-		pthread_t create(routine* start, void* that = nullptr) const
-		{
-			pthread_t id;
-			no = pthread_create(&id, &self, start, that);
-			if (no) sys::uni::err(no, here);
-			return id;
-		}
+		pthread_t id;
 
-		thread()
+		thread(Routine f, pthread_attr_t* attr = nullptr) : work(f)
 		{
-			no = pthread_attr_init(&self);
+			const int no = pthread_create(&id, attr, thunk, this);
 			if (no) sys::uni::err(no, here);
 		}
 
 		~thread()
 		{
-			if (not no)
-			{
-				no = pthread_attr_destroy(&self);
-				if (no) sys::uni::err(no, here);
-			}
+			void* that = nullptr;
+			const int no = pthread_join(id, &that);
+			if (no) sys::uni::err(no, here);
+			#ifdef assert
+			assert(no or this == that);
+			#endif
 		}
 
-		auto getdetachstate() const
+	private:
+
+		Routine work;
+
+		static void* thunk(void* ptr)
 		{
-			int state;
-			no = pthread_attr_getdetachstate(&self, &state);
-			if (no) sys::uni::err(no, here);
-			return state;
+			auto that = fwd::cast_as<thread>(ptr);
+			if (that) that->work();
+			return ptr;
+		}
+	};
+
+	struct attr : fwd::unique
+	{
+		pthread_attr_t buf[1];
+
+		template <class Routine> auto thread(Routine work)
+		{
+			return sys::uni::thread(work, this);
 		}
 
-		void setdetachstate(int state)
+		auto event(sig::event::function f)
 		{
-			no = pthread_attr_setdetachstate(&self, state);
+			return sig::event(f, this);
+		}
+
+		auto notify(msg::event::function f, mqd_t mqd)
+		{
+			return msg::event(f, mqd, this);
+		}
+
+		auto timer(time::event::function f, clockid_t clock = CLOCK_REALTIME)
+		{
+			return time::event(f, clock, this);
+		}
+
+		thread()
+		{
+			const int no = pthread_attr_init(buf);
 			if (no) sys::uni::err(no, here);
 		}
 
-		auto getguardsize() const
+		~thread()
 		{
-			size_t size;
-			no = pthread_attr_getguardsize(&self, &size);
-			if (no) sys::uni::err(no, here);
-			return size;
-		}
-
-		void setguardsize(size_t size)
-		{
-			no = pthread_attr_setguardsize(&self, size);
+			const int no = pthread_attr_destroy(buf);
 			if (no) sys::uni::err(no, here);
 		}
 
-		auto getscope() const
+		int getdetachstate(int* state) const
 		{
-			int scope;
-			no = pthread_attr_getscope(&self, &scope);
+			const int no = pthread_attr_getdetachstate(buf, state);
 			if (no) sys::uni::err(no, here);
-			return scope;
+			return no;
 		}
 
-		void setscope(int scope)
+		int setdetachstate(int state)
 		{
-			no = pthread_attr_setscope(&self, scope);
+			const int no = pthread_attr_setdetachstate(buf, state);
 			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
-		auto getstacksize() const
+		int getguardsize(size_t* size) const
 		{
-			size_t size;
-			no = pthread_attr_getstacksize(&self, &size);
+			const int no = pthread_attr_getguardsize(buf, size);
 			if (no) sys::uni::err(no, here);
-			return size;
+			return no
 		}
 
-		void setstacksize(size_t size)
+		int setguardsize(size_t size)
 		{
-			no = pthread_attr_setstacksize(&self, size);
+			const int no = pthread_attr_setguardsize(buf, size);
 			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int getscope(int* scope) const
+		{
+			const int no = pthread_attr_getscope(buf, scope);
+			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int setscope(int scope)
+		{
+			const int no = pthread_attr_setscope(buf, scope);
+			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int getstacksize(size_t* size) const
+		{
+			const int no = pthread_attr_getstacksize(buf, size);
+			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int setstacksize(size_t size)
+		{
+			const int no = pthread_attr_setstacksize(buf, size);
+			if (no) sys::uni::err(no, here);
+			return no;
 		}
 	};
 
 	struct cond : fwd::unique
 	{
-		pthread_cond_t self;
-		mutable int no = 0;
+		pthread_cond_t buf[1];
 
 		cond(pthread_condattr_t const* attr = nullptr)
 		{
-			no = pthread_cond_init(&self, attr);
+			const int no = pthread_cond_init(buf, attr);
 			if (no) sys::uni::err(no, here);
 		}
 
 		~cond()
 		{
-			if (not no)
-			{
-				no = pthread_cond_destroy(&self);
-				if (no) sys::uni::err(no, here);
-			}
-		}
-
-		void wait(pthread_mutex_t* mutex)
-		{
-			no = pthread_cond_wait(&self, mutex);
+			const int no = pthread_cond_destroy(buf);
 			if (no) sys::uni::err(no, here);
 		}
 
-		void signal()
+		int wait(pthread_mutex_t* mutex)
 		{
-			no = pthread_cond_signal(&self);
+			const int no = pthread_cond_wait(buf, mutex);
 			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
-		void broadcast()
+		int signal()
 		{
-			no = pthread_cond_broadcast(&self);
+			const int no = pthread_cond_signal(buf);
 			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int broadcast()
+		{
+			const int no = pthread_cond_broadcast(buf);
+			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
 		struct attr
 		{
-			pthread_condattr_t self;
-			mutable int no = 0;
+			pthread_condattr_t buf[1];
 
-			cond init() const
+			operator cond() const
 			{
-				return cond(&self);
+				return cond(buf);
 			}
 
 			attr()
 			{
-				no = pthread_condattr_init(&self);
+				const int no = pthread_condattr_init(buf);
 				if (no) sys::uni::err(no, here);
 			}
 
 			~attr()
 			{
-				if (not no)
-				{
-					no = pthread_condattr_destroy(&self);
-					if (no) sys::uni::err(no, here);
-				}
+				const int no = pthread_condattr_destroy(buf);
+				if (no) sys::uni::err(no, here);
 			}
 
-			auto getpshared() const
+			int getpshared(int* pshared) const
 			{
-				int pshared;
-				no = pthread_condattr_getpshared(&self, &pshared);
+				const int no = pthread_condattr_getpshared(buf, pshared);
 				if (no) sys::uni::err(no, here);
-				return pshared;
+				return no;
 			}
 
-			void setpshared(int pshared)
+			int setpshared(int pshared)
 			{
-				no = pthread_condattr_setpshared(&self, pshared);
+				const int no = pthread_condattr_setpshared(buf, pshared);
 				if (no) sys::uni::err(no, here);
+				return no;
 			}
 		};
 	};
 
 	struct mutex : fwd::unique
 	{
-		pthread_mutex_t self;
-		mutable int no = 0;
+		pthread_mutex_t buf[1];
 
 		mutex(pthread_mutexattr_t const* attr = nullptr)
 		{
-			no = pthread_mutex_init(&self, attr);
+			const int no = pthread_mutex_init(buf, attr);
 			if (no) sys::uni::err(no, here);
 		}
 
 		~mutex()
 		{
-			if (not no)
-			{
-				no = pthread_mutex_destroy(&self);
-				if (no) sys::uni::err(no, here);
-			}
-		}
-
-		auto getprioceiling() const
-		{
-			int prioceiling;
-			no = pthread_mutex_getprioceiling(&self, &prioceiling);
-			if (no) sys::uni::err(no, here);
-			return prioceiling;
-		}
-
-		auto setprioceiling(int prioceiling)
-		{
-			no = pthread_mutex_setprioceiling(&self, prioceiling, &prioceiling);
-			if (no) sys::uni::err(no, here);
-			return prioceiling;
-		}
-
-		void lock()
-		{
-			no = pthread_mutex_lock(&self);
+			const int no = pthread_mutex_destroy(buf);
 			if (no) sys::uni::err(no, here);
 		}
 
-		void unlock()
+		int getprioceiling(int* prio) const
 		{
-			no = pthread_mutex_unlock(&self);
+			const int no = pthread_mutex_getprioceiling(buf, prio);
 			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
-		void trylock()
+		int setprioceiling(int prioc)
 		{
-			no = pthread_mutex_trylock(&self);
+			const int no = pthread_mutex_setprioceiling(buf, prio, nullptr);
 			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int lock()
+		{
+			const int no = pthread_mutex_lock(buf);
+			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int unlock()
+		{
+			const int no = pthread_mutex_unlock(buf);
+			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int trylock()
+		{
+			const int no = pthread_mutex_trylock(buf);
+			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
 		struct attr
 		{
-			pthread_mutexattr_t self;
-			mutable int no = 0;
+			pthread_mutexattr_t buf[1];
 
-			mutex init() const
+			operator mutex() const
 			{
-				return mutex(&self);
+				return mutex(buf);
 			}
 
 			attr()
 			{
-				no = pthread_mutexattr_init(&self);
+				const int no = pthread_mutexattr_init(buf);
 				if (no) sys::uni::err(no, here);
 			}
 
 			~attr()
 			{
-				if (not no)
-				{
-					no = pthread_mutexattr_destroy(&self);
-					if (no) sys::uni::err(no, here);
-				}
-			}
-
-			auto getprioceiling() const
-			{
-				int prioceiling;
-				no = pthread_mutexattr_getprioceiling(&self, &prioceiling);
-				if (no) sys::uni::err(no, here);
-				return prioceiling;
-			}
-
-			void setprioceiling(int prioceiling)
-			{
-				no = pthread_mutexattr_setprioceiling(&self, prioceiling);
+				const int no = pthread_mutexattr_destroy(buf);
 				if (no) sys::uni::err(no, here);
 			}
 
-			auto getprotocol() const
+			int getprioceiling(int* prio) const
 			{
-				int protocol;
-				no = pthread_mutexattr_getprotocol(&self, &protocol);
+				const int no = pthread_mutexattr_getprioceiling(buf, prio);
 				if (no) sys::uni::err(no, here);
-				return protocol;
+				return no;
 			}
 
-			void setprotocol(int protocol)
+			int setprioceiling(int prio)
 			{
-				no = pthread_mutexattr_setprotocol(&self, protocol);
+				const int no = pthread_mutexattr_setprioceiling(buf, prio);
 				if (no) sys::uni::err(no, here);
+				return no;
 			}
 
-			auto getpshared() const
+			int getprotocol(int* proto) const
 			{
-				int pshared;
-				no = pthread_mutexattr_getpshared(&self, &pshared);
+				const int no = pthread_mutexattr_getprotocol(buf, proto);
 				if (no) sys::uni::err(no, here);
-				return pshared;
+				return no;
 			}
 
-			void setpshared(int pshared)
+			int setprotocol(int proto)
 			{
-				no = pthread_mutexattr_setpshared(&self, pshared);
+				const int no = pthread_mutexattr_setprotocol(buf, proto);
 				if (no) sys::uni::err(no, here);
+				return no;
 			}
 
-			auto gettype() const
+			int getpshared(int* pshared) const
 			{
-				int type;
-				no = pthread_mutexattr_gettype(&self, &type);
+				const int no = pthread_mutexattr_getpshared(buf, pshared);
 				if (no) sys::uni::err(no, here);
-				return type;
+				return no;
 			}
 
-			void settype(int type)
+			int setpshared(int pshared)
 			{
-				no = pthread_mutexattr_settype(&self, type);
+				const int no = pthread_mutexattr_setpshared(buf, pshared);
 				if (no) sys::uni::err(no, here);
+				return no;
+			}
+
+			int gettype(int* type) const
+			{
+				const int no = pthread_mutexattr_gettype(buf, type);
+				if (no) sys::uni::err(no, here);
+				return no;
+			}
+
+			int settype(int type)
+			{
+				const int no = pthread_mutexattr_settype(buf, type);
+				if (no) sys::uni::err(no, here);
+				return no;
 			}
 		};
 	};
 
 	struct rwlock : fwd::unique
 	{
-		pthread_rwlock_t self;
-		mutable int no = 0;
+		pthread_rwlock_t buf[1];
 
 		rwlock(pthread_rwlockattr_t const* attr = nullptr)
 		{
-			no = pthread_rwlock_init(&self, attr);
+			const int no = pthread_rwlock_init(buf, attr);
 			if (no) sys::uni::err(no, here);
 		}
 
 		~rwlock()
 		{
-			if (not no)
-			{
-				no = pthread_rwlock_destroy(&self);
-				if (no) sys::uni::err(no, here);
-			}
-		}
-
-		void rdlock()
-		{
-			no = pthread_rwlock_rdlock(&self);
+			const int no = pthread_rwlock_destroy(buf);
 			if (no) sys::uni::err(no, here);
 		}
 
-		void wrlock()
+		int rdlock()
 		{
-			no = pthread_rwlock_wrlock(&self);
+			const int no = pthread_rwlock_rdlock(buf);
 			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
-		void tryrdlock()
+		int wrlock()
 		{
-			no = pthread_rwlock_tryrdlock(&self);
+			const int no = pthread_rwlock_wrlock(buf);
 			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
-		void trywrlock()
+		int tryrdlock()
 		{
-			no = pthread_rwlock_trywrlock(&self);
+			const int no = pthread_rwlock_tryrdlock(buf);
 			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
-		void unlock()
+		int trywrlock()
 		{
-			no = pthread_rwlock_unlock(&self);
+			const int no = pthread_rwlock_trywrlock(buf);
 			if (no) sys::uni::err(no, here);
+			return no;
+		}
+
+		int unlock()
+		{
+			const int no = pthread_rwlock_unlock(buf);
+			if (no) sys::uni::err(no, here);
+			return no;
 		}
 
 		struct attr
 		{
-			pthread_rwlockattr_t self;
-			mutable int no = 0;
+			pthread_rwlockattr_t buf[1];
 
-			rwlock init() const
+			operator rwlock() const
 			{
-				return rwlock(&self);
+				return rwlock(buf);
 			}
 
 			attr()
 			{
-				no = pthread_rwlockattr_init(&self);
+				const int no = pthread_rwlockattr_init(buf);
 				if (no) sys::uni::err(no, here);
 			}
 
 			~attr()
 			{
-				if (not no)
-				{
-					no = pthread_rwlockattr_destroy(&self);
-					if (no) sys::uni::err(no, here);
-				}
+				const int no = pthread_rwlockattr_destroy(buf);
+				if (no) sys::uni::err(no, here);
 			}
 
-			auto getpshared() const
+			int getpshared(int* pshared) const
 			{
-				int pshared;
-				no = pthread_rwlockattr_getpshared(&self, &pshared);
+				const int no = pthread_rwlockattr_getpshared(buf, pshared);
 				if (no) sys::uni::err(no, here);
-				return pshared;
+				return no;
 			}
 
-			void setpshared(int pshared)
+			int setpshared(int pshared)
 			{
-				no = pthread_rwlockattr_setpshared(&self, pshared);
+				const int no = pthread_rwlockattr_setpshared(buf, pshared);
 				if (no) sys::uni::err(no, here);
+				return no;
 			}
 		};
 	};
@@ -475,51 +502,7 @@ namespace sys
 		}
 	};
 
-	template <typename Routine>
-	struct thread : fwd::unique
-	{
-		pthread_t id;
-
-		thread(Routine start) : work(start)
-		{
-			static sys::uni::thread attr;
-			id = attr.create(thunk, this);
-		}
-
-		~thread()
-		{
-			void* that = nullptr;
-			int no = pthread_join(id, &that);
-			if (sys::uni::fail(no))
-			{
-				sys::uni::err(no, here, id);
-			}
-			else
-			{
-				assert(this == that);
-			}
-		}
-
-	private:
-
-		Routine work;
-
-		static void* thunk(void* ptr)
-		{
-			auto that = reinterpret_cast<thread*>(ptr);
-			that->work();
-			return ptr;
-		}
-	};
-
-	struct event : sys::uni::cond
-	{
-		bool wait(mutex& key)
-		{
-			cond::wait(&key.self);
-			return sys::uni::fail(no);
-		}
-	};
+	template <typename Routine> using thread = sys::uni::thread<Routine>;
 }
 
 #endif // file
