@@ -35,12 +35,6 @@ namespace fwd
 
 	template
 	<
-		class Matrix
-	> 
-	using index = std::make_index_sequence<std::tuple_size<Matrix>::value>;
-
-	template
-	<
 		class Matrix, size_t... Column
 	>
 	auto size(Matrix&& matrix, std::index_sequence<Column...>)
@@ -63,7 +57,7 @@ namespace fwd
 	>
 	auto at(Matrix&& matrix, size_t row, std::index_sequence<Column...>)
 	{
-		return std::make_tuple(std::get<Column>(matrix).at(row)...);
+		return std::forward_as_tuple(std::get<Column>(matrix).at(row)...);
 	}
 
 	template
@@ -72,7 +66,7 @@ namespace fwd
 	>
 	auto at(Matrix&& matrix, size_t row)
 	{
-		return at(matrix, row, index<Matrix>()):
+		return at(matrix, row, index<Matrix>());
 	}
 
 	template
@@ -81,7 +75,7 @@ namespace fwd
 	>
 	auto back(Matrix&& matrix, std::index_sequence<Column...>)
 	{
-		return std::make_tuple(std::get<Column>(matrix).back()...);
+		return std::forward_as_tuple(std::get<Column>(matrix).back()...);
 	}
 
 	template
@@ -97,16 +91,16 @@ namespace fwd
 	<
 		class Matrix, class... Row, size_t... Column
 	> 
-	auto emplace_back(Matrix&& matrix, Row row..., std::index_sequence<Column...>)
+	auto emplace_back(Matrix&& matrix, Row... row, std::index_sequence<Column...>)
 	{
-		return std::make_tuple(std::get<Column>(matrix).emplace_back(row)...);
+		return std::forward_as_tuple(std::get<Column>(matrix).emplace_back(row)...);
 	}
 
 	template 
 	<
 		class Matrix, class... Row
 	>
-	auto emplace_back(Matrix&& matrix, Row row...)
+	auto emplace_back(Matrix&& matrix, Row... row)
 	{
 		return emplace_back(matrix, row..., index<Matrix>());
 	}
@@ -289,10 +283,10 @@ namespace fwd
 
 	template <class Type> inline auto equal_to(Type right)
 	{
-		return [=](Type left)
+		return [right](Type left)
 		{
 			return left == right;
-		}
+		};
 	}
 
 	template <class Range> bool all(Range&& range, bool value = true)
@@ -311,7 +305,7 @@ namespace fwd
 	}
 
 	//
-	// Structured Text
+	// Container View
 	//
 
 	template
@@ -328,7 +322,7 @@ namespace fwd
 		,
 		class Base = pair<Size>
 	>
-	class view : Base
+	class line : Base
 	{
 		Pointer that;
 

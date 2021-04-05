@@ -22,6 +22,10 @@ namespace fwd
 
 	template <class... Types> struct compose : Types... { };
 
+	// Tuple indexer
+
+	template <class T> using index = std::make_index_sequence<std::tuple_size<T>::value>;
+
 	// Overload traits
 
 	template <class Type> using allocator = std::allocator<Type>;

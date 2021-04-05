@@ -38,7 +38,7 @@ namespace
 }
 
 template class doc::instance<dumb>;
-template <> using doc::alias<&dumb::i> = doc::name<"i">;
+template <> fmt::string::view doc::alias<&dumb::i> = "i";
 
 test_unit(doc)
 {
@@ -48,7 +48,7 @@ test_unit(doc)
 	using value_type = fwd::offset_of<&dumb::i>::value_type;
 	static_assert(std::is_same<value_type, int>::value);
 
-	size_t const id = doc::access<dumb>().make({});
+	size_t const id = doc::access<dumb>().emplace({});
 	assert(0 == id);
 	auto ptr = doc::access<dumb>().find(id);
 	assert(nullptr != ptr);

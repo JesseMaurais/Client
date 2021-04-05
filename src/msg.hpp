@@ -6,16 +6,16 @@
 
 namespace doc
 {
-	using socket = std::function<void()>;
-	extern template instance<socket>;
-	using slot = access_ptr<socket>;
+	using function = std::function<void()>;
+	extern template instance<function>;
+	using slot = access_ptr<function>;
 
-	static auto& message()
+	inline auto& socket()
 	{
-		return access<socket>();
+		return access<function>();
 	}
 
-	static void signal(size_t id)
+	inline void signal(size_t id)
 	{
 		#ifdef assert
 		assert(socket().find(id));

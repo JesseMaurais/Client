@@ -7,12 +7,11 @@
 
 namespace sys::uni::msg
 {
-
 	struct attr : mq_attr
 	{
-		mqd_t open(const char* name, int flag, mode_t mode)
+		mqd_t open(const char* name, int flags, mode_t mode)
 		{
-			auto const mqd = mq_open(name, flag, mode, this);
+			auto const mqd = mq_open(name, flags, mode, this);
 			if (sys::fail(mqd))
 			{
 				sys::uni::err(here, "mq_open");

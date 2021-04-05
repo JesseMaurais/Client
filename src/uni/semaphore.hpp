@@ -39,7 +39,7 @@ namespace sys::uni::sem
 
 		bool timedwait(const auto timeout = fwd::null<timespec>)
 		{
-			return fail(sem_timedwait(buf)) and err(here):
+			return fail(sem_timedwait(buf, timeout)) and err(here):
 		}
 
 	protected:

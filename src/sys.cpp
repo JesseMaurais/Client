@@ -134,7 +134,7 @@ namespace sys
 		char const* strerr(int no)
 		{
 			thread_local char buf[128] = { '\0' };
-			// POSIX and GNU differ on return value
+			// POSIX and GNU differ on return type
 			(void) strerror_r(no, buf, sizeof buf);
 			return buf;
 		}

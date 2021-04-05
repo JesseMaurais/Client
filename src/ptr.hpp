@@ -23,7 +23,7 @@ namespace fwd
 		return reinterpret_cast<as_ptr<Type>>(ptr);
 	}
 
-	template <class Type, int Byte = 0> struct zero : Type
+	template <class Type, int Byte = 0> struct zero : Type // clear trivial class
 	{
 		static_assert(std::is_trivially_copyable<Type>::value);
 		static_assert(std::is_standard_layout<Type>::value);
@@ -31,7 +31,28 @@ namespace fwd
 		zero() { std::memset(this, Byte, sizeof(Type)); }
 	};
 
-	struct unique
+	template <auto f> class offset_of // pointer-to-member types
+	{
+		static_assert(std::is_member_object_pointer<decltype(f)>::value);
+		template <class T, class C> static std::pair<T, C> pair(T C::*);
+
+	public:
+	
+		using pair_type = decltype(pair(f));
+		using value_type = typename pair_type::first_type;
+		using parent_type = typename pair_type::second_type;
+		static constexpr auto value_size = sizeof(value_type);
+		static constexpr auto parent_size = sizeof(parent_type);
+
+		offset_of(decltype(f)) = default;
+
+		constexpr operator size_t() const
+		{
+			return static_cast<size_t>(&(null<parent_type>->f));
+		}
+	};
+
+	struct unique // cannot copy base class
 	{
 		unique(const unique &) = delete;
 		unique & operator = (unique const &) = delete;
@@ -39,12 +60,21 @@ namespace fwd
 		unique() = default;
 	};
 
-	struct local
+	struct stationary // cannot move base class
+	{
+		stationary(stationary &&) = delete;
+	protected:
+		stationary() = default;
+	};
+
+	struct local // cannot allocate base class
 	{
 		void* operator new (size_t) = delete;
 		void operator delete (void*) = delete;
 		void* operator new[] (size_t) = delete;
 		void operator delete[] (void*) = delete;
+	protected:
+		local() = default;
 	};
 
 	template 
@@ -80,20 +110,6 @@ namespace fwd
 			ptr.reset();
 			return make_ptr(that, free);
 		}
-	};
-
-	template <auto f> class offset_of
-	{
-		static_assert(std::is_member_object_pointer<decltype(f)>::value);
-		template <class T, class C> static std::pair<T, C> pair(T C::*);
-
-	public:
-	
-		using pair_type = decltype(pair(f));
-		using value_type = typename pair_type::first_type;
-		using parent_type = typename pair_type::second_type;
-		static constexpr auto value_size = sizeof(value_type);
-		static constexpr auto parent_size = sizeof(parent_type);
 	};
 }
 

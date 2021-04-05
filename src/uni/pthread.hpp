@@ -8,18 +8,14 @@
 #include "tmp.hpp"
 #include "signal.hpp"
 #include "mqueue.hpp"
-#include <pthread.h>
-#include <functional>
 
 namespace sys::uni
 {
 	struct start : fwd::unique
 	{
-		using function = std::function<void()>;
-
 		pthread_t id;
 
-		start(function f, pthread_attr_t* attr = nullptr) : work(f)
+		start(sig::event::function f, auto attr = default_attr) : work(f)
 		{
 			const int no = pthread_create(&id, attr, thread, this);
 			if (no) err(no, here);
@@ -38,7 +34,7 @@ namespace sys::uni
 
 	private:
 
-		function work;
+		sig::event::function work;
 
 		static void* thread(void* ptr)
 		{
@@ -52,36 +48,34 @@ namespace sys::uni
 	{
 		pthread_attr_t buf[1];
 
+		auto start(sig::event::function f)
+		{
+			return start(f, buf);
+		}
+
+		auto event(sig::event::function f)
+		{
+			return sig::event(f, buf);
+		}
+
+		auto notify(sig::event::function f, mqd_t mqd)
+		{
+			return msg::event(f, mqd, buf);
+		}
+
+		auto timer(sig::event::function f, clockid_t clock = CLOCK_REALTIME)
+		{
+			return time::event(f, clock, buf);
+		}
+
 		thread()
 		{
-			const int no = pthread_attr_init(buf);
-			if (no) err(no, here);
+			if (const int no = pthread_attr_init(buf); no) err(no, here);
 		}
 
 		~thread()
 		{
-			const int no = pthread_attr_destroy(buf);
-			if (no) err(no, here);
-		}
-
-		auto start(start::function f)
-		{
-			return start(f, this);
-		}
-
-		auto event(start::function f)
-		{
-			return sig::event(f, this);
-		}
-
-		auto notify(start::function f, mqd_t mqd)
-		{
-			return msg::event(f, mqd, this);
-		}
-
-		auto timer(start::function f, clockid_t clock = CLOCK_REALTIME)
-		{
-			return time::event(f, clock, this);
+			if (const int no = pthread_attr_destroy(buf); no) err(no, here);
 		}
 
 		int getdetachstate(int* state) const
@@ -166,9 +160,26 @@ namespace sys::uni
 			return no;
 		}
 
+		cond(int shared = PTHREAD_PROCESS_PRIVATE, auto attr = default_cond)
+		{
+			const int no = pthread_cond_init(buf, attr);
+			if (no) err(no, here);
+		}
+
+		~cond()
+		{
+			const int no = pthread_cond_destroy(buf);
+			if (no) err(no, here);
+		}
+
 		struct attr
 		{
 			pthread_condattr_t buf[1];
+
+			operator cond() const
+			{
+				return cond(buf);
+			}
 
 			attr()
 			{
@@ -196,20 +207,6 @@ namespace sys::uni
 				return no;
 			}
 		};
-
-		cond(int shared = PTHREAD_PROCESS_PRIVATE)
-		{
-			struct attr attr;
-			attr.setpshared(shared);
-			const int no = pthread_cond_init(buf, attr.buf);
-			if (no) err(no, here);
-		}
-
-		~cond()
-		{
-			const int no = pthread_cond_destroy(buf);
-			if (no) err(no, here);
-		}
 	};
 
 	struct mutex : fwd::unique
@@ -251,9 +248,31 @@ namespace sys::uni
 			return no;
 		}
 
+		int wait(cond& var)
+		{
+			return var.wait(buf);
+		}
+
+		mutex(int shared = PTHREAD_PROCESS_PRIVATE, auto attr = default_mutex)
+		{
+			const int no = pthread_mutex_init(buf, attr);
+			if (no) err(no, here);
+		}
+
+		~mutex()
+		{
+			const int no = pthread_mutex_destroy(buf);
+			if (no) err(no, here);
+		}
+
 		struct attr
 		{
 			pthread_mutexattr_t buf[1];
+
+			operator mutex() const
+			{
+				return mutex(buf);
+			}
 
 			attr()
 			{
@@ -323,20 +342,6 @@ namespace sys::uni
 				return no;
 			}
 		};
-
-		mutex(int shared = PTHREAD_PROCESS_PRIVATE)
-		{
-			struct attr attr;
-			attr.setpshared(shared);
-			const int no = pthread_mutex_init(buf, attr.buf);
-			if (no) err(no, here);
-		}
-
-		~mutex()
-		{
-			const int no = pthread_mutex_destroy(buf);
-			if (no) err(no, here);
-		}
 	};
 
 	struct rwlock : fwd::unique
@@ -378,6 +383,18 @@ namespace sys::uni
 			return no;
 		}
 
+		rwlock(int shared = PTHREAD_PROCESS_PRIVATE, auto attr = default_rwlock)
+		{
+			const int no = pthread_rwlock_init(buf, attr);
+			if (no) err(no, here);
+		}
+
+		~rwlock()
+		{
+			const int no = pthread_rwlock_destroy(buf);
+			if (no) err(no, here);
+		}
+
 		struct attr
 		{
 			pthread_rwlockattr_t buf[1];
@@ -413,34 +430,20 @@ namespace sys::uni
 				return no;
 			}
 		};
-
-		rwlock(int shared = PTHREAD_PROCESS_PRIVATE)
-		{
-			struct attr attr;
-			attr.setpshared(shared);
-			const int no = pthread_rwlock_init(buf, attr.buf);
-			if (no) err(no, here);
-		}
-
-		~rwlock()
-		{
-			const int no = pthread_rwlock_destroy(buf);
-			if (no) err(no, here);
-		}
 	};
 }
 
 namespace sys
 {
-	using thread = sys::uni::start;
+	using thread = uni::start;
 
-	struct mutex : sys::uni::mutex
+	struct mutex : uni::mutex
 	{
 		auto lock()
 		{
 			class unlock : fwd::unique
 			{
-				sys::uni::mutex* that;
+				uni::mutex* that;
 
 			public:
 
@@ -459,17 +462,17 @@ namespace sys
 		}
 	};
 
-	struct rwlock : sys::uni::rwlock
+	struct rwlock : uni::rwlock
 	{
 		auto read()
 		{
 			class unlock : fwd::unique
 			{
-				sys::uni::rwlock* that;
+				uni::rwlock* that;
 
 			public:
 
-				unlock(sys::uni::rwlock* ptr) : that(ptr)
+				unlock(uni::rwlock* ptr) : that(ptr)
 				{
 					that->rdlock();
 				}
@@ -486,11 +489,11 @@ namespace sys
 		{
 			class unlock : fwd::unique
 			{
-				sys::uni::rwlock* that;
+				uni::rwlock* that;
 
 			public:
 			
-				unlock(sys::uni::rwlock* ptr) : that(ptr)
+				unlock(uni::rwlock* ptr) : that(ptr)
 				{
 					that->wrlock();
 				}

@@ -71,12 +71,7 @@ namespace doc
 		}
 	};
 
-	template <auto K> struct name
-	{
-		constexpr auto value = K;
-	};
-
-	template <auto A> using alias = void;
+	template <auto K> static fmt::string::view name = "(none)";
 
 	template <class C> constexpr auto table(const C* = nullptr)
 	{
@@ -90,7 +85,7 @@ namespace doc
 
 	template <size_t N, class C> fmt::string::view key(const C* = nullptr)
 	{
-		return alias<get<N, C>()>::value;
+		return name<get<N, C>()>;
 	}
 
 	template <size_t N, class C> auto& value(const C* that)
