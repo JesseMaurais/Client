@@ -7,20 +7,6 @@
 
 namespace sys::uni::msg
 {
-	struct event : sys::uni::sig::event
-	{
-		int err = invalid;
-
-		event(function f, mqd_t mqd, pthread_attr_t* attr = nullptr) 
-		: event(f, attr)
-		{
-			err = mq_notify(mqd, this);
-			if (sys::fail(err))
-			{
-				sys::uni::err(here, "mq_notify");
-			}
-		}
-	};
 
 	struct attr : mq_attr
 	{

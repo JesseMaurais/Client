@@ -4,81 +4,148 @@
 #include "fwd.hpp"
 #include "tmp.hpp"
 #include "ptr.hpp"
+#include <utility>
+#include <tuple>
 
 namespace fwd
 {
 	//
-	// Structured Text
+	// Graph Structure
 	//
 
-	template
-	<
-		class Type
-		,
-		class View = span<Type>
-		,
-		class Container = vector<Type>
-		,
-		class Pointer = as_ptr<const Container>
-		,
-		class Size = typename Container::size_type
-		,
-		class Base = pair<Size>
-	>
-	class line : Base
-	{
-		Pointer that;
-
-	public:
-
-		line(Size begin, Size end, Pointer ptr) 
-		: Base(begin, end), that(ptr)
-		{ }
-
-		bool empty() const { return this->second == this->first; }
-
-		auto size() const { return this->second - this->first; }
-
-		auto begin() const { return that->data() + this->first; }
-
-		auto end() const { return that->data() + this->second; }
-
-		operator View() const
-		{
-			return { begin(), end() };
-		}
-
-		auto operator[](std::ptrdiff_t index) const 
-		{
-			#ifdef assert
-			assert(size() > index)
-			assert(index > -1);
-			#endif
-			return that->at(this->first + index);
-		}
-	};
-
-	//
-	// Directed Graph
-	//
-
-	template <class Node> using edges = std::pair<Node, span<Node>>;
+	template <class Node> using edges = std::pair<const Node, span<Node>>;
 
 	template
 	<
 		class Node, template <class> class Alloc = allocator
 	>
-	using graph = std::vector<pair<Node>, Alloc<pair<Node>>>;
+	using graph = vector<pair<Node>, Alloc>;
 
 	template
 	<
-		class Node
-		, 
-		template <class> class Order = order
-		,
-		template <class> class Alloc = allocator
+		class Node, template <class> class Alloc = allocator, template <class> class Order = order
 	>
 	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
+
+	template
+	<
+		template <class> class Alloc, class... Columns
+	>
+	using matrix = std::tuple<vector<Columns, Alloc>...>;
+
+	template
+	<
+		class Matrix
+	> 
+	using index = std::make_index_sequence<std::tuple_size<Matrix>::value>;
+
+	template
+	<
+		class Matrix, size_t... Column
+	>
+	auto size(Matrix&& matrix, std::index_sequence<Column...>)
+	{
+		return std::make_tuple(std::get<Column>(matrix).size()...);
+	}
+
+	template
+	<
+		class Matrix
+	>
+	auto size(Matrix&& matrix)
+	{
+		return size(matrix, index<Matrix>());
+	}
+	
+	template
+	<
+		class Matrix, size_t... Column
+	>
+	auto at(Matrix&& matrix, size_t row, std::index_sequence<Column...>)
+	{
+		return std::make_tuple(std::get<Column>(matrix).at(row)...);
+	}
+
+	template
+	<
+		class Matrix
+	>
+	auto at(Matrix&& matrix, size_t row)
+	{
+		return at(matrix, row, index<Matrix>()):
+	}
+
+	template
+	<
+		class Matrix, size_t... Column
+	>
+	auto back(Matrix&& matrix, std::index_sequence<Column...>)
+	{
+		return std::make_tuple(std::get<Column>(matrix).back()...);
+	}
+
+	template
+	<
+		class Matrix
+	>
+	auto back(Matrix&& matrix)
+	{
+		return back(matrix, index<Matrix>());
+	}
+
+	template
+	<
+		class Matrix, class... Row, size_t... Column
+	> 
+	auto emplace_back(Matrix&& matrix, Row row..., std::index_sequence<Column...>)
+	{
+		return std::make_tuple(std::get<Column>(matrix).emplace_back(row)...);
+	}
+
+	template 
+	<
+		class Matrix, class... Row
+	>
+	auto emplace_back(Matrix&& matrix, Row row...)
+	{
+		return emplace_back(matrix, row..., index<Matrix>());
+	}
+
+	template
+	<
+		class Matrix, size_t... Column
+	>
+	auto pop_back(Matrix&& matrix, std::index_sequence<Column...>)
+	{
+		return std::make_tuple(std::get<Column>(matrix).pop_back()...);
+	}
+
+	template
+	<
+		class Matrix
+	>
+	auto pop_back(Matrix&& matrix)
+	{
+		return pop_back(matrix, index<Matrix>());
+	}
+
+	template
+	<
+		class Matrix, size_t... Column
+	>
+	auto empty(Matrix&& matrix, std::index_sequence<Column...>)
+	{
+		return std::make_tuple(std::get<Column>(matrix).empty()...);
+	}
+
+	template
+	<
+		class Matrix
+	>
+	auto empty(Matrix&& matrix)
+	{
+		return empty(matrix, index<Matrix>());
+	}
 
 	//
 	// Algorithms
@@ -219,6 +286,57 @@ namespace fwd
 			return p(obj.*off);
 		});
 	}
+
+	//
+	// Structured Text
+	//
+
+	template
+	<
+		class Type
+		,
+		class View = span<Type>
+		,
+		class Container = vector<Type>
+		,
+		class Pointer = typename Container::const_pointer
+		,
+		class Size = typename Container::size_type
+		,
+		class Base = pair<Size>
+	>
+	class view : Base
+	{
+		Pointer that;
+
+	public:
+
+		line(Size begin, Size end, Pointer ptr) 
+		: Base(begin, end), that(ptr)
+		{ }
+
+		bool empty() const { return this->second == this->first; }
+
+		auto size() const { return this->second - this->first; }
+
+		auto begin() const { return that->data() + this->first; }
+
+		auto end() const { return that->data() + this->second; }
+
+		operator View() const
+		{
+			return { begin(), end() };
+		}
+
+		auto operator[](std::ptrdiff_t index) const 
+		{
+			#ifdef assert
+			assert(size() > index)
+			assert(index > -1);
+			#endif
+			return that->at(this->first + index);
+		}
+	};
 }
 
 #endif // file

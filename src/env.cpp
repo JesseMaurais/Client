@@ -1017,7 +1017,7 @@ namespace
 
 test_unit(usr)
 {
-	std::ofstream out { "Tests.ini" };
+	std::ofstream out { "Tools.ini" };
 
 	out	<< hdr("Fake Environment")
 		<< kv("home", env::home())
@@ -1058,8 +1058,9 @@ test_unit(usr)
 		<< kv("program", env::opt::program())
 		<< kv("command-line", fmt::join(env::opt::arguments(), " "))
 		<< kv("config", env::opt::config())
-		<< env::opt::put
 		<< std::endl;
+
+	out << env::opt::put << std::endl;
 }
 
 test_unit(env)

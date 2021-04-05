@@ -3,6 +3,7 @@
 
 MAKEFILE=.make
 TEMPLATE=.make.cc
+TOOLSINI=Tools.ini
 
 all: $(MAKEFILE)
 	$(MAKE) $(MAKEFLAGS) -f $(MAKEFILE) all
@@ -22,12 +23,12 @@ ctags: $(MAKEFILE)
 config:
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
-$(MAKEFILE): $(TEMPLATE)
+$(MAKEFILE): $(TEMPLATE) $(TOOLSINI)
 	$(CXX) $(MAKECONFIG) -E $(TEMPLATE) > $(MAKEFILE)
 
-tools:
-	echo [NMAKE] > Tools.ini
-	echo MAKECONFIG=-D_NMAKE >> Tools.ini
+$(TOOLSINI):
+	echo [NMAKE] > $(TOOLSINI)
+	echo MAKECONFIG=-D_NMAKE >> $(TOOLSINI)
 
 scan:
 	scan-build --use-c++=$(CXX) $(MAKE)

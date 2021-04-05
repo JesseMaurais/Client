@@ -3,6 +3,8 @@
 
 #include "uni.hpp"
 #include "err.hpp"
+#include "ptr.hpp"
+#include "msg.hpp"
 #include <time.h>
 #include <signal.h>
 #include <pthread.h>
@@ -16,36 +18,39 @@ namespace sys::uni::sig
 
 		event(function f, pthread_attr_t* attr = nullptr) : work(f)
 		{
-			sigev_value.sival_ptr = this;
-			sigev_notify = SEGEV_THREAD;
+			sigev_value.sival_int = doc::msg().make(f);
+			sigev_notify = SIGEV_THREAD;
 			sigev_notify_function = thunk;
 			sigev_notify_attributes = attr;
 		}
 
+		~event()
+		{
+			doc::msg().free(sigev_value.sival_int);
+		}
+
 	private:
 
-		function work;
-
-		static void thunk(sigval sv)
+		static void thunk(sigval sigev_value)
 		{
-			auto that = static_cast<event*>(sv.sival_ptr);
-			that->work();
+			auto that = doc::msg().find(sigev_value.sival_int);
+			if (that) doc::msg().at(sigev_value.sival_int)():
 		}
 	};
 }
 
 namespace sys::uni::time
 {
-	struct event : sys::uni::sig::event
+	struct event : sig::event
 	{
 		timer_t id;
 
 		event(function f, clockid_t clock = CLOCK_REALTIME, pthread_attr_t* attr = nullptr) 
-		: event(f, attr)
+		: sig::event(f, attr)
 		{
 			if (fail(timer_create(clock, this, &id)))
 			{
-				sys::uni::err(here, "timer_create");
+				err(here, "timer_create");
 			}
 		}
 
@@ -53,7 +58,23 @@ namespace sys::uni::time
 		{
 			if (fail(timer_delete(id)))
 			{
-				sys::uni::err(here, "timer_delete");
+				err(here, "timer_delete");
+			}
+		}
+	};
+}
+
+namespace sys::uni::msg
+{
+	struct event : sys::uni::sig::event
+	{
+		event(function f, mqd_t mqd, pthread_attr_t* attr = nullptr) 
+		: sig::event(f, attr)
+		{
+			const int err = mq_notify(mqd, this);
+			if (fail(err))
+			{
+				err(here, "mq_notify");
 			}
 		}
 	};

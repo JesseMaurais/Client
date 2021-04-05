@@ -67,38 +67,40 @@ namespace doc
 
 		auto& operator*()
 		{
-			return access<Type>().at(pos);
+			return access<Type>.at(pos);
 		}
 	};
 
-	template <class C> auto table(const C* = nullptr)
+	template <auto K> struct name
+	{
+		constexpr auto value = K;
+	};
+
+	template <auto A> using alias = void;
+
+	template <class C> constexpr auto table(const C* = nullptr)
 	{
 		return C::table();
 	}
 
-	template <size_t N, class C> auto get(const C* = nullptr)
+	template <size_t N, class C> constexpr auto get(const C* = nullptr)
 	{
 		return std::get<N>(table<C>());
 	}
 
-	template <size_t N, size_t M, class C> auto get(const C* = nullptr)
-	{
-		return std::get<M>(get<N, C>());
-	}
-
 	template <size_t N, class C> fmt::string::view key(const C* = nullptr)
 	{
-		return get<N, 1, C>();
+		return alias<get<N, C>()>::value;
 	}
 
 	template <size_t N, class C> auto& value(const C* that)
 	{
-		return that->*get<N, 0>(that);
+		return that->*get<N>(that);
 	}
 
 	template <size_t N, class C> auto& value(C* that)
 	{
-		return that->*get<N, 0>(that);
+		return that->*get<N>(that);
 	}
 }
 

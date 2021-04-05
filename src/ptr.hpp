@@ -11,7 +11,8 @@ namespace fwd
 	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using extern_ptr = std::unique_ptr<Type, deleter<Type>>;
-	template <class Type> constexpr auto null = static_cast<as_ptr<Type>>(nullptr);
+	template <class Type> constexpr as_ptr<Type> null = nullptr;
+
 	constexpr auto void_ptr = null<void>;
 	
 	template <class Type, class Pointer> inline auto cast_as(Pointer ptr)
@@ -21,6 +22,14 @@ namespace fwd
 		#endif
 		return reinterpret_cast<as_ptr<Type>>(ptr);
 	}
+
+	template <class Type, int Byte = 0> struct zero : Type
+	{
+		static_assert(std::is_trivially_copyable<Type>::value);
+		static_assert(std::is_standard_layout<Type>::value);
+
+		zero() { std::memset(this, Byte, sizeof(Type)); }
+	};
 
 	struct unique
 	{

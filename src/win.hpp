@@ -67,7 +67,7 @@ namespace sys::win
 
 	template <class T> struct zero : T
 	{
-		static_assert(std::is_trivial<T>::value);
+		static_assert(std::is_trivially_copyable<T>::value);
 		static_assert(std::is_standard_layout<T>::value);
 
 		zero()
