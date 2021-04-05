@@ -10,7 +10,7 @@ namespace doc
 	using namespace fwd;
 	using namespace fmt;
 
-	template <class Type> instance<Type>& instance<Type>::self()
+	template <class... Types> instance<Types...>& instance<Types...>::self()
 	{
 		static instance singleton;
 		return singleton;

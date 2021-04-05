@@ -287,6 +287,29 @@ namespace fwd
 		});
 	}
 
+	template <class Type> inline auto equal_to(Type right)
+	{
+		return [=](Type left)
+		{
+			return left == right;
+		}
+	}
+
+	template <class Range> bool all(Range&& range, bool value = true)
+	{
+		return all_of(range, equal_to(value));
+	}
+
+	template <class Range> bool any(Range&& range, bool value = true)
+	{
+		return any_of(range, equal_to(value));
+	}
+
+	template <class Range> bool uniform(Range&& range)
+	{
+		return all_of(range, equal_to(range.front()));
+	}
+
 	//
 	// Structured Text
 	//
