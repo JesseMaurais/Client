@@ -4,22 +4,23 @@
 #include "win.hpp"
 #include "ptr.hpp"
 #include "sys.hpp"
-#include <functional>
+#include "msg.hpp"
 
 namespace sys::win
 {
 	struct start : handle
 	{
-		using function = std::function<void()>;
+		using function = doc::function;
 
 		unsigned id;
 
 		start(function f, LPSECURITY_ATTRIBUTES attr = nullptr) : work(f)
 		{
-			h = _beginthreadex(attr, 0, thunk, this, 0, &id);
+			auto const ptr = _beginthreadex(attr, 0, thread, this, 0, &id);
+			h = reinterpret_cast<HANDLE>(ptr);
 			if (fail(h))
 			{
-				err(here, "_beginthreadex");
+				win::err(here, "_beginthreadex");
 			}
 		}
 
@@ -35,96 +36,12 @@ namespace sys::win
 
 		function work;
 
-		static unsigned thunk(void *ptr)
+		static unsigned WINAPI thread(void *ptr)
 		{
 			auto that = fwd::cast_as<start>(ptr);
 			if (that) that->work();
 			_endthreadex(that->id);
 			return that->id;
-		}
-	};
-
-	struct thread : handle
-	{
-		thread(DWORD id, DWORD dw = THREAD_ALL_ACCESS)
-		{
-			h = OpenThread(dw, false, id);
-			if (fail(h))
-			{
-				err(here, "OpenThread", id);
-			}
-		}
-	};
-
-	struct process : handle
-	{
-		process(DWORD id, DWORD dw = PROCESS_ALL_ACCESS)
-		{
-			h = OpenProcess(dw, false, id);
-			if (fail(h))
-			{
-				err(here, "OpenProcess", id);
-			}
-		}
-	};
-
-	struct timer : handle
-	{
-		timer(LPSTR name = nullptr, DWORD dw = TIMER_ALL_ACCESS)
-		{
-			h = OpenWaitableTimer(dw, false, name);
-			if (fail(h))
-			{
-				err(here, "OpenWaitableTimer", name);
-			}
-		}
-	};
-
-	struct file_map : handle
-	{
-		file_map(LPSTR name = nullptr, DWORD dw = PROCESS_ALL_ACCESS)
-		{
-			h = OpenFileMapping(dw, false, name);
-			if (fail(h))
-			{
-				err(here, "OpenFileMapping", name);
-			}
-		}
-	};
-
-	struct event : handle
-	{
-		event(LPSTR name = nullptr, DWORD dw = EVENT_ALL_ACCESS)
-		{
-			h = OpenEvent(dw, false, name);
-			if (fail(h))
-			{
-				err(here, "OpenEvent", name);
-			}
-		}
-	};
-
-	struct mutex : handle
-	{
-		mutex(LPSTR name = nullptr, DWORD dw = MUTEX_ALL_ACCESS)
-		{
-			h = OpenMutex(dw, false, name);
-			if (fail(h))
-			{
-				err(here, "OpenMutex", name);
-			}
-		}
-	};
-
-	struct semaphore : handle
-	{
-		semaphore(LPSTR name = nullptr, DWORD dw = SEMAPHORE_ALL_ACCESS)
-		{
-			h = OpenSemaphore(dw, false, name);
-			if (fail(h))
-			{
-				err(here, "OpenSemaphore", name);
-			}
 		}
 	};
 
@@ -137,7 +54,7 @@ namespace sys::win
 
 		auto thread(start::function f) const
 		{
-			return start(f, this);
+			return sys::win::start(f, this);
 		}
 
 		auto pipes() const
@@ -147,7 +64,7 @@ namespace sys::win
 
 		handle mutex(LPCSTR name, bool owner = false)
 		{
-			return CreateMutex(name, owner, this);
+			return CreateMutex(this, owner, name);
 		}
 
 		handle semaphore(LPCSTR name, long size = 8, long init = 0)

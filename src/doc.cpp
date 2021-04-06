@@ -7,7 +7,7 @@
 
 namespace doc
 {
-	template class instance<message>;
+	template class instance<function>;
 }
 
 #ifdef test_unit
@@ -25,11 +25,11 @@ namespace
 		double d = 0.0;
 		fmt::string s = "Hello World";
 
-		static auto table()
+		static constexpr auto table()
 		{
 			return std::tuple
-			{ 
-				&dumb::i, 
+			{
+				&dumb::i,
 				&dumb::f,
 				&dumb::s,
 			};
@@ -38,7 +38,7 @@ namespace
 }
 
 template class doc::instance<dumb>;
-template <> fmt::string::view doc::alias<&dumb::i> = "i";
+template <> fmt::string::view doc::name<&dumb::i> = "i";
 
 test_unit(doc)
 {

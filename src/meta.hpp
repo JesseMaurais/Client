@@ -1,4 +1,8 @@
-// Do not include from another header
+#ifndef meta_hpp
+#define meta_hpp "Document Templates"
+#else // Do not include this header from another header
+#error Included more than once. Did you include it from a header?
+#endif
 
 #include "doc.hpp"
 #include "it.hpp"
@@ -10,7 +14,7 @@ namespace doc
 	using namespace fwd;
 	using namespace fmt;
 
-	template <class... Types> instance<Types...>& instance<Types...>::self()
+	template <class Type> instance<Type>& instance<Type>::self()
 	{
 		static instance singleton;
 		return singleton;
@@ -67,8 +71,8 @@ namespace doc
 
 		return item.size();
 	}
-	
-	template <class Type> size_t instance<Type>::make(Type&& type)
+
+	template <class Type> size_t instance<Type>::emplace(Type&& type)
 	{
 		// find lowest free index
 		auto pos = index.size();
@@ -105,4 +109,3 @@ namespace doc
 		return pos;
 	}
 }
-

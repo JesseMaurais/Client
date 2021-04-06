@@ -129,13 +129,12 @@ namespace sys::win
 
 		pipe(LPSECURITY_ATTRIBUTES lp = nullptr)
 		{
-			security_attributes sa;
 			env::file::size_t const sz = env::file::width();
 			if (not CreatePipe(&read.h, &write.h, lp, sz))
 			{
 				sys::win::err(here, "CreatePipe");
 			}
-		} 
+		}
 	};
 }
 

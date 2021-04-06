@@ -3,24 +3,25 @@
 
 #include "tmp.hpp"
 #include "ptr.hpp"
-#include "opt.hpp"
+#include "fmt.hpp"
 #include <tuple>
 
 namespace doc
 {
-	using node = fmt::struct_brief<env::opt::pair>;
+	using node = fmt::struct_brief<fmt::diff::pair>;
 
-	template <class.. Types> class instance : fwd::unique
+	template <class Type> class instance : fwd::unique
 	{
 		instance() = default;
 
-		fwd::matrix<size_t, Types...> item;
+		fwd::vector<Type> item;
+		fwd::vector<size_t> cross;
 		fwd::vector<ptrdiff_t> index;
 
 	public:
 
 		static instance& self();
-		size_t emplace(Type &&);
+		size_t emplace(Type&&);
 		size_t free(size_t);
 		Type* find(size_t);
 		Type& at(size_t);

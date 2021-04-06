@@ -43,13 +43,6 @@ namespace fwd
 		using parent_type = typename pair_type::second_type;
 		static constexpr auto value_size = sizeof(value_type);
 		static constexpr auto parent_size = sizeof(parent_type);
-
-		offset_of(decltype(f)) = default;
-
-		constexpr operator size_t() const
-		{
-			return static_cast<size_t>(&(null<parent_type>->f));
-		}
 	};
 
 	struct unique // cannot copy base class

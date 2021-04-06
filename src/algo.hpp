@@ -29,9 +29,9 @@ namespace fwd
 
 	template
 	<
-		template <class> class Alloc, class... Columns
+		class... Columns
 	>
-	using matrix = std::tuple<vector<Columns, Alloc>...>;
+	using matrix = std::tuple<vector<Columns>...>;
 
 	template
 	<
