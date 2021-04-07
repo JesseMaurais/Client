@@ -10,6 +10,97 @@
 namespace fwd
 {
 	//
+	// Data Matrix
+	//
+
+	template <class... Columns> class matrix
+	{
+		using tuple = std::tuple<vector<Columns>...>;
+		using index = std::make_index_sequence<std::tuple_size<tuple>::value>;
+
+		template <size_t... Count>
+		auto data(std::index_sequence<Count...>) const
+		{
+			return std::make_tuple(std::get<Count>(table).data()...);
+		}
+
+		template <size_t... Count>
+		auto size(std::index_sequence<Count...>) const
+		{
+			return std::make_tuple(std::get<Count>(table).size()...);
+		}
+
+		template <size_t... Count>
+		auto empty(std::index_sequence<Count...>) const
+		{
+			return std::make_tuple(std::get<Count>(table).empty()...);
+		}
+
+		template <size_t... Count>
+		auto at(size_t row, std::index_sequence<Count...>)
+		{
+			return std::forward_as_tuple(std::get<Count>(table).at(row)...);
+		}
+
+		template <size_t... Count>
+		auto back(std::index_sequence<Count...>)
+		{
+			return std::forward_as_tuple(std::get<Count>(table).back()...);
+		}
+
+		template <size_t... Count>
+		auto emplace_back(Columns... row, std::index_sequence<Count...>)
+		{
+			return std::forward_as_tuple(std::get<Count>(table).emplace_back(row)...);
+		}
+
+		template <size_t... Count>
+		void pop_back(std::index_sequence<Count...>)
+		{
+			std::get<Count>(table).pop_back()...;
+		}
+
+		tuple table;
+
+	public:
+
+		auto data() const
+		{
+			return data(index());
+		}
+
+		auto size() const
+		{
+			return size(index());
+		}
+
+		auto empty() const
+		{
+			return empty(index());
+		}
+
+		auto at(size_t row)
+		{
+			return at(row, index());
+		}
+
+		auto back()
+		{
+			return back(index());
+		}
+
+		auto emplace_back(Columns... row)
+		{
+			return emplace_back(row..., index());
+		}
+
+		void pop_back()
+		{
+			return pop_back(index());
+		}
+	};
+
+	//
 	// Graph Structure
 	//
 
@@ -26,120 +117,6 @@ namespace fwd
 		class Node, template <class> class Alloc = allocator, template <class> class Order = order
 	>
 	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
-
-	template
-	<
-		class... Columns
-	>
-	using matrix = std::tuple<vector<Columns>...>;
-
-	template
-	<
-		class Matrix, size_t... Column
-	>
-	auto size(Matrix&& matrix, std::index_sequence<Column...>)
-	{
-		return std::make_tuple(std::get<Column>(matrix).size()...);
-	}
-
-	template
-	<
-		class Matrix
-	>
-	auto size(Matrix&& matrix)
-	{
-		return size(matrix, index<Matrix>());
-	}
-	
-	template
-	<
-		class Matrix, size_t... Column
-	>
-	auto at(Matrix&& matrix, size_t row, std::index_sequence<Column...>)
-	{
-		return std::forward_as_tuple(std::get<Column>(matrix).at(row)...);
-	}
-
-	template
-	<
-		class Matrix
-	>
-	auto at(Matrix&& matrix, size_t row)
-	{
-		return at(matrix, row, index<Matrix>());
-	}
-
-	template
-	<
-		class Matrix, size_t... Column
-	>
-	auto back(Matrix&& matrix, std::index_sequence<Column...>)
-	{
-		return std::forward_as_tuple(std::get<Column>(matrix).back()...);
-	}
-
-	template
-	<
-		class Matrix
-	>
-	auto back(Matrix&& matrix)
-	{
-		return back(matrix, index<Matrix>());
-	}
-
-	template
-	<
-		class Matrix, class... Row, size_t... Column
-	> 
-	auto emplace_back(Matrix&& matrix, Row... row, std::index_sequence<Column...>)
-	{
-		return std::forward_as_tuple(std::get<Column>(matrix).emplace_back(row)...);
-	}
-
-	template 
-	<
-		class Matrix, class... Row
-	>
-	auto emplace_back(Matrix&& matrix, Row... row)
-	{
-		return emplace_back(matrix, row..., index<Matrix>());
-	}
-
-	template
-	<
-		class Matrix, size_t... Column
-	>
-	auto pop_back(Matrix&& matrix, std::index_sequence<Column...>)
-	{
-		return std::make_tuple(std::get<Column>(matrix).pop_back()...);
-	}
-
-	template
-	<
-		class Matrix
-	>
-	auto pop_back(Matrix&& matrix)
-	{
-		return pop_back(matrix, index<Matrix>());
-	}
-
-	template
-	<
-		class Matrix, size_t... Column
-	>
-	auto empty(Matrix&& matrix, std::index_sequence<Column...>)
-	{
-		return std::make_tuple(std::get<Column>(matrix).empty()...);
-	}
-
-	template
-	<
-		class Matrix
-	>
-	auto empty(Matrix&& matrix)
-	{
-		return empty(matrix, index<Matrix>());
-	}
 
 	//
 	// Algorithms
@@ -165,10 +142,10 @@ namespace fwd
 		return out;
 	}
 
-	template 
+	template
 	<
  		class Type
-		, 
+		,
 		template <class> class Alloc = allocator
 		,
 		template <class, template<class> class> class Vector = vector
@@ -328,7 +305,7 @@ namespace fwd
 
 	public:
 
-		line(Size begin, Size end, Pointer ptr) 
+		line(Size begin, Size end, Pointer ptr)
 		: Base(begin, end), that(ptr)
 		{ }
 
@@ -345,7 +322,7 @@ namespace fwd
 			return { begin(), end() };
 		}
 
-		auto operator[](std::ptrdiff_t index) const 
+		auto operator[](std::ptrdiff_t index) const
 		{
 			#ifdef assert
 			assert(size() > index)

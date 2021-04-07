@@ -1,5 +1,5 @@
 #ifndef fwd_hpp
-#define fwd_hpp "Forward Declaration"
+#define fwd_hpp "Forward Declarations"
 
 #include <iosfwd>
 #include <utility>
@@ -22,10 +22,6 @@ namespace fwd
 
 	template <class... Types> struct compose : Types... { };
 
-	// Tuple indexer
-
-	template <class T> using index = std::make_index_sequence<std::tuple_size<T>::value>;
-
 	// Overload traits
 
 	template <class Type> using allocator = std::allocator<Type>;
@@ -45,13 +41,13 @@ namespace fwd
 	>
 	using array = std::array<Type, Size>;
 
-	template 
+	template
 	<
 		class Type, template <class> class Alloc = allocator
 	>
 	using vector = std::vector<Type, Alloc<Type>>;
 
-	template 
+	template
 	<
 		class Type
 		,
@@ -61,7 +57,7 @@ namespace fwd
 	>
 	using set = std::set<Type, Order<Type>, Alloc<Type>>;
 
-	template 
+	template
 	<
 		class Type
 		,
