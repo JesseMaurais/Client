@@ -5,6 +5,7 @@
 #include "ptr.hpp"
 #include "sys.hpp"
 #include "msg.hpp"
+#include <winbase.h>
 
 namespace sys::win
 {
@@ -52,12 +53,12 @@ namespace sys::win
 			bInheritHandle = inherit ? TRUE : FALSE;
 		}
 
-		auto thread(start::function f) const
+		auto thread(start::function f)
 		{
 			return sys::win::start(f, this);
 		}
 
-		auto pipes() const
+		auto pipes()
 		{
 			return pipe(this);
 		}
@@ -69,7 +70,7 @@ namespace sys::win
 
 		handle semaphore(LPCSTR name, long size = 8, long init = 0)
 		{
-			return CreateSempahore(this, init, size, name);
+			return CreateSemaphore(this, init, size, name);
 		}
 
 		handle event(LPCSTR name, bool init = false, bool manual = false)

@@ -12,12 +12,12 @@ namespace env
 		using vector = string::vector;
 		using span   = view::span;
 		using init   = view::init;
-		using line   = string::line;
+		using line   = fwd::line<vector>;
 		using out    = string::out::ref;
 		using in     = string::in::ref;
 
-		vector cache;
-		string last;
+		fmt::string::vector cache;
+		fmt::string last;
 		int status;
 
 		line get(in, char end = '\n', int count = 0);

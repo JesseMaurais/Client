@@ -46,7 +46,9 @@ namespace
 		{
 			auto const reader = store.read();
 			auto const index = fmt::to_size(~key);
+			#ifdef assert
 			assert(got(key) and "String is not stored");
+			#endif
 			return reader->at(index);
 		}
 
@@ -115,7 +117,7 @@ namespace
 				// Index a view to the string
 				auto const q = table.write()->emplace(*p.first, id);
 				verify(q.second);
-				
+
 				writer->push_back(q.first->first);
 			}
 			return ~id;
@@ -135,7 +137,7 @@ namespace
 				assert(p.second);
 
 				auto const size = wstore->size();
-				auto const id = fmt::to<fmt::name>(size);	
+				auto const id = fmt::to<fmt::name>(size);
 				wstore->emplace_back(*p.first);
 
 				auto const q = wtable->emplace(*p.first, id);
@@ -420,8 +422,8 @@ test_unit(type)
 
 	// Split by whitespace/characters
 	{
-		fmt::string::view::vector const v  
-		{ 
+		fmt::string::view::vector const v
+		{
 			"1 2 3", " 1 2 3", "1 2 3 ", " 1 2 3 ",
 			"\t1\n2\n\t3\t\n"
 		};
@@ -485,4 +487,3 @@ test_unit(char)
 }
 
 #endif
-

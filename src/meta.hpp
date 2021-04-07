@@ -1,6 +1,6 @@
 #ifndef meta_hpp
 #define meta_hpp "Document Templates"
-#else // Do not include this header from another header
+#else // Do not include this header from another header!
 #error Included more than once. Did you include it from a header?
 #endif
 

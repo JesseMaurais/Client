@@ -35,7 +35,7 @@ namespace fmt
 
 	template
 	<
-		class Type, 
+		class Type,
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order
 	>
@@ -51,7 +51,7 @@ namespace fmt
 		using graph  = fwd::graph<Type, Alloc>;
 		using group  = fwd::group<Type, Order, Alloc>;
 		using edges  = fwd::edges<Type>;
-		using line   = fwd::line<Type>;
+		using line   = fwd::line<Type, span, vector>;
 	};
 
 	template
@@ -68,7 +68,7 @@ namespace fmt
 		>
 	>
 	struct string_brief : String, Base
-	{ 
+	{
 		using String::String;
 		using stream = fwd::basic_stringstream<Char, Traits, Alloc>;
 

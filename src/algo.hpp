@@ -76,14 +76,15 @@ namespace fwd
 
 	public:
 
+		auto size() const
+		{
+			auto const sizes = size(index());
+			return std::get<0>(sizes);
+		}
+
 		auto data() const
 		{
 			return data(index());
-		}
-
-		auto size() const
-		{
-			return size(index());
 		}
 
 		auto empty() const
@@ -286,21 +287,6 @@ namespace fwd
 		{
 			return left == right;
 		};
-	}
-
-	template <class Range> bool all(Range&& range, bool value = true)
-	{
-		return all_of(range, equal_to(value));
-	}
-
-	template <class Range> bool any(Range&& range, bool value = true)
-	{
-		return any_of(range, equal_to(value));
-	}
-
-	template <class Range> bool uniform(Range&& range)
-	{
-		return all_of(range, equal_to(range.front()));
 	}
 
 	//

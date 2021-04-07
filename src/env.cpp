@@ -595,7 +595,7 @@ namespace env
 	shell::line shell::get(in put, char end, int count)
 	{
 		// Result in span at cache end
-		const auto first = cache.size();
+		auto first = cache.size();
 		auto second = first;
 		try // process can crash
 		{
@@ -611,7 +611,9 @@ namespace env
 		{
 			last = error.what();
 		}
-		return { first, second, &cache };
+		const fmt::string::vector* ptr = &cache;
+		line output(first, second, ptr);
+		return output;
 	}
 
 	shell::line shell::run(span arguments)
@@ -686,7 +688,7 @@ namespace env
 		#else
 		{
 			string::view::pair const test [] =
-			{ 
+			{
 				{ "xfce", "exo-open" },
 				{ "gnome", "gnome-open" },
 				{ "kde", "kde-open" },
@@ -789,7 +791,7 @@ namespace env
 		auto const argv = list.data();
 
 		// Run process with command
-		fmt::ipstream sub 
+		fmt::ipstream sub
 			{ argc, argv };
 		return get(sub);
 	}
@@ -902,7 +904,7 @@ namespace env
 
 		if (not empty(text))
 		{
-			command.emplace_back(param("--text", text));		
+			command.emplace_back(param("--text", text));
 		}
 		if (not empty(title))
 		{
