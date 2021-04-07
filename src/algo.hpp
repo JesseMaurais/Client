@@ -57,7 +57,19 @@ namespace fwd
 		template <size_t... Count>
 		void pop_back(std::index_sequence<Count...>)
 		{
-			std::get<Count>(table).pop_back()...;
+			(std::get<Count>(table).pop_back(), ...);
+		}
+
+		template <size_t... Count>
+		void swap(size_t i, size_t j, std::index_sequence<Count...>)
+		{
+			(std::swap(std::get<Count>(table).at(i), std::get<Count>(table).at(j)), ...);
+		}
+
+		template <size_t... Count>
+		void resize(size_t n, std::index_sequence<Count...>)
+		{
+			(std::get<Count>(table).resize(n), ...);
 		}
 
 		tuple table;
@@ -96,7 +108,17 @@ namespace fwd
 
 		void pop_back()
 		{
-			return pop_back(index());
+			pop_back(index());
+		}
+
+		void swap(size_t i, size_t j)
+		{
+			swap(i, j, index());
+		}
+
+		void resize(size_t n)
+		{
+			resize(index());
 		}
 	};
 
