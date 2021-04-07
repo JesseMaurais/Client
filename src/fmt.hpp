@@ -51,7 +51,7 @@ namespace fmt
 		using graph  = fwd::graph<Type, Alloc>;
 		using group  = fwd::group<Type, Order, Alloc>;
 		using edges  = fwd::edges<Type>;
-		using line   = fwd::line<Type, span, vector>;
+		using page   = fwd::page<Type, Alloc>;
 	};
 
 	template
@@ -112,6 +112,7 @@ namespace fmt
 	struct basic_string : Base
 	{
 		using view = basic_string_view<Char, Traits, Alloc, Order>;
+		using line = fwd::line<Char, Traits, Alloc>;
 
 		basic_string(fwd::basic_string_view<Char, Traits> in)
 		: Base(data(in), size(in))

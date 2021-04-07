@@ -741,7 +741,7 @@ namespace env::file
 		{
 			sys::net::err(here, "accept");
 		}
-		else 
+		else
 		if (nullptr != length)
 		{
 			*length = fmt::to_size(n);
@@ -879,7 +879,7 @@ namespace env::file
 					flags |= FILE_MAP_READ;
 				}
 			}
-			
+
 			sys::win::handle const h = CreateFileMapping
 			(
 				sys::win::get(fd),
@@ -919,7 +919,7 @@ namespace env::file
 			if (am & rd) prot |= PROT_READ;
 			if (am & wr) prot |= PROT_WRITE;
 			if (am & ex) prot |= PROT_EXEC;
-			
+
 			return sys::uni::shm::map(sz, prot, MAP_PRIVATE, fd, off);
 		}
 		#endif
@@ -961,63 +961,4 @@ test_unit(dir)
 	assert(not env::file::remove_dir(stem));
 }
 
-#endif
-
-#if 0
-namespace sig
-{
-	static subject<sys::net::descriptor, short> set;
-	static std::vector<sys::net::pollfd> fds;
-
-	int socket::poll(int timeout)
-	{
-		int const n = sys::net::poll(fds.data(), fds.size(), timeout);
-		if (n < 0)
-		{
-			sys::net::err(here, "poll");
-		}
-		else
-		for (unsigned i = 0, j = 0, k = n; j < k; ++i)
-		{
-			assert(fds.size() > i);
-			auto const& p = fds[i];
-
-			if (p.revents)
-			{
-				set.send(p.fd, [&p](auto& it)
-				{
-					assert(p.fd == it.first);
-					it.second(p.revents);
-				});
-
-				if (j < i)
-				{
-					std::swap(fds[i], fds[j]);
-				}
-
-				++j;
-			}
-		}
-		return n;
-	}
-
-	socket::socket(int family, int type, int proto, short events)
-	: sys::file::socket(family, type, proto)
-	{
-		sys::net::pollfd p;
-		p.fd = sys::net::descriptor(sys::file::socket::fd);
-		p.events = events;
-
-		set.connect(p.fd, [this](short events) { notify(events); });
-		fds.push_back(p);
-	}
-
-	socket::~socket()
-	{
-		auto const pfd = sys::net::descriptor(sys::file::socket::fd);
-		auto eq = [pfd](auto const& p) { return p.fd == pfd; };
-		fds.erase(remove_if(begin(fds), end(fds), eq), end(fds));
-		set.disconnect(pfd);
-	}
-}
 #endif

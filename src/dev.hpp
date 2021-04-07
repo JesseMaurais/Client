@@ -1,5 +1,5 @@
 #ifndef dev_hpp
-#define dev_hpp
+#define dev_hpp "Developer Command Line"
 
 #include "cmd.hpp"
 
@@ -7,11 +7,10 @@ namespace env
 {
 	struct dump : shell
 	{
-		line sym(view path);
-		line dyn(view path);
-
+		page sym(view path);
+		page dyn(view path);
 	};
-	
+
 	dump & dev();
 }
 

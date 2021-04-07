@@ -127,7 +127,11 @@ namespace fwd
 	// Graph Structure
 	//
 
-	template <class Node> using edges = std::pair<const Node, span<Node>>;
+	template
+	<
+		class Node
+	>
+	using edges = std::pair<const Node, span<Node>>;
 
 	template
 	<
@@ -297,9 +301,11 @@ namespace fwd
 	<
 		class Type
 		,
+		template <class> class Alloc = allocator
+		,
 		class View = span<Type>
 		,
-		class Container = vector<Type>
+		class Container = vector<Type, Alloc>
 		,
 		class Pointer = typename Container::const_pointer
 		,
@@ -307,13 +313,13 @@ namespace fwd
 		,
 		class Base = pair<Size>
 	>
-	class line : Base
+	class page : Base
 	{
 		Pointer that;
 
 	public:
 
-		line(Size begin, Size end, Pointer ptr)
+		page(Size begin, Size end, Pointer ptr)
 		: Base(begin, end), that(ptr)
 		{ }
 
@@ -339,6 +345,26 @@ namespace fwd
 			return that->at(this->first + index);
 		}
 	};
+
+	template
+	<
+		class Char
+		,
+		template <class> class Traits = character
+		,
+		template <class> class Alloc = allocator
+		,
+		class View = basic_string_view<Char, Traits>
+		,
+		class Container = basic_string<Char, Traits, Alloc>
+		,
+		class Pointer = typename Container::const_pointer
+		,
+		class Size = typename Container::size_type
+		,
+		class Base = pair<Size>
+	>
+	using line = page<Char, Alloc, View, Container, Pointer, Size, Base>;
 }
 
 #endif // file

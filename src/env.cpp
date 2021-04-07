@@ -592,7 +592,7 @@ namespace env
 		return dlg();
 	}
 
-	shell::line shell::get(in put, char end, int count)
+	shell::page shell::get(in put, char end, int count)
 	{
 		// Result in span at cache end
 		auto first = cache.size();
@@ -611,12 +611,10 @@ namespace env
 		{
 			last = error.what();
 		}
-		const fmt::string::vector* ptr = &cache;
-		line output(first, second, ptr);
-		return output;
+		return page(first, second, &cache);
 	}
 
-	shell::line shell::run(span arguments)
+	shell::page shell::run(span arguments)
 	{
 		fmt::ipstream sub(arguments);
 		auto const line = get(sub);
@@ -624,13 +622,13 @@ namespace env
 		return line;
 	}
 
-	shell::line shell::run(init arguments)
+	shell::page shell::run(init arguments)
 	{
 		view::vector s(arguments);
 		return run(s);
 	}
 
-	shell::line shell::list(view name)
+	shell::page shell::list(view name)
 	{
 		return run
 		(
@@ -642,7 +640,7 @@ namespace env
 		);
 	}
 
-	shell::line shell::copy(view path)
+	shell::page shell::copy(view path)
 	{
 		return run
 		(
@@ -654,7 +652,7 @@ namespace env
 		);
 	}
 
-	shell::line shell::find(view pattern, view directory)
+	shell::page shell::find(view pattern, view directory)
 	{
 		#ifdef _WIN32
 		{
@@ -667,7 +665,7 @@ namespace env
 		#endif
 	}
 
-	shell::line shell::which(view name)
+	shell::page shell::which(view name)
 	{
 		return run
 		(
@@ -679,7 +677,7 @@ namespace env
 		);
 	}
 
-	shell::line shell::open(view path)
+	shell::page shell::open(view path)
 	{
 		#ifdef _WIN32
 		{
@@ -720,7 +718,7 @@ namespace env
 		return local;
 	}
 
-	shell::line dump::sym(view path)
+	shell::page dump::sym(view path)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -731,7 +729,7 @@ namespace env
 		return get(sub);
 	}
 
-	shell::line dump::dyn(view path)
+	shell::page dump::dyn(view path)
 	{
 		fmt::ipstream sub
 		#ifdef _WIN32
@@ -757,7 +755,7 @@ namespace env
 		return current.find(lower) != fmt::npos;
 	}
 
-	shell::line desktop::with(string::span command)
+	shell::page desktop::with(string::span command)
 	{
 		static fmt::name const group = fmt::put("Desktop Entry");
 		static fmt::name const key = fmt::put("DIALOG");
@@ -801,7 +799,7 @@ namespace env
 		return fmt::join({key, value}, "=");
 	}
 
-	shell::line desktop::select(view path, mode mask)
+	shell::page desktop::select(view path, mode mask)
 	{
 		vector command { "--file-selection" };
 
@@ -841,7 +839,7 @@ namespace env
 		}
 	};
 
-	shell::line desktop::message(view text, msg type)
+	shell::page desktop::message(view text, msg type)
 	{
 		vector command { message_type(type) };
 
@@ -853,7 +851,7 @@ namespace env
 		return with(command);
 	}
 
-	shell::line desktop::enter(view start, view label, bool hide)
+	shell::page desktop::enter(view start, view label, bool hide)
 	{
 		vector command { param("--entry-text", start) };
 
@@ -869,7 +867,7 @@ namespace env
 		return with(command);
 	}
 
-	shell::line desktop::text(view path, view check, view font, txt type)
+	shell::page desktop::text(view path, view check, view font, txt type)
 	{
 		vector command { "--text-info" };
 
@@ -898,7 +896,7 @@ namespace env
 
 	}
 
-	shell::line desktop::form(controls add, view text, view title)
+	shell::page desktop::form(controls add, view text, view title)
 	{
 		vector command { "--forms" };
 
@@ -921,7 +919,7 @@ namespace env
 		return with(command);
 	}
 
-	shell::line desktop::notify(view text, view icon)
+	shell::page desktop::notify(view text, view icon)
 	{
 		vector command { "--notification" };
 
@@ -937,7 +935,7 @@ namespace env
 		return with(command);
 	}
 
-	shell::line desktop::calendar(view text, view format, int day, int month, int year)
+	shell::page desktop::calendar(view text, view format, int day, int month, int year)
 	{
 		vector command { "--calendar" };
 
@@ -965,7 +963,7 @@ namespace env
 		return with(command);
 	}
 
-	shell::line desktop::color(view start, bool palette)
+	shell::page desktop::color(view start, bool palette)
 	{
 		vector command { "--color-selection" };
 

@@ -12,36 +12,36 @@ namespace env
 		using vector = string::vector;
 		using span   = view::span;
 		using init   = view::init;
-		using line   = fwd::line<vector>;
+		using page   = string::page;
 		using out    = string::out::ref;
 		using in     = string::in::ref;
 
-		fmt::string::vector cache;
-		fmt::string last;
+		vector cache;
+		string last;
 		int status;
 
-		line get(in, char end = '\n', int count = 0);
+		page get(in, char end = '\n', int count = 0);
 		// Cache all lines in to end, return indices
 
-		line run(init arguments);
+		page run(init arguments);
 		// Run command as sub process
 
-		line run(span arguments);
+		page run(span arguments);
 		// Run command as sub process
 
-		line list(view directory = ".");
+		page list(view directory = ".");
 		// List files in directory
 
-		line copy(view path);
+		page copy(view path);
 		// Lines in file given by path
 
-		line find(view pattern, view directory = ".");
+		page find(view pattern, view directory = ".");
 		// Paths to matching files in directory
 
-		line which(view name);
+		page which(view name);
 		// Paths to executables with program name
 
-		line open(view path);
+		page open(view path);
 		// Preferred application for file type at path
 	};
 
