@@ -5,17 +5,10 @@
 #include "err.hpp"
 #include "ptr.hpp"
 #include <time.h>
+#include <mqueue.h>
 #include <signal.h>
 #include <pthread.h>
 #include <functional>
-
-namespace sys::uni
-{
-	constexpr auto default_thread = fwd::null<pthread_attr_t>;
-	constexpr auto default_cond = fwd::null<pthread_condattr_t>;
-	constexpr auto default_mutex = fwd::null<pthread_mutexattr_t>;
-	constexpr auto default_rwlock = fwd::null<pthread_rwlockattr_t>;
-};
 
 namespace sys::uni::sig
 {
@@ -25,28 +18,28 @@ namespace sys::uni::sig
 
 		bool empty()
 		{
-			return fail(sigemptyset(buf)) and err(here);
+			return fail(sigemptyset(buf)) and sys::err(here);
 		}
 
 		bool fill()
 		{
-			return fail(sigfillset(buf)) and err(here);
+			return fail(sigfillset(buf)) and sys::err(here);
 		}
 
 		bool add(int signo)
 		{
-			return fail(sigaddset(buf, signo)) and err(here);
+			return fail(sigaddset(buf, signo)) and sys::err(here);
 		}
 
 		bool del(int signo)
 		{
-			return fail(sigdelset(buf, signo)) and err(here);
+			return fail(sigdelset(buf, signo)) and sys::err(here);
 		}
 
 		bool member(int signo) const
 		{
 			const int no = sigismember(buf, signo);
-			if (fail(no)) err(here);
+			if (fail(no)) sys::err(here);
 			return no;
 		}
 	};
@@ -55,24 +48,22 @@ namespace sys::uni::sig
 	{
 		using function = std::function<void()>;
 
-		event(function f, auto attr = default_thread) : work(f)
+		event(function f, pthread_attr_t* attr = nullptr) : work(f)
 		{
-			sigev_value.sival_int = doc::socket().emplace(f);
+			sigev_value.sival_ptr = this;
 			sigev_notify = SIGEV_THREAD;
 			sigev_notify_function = thread;
 			sigev_notify_attributes = attr;
 		}
 
-		~event()
-		{
-			doc::socket().free(sigev_value.sival_int);
-		}
-
 	private:
+
+		function work;
 
 		static void thread(sigval sigev_value)
 		{
-			doc::signal(sigev_value.sival_int):
+			auto that = fwd::cast_as<event>(sigev_value.sival_ptr);
+			if (that) that->work();
 		}
 	};
 }
@@ -83,7 +74,7 @@ namespace sys::uni::time
 	{
 		timer_t id;
 
-		event(function f, clockid_t clock = CLOCK_REALTIME, auto attr = default_thread) 
+		event(function f, clockid_t clock = CLOCK_REALTIME, pthread_attr_t* attr = nullptr) 
 		: sig::event(f, attr)
 		{
 			if (fail(timer_create(clock, this, &id)))
@@ -106,13 +97,12 @@ namespace sys::uni::msg
 {
 	struct event : sig::event
 	{
-		event(function f, mqd_t mqd, auto attr = default_thread) 
+		event(function f, mqd_t mqd, pthread_attr_t* attr = nullptr) 
 		: sig::event(f, attr)
 		{
-			const int err = mq_notify(mqd, this);
-			if (fail(err))
+			if (fail(mq_notify(mqd, this)))
 			{
-				err(here, "mq_notify");
+				sys::err(here, "mq_notify");
 			}
 		}
 	};

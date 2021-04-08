@@ -15,7 +15,7 @@ namespace sys::uni
 	{
 		pthread_t id;
 
-		start(sig::event::function f, auto attr = default_attr) : work(f)
+		start(sig::event::function f, pthread_attr_t* attr = nullptr) : work(f)
 		{
 			const int no = pthread_create(&id, attr, thread, this);
 			if (no) err(no, here);
@@ -50,7 +50,7 @@ namespace sys::uni
 
 		auto start(sig::event::function f)
 		{
-			return start(f, buf);
+			return sys::uni::start(f, buf);
 		}
 
 		auto event(sig::event::function f)
@@ -96,7 +96,7 @@ namespace sys::uni
 		{
 			const int no = pthread_attr_getguardsize(buf, size);
 			if (no) err(no, here);
-			return no
+			return no;
 		}
 
 		int setguardsize(size_t size)
@@ -160,7 +160,7 @@ namespace sys::uni
 			return no;
 		}
 
-		cond(int shared = PTHREAD_PROCESS_PRIVATE, auto attr = default_cond)
+		cond(pthread_condattr_t const* attr = nullptr)
 		{
 			const int no = pthread_cond_init(buf, attr);
 			if (no) err(no, here);
@@ -220,9 +220,10 @@ namespace sys::uni
 			return no;
 		}
 
-		int setprioceiling(int prio)
+		int setprioceiling(int prio, int* old = nullptr)
 		{
-			const int no = pthread_mutex_setprioceiling(buf, prio, nullptr);
+			if (nullptr == old) old = &prio;
+			const int no = pthread_mutex_setprioceiling(buf, prio, old);
 			if (no) err(no, here);
 			return no;
 		}
@@ -253,7 +254,7 @@ namespace sys::uni
 			return var.wait(buf);
 		}
 
-		mutex(int shared = PTHREAD_PROCESS_PRIVATE, auto attr = default_mutex)
+		mutex(pthread_mutexattr_t const* attr = nullptr)
 		{
 			const int no = pthread_mutex_init(buf, attr);
 			if (no) err(no, here);
@@ -383,7 +384,7 @@ namespace sys::uni
 			return no;
 		}
 
-		rwlock(int shared = PTHREAD_PROCESS_PRIVATE, auto attr = default_rwlock)
+		rwlock(pthread_rwlockattr_t const* attr = nullptr)
 		{
 			const int no = pthread_rwlock_init(buf, attr);
 			if (no) err(no, here);

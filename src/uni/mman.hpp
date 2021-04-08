@@ -11,7 +11,7 @@
 
 namespace sys::uni::shm
 {
-	template <class Type> auto make_ptr(Type* ptr)
+	template <class Type> auto make_ptr(Type* ptr, size_t sz)
 	{
 		return fwd::make_ptr(ptr, [sz](auto ptr)
 		{
@@ -19,7 +19,7 @@ namespace sys::uni::shm
 			{
 				if (fail(munmap(ptr, sz)))
 				{
-					sys::uni::err(here, "munmap", ptr, sz);
+					sys::err(here, "munmap", ptr, sz);
 				}
 			}
 		});
@@ -30,17 +30,17 @@ namespace sys::uni::shm
 		ptr = mmap(ptr, sz, prot, flags, fd, off);
 		if (MAP_FAILED == ptr)
 		{
-			sys::uni::err(here, "mmap", sz, prot, flags, fd, off);
+			sys::err(here, "mmap", sz, prot, flags, fd, off);
 		}
-		return make_ptr(ptr);
+		return make_ptr(ptr, sz);
 	}
 
-	static auto open(const char* name, int flag, mode_t mode)
+	inline auto open(const char* name, int flag, mode_t mode)
 	{
 		auto const fd = shm_open(name, flag, mode);
 		if (sys::fail(fd))
 		{
-			sys::uni::err(here, "shm_open");
+			sys::err(here, "shm_open");
 		}
 		return env::file::descriptor(fd);
 	}

@@ -12,9 +12,9 @@ namespace sys::uni::msg
 		mqd_t open(const char* name, int flags, mode_t mode)
 		{
 			auto const mqd = mq_open(name, flags, mode, this);
-			if (sys::fail(mqd))
+			if (fail(mqd))
 			{
-				sys::uni::err(here, "mq_open");
+				sys::err(here, "mq_open");
 			}
 			return mqd;
 		}
@@ -22,9 +22,9 @@ namespace sys::uni::msg
 		int get(mqd_t mqd)
 		{
 			auto const err = mq_getattr(mqd, this);
-			if (sys::fail(err))
+			if (fail(err))
 			{
-				sys::uni::err(here, "mq_getattr");
+				sys::err(here, "mq_getattr");
 			}
 			return err;
 		}
@@ -32,9 +32,9 @@ namespace sys::uni::msg
 		int set(mqd_t mqd) const
 		{
 			auto const err = mq_setattr(mqd, this, nullptr);
-			if (sys::fail(err))
+			if (fail(err))
 			{
-				sys::uni::err(here, "mq_setattr");
+				sys::err(here, "mq_setattr");
 			}
 			return err;
 		}

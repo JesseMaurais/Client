@@ -227,7 +227,7 @@ namespace sys
 					int fd = p[n].get();
 					if (fail(fd))
 					{
-						return sys::uni::invalid;
+						return sys::invalid;
 					}
 				}
 			}

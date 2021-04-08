@@ -119,7 +119,7 @@ namespace fwd
 
 		void resize(size_t n)
 		{
-			resize(index());
+			resize(n, index());
 		}
 	};
 

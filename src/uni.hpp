@@ -2,7 +2,7 @@
 #define uni_hpp "POSIX Utility"
 
 #ifdef _WIN32
-# error POSIX utility header included with Win32 macro.
+# error POSIX utility header included with WIN32 macro.
 #endif
 
 #include <unistd.h>

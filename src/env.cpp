@@ -293,7 +293,7 @@ namespace env
 		#else
 		{
 			static thread_local char name[64];
-			if (sys::uni::fail(gethostname(name, sizeof name)))
+			if (sys::fail(gethostname(name, sizeof name)))
 			{
 				sys::err(here, "gethostname");
 				name[0] = fmt::null;
@@ -312,7 +312,7 @@ namespace env
 		#else
 		{
 			static thread_local char name[64];
-			if (sys::uni::fail(getdomainname(name, sizeof name)))
+			if (sys::fail(getdomainname(name, sizeof name)))
 			{
 				sys::err(here, "getdomainname");
 				name[0] = fmt::null;

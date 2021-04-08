@@ -7,7 +7,7 @@
 namespace doc
 {
 	using function = std::function<void()>;
-	extern template instance<function>;
+	extern template class instance<function>;
 	using slot = access_ptr<function>;
 
 	inline auto& socket()
