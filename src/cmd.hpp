@@ -16,7 +16,7 @@ namespace env
 		using out    = string::out::ref;
 		using in     = string::in::ref;
 
-		vector cache;
+		fmt::string::vector cache;
 		string last;
 		int status;
 

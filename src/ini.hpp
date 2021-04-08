@@ -15,7 +15,7 @@ namespace doc
 		using out    = string::out;
 		using in     = string::in;
 
-		fwd::group<env::opt::name> keys;
+		fmt::diff::group keys;
 		string::view::vector values;
 		string::set cache;
 

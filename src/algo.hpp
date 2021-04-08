@@ -307,7 +307,7 @@ namespace fwd
 		,
 		class Container = vector<Type, Alloc>
 		,
-		class Pointer = typename Container::const_pointer
+		class Pointer = as_ptr<typename Container>
 		,
 		class Size = typename Container::size_type
 		,
@@ -358,7 +358,7 @@ namespace fwd
 		,
 		class Container = basic_string<Char, Traits, Alloc>
 		,
-		class Pointer = typename Container::const_pointer
+		class Pointer = as_ptr<typename Container>
 		,
 		class Size = typename Container::size_type
 		,

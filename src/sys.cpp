@@ -35,7 +35,7 @@ namespace sys
 		return thread_buf;
 	}
 
-	fmt::string::out::ref put(fmt::string::out::ref buf) 
+	fmt::string::out::ref put(fmt::string::out::ref buf)
 	{
 		static sys::mutex key;
 		auto const unlock = key.lock();
@@ -97,7 +97,7 @@ namespace sys
 			{
 				h = GetModuleHandle(nullptr);
 			}
-			
+
 			thread_local auto tls = fwd::null_ptr<HLOCAL>(LocalFree);
 
 			LPSTR str = nullptr;
@@ -112,7 +112,7 @@ namespace sys
 				0,      // size
 				nullptr // arguments
 			);
-		
+
 			if (0 < size) // replace
 			{
 				tls.reset(reinterpret_cast<HLOCAL>(str));
@@ -284,10 +284,11 @@ namespace sys
 	{
 		#ifdef _WIN32
 		{
-			sys::win::process const h(pid);
+			constexpr auto dw = PROCESS_ALL_ACCESS;
+			sys::win::handle const h = OpenProcess(dw, false, pid);
 			if (fail(h))
 			{
-				sys::warn(here, pid);
+				sys::win::err(here, "OpenProcess", pid);
 				return failure;
 			}
 			else
@@ -315,10 +316,11 @@ namespace sys
 		#ifdef _WIN32
 		{
 			auto code = static_cast<DWORD>(sys::invalid);
-			sys::win::process const h(pid);
+			constexpr auto dw = PROCESS_ALL_ACCESS;
+			sys::win::handle const h = OpenProcess(dw, false, pid);
 			if (fail(h))
 			{
-				sys::warn(here, pid);
+				sys::win::err(here, "OpenProcess", pid);
 			}
 			else
 			{
@@ -664,9 +666,9 @@ test_unit(sig)
 	{
 		sys::sig::scope const after
 		(
-			signo, [&caught](int signo) 
-			{ 
-				caught.push_back(signo); 
+			signo, [&caught](int signo)
+			{
+				caught.push_back(signo);
 			}
 		);
 		std::raise(signo);

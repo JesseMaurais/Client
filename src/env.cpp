@@ -595,7 +595,7 @@ namespace env
 	shell::page shell::get(in put, char end, int count)
 	{
 		// Result in span at cache end
-		auto first = cache.size();
+		auto const first = cache.size();
 		auto second = first;
 		try // process can crash
 		{
@@ -611,7 +611,8 @@ namespace env
 		{
 			last = error.what();
 		}
-		return page(first, second, &cache);
+		page result(first, second, &cache);
+		return result;
 	}
 
 	shell::page shell::run(span arguments)

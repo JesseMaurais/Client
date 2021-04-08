@@ -5,8 +5,8 @@
 
 namespace fmt
 {
-	using name = std::ptrdiff_t;
-	using pair = fwd::pair<name>;
+	using name = diff::type;
+	using pair = diff::pair;
 
 	bool got(name); // O (1)
 	bool got(view); // O log n
