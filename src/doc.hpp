@@ -8,7 +8,7 @@
 
 namespace doc
 {
-	using node = fmt::struct_brief<fmt::diff::pair>;
+	using node = fmt::diff;
 
 	template <class Type> class instance : fwd::unique
 	{

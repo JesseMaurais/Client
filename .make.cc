@@ -351,21 +351,3 @@ $(EXE): $(LNKDEP); $(LNKCMD)
 #else // GNU
 $(OBJDIR)%.$(OBJEXT): $(SRCDIR)%.$(SRCEXT); $(CXXCMD)
 #endif
-
-//
-// Environment
-//
-
-info:
-	@echo MAKE=$(MAKE)
-	@echo MAKEFLAGS=$(MAKEFLAGS)
-	@echo MAKECONFIG=$(MAKECONFIG)
-#ifdef _MSC_VER
-	@echo "_MSC_VER"=_MSC_VER
-#endif
-#ifdef _MSC_BUILD
-	@echo "_MSC_BUILD"=_MSC_BUILD
-#endif
-#ifdef __GNUC__
-	@echo "__GNUC__"=__GNUC__
-#endif

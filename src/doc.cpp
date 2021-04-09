@@ -149,7 +149,7 @@ namespace doc
 		{
 			auto const size = values.size();
 			values.emplace_back(value);
-			keys[key] = fmt::to<env::opt::word>(size);
+			keys[key] = fmt::to<env::opt::name>(size);
 			return true;
 		}
 		else
@@ -163,6 +163,10 @@ namespace doc
 }
 
 #ifdef test_unit
+
+#include "env.hpp"
+#include "dir.hpp"
+
 namespace
 {
 	using namespace std::literals::string_view_literals;
@@ -224,7 +228,7 @@ test_unit(doc)
 	doc::access<dumb>().free(id);
 }
 
-test(ini)
+test_unit(ini)
 {
 	auto const path = fmt::dir::join({env::pwd(), "Tools.ini"});
 	std::fstream file(path);
@@ -233,8 +237,8 @@ test(ini)
 
 	// Data from file
 	{
-		auto const group = fmt::str::set("NMAKE");
-		auto const key = fmt::str::set("MAKECONFIG");
+		auto const group = fmt::set("NMAKE");
+		auto const key = fmt::set("MAKECONFIG");
 		auto const value = init.get({group, key});
 		assert(not empty(value));
 		assert(value.find("/D_NMAKE") != fmt::npos);
@@ -242,8 +246,8 @@ test(ini)
 
 	// Data at runtime
 	{
-		auto const group = fmt::str::set("Group");
-		auto const key = fmt::str::set("Key");
+		auto const group = fmt::set("Group");
+		auto const key = fmt::set("Key");
 		constexpr auto value = "Value";
 		// Cache value with set
 		{
