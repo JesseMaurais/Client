@@ -1018,7 +1018,7 @@ namespace
 
 test_unit(usr)
 {
-	std::ofstream out { "Tools.ini" };
+	std::ofstream out { ".ini" };
 
 	out	<< hdr("Fake Environment")
 		<< kv("home", env::home())

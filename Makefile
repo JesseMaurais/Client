@@ -4,8 +4,10 @@
 MAKEFILE=.make
 TEMPLATE=.make.cc
 
-# NMake does not support line continuation --> \
-MAKECONFIG=-D_NMAKE
+# \
+MAKECONFIG=-nologo -D_NMAKE
+# \
+MAKEFLAGS=-nologo
 
 all: $(MAKEFILE)
 	$(MAKE) $(MAKEFLAGS) -f $(MAKEFILE) all

@@ -17,8 +17,8 @@
 #include <set>
 #include <map>
 
-#ifndef _TOOLS
-# define _TOOLS "Tools.ini"
+#ifndef _CONFIG
+# define _CONFIG ".ini"
 #endif
 
 #ifndef _MSC_VER
@@ -90,7 +90,7 @@ namespace
 int main(int argc, char** argv)
 {
 	// Default options file
-	fmt::string const config = _TOOLS;
+	fmt::string const config = _CONFIG;
 
 	// Command line words
 	struct
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
 		{ 0, "q", fmt::get(arg.quiet), "Only print error messages" },
 		{ 0, "c", fmt::get(arg.color), "Print using color codes" },
 		{ 0, "a", fmt::get(arg.async), "Run tests asynchronously" },
-		{ 1, "t", fmt::get(arg.tools), _TOOLS " is replaced with argument" },
+		{ 1, "i", fmt::get(arg.tools), _CONFIG " is replaced with argument" },
 		{ 0, "o", fmt::get(arg.host), "Host tests in this process" },
 	};
 
@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 			<< fmt::eol << fmt::tab
 			<< "2. The TESTS environment variable"
 			<< fmt::eol << fmt::tab
-			<< "3. The TESTS variable in " _TOOLS
+			<< "3. The TESTS variable in " _CONFIG
 			<< fmt::eol << fmt::tab
 			<< "4. The dump symbols for " << prefix << "*"
 			<< fmt::eol

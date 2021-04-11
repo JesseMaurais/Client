@@ -194,7 +194,9 @@ namespace
 }
 
 template class doc::instance<dumb>;
-template <> fmt::string::view doc::name<&dumb::i> = "i";
+template <> fmt::view doc::name<&dumb::i> = "i";
+template <> fmt::view doc::name<&dumb::f> = "f";
+template <> fmt::view doc::name<&dumb::s> = "s";
 
 test_unit(doc)
 {
@@ -230,7 +232,7 @@ test_unit(doc)
 
 test_unit(ini)
 {
-	auto const path = fmt::dir::join({env::pwd(), "Tools.ini"});
+	auto const path = fmt::dir::join({env::pwd(), ".ini"});
 	std::fstream file(path);
 	doc::ini init;
 	file >> init;
