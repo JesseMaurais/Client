@@ -64,7 +64,7 @@
 #endif
 
 //
-// Project
+// Project Layout
 //
 
 ifndef STD
@@ -144,6 +144,7 @@ endif
 //
 
 ifdef COMSPEC
+CMD=$(COMSPEC)
 NULL=nul
 WHERE=where
 LIST=dir /b
@@ -153,7 +154,8 @@ MOVE=move
 REMOVE=del /f
 MKDIR=md
 MKTEMP=mktemp
-else // shell
+else
+CMD=$(SHELL)
 NULL=/dev/null
 WHERE=which -a
 LIST=ls
@@ -166,7 +168,7 @@ MKTEMP=mktemp
 endif
 
 //
-// Sources
+// Input Sources
 //
 
 #define source(x) $(SRCDIR)x.$(SRCEXT)
@@ -223,7 +225,7 @@ add(CFLAGS, -I$(HDRDIR))
 #endif
 
 //
-// Compiler
+// Compiler Options
 //
 
 #ifdef _MSC_VER
@@ -309,7 +311,7 @@ LNKDEP=$(PCHOUT) $(OBJ)
 #endif
 
 //
-// Outputs
+// Output Objects
 //
 
 .SUFFIXES: .$(OUTEXT) .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
@@ -363,7 +365,7 @@ help: ; $(SHOW) Readme
 clean: ; $(REMOVE) $(OBJ) $(EXE) $(DEP) $(PCHOUT) $(PCHOBJ)
 cflags: ; @echo $(CFLAGS) $(WARN) $(HEADER) > compile_flags.txt
 ctags: ; ctags $(SRC) $(HDR)
-info: build tool lang time;
+info: build tool lang time shell;
 
 $(EXE): $(LNKDEP); $(LNKCMD)
 #ifdef _NMAKE
@@ -375,6 +377,8 @@ $(OBJDIR)%.$(OBJEXT): $(SRCDIR)%.$(SRCEXT); $(CXXCMD)
 //
 // Environment
 //
+
+shell: ; @echo Command Shell $(CMD)
 
 #ifdef __TIMESTAMP__
 TIMESTAMP=__TIMESTAMP__
@@ -411,4 +415,3 @@ BUILD=GCC __VERSION__
 #endif
 
 build: ; @echo $(BUILD)
-
