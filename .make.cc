@@ -73,13 +73,13 @@ STD=c++20
 #endif
 endif
 ifndef OBJDIR
-OBJDIR=obj$(DIR)
+OBJDIR=object$(DIR)
 endif
 ifndef SRCDIR
-SRCDIR=src$(DIR)
+SRCDIR=source$(DIR)
 endif
 ifndef HDRDIR
-HDRDIR=$(SRCDIR)
+HDRDIR=include$(DIR)
 endif
 ifndef MAKDIR
 MAKDIR=$(OBJDIR)
@@ -98,6 +98,18 @@ HDREXT=hpp
 endif
 ifndef PCH
 PCH=std
+endif
+
+ifndef INCLUDE
+INCLUDE=$(HDRDIR)
+else
+add(INCLUDE, $(ENT)$(HDRDIR))
+endif
+
+ifndef LIBPATH
+LIBPATH=$(OBJDIR)
+else
+add(LIBPATH, $(ENT)$(OBJDIR))
 endif
 
 .SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
@@ -177,10 +189,9 @@ endif
 SRC=$(wildcard $(SRCDIR)*.$(SRCEXT))
 #endif
 
-#ifndef _MSC_VER
 #ifdef _NMAKE
-MAKINC=$(MAKDIR)include.$(MAKEXT)
-if((echo INC=\>$(MAKINC)) && for "delims=$(ENT)" %i in (%INCLUDE%) do @echo , -I"%~i"\>>$(MAKINC))
+MAKINC=$(MAKDIR)includes.$(MAKEXT)
+if((echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:;=";"%") do @echo -I"%~i"\>>$(MAKINC))
 include $(MAKINC)
 else
 error(Cannot parse include directories)
@@ -191,7 +202,7 @@ INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
 
 #ifdef _NMAKE
 MAKLIB=$(MAKDIR)library.$(MAKEXT)
-if((echo LIB=\>$(MAKLIB)) && for "delims=$(ENT)" %i in (%LIBPATH%) do @echo , -L"%~i"\>>$(MAKLIB))
+if((echo LIB=\>$(MAKLIB)) && for %i in ("%LIBPATH:;=";"%") do @echo -L"%~i"\>>$(MAKLIB))
 include $(MAKLIB)
 else
 error(Cannot parse library directories)
@@ -199,13 +210,12 @@ endif
 #else // GNU
 LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 #endif
-#endif // _MSC_VER
 
 //
 // Compiler
 //
 
-add(HEADER, -I$(HDRDIR) -I$(MAKDIR))
+add(CFLAGS, -I$(HDRDIR))
 
 #ifdef _MSC_VER
 
