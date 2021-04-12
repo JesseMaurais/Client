@@ -169,9 +169,13 @@ endif
 // Sources
 //
 
+#define source(x) $(SRCDIR)x.$(SRCEXT)
+#define header(x) $(HDRDIR)x.$(HDREXT)
+#define object(x) $(OBJDIR)x.$(OBJEXT)
+
 #ifdef _NMAKE
 MAKHDR=$(MAKDIR)header.$(MAKEXT)
-if((echo HDR=\>$(MAKHDR)) && for %i in ($(HDRDIR)*.$(HDREXT)) do @echo %i\>>$(MAKHDR))
+if((echo HDR=\>$(MAKHDR)) && for %i in (header(*)) do @echo %i\>>$(MAKHDR))
 include $(MAKHDR)
 else
 error(Cannot locate header files)
@@ -182,7 +186,7 @@ HDR=$(wildcard $(HDRDIR)*.$(HDREXT))
 
 #ifdef _NMAKE
 MAKSRC=$(MAKDIR)source.$(MAKEXT)
-if((echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*.$(SRCEXT)) do @echo %i\>>$(MAKSRC))
+if((echo SRC=\>$(MAKSRC)) && for %i in (source(*)) do @echo %i\>>$(MAKSRC))
 include $(MAKSRC)
 else
 error(Cannot locate source files)
@@ -213,6 +217,7 @@ endif
 #else // GNU
 LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 #endif
+
 #else
 add(CFLAGS, -I$(HDRDIR))
 #endif
@@ -358,7 +363,7 @@ help: ; $(SHOW) Readme
 clean: ; $(REMOVE) $(OBJ) $(EXE) $(DEP) $(PCHOUT) $(PCHOBJ)
 cflags: ; @echo $(CFLAGS) $(WARN) $(HEADER) > compile_flags.txt
 ctags: ; ctags $(SRC) $(HDR)
-info: tool lang time;
+info: build tool lang time;
 
 $(EXE): $(LNKDEP); $(LNKCMD)
 #ifdef _NMAKE
@@ -379,7 +384,9 @@ TIMESTAMP=__DATE__ __TIME__
 
 time: ; @echo $(TIMESTAMP)
 
-#ifdef __cplusplus
+#ifdef _MSC_VER
+LANG=Visual C++ _MSVC_LANG
+#elif defined(__cplusplus)
 LANG=C++ __cplusplus
 #elif defined(__STDC__)
 LANG=C __STDC_VERSION__
@@ -387,14 +394,21 @@ LANG=C __STDC_VERSION__
 
 lang: ; @echo $(LANG)
 
-#ifdef _MSC_VER
-TOOLSET=MSVC _MSC_FULL_VER
-LANG=Visual C++ _MSC_LANG
-#elif defined(__llmv__) || defined(__clang__)
-TOOLSET=LLVM __clang_version__
-#elif defined(__GNUC__)
-TOOLSET=GCC __VERSION__
+#ifdef _NMAKE
+TOOL=NMake $(_NMAKE_VER)
+#else
+TOOL=GNU Make $(MAKE_VERSION)
 #endif
 
-tool: ; @echo $(TOOLSET)
+tool: ; @echo $(TOOL)
+
+#ifdef _MSC_VER
+BUILD=MSVC _MSC_FULL_VER
+#elif defined(__llmv__) || defined(__clang__)
+BUILD=LLVM __clang_version__
+#elif defined(__GNUC__)
+BUILD=GCC __VERSION__
+#endif
+
+build: ; @echo $(BUILD)
 

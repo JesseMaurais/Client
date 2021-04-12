@@ -18,6 +18,8 @@ namespace fwd
 		using tuple = std::tuple<vector<Columns>...>;
 		using index = std::make_index_sequence<std::tuple_size<tuple>::value>;
 
+		tuple table;
+		
 		template <size_t... Count>
 		auto data(std::index_sequence<Count...>) const
 		{
@@ -71,8 +73,6 @@ namespace fwd
 		{
 			(std::get<Count>(table).resize(n), ...);
 		}
-
-		tuple table;
 
 	public:
 
