@@ -9,10 +9,12 @@
 		[NMAKE]
 		MAKECONFIG=-D_NMAKE
 
-	and a bootstrapping Makefile written in the portable Makefile syntax
+	and/or a bootstrapping Makefile written in the portable Makefile syntax
 
 		MAKEFILE=.make
 		TEMPLATE=.make.cpp
+		# GNU line continuation \
+		MAKCONFIG=-D_NMAKE
 		all: $(MAKEFILE)
 			$(MAKE) -f $(MAKEFILE)
 		clean: $(MAKEFILE)
@@ -100,16 +102,16 @@ ifndef PCH
 PCH=std
 endif
 
-ifndef INCLUDE
-INCLUDE=$(HDRDIR)
+ifdef INCLUDE
+INCLUDE=$(INCLUDE)$(ENT)$(HDRDIR)
 else
-add(INCLUDE, $(ENT)$(HDRDIR))
+INCLUDE=$(HDRDIR)
 endif
 
-ifndef LIBPATH
-LIBPATH=$(OBJDIR)
+ifdef LIBPATH
+LIBPATH=$(LIBPATH)$(ENT)$(OBJDIR)
 else
-add(LIBPATH, $(ENT)$(OBJDIR))
+LIBPATH=$(OBJDIR)
 endif
 
 .SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
@@ -189,6 +191,7 @@ endif
 SRC=$(wildcard $(SRCDIR)*.$(SRCEXT))
 #endif
 
+#if 0 // experimental
 #ifdef _NMAKE
 MAKINC=$(MAKDIR)includes.$(MAKEXT)
 if((echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:;=";"%") do @echo -I"%~i"\>>$(MAKINC))
@@ -210,12 +213,13 @@ endif
 #else // GNU
 LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 #endif
+#else
+add(CFLAGS, -I$(HDRDIR))
+#endif
 
 //
 // Compiler
 //
-
-add(CFLAGS, -I$(HDRDIR))
 
 #ifdef _MSC_VER
 

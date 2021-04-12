@@ -137,7 +137,7 @@ namespace fwd
 	<
 		class Node, template <class> class Alloc = allocator
 	>
-	using graph = vector<pair<Node>, Alloc>;
+	using graph = std::vector<pair<Node>, Alloc<Node>>;
 
 	template
 	<
@@ -307,7 +307,7 @@ namespace fwd
 		,
 		class Container = vector<Type, Alloc>
 		,
-		class Pointer = as_ptr<typename Container>
+		class Pointer = as_ptr<Container>
 		,
 		class Size = typename Container::size_type
 		,
@@ -358,7 +358,7 @@ namespace fwd
 		,
 		class Container = basic_string<Char, Traits, Alloc>
 		,
-		class Pointer = as_ptr<typename Container>
+		class Pointer = as_ptr<Container>
 		,
 		class Size = typename Container::size_type
 		,
