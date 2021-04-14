@@ -20,7 +20,29 @@ namespace fmt
 
 	template
 	<
-		class Char, template <class> class Traits = fwd::character
+		class Type,
+		template <class> class Alloc = fwd::allocator,
+		template <class> class Order = fwd::order
+	>
+	struct struct_brief : memory_brief<Type>
+	{
+		using type   = Type;
+		using pair   = std::pair<const Type, Type>;
+		using init   = fwd::init<Type>;
+		using set    = fwd::set<Type, Order, Alloc>;
+		using map    = fwd::map<Type, Order, Alloc>;
+		using span   = fwd::span<Type>;
+		using vector = fwd::vector<Type, Alloc>;
+		using graph  = fwd::graph<Type, Alloc>;
+		using group  = fwd::group<Type, Order, Alloc>;
+		using edges  = fwd::edges<Type>;
+		using page   = fwd::page<Type, Alloc>;
+	};
+
+	template
+	<
+		class Char,
+		template <class> class Traits = fwd::character
 	>
 	struct stream_brief
 	{
@@ -31,27 +53,6 @@ namespace fmt
 		using buf  = memory_brief<fwd::basic_buf<Char, Traits>>;
 		using file = memory_brief<fwd::basic_file<Char, Traits>>;
 		using str  = memory_brief<fwd::basic_stringstream<Char, Traits>>;
-	};
-
-	template
-	<
-		class Type,
-		template <class> class Alloc = fwd::allocator,
-		template <class> class Order = fwd::order
-	>
-	struct struct_brief : memory_brief<Type>
-	{
-		using type   = Type;
-		using pair   = std::pair<Type, Type>;
-		using init   = fwd::init<Type>;
-		using set    = fwd::set<Type, Order, Alloc>;
-		using map    = fwd::map<Type, Order, Alloc>;
-		using span   = fwd::span<Type>;
-		using vector = fwd::vector<Type, Alloc>;
-		using graph  = fwd::graph<Type, Alloc>;
-		using group  = fwd::group<Type, Order, Alloc>;
-		using edges  = fwd::edges<Type>;
-		using page   = fwd::page<Type, Alloc>;
 	};
 
 	template
@@ -133,8 +134,8 @@ namespace fmt
 	using ustring = basic_string<wint_t>;
 
 	using string =
-	#ifdef _T
-		basic_string<_T>;
+	#ifdef TCHAR
+		basic_string<TCHAR>;
 	#else
 		basic_string<char>;
 	#endif
