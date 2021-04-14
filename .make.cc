@@ -49,18 +49,18 @@
 # define if(x) !if ![x]
 # define ifeq(x,y) !if #x==#y
 # define ifneq(x,y) !if #x!=#y
+# define ifexists(x) !if exists(x)
 # define error(x) !error x
 # define message(x) !message x
 # define add(x, y) x=$(x) y
-# define sh(x) %%x
 #else // GNU
 # define if(x) ifeq(0, $(shell x 1>$(NULL); echo $$?))
 # define ifeq(x,y) ifeq (x,y)
 # define ifneq(x,y) ifneq (x,y)
+# define ifexists(x) ifeq ($(wildcard x),)
 # define error(x) $(error x)
 # define message(x) $(message x)
 # define add(x, y) x+=y
-# define sh(x) $${x}
 #endif
 
 //
@@ -74,6 +74,17 @@ STD=c++latest
 STD=c++20
 #endif
 endif
+
+ifndef MAKEXT
+MAKEXT=.mak
+endif
+ifndef SRCEXT
+SRCEXT=.cpp
+endif
+ifndef HDREXT
+HDREXT=.hpp
+endif
+
 ifndef OBJDIR
 OBJDIR=object$(DIR)
 endif
@@ -89,18 +100,16 @@ endif
 ifndef DEPDIR
 DEPDIR=$(MAKDIR)
 endif
-ifndef MAKEXT
-MAKEXT=mak
-endif
-ifndef SRCEXT
-SRCEXT=cpp
-endif
-ifndef HDREXT
-HDREXT=hpp
-endif
+
 ifndef PCH
+ifexists($(SRCDIR)std$(HDREXT))
 PCH=std
-endif
+else
+ifexists($(SRCDIR)stdafx$(HDREXT))
+PCH=stdafx
+endif // AFX
+endif // STD
+endif // PCH
 
 ifdef INCLUDE
 INCLUDE=$(INCLUDE)$(ENT)$(HDRDIR)
@@ -114,8 +123,6 @@ else
 LIBPATH=$(OBJDIR)
 endif
 
-.SUFFIXES: .$(SRCEXT) .$(HDREXT) .$(MAKEXT)
-
 //
 // Operating System
 //
@@ -125,7 +132,7 @@ add(CFLAGS, -D_WIN32)
 ifdef WINVER
 add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
 endif
-OUTEXT=exe
+EXEEXT=.exe
 DIR=\ //
 ENT=;
 else // POSIX
@@ -133,8 +140,7 @@ add(CFLAGS, -D_POSIX_SOURCE)
 ifdef UNIVER
 add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
-add(LDFLAGS, -ldl -pthread)
-OUTEXT=out
+EXEEXT=.out
 DIR=/
 ENT=:
 endif
@@ -171,35 +177,32 @@ endif
 // Input Sources
 //
 
-#define source(x) $(SRCDIR)x.$(SRCEXT)
-#define header(x) $(HDRDIR)x.$(HDREXT)
-#define object(x) $(OBJDIR)x.$(OBJEXT)
-
 #ifdef _NMAKE
-MAKHDR=$(MAKDIR)header.$(MAKEXT)
-if((echo HDR=\>$(MAKHDR)) && for %i in (header(*)) do @echo %i\>>$(MAKHDR))
+MAKHDR=$(MAKDIR)header$(MAKEXT)
+if((echo HDR=\>$(MAKHDR)) && for %i in ($(HDRDIR)*$(HDREXT)) do @echo %i\>>$(MAKHDR))
 include $(MAKHDR)
 else
 error(Cannot locate header files)
 endif
 #else // GNU
-HDR=$(wildcard $(HDRDIR)*.$(HDREXT))
+HDR=$(wildcard $(HDRDIR)*$(HDREXT))
 #endif
 
 #ifdef _NMAKE
-MAKSRC=$(MAKDIR)source.$(MAKEXT)
-if((echo SRC=\>$(MAKSRC)) && for %i in (source(*)) do @echo %i\>>$(MAKSRC))
+MAKSRC=$(MAKDIR)source$(MAKEXT)
+if((echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*$(SRCEXT))) do @echo %i\>>$(MAKSRC))
 include $(MAKSRC)
 else
 error(Cannot locate source files)
 endif
 #else // GNU
-SRC=$(wildcard $(SRCDIR)*.$(SRCEXT))
+SRC=$(wildcard $(SRCDIR)*$(SRCEXT))
 #endif
 
-#if 0 // experimental
+#ifndef _MSC_VER
+
 #ifdef _NMAKE
-MAKINC=$(MAKDIR)includes.$(MAKEXT)
+MAKINC=$(MAKDIR)includes$(MAKEXT)
 if((echo INC=\>$(MAKINC)) && for %i in ("%INCLUDE:;=";"%") do @echo -I"%~i"\>>$(MAKINC))
 include $(MAKINC)
 else
@@ -208,9 +211,10 @@ endif
 #else // GNU
 INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
 #endif
+add(HEAD, $(INC))
 
 #ifdef _NMAKE
-MAKLIB=$(MAKDIR)library.$(MAKEXT)
+MAKLIB=$(MAKDIR)library$(MAKEXT)
 if((echo LIB=\>$(MAKLIB)) && for %i in ("%LIBPATH:;=";"%") do @echo -L"%~i"\>>$(MAKLIB))
 include $(MAKLIB)
 else
@@ -219,136 +223,47 @@ endif
 #else // GNU
 LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 #endif
+add(LINK, $(LIB))
 
-#else
-add(CFLAGS, -I$(HDRDIR))
-#endif
-
-//
-// Compiler Options
-//
-
-#ifdef _MSC_VER
-
-OBJEXT=obj
-DEPEXT=dep
-INLEXT=inl
-LIBEXT=lib
-PCHEXT=pch
-
-ifdef STD
-add(CFLAGS, -std:$(STD))
-endif
-
-add(CFLAGS, -nologo -EHsc -permissive- -DNOMINMAX)
-add(LDFLAGS, -nologo)
-
-ifndef NDEBUG
-add(WARN, -Z7 -W4 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
-add(LDFLAGS, -Z7)
-endif
-
-ifdef PCH
-PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
-PCHSRC=$(SRCDIR)$(PCH).$(SRCEXT)
-PCHOBJ=$(OBJDIR)$(PCH).$(OBJEXT)
-PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
-add(HEADER, -Yu$(PCH).$(HDREXT) -FI$(PCH).$(HDREXT) -Fp$(PCHOUT))
-add(LDFLAGS, -Yu$(PCH).$(HDREXT))
-$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -Yc$(PCH).$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ) -Fp$(PCHOUT)
-endif
-
-CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -Fo$(OBJDIR)
-LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -Fe$@
-LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
-
-#ifdef _NMAKE
-ifdef COMSPEC
-{$(SRCDIR)}.$(SRCEXT){$(DEPDIR)}.$(DEPEXT):
-	@echo $< : \> $@
-	@set CMD=$(CXX) $(CFLAGS) -showIncludes -w -P -Fi"NUL" -c $<
-	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
-endif
-#endif
-
-#elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
-
-OBJEXT=o
-DEPEXT=d
-INLEXT=i
-LIBEXT=a
-PCHEXT=gch
-
-ifdef STD
-add(CFLAGS, -std=$(STD))
-endif
-
-add(CFLAGS, -MP -MMD)
-add(LDFLAGS, -rdynamic)
-
-#if defined(__llvm__) || defined(__clang__)
-add(CFLAGS, -stdlib=libc++)
-add(LDFLAGS, -lc++ -lc++abi)
-#endif
-
-ifndef NDEBUG
-add(WARN, -Wall -Wextra -Wpedantic -g)
-endif
-
-ifdef PCH
-PCHHDR=$(SRCDIR)$(PCH).$(HDREXT)
-PCHOUT=$(OBJDIR)$(PCH).$(PCHEXT)
-add(HEADER, -include $(PCHHDR))
-$(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -c $< -o $@
-endif
-
-CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEADER) -c $< -o $@
-LNKCMD=$(CXX) $(LDFLAGS) $(OBJ) -o $@
-LNKDEP=$(PCHOUT) $(OBJ)
-
-#else
-#error Cannot determine your compiler
-#endif
+#endif//_MSC_VER
 
 //
 // Output Objects
 //
 
-.SUFFIXES: .$(OUTEXT) .$(OBJEXT) .$(DEPEXT) .$(LIBEXT) .$(INLEXT) .$(PCHEXT)
-
 #ifdef _NMAKE
-MAKEXE=$(MAKDIR)target.$(MAKEXT)
-if((echo EXE=\>$(MAKEXE)) && for /f %I in ('findstr /s /m "\<main\>" *.$(SRCEXT)') do @echo %~nI.$(OUTEXT)\>>$(MAKEXE))
+MAKEXE=$(MAKDIR)target$(MAKEXT)
+if((echo EXE=\>$(MAKEXE)) && for /f %I in ('findstr /s /m "\<main\>" *$(SRCEXT)') do @echo %~nI$(EXEEXT)\>>$(MAKEXE))
 include $(MAKEXE)
 else
 error(Cannot find program main)
 endif
 #else // GNU
-EXE=$(addsuffix .$(OUTEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
+EXE=$(addsuffix $(EXEEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
 #endif
 
 #ifdef _NMAKE
-MAKOBJ=$(MAKDIR)object.$(MAKEXT)
-if((echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI.$(OBJEXT)\>>$(MAKOBJ))
+MAKOBJ=$(MAKDIR)object$(MAKEXT)
+if((echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI$(OBJEXT)\>>$(MAKOBJ))
 include $(MAKOBJ)
 else
 error(Cannot name object files)
 endif
 #else // GNU
-OBJ=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(OBJEXT), $(SRC))
+OBJ=$(patsubst $(SRCDIR)%$(SRCEXT), $(OBJDIR)%$(OBJEXT), $(SRC))
 #endif
 
 #ifdef _NMAKE
-MAKDEP=$(MAKDIR)depend.$(MAKEXT)
-if((echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI.$(DEPEXT)\>>$(MAKDEP))
+MAKDEP=$(MAKDIR)depend$(MAKEXT)
+if((echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI$(DEPEXT)\>>$(MAKDEP))
 include $(MAKDEP)
 endif
 #else // GNU
-DEP=$(patsubst $(SRCDIR)%.$(SRCEXT), $(OBJDIR)%.$(DEPEXT), $(SRC))
+DEP=$(patsubst $(SRCDIR)%$(SRCEXT), $(OBJDIR)%$(DEPEXT), $(SRC))
 #endif
 
 #ifdef _NMAKE
-ALLDEP=$(MAKDIR)all.$(MAKEXT)
+ALLDEP=$(MAKDIR)all$(MAKEXT)
 if((echo. >$(ALLDEP)) && for %I in ($(DEP)) do @if exist "%I" @echo include %I >> $(ALLDEP))
 include $(ALLDEP)
 endif
@@ -357,21 +272,112 @@ endif
 #endif
 
 //
-// Targets
+// Compiler Options
 //
+
+#ifdef _MSC_VER
+
+OBJEXT=.obj
+DEPEXT=.dep
+INLEXT=.inl
+LIBEXT=.lib
+PCHEXT=.pch
+DBGEXT=.pdb
+
+ifdef STD
+add(CFLAGS, -std:$(STD))
+endif
+
+add(CFLAGS, -nologo -EHsc -permissive- -DNOMINMAX)
+
+ifndef NDEBUG
+add(WARN, -Z7 -W4 -D_DEBUG -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
+add(LINK, -Z7)
+endif
+
+ifdef PCH
+PCHHDR=$(SRCDIR)$(PCH)$(HDREXT)
+PCHSRC=$(SRCDIR)$(PCH)$(SRCEXT)
+PCHOBJ=$(OBJDIR)$(PCH)$(OBJEXT)
+PCHOUT=$(OBJDIR)$(PCH)$(PCHEXT)
+add(HEAD, -Yu$(PCH)$(HDREXT) -FI$(PCH)$(HDREXT) -Fp$(PCHOUT))
+add(LINK, -Yu$(PCH)$(HDREXT))
+$(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -Yc$(PCH)$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ) -Fp$(PCHOUT)
+endif
+
+CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEAD) -c $< -Fo$(OBJDIR)
+LNKCMD=$(CXX) $(CFLAGS) $(LINK) $(OBJ) -Fe$@
+LNKDEP=$(PCHOBJ) $(OBJ) $(DEP)
+
+#ifdef _NMAKE // make *.dep files
+ifdef COMSPEC
+{$(SRCDIR)}$(SRCEXT){$(DEPDIR)}$(DEPEXT):
+	@echo $< : \> $@
+	@set CMD=$(CXX) $(CFLAGS) -showIncludes -w -P -Fi"NUL" -c $<
+	@for /F "tokens=1,2,3,*" %%A in ('%CMD% 2^>^&1') do @if not "%%D"=="" @echo "%%D" \>> $@
+endif
+#endif
+
+#elif defined(__GNUC__) || defined(__llvm__) || defined(__clang__)
+
+OBJEXT=.o
+DEPEXT=.d
+INLEXT=.i
+LIBEXT=.a
+PCHEXT=.gch
+DBGEXT=.debug
+EXPEXT=.exp
+ILKEXT=.ilk
+
+ifdef STD
+add(CFLAGS, -std=$(STD))
+endif
+
+add(CFLAGS, -MP -MMD)
+add(LINK, -rdynamic)
+
+#if defined(__llvm__) || defined(__clang__)
+add(CFLAGS, -stdlib=libc++)
+add(LINK, -lc++ -lc++abi)
+#endif
+
+ifndef NDEBUG
+add(WARN, -D_DEBUG -Wall -Wextra -Wpedantic -g)
+endif
+
+ifdef PCH
+PCHHDR=$(SRCDIR)$(PCH)$(HDREXT)
+PCHOUT=$(OBJDIR)$(PCH)$(PCHEXT)
+add(HEAD, -include $(PCHHDR))
+$(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -c $< -o $@
+endif
+
+CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEAD) -c $< -o $@
+LNKCMD=$(CXX) $(CFLAGS) $(LINK) $(OBJ) -o $@
+LNKDEP=$(PCHOUT) $(OBJ)
+
+#else
+#error Cannot determine your compiler
+#endif
+
+//
+// Build Targets
+//
+
+.SUFFIXES: $(SRCEXT) $(HDREXT) $(DEPEXT) $(MAKEXT) $(PCHEXT) $(OBJEXT) $(EXEEXT) $(LIBEXT) $(INLEXT) $(DBGEXT) $(EXPEXT) $(ILKEXT)
 
 all: $(EXE)
 help: ; $(SHOW) Readme
 clean: ; $(REMOVE) $(OBJ) $(EXE) $(DEP) $(PCHOUT) $(PCHOBJ)
-cflags: ; @echo $(CFLAGS) $(WARN) $(HEADER) > compile_flags.txt
+cflags: ; @echo $(CFLAGS) $(WARN) $(HEAD) > compile_flags.txt
 ctags: ; ctags $(SRC) $(HDR)
 info: build tool lang time shell;
 
 $(EXE): $(LNKDEP); $(LNKCMD)
 #ifdef _NMAKE
-{$(SRCDIR)}.$(SRCEXT){$(OBJDIR)}.$(OBJEXT):: ; $(CXXCMD)
+{$(SRCDIR)}$(SRCEXT){$(OBJDIR)}$(OBJEXT):: ; $(CXXCMD)
 #else // GNU
-$(OBJDIR)%.$(OBJEXT): $(SRCDIR)%.$(SRCEXT); $(CXXCMD)
+$(OBJDIR)%$(OBJEXT): $(SRCDIR)%$(SRCEXT); $(CXXCMD)
 #endif
 
 //
