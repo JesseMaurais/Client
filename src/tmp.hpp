@@ -94,6 +94,24 @@ namespace fwd
 
 	template <class... Q> constexpr auto never = [](Q...) { return false; };
 	template <class... Q> constexpr auto always = [](Q...) { return true; };
+
+	template
+	<
+		class T, template <class> class U = std::less
+	>
+	predicate<T> order(T right)
+	{
+		return [right](T left)
+		{
+			static U const order;
+			return order(left, right);
+		};
+	}
+
+	template <class T> inline auto bound(T begin, T end)
+	{
+		return not order(begin) and order(end);
+	}
 }
 
 #endif // file
