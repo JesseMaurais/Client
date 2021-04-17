@@ -57,11 +57,61 @@
 # define if(x) ifeq(0, $(shell x 1>$(NULL); echo $$?))
 # define ifeq(x,y) ifeq (x,y)
 # define ifneq(x,y) ifneq (x,y)
-# define ifexists(x) ifeq ($(wildcard x),)
+# define ifexists(x) ifneq ($(wildcard x),)
 # define error(x) $(error x)
 # define message(x) $(message x)
 # define add(x, y) x+=y
 #endif
+
+//
+// Operating System
+//
+
+ifeq($(OS), Windows_NT)
+add(CFLAGS, -D_WIN32)
+ifdef WINVER
+add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
+endif
+EXEEXT=.exe
+DIR=\ //
+ENT=;
+else // POSIX
+add(CFLAGS, -D_POSIX_SOURCE)
+ifdef UNIVER
+add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
+endif
+EXEEXT=.out
+DIR=/
+ENT=:
+endif
+
+//
+// Command Line
+//
+
+ifdef COMSPEC
+CMD=$(COMSPEC)
+NULL=nul
+WHERE=where
+LIST=dir /b
+SHOW=type
+COPY=copy
+MOVE=move
+REMOVE=del /f
+MKDIR=md
+MKTEMP=mktemp
+else
+CMD=$(SHELL)
+NULL=/dev/null
+WHERE=which -a
+LIST=ls
+SHOW=cat
+COPY=cp
+MOVE=mv
+REMOVE=rm -f
+MKDIR=mkdir -p
+MKTEMP=mktemp
+endif
 
 //
 // Project Layout
@@ -124,56 +174,6 @@ LIBPATH=$(OBJDIR)
 endif
 
 //
-// Operating System
-//
-
-ifeq($(OS), Windows_NT)
-add(CFLAGS, -D_WIN32)
-ifdef WINVER
-add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
-endif
-EXEEXT=.exe
-DIR=\ //
-ENT=;
-else // POSIX
-add(CFLAGS, -D_POSIX_SOURCE)
-ifdef UNIVER
-add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
-endif
-EXEEXT=.out
-DIR=/
-ENT=:
-endif
-
-//
-// Command Line
-//
-
-ifdef COMSPEC
-CMD=$(COMSPEC)
-NULL=nul
-WHERE=where
-LIST=dir /b
-SHOW=type
-COPY=copy
-MOVE=move
-REMOVE=del /f
-MKDIR=md
-MKTEMP=mktemp
-else
-CMD=$(SHELL)
-NULL=/dev/null
-WHERE=which -a
-LIST=ls
-SHOW=cat
-COPY=cp
-MOVE=mv
-REMOVE=rm -f
-MKDIR=mkdir -p
-MKTEMP=mktemp
-endif
-
-//
 // Input Sources
 //
 
@@ -190,7 +190,7 @@ HDR=$(wildcard $(HDRDIR)*$(HDREXT))
 
 #ifdef _NMAKE
 MAKSRC=$(MAKDIR)source$(MAKEXT)
-if((echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*$(SRCEXT))) do @echo %i\>>$(MAKSRC))
+if((echo SRC=\>$(MAKSRC)) && for %i in ($(SRCDIR)*$(SRCEXT)) do @echo %i\>>$(MAKSRC))
 include $(MAKSRC)
 else
 error(Cannot locate source files)
@@ -228,50 +228,6 @@ add(LINK, $(LIB))
 #endif//_MSC_VER
 
 //
-// Output Objects
-//
-
-#ifdef _NMAKE
-MAKEXE=$(MAKDIR)target$(MAKEXT)
-if((echo EXE=\>$(MAKEXE)) && for /f %I in ('findstr /s /m "\<main\>" *$(SRCEXT)') do @echo %~nI$(EXEEXT)\>>$(MAKEXE))
-include $(MAKEXE)
-else
-error(Cannot find program main)
-endif
-#else // GNU
-EXE=$(addsuffix $(EXEEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
-#endif
-
-#ifdef _NMAKE
-MAKOBJ=$(MAKDIR)object$(MAKEXT)
-if((echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI$(OBJEXT)\>>$(MAKOBJ))
-include $(MAKOBJ)
-else
-error(Cannot name object files)
-endif
-#else // GNU
-OBJ=$(patsubst $(SRCDIR)%$(SRCEXT), $(OBJDIR)%$(OBJEXT), $(SRC))
-#endif
-
-#ifdef _NMAKE
-MAKDEP=$(MAKDIR)depend$(MAKEXT)
-if((echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI$(DEPEXT)\>>$(MAKDEP))
-include $(MAKDEP)
-endif
-#else // GNU
-DEP=$(patsubst $(SRCDIR)%$(SRCEXT), $(OBJDIR)%$(DEPEXT), $(SRC))
-#endif
-
-#ifdef _NMAKE
-ALLDEP=$(MAKDIR)all$(MAKEXT)
-if((echo. >$(ALLDEP)) && for %I in ($(DEP)) do @if exist "%I" @echo include %I >> $(ALLDEP))
-include $(ALLDEP)
-endif
-#else // GNU
--include $(DEP)
-#endif
-
-//
 // Compiler Options
 //
 
@@ -291,8 +247,8 @@ endif
 add(CFLAGS, -nologo -EHsc -permissive- -DNOMINMAX)
 
 ifndef NDEBUG
-add(WARN, -Z7 -W4 -D_DEBUG -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
-add(LINK, -Z7)
+add(CFLAGS, -Z7)
+add(WARN, -W4 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 endif
 
 ifdef PCH
@@ -342,7 +298,7 @@ add(LINK, -lc++ -lc++abi)
 #endif
 
 ifndef NDEBUG
-add(WARN, -D_DEBUG -Wall -Wextra -Wpedantic -g)
+add(WARN, -Wall -Wextra -Wpedantic -g)
 endif
 
 ifdef PCH
@@ -358,6 +314,50 @@ LNKDEP=$(PCHOUT) $(OBJ)
 
 #else
 #error Cannot determine your compiler
+#endif
+
+//
+// Output Objects
+//
+
+#ifdef _NMAKE
+MAKEXE=$(MAKDIR)target$(MAKEXT)
+if((echo EXE=\>$(MAKEXE)) && for /f %I in ('findstr /s /m "\<main\>" *$(SRCEXT)') do @echo %~nI$(EXEEXT)\>>$(MAKEXE))
+include $(MAKEXE)
+else
+error(Cannot find program main)
+endif
+#else // GNU
+EXE=$(addsuffix $(EXEEXT), $(basename $(notdir $(shell grep -l --color=never "\bmain\b" $(SRC)))))
+#endif
+
+#ifdef _NMAKE
+MAKOBJ=$(MAKDIR)object$(MAKEXT)
+if((echo OBJ=\>$(MAKOBJ)) && for %I in ($(SRC)) do @echo $(OBJDIR)%~nI$(OBJEXT)\>>$(MAKOBJ))
+include $(MAKOBJ)
+else
+error(Cannot name object files)
+endif
+#else // GNU
+OBJ=$(patsubst $(SRCDIR)%$(SRCEXT), $(OBJDIR)%$(OBJEXT), $(SRC))
+#endif
+
+#ifdef _NMAKE
+MAKDEP=$(MAKDIR)depend$(MAKEXT)
+if((echo DEP=\>$(MAKDEP)) && for %I in ($(SRC)) do @echo $(DEPDIR)%~nI$(DEPEXT)\>>$(MAKDEP))
+include $(MAKDEP)
+endif
+#else // GNU
+DEP=$(patsubst $(SRCDIR)%$(SRCEXT), $(OBJDIR)%$(DEPEXT), $(SRC))
+#endif
+
+#ifdef _NMAKE
+ALLDEP=$(MAKDIR)all$(MAKEXT)
+if((echo. >$(ALLDEP)) && for %I in ($(DEP)) do @if exist "%I" @echo include %I >> $(ALLDEP))
+include $(ALLDEP)
+endif
+#else // GNU
+-include $(DEP)
 #endif
 
 //
