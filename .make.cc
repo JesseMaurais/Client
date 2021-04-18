@@ -72,6 +72,7 @@ add(CFLAGS, -D_WIN32)
 ifdef WINVER
 add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
 endif
+add(LOAD, ole32 shell32)
 EXEEXT=.exe
 DIR=\ //
 ENT=;
@@ -80,6 +81,7 @@ add(CFLAGS, -D_POSIX_SOURCE)
 ifdef UNIVER
 add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
+add(LOAD, rt dl pthread)
 EXEEXT=.out
 DIR=/
 ENT=:
@@ -211,10 +213,9 @@ endif
 #else // GNU
 INC=$(addprefix -I, "$(INCLUDE:$(ENT)=" ")")
 #endif
-add(HEAD, $(INC))
 
 #ifdef _NMAKE
-MAKLIB=$(MAKDIR)library$(MAKEXT)
+MAKLIB=$(MAKDIR)libpath$(MAKEXT)
 if((echo LIB=\>$(MAKLIB)) && for %i in ("%LIBPATH:;=";"%") do @echo -L"%~i"\>>$(MAKLIB))
 include $(MAKLIB)
 else
@@ -223,7 +224,17 @@ endif
 #else // GNU
 LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 #endif
-add(LINK, $(LIB))
+
+#ifdef _NMAKE
+MAKLNK=$(MAKDIR)ldflags$(MAKEXT)
+if((echo LNK=\>$(MAKLNK)) && for %i in ("%LOAD%") do @echo -l"%~i"\>>$(MAKLNK))
+inlude $(MAKLIB)
+else
+error(Cannot parse link libraries)
+endif
+#else
+LINK=$(addprefix -l, $(LOAD))
+#endif
 
 #endif//_MSC_VER
 
@@ -305,11 +316,11 @@ ifdef PCH
 PCHHDR=$(SRCDIR)$(PCH)$(HDREXT)
 PCHOUT=$(OBJDIR)$(PCH)$(PCHEXT)
 add(HEAD, -include $(PCHHDR))
-$(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -c $< -o $@
+$(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) $(INC) -c $< -o $@
 endif
 
-CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(HEAD) -c $< -o $@
-LNKCMD=$(CXX) $(CFLAGS) $(LINK) $(OBJ) -o $@
+CXXCMD=$(CXX) $(CFLAGS) $(WARN) $(INC) $(HEAD) -c $< -o $@
+LNKCMD=$(CXX) $(CFLAGS) $(LINK) $(LIB) $(OBJ) -o $@
 LNKDEP=$(PCHOUT) $(OBJ)
 
 #else
