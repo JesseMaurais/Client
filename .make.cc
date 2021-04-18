@@ -91,7 +91,7 @@ endif
 // Command Line
 //
 
-ifdef COMSPEC
+ifdef COMSPEC	
 CMD=$(COMSPEC)
 NULL=nul
 WHERE=where

@@ -195,6 +195,8 @@ namespace
 
 template class doc::instance<dumb>;
 template <> fmt::string::view doc::name<&dumb::i> = "i";
+template <> fmt::string::view doc::name<&dumb::f> = "f";
+template <> fmt::string::view doc::name<&dumb::s> = "s";
 
 test_unit(doc)
 {

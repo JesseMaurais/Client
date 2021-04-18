@@ -20,8 +20,8 @@
 #	else
 #		define breakpoint() raise(SIGTRAP)
 #	endif
-#	define assert(...) if (not(__VA_ARGS__)) breakpoint(), sys::warn(here, #__VA_ARGS__)
-#	define alert(...) if (bool(__VA_ARGS__)) breakpoint(), sys::err(here, #__VA_ARGS__)
+#	define assert(...) if (not(__VA_ARGS__)) sys::warn(here, #__VA_ARGS__)
+#	define alert(...) if (bool(__VA_ARGS__)) sys::err(here, #__VA_ARGS__)
 #	define trace(...) sys::warn(here, #__VA_ARGS__)
 #	define verify(...) assert(__VA_ARGS__)
 #else
