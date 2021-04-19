@@ -4,6 +4,7 @@
 #include "uni.hpp"
 #include "err.hpp"
 #include "ptr.hpp"
+#include "msg.hpp"
 #include <time.h>
 #include <mqueue.h>
 #include <signal.h>
@@ -16,14 +17,11 @@ namespace sys::uni::sig
 	{
 		sigset_t buf[1];
 
-		bool empty()
+		bool member(int signo) const
 		{
-			return fail(sigemptyset(buf)) and sys::err(here);
-		}
-
-		bool fill()
-		{
-			return fail(sigfillset(buf)) and sys::err(here);
+			const int no = sigismember(buf, signo);
+			if (fail(no)) sys::err(here);
+			return no;
 		}
 
 		bool add(int signo)
@@ -36,21 +34,54 @@ namespace sys::uni::sig
 			return fail(sigdelset(buf, signo)) and sys::err(here);
 		}
 
-		bool member(int signo) const
+		bool empty()
 		{
-			const int no = sigismember(buf, signo);
-			if (fail(no)) sys::err(here);
-			return no;
+			return fail(sigemptyset(buf)) and sys::err(here);
+		}
+
+		bool fill()
+		{
+			return fail(sigfillset(buf)) and sys::err(here);
+		}
+
+		bool pending()
+		{
+			return fail(sigpending(buf)) and sys::err(here);
+		}
+
+		bool suspend() const
+		{
+			return fail(sigsuspend(buf)) and sys::err(here);
+		}
+
+		bool wait(int* signo) const
+		{
+			return fail(sigwait(buf, signo)) and sys::err(here);
+		}
+
+		bool wait(siginfo_t* info = nullptr) const
+		{
+			return fail(sigwaitinfo(buf, info)) and sys::err(here);
+		}
+
+		bool procmask(int how, sigset_t* old = nullptr) const
+		{
+			return fail(sigprocmask(how, buf, old)) and sys::err(here);
+		}
+
+		bool threadmask(int how, sigset_t* old = nullptr) const
+		{
+			return fail(pthread_sigmask(how, buf, old)) and sys::err(here);
 		}
 	};
 
 	struct event : fwd::unique, sigevent
 	{
-		using function = std::function<void()>;
+		using doc::function;
 
 		event(function f, pthread_attr_t* attr = nullptr) : work(f)
 		{
-			sigev_value.sival_ptr = this;
+			sigev_value.sival_int = doc::socket().emplace(f);
 			sigev_notify = SIGEV_THREAD;
 			sigev_notify_function = thread;
 			sigev_notify_attributes = attr;
@@ -58,12 +89,9 @@ namespace sys::uni::sig
 
 	private:
 
-		function work;
-
 		static void thread(sigval sigev_value)
 		{
-			auto that = fwd::cast_as<event>(sigev_value.sival_ptr);
-			if (that) that->work();
+			doc::signal(sigev_value.sival_int);
 		}
 	};
 }

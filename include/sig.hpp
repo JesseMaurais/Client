@@ -8,30 +8,23 @@
 #include "ptr.hpp"
 #include "fmt.hpp"
 
-namespace sig
+namespace fwd::sig
 {
-	template 
-	<
-		typename Slot, typename... Args
-	> 
-	class socket : fwd::unique
+	template <class Slot, class... Args> struct socket : fwd::unique
 	{
-	public:
-
-		using signature = void(Args...);
-		using observer = std::function<signature>;
-		using container = std::map<Slot, observer>;
+		using function = std::function<void(Args...)>;
+		using container = std::map<Slot, function>;
 		using size_type = typename container::size_type;
 
 		size_type const invalid = ~size_type(0);
 
-		auto connect(Slot const& id, observer ob)
+		auto connect(Slot id, observer ob)
 		{
 			slots.emplace(id, ob);
 			return slots.size();
 		}
 
-		auto disconnect(Slot const &id)
+		auto disconnect(Slot id)
 		{
 			return slots.erase(id);
 		}
@@ -43,7 +36,7 @@ namespace sig
 			return sz;
 		}
 
-		size_type find(Slot const &id) const
+		size_type find(Slot id) const
 		{
 			auto const it = slots.find(id);
 			auto const begin = slots.begin();
@@ -63,9 +56,9 @@ namespace sig
 		}
 
 		template <typename Filter>
-		void raise(Slot const &id, Filter &&filter) const
+		void raise(Slot id, Filter &&filter) const
 		{
-			const auto pair = slots.equal_range(id);
+			auto const pair = slots.equal_range(id);
 			for_each(pair.first, pair.second, filter);
 		}
 

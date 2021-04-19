@@ -232,19 +232,19 @@ test_unit(doc)
 
 test_unit(ini)
 {
-	auto const path = fmt::dir::join({env::pwd(), ".ini"});
-	std::fstream file(path);
-	doc::ini init;
-	file >> init;
-
 	// Data from file
-	{
+	/*{
+		auto const path = fmt::dir::join({env::pwd(), ".ini"});
+		std::fstream file(path);
+		doc::ini init;
+		file >> init;
+
 		auto const group = fmt::set("NMAKE");
 		auto const key = fmt::set("MAKECONFIG");
 		auto const value = init.get({group, key});
 		assert(not empty(value));
 		assert(value.find("/D_NMAKE") != fmt::npos);
-	}
+	}*/
 
 	// Data at runtime
 	{
