@@ -5,6 +5,7 @@
 #include "err.hpp"
 #include "ptr.hpp"
 #include "msg.hpp"
+#include "fs.hpp"
 #include <time.h>
 #include <mqueue.h>
 #include <signal.h>
@@ -17,21 +18,38 @@ namespace sys::uni::sig
 	{
 		sigset_t buf[1];
 
-		bool member(int signo) const
+		set()
 		{
-			const int no = sigismember(buf, signo);
+			fill();
+		}
+
+		set(std::span<int> list)
+		{
+			empty();
+			for (int n : list) add(n);
+		}
+
+		set(std::initialize_list<int> list)
+		{
+			empty();
+			for (int n : list) add(n);
+		}
+
+		bool member(int n) const
+		{
+			const int no = sigismember(buf, n);
 			if (fail(no)) sys::err(here);
 			return no;
 		}
 
-		bool add(int signo)
+		bool add(int n)
 		{
-			return fail(sigaddset(buf, signo)) and sys::err(here);
+			return fail(sigaddset(buf, n)) and sys::err(here);
 		}
 
-		bool del(int signo)
+		bool del(int n)
 		{
-			return fail(sigdelset(buf, signo)) and sys::err(here);
+			return fail(sigdelset(buf, n)) and sys::err(here);
 		}
 
 		bool empty()
@@ -54,9 +72,9 @@ namespace sys::uni::sig
 			return fail(sigsuspend(buf)) and sys::err(here);
 		}
 
-		bool wait(int* signo) const
+		bool wait(int* n) const
 		{
-			return fail(sigwait(buf, signo)) and sys::err(here);
+			return fail(sigwait(buf, n)) and sys::err(here);
 		}
 
 		bool wait(siginfo_t* info = nullptr) const
@@ -79,9 +97,9 @@ namespace sys::uni::sig
 	{
 		using doc::function;
 
-		event(function f, pthread_attr_t* attr = nullptr) : work(f)
+		event(function f, pthread_attr_t* attr = nullptr)
 		{
-			sigev_value.sival_int = doc::socket(f);
+			sigev_value.sival_int = doc::socket().open(f);
 			sigev_notify = SIGEV_THREAD;
 			sigev_notify_function = thread;
 			sigev_notify_attributes = attr;
@@ -95,39 +113,59 @@ namespace sys::uni::sig
 		}
 	};
 
-	struct action : fwd::unique, fwd::zero<sigaction>
+	struct action : fwd::unique, sigaction
 	{
-		using act = fwd::as_ptr<sigaction>;
-		using set = fwd::as_ptr<sigset_t>;
-		using info = fwd::as_ptr<siginfo_t>;
-		using context = fwd::as_ptr<void>;
-		using event::function;
-
 		action(int flags, set mask)
 		{
 			sa_sigaction = queue;
 			sa_flags = SA_SIGINFO | flags;
-			sa_mask = *mask;
+			sa_mask = mask.buf[0];
 		}
 
-		bool set(int no, act prev = nullptr) const
+		bool set(int n, sigaction* prev = nullptr) const
 		{
-			return fail(sigaction(no, this, prev)) and err(here);
+			return fail(sigaction(n, this, prev)) and err(here);
 		}
 
-		bool get(int no, act next = nullptr)
+		bool get(int n, sigaction* next = nullptr)
 		{
-			return fail(sigaction(no, next, this)) and err(here);
+			return fail(sigaction(n, next, this)) and err(here);
+		}
+
+		static bool queue(int n, int fd = 0, pid_t pid = getpid())
+		{
+			sigval value;
+			value.sival_int = fd;
+			return fail(sigqueue(pid, n, value)) and err(here);
 		}
 
 	private:
 
-		static void queue(int no, info that, context user)
+		static auto strcode(int code)
 		{
-			#ifdef assert
-			assert(SI_QUEUE == that->si_code);
-			#endif
-			doc::signal(that->sival.sival_int);
+			switch (code)
+			{
+				default:
+					return "Unknown";
+				case ILL_ILLOPC:
+					return "Illegal opcode";
+			}
+		}
+
+		static void queue(int n, siginfo_t* info, void* user)
+		{
+			fmt::ofdstream fd;
+			fd.set(info->sival.sival_int):
+			inline auto tab = fmt::assign;
+			inline auto eol = fmt::eol;
+			fd
+				<< "signo" << tab << strsignal(info->si_signo) << eol
+				<< "errno" << tab << strerror(info->si_errno) << eol
+				<< "code" << tab << strcode(info->si_code) << eol
+				<< "status" << tab << info->si_status << eol
+				<< "pid" << tab << info->si_pid << eol
+				<< "uid" << tab << info->si_uid << eol
+				<< "addr" << tab << info->si_addr << eol;
 		}
 	};
 }

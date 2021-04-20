@@ -10,9 +10,9 @@ namespace sys::uni::aio
 	{
 		using function = sig::event::function;
 
-		event(function f, auto attr = thread_ptr) : work(f)
+		event(function f, pthread_attr_t* attr = nullptr) : work(f)
 		{
-			aio_sigevent.sigev_value.sival_int = doc::socket().emplace(f);
+			aio_sigevent.sigev_value.sival_int = doc::socket(f);
 			aio_sigevent.sigev_notify = SIGEV_THREAD;
 			aio_sigevent.sigev_notify_function - thread;
 			aio_sigevent.sigev_notify_attributes = attr;
@@ -20,7 +20,7 @@ namespace sys::uni::aio
 
 		~event()
 		{
-			doc::socket().free(aio_sigevent.sigev_value.sival_int);
+			doc::unsocket(aio_sigevent.sigev_value.sival_int);
 		}
 
 		bool read()

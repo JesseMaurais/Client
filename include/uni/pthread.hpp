@@ -6,6 +6,7 @@
 #include "ptr.hpp"
 #include "err.hpp"
 #include "tmp.hpp"
+#include "aio.hpp"
 #include "signal.hpp"
 #include "mqueue.hpp"
 
@@ -66,6 +67,11 @@ namespace sys::uni
 		auto timer(sig::event::function f, clockid_t clock = CLOCK_REALTIME)
 		{
 			return time::event(f, clock, buf);
+		}
+
+		auto file(sig::event::function f)
+		{
+			return aio::event(f, buf);
 		}
 
 		thread()
