@@ -42,14 +42,14 @@ namespace fmt
 	struct struct_brief : memory_brief<Type>
 	{
 		using type   = Type;
-		using pair   = std::pair<Type, Type>;
+		using pair   = fwd::pair<Type>;
 		using init   = fwd::init<Type>;
 		using set    = fwd::set<Type, Order, Alloc>;
 		using map    = fwd::map<Type, Order, Alloc>;
 		using span   = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
 		using graph  = fwd::graph<Type, Alloc>;
-		using group  = fwd::group<Type, Order, Alloc>;
+		using group  = fwd::group<Type, Alloc, Order>;
 		using edges  = fwd::edges<Type>;
 		using page   = fwd::page<Type, Alloc>;
 	};
@@ -133,12 +133,14 @@ namespace fmt
 	// at least a UTF-32 code point
 	using ustring = basic_string<wint_t>;
 
-	using string =
-	#ifdef _T
-		basic_string<_T>;
+	using tstring =
+	#ifdef TCHAR
+		basic_string<TCHAR>;
 	#else
 		basic_string<char>;
 	#endif
+
+	using string = bstring;
 	using view = string::view;
 	using line = string::line;
 

@@ -81,7 +81,7 @@ namespace sys::uni::sig
 
 		event(function f, pthread_attr_t* attr = nullptr) : work(f)
 		{
-			sigev_value.sival_int = doc::socket().emplace(f);
+			sigev_value.sival_int = doc::socket(f);
 			sigev_notify = SIGEV_THREAD;
 			sigev_notify_function = thread;
 			sigev_notify_attributes = attr;
@@ -92,6 +92,42 @@ namespace sys::uni::sig
 		static void thread(sigval sigev_value)
 		{
 			doc::signal(sigev_value.sival_int);
+		}
+	};
+
+	struct action : fwd::unique, fwd::zero<sigaction>
+	{
+		using act = fwd::as_ptr<sigaction>;
+		using set = fwd::as_ptr<sigset_t>;
+		using info = fwd::as_ptr<siginfo_t>;
+		using context = fwd::as_ptr<void>;
+		using event::function;
+
+		action(int flags, set mask)
+		{
+			sa_sigaction = queue;
+			sa_flags = SA_SIGINFO | flags;
+			sa_mask = *mask;
+		}
+
+		bool set(int no, act prev = nullptr) const
+		{
+			return fail(sigaction(no, this, prev)) and err(here);
+		}
+
+		bool get(int no, act next = nullptr)
+		{
+			return fail(sigaction(no, next, this)) and err(here);
+		}
+
+	private:
+
+		static void queue(int no, info that, context user)
+		{
+			#ifdef assert
+			assert(SI_QUEUE == that->si_code);
+			#endif
+			doc::signal(that->sival.sival_int);
 		}
 	};
 }

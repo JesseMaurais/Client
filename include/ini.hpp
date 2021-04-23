@@ -15,7 +15,7 @@ namespace doc
 		using out    = string::out;
 		using in     = string::in;
 
-		fwd::group<std::ptrdiff_t> keys;
+		path::group keys;
 		string::view::vector values;
 		string::set cache;
 
@@ -27,10 +27,10 @@ namespace doc
 		static vector split(view);
 		static string join(init);
 
-		bool got(node::pair) const;
-		view get(node::pair) const;
-		bool set(node::pair, view);
-		bool put(node::pair, view);
+		bool got(path::pair) const;
+		view get(path::pair) const;
+		bool set(path::pair, view);
+		bool put(path::pair, view);
 	};
 }
 

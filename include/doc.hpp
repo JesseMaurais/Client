@@ -8,7 +8,7 @@
 
 namespace doc
 {
-	using node = fmt::diff;
+	using path = fmt::diff;
 
 	template <class Type> class instance : fwd::unique
 	{
