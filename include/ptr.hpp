@@ -12,9 +12,10 @@ namespace fwd
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using extern_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> constexpr as_ptr<Type> null = nullptr;
+	template <class Type> thread_local auto local = null<Type>;
 
 	constexpr auto void_ptr = null<void>;
-	
+
 	template <class Type, class Pointer> inline auto cast_as(Pointer ptr)
 	{
 		#ifdef assert
@@ -37,7 +38,7 @@ namespace fwd
 		template <class T, class C> static std::pair<T, C> pair(T C::*);
 
 	public:
-	
+
 		using pair_type = decltype(pair(f));
 		using value_type = typename pair_type::first_type;
 		using parent_type = typename pair_type::second_type;
@@ -60,7 +61,7 @@ namespace fwd
 		stationary() = default;
 	};
 
-	struct local // cannot allocate base class
+	struct scoped // cannot allocate base class
 	{
 		void* operator new (size_t) = delete;
 		void operator delete (void*) = delete;
@@ -70,7 +71,7 @@ namespace fwd
 		local() = default;
 	};
 
-	template 
+	template
 	<
 		class Type, class Free = deleter<Type>
 	>
@@ -79,7 +80,7 @@ namespace fwd
 		return std::unique_ptr<Type, Free>(ptr, del);
 	}
 
-	template 
+	template
 	<
 		class Pointer, class Free = deleter<Pointer>
 	>

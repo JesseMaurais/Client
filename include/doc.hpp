@@ -21,10 +21,10 @@ namespace doc
 	public:
 
 		static instance& self();
-		size_t emplace(Type&&);
-		size_t free(size_t);
-		Type* find(size_t);
-		Type& at(size_t);
+		const int open(Type&&);
+		const int close(const int);
+		Type* find(const int);
+		Type& at(const int);
 
 		inline auto gap() const
 		{
@@ -37,66 +37,33 @@ namespace doc
 		return instance<Type>::self();
 	}
 
-	template <class Type> class access_ptr : fwd::unique
+	enum class meta { data };
+
+	template <class Type> constexpr auto tuple(const Type* = nullptr)
 	{
-		size_t const pos;
-
-	public:
-
-		access_ptr(Type&& type) : pos(access<Type>().make(type))
-		{ }
-
-		~access_ptr()
-		{
-			access<Type>().free(pos);
-		}
-
-		auto operator->() const
-		{
-			return access<Type>().find(pos);
-		}
-
-		auto operator->()
-		{
-			return access<Type>().find(pos);
-		}
-
-		auto& operator*() const
-		{
-			return access<Type>().at(pos);
-		}
-
-		auto& operator*()
-		{
-			return access<Type>.at(pos);
-		}
-	};
-
-	template <auto K> static fmt::string::view name = "(none)";
-
-	template <class C> constexpr auto table(const C* = nullptr)
-	{
-		return C::table();
+		return Type::tuple(meta::data);
 	}
 
-	template <size_t N, class C> constexpr auto get(const C* = nullptr)
+	template <size_t Index, class Type> constexpr auto get(const Type* = nullptr)
 	{
-		return std::get<N>(table<C>());
+		return std::get<Index>(tuple<Type>());
 	}
 
-	template <size_t N, class C> fmt::string::view key(const C* = nullptr)
+	template <auto Meta> fmt::string::view name {"(none)"};
+
+	template <size_t Index, class Type> auto key(const Type* = nullptr)
 	{
-		return name<get<N, C>()>;
+		return name<get<Index, Type>()>;
 	}
 
-	template <size_t N, class C> auto& value(const C* that)
+	template <size_t Index, class Type> auto& value(const Type* that)
 	{
-		return that->*get<N>(that);
+		return that->*get<Index>(that);
 	}
 
-	template <size_t N, class C> auto& value(C* that)
+	template <size_t Index, class Type> auto& value(Type* that)
 	{
-		return that->*get<N>(that);
+		return that->*get<Index>(that);
 	}
 }
 

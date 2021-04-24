@@ -15,19 +15,17 @@ namespace doc
 #ifdef test_unit
 namespace
 {
-	using namespace std::literals::string_view_literals;
-
 	struct dumb
 	{
 		int i = 0;
-		long n = 0;
-		short w = 0;
 		char b = 0;
+		short w = 0;
+		long n = 0;
 		float f = 0.0f;
 		double d = 0.0;
 		fmt::string s = "Hello World";
 
-		static constexpr auto table()
+		static constexpr auto tuple(doc::meta)
 		{
 			return std::tuple
 			{
@@ -52,9 +50,9 @@ test_unit(doc)
 	using value_type = fwd::offset_of<&dumb::i>::value_type;
 	static_assert(std::is_same<value_type, int>::value);
 
-	size_t const id = doc::access<dumb>().emplace({});
+	const int id = doc::access<dumb>().open({});
 	assert(0 == id);
-	auto ptr = doc::access<dumb>().find(id);
+	const auto ptr = doc::access<dumb>().find(id);
 	assert(nullptr != ptr);
 
 	doc::value<0>(ptr) = 42;
@@ -73,6 +71,6 @@ test_unit(doc)
 	assert(doc::key<1>(ptr) == "f"sv);
 	assert(doc::key<2>(ptr) == "s"sv);
 
-	doc::access<dumb>().free(id);
+	doc::access<dumb>().close(id);
 }
 #endif

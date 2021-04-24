@@ -20,59 +20,7 @@ namespace doc
 		return singleton;
 	}
 
-	template <class Type> Type& instance<Type>::at(size_t pos)
-	{
-		#ifdef assert
-		assert(cross.at(index.at(pos)) == pos);
-		#endif
-
-		return item.at(index.at(pos));
-	}
-
-	template <class Type> Type* instance<Type>::find(size_t pos)
-	{
-		if (in_range(index, pos))
-		{
-			if (auto off = index.at(pos); in_range(item, off))
-			{
-				#ifdef assert
-				assert(cross.at(index.at(pos)) == pos);
-				#endif
-
-				return item.data() + off;
-			}
-		}
-		return nullptr;
-	}
-
-	template <class Type> size_t instance<Type>::free(size_t pos)
-	{
-		#ifdef assert
-		assert(find(pos));
-		assert(cross.at(index.at(pos)) == pos);
-		#endif
-
-		auto const off = index.at(pos);
-		item.at(off) = move(item.back());
-		cross.at(off) = cross.back();
-		index.at(cross.back()) = off;
-		index.at(pos) = -1;
-		while (index.back() < 0)
-		{
-			index.pop_back();
-		}
-		cross.pop_back();
-		item.pop_back();
-
-		#ifdef assert
-		assert(cross.size() == item.size());
-		assert(item.empty() or cross.at(index.at(off)) == to_size(off));
-		#endif
-
-		return item.size();
-	}
-
-	template <class Type> size_t instance<Type>::emplace(Type&& type)
+	template <class Type> const int instance<Type>::open(Type&& type)
 	{
 		// find lowest free index
 		auto pos = index.size();
@@ -106,6 +54,58 @@ namespace doc
 		assert(cross.at(index.at(pos)) == pos);
 		#endif
 
-		return pos;
+		return fmt::as_int(pos);
+	}
+
+	template <class Type> const int instance<Type>::close(const int id)
+	{
+		auto const pos = fmt::to_size(id);
+		#ifdef assert
+		assert(find(pos));
+		#endif
+
+		auto const off = index.at(pos);
+		item.at(off) = move(item.back());
+		cross.at(off) = cross.back();
+		index.at(cross.back()) = off;
+		index.at(pos) = -1;
+		while (index.back() < 0)
+		{
+			index.pop_back();
+		}
+		cross.pop_back();
+		item.pop_back();
+
+		#ifdef assert
+		assert(cross.size() == item.size());
+		assert(item.empty() or cross.at(index.at(off)) == to_size(off));
+		#endif
+
+		auto const size = item.size();
+		return fmt::to_int(size);
+	}
+
+	template <class Type> Type* instance<Type>::find(int id)
+	{
+		if (auto const pos = fmt::to_size(id); in_range(index, pos))
+		{
+			if (auto const off = index.at(pos); in_range(item, off))
+			{
+				#ifdef assert
+				assert(pos == cross.at(off));
+				#endif
+				return item.data() + off;
+			}
+		}
+		return nullptr;
+	}
+
+	template <class Type> Type& instance<Type>::at(int id)
+	{
+		auto const pos = fmt::to_size(id);
+		#ifdef assert
+		assert(cross.at(index.at(pos)) == pos);
+		#endif
+		return item.at(index.at(pos));
 	}
 }

@@ -9,27 +9,17 @@ namespace doc
 	using function = std::function<void()>;
 	extern template class instance<function>;
 
-	inline size_t socket(function f)
+	inline auto& socket()
 	{
-		#ifdef assert
-		assert(f.target() != nullptr);
-		#endif
-
-		return access<function>().emplace(f);
+		return access<function>();
 	}
 
-	inline size_t unsocket(size_t id)
-	{
-		return access<function>().free(id);
-	}
-
-	inline void signal(size_t id)
+	inline void signal(int id)
 	{
 		#ifdef assert
-		assert(access<function>().find(id));
+		assert(socket().find(id));
 		#endif
-
-		std::invoke(access<function>().at(id));
+		std::invoke(socket().at(id));
 	}
 };
 

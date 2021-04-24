@@ -93,6 +93,82 @@ namespace sys::uni::sig
 		}
 	};
 
+	struct stack : fwd::zero<stack_t>
+	{
+		bool set(stack_t* prev = nullptr) const
+		{
+			return fail(sigaltstack(this, prev)) and err(here);
+		}
+
+		bool get(const stack_t* next = nullptr)
+		{
+			return fail(sigaltstack(next, this)) and err(here);
+		}
+
+		auto alloc(size_t size)
+		{
+			ss_size = std::max(size, SIGSTKSZ);
+			ss_sp = std::realloc(ss_sp, ss_size);
+			return ss_size;
+		}
+	};
+
+	struct action : fwd::unique, sigaction
+	{
+		action(int flags, set mask)
+		{
+			sa_flags = flags;
+			sa_mask = mask.buf[0];
+			sa_sigaction = nullptr;
+			sa_handler = nullptr;
+		}
+
+		bool set(int n, sigaction* prev = nullptr) const
+		{
+			return fail(sigaction(n, this, prev)) and err(here);
+		}
+
+		bool get(int n, sigaction* next = nullptr)
+		{
+			return fail(sigaction(n, next, this)) and err(here);
+		}
+	};
+
+	struct info : sig::action
+	{
+		info(int flags, set mask) : action(SA_SIGINFO | flags, mask)
+		{
+			sa_sigaction = queue;
+		}
+
+		static void err()
+		{
+			psiginfo(fwd::local<siginfo_t>, __func__);
+		}
+
+	private:
+
+		static void queue(int signo, siginfo_t* info, void* context)
+		{
+			fwd::local<siginfo_t> = info;
+			fwd::local<void> = context;
+			doc::signal(info->sival.sival_int);
+		}
+	};
+
+	inline bool queue(pid_t pid, int n, sig::event::function f = info::err)
+	{
+		sigval value;
+		value.sigval_int = doc::socket().open(f);
+		const auto error = fail(sigqueue(pid, n, value))
+		if (error)
+		{
+			doc::socket().close(value.sival_int);
+			err(here);
+		}
+		return error;
+	}
+
 	struct event : fwd::unique, sigevent
 	{
 		using doc::function;
@@ -105,67 +181,16 @@ namespace sys::uni::sig
 			sigev_notify_attributes = attr;
 		}
 
+		~event()
+		{
+			doc::socket().close(sigev_value.sival_int);
+		}
+
 	private:
 
 		static void thread(sigval sigev_value)
 		{
 			doc::signal(sigev_value.sival_int);
-		}
-	};
-
-	struct action : fwd::unique, sigaction
-	{
-		action(int flags, set mask)
-		{
-			sa_sigaction = queue;
-			sa_flags = SA_SIGINFO | flags;
-			sa_mask = mask.buf[0];
-		}
-
-		bool set(int n, sigaction* prev = nullptr) const
-		{
-			return fail(sigaction(n, this, prev)) and err(here);
-		}
-
-		bool get(int n, sigaction* next = nullptr)
-		{
-			return fail(sigaction(n, next, this)) and err(here);
-		}
-
-		static bool queue(int n, int fd = 0, pid_t pid = getpid())
-		{
-			sigval value;
-			value.sival_int = fd;
-			return fail(sigqueue(pid, n, value)) and err(here);
-		}
-
-	private:
-
-		static auto strcode(int code)
-		{
-			switch (code)
-			{
-				default:
-					return "Unknown";
-				case ILL_ILLOPC:
-					return "Illegal opcode";
-			}
-		}
-
-		static void queue(int n, siginfo_t* info, void* user)
-		{
-			fmt::ofdstream fd;
-			fd.set(info->sival.sival_int):
-			inline auto tab = fmt::assign;
-			inline auto eol = fmt::eol;
-			fd
-				<< "signo" << tab << strsignal(info->si_signo) << eol
-				<< "errno" << tab << strerror(info->si_errno) << eol
-				<< "code" << tab << strcode(info->si_code) << eol
-				<< "status" << tab << info->si_status << eol
-				<< "pid" << tab << info->si_pid << eol
-				<< "uid" << tab << info->si_uid << eol
-				<< "addr" << tab << info->si_addr << eol;
 		}
 	};
 }
@@ -176,7 +201,7 @@ namespace sys::uni::time
 	{
 		timer_t id;
 
-		event(function f, clockid_t clock = CLOCK_REALTIME, pthread_attr_t* attr = nullptr) 
+		event(function f, clockid_t clock = CLOCK_REALTIME, pthread_attr_t* attr = nullptr)
 		: sig::event(f, attr)
 		{
 			if (fail(timer_create(clock, this, &id)))
@@ -199,7 +224,7 @@ namespace sys::uni::msg
 {
 	struct event : sig::event
 	{
-		event(function f, mqd_t mqd, pthread_attr_t* attr = nullptr) 
+		event(function f, mqd_t mqd, pthread_attr_t* attr = nullptr)
 		: sig::event(f, attr)
 		{
 			if (fail(mq_notify(mqd, this)))
