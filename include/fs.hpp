@@ -11,31 +11,31 @@ namespace fmt
 	{
 		template
 		<
-		 class Char,
-		 template <class> class Traits,
-		 template <class> class Alloc,
-		 template 
-		 <
-		  class,
-		  template <class> class,
-		  template <class> class
-		 > class Stream,
-		 env::file::mode default_mode
+			class Char,
+			template <class> class Traits,
+			template <class> class Alloc,
+			template 
+			<
+				class,
+				template <class> class,
+				template <class> class
+			> class Stream,
+			auto Default
 		>
-		class basic_fdstream
-		: public Stream<Char, Traits, Alloc>
+		class basic_fdstream : public Stream<Char, Traits, Alloc>
 		{
 			using base = Stream<Char, Traits, Alloc>;
 			using string = fmt::basic_string<Char, Traits, Alloc>;
 			using view = fmt::basic_string_view<Char, Traits>;
+			using size_t = env::file::size_t;
 			using mode = env::file::mode;
-			using size_type = std::size_t;
+			inline auto width = env::file::width;
 
 			env::file::descriptor f;
 
 		public:
 
-			basic_fdstream(mode mask = default_mode, size_type size = env::file::width)
+			basic_fdstream(mode mask = Default, size_t size = width())
 			: base(f)
 			{
 				if (mask & env::file::rw)
@@ -54,8 +54,8 @@ namespace fmt
 				}
 			}
 
-			basic_fdstream(view path, mode mask = default_mode, size_type size = env::file::width)
-			: base(f), f(path, mode(mask | default_mode))
+			basic_fdstream(view path, mode mask = Default, size_t size = width())
+			: base(f), f(path, mode(mask | Default))
 			{
 				if (mask & env::file::rw)
 				{
@@ -73,14 +73,19 @@ namespace fmt
 				}
 			}
 
-			bool open(view path, mode mask = default_mode)
+			bool open(view path, mode mask = Default)
 			{
-				return f.open(path, mode(mask | default_mode));
+				return f.open(path, mode(mask | Default));
 			}
 
 			void close()
 			{
 				f.close();
+			}
+
+			int set(int fd)
+			{
+				return f.set(fd);
 			}
 		};
 	}
@@ -89,13 +94,13 @@ namespace fmt
 
 	template
 	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
 	using basic_fdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, basic_iostream, env::file::rw
+		Char, Traits, Alloc, basic_iostream, env::file::rw
 	>;
 
 	using fdstream = basic_fdstream<char>;
@@ -103,13 +108,13 @@ namespace fmt
 
 	template
 	<
-	 class Char,
-	 template <class> class Traits = std::char_traits,
-	 template <class> class Alloc = std::allocator
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator
 	>
 	using basic_ifdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, basic_istream, env::file::rd
+		Char, Traits, Alloc, basic_istream, env::file::rd
 	>;
 
 	using ifdstream = basic_ifdstream<char>;
@@ -123,7 +128,7 @@ namespace fmt
 	>
 	using basic_ofdstream = impl::basic_fdstream
 	<
-	 Char, Traits, Alloc, basic_ostream, env::file::wr
+		Char, Traits, Alloc, basic_ostream, env::file::wr
 	>;
 
 	using ofdstream = basic_ofdstream<char>;

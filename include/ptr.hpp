@@ -68,7 +68,7 @@ namespace fwd
 		void* operator new[] (size_t) = delete;
 		void operator delete[] (void*) = delete;
 	protected:
-		local() = default;
+		scoped() = default;
 	};
 
 	template
@@ -93,7 +93,7 @@ namespace fwd
 	<
 		class Type, class Remove = deleter<Type>
 	>
-	struct shared : unique, local, std::enable_shared_from_this<Type>
+	struct shared : unique, scoped, std::enable_shared_from_this<Type>
 	{
 		using Type::Type;
 

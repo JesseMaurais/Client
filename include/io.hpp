@@ -23,10 +23,11 @@ namespace fmt
 	{
 		using char_type = typename Base::char_type;
 		using traits_type = typename Base::traits_type;
-		using size_type = std::streamsize;
 		using int_type = typename Base::int_type;
+		using char_ptr = fwd::as_ptr<char_type>;
+		using size_type = std::streamsize;
 
-		Base* setbuf(char_type *s, size_type n, size_type m)
+		Base* setbuf(char_ptr s, size_type n, size_type m)
 		{
 			auto t = s + n;
 			auto u = t + m;
@@ -35,7 +36,7 @@ namespace fmt
 			return this;
 		}
 		
-		Base* setbuf(char_type *s, size_type n) override
+		Base* setbuf(char_ptr s, size_type n) override
 		{
 			size_type const m = n / 2;
 			return setbuf(s, n - m, m);

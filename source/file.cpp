@@ -72,11 +72,11 @@ namespace env::file
 {
 	// file.hpp
 
-	file_ptr make_ptr(fwd::as_ptr<FILE> fp)
+	io_ptr make_ptr(fwd::as_ptr<FILE> fp)
 	{
 		return fwd::make_ptr(fp, [](auto fp)
 		{
-			if (std::fclose(fp))
+			if (EOF == std::fclose(fp))
 			{
 				sys::err(here, "fclose");
 			}

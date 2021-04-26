@@ -15,29 +15,29 @@ namespace env::file
 		return invalid == value;
 	}
 
-	using file_ptr = fwd::extern_ptr<FILE>;
-	file_ptr make_ptr(fwd::as_ptr<FILE>);
+	using io_ptr = fwd::extern_ptr<FILE>;
+	io_ptr make_ptr(fwd::as_ptr<FILE>);
 
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
 
 	struct reader
 	{
-		virtual ssize_t read(void *buf, size_t sz) const = 0;
+		virtual ssize_t read(fwd::as_ptr<void> buf, size_t sz) const = 0;
 
-		template <class C> auto read(C *buf, size_t sz = 1) const
+		template <class C> auto read(fwd::as_ptr<C> buf, size_t sz = 1) const
 		{
-			return read(static_cast<void*>(buf), sz * sizeof (C));
+			return read(fwd::cast_as<void>(buf), sz * sizeof (C));
 		}
 	};
 
 	struct writer
 	{
-		virtual ssize_t write(const void *buf, size_t sz) const = 0;
+		virtual ssize_t write(fwd::as_ptr<const void> buf, size_t sz) const = 0;
 
-		template <class C> auto write(const C *buf, size_t sz = 1) const
+		template <class C> auto write(fwd::as_ptr<const C> buf, size_t sz = 1) const
 		{
-			return write(static_cast<const void*>(buf), sz * sizeof (C));
+			return write(fwd::cast_as<const void>(buf), sz * sizeof (C));
 		}
 	};
 

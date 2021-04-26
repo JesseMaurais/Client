@@ -21,10 +21,10 @@ namespace doc
 	public:
 
 		static instance& self();
-		const int open(Type&&);
-		const int close(const int);
-		Type* find(const int);
-		Type& at(const int);
+		int open(Type&&);
+		size_t close(int);
+		Type* find(int);
+		Type& at(int);
 
 		inline auto gap() const
 		{
@@ -37,33 +37,31 @@ namespace doc
 		return instance<Type>::self();
 	}
 
-	enum class meta { data };
+	template <auto K> static fmt::string::view name = "(none)";
 
-	template <class Type> constexpr auto tuple(const Type* = nullptr)
+	template <class C> constexpr auto table(const C* = nullptr)
 	{
-		return Type::tuple(meta::data);
+		return C::table();
 	}
 
-	template <size_t Index, class Type> constexpr auto get(const Type* = nullptr)
+	template <size_t N, class C> constexpr auto get(const C* = nullptr)
 	{
-		return std::get<Index>(tuple<Type>());
+		return std::get<N>(table<C>());
 	}
 
-	template <auto Meta> fmt::string::view name {"(none)"};
-
-	template <size_t Index, class Type> auto key(const Type* = nullptr)
+	template <size_t N, class C> fmt::string::view key(const C* = nullptr)
 	{
-		return name<get<Index, Type>()>;
+		return name<get<N, C>()>;
 	}
 
-	template <size_t Index, class Type> auto& value(const Type* that)
+	template <size_t N, class C> auto& value(const C* that)
 	{
-		return that->*get<Index>(that);
+		return that->*get<N>(that);
 	}
 
-	template <size_t Index, class Type> auto& value(Type* that)
+	template <size_t N, class C> auto& value(C* that)
 	{
-		return that->*get<Index>(that);
+		return that->*get<N>(that);
 	}
 }
 
