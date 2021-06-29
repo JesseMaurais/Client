@@ -141,31 +141,30 @@ namespace sys::uni::sig
 			sa_sigaction = queue;
 		}
 
-		static void err()
-		{
-			psiginfo(fwd::local<siginfo_t>, __func__);
-		}
-
 	private:
 
 		static void queue(int signo, siginfo_t* info, void* context)
 		{
-			fwd::local<siginfo_t> = info;
-			fwd::local<void> = context;
-			doc::signal(info->sival.sival_int);
+			const int fd = info->si_value.sival_int;
+			if (STDERR_FILENO != fd)
+			{
+				const struct sys::dup tmp(fd);
+				psiginfo(info, strsignal(signo));
+			}
+			else
+			{
+				psiginfo(info, strsignal(signo));
+			}
+			(void) context;
 		}
 	};
 
-	inline bool queue(pid_t pid, int n, sig::event::function f = info::err)
+	inline bool queue(pid_t pid, int n, int fd = STDERR_FILENO)
 	{
 		sigval value;
-		value.sigval_int = doc::socket().open(f);
+		value.sigval_int = fd;
 		const auto error = fail(sigqueue(pid, n, value))
-		if (error)
-		{
-			doc::socket().close(value.sival_int);
-			err(here);
-		}
+		if (error) err(here);
 		return error;
 	}
 

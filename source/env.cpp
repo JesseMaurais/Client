@@ -30,105 +30,139 @@
 #endif // _MSC_VER
 #endif // _WIN32
 
-namespace
+namespace env::os
 {
-	sys::rwlock lock;
-
-	constexpr auto Desktop = "Desktop";
-	constexpr auto Documents = "Documents";
-	constexpr auto Downloads = "Downloads";
-	constexpr auto Music = "Music";
-	constexpr auto Pictures = "Pictures";
-	constexpr auto PublicShare = "Public";
-	constexpr auto Templates = "Templates";
-	constexpr auto Videos = "Videos";
-
-	auto cached(fmt::string::view var, fmt::string::view val)
+	fmt::string::view dir(fmt::string::view path, bool traced)
 	{
-		auto const w = fmt::put(var);
-		auto u = env::opt::get(w);
-		if (u.empty())
-		{
-			constexpr auto base = "user-dirs.dirs";
-			auto const path = fmt::dir::join({env::usr::config_home(), base});
-			std::ifstream in(path);
-			fmt::string line;
-			while (doc::ini::getline(in, line))
-			{
-				constexpr char quote = '"';
-				auto const first = line.find_first_not_of(quote);
-				auto const second = line.find_first_of(quote, first);
-				line = line.substr(first, second);
-				auto const entry = fmt::to_pair(line);
-				auto const value = env::var::value(entry.second);
-				auto const key = fmt::set(entry.first);
-				env::opt::set(key, value);
-			}
-			u = env::opt::get(w, val);
-		}
-		return u;
-	}
-
-	auto folder(fmt::string::view var, fmt::string::view val)
-	{
-		auto u = env::var::get(var);
-		if (empty(u))
-		{
-			u = cached(var, val);
-		}
-
-		#ifdef _WIN32
-		{
-			if (empty(u))
-			{
-				static std::map<fmt::string::view, KNOWNFOLDERID> map =
-				{
-					{ Desktop, FOLDERID_Desktop },
-					{ Documents, FOLDERID_Documents },
-					{ Downloads, FOLDERID_Downloads },
-					{ Music, FOLDERID_Music },
-					{ Pictures, FOLDERID_Pictures },
-					{ PublicShare, FOLDERID_Public },
-					{ Templates, FOLDERID_Templates },
-					{ Videos, FOLDERID_Videos },
-				};
-
-				PWSTR pws = nullptr;
-				auto const ok = SHGetKnownFolderPath
-				(
-					map.at(val),
-					0,
-					nullptr,
-					&pws
-				);
-
-				if (S_OK == ok)
-				{
-					static fmt::string s;
-					s = fmt::to_string(pws);
-					u = s;
-				}
-
-				if (nullptr != pws)
-				{
-					CoTaskMemFree(pws);
-				}
-			}
-		}
+		#ifdef trace
+		if (traced) trace(path);
 		#endif
 
+		fmt::string::view u = fmt::empty;
+		
+		#ifdef _WIN32
+		static std::map
+		<
+			fmt::string::view, std::pair<KNOWNFOLDERID, fmt::string::view::vector>
+		>
+		const map =
+		{
+			{ "AccountPictures", {FOLDERID_AccountPictures, "%AppData%\\Microsoft\\Winodws\\AccountPictures"}},
+			{ "AdminTools", {FOLDERID_AdminTools, "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools"}},
+			{ "AppDataDesktop", {FOLDERID_AppDataDesktop, "%LocalAppData%\\Desktop"}},
+			{ "AppDataDocuments", {FOLDERID_AppDataDocuments, "%LocalAppData%\\Documents"}},
+			{ "AppDataFavorites", {FOLDERID_AppDataDocuments, "%LocalAppData%\\Favorites"}},
+			{ "AppDataProgramData", {FOLDERID_AppDataProgramData, "%LocalAppData%\\ProgramData"}},
+			{ "ApplicationShortcuts", {FOLDERID_ApplicationShortcuts, "%LocalAppData%\\Microsoft\\Windows\\Application Shortcuts"}},
+			{ "CDBurning", {FOLDERID_CDBurning, "%LocalAppData%\\Microsoft\\Winodws\\Burn\\Burn"}},
+			{ "CommonAdminTools", {FOLDERID_CommonAdminTools, "%AllUsersProfile%\\Start Menu\\Programs\\Administrative Tools"}},
+			{ "CommonPrograms", {FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu\\Programs"}},
+			{ "CommonStartMenu", {FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu"}},
+			{ "CommonStartup", {FOLDERID_CommonStartup, "%AllUsersProfile%\\Start Menu\\StartUp"}},
+			{ "CommonTemplates" {FOLDERID_CommonTemplates, "%AllUsersProfile%\\Templates"}},
+			{ "LocalAppData", {FOLDERID_LocalAppData, "%UserProfile%\\AppData\\Local"}},
+			{ "Camera", {FOLDERID_CameraRoll, "%UserProfile%\\Pictures\\Camera Roll"}},
+			{ "Contacts", {FOLDERID_Contacts, "%UserProfile%\\Contacts"}},
+			{ "Cookies", {FOLDERID_Cookies, "%UserProfile%\\Cookies"}},
+			{ "Desktop", {FOLDERID_Desktop, "%UserProfile%\\Desktop"}},
+			{ "Documents", {FOLDERID_Documents, "%UserProfile%\\Documents"}},
+			{ "Downloads", {FOLDERID_Downloads, "%UserProfile%\\Downloads"}},
+			{ "Favorites", {FOLDERID_Favorites, "%UserProfile%\\Favorites"}},
+			{ "Fonts", {FOLDERID_Fonts, "%WinDir%\\Fonts" }},
+			{ "History", {FOLDERID_History, "%UserProfile%\\Local Settings\\History"}},
+			{ "InternetCache", {FOLDERID_InternetCache, "%LocalAppData%\\Local Settings\\Temporary"}},
+			{ "Links", {FOLDERID_Links}, "%UserProfile%\\Links"}},
+			{ "Resources", {FOLDERID_LocalizedResourcesDir, "%WinDir%\\Resources"}},
+			{ "Music", {FOLDERID_Music, "%UserProfile%\\Music;%UserProfile%\\My Documents\\My Music"}},
+			{ "Pictures", {FOLDERID_Pictures, "%UserProfile%\\Pictures;%UserProfile%\\My Documents\\My Pictures"}},
+			{ "Profile", {FOLDERID_Profile, "%UserProfile%"}},
+			{ "ProgramData", {FOLDERID_ProgramData, "%AllUsersProfile%\\Application Data;%AllUsersProfile%;%ProgramData%;%SystemDrive%\\ProgramData"}}},
+			{ "ProgramFilesCommon", {FOLDERID_ProgramFilesCommon, "%ProgramFiles%\\Common Files"}},
+			{ "ProgramFiles", {FOLDERID_ProgramFiles, "%ProgramFiles%;%SystemDrive%\\Program Files"}},
+			{ "Programs", {FOLDERID_Programs, "%UserProfile%\\Start Menu\\Programs"}},
+			{ "Public", {FOLDERID_Public, "%Public%", "%SystemDrive%\\Users\\Public"}},
+			{ "PublicDesktop", {FOLDERID_PublicDesktop, "%Public%\\Desktop;%AllUsersProfile%\\Desktop"}},
+			{ "PublicDocuments", {FOLDERID_PublicDocuments, "%Public%\\Documents;%AllUsersProfile%\\Documents"}},
+			{ "PublicDownloads", {FOLDERID_PublicDownloads, "%Public%\\Downloads"}},
+			{ "Screenshot", {FOLDERID_Screenshots, "%UserProfile%\\Pictures\\Screenshots"}},
+			{ "StartMenu", {FOLDERID_StartMenu, "%UserProfile%\\Start Menu"}},
+			{ "Startup", {FOLDERID_Startup, "%UserProfile%\\Start Menu\\Programs\\StartUp"}},
+			{ "System", {FOLDERID_System, "%WinDir%\\System32"}},
+			{ "Templates", {FOLDERID_Templates, "%UserProfile%\\Templates"}},
+			{ "UserProfiles", {FOLDERID_UserProfiles, "%SystemDrive%\\Users"}},
+			{ "UserProgramFiles", {FOLDERID_UserProgramFiles, "%LocalAppData%\\Programs"}}
+			{ "UserProgramFilesCommon", {FOLDERID_UserProgramFilesCommon, "%LocalAppData%\\Programs\\Common"}},
+			{ "Videos", {FOLDERID_Videos, "%UserProfile%\\Videos;%UserProfile%\\My Documents\\My Videos"}},
+			{ "Windows", {FOLDERID_Windows, "%WinDir%"}}
+		};
+
+		auto it = map.find(path);
+		if (map.end() != it)
+		{
+			PWSTR pws = nullptr;
+			auto const ok = SHGetKnownFolderPath
+			(
+				it->first, 0, nullptr, &pws
+			);
+
+			if (S_OK == ok)
+			{
+				thread_local fmt::string buf;
+				buf = fmt::to_string(pws);
+				u = buf;
+			}
+
+			if (nullptr != pws)
+			{
+				CoTaskMemFree(pws);
+			}
+		}
+
+		#else // POSIX
+		
+		static std::map
+		<
+			fmt::string::view, std::pair<fmt::string::view, fmt::string::view::vector>
+		> 
+		const map =
+		{
+			{"Data", {"XDG_DATA_HOME", {"$HOME/.local/share"}}},
+			{"Desktop", {"XDG_DESKTOP_DIR", {"$HOME/Desktop"}}},
+			{"Documents", {"XDG_DOCUMENTS_DIR", {"$HOME/Documents"}}},
+			{"Downloads", {"XDG_DOWNLOAD_DIR", {"$HOME/Downloads"}}},
+			{"Music", {"XDG_MUSIC_DIR", {"$HOME/Music"}}},
+			{"Runtime", {"XDG_RUNTIME_DIR", {"$TMPDIR", "$TEMP", "$TMP"}}},
+			{"Pictures", {"XDG_PICTURES_DIR", {"$HOME/Pictures"}}},
+			{"Public", {"XDG_PUBLICSHARE_DIR", {"$HOME/Public"}}},
+			{"Templates", {"XDG_TEMPLATES_DIR", {"$HOME/Templates"}}},
+			{"Videos", {"XDG_VIDEOS_DIR", {"$HOME/Videos"}}},
+		};
+
+		auto it = map.find(path);
+		if (map.end() != it)
+		{
+			u = env::var::get(it->first);
+		}
+
+		#endif // OS
+
 		if (empty(u))
 		{
-			static fmt::string s;
-			s = fmt::dir::join({env::home(), val});
-			u = s;
+			for (auto v : it->second)
+			{
+				u = env::var::value(it->second);
+				if (not empty(u)) break;
+			}
 		}
+
 		return u;
 	}
 }
 
 namespace env::var
 {
+	static sys::rwlock lock;
+
 	bool got(fmt::string::view u)
 	{
 		if (not fmt::terminated(u))
@@ -182,34 +216,56 @@ namespace env::var
 		return env::var::put(fmt::join({u, v}, "="));
 	}
 
-	static auto evaluate(fmt::string::view u)
+	fmt::string::view value(fmt::string::view u)
 	{
-		assert(u.front() == '$');
-		u = u.substr(1);
-		return empty(u) ? u : env::var::get(u);
-	}
+		thread_local fmt::string s;
+		fmt::string::stream ss;
 
-	fmt::string value(fmt::string::view u)
-	{
-		static std::regex x { "\\$[A-Z_][A-Z_0-9]*" };
-		std::smatch m;
-		std::string r;
-		auto s = fmt::to_string(u);
-		while (std::regex_search(s, m, x))
+		#ifdef _WIN32
 		{
-			r += m.prefix();
-			auto t = m.str();
-			auto v = evaluate(t);
-			r.append(v.data(), v.size());
-			s = m.suffix().str();
+			constexpr auto x = "%";
+
+			for (auto [i, j] = fmt::embrace(u, x); i < j; std::tie(i, j) = fmt::embrace(u, x))
+			{
+				auto const prefix = u.substr(0, i);
+				auto const infix = u.substr(i + 1, j);
+				auto const suffix = u.substr(j + 1);
+				auto const value = get(infix);
+				ss << prefix << value << suffix;
+			}
 		}
-		r.shrink_to_fit();
-		return r;
+		#else // POSIX
+		{
+			static std::regex x { "\\$[A-Z_][A-Z_0-9]*" };
+			std::smatch m;
+			
+			auto s = fmt::to_string(u);
+			while (std::regex_search(s, m, x))
+			{
+				auto const prefix = m.prefix();
+				auto const infix = m.str().substr(1);
+				auto const suffix = m.suffix();
+				auto const value = get(infix);
+				ss << prefix << value << suffix;
+			}
+		}
+		#endif
+
+		s = ss.str();
+		return s;
 	}
 }
 
 namespace env
 {
+	fmt::string::view::span vars()
+	{
+		static thread_local fmt::string::view::vector local;
+		local.clear();
+		for (auto c = sys::environ(); *c; ++c) local.emplace_back(c);
+		return local;
+	}
+
 	fmt::string::view::span paths()
 	{
 		static thread_local fmt::string::view::vector t;

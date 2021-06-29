@@ -72,7 +72,7 @@ namespace env::file
 {
 	// file.hpp
 
-	io_ptr make_ptr(fwd::as_ptr<FILE> fp)
+	io make_ptr(fwd::as_ptr<FILE> fp)
 	{
 		return fwd::make_ptr(fp, [](auto fp)
 		{
@@ -81,6 +81,16 @@ namespace env::file
 				sys::err(here, "fclose");
 			}
 		});
+	}
+
+	io temp()
+	{
+		auto tmp = std::tmpfile();
+		if (nullptr == tmp)
+		{
+			sys::err(here);
+		}
+		return make_ptr(tmp);
 	}
 
 	// mode.hpp

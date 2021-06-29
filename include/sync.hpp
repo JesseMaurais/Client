@@ -124,6 +124,9 @@ namespace sys
 
 	public:
 
+		atomic(Type x = {}) : value(x) 
+		{ }
+
 		operator Type() const final
 		{
 			auto const unlock = lock.read();

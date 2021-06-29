@@ -13,6 +13,10 @@
 #include <direct.h>
 #include <io.h>
 
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
 #define F_OK 0
 #define W_OK 1
 #define R_OK 3
@@ -101,6 +105,7 @@ namespace sys
 	constexpr auto rmdir = ::_rmdir;
 	constexpr auto stat = ::_stat;
 	constexpr auto swab = ::_swab;
+	constexpr auto tempnam = ::_tempnam;
 	constexpr auto umask = ::_umask;
 	constexpr auto unlink = ::_unlink;
 	constexpr auto write = ::_write;
@@ -176,6 +181,7 @@ namespace sys
 	constexpr auto rmdir = ::rmdir;
 	constexpr auto stat = ::stat;
 	constexpr auto swab = ::swab;
+	constexpr auto tempnam = ::tempnam;
 	constexpr auto umask = ::umask;
 	constexpr auto unlink = ::unlink;
 	constexpr auto write = ::write;
@@ -197,6 +203,7 @@ using stat_t =
 
 namespace sys
 {
+	char** environ();
 	pid_t exec(int fd[3], size_t argc, char const **argv);
 	bool kill(pid_t);
 	int wait(pid_t);
@@ -249,6 +256,40 @@ namespace sys
 	private:
 
 		mode_t um;
+	};
+
+	struct dup
+	{
+		dup(int from, int to = STDERR_FILENO)
+		{
+			tmp = ::sys::dup(fd = to);
+			if (fail(tmp))
+			{
+				err(here);
+			}
+			else
+			if (fail(dup2(from, fd)))
+			{
+				err(here);
+			}
+		}
+
+		~dup()
+		{
+			if (fail(sys::dup2(tmp, to)))
+			{
+				err(here);
+			}
+			else
+			if (fail(close(tmp)))
+			{
+				err(here);
+			}
+		}
+
+	private:
+
+		int fd, tmp;
 	};
 }
 

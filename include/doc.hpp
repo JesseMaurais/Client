@@ -22,7 +22,7 @@ namespace doc
 
 		static instance& self();
 		int open(Type&&);
-		size_t close(int);
+		int close(int);
 		Type* find(int);
 		Type& at(int);
 

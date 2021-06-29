@@ -16,10 +16,15 @@
 #else
 #include "uni/signal.hpp"
 #include <dlfcn.h>
-#endif
+#endif//WIN32
+#ifdef _WINRT
+#include "doc.hpp"
+#endif//WINRT
 
 namespace sys
 {
+	// err.hpp
+
 	bool debug =
 	#ifdef NDEBUG
 		false;
@@ -140,6 +145,17 @@ namespace sys
 		}
 	}
 	#endif
+
+	// sys.hpp
+
+	char** environ()
+	{
+		#ifdef _WIN32
+		return ::_environ;
+		#else //POSIX
+		return ::environ;
+		#endif
+	}
 
 	pid_t exec(int fd[3], size_t argc, char const **argv)
 	{

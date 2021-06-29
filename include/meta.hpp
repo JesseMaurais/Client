@@ -20,7 +20,7 @@ namespace doc
 		return singleton;
 	}
 
-	template <class Type> const int instance<Type>::open(Type&& type)
+	template <class Type> int instance<Type>::open(Type&& type)
 	{
 		// find lowest free index
 		auto pos = index.size();
@@ -54,10 +54,10 @@ namespace doc
 		assert(cross.at(index.at(pos)) == pos);
 		#endif
 
-		return fmt::as_int(pos);
+		return fmt::to_int(pos);
 	}
 
-	template <class Type> const int instance<Type>::close(const int id)
+	template <class Type> int instance<Type>::close(int id)
 	{
 		auto const pos = fmt::to_size(id);
 		#ifdef assert

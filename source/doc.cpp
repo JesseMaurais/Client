@@ -25,7 +25,7 @@ namespace
 		double d = 0.0;
 		fmt::string s = "Hello World";
 
-		static constexpr auto tuple(doc::meta)
+		static constexpr auto table()
 		{
 			return std::tuple
 			{
@@ -67,9 +67,9 @@ test_unit(doc)
 	assert(4.2f == doc::value<1>(ptr));
 	assert(doc::value<2>(ptr) == "42");
 
-	assert(doc::key<0>(ptr) == "i"sv);
-	assert(doc::key<1>(ptr) == "f"sv);
-	assert(doc::key<2>(ptr) == "s"sv);
+	assert(doc::key<0>(ptr) == "i");
+	assert(doc::key<1>(ptr) == "f");
+	assert(doc::key<2>(ptr) == "s");
 
 	doc::access<dumb>().close(id);
 }

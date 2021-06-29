@@ -15,17 +15,11 @@
 #define here fmt::where { __FILE__, __LINE__, __func__ }
 
 #ifndef NDEBUG
-#	ifdef _WIN32
-#		define breakpoint() DebugBreak()
-#	else
-#		define breakpoint() raise(SIGTRAP)
-#	endif
 #	define assert(...) if (not(__VA_ARGS__)) sys::warn(here, #__VA_ARGS__)
 #	define alert(...) if (bool(__VA_ARGS__)) sys::err(here, #__VA_ARGS__)
 #	define trace(...) sys::warn(here, #__VA_ARGS__)
 #	define verify(...) assert(__VA_ARGS__)
 #else
-#	define breakpoint()
 #	define assert(...)
 #	define alert(...) (__VA_ARGS__)
 #	define trace(...)
@@ -35,7 +29,6 @@
 // Pessimistic boolean
 
 enum : bool { success = false, failure = true };
-
 static_assert(failure != success);
 
 // Error format

@@ -15,8 +15,9 @@ namespace env::file
 		return invalid == value;
 	}
 
-	using io_ptr = fwd::extern_ptr<FILE>;
-	io_ptr make_ptr(fwd::as_ptr<FILE>);
+	using io = fwd::extern_ptr<FILE>;
+	io make_ptr(fwd::as_ptr<FILE>);
+	io temp();
 
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
