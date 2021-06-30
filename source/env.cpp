@@ -32,7 +32,7 @@
 
 namespace env::os
 {
-	fmt::string::view dir(fmt::string::view path, bool traced)
+	fmt::string::view::span dir(fmt::string::view path, bool traced)
 	{
 		#ifdef trace
 		if (traced) trace(path);
@@ -54,7 +54,7 @@ namespace env::os
 			{ "AppDataFavorites", {FOLDERID_AppDataDocuments, "%LocalAppData%\\Favorites"}},
 			{ "AppDataProgramData", {FOLDERID_AppDataProgramData, "%LocalAppData%\\ProgramData"}},
 			{ "ApplicationShortcuts", {FOLDERID_ApplicationShortcuts, "%LocalAppData%\\Microsoft\\Windows\\Application Shortcuts"}},
-			{ "CDBurning", {FOLDERID_CDBurning, "%LocalAppData%\\Microsoft\\Winodws\\Burn\\Burn"}},
+			{ "CDBurning", {FOLDERID_CDBurning, "%LocalAppData%\\Microsoft\\Windows\\Burn\\Burn"}},
 			{ "CommonAdminTools", {FOLDERID_CommonAdminTools, "%AllUsersProfile%\\Start Menu\\Programs\\Administrative Tools"}},
 			{ "CommonPrograms", {FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu\\Programs"}},
 			{ "CommonStartMenu", {FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu"}},
@@ -72,6 +72,7 @@ namespace env::os
 			{ "History", {FOLDERID_History, "%UserProfile%\\Local Settings\\History"}},
 			{ "InternetCache", {FOLDERID_InternetCache, "%LocalAppData%\\Local Settings\\Temporary"}},
 			{ "Links", {FOLDERID_Links}, "%UserProfile%\\Links"}},
+			{ "Objects3D", {FOLDERID_Objects3D, "%UserProfile%\\Objects3D"}},
 			{ "Resources", {FOLDERID_LocalizedResourcesDir, "%WinDir%\\Resources"}},
 			{ "Music", {FOLDERID_Music, "%UserProfile%\\Music;%UserProfile%\\My Documents\\My Music"}},
 			{ "Pictures", {FOLDERID_Pictures, "%UserProfile%\\Pictures;%UserProfile%\\My Documents\\My Pictures"}},
@@ -102,7 +103,7 @@ namespace env::os
 			PWSTR pws = nullptr;
 			auto const ok = SHGetKnownFolderPath
 			(
-				it->first, 0, nullptr, &pws
+				it->first, KF_FLAG_DEFAULT, nullptr, &pws
 			);
 
 			if (S_OK == ok)
@@ -119,23 +120,27 @@ namespace env::os
 		}
 
 		#else // POSIX
-		
 		static std::map
 		<
-			fmt::string::view, std::pair<fmt::string::view, fmt::string::view::vector>
+			fmt::string::view, std::pair<fmt::string::view, fmt::string::view>
 		> 
 		const map =
 		{
-			{"Data", {"XDG_DATA_HOME", {"$HOME/.local/share"}}},
-			{"Desktop", {"XDG_DESKTOP_DIR", {"$HOME/Desktop"}}},
-			{"Documents", {"XDG_DOCUMENTS_DIR", {"$HOME/Documents"}}},
-			{"Downloads", {"XDG_DOWNLOAD_DIR", {"$HOME/Downloads"}}},
-			{"Music", {"XDG_MUSIC_DIR", {"$HOME/Music"}}},
-			{"Runtime", {"XDG_RUNTIME_DIR", {"$TMPDIR", "$TEMP", "$TMP"}}},
-			{"Pictures", {"XDG_PICTURES_DIR", {"$HOME/Pictures"}}},
-			{"Public", {"XDG_PUBLICSHARE_DIR", {"$HOME/Public"}}},
-			{"Templates", {"XDG_TEMPLATES_DIR", {"$HOME/Templates"}}},
-			{"Videos", {"XDG_VIDEOS_DIR", {"$HOME/Videos"}}},
+			{"Cache-Home", {"XDG_CACHE_HOME", "$HOME/.cache"}},
+			{"Config-Dirs", {"XDG_CONFIG_DIRS", "/etc/xdg"}},
+			{"Config-Home", {"XDG_CONFIG_HOME", "$HOME/.config"}},
+			{"Data-Dirs", {"XDG_DATA_DIRS", "/usr/local/share:/usr/share"}},
+			{"Data-Home", {"XDG_DATA_HOME", "$HOME/.local/share"}},
+			{"Desktop", {"XDG_DESKTOP_DIR", "$HOME/Desktop"}},
+			{"Documents", {"XDG_DOCUMENTS_DIR", "$HOME/Documents"}},
+			{"Downloads", {"XDG_DOWNLOAD_DIR", "$HOME/Downloads"}},
+			{"Music", {"XDG_MUSIC_DIR", "$HOME/Music"}},
+			{"Runtime", {"XDG_RUNTIME_DIR", "$TMPDIR:$TEMP:$TMP"}},
+			{"Pictures", {"XDG_PICTURES_DIR", "$HOME/Pictures"}},
+			{"Public", {"XDG_PUBLICSHARE_DIR", "$HOME/Public"}},
+			{"State-Home", {"XDG_STATE_HOME", "$HOME/.local/state"}},
+			{"Templates", {"XDG_TEMPLATES_DIR", "$HOME/Templates"}},
+			{"Videos", {"XDG_VIDEOS_DIR", "$HOME/Videos"}},
 		};
 
 		auto it = map.find(path);
@@ -150,12 +155,17 @@ namespace env::os
 		{
 			for (auto v : it->second)
 			{
-				u = env::var::value(it->second);
-				if (not empty(u)) break;
+				u = env::var::value(v);
+				if (not empty(u)) 
+				{
+					break;
+				}
 			}
 		}
 
-		return u;
+		thread_local fmt::string::view::vector w;
+		w = fmt::dir::split(u);
+		return w;
 	}
 }
 

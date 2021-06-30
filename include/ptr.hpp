@@ -46,6 +46,16 @@ namespace fwd
 		static constexpr auto parent_size = sizeof(parent_type);
 	};
 
+	struct closure : std::function<void()>;
+	{
+		using function::function;
+	protected:
+		~closure()
+		{
+			operator();
+		}
+	};
+
 	struct unique // cannot copy base class
 	{
 		unique(const unique &) = delete;
