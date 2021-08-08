@@ -50,22 +50,23 @@ test_unit(doc)
 	using value_type = fwd::offset_of<&dumb::i>::value_type;
 	static_assert(std::is_same<value_type, int>::value);
 
-	const int id = doc::access<dumb>().open({});
+	dumb dumber;
+	const int id = doc::access<dumb>().open(dumber);
 	assert(0 == id);
 	const auto ptr = doc::access<dumb>().find(id);
 	assert(nullptr != ptr);
 
-	doc::value<0>(ptr) = 42;
-	doc::value<1>(ptr) = 4.2f;
-	doc::value<2>(ptr) = "42";
+	doc::set<0>(ptr) = 42;
+	doc::set<1>(ptr) = 4.2f;
+	doc::set<2>(ptr) = "42";
 
 	assert(42 == ptr->i);
 	assert(4.2f == ptr->f);
 	assert(ptr->s == "42");
 
-	assert(42 == doc::value<0>(ptr));
-	assert(4.2f == doc::value<1>(ptr));
-	assert(doc::value<2>(ptr) == "42");
+	assert(42 == doc::get<0>(ptr));
+	assert(4.2f == doc::get<1>(ptr));
+	assert(doc::get<2>(ptr) == "42");
 
 	assert(doc::key<0>(ptr) == "i");
 	assert(doc::key<1>(ptr) == "f");

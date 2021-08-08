@@ -81,7 +81,7 @@ add(CFLAGS, -D_POSIX_SOURCE)
 ifdef UNIVER
 add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
-add(LOAD, rt dl pthread)
+add(LOAD, m rt dl pthread)
 EXEEXT=.out
 DIR=/
 ENT=:

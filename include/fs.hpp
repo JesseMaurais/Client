@@ -29,13 +29,12 @@ namespace fmt
 			using view = fmt::basic_string_view<Char, Traits>;
 			using size_t = env::file::size_t;
 			using mode = env::file::mode;
-			inline auto width = env::file::width;
 
 			env::file::descriptor f;
 
 		public:
 
-			basic_fdstream(mode mask = Default, size_t size = width())
+			basic_fdstream(mode mask = Default, size_t size = env::file::width())
 			: base(f)
 			{
 				if (mask & env::file::rw)
@@ -54,7 +53,7 @@ namespace fmt
 				}
 			}
 
-			basic_fdstream(view path, mode mask = Default, size_t size = width())
+			basic_fdstream(view path, mode mask = Default, size_t size = env::file::width())
 			: base(f), f(path, mode(mask | Default))
 			{
 				if (mask & env::file::rw)

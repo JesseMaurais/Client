@@ -257,40 +257,6 @@ namespace sys
 
 		mode_t um;
 	};
-
-	struct dup
-	{
-		dup(int from, int to = STDERR_FILENO)
-		{
-			tmp = ::sys::dup(fd = to);
-			if (fail(tmp))
-			{
-				err(here);
-			}
-			else
-			if (fail(dup2(from, fd)))
-			{
-				err(here);
-			}
-		}
-
-		~dup()
-		{
-			if (fail(sys::dup2(tmp, to)))
-			{
-				err(here);
-			}
-			else
-			if (fail(close(tmp)))
-			{
-				err(here);
-			}
-		}
-
-	private:
-
-		int fd, tmp;
-	};
 }
 
 #endif // file

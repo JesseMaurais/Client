@@ -32,7 +32,7 @@
 
 namespace env::os
 {
-	fmt::string::view::span dir(fmt::string::view path, bool traced)
+	fmt::string::view dir(fmt::string::view path, bool traced)
 	{
 		#ifdef trace
 		if (traced) trace(path);
@@ -122,7 +122,7 @@ namespace env::os
 		#else // POSIX
 		static std::map
 		<
-			fmt::string::view, std::pair<fmt::string::view, fmt::string::view>
+			fmt::string::view, std::initializer_list<fmt::string::view>
 		> 
 		const map =
 		{
@@ -162,7 +162,12 @@ namespace env::os
 				}
 			}
 		}
+		return u;
+	}
 
+	fmt::string::view::span dirs(fmt::string::view path, bool traced)
+	{
+		auto u = dir(path, traced);
 		thread_local fmt::string::view::vector w;
 		w = fmt::dir::split(u);
 		return w;
@@ -272,7 +277,7 @@ namespace env
 	{
 		static thread_local fmt::string::view::vector local;
 		local.clear();
-		for (auto c = sys::environ(); *c; ++c) local.emplace_back(c);
+		for (auto c = sys::environ(); *c; ++c) local.emplace_back(*c);
 		return local;
 	}
 
@@ -608,44 +613,46 @@ namespace env::usr
 		return t;
 	}
 
+	using namespace std::literals;
+
 	fmt::string::view desktop_dir()
 	{
-		return folder("XDG_DESKTOP_DIR", Desktop);
+		return env::os::dir("Desktop"sv);
 	}
 
 	fmt::string::view documents_dir()
 	{
-		return folder("XDG_DOCUMENTS_DIR", Documents);
+		return env::os::dir("Documents"sv);
 	}
 
 	fmt::string::view download_dir()
 	{
-		return folder("XDG_DOWNLOAD_DIR", Downloads);
+		return env::os::dir("Downloads"sv);
 	}
 
 	fmt::string::view music_dir()
 	{
-		return folder("XDG_MUSIC_DIR", Music);
+		return env::os::dir("Music"sv);
 	}
 
 	fmt::string::view pictures_dir()
 	{
-		return folder("XDG_PICTURES_DIR", Pictures);
+		return env::os::dir("Pictures"sv);
 	}
 
 	fmt::string::view public_dir()
 	{
-		return folder("XDG_PUBLICSHARE_DIR", PublicShare);
+		return env::os::dir("Public"sv);
 	}
 
 	fmt::string::view templates_dir()
 	{
-		return folder("XDG_TEMPLATES_DIR", Templates);
+		return env::os::dir("Templates"sv);
 	}
 
 	fmt::string::view videos_dir()
 	{
-		return folder("XDG_VIDEOS_DIR", Videos);
+		return env::os::dir("Videos"sv);
 	}
 }
 

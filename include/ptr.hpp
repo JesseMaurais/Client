@@ -46,13 +46,13 @@ namespace fwd
 		static constexpr auto parent_size = sizeof(parent_type);
 	};
 
-	struct closure : std::function<void()>;
+	struct closure : std::function<void()>
 	{
 		using function::function;
 	protected:
 		~closure()
 		{
-			operator();
+			(*this)();
 		}
 	};
 

@@ -20,7 +20,7 @@ namespace doc
 		return singleton;
 	}
 
-	template <class Type> int instance<Type>::open(Type&& type)
+	template <class Type> int instance<Type>::open(Type& type)
 	{
 		// find lowest free index
 		auto pos = index.size();

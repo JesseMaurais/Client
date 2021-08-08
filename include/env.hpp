@@ -11,7 +11,7 @@ namespace env::os
 	/// WIN32: environment is %embraced%
 	/// POSIX: environment is $prefaced
 
-	fmt::string::view dir(fmt::wstring::view direct, bool traced = false);
+	fmt::string::view dir(fmt::string::view direct, bool traced = false);
 	/// The first match in paths
 }
 
@@ -24,7 +24,7 @@ namespace env
 		bool set(fmt::string::view);
 		bool put(fmt::string::view);
 		bool put(fmt::string::view, fmt::string::view);
-		fmt::string value(fmt::string::view);
+		fmt::string::view value(fmt::string::view);
 	}
 
 	fmt::string::view::span vars();

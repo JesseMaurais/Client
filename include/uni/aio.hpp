@@ -3,6 +3,7 @@
 
 #include "signal.hpp"
 #include <functional>
+#include <aio.h>
 
 namespace sys::uni::aio
 {
@@ -10,42 +11,42 @@ namespace sys::uni::aio
 	{
 		using function = sig::event::function;
 
-		event(function f, pthread_attr_t* attr = nullptr) : work(f)
+		event(function f, pthread_attr_t* attr = nullptr)
 		{
-			aio_sigevent.sigev_value.sival_int = doc::socket(f);
+			aio_sigevent.sigev_value.sival_int = doc::socket().open(f);
 			aio_sigevent.sigev_notify = SIGEV_THREAD;
-			aio_sigevent.sigev_notify_function - thread;
+			aio_sigevent.sigev_notify_function = thread;
 			aio_sigevent.sigev_notify_attributes = attr;
 		}
 
 		~event()
 		{
-			doc::unsocket(aio_sigevent.sigev_value.sival_int);
+			doc::socket().close(aio_sigevent.sigev_value.sival_int);
 		}
 
 		bool read()
 		{
-			return fail(aio_read(this)) and err(here);
+			return fail(aio_read(this)) and sys::err(here);
 		}
 
 		bool write()
 		{
-			return fail(aio_write(this)) and err(here);
+			return fail(aio_write(this)) and sys::err(here);
 		}
 
 		bool error()
 		{
-			return fail(aio_error(this)) and err(here);
+			return fail(aio_error(this)) and sys::err(here);
 		}
 
 		bool fsync(int op)
 		{
-			return fail(aio_fsync(op, this)) and err(here, op);
+			return fail(aio_fsync(op, this)) and sys::err(here, op);
 		}
 
 		bool cancel(int fd)
 		{
-			return fail(aio_cancel(fd, this)) and err(here, fd);
+			return fail(aio_cancel(fd, this)) and sys::err(here, fd);
 		}
 
 		auto yield()

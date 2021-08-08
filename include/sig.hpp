@@ -6,6 +6,7 @@
 #include <csignal>
 #include <algorithm>
 #include <functional>
+#include "fmt.hpp"
 
 namespace fwd::sig
 {
@@ -44,20 +45,20 @@ namespace fwd::sig
 			return end != it ? distance(begin, it) : invalid;
 		}
 
-		void raise(args... args) const
+		void raise(args... a) const
 		{
-			raise([=](auto const &pair){ pair.second(args...); });
+			raise([=](auto const &pair){ pair.second(a...); });
 		}
 
-		template <class filter>	void raise(filter &&filter) const
+		template <class filter>	void raise(filter &&rule) const
 		{
-			for_each(begin(slots), end(slots), filter);
+			for_each(begin(slots), end(slots), rule);
 		}
 
-		template <class filter>	void raise(slot id, filter &&filter) const
+		template <class filter>	void raise(slot id, filter &&rule) const
 		{
 			auto const pair = slots.equal_range(id);
-			for_each(pair.first, pair.second, filter);
+			for_each(pair.first, pair.second, rule);
 		}
 
 	protected:
@@ -91,7 +92,7 @@ namespace fwd::sig
 
 namespace sys::sig
 {
-	inline bool fail(sighandler_t* f)
+	inline bool fail(sighandler_t f)
 	{
 		return SIG_ERR == f;
 	}
@@ -101,29 +102,29 @@ namespace sys::sig
 	using function = slot::function;
 	using signature = slot::signature;
 
-	std::string to_string(int);
+	fmt::string to_string(int);
 
 	struct scope : fwd::unique, slot
 	{
 		scope(int no, function f) : slot(&event(no), f)
 		{
-			old.no = no;
-			old.f = std::signal(no, raise);
+			old.n = no;
+			old.h = std::signal(no, raise);
 			#ifdef alert
-			alert(fail(old.f));
+			alert(fail(old.h));
 			#endif
 		}
 
 		~scope()
 		{
-			(void) std::signal(old.on, old.f);
+			(void) std::signal(old.n, old.h);
 		}
 
 	protected:
 
 		struct {
-			sighandler_t* f;
-			int no;
+			sighandler_t h;
+			int n;
 		} old;
 
 	private:
@@ -134,16 +135,17 @@ namespace sys::sig
 
 	struct stack : scope
 	{
-		stack(int on, observer ob) : scope(on, next(ob))
+		stack(int no, function f) : scope(no, next(f))
 		{ }
 
 	protected:
 
-		observer next(observer ob)
+		function next(function f)
 		{
-			return [=](int on)
+			return [=](int n)
 			{
-				ob(on); old.ob(on);
+				f(n); 
+				old.h(n);
 			};
 		}
 	};

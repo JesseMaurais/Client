@@ -113,7 +113,7 @@ namespace fmt
 	{
 		using view = basic_string_view<Char, Traits, Alloc, Order>;
 		using line = fwd::line<Char, Traits, Alloc>;
-		using char_ptr = memory_brief<Char>::ptr;
+		using char_ptr = typename memory_brief<Char>::ptr;
 
 		basic_string(fwd::basic_string_view<Char, Traits> in)
 		: Base(data(in), size(in))

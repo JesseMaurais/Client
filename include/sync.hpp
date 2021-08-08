@@ -138,11 +138,6 @@ namespace sys
 			auto const unlock = lock.write();
 			return value = n;
 		}
-
-		atomic(Type n)
-		{
-			operator=(n);
-		}
 	};
 }
 

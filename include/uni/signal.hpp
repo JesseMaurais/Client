@@ -29,7 +29,7 @@ namespace sys::uni::sig
 			for (int n : list) add(n);
 		}
 
-		set(std::initialize_list<int> list)
+		set(std::initializer_list<int> list)
 		{
 			empty();
 			for (int n : list) add(n);
@@ -97,17 +97,18 @@ namespace sys::uni::sig
 	{
 		bool set(stack_t* prev = nullptr) const
 		{
-			return fail(sigaltstack(this, prev)) and err(here);
+			return fail(sigaltstack(this, prev)) and sys::err(here);
 		}
 
 		bool get(const stack_t* next = nullptr)
 		{
-			return fail(sigaltstack(next, this)) and err(here);
+			return fail(sigaltstack(next, this)) and sys::err(here);
 		}
 
 		auto alloc(size_t size)
 		{
-			ss_size = std::max(size, SIGSTKSZ);
+			constexpr size_t limit = SIGSTKSZ;
+			ss_size = std::max(size, limit);
 			ss_sp = std::realloc(ss_sp, ss_size);
 			return ss_size;
 		}
@@ -115,7 +116,7 @@ namespace sys::uni::sig
 
 	struct action : fwd::unique, sigaction
 	{
-		action(int flags, set mask)
+		action(int flags, struct set mask)
 		{
 			sa_flags = flags;
 			sa_mask = mask.buf[0];
@@ -123,20 +124,20 @@ namespace sys::uni::sig
 			sa_handler = nullptr;
 		}
 
-		bool set(int n, sigaction* prev = nullptr) const
+		bool set(int n, struct sigaction* prev = nullptr) const
 		{
-			return fail(sigaction(n, this, prev)) and err(here);
+			return fail(::sigaction(n, this, prev)) and sys::err(here);
 		}
 
-		bool get(int n, sigaction* next = nullptr)
+		bool get(int n, const struct sigaction* next = nullptr)
 		{
-			return fail(sigaction(n, next, this)) and err(here);
+			return fail(::sigaction(n, next, this)) and sys::err(here);
 		}
 	};
 
 	struct info : sig::action
 	{
-		info(int flags, set mask) : action(SA_SIGINFO | flags, mask)
+		info(int flags, struct set mask) : action(SA_SIGINFO | flags, mask)
 		{
 			sa_sigaction = queue;
 		}
@@ -148,7 +149,7 @@ namespace sys::uni::sig
 			const int fd = info->si_value.sival_int;
 			if (STDERR_FILENO != fd)
 			{
-				const struct sys::dup tmp(fd);
+				//const struct sys::dup tmp(fd);
 				psiginfo(info, strsignal(signo));
 			}
 			else
@@ -162,15 +163,15 @@ namespace sys::uni::sig
 	inline bool queue(pid_t pid, int n, int fd = STDERR_FILENO)
 	{
 		sigval value;
-		value.sigval_int = fd;
-		const auto error = fail(sigqueue(pid, n, value))
+		value.sival_int = fd;
+		const auto error = fail(sigqueue(pid, n, value));
 		if (error) err(here);
 		return error;
 	}
 
 	struct event : fwd::unique, sigevent
 	{
-		using doc::function;
+		using function = ::doc::function;
 
 		event(function f, pthread_attr_t* attr = nullptr)
 		{
