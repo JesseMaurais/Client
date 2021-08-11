@@ -203,7 +203,7 @@ using stat_t =
 
 namespace sys
 {
-	char** environ();
+	char** environment();
 	pid_t exec(int fd[3], size_t argc, char const **argv);
 	bool kill(pid_t);
 	int wait(pid_t);

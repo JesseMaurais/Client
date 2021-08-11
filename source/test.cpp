@@ -65,7 +65,7 @@ namespace
 
 				if (0 < sh.status)
 				{
-					auto const text = sys::sig::to_string(sh.status);
+					auto const text = sys::sig::text(sh.status);
 					sys::out() << "Signal: " << text << fmt::eol;
 				}
 				else

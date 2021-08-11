@@ -41,60 +41,57 @@ namespace env::os
 		fmt::string::view u = fmt::empty;
 		
 		#ifdef _WIN32
-		static std::map
-		<
-			fmt::string::view, std::pair<KNOWNFOLDERID, fmt::string::view::vector>
-		>
-		const map =
+		using entry = std::pair<KNOWNFOLDERID, fmt::string::view>;
+		static std::map<fmt::string::view, entry> const map =
 		{
-			{ "AccountPictures", {FOLDERID_AccountPictures, "%AppData%\\Microsoft\\Winodws\\AccountPictures"}},
-			{ "AdminTools", {FOLDERID_AdminTools, "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools"}},
-			{ "AppDataDesktop", {FOLDERID_AppDataDesktop, "%LocalAppData%\\Desktop"}},
-			{ "AppDataDocuments", {FOLDERID_AppDataDocuments, "%LocalAppData%\\Documents"}},
-			{ "AppDataFavorites", {FOLDERID_AppDataDocuments, "%LocalAppData%\\Favorites"}},
-			{ "AppDataProgramData", {FOLDERID_AppDataProgramData, "%LocalAppData%\\ProgramData"}},
-			{ "ApplicationShortcuts", {FOLDERID_ApplicationShortcuts, "%LocalAppData%\\Microsoft\\Windows\\Application Shortcuts"}},
-			{ "CDBurning", {FOLDERID_CDBurning, "%LocalAppData%\\Microsoft\\Windows\\Burn\\Burn"}},
-			{ "CommonAdminTools", {FOLDERID_CommonAdminTools, "%AllUsersProfile%\\Start Menu\\Programs\\Administrative Tools"}},
-			{ "CommonPrograms", {FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu\\Programs"}},
-			{ "CommonStartMenu", {FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu"}},
-			{ "CommonStartup", {FOLDERID_CommonStartup, "%AllUsersProfile%\\Start Menu\\StartUp"}},
-			{ "CommonTemplates" {FOLDERID_CommonTemplates, "%AllUsersProfile%\\Templates"}},
-			{ "LocalAppData", {FOLDERID_LocalAppData, "%UserProfile%\\AppData\\Local"}},
-			{ "Camera", {FOLDERID_CameraRoll, "%UserProfile%\\Pictures\\Camera Roll"}},
-			{ "Contacts", {FOLDERID_Contacts, "%UserProfile%\\Contacts"}},
-			{ "Cookies", {FOLDERID_Cookies, "%UserProfile%\\Cookies"}},
-			{ "Desktop", {FOLDERID_Desktop, "%UserProfile%\\Desktop"}},
-			{ "Documents", {FOLDERID_Documents, "%UserProfile%\\Documents"}},
-			{ "Downloads", {FOLDERID_Downloads, "%UserProfile%\\Downloads"}},
-			{ "Favorites", {FOLDERID_Favorites, "%UserProfile%\\Favorites"}},
-			{ "Fonts", {FOLDERID_Fonts, "%WinDir%\\Fonts" }},
-			{ "History", {FOLDERID_History, "%UserProfile%\\Local Settings\\History"}},
-			{ "InternetCache", {FOLDERID_InternetCache, "%LocalAppData%\\Local Settings\\Temporary"}},
-			{ "Links", {FOLDERID_Links}, "%UserProfile%\\Links"}},
-			{ "Objects3D", {FOLDERID_Objects3D, "%UserProfile%\\Objects3D"}},
-			{ "Resources", {FOLDERID_LocalizedResourcesDir, "%WinDir%\\Resources"}},
-			{ "Music", {FOLDERID_Music, "%UserProfile%\\Music;%UserProfile%\\My Documents\\My Music"}},
-			{ "Pictures", {FOLDERID_Pictures, "%UserProfile%\\Pictures;%UserProfile%\\My Documents\\My Pictures"}},
-			{ "Profile", {FOLDERID_Profile, "%UserProfile%"}},
-			{ "ProgramData", {FOLDERID_ProgramData, "%AllUsersProfile%\\Application Data;%AllUsersProfile%;%ProgramData%;%SystemDrive%\\ProgramData"}}},
-			{ "ProgramFilesCommon", {FOLDERID_ProgramFilesCommon, "%ProgramFiles%\\Common Files"}},
-			{ "ProgramFiles", {FOLDERID_ProgramFiles, "%ProgramFiles%;%SystemDrive%\\Program Files"}},
-			{ "Programs", {FOLDERID_Programs, "%UserProfile%\\Start Menu\\Programs"}},
-			{ "Public", {FOLDERID_Public, "%Public%", "%SystemDrive%\\Users\\Public"}},
-			{ "PublicDesktop", {FOLDERID_PublicDesktop, "%Public%\\Desktop;%AllUsersProfile%\\Desktop"}},
-			{ "PublicDocuments", {FOLDERID_PublicDocuments, "%Public%\\Documents;%AllUsersProfile%\\Documents"}},
-			{ "PublicDownloads", {FOLDERID_PublicDownloads, "%Public%\\Downloads"}},
-			{ "Screenshot", {FOLDERID_Screenshots, "%UserProfile%\\Pictures\\Screenshots"}},
-			{ "StartMenu", {FOLDERID_StartMenu, "%UserProfile%\\Start Menu"}},
-			{ "Startup", {FOLDERID_Startup, "%UserProfile%\\Start Menu\\Programs\\StartUp"}},
-			{ "System", {FOLDERID_System, "%WinDir%\\System32"}},
-			{ "Templates", {FOLDERID_Templates, "%UserProfile%\\Templates"}},
-			{ "UserProfiles", {FOLDERID_UserProfiles, "%SystemDrive%\\Users"}},
-			{ "UserProgramFiles", {FOLDERID_UserProgramFiles, "%LocalAppData%\\Programs"}}
-			{ "UserProgramFilesCommon", {FOLDERID_UserProgramFilesCommon, "%LocalAppData%\\Programs\\Common"}},
-			{ "Videos", {FOLDERID_Videos, "%UserProfile%\\Videos;%UserProfile%\\My Documents\\My Videos"}},
-			{ "Windows", {FOLDERID_Windows, "%WinDir%"}}
+			{ "AccountPictures", entry{FOLDERID_AccountPictures, "%AppData%\\Microsoft\\Winodws\\AccountPictures"}},
+			{ "AdminTools", entry{FOLDERID_AdminTools, "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools"}},
+			{ "AppDataDesktop", entry{FOLDERID_AppDataDesktop, "%LocalAppData%\\Desktop"}},
+			{ "AppDataDocuments", entry{FOLDERID_AppDataDocuments, "%LocalAppData%\\Documents"}},
+			{ "AppDataFavorites", entry{FOLDERID_AppDataDocuments, "%LocalAppData%\\Favorites"}},
+			{ "AppDataProgramData", entry{FOLDERID_AppDataProgramData, "%LocalAppData%\\ProgramData"}},
+			{ "ApplicationShortcuts", entry{FOLDERID_ApplicationShortcuts, "%LocalAppData%\\Microsoft\\Windows\\Application Shortcuts"}},
+			{ "CDBurning", entry{FOLDERID_CDBurning, "%LocalAppData%\\Microsoft\\Windows\\Burn\\Burn"}},
+			{ "CommonAdminTools", entry{FOLDERID_CommonAdminTools, "%AllUsersProfile%\\Start Menu\\Programs\\Administrative Tools"}},
+			{ "CommonPrograms", entry{FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu\\Programs"}},
+			{ "CommonStartMenu", entry{FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu"}},
+			{ "CommonStartup", entry{FOLDERID_CommonStartup, "%AllUsersProfile%\\Start Menu\\StartUp"}},
+//			{ "CommonTemplates" {FOLDERID_CommonTemplates, "%AllUsersProfile%\\Templates"}},
+			{ "LocalAppData", entry{FOLDERID_LocalAppData, "%UserProfile%\\AppData\\Local"}},
+			{ "Camera", entry{FOLDERID_CameraRoll, "%UserProfile%\\Pictures\\Camera Roll"}},
+			{ "Contacts", entry{FOLDERID_Contacts, "%UserProfile%\\Contacts"}},
+			{ "Cookies", entry{FOLDERID_Cookies, "%UserProfile%\\Cookies"}},
+			{ "Desktop", entry{FOLDERID_Desktop, "%UserProfile%\\Desktop"}},
+			{ "Documents", entry{FOLDERID_Documents, "%UserProfile%\\Documents"}},
+			{ "Downloads", entry{FOLDERID_Downloads, "%UserProfile%\\Downloads"}},
+			{ "Favorites", entry{FOLDERID_Favorites, "%UserProfile%\\Favorites"}},
+			{ "Fonts", entry{FOLDERID_Fonts, "%WinDir%\\Fonts" }},
+			{ "History", entry{FOLDERID_History, "%UserProfile%\\Local Settings\\History"}},
+			{ "InternetCache", entry{FOLDERID_InternetCache, "%LocalAppData%\\Local Settings\\Temporary"}},
+			{ "Links", entry{FOLDERID_Links, "%UserProfile%\\Links"}},
+			{ "Objects3D", entry{FOLDERID_Objects3D, "%UserProfile%\\Objects3D"}},
+			{ "Resources", entry{FOLDERID_LocalizedResourcesDir, "%WinDir%\\Resources"}},
+			{ "Music", entry{FOLDERID_Music, "%UserProfile%\\Music;%UserProfile%\\My Documents\\My Music"}},
+			{ "Pictures", entry{FOLDERID_Pictures, "%UserProfile%\\Pictures;%UserProfile%\\My Documents\\My Pictures"}},
+			{ "Profile", entry{FOLDERID_Profile, "%UserProfile%"}},
+			{ "ProgramData", entry{FOLDERID_ProgramData, "%AllUsersProfile%\\Application Data;%AllUsersProfile%;%ProgramData%;%SystemDrive%\\ProgramData"}},
+			{ "ProgramFilesCommon", entry{FOLDERID_ProgramFilesCommon, "%ProgramFiles%\\Common Files"}},
+			{ "ProgramFiles", entry{FOLDERID_ProgramFiles, "%ProgramFiles%;%SystemDrive%\\Program Files"}},
+			{ "Programs", entry{FOLDERID_Programs, "%UserProfile%\\Start Menu\\Programs"}},
+			{ "Public", entry{FOLDERID_Public, "%Public%;%SystemDrive%\\Users\\Public"}},
+			{ "PublicDesktop", entry{FOLDERID_PublicDesktop, "%Public%\\Desktop;%AllUsersProfile%\\Desktop"}},
+			{ "PublicDocuments", entry{FOLDERID_PublicDocuments, "%Public%\\Documents;%AllUsersProfile%\\Documents"}},
+			{ "PublicDownloads", entry{FOLDERID_PublicDownloads, "%Public%\\Downloads"}},
+			{ "Screenshot", entry{FOLDERID_Screenshots, "%UserProfile%\\Pictures\\Screenshots"}},
+			{ "StartMenu", entry{FOLDERID_StartMenu, "%UserProfile%\\Start Menu"}},
+			{ "Startup", entry{FOLDERID_Startup, "%UserProfile%\\Start Menu\\Programs\\StartUp"}},
+			{ "System", entry{FOLDERID_System, "%WinDir%\\System32"}},
+			{ "Templates", entry{FOLDERID_Templates, "%UserProfile%\\Templates"}},
+			{ "UserProfiles", entry{FOLDERID_UserProfiles, "%SystemDrive%\\Users"}},
+			{ "UserProgramFiles", entry{FOLDERID_UserProgramFiles, "%LocalAppData%\\Programs"}},
+			{ "UserProgramFilesCommon", entry{FOLDERID_UserProgramFilesCommon, "%LocalAppData%\\Programs\\Common"}},
+			{ "Videos", entry{FOLDERID_Videos, "%UserProfile%\\Videos;%UserProfile%\\My Documents\\My Videos"}},
+			{ "Windows", entry{FOLDERID_Windows, "%WinDir%"}}
 		};
 
 		auto it = map.find(path);
@@ -103,7 +100,7 @@ namespace env::os
 			PWSTR pws = nullptr;
 			auto const ok = SHGetKnownFolderPath
 			(
-				it->first, KF_FLAG_DEFAULT, nullptr, &pws
+				it->second.first, KF_FLAG_DEFAULT, nullptr, &pws
 			);
 
 			if (S_OK == ok)
@@ -153,13 +150,9 @@ namespace env::os
 
 		if (empty(u))
 		{
-			for (auto v : it->second)
+			if (auto v = it->second.second; not empty(v))
 			{
 				u = env::var::value(v);
-				if (not empty(u)) 
-				{
-					break;
-				}
 			}
 		}
 		return u;
@@ -277,7 +270,7 @@ namespace env
 	{
 		static thread_local fmt::string::view::vector local;
 		local.clear();
-		for (auto c = sys::environ(); *c; ++c) local.emplace_back(*c);
+		for (char** c = ::sys::environment(); *c; ++c) local.emplace_back(*c);
 		return local;
 	}
 

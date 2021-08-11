@@ -92,50 +92,69 @@ namespace fwd::sig
 
 namespace sys::sig
 {
-	inline bool fail(sighandler_t f)
-	{
-		return SIG_ERR == f;
-	}
+	fmt::string::view text(int);
 
 	using slot = fwd::sig::slot<int>;
 	using socket = slot::socket;
 	using function = slot::function;
 	using signature = slot::signature;
+	using handler = fwd::as_ptr<signature>;
 
-	fmt::string to_string(int);
-
-	struct scope : fwd::unique, slot
+	inline bool fail(handler h)
 	{
-		scope(int no, function f) : slot(&event(no), f)
+		return SIG_ERR == h;
+	}
+
+	inline bool fault(handler h)
+	{
+		return SIG_DFL == h;
+	}
+
+	inline bool ignore(handler h)
+	{
+		return SIG_IGN == h;
+	}
+
+	inline bool empty(handler h)
+	{
+		return fail(h) or fault(h) or ignore(h);
+	}
+
+	struct state : fwd::unique, slot
+	{
+		state(int n, function f) : slot(event(n), f)
 		{
-			old.n = no;
-			old.h = std::signal(no, raise);
+			old.n = n;
+			old.h = std::signal(n, raise);
 			#ifdef alert
 			alert(fail(old.h));
 			#endif
 		}
 
-		~scope()
+		~state()
 		{
-			(void) std::signal(old.n, old.h);
+			old.h = std::signal(old.n, old.h);
+			#ifdef alert
+			alert(fail(old.h));
+			#endif
 		}
 
 	protected:
 
 		struct {
-			sighandler_t h;
+			handler h;
 			int n;
 		} old;
 
 	private:
 
-		static socket& event(int);
+		static socket* event(int);
 		static void raise(int);
 	};
 
-	struct stack : scope
+	struct stack : state
 	{
-		stack(int no, function f) : scope(no, next(f))
+		stack(int no, function f) : state(no, next(f))
 		{ }
 
 	protected:

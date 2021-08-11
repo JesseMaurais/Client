@@ -148,10 +148,10 @@ namespace sys
 
 	// sys.hpp
 
-	char** environ()
+	char** environment()
 	{
 		#ifdef _WIN32
-		return ::_environ;
+		return _environ;
 		#else //POSIX
 		return ::environ;
 		#endif
@@ -489,170 +489,173 @@ namespace sys
 
 namespace sys::sig
 {
-	socket &scope::event(int no)
+	socket* state::event(int no)
 	{
 		static std::map<int, sys::sig::socket> map;
-		return map[no];
+		return std::addressof(map[no]);
 	}
 
-	void scope::raise(int no)
+	void state::raise(int no)
 	{
-		event(no).raise([no](auto const &p)
+		event(no)->raise([no](auto const &p)
 		{
 			p.second(no);
 		});
 	}
 
-	fmt::string to_string(int signo)
+	fmt::string::view text(int n)
 	{
-		switch (signo)
+		using namespace std::literals;
+
+		switch (n)
 		{
 		case SIGABRT:
-			return "Abort";
+			return "abort"sv;
 
 		#ifdef SIGALRM
 		case SIGALRM:
-			return "Alarm";
+			return "alarm"sv;
 		#endif
 
 		#ifdef SIGBUS
 		case SIGBUS:
-			return "Memory access violation";
+			return "violation"sv;
 		#endif
 
 		#ifdef SIGCHLD
 		case SIGCHLD:
-			return "Child process stopped/continued";
+			return "child"sv;
 		#endif
 
 		#ifdef SIGCONT
 		case SIGCONT:
-			return "Continue processing";
+			return "continue"sv;
 		#endif
 
 		case SIGFPE:
-			return "Float-point error";
+			return "float"sv;
 
 		#ifdef SIGHUP
 		case SIGHUP:
-			return "Hang up";
+			return "hangup"sv;
 		#endif
 
 		case SIGILL:
-			return "Illegal instruction";
+			return "illegal"sv;
 
 		case SIGINT:
-			return "Interrupt";
+			return "interrupt"sv;
 
 		#ifdef SIGKILL
 		case SIGKILL:
-			return "Kill";
+			return "kill"sv;
 		#endif
 
 		#ifdef SIGPIPE
 		case SIGPIPE:
-			return "Broken pipe";
+			return "pipe"sv;
 		#endif
 
 		#ifdef SIGQUIT
 		case SIGQUIT:
-			return "Quit processing";
+			return "quit"sv;
 		#endif
-
-		case SIGSEGV:
-			return "Segmentation fault";
 
 		#ifdef SIGSTOP
 		case SIGSTOP:
-			return "Stop processing";
+			return "stop"sv;
 		#endif
 
+		case SIGSEGV:
+			return "segmentation"sv;
+
 		case SIGTERM:
-			return "Terminate";
+			return "terminate"sv;
 
 		#ifdef SIGTSTP
 		case SIGTSTP:
-			return "Terminal stopped";
+			return "stopping"sv;
 		#endif
 
 		#ifdef SIGTIN
 		case SIGTIN:
-			return "Process reading";
+			return "reading"sv;
 		#endif
 
 		#ifdef SIGTOU
 		case SIGTOU:
-			return "Process writing";
+			return "writing"sv;
 		#endif
 
 		#ifdef SIGUSR1
 		case SIGUSR1:
-			return "User defined (1)";
+			return "user(1)"sv;
 		#endif
 
 		#ifdef SIGUSR2
 		case SIGUSR2:
-			return "User defined (2)";
+			return "user(2)"sv;
 		#endif
 
 		#ifdef SIGPOLL
 		case SIGPOLL:
-			return "Poll event";
+			return "poll"sv;
 		#endif
 
 		#ifdef SIGPROF
 		case SIGPROF:
-			return "Profiling timer expired";
+			return "profile"sv;
 		#endif
 
 		#ifdef SIGPWR
 		case SIGPWR:
-			return "Power limited";
+			return "power"sv;
 		#endif
 
 		#ifdef SIGSTKFLT
 		case SIGSTKFLT:
-			return "Stack fault";
+			return "stack fault"sv;
 		#endif
 
 		#ifdef SIGSYS
 		case SIGSYS:
-			return "Bad system call";
+			return "system"sv;
 		#endif
 
 		#ifdef SIGTRAP
 		case SIGTRAP:
-			return "Trace or breakpoint trap";
+			return "trap"sv;
 		#endif
 
 		#ifdef SIGURG
 		case SIGURG:
-			return "Urgent out of band data";
+			return "urgent"sv;
 		#endif
 
 		#ifdef SIGVTALRM
 		case SIGVTALRM:
-			return "Virtual timer expired";
+			return "virtual"sv;
 		#endif
 
 		#ifdef SIGWINCH
 		case SIGWINCH:
-			return "Window resized";
+			return "window"sv;
 		#endif
 
 		#ifdef SIGXCPU
 		case SIGXCPU:
-			return "CPU time limit exceeded";
+			return "time limit exceeded"sv;
 		#endif
 
 		#ifdef SIGXFSZ
 		case SIGXFSZ:
-			return "File size limit exceeded";
+			return "file limit exceeded"sv;
 		#endif
-
-		default:
-			return fmt::to_string(signo);
 		}
+		
+		thread_local fmt::string buf;
+		buf = fmt::to_string(n);
+		return buf;
 	}
 }
 
@@ -680,7 +683,7 @@ test_unit(sig)
 
 	for (int signo : raised)
 	{
-		sys::sig::scope const after
+		sys::sig::state const after
 		(
 			signo, [&caught](int signo)
 			{
