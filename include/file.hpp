@@ -2,7 +2,6 @@
 #define file_hpp "File Object"
 
 #include "fwd.hpp"
-#include "ptr.hpp"
 #include <cstddef>
 #include <cstdio>
 
@@ -14,10 +13,6 @@ namespace env::file
 	{
 		return invalid == value;
 	}
-
-	using io = fwd::extern_ptr<FILE>;
-	io make_ptr(fwd::as_ptr<FILE>);
-	io temp();
 
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;

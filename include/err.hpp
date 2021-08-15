@@ -3,16 +3,10 @@
 
 #include "fmt.hpp"
 
-// Pre condition
-
 #ifdef assert
 #	undef assert
 #	warning You should not include assert
 #endif
-
-// Post conditions
-
-#define here fmt::where { __FILE__, __LINE__, __func__ }
 
 #ifndef NDEBUG
 #	define assert(...) if (not(__VA_ARGS__)) sys::warn(here, #__VA_ARGS__)
@@ -26,12 +20,7 @@
 #	define verify(...) (__VA_ARGS__)
 #endif
 
-// Pessimistic boolean
-
-enum : bool { success = false, failure = true };
-static_assert(failure != success);
-
-// Error format
+#define here fmt::where { __FILE__, __LINE__, __func__ }
 
 namespace fmt
 {
@@ -49,19 +38,21 @@ namespace fmt
 	}
 }
 
+enum : bool { success = false, failure = true };
+
 // Error pipe
 
 namespace sys
 {
 	fmt::string::out::ref out(); // thread-safe buffered output device
-	fmt::string::out::ref put(fmt::string::out::ref); // flush out
+	fmt::string::out::ref flush(fmt::string::out::ref); // flush out stderr
 
 	namespace impl
 	{
 		int bug(fmt::string::view, bool);
 	}
 
-	extern bool debug; // whether to write out
+	extern bool debug; // whether to write out errors
 
 	template <typename... T> int warn(fmt::where at, T... t)
 	{
