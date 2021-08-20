@@ -15,6 +15,7 @@
 #include <tuple>
 #include <string>
 #include <string_view>
+#include <locale>
 
 namespace fwd
 {

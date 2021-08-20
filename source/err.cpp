@@ -18,22 +18,6 @@
 #include <set>
 #include <map>
 
-#ifndef _TOOLS
-# define _TOOLS "Tools.ini"
-#endif
-
-#ifndef _MSC_VER
-#ifdef test_unit
-test_unit(err)
-{
-	assert(true == true);
-	assert(true != false);
-	assert(true and not false);
-	except(throw "Holy Cow!");
-}
-#endif
-#endif
-
 namespace sys
 {
 	bool debug =
@@ -43,7 +27,6 @@ namespace sys
 		true;
 	#endif
 
-	thread_local fmt::string::view thread_id;
 	thread_local fmt::string::stream thread_buf;
 
 	fmt::string::out::ref out()
@@ -53,9 +36,6 @@ namespace sys
 
 	fmt::string::out::ref put(fmt::string::out::ref buf)
 	{
-		static sys::mutex key;
-		auto const unlock = key.lock();
-
 		fmt::string line;
 		while (std::getline(thread_buf, line))
 		{
@@ -64,40 +44,27 @@ namespace sys
 		return buf;
 	}
 
-	int impl::bug(fmt::string::view message, bool no)
+	int perror(fmt::string::view message, bool perr)
 	{
 		thread_local struct
 		{
 			fmt::string last;
 			int counter = -1;
+
 		} local;
-		// Avoid spamming
+
 		if (message != local.last)
 		{
-			// reset
-			local.counter = 0;
-			local.last = fmt::to_string(message);
-			// format
-			{
-				// message
-				thread_buf << local.last;
-				// number
-				if (no)
-				{
-					thread_buf << ':' << ' ' << std::strerror(errno);
-				}
-				// thread
-				if (not empty(thread_id))
-				{
-					thread_buf << ' ' << '[' << thread_id << ']';
-				}
-			}
+			thread_buf << message;
+			if (perr) thread_buf << ':' << ' ' << std::strerror(errno);
 			thread_buf << fmt::eol;
+
+			local.last = fmt::to_string(message);
+			local.counter = 0;
 		}
 		else ++local.counter;
 		return local.counter;
 	}
-
 }
 
 namespace
@@ -399,3 +366,14 @@ int main(int argc, char** argv)
 	return 0 < counter ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
+#ifndef _MSC_VER
+#ifdef test_unit
+test_unit(err)
+{
+	assert(true == true);
+	assert(true != false);
+	assert(true and not false);
+	except(throw "Holy Cow!");
+}
+#endif
+#endif

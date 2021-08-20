@@ -89,8 +89,8 @@ namespace fwd
 		}
 	};
 
-	template <class... Q> using truth = proposition<true, Q...>;
-	template <class... Q> using falsity = proposition<false, Q...>;
+	template <class... Q> using always = proposition<true, Q...>;
+	template <class... Q> using never = proposition<false, Q...>;
 
 	template <class... Q> constexpr auto never = [](Q...) { return false; };
 	template <class... Q> constexpr auto always = [](Q...) { return true; };

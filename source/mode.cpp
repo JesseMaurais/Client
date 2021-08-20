@@ -7,7 +7,6 @@
 
 namespace env::file
 {
-
 	fwd::variable<size_t>& width()
 	{
 		static sys::atomic<size_t> safe = BUFSIZ;

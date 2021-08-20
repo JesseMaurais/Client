@@ -25,8 +25,6 @@ namespace fmt
 
 	template <class Char> struct type : std::ctype<Char>
 	{
-		using base = std::ctype<Char>;
-		using typename base::mask;
 		using string = basic_string<Char>;
 		using view = typename string::view;
 		using init = typename view::init;
@@ -34,10 +32,12 @@ namespace fmt
 		using pair = typename view::pair;
 		using vector = typename view::vector;
 		using size_type = typename view::size_type;
+		using ctype = typename string::ctype;
+		using mask = typename ctype::mask;
+
+		static ctype::cref instance();
 
 		static_assert(null == ~npos);
-
-		static type const & instance();
 
 		template 
 		<

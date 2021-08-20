@@ -11,7 +11,7 @@
 #ifndef NDEBUG
 #	define assert(...) if (not(__VA_ARGS__)) sys::warn(here, #__VA_ARGS__)
 #	define alert(...) if (bool(__VA_ARGS__)) sys::err(here, #__VA_ARGS__)
-#	define trace(...) sys::warn(here, #__VA_ARGS__)
+#	define trace(...) sys::warn(here, __VA_ARGS__)
 #	define verify(...) assert(__VA_ARGS__)
 #else
 #	define assert(...)
@@ -38,34 +38,25 @@ namespace fmt
 	}
 }
 
-enum : bool { success = false, failure = true };
-
-// Error pipe
-
 namespace sys
 {
-	fmt::string::out::ref out(); // thread-safe buffered output device
-	fmt::string::out::ref flush(fmt::string::out::ref); // flush out stderr
-
-	namespace impl
-	{
-		int bug(fmt::string::view, bool);
-	}
-
 	extern bool debug; // whether to write out errors
+	int perror(fmt::string::view, bool perr = true); // print out
+	fmt::string::out::ref out(); // thread-safe buffered output device
+	fmt::string::out::ref put(fmt::string::out::ref); // flush out error
 
 	template <typename... T> int warn(fmt::where at, T... t)
 	{
-		return debug ? impl::bug(fmt::err(at, t...), false) : -1;
+		return debug ? perror(fmt::err(at, t...), false) : -1;
 	}
 
 	template <typename... T> int err(fmt::where at, T... t)
 	{
-		return debug ? impl::bug(fmt::err(at, t...), true) : -1;
+		return debug ? perror(fmt::err(at, t...), true) : -1;
 	}
 }
 
-// Unit tests
+enum : bool { success = false, failure = true };
 
 #ifndef NDEBUG
 #	include "test.hpp"

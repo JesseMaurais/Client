@@ -3,34 +3,45 @@
 
 #include "fwd.hpp"
 #include "algo.hpp"
+#include "tmp.hpp"
 
 namespace fmt
 {
-	template
-	<
-		class Type
-	>
-	struct memory_brief
+	template <class Type> struct memory
 	{
 		using ptr  = typename std::add_pointer<Type>::type;
 		using cptr = typename std::add_pointer<typename std::add_const<Type>::type>::type;
 		using ref  = typename std::add_lvalue_reference<Type>::type;
 		using cref = typename std::add_lvalue_reference<typename std::add_const<Type>::type>::type;
+
+		using next  = std::function<cref(cref)>;
+		using put   = std::function<ref(ref)>;
+		using get   = std::function<cref()>;
+		using set   = std::function<ref()>;
+		using order = fwd::relation<cref>;
+		using swap  = fwd::relation<ref>;
+		using check = fwd::predicate<cref>;
+		using copy  = fwd::predicate<ref>;
 	};
 
 	template
 	<
 		class Char, template <class> class Traits = fwd::character
 	>
-	struct stream_brief
+	struct stream
 	{
-		using ios  = memory_brief<fwd::basic_ios<Char, Traits>>;
-		using in   = memory_brief<fwd::basic_istream<Char, Traits>>;
-		using out  = memory_brief<fwd::basic_ostream<Char, Traits>>;
-		using io   = memory_brief<fwd::basic_iostream<Char, Traits>>;
-		using buf  = memory_brief<fwd::basic_buf<Char, Traits>>;
-		using file = memory_brief<fwd::basic_file<Char, Traits>>;
-		using str  = memory_brief<fwd::basic_stringstream<Char, Traits>>;
+		using ctype = memory<std::ctype<Char>>;
+		using ios   = memory<fwd::basic_ios<Char, Traits>>;
+		using in    = memory<fwd::basic_istream<Char, Traits>>;
+		using out   = memory<fwd::basic_ostream<Char, Traits>>;
+		using io    = memory<fwd::basic_iostream<Char, Traits>>;
+		using buf   = memory<fwd::basic_buf<Char, Traits>>;
+		using file  = memory<fwd::basic_file<Char, Traits>>;
+		using str   = memory<fwd::basic_stringstream<Char, Traits>>;
+
+		using input  = in::put;
+		using output = out::put;
+		using format = ctype::get;
 	};
 
 	template
@@ -39,7 +50,7 @@ namespace fmt
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order
 	>
-	struct struct_brief : memory_brief<Type>
+	struct layout
 	{
 		using type   = Type;
 		using pair   = fwd::pair<Type>;
@@ -61,18 +72,22 @@ namespace fmt
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order,
-		// base class composition
-		class Base = fwd::compose
-		<
-			struct_brief<String, Alloc, Order>, stream_brief<Char, Traits>
-		>
+
+		class Memory = memory<String>,
+		class Stream = stream<Char, Traits>,
+		class Layout = layout<String, Alloc, Order>
 	>
-	struct string_brief : String, Base
+	struct basic_string_type : fwd::compose<String, Memory, Stream, Layout>
 	{
+		using check = String::check;
+		using order = String::order;
+		using format = Stream::format;
+		using input = Stream::input;
+		using output = Stream::output;
+
 		using String::String;
-		using stream = fwd::basic_stringstream<Char, Traits, Alloc>;
-
-		string_brief(String const& s) : String(s)
+		basic_string_type(auto const& s)
+		 : String(s)
 		{ }
 	};
 
@@ -82,19 +97,15 @@ namespace fmt
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order,
-		// details
-		class Base = string_brief
-		<
-			fwd::basic_string_view<Char, Traits>, Char, Traits, Alloc, Order
-		>
+
+		class View = fwd::basic_string_view<Char, Traits>
 	>
-	struct basic_string_view : Base
+	struct basic_string_view : basic_string_type<View , Char, Traits, Alloc, Order>
 	{
-		basic_string_view(fwd::basic_string<Char, Traits, Alloc> const& in)
-		: Base(data(in), size(in))
+		using View::View;
+		basic_string_view(auto const& in)
+		: View(data(in), size(in))
 		{ }
-
-		using Base::Base;
 	};
 
 	template
@@ -103,27 +114,17 @@ namespace fmt
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order,
-		// base class composition
-		class Base = string_brief
-		<
-			fwd::basic_string<Char, Traits>, Char, Traits, Alloc, Order
-		>
+
+		class String = fwd::basic_string<Char, Traits, Alloc>
 	>
-	struct basic_string : Base
+	struct basic_string : basic_string_type<String, Char, Traits, Alloc, Order>
 	{
 		using view = basic_string_view<Char, Traits, Alloc, Order>;
-		using line = fwd::line<Char, Traits, Alloc>;
-		using char_ptr = typename memory_brief<Char>::ptr;
 
-		basic_string(fwd::basic_string_view<Char, Traits> in)
-		: Base(data(in), size(in))
+		using String::String;
+		basic_string(auto const& in)
+		: String(data(in), size(in))
 		{ }
-
-		basic_string(fwd::basic_string<Char, Traits, Alloc> const& in)
-		: Base(data(in), size(in))
-		{ }
-
-		using Base::Base;
 	};
 
 	// low 7 bit UTF-8
@@ -141,11 +142,8 @@ namespace fmt
 	#endif
 
 	using string = bstring;
-	using view = string::view;
-	using line = string::line;
-
-	inline view empty("");
-	inline view assign("=");
+	inline string::view empty("");
+	inline string::view assign("=");
 
 	constexpr auto eol = '\n';
 	constexpr auto tab = '\t';
@@ -156,8 +154,8 @@ namespace fmt
 
 	static_assert(null == ~npos, "2's complement required");
 
-	using size = fmt::struct_brief<std::size_t>;
-	using diff = fmt::struct_brief<std::ptrdiff_t>;
+	using size = fmt::layout<std::size_t>;
+	using diff = fmt::layout<std::ptrdiff_t>;
 }
 
 #endif // file
