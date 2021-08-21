@@ -30,16 +30,4 @@ namespace env::var
 	fmt::string::view session();
 }
 
-namespace env::os
-{
-	fmt::string::view::span dirs(fmt::string::view direct, bool traced = false);
-	/// Evaluate $direct as interpreted by operating system
-	/// Write recusive error diagnostic if $traced
-	/// WIN32: environment is %embraced%
-	/// POSIX: environment is $prefaced
-
-	fmt::string::view dir(fmt::string::view direct, bool traced = false);
-	/// The first match in paths
-}
-
 #endif // file
