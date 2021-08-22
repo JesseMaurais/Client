@@ -5,25 +5,23 @@
 #include "env.hpp"
 #include "type.hpp"
 #include "dir.hpp"
+#include "mode.hpp"
 #include "err.hpp"
 
 #ifdef _WIN32
 #include <shlobj.h>
-#ifdef _MSC_VER
-#pragma comment(lib, "shell32.lib")
-#pragma comment(lib, "ole32.lib")
-#endif // _MSC_VER
-#endif // _WIN32
+#endif
 
 namespace env::usr
 {
-	fmt::string::view dir(fmt::string::view path)
+	fmt::string::view dir(fmt::string::view name)
 	{
 		fmt::string::view u = fmt::empty;
 		
 	#ifdef _WIN32
 
 		using entry = std::pair<KNOWNFOLDERID, fmt::string::view>;
+
 		static std::map<fmt::string::view, entry> const map =
 		{
 			{ "AccountPictures", entry{FOLDERID_AccountPictures, "%AppData%\\Microsoft\\Winodws\\AccountPictures"}},
@@ -76,13 +74,14 @@ namespace env::usr
 			{ "Windows", entry{FOLDERID_Windows, "%WinDir%"}}
 		};
 
-		auto it = map.find(path);
-		if (map.end() != it)
+		if (auto it = map.find(name); map.end() != it)
 		{
+			auto [id, path] = it->second;
+
 			PWSTR pws = nullptr;
 			auto const ok = SHGetKnownFolderPath
 			(
-				it->second.first, KF_FLAG_DEFAULT, nullptr, &pws
+				id, KF_FLAG_DEFAULT, nullptr, &pws
 			);
 
 			if (S_OK == ok)
@@ -96,15 +95,18 @@ namespace env::usr
 			{
 				CoTaskMemFree(pws);
 			}
+
+			if (empty(u))
+			{
+				u = path;
+			}
 		}
 
 	#else // POSIX
 
-		static std::map
-		<
-			fmt::string::view, std::initializer_list<fmt::string::view>
-		> 
-		const map =
+		using entry = std::initializer_list<fmt::string::view>;
+
+		static std::map<fmt::string::view, entry> const map =
 		{
 			{"Cache-Home", {"XDG_CACHE_HOME", "$HOME/.cache"}},
 			{"Config-Dirs", {"XDG_CONFIG_DIRS", "/etc/xdg"}},
@@ -123,22 +125,45 @@ namespace env::usr
 			{"Videos", {"XDG_VIDEOS_DIR", "$HOME/Videos"}},
 		};
 
-		auto it = map.find(path);
-		if (map.end() != it)
+		if (auto it = map.find(name); map.end() != it)
 		{
-			u = env::get(it->first);
+			auto [xdg, path] = it->second;
+
+			u = env::get(xdg);
+			if (empty(u))
+			{
+				u = path;
+			}
 		}
 
 	#endif
 
 		if (empty(u))
 		{
-			if (auto v = it->second.second; not empty(v))
+			u = env::get(name);
+		}
+
+		return env::echo(u);
+	}
+
+	fmt::string::view::span dirs(fmt::string::view name)
+	{
+		thread_local fmt::string::view::vector buf;
+		buf.clear();
+
+		if (auto paths = dir(name); not empty(paths))
+		{
+			buf = fmt::path::split(paths);
+		}
+
+		for (auto it = buf.begin(); it != buf.end(); ++it)
+		{
+			if (auto path = *it; env::file::fail(path))
 			{
-				u = env::echo(v);
+				it = buf.erase(it);
 			}
 		}
-		return u;
+		return buf;
 	}
 
 	fmt::string::view current_desktop()
@@ -157,11 +182,11 @@ namespace env::usr
 		if (empty(u))
 		{
 			u = current_desktop();
-			if (not u.empty())
-			{
-				static auto prefix = fmt::to_lower(u) + '-';
-				u = prefix;
-			}
+		}
+		else
+		if (u.back() == '-')
+		{
+			u = u.substr(0, u.size() - 1);
 		}
 		return u;
 	}
@@ -171,14 +196,17 @@ namespace env::usr
 		static fmt::string path;
 		if (empty(path))
 		{
-			constexpr auto base = "applications.menu";
-			auto const menu = fmt::join({menu_prefix(), base});
-			path = fmt::dir::join({config_home(), "menus", menu});
+			auto const home = config_home();
+			path = fmt::dir::join({home, "menus", menu});
 			if (env::file::fail(path))
 			{
 				for (auto const dir : config_dirs())
 				{
-					path = fmt::dir::join({dir, menu});
+					const auto prefix = menu_prefix();
+					constexpr auto menu = "applications.menu";
+					const auto file = fmt::join({prefix, menu}, "-");
+
+					path = fmt::dir::join({dir, file});
 					if (not env::file::fail(path))
 					{
 						break;
@@ -192,10 +220,12 @@ namespace env::usr
 
 	fmt::string::view run_dir()
 	{
-		auto u = env::get("XDG_RUNTIME_DIR");
+		auto u = dir("Runtime");
 		if (empty(u))
 		{
-			static auto const path = fmt::dir::join({env::var::temp(), "run", env::var::user()});
+			auto const temp = env::var::temp();
+			auto const user = env::var::user();
+			static auto const path = fmt::dir::join({temp, "run", user});
 			u = path;
 		}
 		return u;
@@ -209,7 +239,8 @@ namespace env::usr
 			static fmt::string s;
 			if (empty(s))
 			{
-				s = fmt::dir::join({env::var::home(), ".local", "share"});
+				auto const home = env::var::home();
+				s = fmt::dir::join({home, ".local", "share"});
 			}
 			u = s;
 		}
@@ -268,7 +299,6 @@ namespace env::usr
 
 	fmt::string::view::span config_dirs()
 	{
-		static fmt::string::view::vector t;
 		auto u = env::get("XDG_CONFIG_DIRS");
 		if (empty(u))
 		{
@@ -277,8 +307,8 @@ namespace env::usr
 				static fmt::string s;
 				if (empty(s))
 				{
-					auto const appdata = fmt::to_string(env::get("APPDATA"));
-					auto const local = fmt::to_string(env::get("LOCALAPPDATA"));
+					auto const appdata = dir("AppData");
+					auto const local = dir("LocalAppData");
 					s = fmt::path::join({appdata, local});
 				}
 				u = s;
@@ -289,86 +319,45 @@ namespace env::usr
 			}
 			#endif
 		}
-		t = fmt::path::split(u);
-		return t;
+
+		static fmt::string::view::vector buf;
+		buf = fmt::path::split(u);
+		return buf;
 	}
 
 	using namespace std::literals;
 
-	fmt::string::view desktop_dir()
-	{
-		return dir("Desktop"sv);
-	}
-
-	fmt::string::view documents_dir()
-	{
-		return dir("Documents"sv);
-	}
-
-	fmt::string::view download_dir()
-	{
-		return dir("Downloads"sv);
-	}
-
-	fmt::string::view music_dir()
-	{
-		return dir("Music"sv);
-	}
-
-	fmt::string::view pictures_dir()
-	{
-		return dir("Pictures"sv);
-	}
-
-	fmt::string::view public_dir()
-	{
-		return dir("Public"sv);
-	}
-
-	fmt::string::view templates_dir()
-	{
-		return dir("Templates"sv);
-	}
-
-	fmt::string::view videos_dir()
-	{
-		return dir("Videos"sv);
-	}
 }
 
 #ifdef test_unit
-#include "arg.hpp"
-
-namespace
+ namespace
 {
-	constexpr auto eol = '\n';
-
-	struct hdr : fmt::struct_brief<hdr>
+	struct head : fmt::layout<head>
 	{
 		fmt::string::view group;
 
-		hdr(fmt::string::view g)
+		head(fmt::string::view g)
 			: group(g)
 		{ }
 	};
 
-	fmt::string::out::ref operator<<(fmt::string::out::ref out, hdr::cref obj)
+	fmt::string::out::ref operator<<(fmt::string::out::ref out, head::cref obj)
 	{
-		return out << '[' << obj.group << ']' << eol;
+		return out << '[' << obj.group << ']' << fmt::eol;
 	}
 
-	struct kv : fmt::struct_brief<kv>
+	struct key : fmt::layout<key>
 	{
-		fwd::pair<fmt::string::view> entry;
+		fmt::string::view::pair entry;
 
-		kv(fmt::string::view key, fmt::string::view value)
+		key(fmt::string::view key, fmt::string::view value)
 			: entry(key, value)
 		{ }
 	};
 
-	fmt::string::out::ref operator<<(fmt::string::out::ref out, kv::cref obj)
+	fmt::string::out::ref operator<<(fmt::string::out::ref out, key::cref obj)
 	{
-		return out << obj.entry.first << '=' << obj.entry.second << eol;
+		return out << obj.entry.first << '=' << obj.entry.second << fmt::eol;
 	}
 }
 
@@ -376,45 +365,45 @@ test_unit(usr)
 {
 	std::ofstream out { ".ini" };
 
-	out	<< hdr("Fake Environment")
-		<< kv("home", env::var::home())
-		<< kv("user", env::var::user())
-		<< kv("root", env::var::root())
-		<< kv("domain", env::var::domain())
-		<< kv("host", env::var::host())
-		<< kv("pwd", env::var::pwd())
-		<< kv("lang", env::var::lang())
-		<< kv("shell", env::var::shell())
-		<< kv("tmpdir", env::var::temp())
-		<< kv("rootdir", env::var::base())
-		<< kv("session", env::var::session())
+	out	<< head("Fake Environment")
+		<< key("home", env::var::home())
+		<< key("user", env::var::user())
+		<< key("root", env::var::root())
+		<< key("domain", env::var::domain())
+		<< key("host", env::var::host())
+		<< key("pwd", env::var::pwd())
+		<< key("lang", env::var::lang())
+		<< key("shell", env::var::shell())
+		<< key("tmpdir", env::var::temp())
+		<< key("rootdir", env::var::base())
+		<< key("session", env::var::session())
 		<< std::endl;
 
-	out	<< hdr("Desktop")
-		<< kv("runtime-dir", env::usr::run_dir())
-		<< kv("data-home", env::usr::data_home())
-		<< kv("config-home", env::usr::config_home())
-		<< kv("cache-home", env::usr::cache_home())
-		<< kv("data-dirs", fmt::path::join(env::usr::data_dirs()))
-		<< kv("config-dirs", fmt::path::join(env::usr::config_dirs()))
+	out	<< head("Desktop")
+		<< key("runtime-dir", env::usr::run_dir())
+		<< key("data-home", env::usr::data_home())
+		<< key("config-home", env::usr::config_home())
+		<< key("cache-home", env::usr::cache_home())
+		<< key("data-dirs", fmt::path::join(env::usr::data_dirs()))
+		<< key("config-dirs", fmt::path::join(env::usr::config_dirs()))
 		<< std::endl;
 
-	out	<< hdr("User Directories")
-		<< kv("desktop-dir", env::usr::desktop_dir())
-		<< kv("documents-dir", env::usr::documents_dir())
-		<< kv("download-dir", env::usr::download_dir())
-		<< kv("music-dir", env::usr::music_dir())
-		<< kv("pictures-dir", env::usr::pictures_dir())
-		<< kv("publicshare-dir", env::usr::public_dir())
-		<< kv("template-dir", env::usr::templates_dir())
-		<< kv("videos-dir", env::usr::videos_dir())
+	out	<< head("User Directories")
+		<< key("desktop-dir", env::usr::desktop_dir())
+		<< key("documents-dir", env::usr::documents_dir())
+		<< key("download-dir", env::usr::download_dir())
+		<< key("music-dir", env::usr::music_dir())
+		<< key("pictures-dir", env::usr::pictures_dir())
+		<< key("publicshare-dir", env::usr::public_dir())
+		<< key("template-dir", env::usr::templates_dir())
+		<< key("videos-dir", env::usr::videos_dir())
 		<< std::endl;
 
-	out	<< hdr("Application Options")
-		<< kv("name", env::opt::application())
-		<< kv("program", env::opt::program())
-		<< kv("command-line", fmt::join(env::opt::arguments(), " "))
-		<< kv("config", env::opt::config())
+	out	<< head("Application Options")
+		<< key("name", env::opt::application())
+		<< key("program", env::opt::program())
+		<< key("command-line", fmt::join(env::opt::arguments(), " "))
+		<< key("config", env::opt::config())
 		<< std::endl;
 
 	out << env::opt::put << std::endl;

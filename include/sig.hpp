@@ -2,30 +2,26 @@
 #define sig_hpp "Signals and Sockets"
 
 #include <map>
-#include <string>
 #include <csignal>
-#include <algorithm>
 #include <functional>
+#include <algorithm>
 #include "fmt.hpp"
 
 namespace fwd::sig
 {
-	template <class slot, class... args> struct socket : fwd::unique
+	template <class sink, class... argv> struct socket : fwd::unique
 	{
-		using signature = void(args...);
+		using signature = void(argv...);
 		using function = std::function<signature>;
-		using container = std::map<slot, function>;
-		using size_type = typename container::size_type;
+		using container = std::map<sink, function>;
 
-		size_type const invalid = ~size_type(0);
-
-		auto connect(slot id, function f)
+		auto connect(sink id, function f)
 		{
 			slots.emplace(id, f);
 			return slots.size();
 		}
 
-		auto disconnect(slot id)
+		auto disconnect(sink id)
 		{
 			return slots.erase(id);
 		}
@@ -37,28 +33,28 @@ namespace fwd::sig
 			return sz;
 		}
 
-		size_type find(slot id) const
+		auto find(sink id) const
 		{
 			auto const it = slots.find(id);
 			auto const begin = slots.begin();
 			auto const end = slots.end();
-			return end != it ? distance(begin, it) : invalid;
+			return end != it ? std::distance(begin, it) : fmt::npos;
 		}
 
-		void raise(args... a) const
+		void raise(argv... argc) const
 		{
-			raise([=](auto const &pair){ pair.second(a...); });
+			raise([=](auto const &pair){ pair.second(argc...); });
 		}
 
-		template <class filter>	void raise(filter &&rule) const
+		template <class filter>	void raise(filter rule) const
 		{
-			for_each(begin(slots), end(slots), rule);
+			std::for_each(begin(slots), end(slots), rule);
 		}
 
-		template <class filter>	void raise(slot id, filter &&rule) const
+		template <class filter>	void raise(sink id, filter rule) const
 		{
 			auto const pair = slots.equal_range(id);
-			for_each(pair.first, pair.second, rule);
+			std::for_each(pair.first, pair.second, rule);
 		}
 
 	protected:
@@ -70,7 +66,8 @@ namespace fwd::sig
 	{
 	public:
 
-		using socket = socket<slot*, args...>;
+		using sink = as_ptr<slot>;
+		using socket = socket<sink, args...>;
 		using function = typename socket::function;
 		using signature = typename socket::signature;
 
@@ -92,8 +89,6 @@ namespace fwd::sig
 
 namespace sys::sig
 {
-	fmt::string::view text(int);
-
 	using slot = fwd::sig::slot<int>;
 	using socket = slot::socket;
 	using function = slot::function;
@@ -168,6 +163,10 @@ namespace sys::sig
 			};
 		}
 	};
+
+	fwd::span<int> native();
+	fwd::vector<state> error(fwd::span<int> = native());
+	fmt::string::view text(int);
 }
 
 #endif // file

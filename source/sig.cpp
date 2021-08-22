@@ -3,29 +3,148 @@
 
 #include "sig.hpp"
 #include "type.hpp"
+#include "tag.hpp"
+#include "dig.hpp"
 #include "err.hpp"
 #include <memory>
+#include <array>
 #include <map>
 
 namespace sys::sig
 {
-	socket* state::event(int n)
+	fmt::span<int> native()
 	{
-		static std::map<int, sys::sig::socket> map;
-		return std::addressof(map[n]);
-	}
-
-	void state::raise(int no)
-	{
-		event(no)->raise([no](auto const &p)
+		static std::array buf
 		{
-			p.second(no);
-		});
+			SIGABRT,
+
+			#ifdef SIGALRM
+			SIGALRM,
+			#endif
+
+			#ifdef SIGBUS
+			SIGBUS,
+			#endif
+
+			#ifdef SIGCHLD
+			SIGCHLD,
+			#endif
+
+			#ifdef SIGCONT
+			SIGCONT,
+			#endif
+
+			SIGFPE,
+
+			#ifdef SIGHUP
+			SIGHUP,
+			#endif
+
+			SIGILL,
+			SIGINT,
+
+			#ifdef SIGKILL
+			SIGKILL,
+			#endif
+
+			#ifdef SIGPIPE
+			SIGPIPE,
+			#endif
+
+			#ifdef SIGQUIT
+			SIGQUIT,
+			#endif
+
+			#ifdef SIGSTOP
+			SIGSTOP,
+			#endif
+
+			SIGSEGV,
+			SIGTERM,
+
+			#ifdef SIGTSTP
+			SIGTSTP,
+			#endif
+
+			#ifdef SIGTIN
+			SIGTIN,
+			#endif
+
+			#ifdef SIGTOU
+			SIGTOU,
+			#endif
+
+			#ifdef SIGUSR1
+			SIGUSR1,
+			#endif
+
+			#ifdef SIGUSR2
+			SIGUSR2,
+			#endif
+
+			#ifdef SIGPOLL
+			SIGPOLL,
+			#endif
+
+			#ifdef SIGPROF
+			SIGPROF,
+			#endif
+
+			#ifdef SIGPWR
+			SIGPWR,
+			#endif
+
+			#ifdef SIGSTKFLT
+			SIGSTKFLT,
+			#endif
+
+			#ifdef SIGSYS
+			SIGSYS,
+			#endif
+
+			#ifdef SIGTRAP
+			SIGTRAP,
+			#endif
+
+			#ifdef SIGURG
+			SIGURG,
+			#endif
+
+			#ifdef SIGVTALRM
+			SIGVTALRM,
+			#endif
+
+			#ifdef SIGWINCH
+			SIGWINCH,
+			#endif
+
+			#ifdef SIGXCPU
+			SIGXCPU,
+			#endif
+
+			#ifdef SIGXFSZ
+			SIGXFSZ,
+			#endif
+		};
+		return buf;
 	}
 
 	fmt::string::view text(int n)
 	{
 		using namespace std::literals;
+
+	#if _POSIX_C_SOURCE >= 200809L
+
+		if (auto s = strsignal(n); nullptr != s)
+		{
+			fmt::string::view u = s;
+			if (not empty(u))
+			{
+				return u;
+			}
+		}
+
+	#else
 
 		switch (n)
 		{
@@ -172,10 +291,41 @@ namespace sys::sig
 			return "file limit exceeded"sv;
 		#endif
 		}
+
+	#endif
 		
 		thread_local fmt::string buf;
 		buf = fmt::to_string(n);
 		return buf;
+	}
+
+	static void perr(int n)
+	{
+		sys::out() << text(n) << fmt::eol;
+	}
+
+	fwd::vector<state> error(fwd::span<int> p)
+	{
+		fwd::vector<state> buf;
+		for (auto n : p)
+		{
+			buf.emplace_back(n, perr);
+		}
+		return buf;
+	}
+
+	socket* state::event(int n)
+	{
+		static std::map<int, sys::sig::socket> map;
+		return std::addressof(map[n]);
+	}
+
+	void state::raise(int n)
+	{
+		event(no)->raise([n](auto const &p)
+		{
+			p.second(n);
+		});
 	}
 }
 
