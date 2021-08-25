@@ -193,26 +193,20 @@ namespace env::usr
 
 	fmt::string::view applications_menu()
 	{
-		static fmt::string path;
+		thread_local fmt::string path;
 		if (empty(path))
 		{
-			auto const home = config_home();
-			path = fmt::dir::join({home, "menus", menu});
-			if (env::file::fail(path))
+			const auto prefix = menu_prefix();
+			const auto file = fmt::join({prefix, "applications.menu"}, "-");
+			const auto found = env::file::find(env::file::config(), [&](auto dir)
 			{
-				for (auto const dir : config_dirs())
-				{
-					const auto prefix = menu_prefix();
-					constexpr auto menu = "applications.menu";
-					const auto file = fmt::join({prefix, menu}, "-");
+				path = fmt::dir::join({dir, "menus", file});
+				return not env::file::fail(path);
+			});
 
-					path = fmt::dir::join({dir, file});
-					if (not env::file::fail(path))
-					{
-						break;
-					}
-					path.clear();
-				}
+			if (not found)
+			{
+				path.clear();
 			}
 		}
 		return path;
@@ -220,6 +214,7 @@ namespace env::usr
 
 	fmt::string::view run_dir()
 	{
+		thread_local fmt::string path;
 		auto u = dir("Runtime");
 		if (empty(u))
 		{
