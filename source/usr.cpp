@@ -3,8 +3,9 @@
 
 #include "usr.hpp"
 #include "env.hpp"
-#include "type.hpp"
+#include "opt.hpp"
 #include "dir.hpp"
+#include "type.hpp"
 #include "mode.hpp"
 #include "err.hpp"
 

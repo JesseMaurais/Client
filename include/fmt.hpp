@@ -18,8 +18,8 @@ namespace fmt
 		using put   = std::function<ref(ref)>;
 		using get   = std::function<cref()>;
 		using set   = std::function<ref()>;
-		using order = fwd::relation<cref>;
-		using swap  = fwd::relation<ref>;
+		using order = fwd::relation<cref, cref>;
+		using swap  = fwd::relation<ref, ref>;
 		using check = fwd::predicate<cref>;
 		using copy  = fwd::predicate<ref>;
 	};
@@ -77,10 +77,10 @@ namespace fmt
 		class Stream = stream<Char, Traits>,
 		class Layout = layout<String, Alloc, Order>
 	>
-	struct basic_string_type : fwd::compose<String, Memory, Stream, Layout>
+	struct basic_string_type : String, Memory, Stream, Layout
 	{
-		using check = String::check;
-		using order = String::order;
+		using check = Memory::check;
+		using order = Memory::order;
 		using format = Stream::format;
 		using input = Stream::input;
 		using output = Stream::output;
@@ -97,14 +97,14 @@ namespace fmt
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order,
-
-		class View = fwd::basic_string_view<Char, Traits>
+		class View = fwd::basic_string_view<Char, Traits>,
+		class Base = basic_string_type<View , Char, Traits, Alloc, Order>
 	>
-	struct basic_string_view : basic_string_type<View , Char, Traits, Alloc, Order>
+	struct basic_string_view : Base
 	{
-		using View::View;
+		using Base::Base;
 		basic_string_view(auto const& in)
-		: View(data(in), size(in))
+		: Base(data(in), size(in))
 		{ }
 	};
 
@@ -114,16 +114,15 @@ namespace fmt
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order,
-
-		class String = fwd::basic_string<Char, Traits, Alloc>
+		class String = fwd::basic_string<Char, Traits, Alloc>,
+		class Base = basic_string_type<String, Char, Traits, Alloc, Order>
 	>
-	struct basic_string : basic_string_type<String, Char, Traits, Alloc, Order>
+	struct basic_string : Base
 	{
 		using view = basic_string_view<Char, Traits, Alloc, Order>;
-
-		using String::String;
+		using Base::Base;
 		basic_string(auto const& in)
-		: String(data(in), size(in))
+		: Base(data(in), size(in))
 		{ }
 	};
 

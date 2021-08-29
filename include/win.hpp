@@ -11,7 +11,7 @@
 #include "mode.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
-#include "str.hpp"
+#include "tag.hpp"
 #include "sys.hpp"
 
 namespace sys::win

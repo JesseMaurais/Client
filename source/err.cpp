@@ -4,7 +4,7 @@
 #include "test.hpp"
 #include "arg.hpp"
 #include "cmd.hpp"
-#include "str.hpp"
+#include "tag.hpp"
 #include "type.hpp"
 #include "char.hpp"
 #include "sym.hpp"

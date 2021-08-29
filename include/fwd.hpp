@@ -21,7 +21,10 @@ namespace fwd
 {
 	// Class union
 
-	template <class... Types> struct compose : Types... { };
+	template <class... Types> struct compose : Types...
+	{ 
+		using Types::Types...;
+	};
 
 	// Overload traits
 

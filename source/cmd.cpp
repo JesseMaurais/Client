@@ -6,7 +6,7 @@
 #include "opt.hpp"
 #include "dir.hpp"
 #include "type.hpp"
-#include "str.hpp"
+#include "tag.hpp"
 #include "ps.hpp"
 
 namespace env
