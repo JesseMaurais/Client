@@ -15,7 +15,7 @@ namespace sys::net
 {
 	typedef char *pointer;
 	typedef char const *const_pointer;
-	typedef ::SOCKET descriptor;
+	typedef ::SOCKET fd;
 	typedef int size;
 	typedef ::WSAPOLLFD pollfd;
 	typedef ULONG nfds_t;
@@ -27,11 +27,13 @@ namespace sys::net
 		::SOCKADDR_IN in;
 	};
 
-	enum { in = SD_RECEIVE, out = SD_SEND, both = SD_BOTH };
+	enum { rd = SD_RECEIVE, wr = SD_SEND, rw = SD_BOTH };
 
-	inline bool fail(descriptor h)
+	constexpr auto invalid = INVALID_SOCKET;
+
+	inline bool fail(fd value)
 	{
-		return INVALID_SOCKET == h;
+		return invalid == value;
 	}
 
 	template <typename... Args>
@@ -106,7 +108,7 @@ namespace sys::net
 {
 	typedef void *pointer;
 	typedef void const *const_pointer;
-	typedef int descriptor;
+	typedef int fd;
 	typedef ::socklen_t size;
 	typedef ::pollfd pollfd;
 	typedef ::nfds_t nfds_t;
@@ -115,16 +117,18 @@ namespace sys::net
 	{
 		::sockaddr_storage pad;
 		::sockaddr address;
-		::sockaddr_un un;
 		::sockaddr_in in;
 		::sockaddr_in6 in6;
+		::sockaddr_un un;
 	};
 
-	enum { in = SHUT_RD, out = SHUT_WR, both = SHUT_RDWR };
+	enum { rd = SHUT_RD, wr = SHUT_WR, rw = SHUT_RDWR };
 
-	inline bool fail(descriptor fd) 
+	constexpr auto invalid = -1;
+
+	inline bool fail(fd value) 
 	{
-		return -1 == fd;
+		return invalid == value;
 	}
 
 	template <typename... Args>
@@ -149,10 +153,7 @@ namespace sys::net
 	inline auto sendto = ::sendto;
 	inline auto recv = ::recv;
 	inline auto recvfrom = ::recvfrom;
+}
 
-} // sys::net
-
-#endif
-
+#endif // system
 #endif // file
-

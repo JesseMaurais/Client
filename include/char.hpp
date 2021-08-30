@@ -64,7 +64,7 @@ namespace fmt
 	using PUA_A = plane<0x0F0000, 0x0FFFFF>; // private use area A
 	using PUA_B = plane<0x100000, 0x10FFFF>; // private use area B
 
-	// Compound
+	// Compound planes
 
 	using GSA  = fwd::intervals<GSA_0, GSA_1, GSA_2, GSA_3, GSA_4, GSA_5, GSA_6, GSA_7>;
 	using RTL  = fwd::intervals<RTL_0, RTL_1, RTL_2>;

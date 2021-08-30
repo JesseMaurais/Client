@@ -5,7 +5,7 @@
 
 namespace doc
 {
-	struct ini : fmt::struct_brief<ini>
+	struct ini : fmt::layout<ini>
 	{
 		using string = fmt::string;
 		using view   = string::view;

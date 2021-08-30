@@ -78,8 +78,6 @@ namespace sys
 	}
 	#endif
 
-	// sys.hpp
-
 	char** environment()
 	{
 		#ifdef _WIN32

@@ -72,7 +72,7 @@ namespace doc
 			{
 				auto const z = token.size();
 				token = token.substr(1, z - 2);
-				group = fmt::set(token);
+				group = fmt::tag::set(token);
 				continue;
 			}
 
@@ -85,7 +85,7 @@ namespace doc
 
 			// Create key pair for value entry
 			auto const pair = fmt::to_pair(token);
-			auto const key = fmt::set(pair.first);
+			auto const key = fmt::tag::set(pair.first);
 			auto const value = pair.second;
 			if (value.empty())
 			{
@@ -170,8 +170,8 @@ test_unit(ini)
 		std::fstream file(path);
 		file >> init;
 
-		auto const group = fmt::set("NMAKE");
-		auto const key = fmt::set("MAKECONFIG");
+		auto const group = fmt::tag::set("NMAKE");
+		auto const key = fmt::tag::set("MAKECONFIG");
 		auto const value = init.get({group, key});
 		assert(not empty(value));
 		assert(value.find("/D_NMAKE") != fmt::npos);
@@ -179,8 +179,8 @@ test_unit(ini)
 
 	// Data at runtime
 	{
-		auto const group = fmt::set("Group");
-		auto const key = fmt::set("Key");
+		auto const group = fmt::tag::set("Group");
+		auto const key = fmt::tag::set("Key");
 		constexpr auto value = "Value";
 		// Cache value with set
 		{

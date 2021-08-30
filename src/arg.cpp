@@ -19,7 +19,7 @@ namespace
 
 	auto make_pair(env::opt::name key = make_key())
 	{
-		static auto const cmd = fmt::set("Command Line");
+		static auto const cmd = fmt::tag::set("Command Line");
 		return std::make_pair(cmd, key);
 	}
 
@@ -219,7 +219,6 @@ namespace env::opt
 		// Command line range
 		auto const end = cmd.end();
 		auto current = end;
-
 		// Skip the program image path
 		for (int argn = 1; argn < argc; ++argn)
 		{
@@ -228,7 +227,7 @@ namespace env::opt
 			if (auto next = find_next(argu, cmd); end != next)
 			{
 				// Set as option
-				auto const key = fmt::set(next->name);
+				auto const key = fmt::tag::set(next->name);
 				current = 0 < next->argn ? next : end;
 				env::opt::set(key, true);
 				args.clear();
@@ -242,7 +241,7 @@ namespace env::opt
 					// Set as option
 					args.emplace_back(argu);
 					auto const value = doc::ini::join(args);
-					auto const key = fmt::set(current->name);
+					auto const key = fmt::tag::set(current->name);
 					(void) set(key, value);
 				}
 				else
