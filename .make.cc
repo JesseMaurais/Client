@@ -138,10 +138,10 @@ HDREXT=.hpp
 endif
 
 ifndef OBJDIR
-OBJDIR=object$(DIR)
+OBJDIR=obj$(DIR)
 endif
 ifndef SRCDIR
-SRCDIR=source$(DIR)
+SRCDIR=src$(DIR)
 endif
 ifndef HDRDIR
 HDRDIR=include$(DIR)
