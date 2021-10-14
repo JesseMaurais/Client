@@ -14,7 +14,7 @@ namespace doc
 		return access<function>();
 	}
 
-	inline void signal(int id)
+	inline void raise(int id)
 	{
 		#ifdef assert
 		assert(socket().find(id));

@@ -17,7 +17,7 @@ namespace sys::win
 		using app   = fwd::interval<WM_APP, 0xBFFF>;
 		using text  = fwd::interval<0xC000, 0xFFFF>;
 
-		inline bool get(UINT min = 0, UINT max = 0, HWND hw = nullptr)
+		bool get(UINT min = 0, UINT max = 0, HWND hw = nullptr)
 		{
 			auto const result = GetMessage(this, hw, min, max);
 			if (sys::fail(result))
@@ -46,17 +46,14 @@ namespace sys::win
 	{
 		classinfo() = default;
 
-		classinfo(LPCSTR c, HINSTANCE h = nullptr)
+		bool get(LPCSTR c, HINSTANCE h = nullptr)
 		{
-			GetClassInfoExA(h, c, this);
+			return GetClassInfoEx(h, c, this);
 		}
-	};
 
-	struct registerclass : classinfo
-	{
-		~registerclass()
+		auto set() const
 		{
-			RegisterClassEx(this);
+			return RegisterClassEx(this);
 		}
 	};
 }

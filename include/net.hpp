@@ -19,6 +19,8 @@ namespace sys::net
 	typedef int size;
 	typedef ::WSAPOLLFD pollfd;
 	typedef ULONG nfds_t;
+	typedef ::fd_set fd_set;
+	typedef TIMEVAL timeval;
 
 	union address
 	{
@@ -112,6 +114,8 @@ namespace sys::net
 	typedef ::socklen_t size;
 	typedef ::pollfd pollfd;
 	typedef ::nfds_t nfds_t;
+	typedef ::fd_set fd_set;
+	typedef ::timeval timeval;
 
 	union address
 	{

@@ -72,7 +72,7 @@ add(CFLAGS, -D_WIN32)
 ifdef WINVER
 add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
 endif
-add(LOAD, ole32 shell32)
+add(LOAD, ole32 shell32 Ws2_32)
 EXEEXT=.exe
 DIR=\ //
 ENT=;

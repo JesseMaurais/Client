@@ -9,7 +9,7 @@ namespace env::file
 {
 	constexpr int invalid = -1;
 
-	inline bool fail(int value)
+	inline bool fail(auto value)
 	{
 		return invalid == value;
 	}

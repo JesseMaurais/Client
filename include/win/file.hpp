@@ -21,11 +21,11 @@ namespace sys::win
 		}
 	};
 
-	struct find_data : fwd::unique, WIN32_FIND_DATA
+	struct find_file : fwd::unique, WIN32_FIND_DATA
 	{
 		HANDLE h;
 
-		find_data(char const *path)
+		find_file(char const *path)
 		{
 			h = FindFirstFile(path, this);
 			if (sys::win::fail(h))
@@ -34,7 +34,7 @@ namespace sys::win
 			}
 		}
 
-		~find_data()
+		~find_file()
 		{
 			if (not sys::win::fail(h))
 			{
@@ -45,14 +45,48 @@ namespace sys::win
 			}
 		}
 
-		bool next()
+		bool next() const
 		{
 			if (not FindNextFile(h, this))
 			{
 				if (GetLastError() != ERROR_NO_MORE_FILES)
 				{
-					sys::win::err(here);
+					sys::win::err(here, "FindNextFile");
 				}
+				return failure;
+			}
+			return success;
+		}
+	};
+
+	struct find_notify
+	{
+		enum : bool { tree = true, root = false }
+
+		HANDLE h;
+
+		find_notify(char const *path, DWORD dw = 0 bool dir = root)
+		{
+			h = FindFirstChangeNotification(path, dir, dw);
+			if (sys::win::fail(h))
+			{
+				sys::win::err(here, "FindFirstChangeNotification", path, dir, dw);
+			}
+		}
+
+		~find_notify()
+		{
+			if (not FindCloseChangeNotification(h))
+			{
+				sys::win::err(here, "FindCloseChangeNotification");
+			}
+		}
+
+		bool next() const
+		{
+			if (not FindNextChangeNotification(h))
+			{
+				sys::win::err(here, "FindNextChangeNotification");
 				return failure;
 			}
 			return success;
@@ -62,11 +96,11 @@ namespace sys::win
 
 namespace sys
 {
-	class files : sys::win::find_data
+	class files : sys::win::find_file
 	{
 		class iterator
 		{
-			sys::win::find_data *that;
+			sys::win::find_file *that;
 			bool flag;
 
 		public:

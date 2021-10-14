@@ -58,7 +58,7 @@ namespace sys::uni::aio
 
 		static void thread(sigval sigev_value)
 		{
-			doc::signal(sigev_value.sival_int);
+			doc::raise(sigev_value.sival_int);
 		}
 	};
 };

@@ -57,6 +57,16 @@ namespace env::file
 		int fd;
 	};
 
+	struct dup : private descriptor
+	{
+		dup(int from, int to);
+		~dup();
+
+	protected:
+	
+		int tempfd;
+	};
+
 	struct fifo : descriptor
 	{
 		fifo(fmt::string::view, mode = rd);

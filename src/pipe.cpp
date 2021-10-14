@@ -66,6 +66,29 @@ namespace env::file
 		return success;
 	}
 
+	dup::dup(int from, int to) : tempfd(to)
+	{
+		fd = sys::dup(to);
+		if (fail(fd))
+		{
+			sys::err(here, "dup", to);
+		}
+		else
+		if (fail(sys::dup2(from, to)))
+		{
+			sys::err(here, "dup2", from, to);
+			close();
+		}
+	}
+
+	dup::~dup()
+	{
+		if (not fail(fd) and fail(sys::dup2(fd, tempfd)))
+		{
+			sys::err(here, "dup2", fd, tempfd);
+		}
+	}
+
 	pipe::pipe()
 	{
 		int fd[2];

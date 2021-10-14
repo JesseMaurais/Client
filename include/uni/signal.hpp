@@ -16,7 +16,7 @@ namespace sys::uni::sig
 {
 	struct set
 	{
-		sigset_t buf[1];
+		sigset_t buf[1]; 
 
 		set()
 		{
@@ -147,13 +147,13 @@ namespace sys::uni::sig
 		static void queue(int signo, siginfo_t* info, void* context)
 		{
 			const int fd = info->si_value.sival_int;
-			if (STDERR_FILENO != fd)
+			if (STDERR_FILENO == fd)
 			{
-				//const struct sys::dup tmp(fd);
 				psiginfo(info, strsignal(signo));
 			}
 			else
 			{
+				env::file::dup const tmp(fd);
 				psiginfo(info, strsignal(signo));
 			}
 			(void) context;
@@ -190,7 +190,7 @@ namespace sys::uni::sig
 
 		static void thread(sigval sigev_value)
 		{
-			doc::signal(sigev_value.sival_int);
+			doc::raise(sigev_value.sival_int);
 		}
 	};
 }
