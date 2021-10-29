@@ -6,6 +6,7 @@
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "err.hpp"
+#include "type.hpp"
 #ifdef _WIN32
 #include "win.hpp"
 #else

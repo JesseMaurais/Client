@@ -175,6 +175,10 @@ else
 LIBPATH=$(OBJDIR)
 endif
 
+ifexists($(HDRDIR))
+add(CFLAGS, -I$(HDRDIR))
+endif
+
 //
 // Input Sources
 //

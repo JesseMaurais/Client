@@ -167,7 +167,7 @@ namespace
 	};
 }
 
-namespace fmt
+namespace fmt::tag
 {
 	template <class Char> type<Char> const & type<Char>::instance()
 	{

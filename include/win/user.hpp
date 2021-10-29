@@ -1,5 +1,5 @@
-#ifndef win_msg_hpp
-#define win_msg_hpp
+#ifndef win_user_hpp
+#define win_user_hpp "WIN32 User"
 
 #include "win.hpp"
 #include "sys.hpp"
@@ -54,6 +54,42 @@ namespace sys::win
 		auto set() const
 		{
 			return RegisterClassEx(this);
+		}
+	};
+
+	struct timer
+	{
+		using function = std::function<TIMERPROC>
+
+		timer(funciton f, UINT t, HWND h = nullptr)
+		{
+			id = SetTimer(h, static_cast<UINT_PTR>(this), t, thread);
+			if (not id) sys::win::err(here, "SetTimer", h, t);
+			else work = f;
+		}
+
+		void kill(HWND h = nullptr)
+		{
+			if (id)
+			{
+				if (not KillTimer(h, id))
+				{
+					sys::win::err(here, "KillTimer", h, id);
+				}
+			}
+		}
+
+	private:
+
+		function work;
+
+		static void thread(HWND h, UINT u, UINT_PTR ptr, DWORD dw)
+		{
+			auto that = static_cast<fwd::as_ptr<timer>>(ptr);
+			#ifdef assert
+			assert(nullptr != that);
+			#endif
+			if (that) that->work(h, u, dw);
 		}
 	};
 }

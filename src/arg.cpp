@@ -6,6 +6,7 @@
 #include "dir.hpp"
 #include "sync.hpp"
 #include "err.hpp"
+#include "tag.hpp"
 
 namespace
 {
@@ -13,7 +14,7 @@ namespace
 
 	auto make_key()
 	{
-		static auto const app = fmt::put("Application");
+		static auto const app = fmt::tag::put("Application");
 		return app;
 	}
 

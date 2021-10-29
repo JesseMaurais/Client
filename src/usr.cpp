@@ -9,6 +9,8 @@
 #include "mode.hpp"
 #include "err.hpp"
 
+#include <iostream>
+
 #ifdef _WIN32
 #include <shlobj.h>
 #endif

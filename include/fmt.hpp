@@ -79,11 +79,11 @@ namespace fmt
 	>
 	struct basic_string_type : String, Memory, Stream, Layout
 	{
-		using check = Memory::check;
-		using order = Memory::order;
-		using format = Stream::format;
-		using input = Stream::input;
-		using output = Stream::output;
+		using check  = typename Memory::check;
+		using order  = typename Memory::order;
+		using format = typename Stream::format;
+		using input  = typename Stream::input;
+		using output = typename Stream::output;
 
 		using String::String;
 		basic_string_type(auto const& s)
@@ -120,6 +120,7 @@ namespace fmt
 	struct basic_string : Base
 	{
 		using view = basic_string_view<Char, Traits, Alloc, Order>;
+		
 		using Base::Base;
 		basic_string(auto const& in)
 		: Base(data(in), size(in))

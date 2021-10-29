@@ -7,15 +7,14 @@
 #include "dig.hpp"
 #include "err.hpp"
 #include <memory>
-#include <array>
 #include <map>
 
 
 namespace sys::sig
 {
-	fmt::span<int> native()
+	fwd::span<int> native()
 	{
-		static std::array buf
+		static int buf [] =
 		{
 			SIGABRT,
 

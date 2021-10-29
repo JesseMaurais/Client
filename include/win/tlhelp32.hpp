@@ -1,5 +1,5 @@
-#ifndef win_process_hpp
-#define win_process_hpp
+#ifndef win_tlhelp32_hpp
+#define win_tlhelp32_hpp "WIN32 Tool Help"
 
 #include "win.hpp"
 #include "sys.hpp"
