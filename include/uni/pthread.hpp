@@ -499,7 +499,7 @@ namespace sys
 				uni::rwlock* that;
 
 			public:
-			
+
 				unlock(uni::rwlock* ptr) : that(ptr)
 				{
 					that->wrlock();

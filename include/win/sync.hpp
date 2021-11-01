@@ -40,9 +40,39 @@ namespace sys::win
 		static unsigned WINAPI thread(void *ptr)
 		{
 			auto that = fwd::cast_as<start>(ptr);
+			#ifdef assert
+			assert(nullptr != that);
+			#endif
 			if (that) that->work();
 			_endthreadex(that->id);
 			return that->id;
+		}
+	};
+
+	struct timer
+	{
+		using function = doc::function;
+
+		timer(HANDLE h, function f, long long t, long p = 0, bool resume = true) : work(f)
+		{
+			LARGE_INTEGER li = { .QuadPart = t; };
+			if (not SetWaitableTimer(h, &li, p, thread, this, resume))
+			{
+				sys::win::err(here, "SetWaitableTimer");
+			}
+		}
+
+	private:
+
+		function work;
+
+		static void CALLBACK thread(LPVOID lp, DWORD low, DWORD high)
+		{
+			auto that = fwd::cast_as<timer>(lp);
+			#ifdef assert
+			assert(nullptr != that);
+			#endif
+			if (that) that->work();
 		}
 	};
 
@@ -55,7 +85,7 @@ namespace sys::win
 
 		auto thread(start::function f)
 		{
-			return sys::win::start(f, this);
+			return start(f, this);
 		}
 
 		auto pipes()
@@ -173,19 +203,19 @@ namespace sys::win
 
 namespace sys
 {
-	using thread = sys::win::start;
+	using thread = win::start;
 
-	struct mutex : sys::win::critical_section
+	struct mutex : win::critical_section
 	{
 		auto lock()
 		{
 			class unlock : fwd::unique
 			{
-				sys::win::critical_section* that;
+				critical_section* that;
 
 			public:
 
-				unlock(sys::win::critical_section* ptr) : that(ptr)
+				unlock(critical_section* ptr) : that(ptr)
 				{
 					that->enter();
 				}
@@ -200,17 +230,17 @@ namespace sys
 		}
 	};
 
-	struct rwlock : sys::win::srwlock
+	struct rwlock : win::srwlock
 	{
 		auto read()
 		{
 			class unlock : fwd::unique
 			{
-				sys::win::srwlock* that;
+				srwlock* that;
 
 			public:
 
-				unlock(sys::win::srwlock* ptr) : that(ptr)
+				unlock(srwlock* ptr) : that(ptr)
 				{
 					that->lock();
 				}
@@ -227,11 +257,11 @@ namespace sys
 		{
 			class unlock : fwd::unique
 			{
-				sys::win::srwlock* that;
+				srwlock* that;
 
 			public:
 
-				unlock(sys::win::srwlock* ptr) : that(ptr)
+				unlock(srwlock* ptr) : that(ptr)
 				{
 					that->xlock();
 				}

@@ -3,7 +3,7 @@
 
 #include "err.hpp"
 #include "env.hpp"
-#include "tmp.hpp"
+#include "ptr.hpp"
 #ifdef _WIN32
 #include "win/sync.hpp"
 #else
@@ -12,8 +12,6 @@
 
 namespace sys
 {
-	extern thread_local fmt::string::view thread_id;
-
 	template <class object> struct exclusive_ptr : fwd::unique
 	// Allow one writer but many readers (WORM pattern)
 	{
@@ -21,8 +19,10 @@ namespace sys
 		object *that;
 
 		exclusive_ptr(object *ptr) : that(ptr)
-		{ 
-			assert(that);
+		{
+			#ifdef assert
+			assert(nullptr != that);
+			#endif
 		}
 
 		auto read()
@@ -36,7 +36,7 @@ namespace sys
 				unlock(exclusive_ptr* ptr)
 				: key(ptr->lock.read())
 				, that(ptr->that)
-				{ 
+				{
 					assert(that);
 				}
 
@@ -64,7 +64,7 @@ namespace sys
 				unlock(exclusive_ptr *ptr)
 				: key(ptr->lock.write())
 				, that(ptr->that)
-				{ 
+				{
 					assert(that);
 				}
 
@@ -102,7 +102,7 @@ namespace sys
 		using object::object;
 
 		exclusive() : that(this)
-		{ 
+		{
 			assert(this);
 		}
 
@@ -124,7 +124,7 @@ namespace sys
 
 	public:
 
-		atomic(Type x = {}) : value(x) 
+		atomic(Type x = {}) : value(x)
 		{ }
 
 		operator Type() const final

@@ -3,32 +3,56 @@
 
 #include "win.hpp"
 #include "ptr.hpp"
+#include "tmp.hpp"
+#include <cstdlib>
 
 namespace sys::win
 {
-    using performance = fwd::zero<LARGE_INTEGER>;
+	struct large_int : fwd::variable<long long>
+	{
+		long long operator=(long long value) override
+		{
+			return buf->QuadPart = value;
+		}
 
-    struct counter : performance
-    {
-        counter()
-        {
-            if (not QueryPerformanceCounter(this))
-            {
-                sys::win::err(here, "QueryPerformanceCounter");
-            }
-        }
-    };
+		operator long long() const override
+		{
+			return buf->QuadPart;
+		}
 
-    struct frequency : performance
-    {
-        frequency()
-        {
-            if (not QueryPerformanceFrequency(this))
-            {
-                sys::win::err(here, "QueryPerformanceFrequency");
-            }
-        }
-    };
+	protected:
+
+		LARGE_INTEGER buf[1];
+	};
+
+	struct counter : large_int
+	{
+		counter()
+		{
+			if (not QueryPerformanceCounter(buf))
+			{
+				sys::win::err(here, "QueryPerformanceCounter");
+			}
+		}
+	};
+
+	struct frequency : large_int
+	{
+		frequency()
+		{
+			if (not QueryPerformanceFrequency(buf))
+			{
+				sys::win::err(here, "QueryPerformanceFrequency");
+			}
+		}
+	};
+
+	static auto ticks(long long period)
+	{
+		const auto counter t;
+		static const auto frequency hz;
+		return std::lldiv(t, hz);
+	}
 }
 
 #endif // file
