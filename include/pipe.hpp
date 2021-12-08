@@ -15,7 +15,7 @@ namespace env::file
 {
 	fwd::extern_ptr<void> make_map(int fd, size_t = 0, off_t = 0, mode = rw, size_t* = nullptr);
 
-	struct descriptor : fwd::unique, stream
+	struct descriptor : fwd::no_copy, stream
 	{
 		ssize_t read(void *buf, size_t sz) const override;
 		ssize_t write(const void *buf, size_t sz) const override;
@@ -63,7 +63,7 @@ namespace env::file
 		~dup();
 
 	protected:
-	
+
 		int tempfd;
 	};
 
@@ -80,7 +80,7 @@ namespace env::file
 		int const flags;
 	};
 
-	struct pipe : fwd::unique, stream
+	struct pipe : fwd::no_copy, stream
 	{
 		explicit pipe();
 
@@ -130,7 +130,7 @@ namespace env::file
 		descriptor fds[2];
 	};
 
-	struct process : fwd::unique, stream
+	struct process : fwd::no_copy, stream
 	{
 		bool start(fmt::string::view::init args);
 		bool start(fmt::string::view::span args);
@@ -175,7 +175,7 @@ namespace env::file
 
 		void close(int n = invalid)
 		{
-			if (fail(n)) 
+			if (fail(n))
 			{
 				for (auto m : { 0, 1, 2 })
 				{
@@ -221,7 +221,7 @@ namespace env::file
 		descriptor fd[3];
 	};
 
-	struct socket : fwd::unique, stream
+	struct socket : fwd::no_copy, stream
 	{
 		using address = sys::net::address;
 

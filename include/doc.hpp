@@ -10,7 +10,7 @@ namespace doc
 {
 	using path = fmt::diff;
 
-	template <class Type> class instance : fwd::unique
+	template <class Type> class instance : fwd::no_copy
 	{
 		instance() = default;
 

@@ -13,7 +13,7 @@ namespace fwd
 	template <class Type> using extern_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> constexpr as_ptr<Type> null = nullptr;
 	template <class Type> thread_local auto local = null<Type>;
-
+	
 	constexpr auto void_ptr = null<void>;
 
 	template <class Type, class Pointer> inline auto cast_as(Pointer ptr)
@@ -46,39 +46,29 @@ namespace fwd
 		static constexpr auto parent_size = sizeof(parent_type);
 	};
 
-	struct closure : std::function<void()>
+	struct no_copy // cannot copy base class
 	{
-		using function::function;
+		no_copy(const no_copy &) = delete;
+		no_copy & operator = (no_copy const &) = delete;
 	protected:
-		~closure()
-		{
-			(*this)();
-		}
+		no_copy() = default;
 	};
 
-	struct unique // cannot copy base class
+	struct no_move // cannot move base class
 	{
-		unique(const unique &) = delete;
-		unique & operator = (unique const &) = delete;
+		no_move(no_move &&) = delete;
 	protected:
-		unique() = default;
+		no_move() = default;
 	};
 
-	struct stationary // cannot move base class
-	{
-		stationary(stationary &&) = delete;
-	protected:
-		stationary() = default;
-	};
-
-	struct scoped // cannot allocate base class
+	struct no_make // cannot instantiate
 	{
 		void* operator new (size_t) = delete;
 		void operator delete (void*) = delete;
 		void* operator new[] (size_t) = delete;
 		void operator delete[] (void*) = delete;
 	protected:
-		scoped() = default;
+		no_make() = default;
 	};
 
 	template
@@ -87,7 +77,7 @@ namespace fwd
 	>
 	auto make_ptr(Type* ptr, Free del = std::default_delete<Type>())
 	{
-		return std::unique_ptr<Type, Free>(ptr, del);
+		return extern_ptr<Type, Free>(ptr, del);
 	}
 
 	template
@@ -101,18 +91,67 @@ namespace fwd
 
 	template
 	<
+		class Type, class Free = deleter<Type>
+	>
+	auto share(std::enable_shared_from_this<Type>* that, Free free = std::default_delete<Type>())
+	{
+		auto ptr = this->shared_from_this();
+		auto that = ptr.get();
+		ptr.reset();
+		return make_ptr(that, free);
+	}
+
+	template
+	<
 		class Type, class Remove = deleter<Type>
 	>
-	struct shared : unique, scoped, std::enable_shared_from_this<Type>
+	struct shared : no_copy, no_make, std::enable_shared_from_this<Type>
 	{
 		using Type::Type;
 
-		auto extern_from_this(Remove free = std::default_delete<Type>())
+		auto share_this(Remove free = std::default_delete<Type>())
 		{
-			auto ptr = this->shared_from_this();
-			auto that = ptr.get();
-			ptr.reset();
-			return make_ptr(that, free);
+			return share(this);
+		}
+	};
+	
+	
+	template
+	<
+		class Type, class Remove = deleter<Type>
+	>
+	struct closed : no_copy, no_make, std::pair<Type, const Remove>
+	{
+		using pair::pair;
+		
+		~closed()
+		{
+			this->second(&this->first);
+		}
+		
+		auto & get() const
+		{
+			return this->first;
+		}
+		
+		auto & get()
+		{
+			return this->first;
+		}
+		
+		auto & get_deleter() const
+		{
+			return this->second;
+		}
+	};
+	
+	struct scoped : std::function<void()>
+	{
+		using function::function;
+	protected:
+		~scoped()
+		{
+			if (*this) (*this)();
 		}
 	};
 }

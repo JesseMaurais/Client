@@ -209,6 +209,20 @@ namespace env::file
 
 		return success;
 	}
+
+	shared make(fwd::as_ptr<FILE> f)
+	{
+		return fwd::make_ptr(f, [](auto f)
+		{
+			if (nullptr != f)
+			{
+				if (std::fclose(f))
+				{
+					sys::err(here, "fclose");
+				}
+			}
+		});
+	}
 }
 
 #ifdef test_unit

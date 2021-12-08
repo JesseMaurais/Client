@@ -209,7 +209,7 @@ namespace sys
 	{
 		auto lock()
 		{
-			class unlock : fwd::unique
+			class unlock : fwd::no_copy
 			{
 				critical_section* that;
 
@@ -234,7 +234,7 @@ namespace sys
 	{
 		auto read()
 		{
-			class unlock : fwd::unique
+			class unlock : fwd::no_copy
 			{
 				srwlock* that;
 
@@ -255,7 +255,7 @@ namespace sys
 
 		auto write()
 		{
-			class unlock : fwd::unique
+			class unlock : fwd::no_copy
 			{
 				srwlock* that;
 

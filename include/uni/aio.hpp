@@ -7,7 +7,7 @@
 
 namespace sys::uni::aio
 {
-	struct event : fwd::unique, fwd::zero<aiocb>
+	struct event : fwd::no_copy, fwd::zero<aiocb>
 	{
 		using function = sig::event::function;
 

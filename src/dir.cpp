@@ -8,10 +8,14 @@
 #include "arg.hpp"
 #include "sys.hpp"
 #include "err.hpp"
+#include "sync.hpp"
 #ifdef _WIN32
 #include "win/file.hpp"
 #else
 #include "uni/dirent.hpp"
+#ifdef __linux__
+#include "uni/notify.hpp"
+#endif
 #endif
 
 namespace fmt::dir
@@ -140,7 +144,7 @@ namespace env::file
 		return all(u, m, e);
 	}
 
-	fmt::string::view make_dir(fmt::string::view path)
+	fmt::string::view mkdir(fmt::string::view path)
 	{
 		std::stack<fmt::string::view> stack;
 		fmt::string buf;
@@ -177,7 +181,7 @@ namespace env::file
 		return stem;
 	}
 
-	bool remove_dir(fmt::string::view dir)
+	bool rmdir(fmt::string::view dir)
 	{
 		std::deque<fmt::string> deque;
 		deque.emplace_back(dir);
@@ -223,6 +227,25 @@ namespace env::file
 			deque.pop_back();
 		}
 		return ok;
+	}
+
+	shared watch(view path, mode mask, event call)
+	{
+		if (not fmt::terminated(path))
+		{
+			return watch(fmt::to_string(path), mask, call);
+		}
+
+		auto
+		#ifdef _WIN32
+		{
+
+		}
+		#else
+		{
+
+		}
+		#endif
 	}
 }
 

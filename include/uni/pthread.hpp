@@ -12,7 +12,7 @@
 
 namespace sys::uni
 {
-	struct start : fwd::unique
+	struct start : fwd::no_copy
 	{
 		pthread_t id;
 
@@ -45,7 +45,7 @@ namespace sys::uni
 		}
 	};
 
-	struct thread : fwd::unique
+	struct thread : fwd::no_copy
 	{
 		pthread_attr_t buf[1];
 
@@ -141,7 +141,7 @@ namespace sys::uni
 		}
 	};
 
-	struct cond : fwd::unique
+	struct cond : fwd::no_copy
 	{
 		pthread_cond_t buf[1];
 
@@ -215,7 +215,7 @@ namespace sys::uni
 		};
 	};
 
-	struct mutex : fwd::unique
+	struct mutex : fwd::no_copy
 	{
 		pthread_mutex_t buf[1];
 
@@ -351,7 +351,7 @@ namespace sys::uni
 		};
 	};
 
-	struct rwlock : fwd::unique
+	struct rwlock : fwd::no_copy
 	{
 		pthread_rwlock_t buf[1];
 
@@ -448,7 +448,7 @@ namespace sys
 	{
 		auto lock()
 		{
-			class unlock : fwd::unique
+			class unlock : fwd::no_copy
 			{
 				uni::mutex* that;
 
@@ -473,7 +473,7 @@ namespace sys
 	{
 		auto read()
 		{
-			class unlock : fwd::unique
+			class unlock : fwd::no_copy
 			{
 				uni::rwlock* that;
 
@@ -494,7 +494,7 @@ namespace sys
 
 		auto write()
 		{
-			class unlock : fwd::unique
+			class unlock : fwd::no_copy
 			{
 				uni::rwlock* that;
 

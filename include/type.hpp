@@ -36,7 +36,8 @@ namespace fmt
 		using size_type = typename view::size_type;
 		using ctype = typename string::ctype;
 
-		static type& instance();
+		static type* get();
+		static type* set(type*);
 
 		static_assert(null == ~npos);
 
@@ -420,35 +421,38 @@ namespace fmt
 	// Common characters
 
 	extern template struct type<char>;
+	using ctype = type<char>;
+	
 	extern template struct type<wchar_t>;
+	using wtype = type<wchar_t>;
 
 	// Multibyte shims
 
 	template <typename iterator>
 	inline auto next(iterator it, iterator end)
 	{
-		return type<char>::instance().next(it, end);
+		return type<char>::get()->next(it, end);
 	}
 
 	inline auto next(string::view u)
 	{
-		return type<char>::instance().next(u);
+		return type<char>::get()->next(u);
 	}
 
 	template <typename iterator>
 	inline auto skip(iterator it, iterator end)
 	{
-		return type<char>::instance().skip(it, end);
+		return type<char>::get()->skip(it, end);
 	}
 
 	inline auto skip(string::view u)
 	{
-		return type<char>::instance().skip(u);
+		return type<char>::get()->skip(u);
 	}
 
 	inline auto widen(string::view u)
 	{
-		return type<char>::instance().widen(u);
+		return type<char>::get()->widen(u);
 	}
 
 	inline auto widen(char c)
@@ -458,7 +462,7 @@ namespace fmt
 
 	inline auto narrow(wstring::view u)
 	{
-		return type<wchar_t>::instance().narrow(u);
+		return type<wchar_t>::get()->narrow(u);
 	}
 
 	inline auto narrow(wchar_t c)
@@ -468,102 +472,102 @@ namespace fmt
 
 	inline auto first(string::view u)
 	{
-		return type<char>::instance().first(u);
+		return type<char>::get()->first(u);
 	}
 
 	inline auto last(string::view u)
 	{
-		return type<char>::instance().last(u);
+		return type<char>::get()->last(u);
 	}
 
 	inline auto trim(string::view u)
 	{
-		return type<char>::instance().trim(u);
+		return type<char>::get()->trim(u);
 	}
 
 	inline auto all_of(string::view u, type<char>::mask m)
 	{
-		return type<char>::instance().all_of(u, m);
+		return type<char>::get()->all_of(u, m);
 	}
 
 	inline auto any_of(string::view u, type<char>::mask m)
 	{
-		return type<char>::instance().any_of(u, m);
+		return type<char>::get()->any_of(u, m);
 	}
 
 	inline auto to_upper(string::view u)
 	{
-		return type<char>::instance().to_upper(u);
+		return type<char>::get()->to_upper(u);
 	}
 
 	inline auto to_lower(string::view u)
 	{
-		return type<char>::instance().to_lower(u);
+		return type<char>::get()->to_lower(u);
 	}
 
 	inline bool terminated(string::view u)
 	{
-		return type<char>::instance().terminated(u);
+		return type<char>::get()->terminated(u);
 	}
 
 	inline auto count(string::view u, string::view v)
 	{
-		return type<char>::instance().count(u, v);
+		return type<char>::get()->count(u, v);
 	}
 
 	inline auto join(string::view::span t, string::view u = empty)
 	{
-		return type<char>::instance().join(t.begin(), t.end(), u);
+		return type<char>::get()->join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::span t, string::view u = empty)
 	{
-		return type<char>::instance().join(t.begin(), t.end(), u);
+		return type<char>::get()->join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::view::init t, string::view u = empty)
 	{
-		return type<char>::instance().join(t.begin(), t.end(), u);
+		return type<char>::get()->join(t.begin(), t.end(), u);
 	}
 
 	inline auto join(string::init t, string::view u = empty)
 	{
-		return type<char>::instance().join(t.begin(), t.end(), u);
+		return type<char>::get()->join(t.begin(), t.end(), u);
 	}
 
 	inline auto split(string::view u)
 	{
-		return type<char>::instance().split(u);
+		return type<char>::get()->split(u);
 	}
 
 	inline auto split(string::view u, string::view v)
 	{
-		return type<char>::instance().split(u, v);
+		return type<char>::get()->split(u, v);
 	}
 
 	inline auto split(string::view::span p, string::view v)
 	{
-		return type<char>::instance().split(p, v);
+		return type<char>::get()->split(p, v);
 	}
 
 	inline auto split(string::span p, string::view v)
 	{
-		return type<char>::instance().split(p, v);
+		return type<char>::get()->split(p, v);
 	}
 
 	inline auto replace(string::view u, string::view v, string::view w)
 	{
-		return type<char>::instance().replace(u, v, w);
+		return type<char>::get()->replace(u, v, w);
 	}
 
 	inline auto embrace(string::view u, string::view v)
 	{
-		return type<char>::instance().embrace(u, v);
+		return type<char>::get()->embrace(u, v);
 	}
 
 	inline auto to_pair(string::view u, string::view v = assign)
 	{
-		return type<char>::instance().to_pair(u, v);
+		return type<char>::get()->to_pair(u, v);
 	}
 
 	inline auto to_pair(string::view::pair p, string::view u = assign)

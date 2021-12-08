@@ -12,8 +12,8 @@
 
 namespace sys
 {
-	template <class object> struct exclusive_ptr : fwd::unique
-	// Allow one writer but many readers (WORM pattern)
+	template <class object> struct exclusive_ptr : fwd::no_copy
+	// Allow one writer but many readers 
 	{
 		rwlock lock;
 		object *that;
@@ -28,10 +28,10 @@ namespace sys
 		auto read()
 		{
 			using reader = decltype(lock.read());
-			struct unlock : fwd::unique
+			struct unlock : fwd::no_copy
 			{
 				reader const key;
-				object const *that;
+				object const *that;s
 
 				unlock(exclusive_ptr* ptr)
 				: key(ptr->lock.read())
@@ -56,7 +56,7 @@ namespace sys
 		auto write()
 		{
 			using writer = decltype(lock.write());
-			struct unlock : fwd::unique
+			struct unlock : fwd::no_copy
 			{
 				writer const key;
 				object *that;
@@ -103,7 +103,9 @@ namespace sys
 
 		exclusive() : that(this)
 		{
-			assert(this);
+			#ifdef assert
+			assert(nullptr != that);
+			#endif
 		}
 
 		auto read()

@@ -21,7 +21,7 @@ namespace sys::win
 		}
 	};
 
-	struct find_file : fwd::unique, WIN32_FIND_DATA
+	struct find_file : fwd::no_copy, WIN32_FIND_DATA
 	{
 		HANDLE h;
 

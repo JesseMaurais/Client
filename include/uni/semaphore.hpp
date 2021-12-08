@@ -15,7 +15,7 @@ namespace sys::uni
 
 namespace sys::uni::sem
 {
-	template <class Pointer> struct obj : fwd::unique
+	template <class Pointer> struct obj : fwd::no_copy
 	{
 		bool get(int* value)
 		{

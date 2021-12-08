@@ -2,6 +2,7 @@
 #define file_hpp "File Object"
 
 #include "fwd.hpp"
+#include "ptr.hpp"
 #include <cstddef>
 #include <cstdio>
 
@@ -38,6 +39,13 @@ namespace env::file
 	};
 
 	using stream = fwd::compose<reader, writer>;
+	
+
+	fwd::extern_ptr<FILE> close(fwd::as_ptr<FILE>);
+	
+	fwd::destroy<int[2]> pipe();
+
+	fwd::destroy<int[3]> popen(fmt::init);
 }
 
 #endif // file

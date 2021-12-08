@@ -19,13 +19,23 @@
 
 namespace fwd
 {
-	// Class union
+	// Class union 
 
 	template <class... Types> struct compose : Types...
 	{ 
 		using Types::Types...;
 	};
-
+	
+	// Compare by member
+	
+	template <class Object, auto... Member> struct compare
+	{
+		bool operator()(const Object& left, const Object& right) const
+		{
+			return std::tie(left.*member...) < std::tie(right.*member...);
+		}
+	};
+		
 	// Overload traits
 
 	template <class Type> using allocator = std::allocator<Type>;

@@ -41,7 +41,7 @@ namespace sys::linux::inotify
 			auto ev = value();
 			off += sizeof(inotify_event);
 			off += ev->len;
-			
+
 			if (buf.size() <= off)
 			{
 				buf.clear();

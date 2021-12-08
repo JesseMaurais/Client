@@ -35,7 +35,7 @@ namespace fmt
 			Base::setp(t, u);
 			return this;
 		}
-		
+
 		Base* setbuf(char_ptr s, size_type n) override
 		{
 			size_type const m = n / 2;
@@ -160,8 +160,8 @@ namespace fmt
 		using size_type = typename Base::size_type;
 		using char_type = typename Base::char_type;
 
-		basic_buf(env::file::stream const& obj) 
-		: f(obj) 
+		basic_buf(env::file::stream const& obj)
+		: f(obj)
 		{ };
 
 	protected:
@@ -190,19 +190,19 @@ namespace fmt
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator
 	>
-	struct basic_stream : fwd::unique, Stream<Char, Traits>, basic_buf<Char, Traits, Alloc>
+	struct basic_stream : fwd::no_copy, Stream<Char, Traits>, basic_buf<Char, Traits, Alloc>
 	{
 		using stream = Stream<Char, Traits>;
 		using buf = basic_buf<Char, Traits, Alloc>;
 
-		basic_stream(env::file::stream const& f) 
+		basic_stream(env::file::stream const& f)
 		: stream(this), buf(f)
 		{ }
 	};
 
-	template 
+	template
 	<
-		class Char, 
+		class Char,
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator
 	>

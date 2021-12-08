@@ -16,7 +16,7 @@ namespace sys::uni::sig
 {
 	struct set
 	{
-		sigset_t buf[1]; 
+		sigset_t buf[1];
 
 		set()
 		{
@@ -114,7 +114,7 @@ namespace sys::uni::sig
 		}
 	};
 
-	struct action : fwd::unique, sigaction
+	struct action : fwd::no_copy, sigaction
 	{
 		action(int flags, struct set mask)
 		{
@@ -169,7 +169,7 @@ namespace sys::uni::sig
 		return error;
 	}
 
-	struct event : fwd::unique, sigevent
+	struct event : fwd::no_copy, sigevent
 	{
 		using function = ::doc::function;
 

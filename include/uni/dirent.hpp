@@ -8,7 +8,7 @@
 
 namespace sys::uni
 {
-	class dir : fwd::unique
+	class dir : fwd::no_copy
 	{
 		DIR *ptr;
 

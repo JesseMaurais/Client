@@ -15,9 +15,35 @@
 #include <cstdlib>
 #include <cmath>
 
-namespace
+namespace fmt
 {
-	class strings : fwd::unique
+	template <class C> auto & single()
+	{
+		static type<C> instance;
+		thread_local auto ptr = &instance;
+		return ptr;
+	}
+
+	template <class C> type<C>* type<C>::get()
+	{
+		return single();
+	}
+	
+	template <class C> type<C>* type<C>::set(type<C>* to)
+	{
+		auto from = single();
+		single() = to;
+		return ftom;
+	}
+
+	// global object linkage
+	template class type<char>;
+	template class type<wchar_t>;
+}
+
+namespace fmt::tag
+{
+	class strings : fwd::no_copy
 	{
 		strings() = default;
 
@@ -88,7 +114,9 @@ namespace
 			auto const id = fmt::to<fmt::name>(size);
 			{
 				auto [it, unique] = table.write()->emplace(key, id);
+				#ifdef assert
 				assert(unique);
+				#endif
 				writer->push_back(it->first);
 			}
 			return ~id;
@@ -113,10 +141,15 @@ namespace
 			{
 				// Cache the string here
 				auto const p = cache.write()->emplace(key);
-				verify(p.second);
+				#ifdef assert
+				assert(p.second);
+				#endif
+				
 				// Index a view to the string
 				auto const q = table.write()->emplace(*p.first, id);
-				verify(q.second);
+				#ifdef assert
+				assert(q.second);
+				#endif
 
 				writer->push_back(q.first->first);
 			}
@@ -146,7 +179,7 @@ namespace
 			return in;
 		}
 
-		fmt::string::out::ref put(fmt::string::out::ref out, char eol)
+		fmt::string::out::ref put(fmt::string::out::ref out, char end)
 		{
 			auto const reader = cache.read();
 			auto const begin = reader->begin();
@@ -154,29 +187,17 @@ namespace
 
 			for (auto it = begin; it != end; ++it)
 			{
-				out << *it << eol;
+				out << *it << end;
 			}
 			return out;
 		}
 
-		static auto& registry()
+		static auto & registry()
 		{
-			static strings singleton;
-			return singleton;
+			static strings instance;
+			return instance;
 		}
 	};
-}
-
-namespace fmt::tag
-{
-	template <class Char> type<Char> const & type<Char>::instance()
-	{
-		static type<Char> const local;
-		return local;
-	}
-
-	template struct type<char>;
-	template struct type<wchar_t>;
 
 	bool got(name n)
 	{
@@ -219,7 +240,9 @@ namespace fmt::tag
 	}
 }
 
+
 #ifdef test_unit
+
 test_unit(type)
 {
 	fmt::string::view const Space = " \t\v\r\n\f";
@@ -248,8 +271,7 @@ test_unit(type)
 	{
 		fmt::string::view::vector const v
 		{
-			"1 2 3", " 1 2 3", "1 2 3 ", " 1 2 3 ",
-			"\t1\n2\n\t3\t\n"
+			"1 2 3", " 1 2 3", "1 2 3 ", " 1 2 3 ",	"\t1\n2\n\t3\t\n"
 		};
 
 		for (auto u : v)
@@ -295,13 +317,6 @@ test_unit(type)
 
 test_unit(char)
 {
-	// Escape parameter encoding
-	{
-		fmt::string::stream ss;
-		ss << fmt::io::par<1, 2, 3, 4>;
-		assert(ss.str() == "1;2;3;4");
-	}
-
 	// Set graphics rendition
 	{
 		fmt::string::stream ss;

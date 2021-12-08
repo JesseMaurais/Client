@@ -39,9 +39,17 @@ namespace fmt
 		using file  = memory<fwd::basic_file<Char, Traits>>;
 		using str   = memory<fwd::basic_stringstream<Char, Traits>>;
 
-		using input  = in::put;
-		using output = out::put;
+		using read   = in::put;
+		using write  = out::put;
 		using format = ctype::get;
+		
+		template <class Iterator>
+		out::ref put(out::ref buf, Iterator begin, Iterator end, Char* del)
+		{
+			auto it = std::ostream_iterator(buf, del);
+			std::copy(begin, end, it);
+			return out;
+		}
 	};
 
 	template
@@ -81,9 +89,9 @@ namespace fmt
 	{
 		using check  = typename Memory::check;
 		using order  = typename Memory::order;
+		using read   = typename Stream::read;
+		using write  = typename Stream::write;
 		using format = typename Stream::format;
-		using input  = typename Stream::input;
-		using output = typename Stream::output;
 
 		using String::String;
 		basic_string_type(auto const& s)

@@ -9,7 +9,7 @@
 
 namespace fwd::sig
 {
-	template <class sink, class... argv> struct socket : fwd::unique
+	template <class sink, class... argv> struct socket : fwd::no_copy
 	{
 		using signature = void(argv...);
 		using function = std::function<signature>;
@@ -115,7 +115,7 @@ namespace sys::sig
 		return fail(h) or fault(h) or ignore(h);
 	}
 
-	struct state : fwd::unique, slot
+	struct state : fwd::no_copy, slot
 	{
 		state(int n, function f) : slot(event(n), f)
 		{
@@ -158,7 +158,7 @@ namespace sys::sig
 		{
 			return [=](int n)
 			{
-				f(n); 
+				f(n);
 				old.h(n);
 			};
 		}

@@ -94,7 +94,7 @@ namespace sys::win
 		info() { GetSystemInfo(this); }
 	};
 
-	struct handle : fwd::unique
+	struct handle : fwd::no_copy
 	{
 		HANDLE h;
 

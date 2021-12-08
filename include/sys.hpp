@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include <fcntl.h>
 
 #ifdef _WIN32
@@ -256,6 +257,32 @@ namespace sys
 	private:
 
 		mode_t um;
+	};
+
+	struct ftime : std::tm
+	{
+		auto operator()(char* s, std::size_t sz, const char* fmt) const
+		{
+			return std::strftime(s, sz, fmt, this);
+		}
+	};
+
+	struct gmtime : ftime
+	{
+		gmtime(std::time_t tm = std::time(nullptr))
+		{
+			std::tm* that = this;
+			*that = *std::gmtime(&tm);
+		}
+	};
+
+	struct localtime : ftime
+	{
+		localtime(std::time_t tm = std::time(nullptr))
+		{
+			std::tm* that = this;
+			*that = *std::localtime(&tm);
+		}
 	};
 }
 

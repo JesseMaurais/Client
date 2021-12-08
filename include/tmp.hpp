@@ -69,6 +69,8 @@ namespace fwd
 
 	template <class T, class S> using relation = formula<T, S>;
 
+	using sentence = predicate<void>;
+
 	template <bool P, class... Q> struct proposition : formula<Q...>
 	{
 		using base = formula<Q...>;

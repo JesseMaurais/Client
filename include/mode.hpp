@@ -80,7 +80,7 @@ namespace env::file
 	int convert(mode); // file open mode
 	int convert(permit); // file access permissions
 
-	// Make a temporary file 
+	// Make a temporary file
 	int temp(char *tmp, mode = ok);
 
 	// Check for access to the file at path
