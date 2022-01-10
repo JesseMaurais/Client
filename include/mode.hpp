@@ -15,7 +15,7 @@ namespace env::file
 		rd   = 1 << 002, // read
 		ok   = 1 << 003, // exists
 		xu   = 1 << 004, // exclusive
-		sz   = 1 << 005, // truncate
+		un   = 1 << 005, // truncate
 		app  = 1 << 006, // append
 		txt  = 1 << 007, // text
 		bin  = 1 << 010, // binary
@@ -79,9 +79,6 @@ namespace env::file
 
 	int convert(mode); // file open mode
 	int convert(permit); // file access permissions
-
-	// Make a temporary file
-	int temp(char *tmp, mode = ok);
 
 	// Check for access to the file at path
 	bool fail(fmt::string::view path, mode = ok);

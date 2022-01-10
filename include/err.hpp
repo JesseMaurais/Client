@@ -20,6 +20,16 @@
 #	define verify(...) (__VA_ARGS__)
 #endif
 
+#ifndef STRINGIFY
+#	define STRINGIFY(x) #x
+#endif
+
+#ifdef _WIN32
+#	define FILELINE __FILE__ "(" STRINGIFY(__LINE__) ")"
+#else
+#	define FILELINE __FILE__ ":" STRINGIFY(__LINE__)
+#endif
+
 #define here fmt::where { __FILE__, __LINE__, __func__ }
 
 namespace fmt

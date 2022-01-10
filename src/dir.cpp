@@ -228,25 +228,6 @@ namespace env::file
 		}
 		return ok;
 	}
-
-	shared watch(view path, mode mask, event call)
-	{
-		if (not fmt::terminated(path))
-		{
-			return watch(fmt::to_string(path), mask, call);
-		}
-
-		auto
-		#ifdef _WIN32
-		{
-
-		}
-		#else
-		{
-
-		}
-		#endif
-	}
 }
 
 #ifdef test_unit

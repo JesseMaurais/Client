@@ -31,13 +31,18 @@ namespace sys
 			struct unlock : fwd::no_copy
 			{
 				reader const key;
-				object const *that;s
+				object const *that;
 
 				unlock(exclusive_ptr* ptr)
 				: key(ptr->lock.read())
 				, that(ptr->that)
 				{
 					assert(that);
+				}
+
+				operator object const*() const
+				{
+					return that;
 				}
 
 				auto const& operator*() const
@@ -66,6 +71,16 @@ namespace sys
 				, that(ptr->that)
 				{
 					assert(that);
+				}
+
+				operator object const*() const
+				{
+					return that;
+				}
+
+				operator object*()
+				{
+					return that;
 				}
 
 				auto const& operator*() const
@@ -118,6 +133,8 @@ namespace sys
 			return that.write();
 		}
 	};
+
+	template <class Type> extern sys::exclusive<Type> extern_ptr;
 
 	template <class Type> class atomic : public fwd::variable<Type>
 	{

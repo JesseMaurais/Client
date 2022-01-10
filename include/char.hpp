@@ -554,70 +554,59 @@ namespace fmt
 
 	namespace io
 	{
-		template <size_t N, int...P>
-		struct set : std::array<int, N + sizeof...(P)>
+		template <int... Params> auto set(string::out::ref out)
 		{
-			set(std::span<int, N> par) : array(P...)
-			{
-				auto it = std::next(begin(), sizeof...(P));
-				std::copy(par.begin(), par.end(), it);
-			}
-		};
+			return out << C0::ESC << C1::CSI << Params... << CSI::SGR;
+		}
 		
-		using reset = set<0, SGR::reset>;
-		using intense = set<0, SGR::intense>;
-		using faint = set<0, SGR::faint>;
-		using italic = set<0, SGR::italic>;
-		using underline = set<0, SGR::underline>;
-		using blink_slow = set<0, SGR::blink_slow>;
-		using blink_fast = set<0, SGR::blink_fast>;
-		using reverse = set<0, SGR::reverse>;
-		using conceal = set<0, SGR::conceal>;
-		using strike = set<0, SGR::strike>;
-		using font = set<0, SGR::first_font + N>;
-		using fraktur = set<0, SGR::fraktur>;
-		using underline2 = set<0, SGR::underline2>;
-		using intense_off = set<0, SGR::intense_off>;
-		using italic_off = set<0, SGR::italic_off>;
-		using underline_off = set<0, SGR::underline_off>;
-		using blink_off = set<0, SGR::blink_off>;
-		using inverse_off = set<0, SGR::inverse_off>;
-		using reveal = set<0, SGR::reveal>;
-		using strike_off = set<0, SGR::strike_off>;
-		using fg_black = set<0, SGR::fg_black>;
-		using fg_red = set<0, SGR::fg_red>;
-		using fg_green = set<0, SGR::fg_green>;
-		using fg_yellow = set<0, SGR::fg_yellow>;
-		using fg_blue = set<0, SGR::fg_blue>;
-		using fg_magenta = set<0, SGR::fg_magenta>;
-		using fg_cyan = set<0, SGR::fg_cyan>;
-		using fg_white = set<0, SGR::fg_white>;
-		using fg_rgb = set<3, SGR::fg, 2>;
-		using fg = set<1, SGR_fg, 5>;
-		using fg_off = set<0, SGR::fg_off>;
-		using bg_black = set<0, SGR::bg_black>;
-		using bg_red = set<0, SGR::bg_red>;
-		using bg_green = set<0, SGR::bg_green>;
-		using bg_yellow = set<0, SGR::bg_yellow>;
-		using bg_blue = set<0, SGR::bg_blue>;
-		using bg_magenta = set<0, SGR::bg_magenta>;
-		using bg_cyan = set<0, SGR::bg_cyan>;
-		using bg_white = set<0, SGR::bg_white>;
-		using bg_rgb = set<3, SGR::bg, 2>;
-		using bg = set<1, SGR::bg, 5>;
-		using bg_off = set<0, SGR::bg_off>;
-		using frame = set<0, SGR::frame>;
-		using encircle = set<0, SGR::encircle>;
-		using overline = set<0, SGR::overline>;
-		using frame_off = set<0, SGR::frame_off>;
-		using overline_off = set<0, SGR::overline_off>;
+		inline auto reset = set<SGR::reset>;
+		inline auto intense = set<SGR::intense>;
+		inline auto faint = set<SGR::faint>;
+		inline auto italic = set<SGR::italic>;
+		inline auto underline = set<SGR::underline>;
+		inline auto blink_slow = set<SGR::blink_slow>;
+		inline auto blink_fast = set<SGR::blink_fast>;
+		inline auto reverse = set<SGR::reverse>;
+		inline auto conceal = set<SGR::conceal>;
+		inline auto strike = set<SGR::strike>;
+		inline auto font = set<SGR::first_font + N>;
+		inline auto fraktur = set<SGR::fraktur>;
+		inline auto underline2 = set<SGR::underline2>;
+		inline auto intense_off = set<SGR::intense_off>;
+		inline auto italic_off = set<SGR::italic_off>;
+		inline auto underline_off = set<SGR::underline_off>;
+		inline auto blink_off = set<SGR::blink_off>;
+		inline auto inverse_off = set<SGR::inverse_off>;
+		inline auto reveal = set<SGR::reveal>;
+		inline auto strike_off = set<SGR::strike_off>;
+		inline auto fg_black = set<SGR::fg_black>;
+		inline auto fg_red = set<SGR::fg_red>;
+		inline auto fg_green = set<SGR::fg_green>;
+		inline auto fg_yellow = set<SGR::fg_yellow>;
+		inline auto fg_blue = set<SGR::fg_blue>;
+		inline auto fg_magenta = set<SGR::fg_magenta>;
+		inline auto fg_cyan = set<SGR::fg_cyan>;
+		inline auto fg_white = set<SGR::fg_white>;
+//		inline auto fg_rgb = set<3, SGR::fg, 2>;
+//		inline auto fg = set<1, SGR_fg, 5>;
+		inline auto fg_off = set<SGR::fg_off>;
+		inline auto bg_black = set<SGR::bg_black>;
+		inline auto bg_red = set<SGR::bg_red>;
+		inline auto bg_green = set<SGR::bg_green>;
+		inline auto bg_yellow = set<SGR::bg_yellow>;
+		inline auto bg_blue = set<SGR::bg_blue>;
+		inline auto bg_magenta = set<SGR::bg_magenta>;
+		inline auto bg_cyan = set<SGR::bg_cyan>;
+		inline auto bg_white = set<SGR::bg_white>;
+//		inline auto bg_rgb = set<3, SGR::bg, 2>;
+//		inline auto bg = set<1, SGR::bg, 5>;
+		inline auto bg_off = set<SGR::bg_off>;
+		inline auto frame = set<SGR::frame>;
+		inline auto encircle = set<SGR::encircle>;
+		inline auto overline = set<SGR::overline>;
+		inline auto frame_off = set<SGR::frame_off>;
+		inline auto overline_off = set<SGR::overline_off>;
 	}
-}
-
-template <size_t N, int...P>
-fmt::string::out::ref operator<<(fmt::string::out::ref out, fmt::io::set<N, P...> par)
-{
-	return fmt::string::stream::put(out, par.begin(), par.end(), ";");
 }
 
 #endif // file

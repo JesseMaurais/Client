@@ -10,7 +10,8 @@ namespace fwd
 	template <class Type> using as_ptr = typename std::add_pointer<Type>::type;
 	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
-	template <class Type> using extern_ptr = std::unique_ptr<Type, deleter<Type>>;
+	template <class Type> using unique_ptr = std::unique_ptr<Type, deleter<Type>>;
+	template <class Type> using shared_ptr = std::shared_ptr<Type, deleter<Type>>;
 	template <class Type> constexpr as_ptr<Type> null = nullptr;
 	template <class Type> thread_local auto local = null<Type>;
 	
@@ -75,25 +76,43 @@ namespace fwd
 	<
 		class Type, class Free = deleter<Type>
 	>
-	auto make_ptr(Type* ptr, Free del = std::default_delete<Type>())
+	auto make_shared(as_ptr<Type> ptr, Free del = std::default_delete<Type>())
 	{
-		return extern_ptr<Type, Free>(ptr, del);
-	}
-
-	template
-	<
-		class Pointer, class Free = deleter<Pointer>
-	>
-	auto null_ptr(Free del = std::default_delete<Pointer>())
-	{
-		return make_ptr((Pointer) nullptr, del);
+		return std::shared_ptr<Type, Free>(ptr, del);
 	}
 
 	template
 	<
 		class Type, class Free = deleter<Type>
 	>
-	auto share(std::enable_shared_from_this<Type>* that, Free free = std::default_delete<Type>())
+	auto make_unique(as_ptr<Type> ptr, Free del = std::default_delete<Type>())
+	{
+		return std::unique_ptr<Type, Free>(ptr, del);
+	}
+
+	template
+	<
+		class Pointer, class Free = deleter<Pointer>
+	>
+	auto null_shared(Free del = std::default_delete<Pointer>())
+	{
+		return make_shared((Pointer) nullptr, del);
+	}
+
+	template
+	<
+		class Pointer, class Free = deleter<Pointer>
+	>
+	auto null_unique(Free del = std::default_delete<Pointer>())
+	{
+		return make_unique((Pointer) nullptr, del);
+	}
+
+	template
+	<
+		class Type, class Free = deleter<Type>
+	>
+	auto share_ptr(std::enable_shared_from_this<Type>* that, Free free = std::default_delete<Type>())
 	{
 		auto ptr = this->shared_from_this();
 		auto that = ptr.get();
@@ -111,11 +130,10 @@ namespace fwd
 
 		auto share_this(Remove free = std::default_delete<Type>())
 		{
-			return share(this);
+			return share_ptr(this);
 		}
 	};
-	
-	
+
 	template
 	<
 		class Type, class Remove = deleter<Type>
@@ -126,7 +144,7 @@ namespace fwd
 		
 		~closed()
 		{
-			this->second(&this->first);
+			this->second(this->first);
 		}
 		
 		auto & get() const
@@ -144,7 +162,7 @@ namespace fwd
 			return this->second;
 		}
 	};
-	
+
 	struct scoped : std::function<void()>
 	{
 		using function::function;

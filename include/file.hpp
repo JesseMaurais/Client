@@ -2,6 +2,7 @@
 #define file_hpp "File Object"
 
 #include "fwd.hpp"
+#include "mode.hpp"
 #include "ptr.hpp"
 #include <cstddef>
 #include <cstdio>
@@ -17,6 +18,7 @@ namespace env::file
 
 	using size_t = std::size_t;
 	using ssize_t = std::ptrdiff_t;
+	using string = fmt::string;
 
 	struct reader
 	{
@@ -38,14 +40,22 @@ namespace env::file
 		}
 	};
 
-	using stream = fwd::compose<reader, writer>;
-	
+	using basic_ptr = fwd::as_ptr<FILE>;
+	using shared_ptr = fwd::shared_ptr<FILE>;
+	using unique_ptr = fwd::unique_ptr<FILE>;
+	using weak_ptr = std::weak_ptr<FILE>;
 
-	fwd::extern_ptr<FILE> close(fwd::as_ptr<FILE>);
-	
-	fwd::destroy<int[2]> pipe();
+	constexpr auto null_ptr = fwd::null<FILE>;
 
-	fwd::destroy<int[3]> popen(fmt::init);
+	unique_ptr make(basic_ptr);
+	unique_ptr open(string::view, mode);
+	bool lock(basic_ptr, mode, off_t=0, size_t=0);
+
+	inline auto temp()
+	{
+		auto f = std::tmpfile();
+		return make(f);
+	}
 }
 
 #endif // file
