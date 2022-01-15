@@ -9,6 +9,26 @@
 
 namespace env::file
 {
+	using basic_ptr = fwd::as_ptr<FILE>;
+	using shared_ptr = fwd::shared_ptr<FILE>;
+	using unique_ptr = fwd::unique_ptr<FILE>;
+	using weak_ptr = std::weak_ptr<FILE>;
+
+	inline bool fail(basic_ptr ptr)
+	{
+		return nullptr == ptr;
+	}
+
+	unique_ptr enclose(basic_ptr);
+	unique_ptr open(string::view, mode=rd);
+	bool lock(basic_ptr, mode=wo, size_t=0, size_t=0);
+
+	inline auto temp()
+	{
+		auto f = std::tmpfile();
+		return make(f);
+	}
+
 	constexpr int invalid = -1;
 
 	inline bool fail(auto value)
@@ -39,23 +59,6 @@ namespace env::file
 			return write(fwd::cast_as<const void>(buf), sz * sizeof (C));
 		}
 	};
-
-	using basic_ptr = fwd::as_ptr<FILE>;
-	using shared_ptr = fwd::shared_ptr<FILE>;
-	using unique_ptr = fwd::unique_ptr<FILE>;
-	using weak_ptr = std::weak_ptr<FILE>;
-
-	constexpr auto null_ptr = fwd::null<FILE>;
-
-	unique_ptr make(basic_ptr);
-	unique_ptr open(string::view, mode);
-	bool lock(basic_ptr, mode, off_t=0, size_t=0);
-
-	inline auto temp()
-	{
-		auto f = std::tmpfile();
-		return make(f);
-	}
 }
 
 #endif // file

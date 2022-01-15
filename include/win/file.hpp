@@ -92,6 +92,23 @@ namespace sys::win
 			return success;
 		}
 	};
+
+	struct overlapped : zero<OVERLAPPED>
+	{
+		using zero::zero;
+
+		overlapped(std::ptrdiff_t off, HANDLE h=invalid) : hEvent(h)
+		{
+			large_int large = off;
+			DUMMYUNIONNAME.DUMMYSTRUCTNAME.Offset = large.low_part();
+			DUMMYUNIONNAME.DUMMYSTRUCTNAME.OffsetHigh = large.high_part();
+		}
+
+		overlapped(void* ptr, HANDLE h=invalid) : hEvent(h)
+		{
+			DUMMYUNIONNAME.Pointer = ptr;
+		}
+	};
 }
 
 namespace sys

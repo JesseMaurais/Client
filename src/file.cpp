@@ -10,6 +10,7 @@
 #else
 #include "uni/fctrl.hpp"
 #endif
+#include <climits>
 
 namespace env::file
 {
@@ -216,7 +217,7 @@ namespace env::file
 		return success;
 	}
 
-	unique_ptr make(basic_ptr f)
+	unique_ptr enclose(basic_ptr f)
 	{
 		return fwd::make_ptr(f, [](auto f)
 		{
@@ -234,8 +235,8 @@ namespace env::file
 	{
 		if (not fmt::terminated(path))
 		{
-			const auto s = fmt::to_string(path);
-			return open(s, mask);
+			const auto buf = fmt::to_string(path);
+			return open(buf, mask);
 		}
 
 		if (mask & ex)
@@ -252,17 +253,22 @@ namespace env::file
 				f = sys::popen(path.data(), "r");
 			}
 
-			if (null_ptr == f)
+			if (fail(f))
 			{
 				sys::err(here, "popen", path);
 			}
 
-			return make(f);
+			return enclose(f);
 		}
 	}
 
-	bool lock(basic_ptr f, mode mask, off_t off, size_t sz)
+	bool lock(basic_ptr f, mode mask, size_t off, size_t sz)
 	{
+		#ifdef assert
+		assert(not fail(f));
+		assert((mask & (rd|wr|un|ok)) == mask);
+		#endif
+
 		const auto fd = sys::fileno(f);
 		#ifdef alert
 		alert(fail(fd));
@@ -270,39 +276,45 @@ namespace env::file
 
 		#ifdef _WIN32
 		{
-			DWORD dw = 0;
-			if (not (mask & wr))
-			{
-				dw |= LOCKFILE_EXCLUSIVE_LOCK;
-			}
-			if (mask & ok)
-			{
-				dw |= LOCKFILE_FAIL_IMMEDIATELY
-			}
+			const auto h = sys::win::get(fd);
+			#ifdef assert
+			assert(not sys::win::fail(h))
+			#endif
+
 			if (0 == sz)
 			{
-				sz = MAXDWORD;
+				sz = SIZE_MAX;
 			}
 
-			const auto h = sys::win::get(fd);
+			sys::win::overlapped over = off;
+			sys::win::large_int large = sz;
+
 			if (mask & un)
 			{
-				if (UnlockFile(h, LOWORD(off), HIWORD(off), LOWORD(sz), HIWORD(sz)))
+				if (UnlockFileEx(h, 0, large.low_part(), large.high_part(), &over))
 				{
 					return success;
 				}
+				sys::win::err(here, "UnlockFileEx");
 			}
 			else
 			{
-				fwd::zero<OVERLAPPED> over;
-				over.DUMMYUNIONNAME.DUMMYSTRUCTNAME.Offset = LOWORD(off);
-				over.DUMMYUNIONNAME.DUMMYSTRUCTNAME.OffsetHigh = HIWORD(off);
-				if (LockFileEx(h, dw, 0, LOWORD(sz), HIWORD(sz), &over))
+				DWORD dw = 0;
+				if (mask & wr)
+				{
+					dw |= LOCKFILE_EXCLUSIVE_LOCK;
+				}
+				if (mask & ok)
+				{
+					dw |= LOCKFILE_FAIL_IMMEDIATELY
+				}
+
+				if (LockFileEx(h, dw, 0, large.low_part(), large.high_part(), &over))
 				{
 					return success;
 				}
+				sys::win::err(here, "LockFileEx");
 			}
-			sys::win::err(here);
 			return failure;
 		}
 		#else // UNIX
@@ -322,10 +334,11 @@ namespace env::file
 				key.l_type = F_WRLCK;
 			}
 			else
-			if (mask & rd)
+			//if (mask & rd)
 			{
 				key.l_type = F_RDLCK;
 			}
+
 			if (mask & ok)
 			{
 				return key.set(fd);
@@ -345,5 +358,11 @@ test_unit(mode)
 {
 	assert(not env::file::fail(__FILE__) and "Source file exists");
 	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
+
+	const auto f = env::file::open(__FILE__);
+	assert(not env::file::fail(f));
+	assert(not env::file::lock(f, env::file::rd));
+	assert(env::file::lock(f, env::file::wr | env::file::ok));
+	assert(not env::file::lock(f, env::file::un));
 }
 #endif

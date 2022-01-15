@@ -20,6 +20,16 @@ namespace sys::win
 			return buf->QuadPart;
 		}
 
+		inline auto low_part() const
+		{
+			return DUMMYSTRUCTNAME.LowPart;
+		}
+
+		inline auto high_part() const
+		{
+			return DUMMYSTRUCTNAME.HighPart;
+		}
+
 	protected:
 
 		LARGE_INTEGER buf[1];
