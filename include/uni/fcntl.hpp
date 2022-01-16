@@ -11,17 +11,17 @@ namespace sys::uni::file
 	{
 		bool get(int fd)
 		{
-			return fail(fcntl(fd, F_GETLK, this)) and err(here);
+			return fail(fcntl(fd, F_GETLK, this));
 		}
 
 		bool set(int fd)
 		{
-			return fail(fcntl(fd, F_SETLK, this)) and err(here);
+			return fail(fcntl(fd, F_SETLK, this));
 		}
 
 		bool wait(int fd)
 		{
-			return fail(fctrl(fd, F_SETLKW, this)) and err(here);
+			return fail(fctrl(fd, F_SETLKW, this));
 		}
 	};
 }

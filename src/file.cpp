@@ -262,7 +262,7 @@ namespace env::file
 		}
 	}
 
-	scoped lock(basic_ptr f, mode mask, size_t off, size_t sz)
+	fwd::scoped lock(basic_ptr f, mode mask, size_t off, size_t sz)
 	{
 		#ifdef assert
 		assert(nullptr != f);
@@ -303,13 +303,13 @@ namespace env::file
 			{
 				sys::win::err(here, "LockFileEx");
 			}
-			else return [=]()
+			else return fwd::make_ptr(f, [=](basic_ptr)
 			{
 				if (not UnlockFileEx(h, 0, large.low_part(), large.high_part(), &over))
 				{
 					sys::win::err(here, "UnlockFileEx");
 				}
-			};
+			});
 		}
 		#else // UNIX
 		{
@@ -329,13 +329,16 @@ namespace env::file
 
 			if ((mask & ok) ? key.set(fd) : key.wait(fd))
 			{
-				return nullptr;
+				sys::err(here, (mask & wr) ? "F_WRLCK" : "F_RDLCK", fd);
 			}
-			else return [=]()
+			else return fwd::make_ptr(f, [=](basic_ptr)
 			{
 				key.l_type = FD_UNLCK;
-				key.set(fd);
-			};
+				if (key.set(fd))
+				{
+					sys::err(here, "FD_UNLCK", fd);
+				}
+			});
 		}
 		#endif
 
@@ -477,10 +480,14 @@ test_unit(mode)
 {
 	assert(not env::file::fail(__FILE__) and "Source file exists");
 	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
-
-	const auto f = env::file::open(__FILE__);
-	assert(not env::file::lock(f.get(), env::file::rd));
-	assert(env::file::lock(f.get(), env::file::wr | env::file::ok));
-	assert(not env::file::lock(f.get(), env::file::un));
+}
+test_unit(lock)
+{
+	auto f = env::file::open(__FILE__);
+	assert(f and "Open file");
+	auto rdk = env::file::lock(f.get(), env::file::rd);
+	assert(rdk and "Lock file to read");
+	auto wrk = env::file::lock(f.get(), env::file::wo);
+	assert(wrk and "Lock file to write");
 }
 #endif

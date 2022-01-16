@@ -26,7 +26,7 @@ namespace env::file
 	unique_ptr enclose(basic_ptr);
 	unique_ptr open(view, mode=rw);
 
-	fwd::scoped lock(basic_ptr, mode=rw, off_t=0, size_t=0);
+	unique_ptr lock(basic_ptr, mode=rw, off_t=0, size_t=0);
 	unique_buf map(basic_ptr, mode=rw, off_t=0, size_t=0, basic_buf=nullptr);
 
 	inline auto temp()
