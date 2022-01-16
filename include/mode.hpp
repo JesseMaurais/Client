@@ -30,7 +30,7 @@ namespace env::file
 		rw   = rd | wr, // read & write
 		wo   = rw | ok, // write & exists
 		rwx  = rw | ex, // read, write & execute
-		ov   = wo | sz, // overwrite
+		ov   = wo | un, // overwrite
 	};
 
 	constexpr int owner(int am)

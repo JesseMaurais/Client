@@ -1,5 +1,5 @@
 #ifndef ptr_hpp
-#define ptr_hpp "Object Pointers"
+#define ptr_hpp "Memory & Pointers"
 
 #include <memory>
 #include <functional>
@@ -13,9 +13,8 @@ namespace fwd
 	template <class Type> using unique_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> using shared_ptr = std::shared_ptr<Type, deleter<Type>>;
 	template <class Type> constexpr as_ptr<Type> null = nullptr;
-	template <class Type> thread_local auto local = null<Type>;
 	
-	constexpr auto void_ptr = null<void>;
+	constexpr auto voidptr = null<void>;
 
 	template <class Type, class Pointer> inline auto cast_as(Pointer ptr)
 	{
@@ -169,7 +168,7 @@ namespace fwd
 	protected:
 		~scoped()
 		{
-			if (*this) (*this)();
+			if (*this) operator();
 		}
 	};
 }

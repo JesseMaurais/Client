@@ -262,11 +262,11 @@ namespace env::file
 		}
 	}
 
-	bool lock(basic_ptr f, mode mask, size_t off, size_t sz)
+	scoped lock(basic_ptr f, mode mask, size_t off, size_t sz)
 	{
 		#ifdef assert
-		assert(not fail(f));
-		assert((mask & (rd|wr|un|ok)) == mask);
+		assert(nullptr != f);
+		assert((mask & (rw|ok)) == mask);
 		#endif
 
 		const auto fd = sys::fileno(f);
@@ -286,36 +286,30 @@ namespace env::file
 				sz = SIZE_MAX;
 			}
 
+			DWORD dw = 0;
+			if (mask & wr)
+			{
+				dw |= LOCKFILE_EXCLUSIVE_LOCK;
+			}
+			if (mask & ok)
+			{
+				dw |= LOCKFILE_FAIL_IMMEDIATELY;
+			}
+
 			sys::win::overlapped over = off;
 			sys::win::large_int large = sz;
 
-			if (mask & un)
+			if (not LockFileEx(h, dw, 0, large.low_part(), large.high_part(), &over))
 			{
-				if (UnlockFileEx(h, 0, large.low_part(), large.high_part(), &over))
-				{
-					return success;
-				}
-				sys::win::err(here, "UnlockFileEx");
-			}
-			else
-			{
-				DWORD dw = 0;
-				if (mask & wr)
-				{
-					dw |= LOCKFILE_EXCLUSIVE_LOCK;
-				}
-				if (mask & ok)
-				{
-					dw |= LOCKFILE_FAIL_IMMEDIATELY
-				}
-
-				if (LockFileEx(h, dw, 0, large.low_part(), large.high_part(), &over))
-				{
-					return success;
-				}
 				sys::win::err(here, "LockFileEx");
 			}
-			return failure;
+			else return [=]()
+			{
+				if (not UnlockFileEx(h, 0, large.low_part(), large.high_part(), &over))
+				{
+					sys::win::err(here, "UnlockFileEx");
+				}
+			};
 		}
 		#else // UNIX
 		{
@@ -324,29 +318,154 @@ namespace env::file
 			key.l_start = off;
 			key.l_len = sz;
 
-			if (mask & un)
-			{
-				key.l_type = F_UNLCK;
-			}
-			else
 			if (mask & wr)
 			{
 				key.l_type = F_WRLCK;
 			}
 			else
-			//if (mask & rd)
 			{
 				key.l_type = F_RDLCK;
 			}
 
-			if (mask & ok)
+			if ((mask & ok) ? key.set(fd) : key.wait(fd))
 			{
-				return key.set(fd);
+				return nullptr;
+			}
+			else return [=]()
+			{
+				key.l_type = FD_UNLCK;
+				key.set(fd);
+			};
+		}
+		#endif
+
+		return nullptr;
+	}
+
+	unique_buf map(basic_ptr f, mode mask, off_t off, size_t sz, basic_buf buf)
+	{
+		#ifdef assert
+		assert(nullptr != f);
+		assert((mask & (rwx|xu)) == mask);
+		#endif
+
+		const auto fd = sys::fileno(f);
+		#ifdef alert
+		alert(fail(fd));
+		#endif
+
+		if (0 == sz)
+		{
+			struct sys::stat st(fd);
+			if (sys::fail(st))
+			{
+				sys::err(here, "stat");
+			}
+			else sz = st.st_size;
+		}
+
+		#ifdef _WIN32
+		{
+			const auto h = sys::win::get(fd);
+			#ifdef assert
+			assert(not sys::win::fail(h))
+			#endif
+
+			DWORD flags = 0;
+			DWORD prot = 0;
+
+			if (mask & xu)
+			{
+				flags |= FILE_MAP_COPY;
+			}
+
+			if (mask & ex)
+			{
+				flags |= FILE_MAP_EXECUTE;
+
+				if (mask & rw)
+				{
+					prot = PAGE_EXECUTE_READWRITE;
+					flags |= FILE_MAP_ALL_ACCESS;
+				}
+				else
+				if (mask & wr)
+				{
+					if (mask & xu)
+					{
+						prot = PAGE_EXECUTE_WRITECOPY;
+					}
+					else
+					{
+						prot = PAGE_EXECUTE_READWRITE;
+					}
+					flags |= FILE_MAP_WRITE;
+				}
+				else
+				if (mask & rd)
+				{
+					prot = PAGE_EXECUTE_READ;
+					flags |= FILE_MAP_READ;
+				}
 			}
 			else
 			{
-				return key.wait(fd);
+				if (mask & rw)
+				{
+					prot = PAGE_READWRITE;
+					flags |= FILE_MAP_ALL_ACCESS;
+				}
+				else
+				if (mask & wr)
+				{
+					if (mask & xu)
+					{
+						prot = PAGE_WRITECOPY;
+					}
+					else
+					{
+						prot = PAGE_READWRITE;
+					}
+					flags |= FILE_MAP_WRITE;
+				}
+				else
+				if (mask & rd)
+				{
+					prot = PAGE_READONLY;
+					flags |= FILE_MAP_READ;
+				}
 			}
+
+			sys::win::handle const hm = CreateFileMapping
+			(
+				h, nullptr, prot, HIWORD(sz), LOWORD(sz), nullptr
+			);
+
+			if (sys::win::fail(hm))
+			{
+				sys::win::err(here, "CreateFileMapping");
+			}
+
+			return sys::win::mem::map(hm, flags, off, sz, buf);
+		}
+		#else
+		{
+			int prot = 0;
+			int flags = 0;
+
+			if (mask & rd) prot |= PROT_READ;
+			if (mask & wr) prot |= PROT_WRITE;
+			if (mask & ex) prot |= PROT_EXEC;
+			if (mask & xu)
+			{
+				flags |= MAP_PRIVATE;
+			}
+			else
+			{
+				flags |= MAP_SHARED;
+			}
+
+			return sys::uni::shm::map(sz, prot, flags, fd, off, buf);
 		}
 		#endif
 	}
@@ -360,9 +479,8 @@ test_unit(mode)
 	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
 
 	const auto f = env::file::open(__FILE__);
-	assert(not env::file::fail(f));
-	assert(not env::file::lock(f, env::file::rd));
-	assert(env::file::lock(f, env::file::wr | env::file::ok));
-	assert(not env::file::lock(f, env::file::un));
+	assert(not env::file::lock(f.get(), env::file::rd));
+	assert(env::file::lock(f.get(), env::file::wr | env::file::ok));
+	assert(not env::file::lock(f.get(), env::file::un));
 }
 #endif
