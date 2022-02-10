@@ -227,9 +227,9 @@ namespace sys
 			ok = sys::stat(path, this);
 		}
 
-		operator int() const
+		operator bool() const
 		{
-			return ok;
+			return fail(ok);
 		}
 
 	private:

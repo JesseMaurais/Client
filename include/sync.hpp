@@ -105,6 +105,46 @@ namespace sys
 			};
 			return unlock(this);
 		}
+
+		auto unique() const
+		{
+			return fwd::make_unique(that, [that, key=read()](auto ptr)
+			{
+				#ifdef assert
+				assert(that == ptr);
+				#endif
+			});
+		}
+
+		auto shared() const
+		{
+			return fwd::make_shared(that, [that, key=read()](auto ptr)
+			{
+				#ifdef assert
+				assert(that == ptr);
+				#endif
+			});
+		}
+
+		auto unique()
+		{
+			return fwd::make_unique(that, [that, key=write()](auto ptr)
+			{
+				#ifdef assert
+				assert(that == ptr);
+				#endif
+			});
+		}
+
+		auto shared()
+		{
+			return fwd::make_shared(that, [that, key=write()](auto ptr)
+			{
+				#ifdef assert
+				assert(that == ptr);
+				#endif
+			});
+		}
 	};
 
 	template <class object> class exclusive : object
@@ -131,6 +171,26 @@ namespace sys
 		auto write()
 		{
 			return that.write();
+		}
+
+		auto unique() const
+		{
+			return that.unique();
+		}
+
+		auto shared() const
+		{
+			return that.shared();
+		}
+
+		auto unique()
+		{
+			return that.unique();
+		}
+
+		auto shared()
+		{
+			return that.shared();
 		}
 	};
 

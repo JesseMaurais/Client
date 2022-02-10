@@ -54,6 +54,23 @@ namespace fmt::path
 	}
 }
 
+namespace fmt::file
+{
+	string fifo(string::view name)
+	{
+		#ifdef _WIN32
+		{
+			return fmt::join({ R"(\\.\pipe\)", name });
+		}
+		#else // UNIX
+		{
+			const auto run = env::usr::run_dir();
+			return fmt::dir::join({ run, name });
+		}
+		#endif // API
+	}
+}
+
 namespace env::file
 {
 	fmt::string::view::edges paths()

@@ -20,8 +20,8 @@ namespace sys::linux::inotify
 			for (ssize_t n = 0, sz = size; 0 < sz; n += sz)
 			{
 				buf.resize(n + sz);
-				sz = sys::read(fd, (void*) buf.data() + n, buf.size() - n);
-				if (env::file::fail(sz) and sys::err(here))
+				sz = sys::read(fd, buf.data() + n, buf.size() - n);
+				if (sys::fail(sz) and sys::err(here, "read"))
 				{
 					buf.clear();
 					break;

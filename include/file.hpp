@@ -9,7 +9,7 @@
 namespace env::file
 {
 	using size_t = std::size_t;
-	using ssize_t = std::ptrdiff_t;
+	using off_t = std::ptrdiff_t;
 	using string = fmt::string;
 	using view = string::view;
 

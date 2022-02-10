@@ -20,6 +20,11 @@ namespace fmt::dir
 	string join(string::view::init);
 }
 
+namespace fmt::file
+{
+	string fifo(string::view);
+}
+
 namespace env::file
 {
 	using string = fmt::string;

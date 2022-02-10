@@ -24,26 +24,27 @@ namespace env::file
 		dir  = 1 << 013, // directory
 		fifo = 1 << 014, // byte stream
 		lnk  = 1 << 015, // symbolic link
-		reg  = 1 << 016, // regulare file
+		reg  = 1 << 016, // regular file
 		sock = 1 << 017, // domain socket
-
-		rw   = rd | wr, // read & write
-		wo   = rw | ok, // write & exists
-		rwx  = rw | ex, // read, write & execute
+		rw   = rd | wr, // read/write
+		wo   = rw | ok, // read/write/exists
+		rwx  = rw | ex, // read/write/execute
+		rx   = rd | ex, // read/execute
+		wx   = wr | ex, // write/execute
 		ov   = wo | un, // overwrite
 	};
 
-	constexpr int owner(int am)
+	constexpr int owner(int mask)
 	{
-		return (am & rwx) << 6;
+		return (mask & rwx) << 6;
 	}
 
-	constexpr int group(int am)
+	constexpr int group(int mask)
 	{
 		return (am & rwx) << 3;
 	}
 
-	constexpr int other(int am)
+	constexpr int other(int mask)
 	{
 		return (am & rwx) << 0;
 	}
@@ -77,8 +78,9 @@ namespace env::file
 		return static_cast<permit>(other(static_cast<int>(am)));
 	}
 
-	int convert(mode); // file open mode
-	int convert(permit); // file access permissions
+	int to_flags(mode); // file open mode
+	int to_flags(permit); // file access permissions
+	fmt::string to_string(mode); // fopen style string
 
 	// Check for access to the file at path
 	bool fail(fmt::string::view path, mode = ok);

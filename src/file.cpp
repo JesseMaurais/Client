@@ -20,51 +20,55 @@ namespace env::file
 		return safe;
 	}
 
-	int convert(mode am)
+	int to_flags(mode mask)
 	{
+		#ifdef assert
+		assert((mask & (rw|ok|un|xu|app|txt|bin)) == mask);
+		#endif
+
 		int flags = 0;
 
-		if (am & rw)
+		if ((mask & rw) == rw)
 		{
 			flags |= O_RDWR;
 		}
 		else
-		if (am & wr)
+		if (mask & wr)
 		{
 			flags |= O_WRONLY;
 		}
 		else
-		if (am & rd)
+		if (mask & rd)
 		{
 			flags |= O_RDONLY;
 		}
 
-		if (am & txt)
+		if (mask & txt)
 		{
 			flags |= O_TEXT;
 		}
 		else
-		if (am & bin)
+		if (mask & bin)
 		{
 			flags |= O_BINARY;
 		}
 
-		if (am & app)
+		if (mask & app)
 		{
 			flags |= O_APPEND;
 		}
 
-		if (am & sz)
+		if (mask & un)
 		{
 			flags |= O_TRUNC;
 		}
 
-		if (am & xu)
+		if (mask & xu)
 		{
 			flags |= O_EXCL;
 		}
 
-		if (am & ok)
+		if (mask & ok)
 		{
 			flags |= O_CREAT;
 		}
@@ -72,48 +76,116 @@ namespace env::file
 		return flags;
 	}
 
-	int convert(permit pm)
+	int to_flags(permit mask)
 	{
 		int flags = 0;
 
-		if (pm & owner_x)
+		if (mask & owner_x)
 		{
 			flags |= S_IXUSR;
 		}
-		if (pm & owner_w)
+		if (mask & owner_w)
 		{
 			flags |= S_IWUSR;
 		}
-		if (pm & owner_r)
+		if (mask & owner_r)
 		{
 			flags |= S_IRUSR;
 		}
-		if (pm & group_x)
+		if (mask & group_x)
 		{
 			flags |= S_IXGRP;
 		}
-		if (pm & group_w)
+		if (mask & group_w)
 		{
 			flags |= S_IWGRP;
 		}
-		if (pm & group_r)
+		if (mask & group_r)
 		{
 			flags |= S_IRGRP;
 		}
-		if (pm & other_x)
+		if (mask & other_x)
 		{
 			flags |= S_IXOTH;
 		}
-		if (pm & other_w)
+		if (mask & other_w)
 		{
 			flags |= S_IWOTH;
 		}
-		if (pm & other_r)
+		if (mask & other_r)
 		{
 			flags |= S_IROTH;
 		}
 
 		return flags;
+	}
+
+	fmt::string to_string(mode mask)
+	{
+		#ifdef assert
+		assert((mask & (rw|un|ok|app|bin|txt)) == mask);
+		#endif
+
+		fmt::string buf;
+
+		if (mask & un)
+		{
+			if (mask & rd)
+			{
+				buf = "w+";
+			}
+			else
+			{
+				buf = "w";
+			}
+		}
+		else
+		if (mask & ok)
+		{
+			if (mask & rd)
+			{
+				buf = "x+";
+			}
+			else
+			{
+				buf = "x";
+			}
+		}
+		else
+		if (mask & app)
+		{
+			if (mask & rd)
+			{
+				buf = "a+";
+			}
+			else
+			{
+				buf = "a";
+			}
+		}
+		else
+		{
+			if (mask & wr)
+			{
+				buf = "r+";
+			}
+			else
+			{
+				buf = "r";
+			}
+		}
+
+		if (mask & bin)
+		{
+			buf += 'b';
+		}
+
+		if (mask & txt)
+		{
+			buf += 't';
+		}
+
+		return buf;
 	}
 
 	bool fail(view path, mode mask)
@@ -122,18 +194,16 @@ namespace env::file
 		{
 			return fail(fmt::to_string(path), mask);
 		}
-		auto const c = path.data();
 
 		#ifdef _WIN32
-		if (mask & ex)
+		if (DWORD dw; mask & ex)
 		{
-			DWORD dw;
-			return GetBinaryType(c, &dw)
+			return GetBinaryType(path.data(), &dw)
 				? success : failure;
 		}
 		#endif
 
-		if (mask == (mask & rwx))
+		if ((mask & rwx) == mask)
 		{
 			int flags = 0;
 
@@ -154,38 +224,44 @@ namespace env::file
 				flags |= W_OK;
 			}
 
-			return sys::fail(sys::access(c, flags));
+			return sys::access(path.data(), flags);
 		}
 
-		struct sys::stat state(c);
-		if (sys::fail(state))
+		const auto state = sys::stat(path.data());
+		if (state)
 		{
 			return failure;
 		}
 
-		if ((am & dir) and not S_ISDIR(state.st_mode))
+		if (mask & dir)
 		{
-			return failure;
-		}
-		if ((am & chr) and not S_ISCHR(state.st_mode))
-		{
-			return failure;
-		}
-		if ((am & reg) and not S_ISREG(state.st_mode))
-		{
-			return failure;
-		}
-		if (am & fifo)
-		{
-			#ifdef _WIN32
-			if (not path.starts_with(R"(\.\pipe\)"))
+			#ifdef S_ISDIR
+			if (not S_ISDIR(state.st_mode))
 			#endif
+				return failure;
+		}
+		if (mask & chr)
+		{
+			#ifdef S_ISCHAR
+			if (not S_ISCHR(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (mask & reg)
+		{
+			#ifdef S_ISREG
+			if (not S_ISREG(state.st_mode))
+			#endif
+				return failure;
+		}
+		if (mask & fifo)
+		{
 			#ifdef S_ISFIFO
 			if (not S_ISFIFO(state.st_mode))
 			#endif
 				return failure;
 		}
-		if (am & sock)
+		if (mask & sock)
 		{
 			#ifdef S_IFSOCK
 			if (not S_ISSOCK(state.st_mode))
@@ -223,7 +299,7 @@ namespace env::file
 		{
 			if (nullptr != f)
 			{
-				if (std::fclose(f))
+				if (EOF == std::fclose(f))
 				{
 					sys::err(here, "fclose");
 				}
@@ -231,38 +307,79 @@ namespace env::file
 		});
 	}
 
-	unique_ptr open(string::view path, mode mask)
+	unique_ptr open(view path, mode mask)
 	{
 		if (not fmt::terminated(path))
 		{
-			const auto buf = fmt::to_string(path);
-			return open(buf, mask);
+			return open(fmt::to_string(path), mask);
 		}
+
+		#ifdef assert
+		assert((mask & (rwx|ok|un|app|fifo|bin|txt)) == mask);
+		#endif
 
 		if (mask & ex)
 		{
-			auto f = null_ptr;
+			basic_ptr f = nullptr;
 
 			if (mask & wr)
 			{
 				f = sys::popen(path.data(), "w");
 			}
 			else
-			if (mask & rd)
 			{
 				f = sys::popen(path.data(), "r");
 			}
 
-			if (fail(f))
+			if (nullptr == f)
 			{
 				sys::err(here, "popen", path);
 			}
 
+			return fwd::make_ptr(f, [](auto f)
+			{
+				if (f and sys::fail(sys::pclose(f)))
+				{
+					sys::err(here, "pclose");
+				}
+			})
+		}
+		else
+		if (mask & fifo)
+		{
+			const auto name = fmt::file::fifo(path);
+
+			#ifdef _WIN32
+			{
+
+			}
+			#else // UNIX
+			{
+				const auto flags = to_flags(mask & rw);
+				if (sys::fail(mkfifo(name.data(), flags)))
+				{
+					sys::err(here, "mkfifo", name);
+				}
+				else
+				{
+					return open(name, mask & ~fifo);
+				}
+			}
+			#endif // API
+		}
+		else
+		{
+			const auto mode = to_string(mask);
+			auto f = std::fopen(path.data(), mode.data());
+			if (nullptr == f)
+			{
+				sys::err(here, "fopen", mode, path);
+			}
 			return enclose(f);
 		}
 	}
 
-	fwd::scoped lock(basic_ptr f, mode mask, size_t off, size_t sz)
+	unique_ptr lock(basic_ptr f, mode mask, size_t off, size_t sz)
 	{
 		#ifdef assert
 		assert(nullptr != f);
@@ -386,7 +503,7 @@ namespace env::file
 			{
 				flags |= FILE_MAP_EXECUTE;
 
-				if (mask & rw)
+				if ((mask & rw) == rw)
 				{
 					prot = PAGE_EXECUTE_READWRITE;
 					flags |= FILE_MAP_ALL_ACCESS;
@@ -394,14 +511,7 @@ namespace env::file
 				else
 				if (mask & wr)
 				{
-					if (mask & xu)
-					{
-						prot = PAGE_EXECUTE_WRITECOPY;
-					}
-					else
-					{
-						prot = PAGE_EXECUTE_READWRITE;
-					}
+					prot = (mask & xu) ? PAGE_EXECUTE_WRITECOPY : PAGE_EXECUTE_READWRITE;
 					flags |= FILE_MAP_WRITE;
 				}
 				else
@@ -413,7 +523,7 @@ namespace env::file
 			}
 			else
 			{
-				if (mask & rw)
+				if ((mask & rw) == rw)
 				{
 					prot = PAGE_READWRITE;
 					flags |= FILE_MAP_ALL_ACCESS;
@@ -421,14 +531,7 @@ namespace env::file
 				else
 				if (mask & wr)
 				{
-					if (mask & xu)
-					{
-						prot = PAGE_WRITECOPY;
-					}
-					else
-					{
-						prot = PAGE_READWRITE;
-					}
+					prot = (mask & xu) ? PAGE_WRITECOPY : PAGE_READWRITE;
 					flags |= FILE_MAP_WRITE;
 				}
 				else
@@ -456,9 +559,19 @@ namespace env::file
 			int prot = 0;
 			int flags = 0;
 
-			if (mask & rd) prot |= PROT_READ;
-			if (mask & wr) prot |= PROT_WRITE;
-			if (mask & ex) prot |= PROT_EXEC;
+			if (mask & rd)
+			{
+				prot |= PROT_READ;
+			}
+			if (mask & wr)
+			{
+				prot |= PROT_WRITE;
+			}
+			if (mask & ex)
+			{
+				prot |= PROT_EXEC;
+			}
+
 			if (mask & xu)
 			{
 				flags |= MAP_PRIVATE;
@@ -481,6 +594,13 @@ test_unit(mode)
 	assert(not env::file::fail(__FILE__) and "Source file exists");
 	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
 }
+test_unit(flags)
+{
+	using namespace env::file;
+	assert(to_flags(rw|un) == "w+");
+	assert(to_rlags(rd) == "r");
+	assert(to_flags(rw|ok) == "x+");
+}
 test_unit(lock)
 {
 	auto f = env::file::open(__FILE__);
@@ -488,6 +608,6 @@ test_unit(lock)
 	auto rdk = env::file::lock(f.get(), env::file::rd);
 	assert(rdk and "Lock file to read");
 	auto wrk = env::file::lock(f.get(), env::file::wo);
-	assert(wrk and "Lock file to write");
+	assert(not wrk and "Lock file to write");
 }
 #endif

@@ -229,7 +229,7 @@ namespace env::file
 		#else
 		{
 			sys::mode const um;
-			auto const s = data(path);
+			auto const s = path.data());
 			fd = sys::open(s, flags, (mode_t) um);
 			if (fail(fd))
 			{

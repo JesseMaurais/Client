@@ -7,7 +7,7 @@
 #include "dir.hpp"
 #include "type.hpp"
 #include "tag.hpp"
-#include "ps.hpp"
+#include "io.hpp"
 
 namespace env
 {
@@ -24,7 +24,7 @@ namespace env
 		auto second = first;
 		try // process can crash
 		{
-			while (--count and std::getline(put, last, end))
+			while (0 < --count and std::getline(put, last, end))
 			{
 				cache.emplace_back(std::move(last));
 			}
@@ -42,7 +42,8 @@ namespace env
 
 	shell::page shell::run(span arguments)
 	{
-		fmt::ipstream sub(arguments);
+		const auto exe = fmt::join(arguments, " ");
+		fmt::istream sub = env::file::open(exe, env::file::ex);
 		auto const line = get(sub);
 		status = sub.wait();
 		return line;

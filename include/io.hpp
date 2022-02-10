@@ -1,5 +1,5 @@
 #ifndef io_hpp
-#define io_hpp "Standard Input/Output"
+#define io_hpp "Input/Output Streams"
 
 #include <cstring>
 #include <streambuf>
@@ -106,78 +106,44 @@ namespace fmt
 	using streambuf = basic_streambuf<char>;
 	using wstreambuf = basic_streambuf<wchar_t>;
 
-
-	template
-	<
-		class Char,
-		template <class> class Traits = std::char_traits,
-		template <class> class Alloc = std::allocator,
-		// details
-		class Base = basic_streambuf<Char, Traits, Alloc>
-	>
-	struct basic_stringbuf : Base
-	{
-		using string = basic_string<Char, Traits, Alloc>;
-		using char_type = typename Base::char_type;
-		using size_type = typename Base::size_type;
-
-		basic_stringbuf() = default;
-		basic_stringbuf(size_type n)
-		{
-			setbufsiz(n);
-		}
-
-		auto setbufsiz(size_type n)
-		{
-			buf.resize(fmt::to_size(n));
-			return Base::setbuf(buf.data(), n);
-		}
-
-		auto setbufsiz(size_type n, size_type m)
-		{
-			buf.resize(fmt::to_size(n + m));
-			return Base::setbuf(buf.data(), n, m);
-		}
-
-	private:
-
-		string buf;
-	};
-
-	using stringbuf = basic_stringbuf<char>;
-	using wstringbuf = basic_stringbuf<wchar_t>;
-
-
 	template
 	<
 		class Char,
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator
 	>
-	struct basic_buf : basic_stringbuf<Char, Traits, Alloc>
+	struct basic_buf : basic_streambuf<Char, Traits, Alloc>
 	{
 		using Base = basic_stringbuf<Char, Traits, Alloc>;
 		using size_type = typename Base::size_type;
 		using char_type = typename Base::char_type;
 
-		basic_buf(env::file::stream const& obj)
-		: f(obj)
-		{ };
+		basic_buf(env::file::unique_ptr that)
+		{
+			file = std::move(that);
+		}
+
+		basic_buf(env::file::shared_ptr that)
+		{
+			file = that;
+		}
 
 	protected:
 
-		env::file::stream const& f;
+		env::file::shared_ptr file;
 
 	private:
 
 		size_type xsputn(char_type const *s, size_type n) override
 		{
-			return f.write(s, fmt::to_size(n));
+			const auto m = std::fwrite(s, fmt::to_size(n), sizeof(char), file.get());
+			return fmt::to<size_type>(m);
 		}
 
 		size_type xsgetn(char_type *s, size_type n) override
 		{
-			return f.read(s, fmt::to_size(n));
+			const auto m = std::fread(s, fmt::to_size(n), sizeof(char), file.get());
+			return fmt::to<size_type>(m);
 		}
 
 		using Base::Base;
@@ -195,8 +161,8 @@ namespace fmt
 		using stream = Stream<Char, Traits>;
 		using buf = basic_buf<Char, Traits, Alloc>;
 
-		basic_stream(env::file::stream const& f)
-		: stream(this), buf(f)
+		basic_stream(env::file::unique_ptr && file)
+		: stream(this), buf(file)
 		{ }
 	};
 
