@@ -44,7 +44,7 @@ namespace sys
 		return buf;
 	}
 
-	int perror(fmt::string::view message, bool perr)
+	int perror(fmt::string::view message, bool errn)
 	{
 		thread_local struct
 		{
@@ -56,7 +56,7 @@ namespace sys
 		if (message != local.last)
 		{
 			thread_buf << message;
-			if (perr) thread_buf << ':' << ' ' << std::strerror(errno);
+			if (errn) thread_buf << ':' << ' ' << std::strerror(errno);
 			thread_buf << fmt::eol;
 
 			local.last = fmt::to_string(message);
@@ -64,6 +64,30 @@ namespace sys
 		}
 		else ++local.counter;
 		return local.counter;
+	}
+
+	thread_local fwd::stack<fmt::where> callstack;
+
+	class tracepoint
+	{
+		const int depth;
+
+	public:
+
+		tracepoint(fmt::where at) : depth(sys::warn(top))
+		{
+			callstack.push(at);
+		}
+
+		~tracepoint()
+		{
+			callstack.pop();
+		}
+	};
+
+	tracepoint & trace(fmt::where at)
+	{
+		return tracepoint(at);
 	}
 }
 

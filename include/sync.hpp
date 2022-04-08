@@ -25,9 +25,9 @@ namespace sys
 			#endif
 		}
 
-		auto read()
+		auto reader()
 		{
-			using reader = decltype(lock.read());
+			using reader = decltype(lock.reader());
 			struct unlock : fwd::no_copy
 			{
 				reader const key;
@@ -58,9 +58,9 @@ namespace sys
 			return unlock(this);
 		}
 
-		auto write()
+		auto writer()
 		{
-			using writer = decltype(lock.write());
+			using writer = decltype(lock.writer());
 			struct unlock : fwd::no_copy
 			{
 				writer const key;
@@ -108,7 +108,7 @@ namespace sys
 
 		auto unique() const
 		{
-			return fwd::make_unique(that, [that, key=read()](auto ptr)
+			return fwd::make_unique(that, [that, key=reader()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -118,7 +118,7 @@ namespace sys
 
 		auto shared() const
 		{
-			return fwd::make_shared(that, [that, key=read()](auto ptr)
+			return fwd::make_shared(that, [that, key=reader()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -128,7 +128,7 @@ namespace sys
 
 		auto unique()
 		{
-			return fwd::make_unique(that, [that, key=write()](auto ptr)
+			return fwd::make_unique(that, [that, key=writer()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -138,7 +138,7 @@ namespace sys
 
 		auto shared()
 		{
-			return fwd::make_shared(that, [that, key=write()](auto ptr)
+			return fwd::make_shared(that, [that, key=writer()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -163,14 +163,14 @@ namespace sys
 			#endif
 		}
 
-		auto read()
+		auto reader()
 		{
-			return that.read();
+			return that.reader();
 		}
 
-		auto write()
+		auto writer()
 		{
-			return that.write();
+			return that.writer();
 		}
 
 		auto unique() const
@@ -208,13 +208,13 @@ namespace sys
 
 		operator Type() const final
 		{
-			auto const unlock = lock.read();
+			auto const unlock = lock.reader();
 			return value;
 		}
 
 		Type operator=(Type n) final
 		{
-			auto const unlock = lock.write();
+			auto const unlock = lock.writer();
 			return value = n;
 		}
 	};

@@ -39,11 +39,11 @@ namespace fmt
 		using file  = memory<fwd::basic_file<Char, Traits>>;
 		using str   = memory<fwd::basic_stringstream<Char, Traits>>;
 
-		using read   = in::put;
-		using write  = out::put;
+		using scan   = in::put;
+		using print  = out::put;
 		using format = ctype::get;
 		
-		template <class Iterator>
+		template <class Iterator> static
 		out::ref put(out::ref buf, Iterator begin, Iterator end, Char* del)
 		{
 			auto it = std::ostream_iterator(buf, del);
@@ -89,8 +89,8 @@ namespace fmt
 	{
 		using check  = typename Memory::check;
 		using order  = typename Memory::order;
-		using read   = typename Stream::read;
-		using write  = typename Stream::write;
+		using scan   = typename Stream::read;
+		using print  = typename Stream::write;
 		using format = typename Stream::format;
 
 		using String::String;

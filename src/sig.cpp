@@ -3,6 +3,7 @@
 
 #include "sig.hpp"
 #include "type.hpp"
+#include "sync.hpp"
 #include "tag.hpp"
 #include "dig.hpp"
 #include "err.hpp"
@@ -10,9 +11,160 @@
 #include <map>
 
 
-namespace sys::sig
+namespace
 {
-	fwd::span<int> native()
+	sys::sig::string sigstr(int n)
+	{
+		switch (n)
+		{
+		case SIGABRT:
+			return "SIGABRT";
+
+		#ifdef SIGALRM
+		case SIGALRM:
+			return "SIGALRM";
+		#endif
+
+		#ifdef SIGBUS
+		case SIGBUS:
+			return "SIGBUS";
+		#endif
+
+		#ifdef SIGCHLD
+		case SIGCHLD:
+			return "SIGCHLD";
+		#endif
+
+		#ifdef SIGCONT
+		case SIGCONT:
+			return "SIGCONT";
+		#endif
+
+		case SIGFPE:
+			return "SIGFPE";
+
+		#ifdef SIGHUP
+		case SIGHUP:
+			return "SIGHUP";
+		#endif
+
+		case SIGILL:
+			return "SIGILL";
+
+		case SIGINT:
+			return "SIGINT";
+
+		#ifdef SIGKILL
+		case SIGKILL:
+			return "SIGKILL";
+		#endif
+
+		#ifdef SIGPIPE
+		case SIGPIPE:
+			return "SIGPIPE";
+		#endif
+
+		#ifdef SIGQUIT
+		case SIGQUIT:
+			return "SIGQUIT";
+		#endif
+
+		#ifdef SIGSTOP
+		case SIGSTOP:
+			return "SIGSTOP";
+		#endif
+
+		case SIGSEGV:
+			return "SIGSEGV";
+
+		case SIGTERM:
+			return "SIGTERM";
+
+		#ifdef SIGTSTP
+		case SIGTSTP:
+			return "SIGTSTP";
+		#endif
+
+		#ifdef SIGTIN
+		case SIGTIN:
+			return "SIGTIN";
+		#endif
+
+		#ifdef SIGTOU
+		case SIGTOU:
+			return "SIGTOU";
+		#endif
+
+		#ifdef SIGUSR1
+		case SIGUSR1:
+			return "SIGUSR1";
+		#endif
+
+		#ifdef SIGUSR2
+		case SIGUSR2:
+			return "SIGUSR2";
+		#endif
+
+		#ifdef SIGPOLL
+		case SIGPOLL:
+			return "SIGPOLL";
+		#endif
+
+		#ifdef SIGPROF
+		case SIGPROF:
+			return "SIGPROF";
+		#endif
+
+		#ifdef SIGPWR
+		case SIGPWR:
+			return "SIGPWR";
+		#endif
+
+		#ifdef SIGSTKFLT
+		case SIGSTKFLT:
+			return "SIGSTKFLT";
+		#endif
+
+		#ifdef SIGSYS
+		case SIGSYS:
+			return "SIGSYS";
+		#endif
+
+		#ifdef SIGTRAP
+		case SIGTRAP:
+			return "SIGTRAP";
+		#endif
+
+		#ifdef SIGURG
+		case SIGURG:
+			return "SIGURG";
+		#endif
+
+		#ifdef SIGVTALRM
+		case SIGVTALRM:
+			return "SIGVTALRM";
+		#endif
+
+		#ifdef SIGWINCH
+		case SIGWINCH:
+			return "SIGWINCH";
+		#endif
+
+		#ifdef SIGXCPU
+		case SIGXCPU:
+			return "SIGXCPU";
+		#endif
+
+		#ifdef SIGXFSZ
+		case SIGXFSZ:
+			return "SIGXFSZ";
+		#endif
+		}
+
+		return fmt::empty;
+	}
+
+	fwd::span<int> sigset()
 	{
 		static int buf [] =
 		{
@@ -126,233 +278,74 @@ namespace sys::sig
 			SIGXFSZ,
 			#endif
 		};
+
 		return buf;
 	}
 
-	fmt::string::view text(int n)
+	auto sigmap()
 	{
-		using namespace std::literals;
-
-	#if _POSIX_C_SOURCE >= 200809L
-
-		if (auto s = strsignal(n); nullptr != s)
+		struct
 		{
-			fmt::string::view u = s;
-			if (not empty(u))
-			{
-				return u;
-			}
+			std::map<sys::sig::string, int> map;
+			std::map<int, sys::sig::string> inv;
+
+		} sigs;
+
+		auto buf = sigset();
+		for (auto n : buf)
+		{
+			auto u = sigstr(n);
+			sigs.map[u] = n;
+			sigs.inv[n] = u;
 		}
-
-	#else
-
-		switch (n)
-		{
-		case SIGABRT:
-			return "abort"sv;
-
-		#ifdef SIGALRM
-		case SIGALRM:
-			return "alarm"sv;
-		#endif
-
-		#ifdef SIGBUS
-		case SIGBUS:
-			return "violation"sv;
-		#endif
-
-		#ifdef SIGCHLD
-		case SIGCHLD:
-			return "child"sv;
-		#endif
-
-		#ifdef SIGCONT
-		case SIGCONT:
-			return "continue"sv;
-		#endif
-
-		case SIGFPE:
-			return "float"sv;
-
-		#ifdef SIGHUP
-		case SIGHUP:
-			return "hangup"sv;
-		#endif
-
-		case SIGILL:
-			return "illegal"sv;
-
-		case SIGINT:
-			return "interrupt"sv;
-
-		#ifdef SIGKILL
-		case SIGKILL:
-			return "kill"sv;
-		#endif
-
-		#ifdef SIGPIPE
-		case SIGPIPE:
-			return "pipe"sv;
-		#endif
-
-		#ifdef SIGQUIT
-		case SIGQUIT:
-			return "quit"sv;
-		#endif
-
-		#ifdef SIGSTOP
-		case SIGSTOP:
-			return "stop"sv;
-		#endif
-
-		case SIGSEGV:
-			return "segmentation"sv;
-
-		case SIGTERM:
-			return "terminate"sv;
-
-		#ifdef SIGTSTP
-		case SIGTSTP:
-			return "stopping"sv;
-		#endif
-
-		#ifdef SIGTIN
-		case SIGTIN:
-			return "reading"sv;
-		#endif
-
-		#ifdef SIGTOU
-		case SIGTOU:
-			return "writing"sv;
-		#endif
-
-		#ifdef SIGUSR1
-		case SIGUSR1:
-			return "user(1)"sv;
-		#endif
-
-		#ifdef SIGUSR2
-		case SIGUSR2:
-			return "user(2)"sv;
-		#endif
-
-		#ifdef SIGPOLL
-		case SIGPOLL:
-			return "poll"sv;
-		#endif
-
-		#ifdef SIGPROF
-		case SIGPROF:
-			return "profile"sv;
-		#endif
-
-		#ifdef SIGPWR
-		case SIGPWR:
-			return "power"sv;
-		#endif
-
-		#ifdef SIGSTKFLT
-		case SIGSTKFLT:
-			return "stack fault"sv;
-		#endif
-
-		#ifdef SIGSYS
-		case SIGSYS:
-			return "system"sv;
-		#endif
-
-		#ifdef SIGTRAP
-		case SIGTRAP:
-			return "trap"sv;
-		#endif
-
-		#ifdef SIGURG
-		case SIGURG:
-			return "urgent"sv;
-		#endif
-
-		#ifdef SIGVTALRM
-		case SIGVTALRM:
-			return "virtual"sv;
-		#endif
-
-		#ifdef SIGWINCH
-		case SIGWINCH:
-			return "window"sv;
-		#endif
-
-		#ifdef SIGXCPU
-		case SIGXCPU:
-			return "time limit exceeded"sv;
-		#endif
-
-		#ifdef SIGXFSZ
-		case SIGXFSZ:
-			return "file limit exceeded"sv;
-		#endif
-		}
-
-	#endif
-		
-		thread_local fmt::string buf;
-		buf = fmt::to_string(n);
-		return buf;
+		return sigs;
 	}
 
-	static void perr(int n)
-	{
-		sys::out() << text(n) << fmt::eol;
-	}
+	const auto sigs = sigmap();
 
-	fwd::vector<state> error(fwd::span<int> p)
-	{
-		fwd::vector<state> buf;
-		for (auto n : p)
-		{
-			buf.emplace_back(n, perr);
-		}
-		return buf;
-	}
-
-	socket* state::event(int n)
-	{
-		static std::map<int, sys::sig::socket> map;
-		return std::addressof(map[n]);
-	}
-
-	void state::raise(int n)
-	{
-		event(no)->raise([n](auto const &p)
-		{
-			p.second(n);
-		});
-	}
+	sys::exclusive<std::map<sys::sig::string, sys::sig::function>> socket;
 }
 
-#ifdef test_unit
-test_unit(sig)
+
+namespace sys::sig
 {
-	std::vector<int> caught;
-	std::vector<int> raised = { SIGINT, SIGFPE, SIGILL };
-
-	for (int n : raised)
+	void raise(string key)
 	{
-		sys::sig::state const after
-		(
-			n, [&](int n)
+		if (auto it = sigs.find(key); sigs.end() != it)
+		{
+			std::raise(it->second);
+		}
+		else
+		{
+			auto reader = socket.reader();
+			auto it = reader->find(key);
+			if (reader->end() != it)
 			{
-				caught.push_back(n);
+				auto call = it->second;
+				sys::thread job = [call, key]()
+				{
+					std::invoke(call, key);
+				};
 			}
-		);
-		std::raise(n);
+		}
 	}
 
-	auto const begin = caught.begin();
-	auto const end = caught.end();
-
-	for (int signo : raised)
+	void notify(string key, function call)
 	{
-		assert(end != std::find(begin, end, signo));
+		auto writer = socket.writer();
+		auto it = writer->find(key);
+		if (writer->end() != it)
+		{
+			auto old = it->second;
+			*it = [call, old](string key)
+			{
+				std::invoke(old, key);
+				std::invoke(call, key);
+			});
+		}
+		else
+		{
+			writer->emplace(key, call);
+		}
 	}
 }
-#endif

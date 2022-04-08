@@ -22,17 +22,6 @@ namespace sys::uni
 			if (no) err(no, here);
 		}
 
-		~start()
-		{
-			auto that = fwd::void_ptr;
-			const int no = pthread_join(id, &that);
-			if (no) err(no, here);
-
-			#ifdef assert
-			assert(no or this == that);
-			#endif
-		}
-
 	private:
 
 		sig::event::function work;
@@ -42,6 +31,20 @@ namespace sys::uni
 			auto that = fwd::cast_as<start>(ptr);
 			if (that) that->work();
 			return ptr;
+		}
+	};
+
+	struct join : start
+	{
+		~join()
+		{
+			auto that = fwd::void_ptr;
+			const int no = pthread_join(id, &that);
+			if (no) err(no, here);
+
+			#ifdef assert
+			assert(no or this == that);
+			#endif
 		}
 	};
 
@@ -443,6 +446,7 @@ namespace sys::uni
 namespace sys
 {
 	using thread = uni::start;
+	using join = uni::join;
 
 	struct mutex : uni::mutex
 	{
@@ -471,7 +475,7 @@ namespace sys
 
 	struct rwlock : uni::rwlock
 	{
-		auto read()
+		auto reader()
 		{
 			class unlock : fwd::no_copy
 			{
@@ -492,7 +496,7 @@ namespace sys
 			return unlock(this);
 		}
 
-		auto write()
+		auto writer()
 		{
 			class unlock : fwd::no_copy
 			{

@@ -585,6 +585,80 @@ namespace env::file
 		}
 		#endif
 	}
+
+	fmt::string name(basic_ptr f)
+	{
+		fmt::string path;
+
+		#ifdef assert
+		assert(nullptr != f)
+		#endif
+
+		const int fd = sys::fileno(f);
+
+		#ifdef alert
+		alert(sys::fail(fd));
+		#endif
+
+		#ifdef _WIN32
+		{
+			const auto h = sys::win::get(fd);
+
+			#ifdef assert
+			assert(not sys::win::fail(h));
+			#endif
+
+			union
+			{
+				FILE_NAME_INFO info;
+				char buf[sizeof info + MAX_PATH];
+			};
+
+			if (not GetFileInformationByHandleEx(h, FileNameInfo, buf, sizeof buf))
+			{
+				sys::win::err(here, "GetFileInformationByHandleEx");
+			}
+			else
+			{
+				fmt::wstring::view u(info.FileName, info.FileNameLength);
+				path = fmt::to_string(u);
+			}
+		}
+		#elif defined(F_GETPATH)
+		{
+			path.resize(MAXPATHLEN);
+			if (sys::fail(fcntl(fd, F_GETPATH, path.data())))
+			{
+				sys::err(here, "F_GETPATH", fd);
+				path.clear();
+			}
+			else
+			{
+				const auto pos = path.find_last_of("\0");
+				if (fmt::npos != pos) path.resize(pos);
+			}
+		}
+		#elif defined(__linux__)
+		{
+			const auto link = "/proc/self/fd/"s + fmt::to_string(fd);
+			path.resize(MAXLEN)
+			const auto n = readlink(link, path.data(), math.size());
+			if (sys::fail(n))
+			{
+				sys::err(here, "readlink", link);
+				path.clear();
+			}
+			else
+			{
+				path.resize(n);
+			}
+		}
+		#else
+		#error Cannot implement function
+		#endif
+
+		return path;
+	}
 }
 
 #ifdef test_unit

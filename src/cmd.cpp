@@ -17,16 +17,24 @@ namespace env
 		return sh;
 	}
 
-	shell::page shell::get(in put, char end, int count)
+	shell::page shell::get(in feed, char end, int count)
 	{
 		// Result in span at cache end
-		auto const first = cache.size();
+		const auto first = cache.size();
 		auto second = first;
 		try // process can crash
 		{
-			while (0 < --count and std::getline(put, last, end))
+			std::string line;
+			while (count-- and std::getline(feed, line, end))
 			{
-				cache.emplace_back(std::move(last));
+				buffer.append(line);
+				buffer.push_back(end);
+			}
+			// Cache lines partition the buffer
+			auto it = std::back_inserter(cache);
+			for (auto part : fmt::split(buffer, end))
+			{
+				++it = part;
 			}
 			// One past the end
 			second = cache.size();
@@ -34,30 +42,24 @@ namespace env
 		// Put exception message into line
 		catch (std::exception const& error)
 		{
-			last = error.what();
+			buffer = error.what();
 		}
 		page result(first, second, &cache);
 		return result;
 	}
 
-	shell::page shell::run(span arguments)
+	shell::page shell::run(iterator begin, iterator end)
 	{
-		const auto exe = fmt::join(arguments, " ");
-		fmt::istream sub = env::file::open(exe, env::file::ex);
-		auto const line = get(sub);
-		status = sub.wait();
-		return line;
-	}
-
-	shell::page shell::run(init arguments)
-	{
-		view::vector s(arguments);
-		return run(s);
+		auto const exe = fmt::join(begin, end, " ");
+		fmt::istream in = env::file::open(exe, env::file::ex);
+		auto const lines = get(in);
+		in.file.release();
+		return lines;
 	}
 
 	shell::page shell::echo(view line)
 	{
-		return run({ "echo", line });
+		return open({ "echo", line });
 	}
 
 	shell::page shell::list(view name)
@@ -109,7 +111,7 @@ namespace env
 		);
 	}
 
-	shell::page shell::open(view path)
+	shell::page shell::start(view path)
 	{
 		#ifdef _WIN32
 		{
@@ -127,14 +129,14 @@ namespace env
 
 			for (auto [session, program] : test)
 			{
-				if (empty(session) or desktop::current(session))
+				if (session.empty() or desktop(session))
 				{
-					if (auto path = which(program); not path.empty())
+					if (auto path = which(program); path.empty())
 					{
 						continue;
 					}
 
-					return run({ program, path });
+					return open({ program, path });
 				}
 			}
 			return { 0, 0, &cache };
@@ -171,43 +173,50 @@ namespace env
 		return current.find(lower) != fmt::npos;
 	}
 
-	shell::page shell::with(string::span command)
+	static fmt::string::view::vector envpick()
 	{
-		static fmt::name const group = fmt::put("Desktop Entry");
-		static fmt::name const key = fmt::put("DIALOG");
-		static fmt::pair const entry { group, key };
-		static fmt::view const zenity = "zenity";
+		constexpr auto zenity = "zenity", qarma = "qarma";
 
-		// Look for the Zenity desktop utility program
-		auto const program = env::opt::get(entry, zenity);
-		if (auto const path = which(program); path.empty())
+		if (shell::desktop("KDE") or shell::desktop("LXQT"))
 		{
-			return path;
+			return { qarma, zenity };
 		}
-
-		// Program is first command in paired
-		fwd::vector<char const*> list;
-		list.push_back(data(program));
-
-		// Arguments null terminated
-		constexpr auto del = " ";
-		if (auto s = fmt::join(command, del); not empty(s))
+		else // GNOME or XFCE, etc
 		{
-			for (auto u : fmt::split(s, del))
+			return { zenity, qarma };
+		}
+	}
+
+	static fmt::string::view optpick(fmt::string::view value)
+	{
+		static auto const group = fmt::tag::put("Runtime Options");
+		static auto const key = fmt::tag::put("DIALOG");
+		static auto const entry = fmt::tag::pair(group, key);
+		return env::opt::get(entry, value);
+	}
+
+	shell::page shell::dialog(span args)
+	{
+		// Look for any desktop utility program
+		view program;
+		static auto const session = envpick();
+		for (auto test : session)
+		{
+			if (auto path = where(test); not path.empty())
 			{
-				list.push_back(data(u));
+				program = path;
+				break;
 			}
 		}
-
-		// Command list null terminated
-		auto const argc = list.size();
-		list.push_back(nullptr);
-		auto const argv = list.data();
-
-		// Run process with command
-		fmt::ipstream sub
-			{ argc, argv };
-		return get(sub);
+		program = optpick(program);
+		// Append the command line
+		vector command;
+		command.push_back(program);
+		for (auto arg : args)
+		{
+			command.push_back(arg);
+		}
+		return run(command);
 	}
 
 	static auto param(fmt::string::view key, fmt::string::view value)
@@ -264,7 +273,7 @@ namespace env
 			command.emplace_back(param("--text", text));
 		}
 
-		return with(command);
+		return dialog(command);
 	}
 
 	shell::page shell::enter(view start, view label, bool hide)
@@ -280,7 +289,7 @@ namespace env
 			command.emplace_back("--hide-text");
 		}
 
-		return with(command);
+		return dialog(command);
 	}
 
 	shell::page shell::text(view path, view check, view font, txt type)
@@ -308,7 +317,7 @@ namespace env
 		{
 			command.emplace_back(param("--checkbox", check));
 		}
-		return with(command);
+		return dialog(command);
 
 	}
 
@@ -332,7 +341,7 @@ namespace env
 			command.emplace_back(param(key, ctl.first));
 		}
 
-		return with(command);
+		return dialog(command);
 	}
 
 	shell::page shell::notify(view text, view icon)
@@ -348,7 +357,7 @@ namespace env
 			command.emplace_back(param("--icon", icon));
 		}
 
-		return with(command);
+		return dialog(command);
 	}
 
 	shell::page shell::calendar(view text, view format, int day, int month, int year)
@@ -376,7 +385,7 @@ namespace env
 			command.emplace_back(param("--year", fmt::to_string(year)));
 		}
 
-		return with(command);
+		return dialog(command);
 	}
 
 	shell::page shell::color(view start, bool palette)
@@ -392,7 +401,7 @@ namespace env
 			command.emplace_back("--show-palette");
 		}
 
-		return with(command);
+		return dialog(command);
 	}
 }
 

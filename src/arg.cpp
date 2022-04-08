@@ -20,7 +20,7 @@ namespace
 
 	auto make_pair(env::opt::name key = make_key())
 	{
-		static auto const cmd = fmt::tag::set("Command Line");
+		static auto const cmd = fmt::tag::put("Command Line");
 		return std::make_pair(cmd, key);
 	}
 
@@ -31,13 +31,15 @@ namespace
 
 	auto find_next(fmt::string::view argu, env::opt::command::span cmd)
 	{
+		constexpr auto dash = "-";
+		constexpr auto dual = "--";
+
 		auto const begin = cmd.begin();
 		auto const end = cmd.end();
 		auto next = end;
 
-		if (argu.starts_with(env::opt::dual))
+		if (auto entry = argu.substr(2); argu.starts_with(dual))
 		{
-			auto const entry = argu.substr(2);
 			next = std::find_if
 			(
 				begin, end, [entry](auto const& d)
@@ -47,9 +49,8 @@ namespace
 			);
 		}
 		else
-		if (argu.starts_with(env::opt::dash))
+		if (auto entry = argu.substr(1); argu.starts_with(dash))
 		{
-			auto const entry = argu.substr(1);
 			next = std::find_if
 			(
 				begin, end, [entry](auto const& d)
@@ -58,7 +59,7 @@ namespace
 				}
 			);
 		}
-	
+
 		return next;
 	}
 
@@ -68,7 +69,7 @@ namespace
 		// try read
 		{
 			auto const reader = ini.read();
-			if (not empty(reader->keys))
+			if (not reader->keys.empty())
 			{
 				return ini;
 			}
@@ -112,16 +113,16 @@ namespace env::opt
 	view program()
 	{
 		static fmt::string::view u;
-		if (empty(u))
+		if (u.empty())
 		{
 			auto const args = env::opt::arguments();
-			assert(not empty(args));
+			assert(not args.empty());
 			auto const path = args.front();
-			assert(not empty(path));
+			assert(not path.empty());
 			auto const dirs = fmt::dir::split(path);
-			assert(not empty(dirs));
+			assert(not dirs.empty());
 			auto const name = dirs.back();
-			assert(not empty(name));
+			assert(not name.empty());
 			auto const first = name.find_first_not_of("./");
 			auto const last = name.rfind(sys::ext::image);
 			u = name.substr(first, last);
@@ -132,7 +133,7 @@ namespace env::opt
 	view config()
 	{
 		static fmt::string s;
-		if (empty(s))
+		if (s.empty())
 		{
 			auto const filename = make_ini();
 			for (auto dirs : { env::file::config(), env::file::paths() })
@@ -149,41 +150,41 @@ namespace env::opt
 
 	fmt::string::in::ref get(fmt::string::in::ref in)
 	{
-		auto writer = registry().write();
+		auto writer = registry().writer();
 		doc::ini::ref slice = *writer;
 		return in >> slice;
 	}
 
 	fmt::string::out::ref put(fmt::string::out::ref out)
 	{
-		auto const reader = registry().read();
+		auto reader = registry().reader();
 		doc::ini::cref slice = *reader;
 		return out << slice;
 	}
 
 	bool got(pair key)
 	{
-		return registry().read()->got(key);
+		return registry().reader()->got(key);
 	}
 
 	view get(pair key)
 	{
-		return registry().read()->get(key);
+		return registry().reader()->get(key);
 	}
 
 	bool set(pair key, view value)
 	{
-		return registry().write()->set(key, value);
+		return registry().writer()->set(key, value);
 	}
 
 	bool got(name key)
 	{
-		return not empty(get(key));
+		return not get(key).empty();
 	}
 
 	view get(name key)
 	{
-		auto const u = fmt::get(key);
+		auto const u = fmt::tag::get(key);
 		// First look for argument
 		auto const args = arguments();
 		for (auto const a : args)
@@ -267,7 +268,7 @@ test_unit(arg)
 	// Application name exists
 	{
 		auto const app = env::opt::application();
-		assert(not empty(app) and "Application is not named");
+		assert(not app.empty() and "Application is not named");
 		assert(env::opt::arg().find(app) != fmt::npos);
 	}
 	// Dump options into stream
@@ -275,7 +276,7 @@ test_unit(arg)
 		fmt::string::stream ss;
 		ss << env::opt::put;
 		auto const s = ss.str();
-		assert(not empty(s) and "Cannot dump options");
+		assert(not s.empty() and "Cannot dump options");
 	}
 }
 #endif

@@ -1,13 +1,13 @@
 #ifndef io_hpp
 #define io_hpp "Input/Output Streams"
 
-#include <cstring>
 #include <streambuf>
 #include "file.hpp"
 #include "dig.hpp"
 #include "fwd.hpp"
 #include "ptr.hpp"
 #include "tmp.hpp"
+#include <cstring>
 
 namespace fmt
 {
@@ -106,29 +106,64 @@ namespace fmt
 	using streambuf = basic_streambuf<char>;
 	using wstreambuf = basic_streambuf<wchar_t>;
 
+
+	template
+	<
+		class Char,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator,
+		// details
+		class Base = basic_streambuf<Char, Traits, Alloc>
+	>
+	struct basic_stringbuf : Base
+	{
+		using string_type = basic_string<Char, Traits, Alloc>;
+		using char_type = typename Base::char_type;
+		using size_type = typename Base::size_type;
+
+		basic_stringbuf() = default;
+		basic_stringbuf(size_type n)
+		{
+			setbufsiz(n);
+		}
+
+		auto setbufsiz(size_type n)
+		{
+			buf.resize(fmt::to_size(n));
+			return Base::setbuf(buf.data(), n);
+		}
+
+		auto setbufsiz(size_type n, size_type m)
+		{
+			buf.resize(fmt::to_size(n + m));
+			return Base::setbuf(buf.data(), n, m);
+		}
+
+	private:
+
+		string_type buf;
+	};
+
+	using stringbuf = basic_stringbuf<char>;
+	using wstringbuf = basic_stringbuf<wchar_t>;
+
+
 	template
 	<
 		class Char,
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator
 	>
-	struct basic_buf : basic_streambuf<Char, Traits, Alloc>
+	struct basic_buf : basic_stringbuf<Char, Traits, Alloc>
 	{
 		using Base = basic_stringbuf<Char, Traits, Alloc>;
 		using size_type = typename Base::size_type;
 		using char_type = typename Base::char_type;
 
-		basic_buf(env::file::unique_ptr that)
-		{
-			file = std::move(that);
-		}
-
 		basic_buf(env::file::shared_ptr that)
 		{
 			file = that;
 		}
-
-	protected:
 
 		env::file::shared_ptr file;
 
@@ -161,7 +196,11 @@ namespace fmt
 		using stream = Stream<Char, Traits>;
 		using buf = basic_buf<Char, Traits, Alloc>;
 
-		basic_stream(env::file::unique_ptr && file)
+		basic_stream(env::file::unique_ptr file)
+		: stream(this), buf(std::move(file))
+		{ }
+
+		basic_stream(env::file::shared_ptr file)
 		: stream(this), buf(file)
 		{ }
 	};

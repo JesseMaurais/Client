@@ -7,27 +7,36 @@ namespace env
 {
 	struct shell
 	{
-		using string = fmt::string;
-		using view   = string::view;
-		using vector = string::vector;
-		using span   = view::span;
-		using init   = view::init;
-		using page   = string::page;
-		using out    = string::out::ref;
-		using in     = string::in::ref;
+		using string   = fmt::string;
+		using view     = string::view;
+		using vector   = view::vector;
+		using iterator = vector::iterator;
+		using span     = view::span;
+		using init     = view::init;
+		using page     = view::page;
+		using out      = view::out::ref;
+		using in       = view::in::ref;
 
-		fmt::string::vector cache;
-		string last;
-		int status;
+		string buffer;
+		vector cache;
 
-		page get(in, char end = '\n', int count = 0);
+		page get(in, char = '\n', int = -1);
 		// Cache all lines in to end, return indices
 
-		page run(init arguments);
-		// Run command as sub process
+		page run(iterator begin, iterator end);
+		// Run command as a sub process
 
-		page run(span arguments);
-		// Run command as sub process
+		page run(init args);
+		// Run using initializers
+		{
+			return run(args.begin(), args.end());
+		}
+
+		page run(span args);
+		// Run using vector view
+		{
+			return run(args.begin(), args.end());
+		}
 
 		page echo(view line);
 		// Expand macros in line
@@ -44,7 +53,7 @@ namespace env
 		page which(view name);
 		// Paths to executables with program name
 
-		page open(view path);
+		page start(view path);
 		// Preferred application for file type at path
 
 		page imports(view path);
@@ -56,7 +65,7 @@ namespace env
 		static bool desktop(view name);
 		// Whether name matches current session
 
-		page with(string::span command);
+		page dialog(span command);
 		// Open dialog with command
 
 		page notify(view text, view icon = "info");

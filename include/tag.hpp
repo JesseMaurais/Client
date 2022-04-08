@@ -19,6 +19,7 @@ namespace fmt::tag
 
 	string::in::ref get(string::in::ref, char = eol);
 	// read all file lines to cache
+	
 	string::out::ref put(string::out::ref, char = eol);
 	// write all cache lines to file
 }

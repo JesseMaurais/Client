@@ -25,14 +25,6 @@ namespace sys::win
 			}
 		}
 
-		~start()
-		{
-			if (wait(h))
-			{
-				warn(here, id);
-			}
-		}
-
 	private:
 
 		function work;
@@ -46,6 +38,17 @@ namespace sys::win
 			if (that) that->work();
 			_endthreadex(that->id);
 			return that->id;
+		}
+	};
+
+	struct join : start
+	{
+		~join()
+		{
+			if (wait(h))
+			{
+				warn(here, id);
+			}
 		}
 	};
 
@@ -204,6 +207,7 @@ namespace sys::win
 namespace sys
 {
 	using thread = win::start;
+	using join = win::join;
 
 	struct mutex : win::critical_section
 	{
@@ -232,7 +236,7 @@ namespace sys
 
 	struct rwlock : win::srwlock
 	{
-		auto read()
+		auto reader()
 		{
 			class unlock : fwd::no_copy
 			{
@@ -253,7 +257,7 @@ namespace sys
 			return unlock(this);
 		}
 
-		auto write()
+		auto writer()
 		{
 			class unlock : fwd::no_copy
 			{

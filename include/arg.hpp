@@ -25,24 +25,23 @@ namespace env::opt
 		return argv[argn];
 	}
 
-	constexpr auto dash = "-";
-	constexpr auto dual = "--";
-
 	struct command
 	{
-		using vector = fwd::vector<command>;
-		using span = fwd::span<command>;
-		
 		long argn; // required arguments (or -1 for any number)
 		view dash; // short name with one dash (-c)
 		view name; // long name with dual dash (--config)
 		view text; // descriptive text for user help menu
+
+		using vector = fwd::vector<command>;
+		using span = fwd::span<command>;
 	};
 
 	view::vector put(int argc, char** argv, command::span);
 	// Put command line arguments into options
+
 	fmt::string::out::ref put(fmt::string::out::ref);
 	// Write options to output string
+
 	fmt::string::in::ref get(fmt::string::in::ref);
 	// Read options from input string
 };
