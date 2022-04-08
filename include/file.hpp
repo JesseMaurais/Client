@@ -29,6 +29,8 @@ namespace env::file
 	unique_ptr lock(basic_ptr, mode=rw, off_t=0, size_t=0);
 	unique_buf map(basic_ptr, mode=rw, off_t=0, size_t=0, basic_buf=nullptr);
 
+	fmt::string name(basic_ptr);
+
 	inline auto temp()
 	{
 		auto f = std::tmpfile();
