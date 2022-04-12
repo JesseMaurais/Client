@@ -13,9 +13,9 @@ namespace fwd
 	// Data Matrix
 	//
 
-	template <class... Columns, template <class> class Alloc = allocator> class matrix
+	template <class... Columns> class matrix
 	{
-		using tuple = std::tuple<vector<Columns, Alloc>...>;
+		using tuple = std::tuple<vector<Columns>...>;
 		using index = std::make_index_sequence<std::tuple_size<tuple>::value>;
 
 		tuple table;

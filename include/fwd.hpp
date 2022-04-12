@@ -32,7 +32,7 @@ namespace fwd
 	{
 		bool operator()(const Object& left, const Object& right) const
 		{
-			return std::tie(left.*member...) < std::tie(right.*member...);
+			return std::tie(left.*Member...) < std::tie(right.*Member...);
 		}
 	};
 		

@@ -25,7 +25,7 @@ namespace fmt
 
 	template <class Char> struct type : std::ctype<Char>
 	{
-		using base = std::ctype<char>;
+		using base = std::ctype<Char>;
 		using mask = typename base::mask;
 		using string = basic_string<Char>;
 		using view = typename string::view;

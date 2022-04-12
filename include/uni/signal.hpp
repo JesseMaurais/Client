@@ -5,7 +5,6 @@
 #include "err.hpp"
 #include "ptr.hpp"
 #include "msg.hpp"
-#include "fs.hpp"
 #include <time.h>
 #include <mqueue.h>
 #include <signal.h>
@@ -153,8 +152,10 @@ namespace sys::uni::sig
 			}
 			else
 			{
-				env::file::dup const tmp(fd);
+				const auto tmp = sys::dup(STDERR_FILENO);
+				sys::dup2(fd, STDERR_FILENO);
 				psiginfo(info, strsignal(signo));
+				sys::dup2(tmp, STDERR_FILENO);
 			}
 			(void) context;
 		}

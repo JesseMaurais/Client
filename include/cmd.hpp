@@ -26,13 +26,13 @@ namespace env
 		page run(iterator begin, iterator end);
 		// Run command as a sub process
 
-		page run(init args);
+		page run(init args)
 		// Run using initializers
 		{
 			return run(args.begin(), args.end());
 		}
 
-		page run(span args);
+		page run(span args)
 		// Run using vector view
 		{
 			return run(args.begin(), args.end());

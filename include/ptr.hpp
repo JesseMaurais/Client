@@ -11,7 +11,7 @@ namespace fwd
 	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using unique_ptr = std::unique_ptr<Type, deleter<Type>>;
-	template <class Type> using shared_ptr = std::shared_ptr<Type, deleter<Type>>;
+	template <class Type> using shared_ptr = std::shared_ptr<Type>;
 	template <class Type> constexpr as_ptr<Type> null = nullptr;
 	
 	constexpr auto voidptr = null<void>;
@@ -77,7 +77,7 @@ namespace fwd
 	>
 	auto make_shared(as_ptr<Type> ptr, Free del = std::default_delete<Type>())
 	{
-		return std::shared_ptr<Type, Free>(ptr, del);
+		return std::shared_ptr<Type>(ptr, del);
 	}
 
 	template
@@ -113,10 +113,10 @@ namespace fwd
 	>
 	auto share_ptr(std::enable_shared_from_this<Type>* that, Free free = std::default_delete<Type>())
 	{
-		auto ptr = this->shared_from_this();
-		auto that = ptr.get();
+		auto ptr = that->shared_from_this();
+		auto raw = ptr.get();
 		ptr.reset();
-		return make_ptr(that, free);
+		return make_shared(raw, free);
 	}
 
 	template
@@ -129,17 +129,17 @@ namespace fwd
 
 		auto share_this(Remove free = std::default_delete<Type>())
 		{
-			return share_ptr(this);
+			return share_ptr(this, free);
 		}
 	};
 
 	template
 	<
-		class Type, class Remove = deleter<Type>
+		class Type, class Remove = deleter<Type>, class Base = std::pair<Type, const Remove>
 	>
-	struct closed : no_copy, no_make, std::pair<Type, const Remove>
+	struct closed : Base, no_copy, no_make
 	{
-		using pair::pair;
+		using Base::Base;
 		
 		~closed()
 		{
@@ -168,7 +168,7 @@ namespace fwd
 	protected:
 		~scoped()
 		{
-			if (*this) operator();
+			if (*this) operator()();
 		}
 	};
 }

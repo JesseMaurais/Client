@@ -22,11 +22,11 @@
 
 namespace fmt
 {
-	struct where { const char* file; int line; const char* func; };
+	struct where { view file; int line; view func; };
 
 	template <typename... T> auto err(where at, T&&... va)
 	{
-		string::stream ss;
+		std::stringstream ss;
 		ss << at.file << "(" << at.line << ")" << at.func << ":";
 		if constexpr (0 < sizeof...(T)) ((ss << ' ' << va), ...);
 		return ss.str();

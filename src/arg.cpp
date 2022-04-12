@@ -7,6 +7,7 @@
 #include "sync.hpp"
 #include "err.hpp"
 #include "tag.hpp"
+#include "type.hpp"
 
 namespace
 {
@@ -68,7 +69,7 @@ namespace
 		static sys::exclusive<doc::ini> ini;
 		// try read
 		{
-			auto const reader = ini.read();
+			auto const reader = ini.reader();
 			if (not reader->keys.empty())
 			{
 				return ini;
@@ -76,7 +77,7 @@ namespace
 		}
 		// next write
 		{
-			auto writer = ini.write();
+			auto writer = ini.writer();
 			auto const path = env::opt::initials();
 			auto const s = fmt::to_string(path);
 			doc::ini::ref slice = *writer;
@@ -273,7 +274,7 @@ test_unit(arg)
 	}
 	// Dump options into stream
 	{
-		fmt::string::stream ss;
+		std::stringstream ss;
 		ss << env::opt::put;
 		auto const s = ss.str();
 		assert(not s.empty() and "Cannot dump options");

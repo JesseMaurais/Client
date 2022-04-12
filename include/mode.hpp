@@ -41,12 +41,12 @@ namespace env::file
 
 	constexpr int group(int mask)
 	{
-		return (am & rwx) << 3;
+		return (mask & rwx) << 3;
 	}
 
 	constexpr int other(int mask)
 	{
-		return (am & rwx) << 0;
+		return (mask & rwx) << 0;
 	}
 
 	// Permissions
@@ -63,19 +63,19 @@ namespace env::file
 		other_x = other(ex),
 	};
 
-	inline permit owner(mode am)
+	inline permit owner(mode mask)
 	{
-		return static_cast<permit>(owner(static_cast<int>(am)));
+		return static_cast<permit>(owner(static_cast<int>(mask)));
 	}
 
-	inline permit group(mode am)
+	inline permit group(mode mask)
 	{
-		return static_cast<permit>(group(static_cast<int>(am)));
+		return static_cast<permit>(group(static_cast<int>(mask)));
 	}
 
-	inline permit other(mode am)
+	inline permit other(mode mask)
 	{
-		return static_cast<permit>(other(static_cast<int>(am)));
+		return static_cast<permit>(other(static_cast<int>(mask)));
 	}
 
 	int to_flags(mode); // file open mode
