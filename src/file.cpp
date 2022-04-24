@@ -616,12 +616,12 @@ namespace env::file
 
 			if (not GetFileInformationByHandleEx(h, FileNameInfo, buf, sizeof buf))
 			{
-				sys::win::err(here, "GetFileInformationByHandleEx");
+				sys::win::err(here, "GetFileInformationByHandleEx FileNameInfo", fd);
 			}
 			else
 			{
-				fmt::wstring::view u(info.FileName, info.FileNameLength);
-				path = fmt::to_string(u);
+				fmt::wide w(info.FileName, info.FileNameLength);
+				path = fmt::to_string(w);
 			}
 		}
 		#elif defined(F_GETPATH)
@@ -638,11 +638,13 @@ namespace env::file
 				if (fmt::npos != pos) path.resize(pos);
 			}
 		}
-		#elif defined(__linux__)
+		#elif defined(__bsd__) || defined(__linux__)
 		{
-			const auto link = "/proc/self/fd/"s + fmt::to_string(fd);
+			static const auto pid = sys::getpid();
+			const auto link = "/proc/"s + pid + "/fd/" + fmt::to_string(fd);
+
 			path.resize(MAXLEN)
-			const auto n = readlink(link, path.data(), math.size());
+			const auto n = readlink(link, path.data(), path.size());
 			if (sys::fail(n))
 			{
 				sys::err(here, "readlink", link);

@@ -150,6 +150,9 @@ namespace fmt
 	#endif
 
 	using string = bstring;
+	using view = string::view;
+	using wide = wstring::view;
+
 	inline string::view empty("");
 	inline string::view assign("=");
 

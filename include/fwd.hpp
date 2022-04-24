@@ -25,9 +25,9 @@ namespace fwd
 	{ 
 		using Types::Types...;
 	};
-	
+
 	// Compare by member
-	
+
 	template <class Object, auto... Member> struct compare
 	{
 		bool operator()(const Object& left, const Object& right) const
@@ -35,7 +35,16 @@ namespace fwd
 			return std::tie(left.*member...) < std::tie(right.*member...);
 		}
 	};
-		
+
+	// Composed template
+
+	template <template <class...> class Combo, class... Object> struct compose
+		: Combo<Object...>
+	{
+		using base = typename Combo<Object...>;
+		using base::base;
+	};
+
 	// Overload traits
 
 	template <class Type> using allocator = std::allocator<Type>;

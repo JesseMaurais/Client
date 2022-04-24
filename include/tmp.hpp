@@ -5,6 +5,14 @@
 #include <utility>
 #include <cstddef>
 
+#ifndef @
+#define @(...) ::fwd::lazy([&]{ return __VA_ARGS__; })
+#endif
+
+#ifndef $
+#define $(...) ::fwd::lazy([=]{ return __VA_ARGS__; })
+#endif
+
 namespace fwd
 {
 	template <class T> struct type_of
@@ -25,6 +33,16 @@ namespace fwd
 	template <class T> struct variable : constant<T>
 	{
 		virtual T operator=(T) = 0;
+	};
+
+	template <class T> struct lazy : std::function<T()>
+	{
+		using function::function;
+
+		operator T() const
+		{
+			return this->operator();
+		}
 	};
 
 	template <class... T> struct formula : std::function<bool(T...)>

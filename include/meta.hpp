@@ -5,14 +5,44 @@
 #endif
 
 #include "doc.hpp"
-#include "it.hpp"
+#include "sync.hpp"
 #include "dig.hpp"
+#include "it.hpp"
 
 namespace doc
 {
-	using namespace std;
-	using namespace fwd;
-	using namespace fmt;
+	template <class Type> struct object : Type
+	{
+		using Type::Type;
+		node::vector sub;
+	};
+
+	template <class Type> struct array
+	{
+		fwd::vector<object<Type>> item;
+		fwd::vector<std::ptrdiff_t> index;
+		fwd::vector<std::size_t> cross;
+	};
+
+	static sys::exclusive<std::map<std::type_index, fwd::as_ptr<interface>> registry;
+
+	static interface* find(std::type_index id)
+	{
+		auto data = registry.reader();
+		auto it = data->find(id);
+		return data->end() == it
+			? nullptr : it->second;
+	}
+
+	template <class Type> instance<Type>::instance()
+	{
+		auto writer = registry.writer();
+		[[maybe_unused]] auto [it, unique] = writer->emplace(typeid(Type), this);
+		#ifdef assert
+		assert(writer->end() != it);
+		assert(unique);
+		#endif
+	}
 
 	template <class Type> instance<Type>& instance<Type>::self()
 	{
@@ -20,15 +50,19 @@ namespace doc
 		return singleton;
 	}
 
-	template <class Type> int instance<Type>::open(Type& type)
+	template <class Type> static sys::exclusive<array<Type>> global;
+
+	template <class Type> int instance<Type>::emplace(Type&& type)
 	{
+		auto data = global<Type>.writer();
+
 		// find lowest free index
-		auto pos = index.size();
-		if (gap() > 0)
+		auto pos = writer->index.size();
+		if (data->index.size() > data->item.size())
 		{
-			for (auto count : up_to(pos))
+			for (auto count : fwd::up_to(pos))
 			{
-				if (index.at(count) < 0)
+				if (data->index.at(count) < 0)
 				{
 					pos = count;
 					break;
@@ -36,76 +70,69 @@ namespace doc
 			}
 		}
 		// allocate a position
-		auto const off = item.size();
-		if (index.size() == pos)
+		auto const off = data->item.size();
+		if (data->index.size() == pos)
 		{
-			index.push_back(off);
+			data->index.push_back(off);
 		}
 		else
 		{
-			index.at(pos) = off;
+			data->index.at(pos) = off;
 		}
 		// allocate an item
-		item.emplace_back(type);
-		cross.push_back(pos);
+		data->item.emplace_back(std::move(type));
+		data->cross.push_back(pos);
 
 		#ifdef assert
-		assert(cross.size() == item.size());
-		assert(cross.at(index.at(pos)) == pos);
+		assert(data->cross.size() == data->item.size());
+		assert(data->cross.at(data->index.at(pos)) == pos);
 		#endif
 
 		return fmt::to_int(pos);
 	}
 
-	template <class Type> int instance<Type>::close(int id)
+	template <class Type> void instance<Type>::erase(int id)
 	{
+		auto data = global<Type>.writer();
+
 		auto const pos = fmt::to_size(id);
 		#ifdef assert
-		assert(find(pos));
+		assert(writer->contains(pos));
 		#endif
 
-		auto const off = index.at(pos);
-		item.at(off) = move(item.back());
-		cross.at(off) = cross.back();
-		index.at(cross.back()) = off;
-		index.at(pos) = -1;
-		while (index.back() < 0)
+		auto const off = data->index.at(pos);
+		data->item.at(off) = std::move(data->item.back());
+		data->cross.at(off) = data->cross.back();
+		data->index.at(data->cross.back()) = off;
+		data->index.at(pos) = -1;
+		while (data->index.back() < 0)
 		{
-			index.pop_back();
+			data->index.pop_back();
 		}
-		cross.pop_back();
-		item.pop_back();
+		data->cross.pop_back();
+		data->item.pop_back();
 
 		#ifdef assert
-		assert(cross.size() == item.size());
-		assert(item.empty() or cross.at(index.at(off)) == to_size(off));
+		assert(data->cross.size() == data->item.size());
+		assert(data->item.empty() or data->cross.at(data->index.at(off)) == fmt::to_size(off));
+		assert(data->item.empty() or data->cross.at(data->index.at(off)) == fmt::to_size(off));
 		#endif
-
-		auto const size = item.size();
-		return fmt::to_int(size);
 	}
 
-	template <class Type> Type* instance<Type>::find(int id)
+	template <class Type> bool instance<Type>::contains(int id)
 	{
-		if (auto const pos = fmt::to_size(id); in_range(index, pos))
+		auto reader = global<Type>.reader();
+
+		if (auto const pos = fmt::to_size(id); fwd::in_range(reader->index, pos))
 		{
-			if (auto const off = index.at(pos); in_range(item, off))
+			if (auto const off = reader->index.at(pos); fwd::in_range(reader->item, off))
 			{
 				#ifdef assert
-				assert(pos == cross.at(off));
+				assert(pos == reader->cross.at(off));
 				#endif
-				return item.data() + off;
+				return true;
 			}
 		}
-		return nullptr;
-	}
-
-	template <class Type> Type& instance<Type>::at(int id)
-	{
-		auto const pos = fmt::to_size(id);
-		#ifdef assert
-		assert(cross.at(index.at(pos)) == pos);
-		#endif
-		return item.at(index.at(pos));
+		return false;
 	}
 }
