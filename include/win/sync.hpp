@@ -11,11 +11,9 @@ namespace sys::win
 {
 	struct start : handle
 	{
-		using function = doc::function;
-
 		unsigned id;
 
-		start(function f, LPSECURITY_ATTRIBUTES attr = nullptr) : work(f)
+		start(fwd::function f, LPSECURITY_ATTRIBUTES attr = nullptr) : work(f)
 		{
 			auto const ptr = _beginthreadex(attr, 0, thread, this, 0, &id);
 			h = reinterpret_cast<HANDLE>(ptr);
@@ -49,33 +47,6 @@ namespace sys::win
 			{
 				warn(here, id);
 			}
-		}
-	};
-
-	struct timer
-	{
-		using function = doc::function;
-
-		timer(HANDLE h, function f, long long t, long p = 0, bool resume = true) : work(f)
-		{
-			LARGE_INTEGER li = { .QuadPart = t; };
-			if (not SetWaitableTimer(h, &li, p, thread, this, resume))
-			{
-				sys::win::err(here, "SetWaitableTimer");
-			}
-		}
-
-	private:
-
-		function work;
-
-		static void CALLBACK thread(LPVOID lp, DWORD low, DWORD high)
-		{
-			auto that = fwd::cast_as<timer>(lp);
-			#ifdef assert
-			assert(nullptr != that);
-			#endif
-			if (that) that->work();
 		}
 	};
 
@@ -116,7 +87,7 @@ namespace sys::win
 			return CreateJobObject(this, name);
 		}
 
-		handle timer(LPCSTR name, bool manual = false)
+		handle timer(LPCSTR name = nullptr, bool manual = false)
 		{
 			return CreateWaitableTimer(this, manual, name);
 		}

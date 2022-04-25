@@ -11,22 +11,23 @@
 
 namespace doc
 {
-	template <class Type> struct object : Type
+	template <class Type> struct element : Type
 	{
+		fwd::vector<int> link;
+		/// Links to child elements
 		using Type::Type;
-		node::vector sub;
 	};
 
-	template <class Type> struct array
+	template <class Type> struct store
 	{
-		fwd::vector<object<Type>> item;
+		fwd::vector<element<Type>> item;
 		fwd::vector<std::ptrdiff_t> index;
 		fwd::vector<std::size_t> cross;
 	};
 
-	static sys::exclusive<std::map<std::type_index, fwd::as_ptr<interface>> registry;
+	static sys::exclusive<std::map<std::type_index, interface::ptr> registry;
 
-	static interface* find(std::type_index id)
+	static interface:ptr find(std::type_index id)
 	{
 		auto data = registry.reader();
 		auto it = data->find(id);
@@ -91,7 +92,7 @@ namespace doc
 		return fmt::to_int(pos);
 	}
 
-	template <class Type> void instance<Type>::erase(int id)
+	template <class Type> void instance<Type>::destroy(int id)
 	{
 		auto data = global<Type>.writer();
 

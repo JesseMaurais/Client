@@ -64,8 +64,14 @@ namespace sys
 
 			return str;
 		}
+
+		exclusive<security>& sync()
+		{
+			static exclusive<security> lock;
+			return lock;
+		}
 	}
-	#else
+	#else //POSIX
 	namespace uni
 	{
 		char const* strerr(int no)
@@ -74,6 +80,12 @@ namespace sys
 			// POSIX and GNU differ on return type
 			(void) strerror_r(no, buf, sizeof buf);
 			return buf;
+		}
+
+		exclusive<thread>& sync()
+		{
+			static exclusive<thread> lock;
+			return lock;
 		}
 	}
 	#endif

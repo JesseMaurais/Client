@@ -175,7 +175,7 @@ namespace sys::uni::sig
 
 		event(function f, pthread_attr_t* attr = nullptr)
 		{
-			sigev_value.sival_int = doc::socket().open(f);
+			sigev_value.sival_int = doc::signal(f);
 			sigev_notify = SIGEV_THREAD;
 			sigev_notify_function = thread;
 			sigev_notify_attributes = attr;
@@ -183,7 +183,7 @@ namespace sys::uni::sig
 
 		~event()
 		{
-			doc::socket().close(sigev_value.sival_int);
+			doc::cancel(sigev_value.sival_int);
 		}
 
 	private:
@@ -201,7 +201,7 @@ namespace sys::uni::time
 	{
 		timer_t id;
 
-		event(function f, clockid_t clock = CLOCK_REALTIME, pthread_attr_t* attr = nullptr)
+		event(function f, pthread_attr_t* attr = nullptr, clockid_t clock = CLOCK_REALTIME)
 		: sig::event(f, attr)
 		{
 			if (fail(timer_create(clock, this, &id)))

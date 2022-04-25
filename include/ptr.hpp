@@ -161,16 +161,6 @@ namespace fwd
 			return this->second;
 		}
 	};
-
-	struct scoped : std::function<void()>
-	{
-		using function::function;
-	protected:
-		~scoped()
-		{
-			if (*this) operator();
-		}
-	};
 }
 
 #endif // file

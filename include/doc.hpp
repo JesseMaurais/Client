@@ -1,74 +1,66 @@
 #ifndef doc_hpp
 #define doc_hpp "Document Structure"
 
+#include "fwd.hpp"
 #include "tmp.hpp"
 #include "ptr.hpp"
-#include "fmt.hpp"
 #include <typeindex>
-#include <tuple>
 
 namespace doc
 {
-	using node = fmt::layout<int>;
-
-	// Abstract access to classes
-
-	struct interface : fwd::no_copy
+	struct interface : fwd::no_copy, fmt::layout<interface>
 	{
-		virtual node::span next(node::type) const = 0;
 		virtual std::type_index type() const = 0;
-		virtual std::size_t size() const = 0;
+		virtual std::ptrdiff_t size() const = 0;
+		virtual fwd::span<int> at(int n) const = 0;
+		virtual bool contains(int n) const = 0;
+		virtual void destroy(int n) = 0;
 	};
 
 	template <class Type> class instance : final interface
 	{
-		node::span next(node::type) const override;
 		std::type_index type() const override;
-		std::size_t size() const override;
+		std::ptrdiff_t size() const override;
+		fwd::span<int> at(int n) const override;
+		bool contains(int n) const override;
+		void destroy(int n) override;
 
 		instance();
 
 	public:
 
-		static instance& self();
-
-		using read_ptr = fwd::shared_ptr<const Type>;
 		using write_ptr = fwd::shared_ptr<Type>;
+		using read_ptr = fwd::shared_ptr<const Type>;
 
-		read_ptr read(int);
-		write_ptr write(int);
+		write_ptr writer(int n);
+		read_ptr reader(int n);
 		int emplace(Type &&);
-		bool contains(int);
-		void erase(int);
+
+		static ref self();
 	};
 
-	// Abstract access to members of classes
+	using manager = instance<doc::interface::ptr>;
+	extern template class manager;
 
-	template <class C> constexpr auto table(const C *that = nullptr)
+	using strings = instance<fmt::string::view>;
+	extern template class strings;
+
+	using message = instance<fwd::function>;
+	extern template class message;
+
+	static auto signal(fwd::function f)
 	{
-		return that->table(); // std::tuple of pointers to members of C
+		return message::self().emplace(f);
 	}
 
-	template <size_t N, class C> constexpr auto index(const C *that = nullptr)
+	static auto cancel(int n)
 	{
-		return std::get<N>(table(that)); // the N'th member of C's table
+		return message::self().destroy(n);
 	}
 
-	template <auto K> extern fmt::view name;
-
-	template <size_t N, class C> inline auto key(const C* = nullptr)
+	static auto raise(int n)
 	{
-		return name<index<N, C>()>; // name of the N'th member of C's table
-	}
-
-	template <size_t N, class C> inline auto& get(const C* that)
-	{
-		return that->*index<N>(that); // read the N'th member of C
-	}
-
-	template <size_t N, class C> inline auto& set(C* that)
-	{
-		return that->*index<N>(that); // write to the N'th member of C
+		return message::self()->reader()->operator()();
 	}
 }
 

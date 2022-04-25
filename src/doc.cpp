@@ -9,7 +9,8 @@
 
 namespace doc
 {
-	template class instance<function>;
+	template class instance<interface::ptr>;
+	template class instance<fwd::function>;
 }
 
 #ifdef test_unit

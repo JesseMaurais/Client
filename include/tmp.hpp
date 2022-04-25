@@ -5,16 +5,14 @@
 #include <utility>
 #include <cstddef>
 
-#ifndef @
-#define @(...) ::fwd::lazy([&]{ return __VA_ARGS__; })
-#endif
-
-#ifndef $
-#define $(...) ::fwd::lazy([=]{ return __VA_ARGS__; })
+#ifndef lambda
+#define lambda(...) ::fwd::lazy([=]{ return __VA_ARGS__; })
 #endif
 
 namespace fwd
 {
+	using function = std::function<void()>;
+
 	template <class T> struct type_of
 	{
 		using type = T;
@@ -38,12 +36,13 @@ namespace fwd
 	template <class T> struct lazy : std::function<T()>
 	{
 		using function::function;
-
 		operator T() const
 		{
-			return this->operator();
+			return operator()();
 		}
 	};
+
+	using scope = lazy<void>;
 
 	template <class... T> struct formula : std::function<bool(T...)>
 	{

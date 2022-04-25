@@ -218,6 +218,18 @@ namespace sys
 			return value = n;
 		}
 	};
+
+	#ifdef _WIN32
+	namespace win
+	{
+		exclusive<security>& sync();
+	}
+	#else //POSIX
+	namespace uni
+	{
+		exclusive<thread>& sync();
+	}
+	#endif
 }
 
 #endif
