@@ -34,7 +34,7 @@ namespace sys
 				object const *that;
 
 				unlock(exclusive_ptr* ptr)
-				: key(ptr->lock.read())
+				: key(ptr->lock.reader())
 				, that(ptr->that)
 				{
 					assert(that);
@@ -67,7 +67,7 @@ namespace sys
 				object *that;
 
 				unlock(exclusive_ptr *ptr)
-				: key(ptr->lock.write())
+				: key(ptr->lock.writer())
 				, that(ptr->that)
 				{
 					assert(that);
@@ -108,7 +108,7 @@ namespace sys
 
 		auto unique() const
 		{
-			return fwd::make_unique(that, [that, key=reader()](auto ptr)
+			return fwd::make_unique(that, [this, key=reader()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -118,7 +118,7 @@ namespace sys
 
 		auto shared() const
 		{
-			return fwd::make_shared(that, [that, key=reader()](auto ptr)
+			return fwd::make_shared(that, [this, key=reader()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -128,7 +128,7 @@ namespace sys
 
 		auto unique()
 		{
-			return fwd::make_unique(that, [that, key=writer()](auto ptr)
+			return fwd::make_unique(that, [this, key=writer()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -138,7 +138,7 @@ namespace sys
 
 		auto shared()
 		{
-			return fwd::make_shared(that, [that, key=writer()](auto ptr)
+			return fwd::make_shared(that, [this, key=writer()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -157,11 +157,7 @@ namespace sys
 		using object::object;
 
 		exclusive() : that(this)
-		{
-			#ifdef assert
-			assert(nullptr != that);
-			#endif
-		}
+		{ }
 
 		auto reader()
 		{

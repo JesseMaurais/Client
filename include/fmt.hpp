@@ -16,8 +16,8 @@ namespace fmt
 
 		using next  = std::function<cref(cref)>;
 		using put   = std::function<ref(ref)>;
-		using get   = std::function<cref()>;
-		using set   = std::function<ref()>;
+		using read  = std::function<cref()>;
+		using write = std::function<ref()>;
 		using order = fwd::relation<cref, cref>;
 		using swap  = fwd::relation<ref, ref>;
 		using check = fwd::predicate<cref>;
@@ -39,16 +39,16 @@ namespace fmt
 		using file  = memory<fwd::basic_file<Char, Traits>>;
 		using str   = memory<fwd::basic_stringstream<Char, Traits>>;
 
-		using scan   = in::put;
-		using print  = out::put;
-		using format = ctype::get;
+		using scan   = typename in::put;
+		using print  = typename out::put;
+		using format = typename ctype::read;
 		
 		template <class Iterator> static
-		out::ref put(out::ref buf, Iterator begin, Iterator end, Char* del)
+		typename out::ref put(typename out::ref buf, Iterator begin, Iterator end, Char* del)
 		{
 			auto it = std::ostream_iterator(buf, del);
 			std::copy(begin, end, it);
-			return out;
+			return buf;
 		}
 	};
 
@@ -89,8 +89,8 @@ namespace fmt
 	{
 		using check  = typename Memory::check;
 		using order  = typename Memory::order;
-		using scan   = typename Stream::read;
-		using print  = typename Stream::write;
+		using scan   = typename Stream::scan;
+		using print  = typename Stream::print;
 		using format = typename Stream::format;
 
 		using String::String;
@@ -105,14 +105,15 @@ namespace fmt
 		template <class> class Traits = fwd::character,
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order,
+		class String = fwd::basic_string<Char, Traits, Alloc>,
 		class View = fwd::basic_string_view<Char, Traits>,
 		class Base = basic_string_type<View , Char, Traits, Alloc, Order>
 	>
 	struct basic_string_view : Base
 	{
 		using Base::Base;
-		basic_string_view(auto const& in)
-		: Base(data(in), size(in))
+		basic_string_view(const String& in)
+		: Base(in.data(), in.size())
 		{ }
 	};
 
@@ -123,6 +124,7 @@ namespace fmt
 		template <class> class Alloc = fwd::allocator,
 		template <class> class Order = fwd::order,
 		class String = fwd::basic_string<Char, Traits, Alloc>,
+		class View = fwd::basic_string_view<Char, Traits>,
 		class Base = basic_string_type<String, Char, Traits, Alloc, Order>
 	>
 	struct basic_string : Base
@@ -130,8 +132,8 @@ namespace fmt
 		using view = basic_string_view<Char, Traits, Alloc, Order>;
 		
 		using Base::Base;
-		basic_string(auto const& in)
-		: Base(data(in), size(in))
+		basic_string(const View& in)
+		: Base(in.data(), in.size())
 		{ }
 	};
 

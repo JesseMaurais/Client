@@ -34,15 +34,13 @@ namespace env::file
 	using edges = view::edges;
 	using span = view::span;
 
-	// Run event when file at path enters mode
-	shared watch(view, mode, event);
 	// Make path to directory, return extant root
 	view mkdir(view);
 	// Remove directory and all contents
 	bool rmdir(view);
 
-	constexpr auto stop = fwd::always<view>;
-	constexpr auto next = fwd::never<view>;
+	constexpr auto stop = fwd::truth<view>;
+	constexpr auto next = fwd::falsity<view>;
 
 	edges paths(); // pwd, paths
 	edges config(); // config_home, config_dirs
