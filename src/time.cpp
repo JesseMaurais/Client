@@ -9,8 +9,7 @@
 
 #ifdef _WIN32
 #include "win/sync.hpp"
-#include "win/profile.hpp"
-#else //POSIX
+#else // UNIX
 #include "uni/signal.hpp"
 #endif
 
@@ -44,13 +43,13 @@ namespace env
 	{
 		if (not fmt::terminated(format))
 		{
-			auto buf = fmt::to_string(format);
+			const auto buf = fmt::to_string(format);
 			return operator()(buf);
 		}
 
 		fmt::string buf(8, 0);
 
-		for (auto n = 2; n; --n)
+		for (int n = 2; n; --n)
 		{
 			auto sz = std::strftime(buf.data(), buf.size(), format.data(), this);
 			if (0 < sz)
@@ -59,12 +58,7 @@ namespace env
 				break;
 			}
 			sz = buf.size() * 2;
-			buf.resize(sz);
-		}
-
-		if (buf.empty())
-		{
-			sys::warn(here, "strftime");
+			buf.resize(sz, 0);
 		}
 
 		return buf;
@@ -111,24 +105,52 @@ namespace env
 	}
 }
 
-namespace env::time
+namespace env::clock
 {
+	void wait(fmt::time tv)
+	{
+		#ifdef _WIN32
+		{
+			const auto div = std::div(tv.tv_nsec, 1e6L);
+			const auto msec = std::fma(tv.tv_sec, 1e3L, div.quot);
+			#ifdef assert
+			assert(0 == div.rem);
+			#endif
+			Sleep(msec);
+		}
+		#else // UNIX
+		{
+			const auto div = std::div(tv.tv_nsec, 1e3L);
+			const auto usec = std::fma(tv.tv_sec, 1e6L, div.quot);
+			#ifdef assert
+			assert(0 == div.rem);
+			#endif
+			if (sys::fail(usleep(usec))
+			{
+				sys::err(here, "usleep");
+			}
+		}
+		#endif
+	}
+
 	fwd::scope event(fmt::timer it, fwd::function f)
 	{
 		#ifdef _WIN32
 		{
-			static const long long tick = sys::win::frequency();
-			static const auto nsec = std::lldiv(1e9LL, tick);
-
+			const auto t = sys::win::timer::convert(it.it_value);
+			const auto p = sys::win::timer::convert(it.it_interval);
+			#ifdef assert
+			assert(0 == t.rem);
+			assert(0 == p.rem);
+			#endif
 			const auto h = sys::sync().reader()->timer();
-			return [t=sys::win::timer(h, f, t, p)] { };
+			return [t=sys::win::timer(h, f, t.quot, p.quot)] { };
 		}
-		#else //POSIX
+		#else // UNIX
 		{
 			struct intern : sys::uni::time::event
 			{
-				intern(fmt::timer it, fwd::function f) 
-				: event(f)
+				intern(fmt::timer it, fwd::function f) : event(f)
 				{
 					sys::uni::timer(it.it_interval, it.it_value).set(id);
 				}
@@ -144,8 +166,14 @@ test_unit(time)
 {
 	int n = 0;
 	{
-		auto scope = env::time::event({{ .tv_nsec = 100}}, [&] { ++n; });
+		auto scope = env::clock::event
+		(
+			{{ .tv_nsec = 1e8 }}, [&] { ++n; }
+		);
+
+		env::clock::wait({ .tv_sec = 1 });
 	}
+	assert(0 < n);
 
 	// Attempt to convert a number of common and standard time formats
 	const auto format = fmt::split("%n %t %c %x %X %D %F %R %T %Z %%");

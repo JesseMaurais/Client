@@ -5,6 +5,7 @@
 #include "ptr.hpp"
 #include "sys.hpp"
 #include "msg.hpp"
+#include "profile.hpp"
 #include <winbase.h>
 
 namespace sys::win
@@ -171,6 +172,50 @@ namespace sys::win
 		auto xtrylock()
 		{
 			return TryAcquireSRWLockExclusive(this);
+		}
+	};
+
+	struct timer : handle
+	{
+		timer(HANDLE h, fwd::function f, long long t, long p = 0, bool resume = true) : work(f), handle(h)
+		{
+			const large_int large = t;
+			if (not SetWaitableTimer(h, large.buf, p, thread, this, resume))
+			{
+				sys::win::err(here, "SetWaitableTimer");
+			}
+		}
+
+		~timer()
+		{
+			if (not sys::win::fail(h))
+			{
+				if (not CancelWaitableTimer(h))
+				{
+					sys::win::err(here, "CancelWaitableTimer");
+				}
+			}
+		}
+
+		static auto convert(std::timespec tv)
+		{
+			const auto div = std::div(tv.tv_nsec, 1e2L);
+			std::lldiv_t ll;
+			ll.quot = std::fma(tv.tv_sec, 1e7L, div.quot);
+			ll.rem = div.rem;
+			return ll;
+		}
+
+	private:
+
+		function work;
+
+		static void CALLBACK thread(LPVOID lp, DWORD low, DWORD high)
+		{
+			if (auto that = fwd::cast_as<timer>(lp); that)
+			{
+				that->work();
+			}
 		}
 	};
 }

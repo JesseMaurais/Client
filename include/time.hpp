@@ -29,9 +29,6 @@ namespace fmt
 
 	struct time : fwd::zero<std::timespec>
 	{
-		static constexpr auto nsecpsec = 1e9LL;
-		/// Number of nano-seconds per second
-
 		static constexpr std::tuple table
 		(
 			&std::timespec::tv_sec,
@@ -64,7 +61,7 @@ namespace env
 	struct date : fmt::date
 	{
 		fmt::string operator()(fmt::string::view) const;
-		/// Convert to string using given format with strftime
+		/// Convert to string using format given like strftime
 		using date::date;
 	};
 
@@ -83,9 +80,13 @@ namespace env
 	};
 }
 
-namespace env::time
+namespace env::clock
 {
+	void wait(fmt::time);
+	/// Suspend execution for amount of time
+
 	fwd::scope event(fmt::timer, fwd::function);
+	/// Invoke function periodically on a timer
 }
 
 #endif // file
