@@ -25,124 +25,67 @@ namespace fmt
 
 	template <class Char> struct type : std::ctype<Char>
 	{
-		using base = std::ctype<Char>;
-		using mask = typename base::mask;
-		using string = basic_string<Char>;
-		using view = typename string::view;
-		using init = typename view::init;
-		using span = typename view::span;
-		using pair = typename view::pair;
-		using vector = typename view::vector;
-		using size_type = typename view::size_type;
-		using ctype = typename string::ctype;
+		using string     = basic_string<Char>;
+		using basic_type = std::ctype<Char>;
+		using mask       = typename basic_type::mask;
+		using view       = typename string::view;
+		using init       = typename view::init;
+		using span       = typename view::span;
+		using pair       = typename view::pair;
+		using vector     = typename view::vector;
+		using size_type  = typename view::size_type;
+		using ctype      = typename view::ctype;
+		using iterator   = typename view::iterator;
+		using pointer    = typename view::cptr;
+		using range      = fwd::range<iterator>;
+		using mark       = fwd::vector<mask>;
 
 		static type* get();
 		static type* set(type*);
 
 		static_assert(null == ~npos);
 
-		template 
-		<
-			class Data
-		> 
-		static string from(Data const& s);
+		template <class C> static string from(const C &);
 
-		bool check(Char c, mask x = space) const
+		bool check(Char c, mask x = space) const;
 		// Check whether code w is an x
-		{
-			return base::is(x, c);
-		}
 
-		auto check(view u) const
+		mark check(view u) const;
 		// Classify all characters in a view
-		{
-			std::vector<mask> x(u.size());
-			base::is(u.data(), u.data() + u.size(), x.data());
-			return x;
-		}
 
-		template <class Iterator>
-		auto next(Iterator it, Iterator end, mask x = space) const
+		iterator next(iterator it, iterator end, mask x = space) const;
 		// Next iterator after $it but before $end which is an $x
-		{
-			while (it != end) 
-			{
-				auto const w = *it;
-				if (check(w, x))
-				{
-					break;
-				}
-				else ++it;
-			}
-			return it;
-		}
 
-		auto next(Char const* it, Char const* end, mask x = space) const
+		pointer next(pointer it, pointer end, mask x = space) const;
 		// Next character after $it but before $end which is an $x
-		{
-			return base::scan_is(x, it, end);
-		}
 
-		auto next(view u, mask x = space) const
+		iterator next(view u, mask x = space) const;
 		// Index of first character in view $u which is an $x
-		{
-			return next(begin(u), end(u), x);
-		}
 
-		template <typename iterator>
-		auto skip(iterator it, iterator end, mask x = space) const
+		iterator skip(iterator it, iterator end, mask x = space) const;
 		// Next iterator after $it but before $end which is not $x
-		{
-			while (it != end)
-			{
-				Char const w = *it;
-				if (check(w, x))
-				{
-					++it;
-				}
-				else break;
-			}
-			return it;
-		}
 
-		auto skip(Char const* it, Char const* end, mask x = space) const
+		pointer skip(pointer it, pointer end, mask x = space) const;
 		// Next character after $it but before $end which is not $x
-		{
-			return base::scan_not(x, it, end);
-		}
 
-		auto skip(view u, mask x = space) const
+		iterator skip(view u, mask x = space) const;
 		// Index of first character in view $u which is not $x
-		{
-			return skip(begin(u), end(u), x);
-		}
 
-		auto split(view u, mask x = space) const
+		vector split(view u, mask x = space) const;
 		// Split strings in $u delimited by $x
-		{
-			vector t;
-			auto const begin = u.data(), end = begin + u.size();
-			for (auto i = skip(begin, end, x), j = end; i != end; i = skip(j, end, x))
-			{
-				j = next(i, end, x);
-				auto const n = std::distance(i, j);
-				t.emplace_back(i, n);
-			}
-			return t;
-		}
 
 		auto widen(fwd::basic_string_view<char> u) const
 		// Decode multibyte characters as wide type
 		{
 			struct iterator : utf
 			{
-				base const* that;
+				basic_type const* that;
 				char const* pos;
 				std::size_t size;
 
 				bool operator!=(iterator const& it) const
 				{
-					return it.pos != pos; 
+					return it.pos != pos;
 				}
 
 				auto operator*() const
@@ -159,7 +102,7 @@ namespace fmt
 					return *this;
 				}
 
-				iterator(base const* owner, char const* it)
+				iterator(basic_type const* owner, char const* it)
 				: that(owner), pos(it)
 				{
 					if (nullptr != that)
@@ -187,7 +130,7 @@ namespace fmt
 		{
 			struct iterator
 			{
-				base const* that;
+				basic_type const* that;
 				Char const* pos;
 
 				bool operator!=(iterator const& it) const
@@ -208,7 +151,7 @@ namespace fmt
 					return *this;
 				}
 
-				iterator(base const* owner, Char const* it)
+				iterator(basic_type const* owner, Char const* it)
 				: that(owner), pos(it)
 				{ }
 			};
@@ -226,85 +169,32 @@ namespace fmt
 			return u;
 		}
 
-		auto first(view u, mask x = space) const
+		iterator first(view u, mask x = space) const;
 		// First iterator in view $u that is not $x
-		{
-			return skip(begin(u), end(u), x);
-		}
 
-		auto last(view u, mask x = space) const
+		iterator last(view u, mask x = space) const;
 		// Last iterator in view $u that is not $x
-		{
-			return skip(rbegin(u), rend(u), x).base() - 1;
-		}
 
-		auto trim(view u, mask x = space) const
+		view trim(view u, mask x = space) const;
 		// Trim $x off the front and back of $u
-		{
-			auto const before = last(u, x) + 1;
-			auto const after = first(u, x);
-			auto const pos = std::distance(begin(u), after);
-			auto const size = std::distance(after, before);
-			return u.substr(pos, size);
-		}
 
-		bool all_of(view u, mask x = space) const
+		bool all_of(view u, mask x = space) const;
 		// All decoded characters in $u are $x
-		{
-			return fwd::all_of(widen(u), [this, x](auto w)
-			{
-				return this->check(w, x);
-			});
-		}
 
-		bool any_of(view u, mask x = space) const
+		bool any_of(view u, mask x = space) const;
 		// Any decoded characters in $u are $x
-		{
-			return fwd::any_of(widen(u), [this, x](auto w)
-			{
-				return this->check(w, x);
-			});
-		}
 
-		auto to_upper(view u) const
+		string to_upper(view u) const;
 		// Recode characters in upper case
-		{
-			string s;
-			for (auto const w : widen(u))
-			{
-				auto const p = base::toupper(w);
-				s += from(p);
-			}
-			return s;
-		}
 
-		auto to_lower(view u) const
+		string to_lower(view u) const;
 		// Recode characters in lower case
-		{
-			string s;
-			for (auto const w : widen(u))
-			{
-				auto const p = base::tolower(w);
-				s += from(p);
-			}
-			return s;
-		}
 
-		static auto to_pair(view u, view v)
-		// Divide view u by first occurance of v
-		{
-			auto const m = u.size();
-			auto const n = u.find(v);
-			auto const p = u.substr(0, n);
-			auto const q = u.substr(n < m ? n + 1 : m);
-			return pair { p, q };
-		}
+		static pair to_pair(view u, view v);
+		// Divide view $u by first occurance of $v
 
-		static bool terminated(view u)
+		static bool terminated(view u);
 		// Check whether string is null terminated
-		{
-			return not u.empty() and (u.back() == '\0' or u[u.size()] == '\0');
-		}
 
 		static auto count(view u, view v)
 		// Count occurances in $u of a substring $v
@@ -319,7 +209,7 @@ namespace fmt
 			return n;
 		}
 
-		template <class Iterator> 
+		template <class Iterator>
 		static auto join(Iterator begin, Iterator end, view u)
 		// Join strings in $t with $u inserted between
 		{
@@ -422,7 +312,7 @@ namespace fmt
 
 	extern template struct type<char>;
 	using ctype = type<char>;
-	
+
 	extern template struct type<wchar_t>;
 	using wtype = type<wchar_t>;
 
@@ -578,7 +468,7 @@ namespace fmt
 
 	inline bool same(string::view u, string::view v)
 	{
-		return u.empty() ? v.empty() : 
+		return u.empty() ? v.empty() :
 			u.data() == v.data() and u.size() == v.size();
 	}
 

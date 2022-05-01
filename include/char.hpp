@@ -417,7 +417,7 @@ namespace fmt
 
 	enum DAQ
 	{
-		unprotected_and_unguarded =  0, 
+		unprotected_and_unguarded =  0,
 		protected_and_guarded     =  1,
 		graphic_char_input        =  2,
 		numeric_input             =  3,
@@ -473,7 +473,7 @@ namespace fmt
 	enum JFY
 	{
 		none                = 0,
-		word_fill           = 1, 
+		word_fill           = 1,
 		word_space          = 2,
 		letter_space        = 3,
 		hyphenation         = 4,
@@ -554,11 +554,11 @@ namespace fmt
 
 	namespace io
 	{
-		template <int... Params> auto set(string::out::ref out)
+		template <int... Char> auto& set(string::out::ref out)
 		{
-			return out << C0::ESC << C1::CSI << Params... << CSI::SGR;
+			return ((out << C0::ESC << C1::CSI) << ... << Char) << CSI::SGR;
 		}
-		
+
 		inline auto reset = set<SGR::reset>;
 		inline auto intense = set<SGR::intense>;
 		inline auto faint = set<SGR::faint>;
@@ -569,7 +569,7 @@ namespace fmt
 		inline auto reverse = set<SGR::reverse>;
 		inline auto conceal = set<SGR::conceal>;
 		inline auto strike = set<SGR::strike>;
-		inline auto font = set<SGR::first_font + N>;
+		template <int N> inline auto font = set<SGR::first_font + N>;
 		inline auto fraktur = set<SGR::fraktur>;
 		inline auto underline2 = set<SGR::underline2>;
 		inline auto intense_off = set<SGR::intense_off>;
@@ -587,8 +587,8 @@ namespace fmt
 		inline auto fg_magenta = set<SGR::fg_magenta>;
 		inline auto fg_cyan = set<SGR::fg_cyan>;
 		inline auto fg_white = set<SGR::fg_white>;
-//		inline auto fg_rgb = set<3, SGR::fg, 2>;
-//		inline auto fg = set<1, SGR_fg, 5>;
+		inline auto fg_rgb = set<3, SGR::fg, 2>;
+		inline auto fg = set<1, SGR::fg, 5>;
 		inline auto fg_off = set<SGR::fg_off>;
 		inline auto bg_black = set<SGR::bg_black>;
 		inline auto bg_red = set<SGR::bg_red>;
@@ -598,8 +598,8 @@ namespace fmt
 		inline auto bg_magenta = set<SGR::bg_magenta>;
 		inline auto bg_cyan = set<SGR::bg_cyan>;
 		inline auto bg_white = set<SGR::bg_white>;
-//		inline auto bg_rgb = set<3, SGR::bg, 2>;
-//		inline auto bg = set<1, SGR::bg, 5>;
+		inline auto bg_rgb = set<3, SGR::bg, 2>;
+		inline auto bg = set<1, SGR::bg, 5>;
 		inline auto bg_off = set<SGR::bg_off>;
 		inline auto frame = set<SGR::frame>;
 		inline auto encircle = set<SGR::encircle>;

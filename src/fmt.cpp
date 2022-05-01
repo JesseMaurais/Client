@@ -17,28 +17,275 @@
 
 namespace fmt
 {
-	template <class C> auto & single()
-	{
-		static type<C> instance;
-		thread_local auto ptr = &instance;
-		return ptr;
-	}
+	template <class C> static type<C> singleton;
+	template <class C> static auto address = &singleton<C>;
 
 	template <class C> type<C>* type<C>::get()
 	{
-		return single();
-	}
-	
-	template <class C> type<C>* type<C>::set(type<C>* to)
-	{
-		auto from = single();
-		single() = to;
-		return ftom;
+		return address<C>;
 	}
 
+	template <class C> type<C>* type<C>::set(type<C>* to)
+	{
+		return address<C> = to;
+	}
+
+	template <class C> bool type<C>::check(C c, mask x) const
+	{
+		return basic_type::is(x, c);
+	}
+
+	template <class C> typename type<C>::mark type<C>::check(view u) const
+	{
+		mark x(u.size());
+		basic_type::is(u.data(), u.data() + u.size(), x.data());
+		return x;
+	}
+
+	template <class C> typename type<C>::iterator type<C>::next(iterator it, iterator end, mask x) const
+	{
+		while (it != end)
+		{
+			if (check(*it, x))
+			{
+				break;
+			}
+			else ++it;
+		}
+		return it;
+	}
+
+	template <class C> typename type<C>::pointer type<C>::next(pointer it, pointer end, mask x) const
+	{
+		return basic_type::scan_is(x, it, end);
+	}
+
+	template <class C> typename type<C>::iterator type<C>::next(view u, mask x) const
+	{
+		return next(begin(u), end(u), x);
+	}
+
+	template <class C> typename type<C>::iterator type<C>::skip(iterator it, iterator end, mask x) const
+	{
+		while (it != end)
+		{
+			if (check(*it, x))
+			{
+				++it;
+			}
+			else break;
+		}
+		return it;
+	}
+
+	template <class C> typename type<C>::pointer type<C>::skip(pointer it, pointer end, mask x) const
+	{
+		return basic_type::scan_not(x, it, end);
+	}
+
+	template <class C> typename type<C>::iterator type<C>::skip(view u, mask x) const
+	{
+		return skip(u.begin(), u.end(), x);
+	}
+
+	template <class C> typename type<C>::vector type<C>::split(view u, mask x) const
+	{
+		vector t;
+		auto const begin = u.data(), end = begin + u.size();
+		for (auto i = skip(begin, end, x), j = end; i != end; i = skip(j, end, x))
+		{
+			j = next(i, end, x);
+			auto const n = std::distance(i, j);
+			t.emplace_back(i, n);
+		}
+		return t;
+	}
+
+	template <class C> typename type<C>::iterator type<C>::first(view u, mask x) const
+	{
+		return skip(u.begin(), u.end(), x);
+	}
+
+	template <class C> typename type<C>::iterator type<C>::last(view u, mask x) const
+	{
+		return skip(u.rbegin(), u.rend(), x).base() - 1;
+	}
+
+	template <class C> typename type<C>::view type<C>::trim(view u, mask x) const
+	{
+		auto const before = last(u, x) + 1;
+		auto const after = first(u, x);
+		auto const pos = std::distance(begin(u), after);
+		auto const size = std::distance(after, before);
+		return u.substr(pos, size);
+	}
+
+	template <class C> bool type<C>::all_of(view u, mask x) const
+	{
+		return fwd::all_of(widen(u), [this, x](auto w)
+		{
+			return this->check(w, x);
+		});
+	}
+
+	template <class C> bool type<C>::any_of(view u, mask x) const
+	{
+		return fwd::any_of(widen(u), [this, x](auto w)
+		{
+			return this->check(w, x);
+		});
+	}
+
+	template <class C> typename type<C>::string type<C>::to_upper(view u) const
+	{
+		string s;
+		for (const auto w : widen(u))
+		{
+			const auto p = basic_type::toupper(w);
+			s += from(p);
+		}
+		return s;
+	}
+
+	template <class C> typename type<C>::string type<C>::to_lower(view u) const
+	{
+		string s;
+		for (const auto w : widen(u))
+		{
+			const auto p = basic_type::tolower(w);
+			s += from(p);
+		}
+		return s;
+	}
+
+	template <class C> typename type<C>::pair type<C>::to_pair(view u, view v)
+	{
+		const auto m = u.size();
+		const auto n = u.find(v);
+		const auto p = u.substr(0, n);
+		const auto q = u.substr(n < m ? n + 1 : m);
+		return pair { p, q };
+	}
+
+	template <class C> bool type<C>::terminated(view u)
+	{
+		return not u.empty() and (u.back() == '\0' or u[u.size()] == '\0');
+	}
+
+		static auto count(view u, view v)
+		// Count occurances in $u of a substring $v
+		{
+			auto n = null;
+			auto const z = v.size();
+			for (auto i = u.find(v); i != npos; i = u.find(v, i))
+			{
+				i += z;
+				++ n;
+			}
+			return n;
+		}
+
+		template <class Iterator>
+		static auto join(Iterator begin, Iterator end, view u)
+		// Join strings in $t with $u inserted between
+		{
+			string s;
+			for (auto it = begin; it != end; ++it)
+			{
+				if (begin != it)
+				{
+					s += u;
+				}
+				s += *it;
+			}
+			return s;
+		}
+
+		template <class Span> static auto split(Span t, view u)
+		// Split strings in $p delimited by $v
+		{
+			fwd::vector<Span> s;
+			auto p = t.data();
+			size_t i = 0, j = 0;
+			for (auto v : t)
+			{
+				if (u == v)
+				{
+					s.emplace_back(p + i, j - i);
+					j = ++i;
+				}
+				else ++j;
+			}
+			return s;
+		}
+
+		static auto split(view u, view v)
+		// Split strings in $u delimited by $v
+		{
+			vector t;
+			auto const uz = u.size(), vz = v.size();
+			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
+			{
+				auto const k = uz < j ? uz : j;
+				auto const w = u.substr(i, k - i);
+				if (i <= k) t.emplace_back(w);
+				i = k + vz;
+			}
+			return t;
+		}
+
+		static auto replace(view u, view v, view w)
+		// Replace in u all occurrances of v with w
+		{
+			string s;
+			auto const uz = u.size(), vz = v.size();
+			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
+			{
+				auto const k = std::min(j, uz);
+				s = u.substr(i, k - i);
+				if (j < uz) s += w;
+				i = k + vz;
+			}
+			return s;
+		}
+
+		static auto embrace(view u, view v)
+		// Position in u with matching braces front and back in v
+		{
+			auto i = u.find_first_of(v.front()), j = i;
+			if (i < npos)
+			{
+				int n = 1;
+				do
+				{
+					j = u.find_first_of(v, j + 1);
+					if (npos == j)
+					{
+						break; // missing
+					}
+					else
+					if (v.back() == u[j])
+					{
+						--n; // close
+					}
+					else
+					if (v.front() == u[j])
+					{
+						++n; // open
+					}
+					else
+					{
+						break; // other
+					}
+				}
+				while (0 < n);
+			}
+			return std::pair { i, j };
+		}
+
 	// global object linkage
-	template class type<char>;
-	template class type<wchar_t>;
+	template struct type<char>;
+	template struct type<wchar_t>;
 }
 
 namespace fmt::tag
@@ -144,7 +391,7 @@ namespace fmt::tag
 				#ifdef assert
 				assert(p.second);
 				#endif
-				
+
 				// Index a view to the string
 				auto const q = table.write()->emplace(*p.first, id);
 				#ifdef assert
