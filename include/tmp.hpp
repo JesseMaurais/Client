@@ -11,8 +11,6 @@
 
 namespace fwd
 {
-	using function = std::function<void()>;
-
 	template <class T> struct type_of
 	{
 		using type = T;
@@ -33,12 +31,16 @@ namespace fwd
 		virtual T operator=(T) = 0;
 	};
 
+	using function = std::function<void()>;
+
 	template <class T> struct lazy : std::function<T()>
 	{
+		using function = std::function<T()>;
 		using function::function;
+
 		operator T() const
 		{
-			return operator()();
+			return function::operator()();
 		}
 	};
 
@@ -46,10 +48,10 @@ namespace fwd
 
 	template <class... T> struct formula : std::function<bool(T...)>
 	{
-		using base = std::function<bool(T...)>;
-		using base::base;
+		using function = std::function<bool(T...)>;
+		using function::function;
 
-		formula operator and(base const& that) const
+		formula operator and(function const& that) const
 		{
 			return [&](T... x)
 			{
@@ -57,7 +59,7 @@ namespace fwd
 			};
 		}
 
-		formula operator or(base const& that) const
+		formula operator or(function const& that) const
 		{
 			return [&](T... x)
 			{
@@ -65,7 +67,7 @@ namespace fwd
 			};
 		}
 
-		formula operator xor(base const& that) const
+		formula operator xor(function const& that) const
 		{
 			return [&](T... x)
 			{

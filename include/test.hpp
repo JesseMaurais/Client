@@ -1,7 +1,6 @@
 #ifndef test_hpp
 #define test_hpp "Unit Tests"
 
-#include "err.hpp"
 #include "sym.hpp"
 
 #ifdef NDEBUG

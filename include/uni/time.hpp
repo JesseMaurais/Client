@@ -49,24 +49,6 @@ namespace sys::uni
 			return fail(timer_settime(id, flags, this, old)) and err(here);
 		}
 	};
-
-	constexpr long nsecpersec = 1e9;
-}
-
-static timerspec operator+(const timerspec& left, const timerspec& right)
-{
-	const auto sec = left.tv_sec + right.tv_sec;
-	const auto nsec = left.tv_nsec + right.tv_nsec;
-	const auto div = std::div(nsec, sys::uni::nsecpersec);
-	return { .tv_sec = sec + div.quot, .tv_nsec = div.rem };
-}
-
-static timerspec operator-(const timerspec& first, const timerspec& second)
-{
-	auto sec = left.tv_sec - right.tv_sec;
-	auto nsec = left.tv_nsec - right.tv_nsec;
-	while (nec < 0) --sec, nsec += sys::uni::nsecpersec;
-	return { .tv_sec = sec, .tv_nsec = nsec };
 }
 
 #endif // file

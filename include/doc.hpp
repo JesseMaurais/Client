@@ -1,66 +1,68 @@
 #ifndef doc_hpp
-#define doc_hpp "Document Structure"
+#define doc_hpp "Document Object Model"
 
 #include "fwd.hpp"
 #include "tmp.hpp"
 #include "ptr.hpp"
 #include <typeindex>
+#include <string_view>
 
 namespace doc
 {
-	struct interface : fwd::no_copy, fmt::layout<interface>
+	struct interface : fwd::no_copy
 	{
 		virtual std::type_index type() const = 0;
 		virtual std::ptrdiff_t size() const = 0;
-		virtual fwd::span<int> at(int n) const = 0;
+		virtual std::span<int> link(int n) const = 0;
 		virtual bool contains(int n) const = 0;
 		virtual void destroy(int n) = 0;
+
+		inline auto empty() const
+		{
+			return 0 == size();
+		}
 	};
 
-	template <class Type> class instance : final interface
+	interface* find(std::type_index);
+
+	template <class Type> struct instance final : interface
 	{
-		std::type_index type() const override;
-		std::ptrdiff_t size() const override;
-		fwd::span<int> at(int n) const override;
-		bool contains(int n) const override;
-		void destroy(int n) override;
-
-		instance();
-
-	public:
-
 		using write_ptr = fwd::shared_ptr<Type>;
 		using read_ptr = fwd::shared_ptr<const Type>;
+
+		std::type_index type() const override;
+		std::ptrdiff_t size() const override;
+		std::span<int> link(int n) const override;
+		bool contains(int n) const override;
+		void destroy(int n) override;
 
 		write_ptr writer(int n);
 		read_ptr reader(int n);
 		int emplace(Type &&);
 
-		static ref self();
+		static instance& self();
+
+	private:
+
+		instance();
 	};
 
-	using manager = instance<doc::interface::ptr>;
-	extern template class manager;
-
-	using strings = instance<fmt::string::view>;
-	extern template class strings;
-
+	extern template struct instance<fwd::function>;
 	using message = instance<fwd::function>;
-	extern template class message;
 
-	static auto signal(fwd::function f)
+	inline auto signal(fwd::function f)
 	{
-		return message::self().emplace(f);
+		return message::self().emplace(std::move(f));
 	}
 
-	static auto cancel(int n)
+	inline auto raise(int n)
+	{
+		return message::self().reader(n)->operator()();
+	}
+
+	inline auto cancel(int n)
 	{
 		return message::self().destroy(n);
-	}
-
-	static auto raise(int n)
-	{
-		return message::self()->reader()->operator()();
 	}
 }
 

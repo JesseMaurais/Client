@@ -1,22 +1,18 @@
 #ifndef utf_hpp
 #define utf_hpp "Universal Transformation Format"
 
+#include "ptr.hpp"
 #include <uchar.h>
 #include <wchar.h>
 #include <cstring>
 
 namespace fmt
 {
-	struct utf : std::mbstate_t
+	struct utf : fwd::zero<std::mbstate_t>
 	{
-		utf()
-		{
-			std::memset(this, 0, sizeof(mbstate_t));
-		}
-
 		operator bool() const
 		{
-			return 0 != std::mbsinit(this);
+			return std::mbsinit(this);
 		}
 
 		std::ptrdiff_t len(char const* s, std::size_t n = MB_CUR_MAX)

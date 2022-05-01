@@ -8,7 +8,7 @@
 #include <time.h>
 #include <fcntl.h>
 
-#ifdef _WIN32
+#ifdef _UCRT
 
 #include <process.h>
 #include <direct.h>

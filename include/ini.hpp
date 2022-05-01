@@ -1,36 +1,28 @@
 #ifndef ini_hpp
 #define ini_hpp "Initial Options"
 
-#include "doc.hpp"
+#include "fmt.hpp"
 
 namespace doc
 {
 	struct ini : fmt::memory<ini>
 	{
+		fmt::view::vector values;
+		fmt::string::set cache;
+		fwd::group<int> keys;
+
+		using pair = fwd::group<int>::key_type;
 		using string = fmt::string;
-		using view   = string::view;
-		using init   = view::init;
-		using vector = view::vector;
-		using span   = view::span;
-		using out    = string::out;
-		using in     = string::in;
+		using view = fmt::view;
 
-		path::group keys;
-		string::view::vector values;
-		string::set cache;
+		friend view::in::ref operator>>(view::in::ref, ref);
+		friend view::out::ref operator<<(view::out::ref, cref);
+		static view::in::ref getline(view::in::ref, string::ref);
 
-		friend in::ref operator>>(in::ref, ref);
-		friend out::ref operator<<(out::ref, cref);
-		static in::ref getline(in::ref, string::ref);
-
-		static string join(span);
-		static vector split(view);
-		static string join(init);
-
-		bool got(path::pair) const;
-		view get(path::pair) const;
-		bool set(path::pair, view);
-		bool put(path::pair, view);
+		bool got(pair) const;
+		view get(pair) const;
+		bool set(pair, view);
+		bool put(pair, view);
 	};
 }
 

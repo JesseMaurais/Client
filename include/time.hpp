@@ -13,7 +13,7 @@ namespace fmt
 {
 	struct date : fwd::zero<std::tm>
 	{
-		static constexpr std::tuple table
+		static inline auto table = std::tuple
 		(
 			&std::tm::tm_year,
 			&std::tm::tm_mon,
@@ -29,7 +29,7 @@ namespace fmt
 
 	struct time : fwd::zero<std::timespec>
 	{
-		static constexpr std::tuple table
+		static inline auto table = std::tuple
 		(
 			&std::timespec::tv_sec,
 			&std::timespec::tv_nsec
@@ -41,7 +41,7 @@ namespace fmt
 		time it_interval;
 		time it_value;
 
-		static constexpr std::tuple table
+		static inline auto table = std::tuple
 		(
 			&timer::it_interval,
 			&timer::it_value
@@ -55,14 +55,14 @@ namespace env
 	{
 		time(int = TIME_UTC);
 		/// Convert the current time
-		using time::time;
+		using fmt::time::time;
 	};
 
 	struct date : fmt::date
 	{
 		fmt::string operator()(fmt::string::view) const;
 		/// Convert to string using format given like strftime
-		using date::date;
+		using fmt::date::date;
 	};
 
 	struct gmtime : date
@@ -83,10 +83,10 @@ namespace env
 namespace env::clock
 {
 	void wait(fmt::time);
-	/// Suspend execution for amount of time
+	/// Suspend execution for an amount of time
 
 	fwd::scope event(fmt::timer, fwd::function);
-	/// Invoke function periodically on a timer
+	/// Invoke function on a periodic timer
 }
 
 #endif // file

@@ -4,7 +4,7 @@
 #include "uni.hpp"
 #include "err.hpp"
 #include "ptr.hpp"
-#include "msg.hpp"
+#include "doc.hpp"
 #include <time.h>
 #include <mqueue.h>
 #include <signal.h>
@@ -172,19 +172,12 @@ namespace sys::uni::sig
 
 	struct event : fwd::no_copy, sigevent
 	{
-		using function = ::doc::function;
-
-		event(function f, pthread_attr_t* attr = nullptr)
+		event(fwd::function f, pthread_attr_t* attr = nullptr)
 		{
 			sigev_value.sival_int = doc::signal(f);
 			sigev_notify = SIGEV_THREAD;
 			sigev_notify_function = thread;
 			sigev_notify_attributes = attr;
-		}
-
-		~event()
-		{
-			doc::cancel(sigev_value.sival_int);
 		}
 
 	private:
@@ -202,7 +195,7 @@ namespace sys::uni::time
 	{
 		timer_t id;
 
-		event(function f, pthread_attr_t* attr = nullptr, clockid_t clock = CLOCK_REALTIME)
+		event(fwd::function f, pthread_attr_t* attr = nullptr, clockid_t clock = CLOCK_REALTIME)
 		: sig::event(f, attr)
 		{
 			if (fail(timer_create(clock, this, &id)))
@@ -225,7 +218,7 @@ namespace sys::uni::msg
 {
 	struct event : sig::event
 	{
-		event(function f, mqd_t mqd, pthread_attr_t* attr = nullptr)
+		event(fwd::function f, mqd_t mqd, pthread_attr_t* attr = nullptr)
 		: sig::event(f, attr)
 		{
 			if (fail(mq_notify(mqd, this)))

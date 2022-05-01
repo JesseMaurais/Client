@@ -1,6 +1,16 @@
 #ifndef api_hpp
 #define api_hpp "Application Programming Interface"
 
+// https://sourceforge.net/p/predef/wiki/Libraries/
+
+#if __has_include(<vcruntime.h>)
+#	include <vcruntime.h>
+#endif
+
+#if __has_include(<features.h>)
+#	include <features.h>
+#else
+
 // https://sourceforge.net/p/predef/wiki/Standards/
 
 #ifdef _WIN32
@@ -71,25 +81,25 @@
 #	ifdef _XOPEN_VERSION
 #		define _XPG
 #	endif
-#	if _XOPEN_VERSION >= 2 
+#	if _XOPEN_VERSION >= 2
 #		define _XPG2 // X/Open Portability Guide 2 (1985)
 #	endif
-#	if _XOPEN_VERSION >= 3 
+#	if _XOPEN_VERSION >= 3
 #		define _XPG3 // X/Open Portability Guide 3 (1989)
 #	endif
-#	if _XOPEN_VERSION >= 4 
+#	if _XOPEN_VERSION >= 4
 #		define _XPG4 // X/Open Portability Guide 4 (1992)
 #	endif
 #	ifdef _XOPEN_UNIX
 #		define _SUS // X/Open Single UNIX Specification (UNIX95)
 #	endif
-#	if _XOPEN_VERSION >= 500 
+#	if _XOPEN_VERSION >= 500
 #		define _SUS2 // X/Open Single UNIX Specification, Version 2 (UNIX98)
 #	endif
-#	if _XOPEN_VERSION >= 600 
+#	if _XOPEN_VERSION >= 600
 #		define _SUS3 // Open Group Single UNIX Specification, Version 3 (UNIX03)
 #	endif
-#	if _XOPEN_VERSION >= 700 
+#	if _XOPEN_VERSION >= 700
 #		define _SUS4 // Open Group Single UNIX Specification, Version 4
 #	endif
 
@@ -99,22 +109,22 @@
 #	if _POSIX_C_VERSION
 #		define _POSIX2
 #	endif
-#	if _POSIX_VERSION >= 198808L 
+#	if _POSIX_VERSION >= 198808L
 #		define _POSIX_1988 // IEEE 1003.1-1988
 #	endif
-#	if _POSIX_VERSION >= 199009L 
+#	if _POSIX_VERSION >= 199009L
 #		define _POSIX_1990 // ISO/IEC 9945-1:1990
 #	endif
-#	if _POSIX2_C_VERSION >= 199209L 
+#	if _POSIX2_C_VERSION >= 199209L
 #		define _POSIX_1992 // ISO/IEC 9945-2:1993
 #	endif
-#	if _POSIX_VERSION >= 199309L 
+#	if _POSIX_VERSION >= 199309L
 #		define _POSIX_1993 // IEEE 1003.1b-1993
 #	endif
-#	if _POSIX_VERSION >= 199506L 
+#	if _POSIX_VERSION >= 199506L
 #		define _POSIX_1996 // IEEE 1003.1-1996
 #	endif
-#	if _POSIX_VERSION >= 200112L 
+#	if _POSIX_VERSION >= 200112L
 #		define _POSIX_2001 // IEEE 1003.1-2001
 #	endif
 #	if _POSIX_VERSION >= 200809L

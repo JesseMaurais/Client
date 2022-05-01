@@ -9,19 +9,12 @@ namespace sys::uni::aio
 {
 	struct event : fwd::no_copy, fwd::zero<aiocb>
 	{
-		using function = sig::event::function;
-
-		event(function f, pthread_attr_t* attr = nullptr)
+		event(fwd::function f, pthread_attr_t* attr = nullptr)
 		{
-			aio_sigevent.sigev_value.sival_int = doc::socket().open(f);
+			aio_sigevent.sigev_value.sival_int = doc::signal(f);
 			aio_sigevent.sigev_notify = SIGEV_THREAD;
 			aio_sigevent.sigev_notify_function = thread;
 			aio_sigevent.sigev_notify_attributes = attr;
-		}
-
-		~event()
-		{
-			doc::socket().close(aio_sigevent.sigev_value.sival_int);
 		}
 
 		bool read()

@@ -2,18 +2,26 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "doc.hpp"
-#include "meta.hpp"
-#include "ptr.hpp"
-#include "msg.hpp"
+#include "tab.hpp"
 #include "err.hpp"
+#include "meta.hpp"
 
 namespace doc
 {
-	template class instance<interface::ptr>;
-	template class instance<fwd::function>;
+	template struct instance<fwd::function>;
+
+	sys::exclusive<std::map<std::type_index, interface*>> registry;
+	interface* find(std::type_index index)
+	{
+		auto data = registry.reader();
+		auto it = data->find(index);
+		return data->end() == it
+			? nullptr : it->second;
+	}
 }
 
 #ifdef test_unit
+
 namespace
 {
 	struct dumb
@@ -38,10 +46,11 @@ namespace
 	};
 }
 
-template class doc::instance<dumb>;
-template <> fmt::string::view doc::name<&dumb::i> = "i";
-template <> fmt::string::view doc::name<&dumb::f> = "f";
-template <> fmt::string::view doc::name<&dumb::s> = "s";
+template struct doc::instance<dumb>;
+
+template <> fmt::view doc::name<&dumb::i> = "i";
+template <> fmt::view doc::name<&dumb::f> = "f";
+template <> fmt::view doc::name<&dumb::s> = "s";
 
 test_unit(doc)
 {
@@ -51,28 +60,44 @@ test_unit(doc)
 	using value_type = fwd::offset_of<&dumb::i>::value_type;
 	static_assert(std::is_same<value_type, int>::value);
 
-	dumb dumber;
-	const int id = doc::access<dumb>().open(dumber);
+	static auto& dummy = doc::instance<dumb>::self();
+	assert(0 == dummy.size());
+	const int id = dummy.emplace({});
+	assert(1 == dummy.size());
 	assert(0 == id);
-	const auto ptr = doc::access<dumb>().find(id);
+
+	assert(dummy.contains(id));
+	auto data = dummy.writer(id);
+	auto ptr = data.get();
 	assert(nullptr != ptr);
-
-	doc::set<0>(ptr) = 42;
-	doc::set<1>(ptr) = 4.2f;
-	doc::set<2>(ptr) = "42";
-
-	assert(42 == ptr->i);
-	assert(4.2f == ptr->f);
-	assert(ptr->s == "42");
-
-	assert(42 == doc::get<0>(ptr));
-	assert(4.2f == doc::get<1>(ptr));
-	assert(doc::get<2>(ptr) == "42");
 
 	assert(doc::key<0>(ptr) == "i");
 	assert(doc::key<1>(ptr) == "f");
 	assert(doc::key<2>(ptr) == "s");
 
-	doc::access<dumb>().close(id);
+	assert(doc::get<0>(ptr) == 0);
+	assert(doc::get<1>(ptr) == 0.0f);
+	assert(doc::get<2>(ptr) == "Hello World");
+
+	assert(doc::get<0>(ptr) == ptr->i);
+	assert(doc::get<1>(ptr) == ptr->f);
+	assert(doc::get<2>(ptr) == ptr->s);
+
+	doc::set<0>(ptr) = 42;
+	doc::set<1>(ptr) = 4.2f;
+	doc::set<2>(ptr) = "42";
+
+	assert(doc::get<0>(ptr) == 42);
+	assert(doc::get<1>(ptr) == 4.2f);
+	assert(doc::get<2>(ptr) == "42");
+
+	assert(doc::get<0>(ptr) == ptr->i);
+	assert(doc::get<1>(ptr) == ptr->f);
+	assert(doc::get<2>(ptr) == ptr->s);
+
+	assert(1 == dummy.size());
+	dummy.destroy(id);
+	assert(0 == dummy.size());
 }
+
 #endif

@@ -11,6 +11,8 @@
 
 namespace doc
 {
+	// private
+
 	template <class Type> struct element : Type
 	{
 		fwd::vector<int> link;
@@ -25,24 +27,14 @@ namespace doc
 		fwd::vector<std::size_t> cross;
 	};
 
-	static sys::exclusive<std::map<std::type_index, interface::ptr> registry;
+	template <class Type> static sys::exclusive<store<Type>> global;
+	extern sys::exclusive<std::map<std::type_index, interface*>> registry;
 
-	static interface:ptr find(std::type_index id)
-	{
-		auto data = registry.reader();
-		auto it = data->find(id);
-		return data->end() == it
-			? nullptr : it->second;
-	}
+	// public
 
 	template <class Type> instance<Type>::instance()
 	{
-		auto writer = registry.writer();
-		[[maybe_unused]] auto [it, unique] = writer->emplace(typeid(Type), this);
-		#ifdef assert
-		assert(writer->end() != it);
-		assert(unique);
-		#endif
+		registry.writer()->insert(typeid(Type), this);
 	}
 
 	template <class Type> instance<Type>& instance<Type>::self()
@@ -51,14 +43,27 @@ namespace doc
 		return singleton;
 	}
 
-	template <class Type> static sys::exclusive<array<Type>> global;
+	template <class Type> std::type_index instance<Type>::type() const
+	{
+		return typeid(Type);
+	}
+
+	template <class Type> std::ptrdiff_t instance<Type>::size() const
+	{
+		return global<Type>.reader()->item.size();
+	}
+
+	template <class Type> std::span<int> instance<Type>::link(int n) const
+	{
+		return reader(n)->link;
+	}
 
 	template <class Type> int instance<Type>::emplace(Type&& type)
 	{
 		auto data = global<Type>.writer();
 
 		// find lowest free index
-		auto pos = writer->index.size();
+		auto pos = data->index.size();
 		if (data->index.size() > data->item.size())
 		{
 			for (auto count : fwd::up_to(pos))
@@ -98,7 +103,7 @@ namespace doc
 
 		auto const pos = fmt::to_size(id);
 		#ifdef assert
-		assert(writer->contains(pos));
+		assert(data->contains(pos));
 		#endif
 
 		auto const off = data->index.at(pos);
@@ -120,7 +125,7 @@ namespace doc
 		#endif
 	}
 
-	template <class Type> bool instance<Type>::contains(int id)
+	template <class Type> bool instance<Type>::contains(int id) const
 	{
 		auto reader = global<Type>.reader();
 
