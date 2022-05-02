@@ -42,7 +42,7 @@ namespace fmt
 		using scan   = typename in::put;
 		using print  = typename out::put;
 		using format = typename ctype::read;
-		
+
 		template <class Iterator> static
 		typename out::ref put(typename out::ref buf, Iterator begin, Iterator end, Char* del)
 		{
@@ -130,7 +130,7 @@ namespace fmt
 	struct basic_string : Base
 	{
 		using view = basic_string_view<Char, Traits, Alloc, Order>;
-		
+
 		using Base::Base;
 		basic_string(const View& in)
 		: Base(in.data(), in.size())
@@ -138,11 +138,14 @@ namespace fmt
 	};
 
 	// low 7 bit UTF-8
-	using bstring = basic_string<char>;
+	using string = basic_string<char>;
+	using view = string::view;
 	// UTF-16 or UTF-32 wide
 	using wstring = basic_string<wchar_t>;
+	using wide = wstring::view;
 	// at least a UTF-32 code point
 	using ustring = basic_string<wint_t>;
+	using path = ustring::view;
 
 	using tstring =
 	#ifdef TCHAR
@@ -150,10 +153,6 @@ namespace fmt
 	#else
 		basic_string<char>;
 	#endif
-
-	using string = bstring;
-	using view = string::view;
-	using wide = wstring::view;
 
 	inline string::view empty("");
 	inline string::view assign("=");

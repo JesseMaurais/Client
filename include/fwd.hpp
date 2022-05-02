@@ -19,10 +19,10 @@
 
 namespace fwd
 {
-	// Class union 
+	// Class union
 
 	template <class... Types> struct compose : Types...
-	{ 
+	{
 		using Types::Types...;
 	};
 
@@ -35,7 +35,7 @@ namespace fwd
 
 	// Containers
 
-	template <class Type> using pair = std::pair<const Type, Type>;
+	template <class Type> using pair = std::pair<Type, Type>;
 	template <class Type> using init = std::initializer_list<Type>;
 	template <class Type> using span = std::span<Type>;
 

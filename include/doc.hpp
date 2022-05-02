@@ -16,11 +16,6 @@ namespace doc
 		virtual std::span<int> link(int n) const = 0;
 		virtual bool contains(int n) const = 0;
 		virtual void destroy(int n) = 0;
-
-		inline auto empty() const
-		{
-			return 0 == size();
-		}
 	};
 
 	interface* find(std::type_index);

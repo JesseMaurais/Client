@@ -1,15 +1,14 @@
 #ifndef type_hpp
 #define type_hpp "Character Types"
 
-#include "algo.hpp"
 #include "fmt.hpp"
-#include "it.hpp"
 #include "utf.hpp"
+#include "it.hpp"
 #include <locale>
 
 namespace fmt
 {
-	constexpr auto
+	const auto
 		space  = std::ctype_base::space,
 		print  = std::ctype_base::print,
 		cntrl  = std::ctype_base::cntrl,
@@ -33,31 +32,21 @@ namespace fmt
 		using span       = typename view::span;
 		using pair       = typename view::pair;
 		using vector     = typename view::vector;
-		using size_type  = typename view::size_type;
 		using ctype      = typename view::ctype;
 		using iterator   = typename view::iterator;
-		using pointer    = typename view::cptr;
-		using range      = fwd::range<iterator>;
-		using mark       = fwd::vector<mask>;
-
-		static type* get();
-		static type* set(type*);
-
-		static_assert(null == ~npos);
-
-		template <class C> static string from(const C &);
+		using pointer    = typename view::const_pointer;
+		using size_type  = typename view::size_type;
+		using size_pair  = fwd::pair<size_type>;
+		using marks       = fwd::vector<mask>;
 
 		bool check(Char c, mask x = space) const;
-		// Check whether code w is an x
+		// Check whether code $c is an $x
 
-		mark check(view u) const;
-		// Classify all characters in a view
+		marks check(view u) const;
+		// Classify all characters in view
 
 		iterator next(iterator it, iterator end, mask x = space) const;
 		// Next iterator after $it but before $end which is an $x
-
-		pointer next(pointer it, pointer end, mask x = space) const;
-		// Next character after $it but before $end which is an $x
 
 		iterator next(view u, mask x = space) const;
 		// Index of first character in view $u which is an $x
@@ -65,109 +54,11 @@ namespace fmt
 		iterator skip(iterator it, iterator end, mask x = space) const;
 		// Next iterator after $it but before $end which is not $x
 
-		pointer skip(pointer it, pointer end, mask x = space) const;
-		// Next character after $it but before $end which is not $x
-
 		iterator skip(view u, mask x = space) const;
 		// Index of first character in view $u which is not $x
 
 		vector split(view u, mask x = space) const;
 		// Split strings in $u delimited by $x
-
-		auto widen(fwd::basic_string_view<char> u) const
-		// Decode multibyte characters as wide type
-		{
-			struct iterator : utf
-			{
-				basic_type const* that;
-				char const* pos;
-				std::size_t size;
-
-				bool operator!=(iterator const& it) const
-				{
-					return it.pos != pos;
-				}
-
-				auto operator*() const
-				{
-					Char c[1];
-					(void) that->widen(pos, pos + size, c);
-					return *c;
-				}
-
-				auto operator++()
-				{
-					pos += size;
-					size = utf::len(pos);
-					return *this;
-				}
-
-				iterator(basic_type const* owner, char const* it)
-				: that(owner), pos(it)
-				{
-					if (nullptr != that)
-					{
-						size = utf::len(pos);
-					}
-				}
-			};
-
-			auto const begin = u.data();
-			auto const end = begin + u.size();
-			return fwd::range<iterator>
-			(
-				{ this, begin }, { nullptr, end }
-			);
-		}
-
-		auto widen(fwd::basic_string_view<wchar_t> u) const
-		{
-			return u;
-		}
-
-		auto narrow(fwd::basic_string_view<Char> u) const
-		// Encode wide characters as multibyte type
-		{
-			struct iterator
-			{
-				basic_type const* that;
-				Char const* pos;
-
-				bool operator!=(iterator const& it) const
-				{
-					return it.pos != pos;
-				}
-
-				auto operator*() const
-				{
-					std::string s(MB_CUR_MAX, 0);
-					(void) that->narrow(pos, pos + 1, 0, s.data());
-					return s;
-				}
-
-				auto operator++()
-				{
-					++ pos;
-					return *this;
-				}
-
-				iterator(basic_type const* owner, Char const* it)
-				: that(owner), pos(it)
-				{ }
-			};
-
-			auto const begin = u.data();
-			auto const end = begin + u.size();
-			return fwd::range<iterator>
-			(
-				{ this, begin }, { nullptr, end }
-			);
-		}
-
-		auto narrow(fmt::basic_string_view<char> u) const
-		{
-			return u;
-		}
 
 		iterator first(view u, mask x = space) const;
 		// First iterator in view $u that is not $x
@@ -196,117 +87,111 @@ namespace fmt
 		static bool terminated(view u);
 		// Check whether string is null terminated
 
-		static auto count(view u, view v)
+		static std::size_t count(view u, view v);
 		// Count occurances in $u of a substring $v
-		{
-			auto n = null;
-			auto const z = v.size();
-			for (auto i = u.find(v); i != npos; i = u.find(v, i))
-			{
-				i += z;
-				++ n;
-			}
-			return n;
-		}
 
-		template <class Iterator>
-		static auto join(Iterator begin, Iterator end, view u)
+		static string join(span t, view u);
 		// Join strings in $t with $u inserted between
-		{
-			string s;
-			for (auto it = begin; it != end; ++it)
-			{
-				if (begin != it)
-				{
-					s += u;
-				}
-				s += *it;
-			}
-			return s;
-		}
 
-		template <class Span> static auto split(Span t, view u)
-		// Split strings in $p delimited by $v
-		{
-			fwd::vector<Span> s;
-			auto p = t.data();
-			size_t i = 0, j = 0;
-			for (auto v : t)
-			{
-				if (u == v)
-				{
-					s.emplace_back(p + i, j - i);
-					j = ++i;
-				}
-				else ++j;
-			}
-			return s;
-		}
-
-		static auto split(view u, view v)
+		static vector split(view u, view v);
 		// Split strings in $u delimited by $v
-		{
-			vector t;
-			auto const uz = u.size(), vz = v.size();
-			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
-			{
-				auto const k = uz < j ? uz : j;
-				auto const w = u.substr(i, k - i);
-				if (i <= k) t.emplace_back(w);
-				i = k + vz;
-			}
-			return t;
-		}
 
-		static auto replace(view u, view v, view w)
+		static string replace(view u, view v, view w);
 		// Replace in u all occurrances of v with w
-		{
-			string s;
-			auto const uz = u.size(), vz = v.size();
-			for (auto i = null, j = u.find(v); i < uz; j = u.find(v, i))
-			{
-				auto const k = std::min(j, uz);
-				s = u.substr(i, k - i);
-				if (j < uz) s += w;
-				i = k + vz;
-			}
-			return s;
-		}
 
-		static auto embrace(view u, view v)
+		static size_pair embrace(view u, view v);
 		// Position in u with matching braces front and back in v
-		{
-			auto i = u.find_first_of(v.front()), j = i;
-			if (i < npos)
-			{
-				int n = 1;
-				do
-				{
-					j = u.find_first_of(v, j + 1);
-					if (npos == j)
-					{
-						break; // missing
-					}
-					else
-					if (v.back() == u[j])
-					{
-						--n; // close
-					}
-					else
-					if (v.front() == u[j])
-					{
-						++n; // open
-					}
-					else
-					{
-						break; // other
-					}
-				}
-				while (0 < n);
-			}
-			return std::pair { i, j };
-		}
+
+		static type* get();
+		/// Current character type
+
+		static type* set(type*);
+		/// Change current character type
+
+		template <class C> static string from(const C &);
+
+	private:
+
+		template <class It> It scan_is(It begin, It end, mask x) const;
+		template <class It> It scan_not(It begin, It end, mask x) const;
 	};
+
+	// Multibyte conversions
+
+	inline auto widen(view u)
+	{
+		struct iterator : utf
+		{
+			const std::ctype<wchar_t>* that = type<wchar_t>::get();
+			const char* pos;
+			std::size_t size;
+
+			bool operator!=(const iterator& it) const
+			{
+				return it.pos != pos;
+			}
+
+			auto operator*() const
+			{
+				wchar_t c[1];
+				(void) that->widen(pos, pos + size, c);
+				return *c;
+			}
+
+			auto operator++()
+			{
+				pos += size;
+				size = utf::len(pos);
+				return *this;
+			}
+
+			iterator(const char* it) : pos(it)
+			{
+				if (that)
+				{
+					size = utf::len(pos);
+				}
+			}
+		};
+
+		const auto begin = u.data();
+		const auto end = begin + u.size();
+		return fwd::range<iterator>(begin, end);
+	}
+
+	inline auto narrow(wide w)
+	{
+		struct iterator
+		{
+			const std::ctype<wchar_t>* that = type<wchar_t>::get();
+			const wchar_t* pos;
+
+			bool operator!=(iterator const& it) const
+			{
+				return it.pos != pos;
+			}
+
+			auto operator*() const
+			{
+				string s(MB_CUR_MAX, 0);
+				(void) that->narrow(pos, pos + 1, 0, s.data());
+				return s;
+			}
+
+			auto operator++()
+			{
+				++ pos;
+				return *this;
+			}
+
+			iterator(const wchar_t* it) : pos(it)
+			{ }
+		};
+
+		const auto begin = w.data();
+		const auto end = begin + w.size();
+		return fwd::range<iterator>(begin, end);
+	}
 
 	// Common characters
 
@@ -318,155 +203,108 @@ namespace fmt
 
 	// Multibyte shims
 
-	template <typename iterator>
-	inline auto next(iterator it, iterator end)
+	inline auto next(view::iterator it, view::iterator end)
 	{
-		return type<char>::get()->next(it, end);
+		return ctype::get()->next(it, end);
 	}
 
-	inline auto next(string::view u)
+	inline auto next(view u)
 	{
-		return type<char>::get()->next(u);
+		return ctype::get()->next(u);
 	}
 
-	template <typename iterator>
-	inline auto skip(iterator it, iterator end)
+	inline auto skip(view::iterator it, view::iterator end)
 	{
-		return type<char>::get()->skip(it, end);
+		return ctype::get()->skip(it, end);
 	}
 
-	inline auto skip(string::view u)
+	inline auto skip(view u)
 	{
-		return type<char>::get()->skip(u);
+		return ctype::get()->skip(u);
 	}
 
-	inline auto widen(string::view u)
+	inline auto first(view u)
 	{
-		return type<char>::get()->widen(u);
+		return ctype::get()->first(u);
 	}
 
-	inline auto widen(char c)
+	inline auto last(view u)
 	{
-		return widen(string(1, c));
+		return ctype::get()->last(u);
 	}
 
-	inline auto narrow(wstring::view u)
+	inline auto trim(view u)
 	{
-		return type<wchar_t>::get()->narrow(u);
+		return ctype::get()->trim(u);
 	}
 
-	inline auto narrow(wchar_t c)
+	inline auto all_of(view u, ctype::mask m)
 	{
-		return narrow(wstring(1, c));
+		return ctype::get()->all_of(u, m);
 	}
 
-	inline auto first(string::view u)
+	inline auto any_of(view u, ctype::mask m)
 	{
-		return type<char>::get()->first(u);
+		return ctype::get()->any_of(u, m);
 	}
 
-	inline auto last(string::view u)
+	inline auto to_upper(view u)
 	{
-		return type<char>::get()->last(u);
+		return ctype::get()->to_upper(u);
 	}
 
-	inline auto trim(string::view u)
+	inline auto to_lower(view u)
 	{
-		return type<char>::get()->trim(u);
+		return ctype::get()->to_lower(u);
 	}
 
-	inline auto all_of(string::view u, type<char>::mask m)
+	inline bool terminated(view u)
 	{
-		return type<char>::get()->all_of(u, m);
+		return ctype::get()->terminated(u);
 	}
 
-	inline auto any_of(string::view u, type<char>::mask m)
+	inline auto count(view u, view v)
 	{
-		return type<char>::get()->any_of(u, m);
+		return ctype::get()->count(u, v);
 	}
 
-	inline auto to_upper(string::view u)
+	inline auto join(view::span t, view u = empty)
 	{
-		return type<char>::get()->to_upper(u);
+		return ctype::get()->join(t, u);
 	}
 
-	inline auto to_lower(string::view u)
+	inline auto split(view u, ctype::mask m = space)
 	{
-		return type<char>::get()->to_lower(u);
+		return ctype::get()->split(u, m);
 	}
 
-	inline bool terminated(string::view u)
+	inline auto split(view u, view v)
 	{
-		return type<char>::get()->terminated(u);
+		return ctype::get()->split(u, v);
 	}
 
-	inline auto count(string::view u, string::view v)
+	inline auto replace(view u, view v, view w)
 	{
-		return type<char>::get()->count(u, v);
+		return ctype::get()->replace(u, v, w);
 	}
 
-	inline auto join(string::view::span t, string::view u = empty)
+	inline auto embrace(view u, view v)
 	{
-		return type<char>::get()->join(t.begin(), t.end(), u);
+		return ctype::get()->embrace(u, v);
 	}
 
-	inline auto join(string::span t, string::view u = empty)
+	inline auto to_pair(view u, view v = assign)
 	{
-		return type<char>::get()->join(t.begin(), t.end(), u);
+		return ctype::get()->to_pair(u, v);
 	}
 
-	inline auto join(string::view::init t, string::view u = empty)
+	inline auto to_pair(view::pair p, view u = assign)
 	{
-		return type<char>::get()->join(t.begin(), t.end(), u);
-	}
-
-	inline auto join(string::init t, string::view u = empty)
-	{
-		return type<char>::get()->join(t.begin(), t.end(), u);
-	}
-
-	inline auto split(string::view u)
-	{
-		return type<char>::get()->split(u);
-	}
-
-	inline auto split(string::view u, string::view v)
-	{
-		return type<char>::get()->split(u, v);
-	}
-
-	inline auto split(string::view::span p, string::view v)
-	{
-		return type<char>::get()->split(p, v);
-	}
-
-	inline auto split(string::span p, string::view v)
-	{
-		return type<char>::get()->split(p, v);
-	}
-
-	inline auto replace(string::view u, string::view v, string::view w)
-	{
-		return type<char>::get()->replace(u, v, w);
-	}
-
-	inline auto embrace(string::view u, string::view v)
-	{
-		return type<char>::get()->embrace(u, v);
-	}
-
-	inline auto to_pair(string::view u, string::view v = assign)
-	{
-		return type<char>::get()->to_pair(u, v);
-	}
-
-	inline auto to_pair(string::view::pair p, string::view u = assign)
-	{
-		string::view::vector x { p.first, p.second };
+		view::vector x { p.first, p.second };
 		return fmt::join(x, u);
 	}
 
-	inline bool same(string::view u, string::view v)
+	inline bool same(view u, view v)
 	{
 		return u.empty() ? v.empty() :
 			u.data() == v.data() and u.size() == v.size();
