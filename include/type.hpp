@@ -2,9 +2,9 @@
 #define type_hpp "Character Types"
 
 #include "fmt.hpp"
-#include "utf.hpp"
 #include "it.hpp"
 #include <locale>
+#include <cmath>
 
 namespace fmt
 {
@@ -43,19 +43,19 @@ namespace fmt
 		// Check whether code $c is an $x
 
 		marks check(view u) const;
-		// Classify all characters in view
+		// Classify all characters in $u
 
 		iterator next(iterator it, iterator end, mask x = space) const;
 		// Next iterator after $it but before $end which is an $x
 
 		iterator next(view u, mask x = space) const;
-		// Index of first character in view $u which is an $x
+		// First character in view $u which is an $x
 
 		iterator skip(iterator it, iterator end, mask x = space) const;
 		// Next iterator after $it but before $end which is not $x
 
 		iterator skip(view u, mask x = space) const;
-		// Index of first character in view $u which is not $x
+		// First character in view $u which is not $x
 
 		vector split(view u, mask x = space) const;
 		// Split strings in $u delimited by $x
@@ -82,49 +82,77 @@ namespace fmt
 		// Recode characters in lower case
 
 		static pair to_pair(view u, view v);
-		// Divide view $u by first occurance of $v
+		// Divide $u by first occurance of $v
 
 		static bool terminated(view u);
 		// Check whether string is null terminated
 
-		static std::size_t count(view u, view v);
+		static size_type count(view u, view v);
 		// Count occurances in $u of a substring $v
 
 		static string join(span t, view u);
-		// Join strings in $t with $u inserted between
+		// Join strings in $t with $u inserted
 
 		static vector split(view u, view v);
 		// Split strings in $u delimited by $v
 
 		static string replace(view u, view v, view w);
-		// Replace in u all occurrances of v with w
+		// Replace in $u all occurrances of $v with $w
 
-		static size_pair embrace(view u, view v);
-		// Position in u with matching braces front and back in v
+		static size_pair embrace(view u, view v = "()");
+		// Position in $u with front and back braces in $v
 
 		static type* get();
-		/// Current character type
+		// Current character type
 
 		static type* set(type*);
-		/// Change current character type
+		// Change current character type
 
 		template <class C> static string from(const C &);
+		// Indirection for calling `to_string` functions
 
 	private:
 
 		template <class It> It scan_is(It begin, It end, mask x) const;
+		// Generic implementation of the base type's virtual method, scan_is
+
 		template <class It> It scan_not(It begin, It end, mask x) const;
+		// Generic implementation of the base type's virtual method, scan_not
 	};
 
+	//
+	// Common characters
+	//
+
+	extern template struct type<char>;
+	using ctype = type<char>;
+
+	extern template struct type<wchar_t>;
+	using wtype = type<wchar_t>;
+
+	//
 	// Multibyte conversions
+	//
+
+	template <class Char> auto length(Char u)
+	// Size of UTF encoded data from first item
+	{
+		std::size_t n = 1;
+		if (std::signbit(u))
+		{
+			for (n = 0; std::signbit(u << n); ++n);
+		}
+		return n;
+	}
 
 	inline auto widen(view u)
+	// Decode UTF-8 string
 	{
-		struct iterator : utf
+		struct iterator
 		{
-			const std::ctype<wchar_t>* that = type<wchar_t>::get();
-			const char* pos;
+			const wtype* that;
 			std::size_t size;
+			const char* pos;
 
 			bool operator!=(const iterator& it) const
 			{
@@ -134,24 +162,20 @@ namespace fmt
 			auto operator*() const
 			{
 				wchar_t c[1];
+				const auto size = length(*pos);
 				(void) that->widen(pos, pos + size, c);
 				return *c;
 			}
 
 			auto operator++()
 			{
-				pos += size;
-				size = utf::len(pos);
+				pos += length(*pos);
 				return *this;
 			}
 
-			iterator(const char* it) : pos(it)
-			{
-				if (that)
-				{
-					size = utf::len(pos);
-				}
-			}
+			iterator(const char* it)
+			: that(wtype::get()), pos(it)
+			{ }
 		};
 
 		const auto begin = u.data();
@@ -160,10 +184,11 @@ namespace fmt
 	}
 
 	inline auto narrow(wide w)
+	// Encode UTF-8 string
 	{
 		struct iterator
 		{
-			const std::ctype<wchar_t>* that = type<wchar_t>::get();
+			const wtype* that;
 			const wchar_t* pos;
 
 			bool operator!=(iterator const& it) const
@@ -184,7 +209,8 @@ namespace fmt
 				return *this;
 			}
 
-			iterator(const wchar_t* it) : pos(it)
+			iterator(const wchar_t* it)
+			: that(wtype::get()), pos(it)
 			{ }
 		};
 
@@ -193,15 +219,9 @@ namespace fmt
 		return fwd::range<iterator>(begin, end);
 	}
 
-	// Common characters
-
-	extern template struct type<char>;
-	using ctype = type<char>;
-
-	extern template struct type<wchar_t>;
-	using wtype = type<wchar_t>;
-
+	//
 	// Multibyte shims
+	//
 
 	inline auto next(view::iterator it, view::iterator end)
 	{
