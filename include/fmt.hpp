@@ -14,12 +14,12 @@ namespace fmt
 		using ref  = typename std::add_lvalue_reference<Type>::type;
 		using cref = typename std::add_lvalue_reference<typename std::add_const<Type>::type>::type;
 
-		using next  = std::function<cref(cref)>;
-		using put   = std::function<ref(ref)>;
-		using read  = std::function<cref()>;
-		using write = std::function<ref()>;
-		using order = fwd::relation<cref, cref>;
-		using swap  = fwd::relation<ref, ref>;
+		using next  = fwd::function<cref>;
+		using put   = fwd::function<ref>;
+		using read  = fwd::accessor<cref>;
+		using write = fwd::accessor<ref>;
+		using order = fwd::relation<cref>;
+		using swap  = fwd::relation<ref>;
 		using check = fwd::predicate<cref>;
 		using copy  = fwd::predicate<ref>;
 	};
@@ -145,7 +145,7 @@ namespace fmt
 	using wide = wstring::view;
 	// at least a UTF-32 code point
 	using ustring = basic_string<wint_t>;
-	using path = ustring::view;
+	using code = ustring::view;
 
 	using tstring =
 	#ifdef TCHAR

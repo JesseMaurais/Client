@@ -32,8 +32,8 @@ namespace sys::linux::inotify
 
 		auto value() const
 		{
-			auto const ptr = buf.data() + off;
-			return fwd::cast_as<inotify_event>(ptr);
+			const auto ptr = buf.data() + off;
+			return fwd::cast_as<const inotify_event>(ptr);
 		}
 
 		void next()

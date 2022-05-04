@@ -6,7 +6,7 @@
 #include "tag.hpp"
 #include "type.hpp"
 #include "char.hpp"
-#include "sync.hpp"
+#include "meta.hpp"
 #include "err.hpp"
 #include <sstream>
 #include <iomanip>
@@ -14,6 +14,12 @@
 #include <system_error>
 #include <cstdlib>
 #include <cmath>
+
+namespace doc
+{
+	template struct instance<fmt::view>;
+	using strings = instance<fmt::view>;
+}
 
 namespace fmt
 {
@@ -194,7 +200,7 @@ namespace fmt
 		return not u.empty() and (u.back() == null or u[u.size()] == null);
 	}
 
-	template <class C> std::size_t type<C>::count(view u, view v)
+	template <class C> typename type<C>::size_type type<C>::count(view u, view v)
 	{
 		auto n = null;
 		const auto z = v.size();
@@ -289,200 +295,65 @@ namespace fmt
 
 namespace fmt::tag
 {
-	class strings : fwd::no_copy
+	static sys::exclusive<std::set<string>> cache;
+	static sys::exclusive<std::map<view, long>> lookup;
+
+	bool got(long n)
 	{
-		strings() = default;
-
-		sys::exclusive<fmt::string::set> cache;
-		sys::exclusive<fmt::view::vector> store;
-		sys::exclusive<std::map<fmt::view, fmt::name>> table;
-
-	public:
-
-		bool got(fmt::name key)
-		{
-			fmt::name const index = ~key;
-			fmt::name const size = store.reader()->size();
-			return -1 < index and index < size;
-		}
-
-		bool got(fmt::view key)
-		{
-			auto const reader = table.reader();
-			auto const it = reader->find(key);
-			auto const end = reader->end();
-			return end != it;
-		}
-
-		fmt::view get(fmt::name key)
-		{
-			auto const reader = store.reader();
-			auto const index = fmt::to_size(~key);
-			#ifdef assert
-			assert(got(key) and "String is not stored");
-			#endif
-			return reader->at(index);
-		}
-
-		fmt::view get(fmt::view key)
-		{
-			assert(not key.empty());
-			// Lookup
-			{
-				auto const reader = table.reader);
-				auto const it = reader->find(key);
-				auto const end = reader->end();
-				if (end != it)
-				{
-					return it->first;
-				}
-			}
-			// Create
-			return get(set(key));
-		}
-
-		fmt::name put(fmt::view key)
-		{
-			assert(not key.empty());
-			// Lookup
-			{
-				auto const reader = table.read();
-				auto const end = reader->end();
-				auto const it = reader->find(key);
-				if (end != it)
-				{
-					return ~it->second;
-				}
-			}
-			// Create
-			auto writer = store.writer();
-			auto const size = writer->size();
-			auto const id = fmt::to<fmt::name>(size);
-			{
-				auto [it, unique] = table.write()->emplace(key, id);
-				#ifdef assert
-				assert(unique);
-				#endif
-				writer->push_back(it->first);
-			}
-			return ~id;
-		}
-
-		fmt::name set(fmt::view key)
-		{
-			// Lookup
-			{
-				auto const reader = table.read();
-				auto const end = reader->end();
-				auto const it = reader->find(key);
-				if (end != it)
-				{
-					return ~it->second;
-				}
-			}
-			// Create
-			auto writer = store.writer();
-			auto const size = writer->size();
-			auto const id = fmt::to<fmt::name>(size);
-			{
-				// Cache the string here
-				auto const p = cache.writer()->emplace(key);
-				#ifdef assert
-				assert(p.second);
-				#endif
-
-				// Index a view to the string
-				auto const q = table.write()->emplace(*p.first, id);
-				#ifdef assert
-				assert(q.second);
-				#endif
-
-				writer->push_back(q.first->first);
-			}
-			return ~id;
-		}
-
-		fmt::string::in::ref get(fmt::string::in::ref in, char end)
-		{
-			// Block all threads at this point
-			auto wcache = cache.writer();
-			auto wstore = store.writer();
-			auto wtable = table.writer();
-
-			fmt::string line;
-			while (std::getline(in, line, end))
-			{
-				auto const p = wcache->emplace(move(line));
-				assert(p.second);
-
-				auto const size = wstore->size();
-				auto const id = fmt::to<fmt::name>(size);
-				wstore->emplace_back(*p.first);
-
-				auto const q = wtable->emplace(*p.first, id);
-				assert(q.second);
-			}
-			return in;
-		}
-
-		fmt::string::out::ref put(fmt::string::out::ref out, char end)
-		{
-			auto const reader = cache.reader();
-			auto const begin = reader->begin();
-			auto const end = reader->end();
-
-			for (auto it = begin; it != end; ++it)
-			{
-				out << *it << end;
-			}
-			return out;
-		}
-
-		static auto & registry()
-		{
-			static strings instance;
-			return instance;
-		}
-	};
-
-	bool got(name n)
-	{
-		return strings::registry().got(n);
+		return doc::strings::self().contains(n);
 	}
 
-	bool got(view n)
+	bool got(view u)
 	{
-		return strings::registry().got(n);
+		auto reader = lookup.reader();
+		return reader->find(u) != reader->end();
 	}
 
-	view get(name n)
+	view get(long n)
 	{
-		return strings::registry().get(n);
+		auto reader = doc::strings::self().reader(n);
+		return reader ? reader->substr() : view();
 	}
 
-	view get(view n)
+	view get(view u)
 	{
-		return strings::registry().get(n);
+		return get(put(u));
 	}
 
-	name put(view n)
+	long put(view u)
 	{
-		return strings::registry().put(n);
+		const auto n = doc::strings::self().emplace(std::move(u));
+		auto writer = lookup.writer();
+		writer->emplace(get(n), n);
+		return n;
 	}
 
-	name set(view n)
+	long set(view n)
 	{
-		return strings::registry().set(n);
+		auto writer = cache.writer();
+		return put(writer->emplace(n));
 	}
 
-	string::in::ref get(string::in::ref in, char end)
+	string::in::ref get(string::in::ref in, char eol)
 	{
-		return strings::registry().get(in, end);
+		fmt::string line;
+		while (std::getline(in, line, eol))
+		{
+			set(line);
+		}
+		return in;
 	}
 
-	string::out::ref put(string::out::ref out, char end)
+	string::out::ref put(string::out::ref out, char eol)
 	{
-		return strings::registry().put(out, end);
+		auto reader = cache.reader();
+		auto begin = reader->begin();
+		auto end = reader->end();
+		for (auto it = begin; it != end; ++it)
+		{
+			out << *it << eol;
+		}
+		return out;
 	}
 }
 
@@ -565,7 +436,7 @@ test_unit(char)
 {
 	// Set graphics rendition
 	{
-		fmt::string::stream ss;
+		std::stringstream ss;
 		ss << fmt::io::fg_green << "GREEN" << fmt::io::fg_off;
 		assert(ss.str() == "\x1b[32mGREEN\x1b[39m");
 	}

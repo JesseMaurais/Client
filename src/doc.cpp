@@ -11,6 +11,7 @@ namespace doc
 	template struct instance<fwd::function>;
 
 	sys::exclusive<std::map<std::type_index, interface*>> registry;
+
 	interface* find(std::type_index index)
 	{
 		auto data = registry.reader();

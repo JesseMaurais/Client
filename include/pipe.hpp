@@ -13,7 +13,7 @@ namespace sys::net
 
 namespace env::file
 {
-	fwd::extern_ptr<void> make_map(int fd, size_t = 0, off_t = 0, mode = rw, size_t* = nullptr);
+	fwd::shared_ptr<void> make_map(int fd, size_t = 0, off_t = 0, mode = rw, size_t* = nullptr);
 
 	struct descriptor : fwd::no_copy, stream
 	{

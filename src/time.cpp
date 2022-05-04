@@ -15,18 +15,18 @@
 
 namespace doc
 {
-	std::string_view name<&std::tm::tm_year> = "year";
-	std::string_view name<&std::tm::tm_mon> = "month";
-	std::string_view name<&std::tm::tm_mday> = "day-of-month";
-	std::string_view name<&std::tm::tm_wday> = "day-of-week";
-	std::string_view name<&std::tm::tm_yday> = "day-of-year";
-	std::string_view name<&std::tm::tm_hour> = "hour";
-	std::string_view name<&std::tm::tm_min> = "minute";
-	std::string_view name<&std::tm::tm_sec> = "seconds";
-	std::string_view name<&std::tm::tm_isdst> = "daylight-saving-time";
+	template <> std::string_view name<&std::tm::tm_year> = "year";
+	template <> std::string_view name<&std::tm::tm_mon> = "month";
+	template <> std::string_view name<&std::tm::tm_mday> = "day-of-month";
+	template <> std::string_view name<&std::tm::tm_wday> = "day-of-week";
+	template <> std::string_view name<&std::tm::tm_yday> = "day-of-year";
+	template <> std::string_view name<&std::tm::tm_hour> = "hour";
+	template <> std::string_view name<&std::tm::tm_min> = "minute";
+	template <> std::string_view name<&std::tm::tm_sec> = "seconds";
+	template <> std::string_view name<&std::tm::tm_isdst> = "daylight-saving-time";
 
-	std::string_view name<&std::timespec::tv_sec> = "seconds";
-	std::string_view name<&std::timespec::tv_nsec> = "nanoseconds";
+	template <> std::string_view name<&std::timespec::tv_sec> = "seconds";
+	template <> std::string_view name<&std::timespec::tv_nsec> = "nanoseconds";
 }
 
 namespace env

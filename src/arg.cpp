@@ -27,7 +27,8 @@ namespace
 
 	auto make_ini()
 	{
-		return fmt::join({env::opt::program(), "ini"}, ".");
+		fmt::view::vector path { env::opt::program(), "ini" };
+		return fmt::join(path, ".");
 	}
 
 	auto find_next(fmt::string::view argu, env::opt::command::span cmd)

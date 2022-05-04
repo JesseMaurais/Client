@@ -24,8 +24,8 @@ namespace fmt
 
 	template <class Char> struct type : std::ctype<Char>
 	{
-		using string     = basic_string<Char>;
 		using basic_type = std::ctype<Char>;
+		using string     = basic_string<Char>;
 		using mask       = typename basic_type::mask;
 		using view       = typename string::view;
 		using init       = typename view::init;
@@ -33,6 +33,8 @@ namespace fmt
 		using pair       = typename view::pair;
 		using vector     = typename view::vector;
 		using ctype      = typename view::ctype;
+		using input      = typename view::in::ref;
+		using output     = typename view::out::ref;
 		using iterator   = typename view::iterator;
 		using pointer    = typename view::const_pointer;
 		using size_type  = typename view::size_type;

@@ -3,11 +3,8 @@
 
 #include <functional>
 #include <utility>
-#include <cstddef>
 
-#ifndef lambda
-#define lambda(...) ::fwd::lazy([=]{ return __VA_ARGS__; })
-#endif
+#define LAZY(...) ::fwd::lazy([=]{ return __VA_ARGS__; })
 
 namespace fwd
 {
@@ -31,20 +28,31 @@ namespace fwd
 		virtual T operator=(T) = 0;
 	};
 
-	using function = std::function<void()>;
+	template <class... T> using signal = std::function<void(T...)>;
+	template <class T> using nullary = std::function<T()>;
+	template <class T> using unary = std::function<T(T)>;
 
-	template <class T> struct lazy : std::function<T()>
+	template <class T> struct lazy : nullary<T>, constant<T>
 	{
-		using function = std::function<T()>;
-		using function::function;
+		using nullary = nullary<T>;
+		using nullary::nullary;
 
-		operator T() const
+		operator T() const override
 		{
-			return function::operator()();
+			return nullary::operator()();
 		}
 	};
 
-	using scope = lazy<void>;
+	struct scope : nullary<void>
+	{
+		using nullary = nullary<void>;
+		using nullary::nullary;
+
+		~scope()
+		{
+			nullary::operator()();
+		}
+	};
 
 	template <class... T> struct formula : std::function<bool(T...)>
 	{
@@ -86,17 +94,17 @@ namespace fwd
 
 	template <class T> using predicate = formula<T>;
 
-	template <class T, class S> using relation = formula<T, S>;
+	template <class T, class S=T> using relation = formula<T, S>;
 
 	using sentence = predicate<void>;
 
 	template <bool P, class... Q> struct proposition : formula<Q...>
 	{
-		using base = formula<Q...>;
+		using formula = formula<Q...>;
+		using formula::formula;
 		using closure = std::function<void(Q...)>;
-		using base::base;
 
-		proposition(closure go) : base(enclose(go)) { };
+		proposition(closure go) : formula(enclose(go)) { };
 
 	private:
 
