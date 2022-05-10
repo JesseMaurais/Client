@@ -8,7 +8,7 @@
 
 namespace doc
 {
-	template struct instance<fwd::function>;
+	template struct instance<fwd::event>;
 
 	sys::exclusive<std::map<std::type_index, interface*>> registry;
 

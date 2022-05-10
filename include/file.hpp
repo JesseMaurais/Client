@@ -11,7 +11,7 @@ namespace env::file
 	using size_t = std::size_t;
 	using off_t = std::ptrdiff_t;
 	using string = fmt::string;
-	using view = string::view;
+	using view = fmt::view;
 
 	using basic_ptr = fwd::as_ptr<FILE>;
 	using unique_ptr = fwd::unique_ptr<FILE>;

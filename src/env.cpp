@@ -5,10 +5,9 @@
 #include "usr.hpp"
 #include "opt.hpp"
 #include "arg.hpp"
-#include "ini.hpp"
 #include "cmd.hpp"
+#include "ini.hpp"
 #include "dir.hpp"
-#include "ps.hpp"
 #include "fmt.hpp"
 #include "type.hpp"
 #include "tag.hpp"
@@ -32,7 +31,7 @@ namespace env
 			return env::got(s);
 		}
 		auto const c = u.data();
-		auto const unlock = lock.read();
+		auto const unlock = lock.reader();
 		auto const ptr = std::getenv(c);
 		return nullptr == ptr;
 	}
@@ -45,7 +44,7 @@ namespace env
 			return env::get(s);
 		}
 		auto const c = u.data();
-		auto const unlock = lock.read();
+		auto const unlock = lock.reader();
 		auto const ptr = std::getenv(c);
 		return nullptr == ptr ? "" : ptr;
 	}
@@ -56,7 +55,7 @@ namespace env
 		{
 			return env::put(u);
 		}
-		auto const unlock = lock.write();
+		auto const unlock = lock.writer();
 		auto const d = u.data();
 		auto c = const_cast<char*>(d);
 		return 0 != sys::putenv(c);
@@ -65,7 +64,7 @@ namespace env
 	bool put(fmt::string::view u)
 	{
 		static fmt::string::set buf;
-		auto const unlock = lock.write();
+		auto const unlock = lock.writer();
 		auto it = buf.emplace(u).first;
 		auto d = it->data();
 		auto c = const_cast<char*>(d);
@@ -74,12 +73,14 @@ namespace env
 
 	bool put(fmt::string::view u, fmt::string::view v)
 	{
-		return env::put(fmt::join({u, v}, "="));
+		fmt::string::view::vector w { u, v };
+		return env::put(fmt::join(w, "="));
 	}
 
 	fmt::string::view echo(fmt::string::view u)
 	{
-		auto const p = env::shell().echo(u);
+		static env::shell sh;
+		auto const p = sh.echo(u);
 		return p.empty() ? fmt::empty : p[0];
 	}
 }
@@ -90,7 +91,7 @@ namespace env::var
 	{
 		static thread_local fmt::string::view::vector local;
 		local.clear();
-		for (char** c = ::sys::environment(); *c; ++c) local.emplace_back(*c);
+		for (char** c = ::sys::environ(); *c; ++c) local.emplace_back(*c);
 		return local;
 	}
 

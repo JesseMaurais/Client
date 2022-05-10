@@ -11,12 +11,6 @@
 
 namespace env
 {
-	struct shell& shell()
-	{
-		static struct shell sh;
-		return sh;
-	}
-
 	shell::page shell::get(in feed, char end, int count)
 	{
 		// Result in span at cache end
@@ -48,18 +42,32 @@ namespace env
 		return result;
 	}
 
-	shell::page shell::run(iterator begin, iterator end)
+	shell::page shell::run(span args)
 	{
-		auto const exe = fmt::join(begin, end, " ");
-		fmt::istream in = env::file::open(exe, env::file::ex);
-		auto const lines = get(in);
-		in.file.release();
+		string line;
+		for (view arg : args)
+		{
+			const bool spaces = fmt::any_of(arg);
+			constexpr auto quote = "\"";
+			if (spaces) line += quote;
+			line += arg;
+			if (spaces) line += quote;
+		}
+		fmt::istream in = env::file::open(line, env::file::ex);
+		const auto lines = get(in);
+		in.file.reset();
 		return lines;
+	}
+
+	shell::page shell::run(init args)
+	{
+		vector vec { args };
+		return run(vec);
 	}
 
 	shell::page shell::echo(view line)
 	{
-		return open({ "echo", line });
+		return run({ "echo", line });
 	}
 
 	shell::page shell::list(view name)
@@ -136,7 +144,7 @@ namespace env
 						continue;
 					}
 
-					return open({ program, path });
+					return run({ program, path });
 				}
 			}
 			return { 0, 0, &cache };
@@ -146,24 +154,26 @@ namespace env
 
 	shell::page shell::imports(view path)
 	{
-		fmt::ipstream sub
+		return run
+		(
 		#ifdef _WIN32
-			{ "dumpbin", "-nologo", "-imports", path };
+			{ "dumpbin", "-nologo", "-imports", path }
 		#else
-			{ "objdump", "-t", path };
+			{ "objdump", "-t", path }
 		#endif
-		return get(sub);
+		);
 	}
 
 	shell::page shell::exports(view path)
 	{
-		fmt::ipstream sub
+		return run
+		(
 		#ifdef _WIN32
-			{ "dumpbin", "-nologo", "-exports", path };
+			{ "dumpbin", "-nologo", "-exports", path }
 		#else
-			{ "objdump", "-T", path };
+			{ "objdump", "-T", path }
 		#endif
-		return get(sub);
+		);
 	}
 
 	bool shell::desktop(fmt::string::view name)
@@ -191,7 +201,7 @@ namespace env
 	{
 		static auto const group = fmt::tag::put("Runtime Options");
 		static auto const key = fmt::tag::put("DIALOG");
-		static auto const entry = fmt::tag::pair(group, key);
+		static auto const entry = std::make_pair(group, key);
 		return env::opt::get(entry, value);
 	}
 
@@ -202,7 +212,7 @@ namespace env
 		static auto const session = envpick();
 		for (auto test : session)
 		{
-			if (auto path = where(test); not path.empty())
+			if (auto path = which(test); not path.empty())
 			{
 				program = path;
 				break;
@@ -219,9 +229,10 @@ namespace env
 		return run(command);
 	}
 
-	static auto param(fmt::string::view key, fmt::string::view value)
+	static auto param(fmt::view key, fmt::view value)
 	{
-		return fmt::join({key, value}, "=");
+		fmt::view::vector pair { key, value };
+		return fmt::join(pair, "=");
 	}
 
 	shell::page shell::select(view path, mode mask)
@@ -245,7 +256,7 @@ namespace env
 			command.emplace_back("--save");
 		}
 
-		return with(command);
+		return dialog(command);
 	}
 
 	static auto message_type(shell::msg type)

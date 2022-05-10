@@ -19,7 +19,7 @@ namespace fwd
 		using index = std::make_index_sequence<std::tuple_size<tuple>::value>;
 
 		tuple table;
-		
+
 		template <size_t... Count>
 		auto data(std::index_sequence<Count...>) const
 		{
@@ -135,15 +135,15 @@ namespace fwd
 
 	template
 	<
-		class Node, template <class> class Alloc = allocator
+		class Node, template <class> class Alloc = std::allocator
 	>
 	using graph = std::vector<pair<Node>, Alloc<Node>>;
 
 	template
 	<
-		class Node, template <class> class Alloc = allocator, template <class> class Order = order
+		class Node, template <class> class Alloc = std::allocator, template <class> class Sort = std::less
 	>
-	using group = std::map<pair<Node>, Node, Order<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
+	using group = std::map<pair<Node>, Node, Sort<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
 
 	//
 	// Algorithms
@@ -173,7 +173,7 @@ namespace fwd
 	<
  		class Type
 		,
-		template <class> class Alloc = allocator
+		template <class> class Alloc = std::allocator
 		,
 		template <class, template<class> class> class Vector = vector
 	>
@@ -188,7 +188,7 @@ namespace fwd
 
 	template
 	<
-		class Type, class Iterator, template<class> class Identity = identity
+		class Type, class Iterator, template<class> class Identity = std::equal_to
 	>
 	auto split(span<Type> s, Type n, Iterator out)
 	// Partition a span by value
@@ -200,7 +200,7 @@ namespace fwd
 
 	template
 	<
-		class Type, template <class> class Alloc = allocator
+		class Type, template <class> class Alloc = std::allocator
 	>
 	auto split(span<Type> s, Type n = { })
 	// Partition a span by value
@@ -231,7 +231,7 @@ namespace fwd
 
 	template
 	<
-		class Type, template <class> class Alloc = allocator
+		class Type, template <class> class Alloc = std::allocator
 	>
 	auto join(span<span<Type>> s, Type n = { })
 	// Join spans with separator
@@ -301,7 +301,7 @@ namespace fwd
 	<
 		class Type
 		,
-		template <class> class Alloc = allocator
+		template <class> class Alloc = std::allocator
 		,
 		class View = span<Type>
 		,
@@ -350,9 +350,9 @@ namespace fwd
 	<
 		class Char
 		,
-		template <class> class Traits = character
+		template <class> class Traits = std::char_traits
 		,
-		template <class> class Alloc = allocator
+		template <class> class Alloc = std::allocator
 		,
 		class View = basic_string_view<Char, Traits>
 		,

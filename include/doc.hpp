@@ -42,10 +42,10 @@ namespace doc
 		instance();
 	};
 
-	extern template struct instance<fwd::function>;
-	using message = instance<fwd::function>;
+	extern template struct instance<fwd::event>;
+	using message = instance<fwd::event>;
 
-	inline auto signal(fwd::function f)
+	inline auto signal(fwd::event f)
 	{
 		return message::self().emplace(std::move(f));
 	}

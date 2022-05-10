@@ -13,7 +13,7 @@ namespace fwd
 	template <class Type> using unique_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> using shared_ptr = std::shared_ptr<Type>;
 	template <class Type> constexpr as_ptr<Type> null = nullptr;
-	
+
 	constexpr auto voidptr = null<void>;
 
 	template <class Type, class Pointer> inline auto cast_as(Pointer ptr)
@@ -22,6 +22,11 @@ namespace fwd
 		assert(nullptr != ptr);
 		#endif
 		return reinterpret_cast<as_ptr<Type>>(ptr);
+	}
+
+	template <class Type> auto non_const(const Type* obj)
+	{
+		return const_cast<Type*>(obj);
 	}
 
 	template <class Type, int Byte = 0> struct zero : Type // clear trivial class
@@ -140,22 +145,22 @@ namespace fwd
 	struct closed : Base, no_copy, no_make
 	{
 		using Base::Base;
-		
+
 		~closed()
 		{
 			this->second(this->first);
 		}
-		
+
 		auto & get() const
 		{
 			return this->first;
 		}
-		
+
 		auto & get()
 		{
 			return this->first;
 		}
-		
+
 		auto & get_deleter() const
 		{
 			return this->second;

@@ -17,6 +17,8 @@
 #include "uni/notify.hpp"
 #endif
 #endif
+#include <regex>
+#include <stack>
 
 namespace fmt::dir
 {
@@ -27,7 +29,8 @@ namespace fmt::dir
 
 	string join(string::view::init p)
 	{
-		return fmt::join(p, sys::sep::dir);
+		string::view::vector v(p);
+		return fmt::join(v, sys::sep::dir);
 	}
 
 	string::view::vector split(string::view u)
@@ -45,7 +48,8 @@ namespace fmt::path
 
 	string join(string::view::init p)
 	{
-		return fmt::join(p, sys::sep::path);
+		string::view::vector v(p);
+		return fmt::join(v, sys::sep::path);
 	}
 
 	string::view::vector split(string::view u)
@@ -124,7 +128,7 @@ namespace env::file
 	{
 		auto const s = fmt::to_string(u);
 		auto const x = std::regex(s);
-		return [x](fmt::string::view u)
+		return [x](fmt::view u)
 		{
 			std::cmatch cm;
 			auto const s = fmt::to_string(u);
@@ -209,8 +213,8 @@ namespace env::file
 			{
 				auto const path = fmt::dir::join({*it, u});
 				auto const c = path.data();
-				struct sys::stat st(c);
-				if (file::fail(st))
+				struct sys::stats st(c);
+				if (fail(st.ok))
 				{
 					sys::err(here, "stat", c);
 				}
@@ -268,9 +272,9 @@ test_unit(dir)
 
 	auto const temp = fmt::dir::join({env::var::temp(), "my", "test", "dir"});
 	if (std::empty(temp)) return;
-	auto const stem = env::file::make_dir(temp);
+	auto const stem = env::file::mkdir(temp);
 //	assert(not empty(stem.first));
 //	assert(not empty(stem.second));
-	assert(not env::file::remove_dir(stem));
+	assert(not env::file::rmdir(stem));
 }
 #endif

@@ -202,62 +202,45 @@ using stat_t =
 	struct stat;
 #endif
 
+#include <array>
+
 namespace sys
 {
-	char** environment();
+	char** environ();
 	pid_t exec(int fd[3], size_t argc, char const **argv);
 	bool kill(pid_t);
 	int wait(pid_t);
 
 	constexpr int invalid = -1;
+
 	inline bool fail(int value)
 	{
 		return invalid == value;
 	}
 
-	struct stat : ::stat_t
+	struct stats : ::stat_t
 	{
-		stat(int fd)
-		{
-			ok = sys::fstat(fd, this);
-		}
-
-		stat(char const* path)
-		{
-			ok = sys::stat(path, this);
-		}
-
-		operator bool() const
-		{
-			return fail(ok);
-		}
-
-	private:
+		stats(int), stats(const char* path);
 
 		int ok;
 	};
 
 	struct mode
 	{
-		mode(mode_t mask = 0777)
-		{
-			um = sys::umask(mask);
-		}
-
-		~mode()
-		{
-			(void) sys::umask(um);
-		}
-
-		operator mode_t() const
-		{
-			return um;
-		}
-
-	private:
+		mode(mode_t mask = 0777), ~mode();
 
 		mode_t um;
 	};
+
+	struct pipe : std::array<int, 2>
+	{
+		pipe(), ~pipe();
+	};
+
+	inline bool fail(const struct pipe &fd)
+	{
+		return fail(fd[0]) or fail(fd[1]);
+	}
 }
 
 #endif // file

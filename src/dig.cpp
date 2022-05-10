@@ -3,6 +3,7 @@
 
 #include "dig.hpp"
 #include <iomanip>
+#include <charconv>
 
 namespace
 {
@@ -74,7 +75,8 @@ namespace
 		{
 			auto begin = s.data();
 			auto end = begin + s.size();
-			auto code = std::to_chars(begin, end, value, 0, precision);
+			constexpr auto format = std::chars_format::general;
+			auto code = std::to_chars(begin, end, value, format, precision);
 			if (std::errc::value_too_large == code.ec)
 			{
 				s.resize(2*s.size(), '\0');
@@ -85,10 +87,11 @@ namespace
 		while (0);
 		s.shrink_to_fit();
 		return s;
-		*/
+		/*/
 		std::stringstream ss;
 		ss << std::fixed << std::setprecision(precision) << value;
 		return ss.str();
+		//*/
 	}
 }
 

@@ -1,6 +1,8 @@
-#ifndef time_hpp
-#define time_hpp "POSIX Time"
+#ifndef uni_time_hpp
+#define uni_time_hpp "POSIX Time"
 
+#include "sys.hpp"
+#include "err.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
 #include <time.h>

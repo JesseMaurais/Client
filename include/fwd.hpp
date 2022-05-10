@@ -14,6 +14,7 @@
 #include <vector>
 #include <tuple>
 #include <string>
+#include <sstream>
 #include <string_view>
 #include <locale>
 
@@ -26,18 +27,11 @@ namespace fwd
 		using Types::Types...;
 	};
 
-	// Overload traits
-
-	template <class Type> using allocator = std::allocator<Type>;
-	template <class Type> using order = std::less<Type>;
-	template <class Type> using identity = std::equal_to<Type>;
-	template <class Char> using character = std::char_traits<Char>;
-
 	// Containers
 
-	template <class Type> using pair = std::pair<Type, Type>;
+	template <class T, class S=T> using pair = std::pair<T, S>;
 	template <class Type> using init = std::initializer_list<Type>;
-	template <class Type> using span = std::span<Type>;
+	template <class Type> using span = std::span<Type, ~std::size_t{}>;
 
 	template
 	<
@@ -47,7 +41,7 @@ namespace fwd
 
 	template
 	<
-		class Type, template <class> class Alloc = allocator
+		class Type, template <class> class Alloc = std::allocator
 	>
 	using vector = std::vector<Type, Alloc<Type>>;
 
@@ -55,21 +49,23 @@ namespace fwd
 	<
 		class Type
 		,
-		template <class> class Order = order
+		template <class> class Order = std::less
 		,
-		template <class> class Alloc = allocator
+		template <class> class Alloc = std::allocator
 	>
 	using set = std::set<Type, Order<Type>, Alloc<Type>>;
 
 	template
 	<
-		class Type
+		class Key
 		,
-		template <class> class Order = order
+		class Value
 		,
-		template <class> class Alloc = allocator
+		template <class> class Order = std::less
+		,
+		template <class> class Alloc = std::allocator
 	>
-	using map = std::map<Type, Type, Order<Type>, Alloc<pair<Type>>>;
+	using map = std::map<Key, Value, Order<Key>, Alloc<std::pair<Key, Value>>>;
 
 	//
 	// Strings
@@ -77,7 +73,7 @@ namespace fwd
 
 	template
 	<
-		class Char, template <class> class Traits = character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	using basic_string_view = std::basic_string_view<Char, Traits<Char>>;
 
@@ -85,9 +81,9 @@ namespace fwd
 	<
 		class Char
 		,
-		template <class> class Traits = character
+		template <class> class Traits = std::char_traits
 		,
-		template <class> class Alloc = allocator
+		template <class> class Alloc = std::allocator
 	>
 	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
 
@@ -97,37 +93,37 @@ namespace fwd
 
 	template
 	<
-		class Char, template <class> class Traits = character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	using basic_ios = std::basic_ios<Char, Traits<Char>>;
 
 	template
 	<
-		class Char, template <class> class Traits = character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	using basic_istream = std::basic_istream<Char, Traits<Char>>;
 
 	template
 	<
-		class Char, template <class> class Traits = character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	using basic_iostream = std::basic_iostream<Char, Traits<Char>>;
 
 	template
 	<
-		class Char, template <class> class Traits = character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	using basic_ostream = std::basic_ostream<Char, Traits<Char>>;
 
 	template
 	<
-		class Char, template <class> class Traits = character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	using basic_buf = std::basic_streambuf<Char, Traits<Char>>;
 
 	template
 	<
-		class Char, template <class> class Traits = character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	using basic_file = std::basic_filebuf<Char, Traits<Char>>;
 
@@ -135,9 +131,9 @@ namespace fwd
 	<
 		class Char
 		,
-		template <class> class Traits = character
+		template <class> class Traits = std::char_traits
 		,
-		template <class> class Alloc = allocator
+		template <class> class Alloc = std::allocator
 	>
 	using basic_stringstream = std::basic_stringstream<Char, Traits<Char>, Alloc<Char>>;
 }

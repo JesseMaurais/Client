@@ -8,6 +8,7 @@
 #include "err.hpp"
 #include "tag.hpp"
 #include "type.hpp"
+#include <fstream>
 
 namespace
 {
@@ -244,7 +245,7 @@ namespace env::opt
 				{
 					// Set as option
 					args.emplace_back(argu);
-					auto const value = doc::ini::join(args);
+					auto const value = fmt::join(args, ";");
 					auto const key = fmt::tag::set(current->name);
 					(void) set(key, value);
 				}

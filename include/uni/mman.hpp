@@ -4,16 +4,15 @@
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
-#include "pipe.hpp"
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
 namespace sys::uni::shm
 {
-	template <class Type> auto make_ptr(Type* ptr, size_t sz)
+	template <class Type> auto make_unique(Type* ptr, size_t sz)
 	{
-		return fwd::make_ptr(ptr, [sz](auto ptr)
+		return fwd::make_unique(ptr, [sz](auto ptr)
 		{
 			if (MAP_FAILED != ptr)
 			{
@@ -27,12 +26,12 @@ namespace sys::uni::shm
 
 	template <class Type = void> auto map(size_t sz, int prot, int flags, int fd, off_t off = 0, Type* ptr = nullptr)
 	{
-		ptr = mmap(ptr, sz, prot, flags, fd, off);
+		ptr = fwd::cast_as<Type>(mmap(fwd::cast_as<void>(ptr), sz, prot, flags, fd, off));
 		if (MAP_FAILED == ptr)
 		{
 			sys::err(here, "mmap", sz, prot, flags, fd, off);
 		}
-		return make_ptr(ptr, sz);
+		return make_unique(ptr, sz);
 	}
 
 	inline auto open(const char* name, int flag, mode_t mode)
@@ -42,7 +41,7 @@ namespace sys::uni::shm
 		{
 			sys::err(here, "shm_open");
 		}
-		return env::file::descriptor(fd);
+		return fd;
 	}
 }
 

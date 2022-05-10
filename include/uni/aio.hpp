@@ -1,5 +1,5 @@
 #ifndef uni_aio_hpp
-#define uni_aio_hpp "POSIX Asynchonous Input/Output"
+#define uni_aio_hpp "POSIX Asynchronous Input/Output"
 
 #include "signal.hpp"
 #include <functional>
@@ -9,7 +9,7 @@ namespace sys::uni::aio
 {
 	struct event : fwd::no_copy, fwd::zero<aiocb>
 	{
-		event(fwd::function f, pthread_attr_t* attr = nullptr)
+		event(fwd::event f, pthread_attr_t* attr = nullptr)
 		{
 			aio_sigevent.sigev_value.sival_int = doc::signal(f);
 			aio_sigevent.sigev_notify = SIGEV_THREAD;

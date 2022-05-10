@@ -172,7 +172,7 @@ namespace sys::uni::sig
 
 	struct event : fwd::no_copy, sigevent
 	{
-		event(fwd::function f, pthread_attr_t* attr = nullptr)
+		event(fwd::event f, pthread_attr_t* attr = nullptr)
 		{
 			sigev_value.sival_int = doc::signal(f);
 			sigev_notify = SIGEV_THREAD;
@@ -195,7 +195,7 @@ namespace sys::uni::time
 	{
 		timer_t id;
 
-		event(fwd::function f, pthread_attr_t* attr = nullptr, clockid_t clock = CLOCK_REALTIME)
+		event(fwd::event f, pthread_attr_t* attr = nullptr, clockid_t clock = CLOCK_REALTIME)
 		: sig::event(f, attr)
 		{
 			if (fail(timer_create(clock, this, &id)))
@@ -218,7 +218,7 @@ namespace sys::uni::msg
 {
 	struct event : sig::event
 	{
-		event(fwd::function f, mqd_t mqd, pthread_attr_t* attr = nullptr)
+		event(fwd::event f, mqd_t mqd, pthread_attr_t* attr = nullptr)
 		: sig::event(f, attr)
 		{
 			if (fail(mq_notify(mqd, this)))

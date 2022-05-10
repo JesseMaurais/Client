@@ -11,6 +11,7 @@
 #include "win/sync.hpp"
 #else // UNIX
 #include "uni/signal.hpp"
+#include "uni/time.hpp"
 #endif
 
 namespace doc
@@ -76,7 +77,11 @@ namespace env
 		}
 		#else // STDC
 		{
-			if (std::gmtime_s(&t, this))
+			#ifdef __STDC_LIB_EXT1__
+			if (gmtime_s(&t, this))
+			#else
+			if (gmtime_r(&t, this))
+			#endif
 			{
 				sys::err(here, "gmtime_s");
 			}
@@ -85,7 +90,7 @@ namespace env
 	}
 
 	localtime::localtime(std::time_t t)
-	{f
+	{
 		#ifdef _MSC_VER
 		{
 			std::errno = std::localtime_s(this, &t);
@@ -96,7 +101,11 @@ namespace env
 		}
 		#else // STDC
 		{
-			if (std::localtime_s(&t, this))
+			#ifdef __STDC_LIB_EXT1__
+			if (localtime_s(&t, this))
+			#else
+			if (localtime_r(&t, this))
+			#endif
 			{
 				sys::err(here, "localtime_s");
 			}
@@ -125,7 +134,7 @@ namespace env::clock
 			#ifdef assert
 			assert(0 == div.rem);
 			#endif
-			if (sys::fail(usleep(usec))
+			if (sys::fail(usleep(usec)))
 			{
 				sys::err(here, "usleep");
 			}
@@ -133,7 +142,7 @@ namespace env::clock
 		#endif
 	}
 
-	fwd::scope event(fmt::timer it, fwd::function f)
+	fwd::scope event(fmt::timer it, fwd::event f)
 	{
 		#ifdef _WIN32
 		{
@@ -150,7 +159,7 @@ namespace env::clock
 		{
 			struct intern : sys::uni::time::event
 			{
-				intern(fmt::timer it, fwd::function f) : event(f)
+				intern(fmt::timer it, fwd::event f) : event(f)
 				{
 					sys::uni::timer(it.it_interval, it.it_value).set(id);
 				}

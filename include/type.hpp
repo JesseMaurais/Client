@@ -3,8 +3,8 @@
 
 #include "fmt.hpp"
 #include "it.hpp"
-#include <locale>
 #include <cmath>
+#include <locale>
 
 namespace fmt
 {
@@ -39,7 +39,7 @@ namespace fmt
 		using pointer    = typename view::const_pointer;
 		using size_type  = typename view::size_type;
 		using size_pair  = fwd::pair<size_type>;
-		using marks       = fwd::vector<mask>;
+		using marks      = fwd::vector<mask>;
 
 		bool check(Char c, mask x = space) const;
 		// Check whether code $c is an $x
@@ -84,13 +84,13 @@ namespace fmt
 		// Recode characters in lower case
 
 		static pair to_pair(view u, view v);
-		// Divide $u by first occurance of $v
+		// Divide $u by first occurrence of $v
 
 		static bool terminated(view u);
 		// Check whether string is null terminated
 
 		static size_type count(view u, view v);
-		// Count occurances in $u of a substring $v
+		// Count occurrences in $u of a substring $v
 
 		static string join(span t, view u);
 		// Join strings in $t with $u inserted
@@ -260,12 +260,12 @@ namespace fmt
 		return ctype::get()->trim(u);
 	}
 
-	inline auto all_of(view u, ctype::mask m)
+	inline auto all_of(view u, ctype::mask m = space)
 	{
 		return ctype::get()->all_of(u, m);
 	}
 
-	inline auto any_of(view u, ctype::mask m)
+	inline auto any_of(view u, ctype::mask m = space)
 	{
 		return ctype::get()->any_of(u, m);
 	}

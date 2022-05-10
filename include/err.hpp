@@ -24,7 +24,7 @@ namespace fmt
 {
 	struct where { view file; int line; view func; };
 
-	template <typename... T> auto err(where at, T&&... va)
+	template <typename... T> auto error(where at, T&&... va)
 	{
 		std::stringstream ss;
 		ss << at.file << "(" << at.line << ")" << at.func << ":";
@@ -46,12 +46,12 @@ namespace sys
 
 	template <typename... T> int warn(fmt::where at, T... va)
 	{
-		return debug ? perror(fmt::err(at, va...), false) : -1;
+		return debug ? perror(fmt::error(at, va...), false) : -1;
 	}
 
 	template <typename... T> int err(fmt::where at, T... va)
 	{
-		return debug ? perror(fmt::err(at, va...), true) : -1;
+		return debug ? perror(fmt::error(at, va...), true) : -1;
 	}
 }
 

@@ -1,14 +1,18 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "file.hpp"
 #include "mode.hpp"
+#include "ptr.hpp"
 #include "err.hpp"
 #include "sys.hpp"
 #include "sync.hpp"
+#include "type.hpp"
 #ifdef _WIN32
 #include "win/file.hpp"
 #else
-#include "uni/fctrl.hpp"
+#include "uni/fcntl.hpp"
+#include "uni/mman.hpp"
 #endif
 #include <climits>
 
@@ -227,8 +231,8 @@ namespace env::file
 			return sys::access(path.data(), flags);
 		}
 
-		const auto state = sys::stat(path.data());
-		if (state)
+		struct sys::stats state(path.data());
+		if (fail(state.ok))
 		{
 			return failure;
 		}
@@ -268,21 +272,21 @@ namespace env::file
 			#endif
 				return failure;
 		}
-		if (am & blk)
+		if (mask & blk)
 		{
 			#ifdef S_ISFBLK
 			if (not S_ISFBLK(state.st_mode)
 			#endif
 				return failure;
 		}
-		if (am & reg)
+		if (mask & reg)
 		{
 			#ifdef S_ISREG
 			if (not S_ISREG(state.st_mode))
 			#endif
 				return failure;
 		}
-		if (am & lnk)
+		if (mask & lnk)
 		{
 			#ifdef S_ISLNK
 			if (not S_ISLNK(state.st_mode))
@@ -295,7 +299,7 @@ namespace env::file
 
 	unique_ptr enclose(basic_ptr f)
 	{
-		return fwd::make_ptr(f, [](auto f)
+		return fwd::make_unique<FILE>(f, [](auto f)
 		{
 			if (nullptr != f)
 			{
@@ -336,7 +340,7 @@ namespace env::file
 				sys::err(here, "popen", path);
 			}
 
-			return fwd::make_ptr(f, [](auto f)
+			return fwd::make_unique<FILE>(f, [](auto f)
 			{
 				if (f and sys::fail(sys::pclose(f)))
 				{
@@ -448,9 +452,9 @@ namespace env::file
 			{
 				sys::err(here, (mask & wr) ? "F_WRLCK" : "F_RDLCK", fd);
 			}
-			else return fwd::make_ptr(f, [=](basic_ptr)
+			else return fwd::make_unique<FILE>(f, [=](basic_ptr)
 			{
-				key.l_type = FD_UNLCK;
+				key.l_type = F_UNLCK;
 				if (key.set(fd))
 				{
 					sys::err(here, "FD_UNLCK", fd);
@@ -476,8 +480,8 @@ namespace env::file
 
 		if (0 == sz)
 		{
-			struct sys::stat st(fd);
-			if (sys::fail(st))
+			struct sys::stats st(fd);
+			if (sys::fail(st.ok))
 			{
 				sys::err(here, "stat");
 			}
@@ -674,7 +678,7 @@ test_unit(flags)
 {
 	using namespace env::file;
 	assert(to_flags(rw|un) == "w+");
-	assert(to_rlags(rd) == "r");
+	assert(to_flags(rd) == "r");
 	assert(to_flags(rw|ok) == "x+");
 }
 test_unit(lock)

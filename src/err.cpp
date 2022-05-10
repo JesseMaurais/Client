@@ -8,7 +8,6 @@
 #include "type.hpp"
 #include "char.hpp"
 #include "sym.hpp"
-#include "sig.hpp"
 #include "err.hpp"
 #include "sync.hpp"
 #include <iostream>
@@ -27,7 +26,7 @@ namespace sys
 		true;
 	#endif
 
-	thread_local fmt::string::stream thread_buf;
+	thread_local std::stringstream thread_buf;
 
 	fmt::string::out::ref out()
 	{
@@ -64,30 +63,6 @@ namespace sys
 		}
 		else ++local.counter;
 		return local.counter;
-	}
-
-	thread_local fwd::stack<fmt::where> callstack;
-
-	class tracepoint
-	{
-		const int depth;
-
-	public:
-
-		tracepoint(fmt::where at) : depth(sys::warn(top))
-		{
-			callstack.push(at);
-		}
-
-		~tracepoint()
-		{
-			callstack.pop();
-		}
-	};
-
-	tracepoint & trace(fmt::where at)
-	{
-		return tracepoint(at);
 	}
 }
 
@@ -147,6 +122,10 @@ namespace
 
 int main(int argc, char** argv)
 {
+	#ifndef _TOOLS
+	#define _TOOLS "Tools.ini"
+	#endif
+
 	// Default options file
 	fmt::string const config = _TOOLS;
 
@@ -154,26 +133,26 @@ int main(int argc, char** argv)
 	struct
 	{
 		env::opt::name const
-			tests = fmt::put("TESTS"),
-			color = fmt::put("color"),
-			async = fmt::put("async"),
-			tools = fmt::put("tools"),
-			print = fmt::put("print"),
-			quiet = fmt::put("quiet"),
-			host  = fmt::put("host"),
-			help  = fmt::put("help");
+			tests = fmt::tag::put("TESTS"),
+			color = fmt::tag::put("color"),
+			async = fmt::tag::put("async"),
+			tools = fmt::tag::put("tools"),
+			print = fmt::tag::put("print"),
+			quiet = fmt::tag::put("quiet"),
+			host  = fmt::tag::put("host"),
+			help  = fmt::tag::put("help");
 	} arg;
 
 	// Command line details
 	env::opt::command::vector cmd
 	{
-		{ 0, "h", fmt::get(arg.help), "Print command line usage then quit" },
-		{ 0, "p", fmt::get(arg.print), "Print all source tests then quit" },
-		{ 0, "q", fmt::get(arg.quiet), "Only print error messages" },
-		{ 0, "c", fmt::get(arg.color), "Print using color codes" },
-		{ 0, "a", fmt::get(arg.async), "Run tests asynchronously" },
-		{ 1, "t", fmt::get(arg.tools), _TOOLS " is replaced with argument" },
-		{ 0, "o", fmt::get(arg.host), "Host tests in this process" },
+		{ 0, "h", fmt::tag::get(arg.help), "Print command line usage then quit" },
+		{ 0, "p", fmt::tag::get(arg.print), "Print all source tests then quit" },
+		{ 0, "q", fmt::tag::get(arg.quiet), "Only print error messages" },
+		{ 0, "c", fmt::tag::get(arg.color), "Print using color codes" },
+		{ 0, "a", fmt::tag::get(arg.async), "Run tests asynchronously" },
+		{ 1, "t", fmt::tag::get(arg.tools), _TOOLS " is replaced with argument" },
+		{ 0, "o", fmt::tag::get(arg.host), "Host tests in this process" },
 	};
 
 	// Command line parsing
@@ -277,7 +256,7 @@ int main(int argc, char** argv)
 			if (color) std::cout << fmt::io::fg_off;
 		}
 
-		std::cout 
+		std::cout
 			<< "Unit tests are found in order:"
 			<< fmt::eol << fmt::tab
 			<< "1. Free command line arguments"
@@ -305,7 +284,7 @@ int main(int argc, char** argv)
 		return EXIT_SUCCESS;
 	}
 
-	// Run all the selected unit tests 
+	// Run all the selected unit tests
 	{
 		std::vector<std::future<void>> threads;
 

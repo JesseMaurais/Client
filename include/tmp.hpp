@@ -28,29 +28,30 @@ namespace fwd
 		virtual T operator=(T) = 0;
 	};
 
-	template <class... T> using signal = std::function<void(T...)>;
-	template <class T> using nullary = std::function<T()>;
-	template <class T> using unary = std::function<T(T)>;
+	template <class T> using function = std::function<T(T)>;
+	template <class T> using notify = std::function<void(T)>;
+	template <class T> using query = std::function<T(void)>;
+	using event = std::function<void()>;
 
-	template <class T> struct lazy : nullary<T>, constant<T>
+	template <class T> struct lazy : query<T>, constant<T>
 	{
-		using nullary = nullary<T>;
-		using nullary::nullary;
+		using query = query<T>;
+		using query::query;
 
 		operator T() const override
 		{
-			return nullary::operator()();
+			return query::operator()();
 		}
 	};
 
-	struct scope : nullary<void>
+	struct scope : query<void>
 	{
-		using nullary = nullary<void>;
-		using nullary::nullary;
+		using query = query<void>;
+		using query::query;
 
 		~scope()
 		{
-			nullary::operator()();
+			query::operator()();
 		}
 	};
 

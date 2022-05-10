@@ -8,9 +8,8 @@ namespace env
 	struct shell
 	{
 		using string   = fmt::string;
-		using view     = string::view;
+		using view     = fmt::view;
 		using vector   = view::vector;
-		using iterator = vector::iterator;
 		using span     = view::span;
 		using init     = view::init;
 		using page     = view::page;
@@ -23,20 +22,11 @@ namespace env
 		page get(in, char = '\n', int = -1);
 		// Cache all lines in to end, return indices
 
-		page run(iterator begin, iterator end);
-		// Run command as a sub process
-
-		page run(init args)
-		// Run using initializers
-		{
-			return run(args.begin(), args.end());
-		}
-
-		page run(span args)
+		page run(span args);
 		// Run using vector view
-		{
-			return run(args.begin(), args.end());
-		}
+
+		page run(init args);
+		// Run using initializers
 
 		page echo(view line);
 		// Expand macros in line
@@ -95,8 +85,7 @@ namespace env
 		enum class mode { none, many, dir, save };
 		page select(view start = "", mode = mode::none);
 		// User selects file(s) from the system
-
-	} &shell();
+	};
 }
 
 #endif // file

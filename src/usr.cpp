@@ -20,7 +20,7 @@ namespace env::usr
 	fmt::string::view dir(fmt::string::view name)
 	{
 		fmt::string::view u = fmt::empty;
-		
+
 	#ifdef _WIN32
 
 		using entry = std::pair<KNOWNFOLDERID, fmt::string::view>;
@@ -107,7 +107,7 @@ namespace env::usr
 
 	#else // POSIX
 
-		using entry = std::initializer_list<fmt::string::view>;
+		using entry = fwd::pair<fmt::string::view>;
 
 		static std::map<fmt::string::view, entry> const map =
 		{
@@ -197,10 +197,12 @@ namespace env::usr
 	fmt::string::view applications_menu()
 	{
 		thread_local fmt::string path;
-		if (empty(path))
+		if (path.empty())
 		{
-			const auto prefix = menu_prefix();
-			const auto file = fmt::join({prefix, "applications.menu"}, "-");
+			const fmt::view prefix = menu_prefix();
+			const fmt::view basename = "applications.menu";
+			fmt::view::vector parts { prefix, basename };
+			const auto file = fmt::join(parts, "-");
 			const auto found = env::file::find(env::file::config(), [&](auto dir)
 			{
 				path = fmt::dir::join({dir, "menus", file});

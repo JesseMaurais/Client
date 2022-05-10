@@ -16,7 +16,7 @@ namespace sys::uni
 	{
 		pthread_t id;
 
-		start(fwd::function f, pthread_attr_t* attr = nullptr) : work(f)
+		start(fwd::event f, pthread_attr_t* attr = nullptr) : work(f)
 		{
 			const int no = pthread_create(&id, attr, thread, this);
 			if (no) err(no, here);
@@ -24,7 +24,7 @@ namespace sys::uni
 
 	private:
 
-		fwd::function work;
+		fwd::event work;
 
 		static void* thread(void* ptr)
 		{
@@ -52,27 +52,27 @@ namespace sys::uni
 	{
 		pthread_attr_t buf[1];
 
-		auto start(fwd::function f)
+		auto start(fwd::event f)
 		{
 			return sys::uni::start(f, buf);
 		}
 
-		auto event(fwd::function f)
+		auto event(fwd::event f)
 		{
 			return sig::event(f, buf);
 		}
 
-		auto notify(fwd::function f, mqd_t mqd)
+		auto notify(fwd::event f, mqd_t mqd)
 		{
 			return msg::event(f, mqd, buf);
 		}
 
-		auto timer(fwd::function f, clockid_t clock = CLOCK_REALTIME)
+		auto timer(fwd::event f, clockid_t clock = CLOCK_REALTIME)
 		{
 			return time::event(f, buf, clock);
 		}
 
-		auto file(fwd::function f)
+		auto file(fwd::event f)
 		{
 			return aio::event(f, buf);
 		}

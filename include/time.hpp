@@ -85,7 +85,7 @@ namespace env::clock
 	void wait(fmt::time);
 	/// Suspend execution for an amount of time
 
-	fwd::scope event(fmt::timer, fwd::function);
+	fwd::scope event(fmt::timer, fwd::event);
 	/// Invoke function on a periodic timer
 }
 

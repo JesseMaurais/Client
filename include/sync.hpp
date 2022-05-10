@@ -13,7 +13,7 @@
 namespace sys
 {
 	template <class object> struct exclusive_ptr : fwd::no_copy
-	// Allow one writer but many readers 
+	// Allow one writer but many readers
 	{
 		rwlock lock;
 		object *that;
@@ -37,7 +37,9 @@ namespace sys
 				: key(ptr->lock.reader())
 				, that(ptr->that)
 				{
+					#ifdef assert
 					assert(that);
+					#endif
 				}
 
 				operator object const*() const
@@ -70,7 +72,9 @@ namespace sys
 				: key(ptr->lock.writer())
 				, that(ptr->that)
 				{
+					#ifdef assert
 					assert(that);
+					#endif
 				}
 
 				operator object const*() const

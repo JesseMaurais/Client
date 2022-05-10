@@ -16,9 +16,9 @@ namespace fmt
 
 		using next  = fwd::function<cref>;
 		using put   = fwd::function<ref>;
-		using read  = fwd::accessor<cref>;
-		using write = fwd::accessor<ref>;
-		using order = fwd::relation<cref>;
+		using read  = fwd::query<cref>;
+		using write = fwd::query<ref>;
+		using sort  = fwd::relation<cref>;
 		using swap  = fwd::relation<ref>;
 		using check = fwd::predicate<cref>;
 		using copy  = fwd::predicate<ref>;
@@ -26,7 +26,7 @@ namespace fmt
 
 	template
 	<
-		class Char, template <class> class Traits = fwd::character
+		class Char, template <class> class Traits = std::char_traits
 	>
 	struct stream
 	{
@@ -55,20 +55,20 @@ namespace fmt
 	template
 	<
 		class Type,
-		template <class> class Alloc = fwd::allocator,
-		template <class> class Order = fwd::order
+		template <class> class Alloc = std::allocator,
+		template <class> class Sort = std::less
 	>
 	struct layout
 	{
 		using type   = Type;
 		using pair   = fwd::pair<Type>;
 		using init   = fwd::init<Type>;
-		using set    = fwd::set<Type, Order, Alloc>;
-		using map    = fwd::map<Type, Order, Alloc>;
+		using set    = fwd::set<Type, Sort, Alloc>;
+		using map    = fwd::map<Type, Type, Sort, Alloc>;
 		using span   = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
 		using graph  = fwd::graph<Type, Alloc>;
-		using group  = fwd::group<Type, Alloc, Order>;
+		using group  = fwd::group<Type, Alloc, Sort>;
 		using edges  = fwd::edges<Type>;
 		using page   = fwd::page<Type, Alloc>;
 	};
@@ -77,18 +77,18 @@ namespace fmt
 	<
 		class String,
 		class Char,
-		template <class> class Traits = fwd::character,
-		template <class> class Alloc = fwd::allocator,
-		template <class> class Order = fwd::order,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator,
+		template <class> class Sort = std::less,
 
 		class Memory = memory<String>,
 		class Stream = stream<Char, Traits>,
-		class Layout = layout<String, Alloc, Order>
+		class Layout = layout<String, Alloc, Sort>
 	>
 	struct basic_string_type : String, Memory, Stream, Layout
 	{
 		using check  = typename Memory::check;
-		using order  = typename Memory::order;
+		using sort   = typename Memory::sort;
 		using scan   = typename Stream::scan;
 		using print  = typename Stream::print;
 		using format = typename Stream::format;
@@ -102,12 +102,12 @@ namespace fmt
 	template
 	<
 		class Char,
-		template <class> class Traits = fwd::character,
-		template <class> class Alloc = fwd::allocator,
-		template <class> class Order = fwd::order,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator,
+		template <class> class Sort = std::less,
 		class String = fwd::basic_string<Char, Traits, Alloc>,
 		class View = fwd::basic_string_view<Char, Traits>,
-		class Base = basic_string_type<View , Char, Traits, Alloc, Order>
+		class Base = basic_string_type<View , Char, Traits, Alloc, Sort>
 	>
 	struct basic_string_view : Base
 	{
@@ -120,16 +120,16 @@ namespace fmt
 	template
 	<
 		class Char,
-		template <class> class Traits = fwd::character,
-		template <class> class Alloc = fwd::allocator,
-		template <class> class Order = fwd::order,
+		template <class> class Traits = std::char_traits,
+		template <class> class Alloc = std::allocator,
+		template <class> class Sort = std::less,
 		class String = fwd::basic_string<Char, Traits, Alloc>,
 		class View = fwd::basic_string_view<Char, Traits>,
-		class Base = basic_string_type<String, Char, Traits, Alloc, Order>
+		class Base = basic_string_type<String, Char, Traits, Alloc, Sort>
 	>
 	struct basic_string : Base
 	{
-		using view = basic_string_view<Char, Traits, Alloc, Order>;
+		using view = basic_string_view<Char, Traits, Alloc, Sort>;
 
 		using Base::Base;
 		basic_string(const View& in)
@@ -145,7 +145,7 @@ namespace fmt
 	using wide = wstring::view;
 	// at least a UTF-32 code point
 	using ustring = basic_string<wint_t>;
-	using code = ustring::view;
+	using wint = ustring::view;
 
 	using tstring =
 	#ifdef TCHAR
