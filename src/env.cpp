@@ -81,7 +81,7 @@ namespace env
 	{
 		static env::shell sh;
 		auto const p = sh.echo(u);
-		return p.empty() ? fmt::empty : p[0];
+		return p.empty() ? fmt::tag::empty : p[0];
 	}
 }
 
@@ -214,7 +214,7 @@ namespace env::var
 		}
 		#else
 		{
-			return fmt::empty; // omit "/" for join
+			return fmt::tag::empty; // omit "/" for join
 		}
 		#endif
 	}
@@ -241,7 +241,7 @@ namespace env::var
 				return v;
 			}
 		}
-		return fmt::empty;
+		return fmt::tag::empty;
 	}
 
 	fmt::string::view shell()

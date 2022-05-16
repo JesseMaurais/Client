@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iomanip>
 #include <charconv>
+#include <iostream>
 #include <system_error>
 #include <cstdlib>
 #include <cmath>
@@ -18,49 +19,65 @@
 namespace doc
 {
 	template struct instance<fmt::view>;
-	using strings = instance<fmt::view>;
+	using view = instance<fmt::view>;
+}
+
+namespace
+{
+	template <class Face> const Face& use_facet()
+	// The character facet using a default locale
+	{
+		return std::use_facet<Face>(std::cout.getloc());
+	}
+
+	template <class Char, class Type> auto as_string(const Type& p)
+	{
+		if constexpr (std::is_same<Char, char>::value)
+		{
+			return fmt::to_string(p);
+		}
+		else
+		{
+			return fmt::to_wstring(p);
+		}
+	}
 }
 
 namespace fmt
 {
-	// type.hpp
-
-	template <class C> auto& instance()
+	template <class C> const typename type<C>::ctype* type<C>::use_ctype()
 	{
-		static type<C> singleton;
-		static auto address = std::addressof(singleton);
-		return address;
+		return & use_facet<ctype>();
 	}
 
-	template <class C> type<C>* type<C>::get()
+	template <class C> typename type<C>::size_type type<C>::length(C u)
+	// Size of UTF encoded data from first item
 	{
-		return instance<C>();
+		size_type n = 1;
+		if (std::signbit(u))
+		{
+			for (n = 0; std::signbit(u << n); ++n);
+		}
+		return n;
 	}
 
-	template <class C> type<C>* type<C>::set(type<C>* to)
+	template <class C> bool type<C>::check(C c, mask x)
 	{
-		auto old = instance<C>();
-		instance<C>() = to;
-		return old;
+		return use_facet<ctype>().is(x, c);
 	}
 
-	template <class C> bool type<C>::check(C c, mask x) const
+	template <class C> mark type<C>::check(view u)
 	{
-		return basic_type::is(x, c);
-	}
-
-	template <class C> typename type<C>::marks type<C>::check(view u) const
-	{
-		marks x(u.size());
-		basic_type::is(u.data(), u.data() + u.size(), x.data());
+		mark x(u.size());
+		use_facet<ctype>().is(u.data(), u.data() + u.size(), x.data());
 		return x;
 	}
 
-	template <class C> template <class It> It type<C>::scan_is(It it, It end, mask x) const
+	template <class C> template <class It> It type<C>::scan_is(It it, It end, mask x)
 	{
 		if constexpr (std::is_same<It, pointer>::value)
 		{
-			return basic_type::scan_is(x, it, end);
+			return use_facet<ctype>().scan_is(x, it, end);
 		}
 		else
 		{
@@ -76,11 +93,11 @@ namespace fmt
 		}
 	}
 
-	template <class C> template <class It> It type<C>::scan_not(It it, It end, mask x) const
+	template <class C> template <class It> It type<C>::scan_not(It it, It end, mask x)
 	{
 		if constexpr (std::is_same<It, pointer>::value)
 		{
-			return basic_type::scan_not(x, it, end);
+			return use_ctype()->scan_not(x, it, end);
 		}
 		else
 		{
@@ -96,27 +113,27 @@ namespace fmt
 		}
 	}
 
-	template <class C> typename type<C>::iterator type<C>::next(iterator it, iterator end, mask x) const
+	template <class C> typename type<C>::iterator type<C>::next(iterator it, iterator end, mask x)
 	{
 		return scan_is(it, end, x);
 	}
 
-	template <class C> typename type<C>::iterator type<C>::next(view u, mask x) const
+	template <class C> typename type<C>::iterator type<C>::next(view u, mask x)
 	{
 		return next(u.begin(), u.end(), x);
 	}
 
-	template <class C> typename type<C>::iterator type<C>::skip(iterator it, iterator end, mask x) const
+	template <class C> typename type<C>::iterator type<C>::skip(iterator it, iterator end, mask x)
 	{
 		return scan_not(it, end, x);
 	}
 
-	template <class C> typename type<C>::iterator type<C>::skip(view u, mask x) const
+	template <class C> typename type<C>::iterator type<C>::skip(view u, mask x)
 	{
 		return skip(u.begin(), u.end(), x);
 	}
 
-	template <class C> typename type<C>::vector type<C>::split(view u, mask x) const
+	template <class C> typename type<C>::vector type<C>::split(view u, mask x)
 	{
 		vector t;
 		const auto begin = u.data(), end = begin + u.size();
@@ -129,59 +146,61 @@ namespace fmt
 		return t;
 	}
 
-	template <class C> typename type<C>::iterator type<C>::first(view u, mask x) const
+	template <class C> typename type<C>::iterator type<C>::first(view u, mask x)
 	{
 		return scan_is(u.begin(), u.end(), x);
 	}
 
-	template <class C> typename type<C>::iterator type<C>::last(view u, mask x) const
+	template <class C> typename type<C>::iterator type<C>::last(view u, mask x)
 	{
 		return scan_is(u.rbegin(), u.rend(), x).base() - 1;
 	}
 
-	template <class C> typename type<C>::view type<C>::trim(view u, mask x) const
+	template <class C> typename type<C>::view type<C>::trim(view u, mask x)
 	{
-		auto const before = last(u, x) + 1;
-		auto const after = first(u, x);
-		auto const pos = std::distance(u.begin(), after);
-		auto const size = std::distance(after, before);
+		const auto before = last(u, x) + 1;
+		const auto after = first(u, x);
+		const auto pos = std::distance(u.begin(), after);
+		const auto size = std::distance(after, before);
 		return u.substr(pos, size);
 	}
 
-	template <class C> bool type<C>::all_of(view u, mask x) const
+	template <class C> bool type<C>::all_of(view u, mask x)
 	{
-		return fwd::all_of(widen(u), [this, x](auto w)
+		return fwd::all_of(widen(u), [x](auto w)
 		{
-			return this->check(w, x);
+			return check(w, x);
 		});
 	}
 
-	template <class C> bool type<C>::any_of(view u, mask x) const
+	template <class C> bool type<C>::any_of(view u, mask x)
 	{
-		return fwd::any_of(widen(u), [this, x](auto w)
+		return fwd::any_of(widen(u), [x](auto w)
 		{
-			return this->check(w, x);
+			return check(w, x);
 		});
 	}
 
-	template <class C> typename type<C>::string type<C>::to_upper(view u) const
+	template <class C> typename type<C>::string type<C>::to_upper(view u)
 	{
 		string s;
+		const auto use = use_ctype();
 		for (const auto w : widen(u))
 		{
-			const auto p = basic_type::toupper(w);
-			s += from(p);
+			const auto p = use->toupper(w);
+			s += as_string<C>(p);
 		}
 		return s;
 	}
 
-	template <class C> typename type<C>::string type<C>::to_lower(view u) const
+	template <class C> typename type<C>::string type<C>::to_lower(view u)
 	{
 		string s;
+		const auto use = use_ctype();
 		for (const auto w : widen(u))
 		{
-			const auto p = basic_type::tolower(w);
-			s += from(p);
+			const auto p = use->tolower(w);
+			s += as_string<C>(p);
 		}
 		return s;
 	}
@@ -296,42 +315,37 @@ namespace fmt
 namespace fmt::tag
 {
 	static sys::exclusive<std::set<string>> cache;
-	static sys::exclusive<std::map<view, long>> lookup;
-
-	bool got(long n)
-	{
-		return doc::strings::self().contains(n);
-	}
 
 	bool got(view u)
 	{
-		auto reader = lookup.reader();
+		auto reader = cache.reader();
 		return reader->find(u) != reader->end();
-	}
-
-	view get(long n)
-	{
-		auto reader = doc::strings::self().reader(n);
-		return reader ? reader->substr() : view();
 	}
 
 	view get(view u)
 	{
-		return get(put(u));
-	}
-
-	long put(view u)
-	{
-		const auto n = doc::strings::self().emplace(std::move(u));
-		auto writer = lookup.writer();
-		writer->emplace(get(n), n);
-		return n;
-	}
-
-	long set(view n)
-	{
 		auto writer = cache.writer();
-		return put(writer->emplace(n));
+		auto it = writer->find(u);
+		if (writer->end() == it)
+		{
+			auto pair = writer->emplace(u);
+			#ifdef assert
+			assert(pair.second);
+			#endif
+			it = pair.first;
+		}
+		return it->substr();
+	}
+
+	view put(view u)
+	{
+		doc::view::self().emplace(std::move(u));
+		return u;
+	}
+
+	view set(view u)
+	{
+		return put(get(u));
 	}
 
 	string::in::ref get(string::in::ref in, char eol)
@@ -379,8 +393,8 @@ test_unit(type)
 
 	// Triming whitespace
 	{
-		assert(std::empty(fmt::trim(Space)));
-		assert(not std::empty(fmt::trim(Filled)));
+		assert(fmt::trim(Space).empty());
+		assert(not fmt::trim(Filled).empty());
 		assert(Hello == fmt::trim(Filled));
 	}
 
@@ -421,13 +435,13 @@ test_unit(type)
 
 	// Search matching braces
 	{
-		using pos = std::pair<fmt::string::size_type, fmt::string::size_type>;
+		using pos = fmt::size::pair;
 
 		assert(fmt::embrace("<A<B>C>", "<>") == pos { 0, 6 });
 		assert(fmt::embrace("<A<B>C>", "<B>") == pos { 0, 3 });
 		assert(fmt::embrace("A[B]C[D]", "[D]") == pos { 1, 3 });
-		assert(fmt::embrace("{A<B}C}", "<>") == pos { 2, fmt::npos });
-		assert(fmt::embrace("{A{B>C}", "<>") == pos { fmt::npos, fmt::npos });
+		assert(fmt::embrace("{A<B}C}", "<>") == pos { 2, -1 });
+		assert(fmt::embrace("{A{B>C}", "<>") == pos { -1, -1 });
 		assert(fmt::embrace("&amp;", "&;") == pos { 0, 4 });
 	}
 }
@@ -438,7 +452,8 @@ test_unit(char)
 	{
 		std::stringstream ss;
 		ss << fmt::io::fg_green << "GREEN" << fmt::io::fg_off;
-		assert(ss.str() == "\x1b[32mGREEN\x1b[39m");
+		auto green = ss.str();
+		assert(green == "\x1b[32mGREEN\x1b[39m");
 	}
 }
 

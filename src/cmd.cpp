@@ -197,11 +197,10 @@ namespace env
 		}
 	}
 
-	static fmt::string::view optpick(fmt::string::view value)
+	static fmt::view optpick(fmt::view value)
 	{
-		static auto const group = fmt::tag::put("Runtime Options");
-		static auto const key = fmt::tag::put("DIALOG");
-		static auto const entry = std::make_pair(group, key);
+		using namespace std::literals;
+		static auto entry = std::make_pair("Runtime Options"sv, "DIALOG"sv);
 		return env::opt::get(entry, value);
 	}
 

@@ -4,29 +4,26 @@
 #include "ini.hpp"
 #include "fmt.hpp"
 #include "tag.hpp"
-#include "type.hpp"
-#include "dig.hpp"
 #include "err.hpp"
+#include "type.hpp"
 
 namespace
 {
-	bool header(fmt::string::view u)
+	bool header(fmt::view u)
 	{
-		return not empty(u) and u.front() == '[' and u.back() == ']';
+		return not u.empty() and u.front() == '[' and u.back() == ']';
 	}
-
-	constexpr auto separator = ";";
 }
 
 namespace doc
 {
-	fmt::view::in::ref ini::getline(view::in::ref input, string::ref output)
+	fmt::input ini::getline(fmt::input buf, fmt::string::ref line)
 	{
-		while (std::getline(input, output))
+		while (std::getline(buf, line))
 		{
 			constexpr char omit = '#';
 			// Read past comment
-			view u = output;
+			view u = line;
 			const auto begin = u.begin();
 			const auto end = u.end();
 			const auto it = fmt::skip(begin, end);
@@ -38,75 +35,51 @@ namespace doc
 				u = fmt::trim(u);
 				if (not u.empty())
 				{
-					output = fmt::to_string(u);
+					line = fmt::to_string(u);
 					break; // done
 				}
 			}
 		}
-		return input;
+		return buf;
 	}
 
-	fmt::view::in::ref operator>>(fmt::view::in::ref input, ini::ref output)
+	fmt::input operator>>(fmt::input buf, ini::ref data)
 	{
-		long group = 0;
-		ini::string token;
-
-		while (ini::getline(input, token))
+		fmt::string token;
+		auto group = fmt::tag::empty;
+		while (ini::getline(buf, token))
 		{
 			// Check for new group
 			if (header(token))
 			{
-				const auto z = token.size();
-				token = token.substr(1, z - 2);
+				token = token.substr(1, token.size() - 2);
 				group = fmt::tag::set(token);
 				continue;
 			}
-
-			#ifdef trace
-			if (not fmt::tag::got(group))
-			{
-				trace("no group");
-			}
-			#endif
-
 			// Create key pair for value entry
 			const auto pair = fmt::to_pair(token);
 			const auto key = fmt::tag::set(pair.first);
 			const auto value = pair.second;
 			if (value.empty())
-			{
-				break;
-			}
-
 			// Create a new entry in the key table
-			if (not output.set({ group, key }, value))
-			{
-				#ifdef trace
-				trace("overwrite", key, "with", value);
-				#endif
-			}
+			data.set({ group, key }, value);
 		}
-		return input;
+		return buf;
 	}
 
-	fmt::view::out::ref operator<<(fmt::view::out::ref output, ini::cref input)
+	fmt::output operator<<(fmt::output buf, ini::cref data)
 	{
-		long last = -1;
-		for (auto [k, v] : input.keys)
+		auto last = fmt::tag::empty;
+		for (auto [key, value] : data.keys)
 		{
-			if (k.first != last)
+			if (key.first != last)
 			{
-				last = k.first;
-
-				const auto group = fmt::tag::get(k.first);
-				output << '[' << group << ']' << fmt::eol;
+				last = key.first;
+				buf << '[' << key.first << ']' << fmt::tag::eol;
 			}
-
-			const auto key = fmt::tag::get(k.second);
-			const fmt::view value = input.values.at(v);
-			output << key << "=" << value << fmt::eol;
+			buf << key.second << fmt::tag::assign << value << fmt::tag::eol;
 		}
-		return output;
+		return buf;
 	}
 
 	bool ini::got(pair key) const
@@ -117,15 +90,16 @@ namespace doc
 	ini::view ini::get(pair key) const
 	{
 		const auto it = keys.find(key);
-		return it != keys.end()
-			? values.at(it->second)
-			: fmt::empty;
+		return keys.end() == it
+			? fmt::tag::empty : it->second;
 	}
 
 	bool ini::set(pair key, view value)
 	{
 		const auto it = cache.emplace(value).first;
+		#ifdef assert
 		assert(cache.end() != it);
+		#endif
 		return put(key, *it);
 	}
 
@@ -134,14 +108,12 @@ namespace doc
 		const auto it = keys.find(key);
 		if (keys.end() == it)
 		{
-			const auto size = values.size();
-			values.emplace_back(value);
-			keys[key] = fmt::to_int(size);
+			keys[key] = values.emplace_back(value);
 			return true;
 		}
 		else
 		{
-			values[it->second] = value;
+			it->second = value;
 			return false;
 		}
 	}
@@ -185,7 +157,7 @@ test_unit(ini)
 		}
 		// Reference with put
 		{
-			fmt::string::view u = value;
+			fmt::view u = value;
 			bool unique = init.put({group, key}, u);
 			assert(not unique);
 		}

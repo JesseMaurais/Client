@@ -9,7 +9,7 @@
 
 namespace sys::uni
 {
-	struct clock : fwd::zero<timespec>
+	struct clock : fwd::zero<std::timespec>
 	{
 		clock(time_t sec = 0, long nsec = 0)
 		{
@@ -35,7 +35,7 @@ namespace sys::uni
 
 	struct timer : fwd::zero<itimerspec>
 	{
-		timer(clock interval, clock value)
+		timer(std::timespec interval, std::timespec value)
 		{
 			it_interval = interval;
 			it_value = value;
@@ -46,7 +46,7 @@ namespace sys::uni
 			return fail(timer_gettime(id, this)) and err(here);
 		}
 
-		bool set(timer_t id, int flags, itimerspec* old = nullptr) const
+		bool set(timer_t id, int flags = 0, itimerspec* old = nullptr) const
 		{
 			return fail(timer_settime(id, flags, this, old)) and err(here);
 		}

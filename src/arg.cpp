@@ -12,36 +12,33 @@
 
 namespace
 {
-	fmt::string::view::vector list;
+	fmt::vector list;
 
-	auto make_key()
+	fmt::view make_key()
 	{
-		static auto const app = fmt::tag::put("Application");
+		static const fmt::view app = "Application";
 		return app;
 	}
 
-	auto make_pair(env::opt::name key = make_key())
+	fmt::pair make_pair(fmt::view key = make_key())
 	{
-		static auto const cmd = fmt::tag::put("Command Line");
+		static const fmt::view cmd = "Command Line";
 		return std::make_pair(cmd, key);
 	}
 
-	auto make_ini()
+	fmt::string make_ini()
 	{
-		fmt::view::vector path { env::opt::program(), "ini" };
+		fmt::vector path { env::opt::program(), "ini" };
 		return fmt::join(path, ".");
 	}
 
-	auto find_next(fmt::string::view argu, env::opt::command::span cmd)
+	auto find_next(fmt::view argu, env::opt::command::span cmd)
 	{
-		constexpr auto dash = "-";
-		constexpr auto dual = "--";
-
-		auto const begin = cmd.begin();
-		auto const end = cmd.end();
+		const auto begin = cmd.begin();
+		const auto end = cmd.end();
 		auto next = end;
 
-		if (auto entry = argu.substr(2); argu.starts_with(dual))
+		if (auto entry = argu.substr(2); argu.starts_with(fmt::tag::dual))
 		{
 			next = std::find_if
 			(
@@ -52,7 +49,7 @@ namespace
 			);
 		}
 		else
-		if (auto entry = argu.substr(1); argu.starts_with(dash))
+		if (auto entry = argu.substr(1); argu.starts_with(fmt::tag::dash))
 		{
 			next = std::find_if
 			(
@@ -180,19 +177,19 @@ namespace env::opt
 		return registry().writer()->set(key, value);
 	}
 
-	bool got(name key)
+	bool got(view key)
 	{
 		return not get(key).empty();
 	}
 
-	view get(name key)
+	view get(view key)
 	{
-		auto const u = fmt::tag::get(key);
+		const auto u = fmt::tag::get(key);
 		// First look for argument
-		auto const args = arguments();
-		for (auto const a : args)
+		const auto args = arguments();
+		for (const auto a : args)
 		{
-			auto const e = fmt::to_pair(a);
+			const auto e = fmt::to_pair(a);
 			if (e.first == u)
 			{
 				return e.second;
@@ -200,7 +197,7 @@ namespace env::opt
 		}
 		// Second look in environment
 		auto value = env::get(u);
-		if (empty(value))
+		if (value.empty())
 		{
 			// Finally look in options table
 			value = env::opt::get(make_pair(key));
@@ -208,7 +205,7 @@ namespace env::opt
 		return value;
 	}
 
-	bool set(name key, fmt::string::view value)
+	bool set(fmt::view key, fmt::view value)
 	{
 		return set(make_pair(key), value);
 	}
@@ -270,7 +267,7 @@ test_unit(arg)
 {
 	// Application name exists
 	{
-		auto const app = env::opt::application();
+		const auto app = env::opt::application();
 		assert(not app.empty() and "Application is not named");
 		assert(env::opt::arg().find(app) != fmt::npos);
 	}
@@ -278,7 +275,7 @@ test_unit(arg)
 	{
 		std::stringstream ss;
 		ss << env::opt::put;
-		auto const s = ss.str();
+		const auto s = ss.str();
 		assert(not s.empty() and "Cannot dump options");
 	}
 }

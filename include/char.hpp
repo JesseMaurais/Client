@@ -488,7 +488,7 @@ namespace fmt
 		to_primary               = 0,
 		from_primary             = 1,
 		to_secondary             = 2,
-		from_seconary            = 3,
+		from_secondary           = 3,
 		stop_relay_to_primary    = 4,
 		start_relay_to_primary   = 5,
 		stop_relay_to_secondary  = 6,

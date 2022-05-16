@@ -43,21 +43,21 @@ namespace doc
 	};
 
 	extern template struct instance<fwd::event>;
-	using message = instance<fwd::event>;
+	using event = instance<fwd::event>;
 
 	inline auto signal(fwd::event f)
 	{
-		return message::self().emplace(std::move(f));
+		return event::self().emplace(std::move(f));
 	}
 
 	inline auto raise(int n)
 	{
-		return message::self().reader(n)->operator()();
+		return event::self().reader(n)->operator()();
 	}
 
 	inline auto cancel(int n)
 	{
-		return message::self().destroy(n);
+		return event::self().destroy(n);
 	}
 }
 

@@ -4,11 +4,12 @@
 #include "usr.hpp"
 #include "env.hpp"
 #include "opt.hpp"
+#include "arg.hpp"
 #include "dir.hpp"
 #include "type.hpp"
 #include "mode.hpp"
 #include "err.hpp"
-
+#include <fstream>
 #include <iostream>
 
 #ifdef _WIN32
@@ -19,7 +20,7 @@ namespace env::usr
 {
 	fmt::string::view dir(fmt::string::view name)
 	{
-		fmt::string::view u = fmt::empty;
+		auto u = fmt::tag::empty;
 
 	#ifdef _WIN32
 
@@ -332,32 +333,30 @@ namespace env::usr
 #ifdef test_unit
  namespace
 {
-	struct head : fmt::layout<head>
+	struct head : fmt::memory<head>
 	{
-		fmt::string::view group;
-
-		head(fmt::string::view g)
-			: group(g)
+		fmt::view group;
+		head(fmt::view g)
+		: group(g)
 		{ }
 	};
 
 	fmt::string::out::ref operator<<(fmt::string::out::ref out, head::cref obj)
 	{
-		return out << '[' << obj.group << ']' << fmt::eol;
+		return out << '[' << obj.group << ']' << fmt::tag::eol;
 	}
 
-	struct key : fmt::layout<key>
+	struct key : fmt::memory<key>
 	{
-		fmt::string::view::pair entry;
-
-		key(fmt::string::view key, fmt::string::view value)
-			: entry(key, value)
+		fmt::pair entry;
+		key(fmt::view key, fmt::view value)
+		: entry(key, value)
 		{ }
 	};
 
 	fmt::string::out::ref operator<<(fmt::string::out::ref out, key::cref obj)
 	{
-		return out << obj.entry.first << '=' << obj.entry.second << fmt::eol;
+		return out << obj.entry.first << '=' << obj.entry.second << fmt::tag::eol;
 	}
 }
 

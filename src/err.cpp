@@ -28,12 +28,12 @@ namespace sys
 
 	thread_local std::stringstream thread_buf;
 
-	fmt::string::out::ref out()
+	fmt::output out()
 	{
 		return thread_buf;
 	}
 
-	fmt::string::out::ref put(fmt::string::out::ref buf)
+	fmt::output put(fmt::output buf)
 	{
 		fmt::string line;
 		while (std::getline(thread_buf, line))
@@ -43,7 +43,7 @@ namespace sys
 		return buf;
 	}
 
-	int perror(fmt::string::view message, bool errn)
+	int perror(fmt::view message, bool errn)
 	{
 		thread_local struct
 		{
@@ -56,7 +56,7 @@ namespace sys
 		{
 			thread_buf << message;
 			if (errn) thread_buf << ':' << ' ' << std::strerror(errno);
-			thread_buf << fmt::eol;
+			thread_buf << fmt::tag::eol;
 
 			local.last = fmt::to_string(message);
 			local.counter = 0;
@@ -68,7 +68,7 @@ namespace sys
 
 namespace
 {
-	void runner(fmt::string::view name, fmt::string::buf::ptr buf, bool host)
+	void runner(fmt::view name, fmt::string::buf::ptr buf, bool host)
 	{
 		auto back = sys::out().rdbuf();
 		try
@@ -93,28 +93,27 @@ namespace
 				fmt::string::view::vector args { image, "-o", "-q", name };
 				for (auto line : sh.run(args))
 				{
-					sys::out() << line << fmt::eol;
+					sys::out() << line << fmt::tag::eol;
 				}
 
 				if (0 < sh.status)
 				{
-					auto const text = sys::sig::text(sh.status);
-					sys::out() << "Signal: " << text << fmt::eol;
+					sys::out() << "Signal: " << sh.status << fmt::tag::eol;
 				}
 				else
 				if (sh.status < 0)
 				{
-					sys::out() << "Failed: " << sh.status << fmt::eol;
+					sys::out() << "Failed: " << sh.status << fmt::tag::eol;
 				}
 			}
 		}
 		catch (std::exception const& error)
 		{
-			sys::out() << error.what() << fmt::eol;
+			sys::out() << error.what() << fmt::tag::eol;
 		}
 		catch (...)
 		{
-			sys::out() << "Unknown" << fmt::eol;
+			sys::out() << "Unknown" << fmt::tag::eol;
 		}
 		sys::out().rdbuf(back);
 	}
@@ -127,49 +126,49 @@ int main(int argc, char** argv)
 	#endif
 
 	// Default options file
-	fmt::string const config = _TOOLS;
+	const fmt::string config = _TOOLS;
 
 	// Command line words
 	struct
 	{
-		env::opt::name const
-			tests = fmt::tag::put("TESTS"),
-			color = fmt::tag::put("color"),
-			async = fmt::tag::put("async"),
-			tools = fmt::tag::put("tools"),
-			print = fmt::tag::put("print"),
-			quiet = fmt::tag::put("quiet"),
-			host  = fmt::tag::put("host"),
-			help  = fmt::tag::put("help");
+		const fmt::view
+			tests = "TESTS",
+			color = "color",
+			async = "async",
+			tools = "tools",
+			print = "print",
+			quiet = "quiet",
+			host  = "host",
+			help  = "help";
 	} arg;
 
 	// Command line details
 	env::opt::command::vector cmd
 	{
-		{ 0, "h", fmt::tag::get(arg.help), "Print command line usage then quit" },
-		{ 0, "p", fmt::tag::get(arg.print), "Print all source tests then quit" },
-		{ 0, "q", fmt::tag::get(arg.quiet), "Only print error messages" },
-		{ 0, "c", fmt::tag::get(arg.color), "Print using color codes" },
-		{ 0, "a", fmt::tag::get(arg.async), "Run tests asynchronously" },
-		{ 1, "t", fmt::tag::get(arg.tools), _TOOLS " is replaced with argument" },
-		{ 0, "o", fmt::tag::get(arg.host), "Host tests in this process" },
+		{ 0, "h", arg.help, "Print command line usage then quit" },
+		{ 0, "p", arg.print, "Print all source tests then quit" },
+		{ 0, "q", arg.quiet, "Only print error messages" },
+		{ 0, "c", arg.color, "Print using color codes" },
+		{ 0, "a", arg.async, "Run tests asynchronously" },
+		{ 1, "t", arg.tools, _TOOLS " is replaced with argument" },
+		{ 0, "o", arg.host, "Host tests in this process" },
 	};
 
 	// Command line parsing
 	auto tests = env::opt::put(argc, argv, cmd);
 
 	// Command line options
-	auto const host  = env::opt::get(arg.host, false);
-	auto const color = env::opt::get(arg.color, not host);
-	auto const quiet = env::opt::get(arg.quiet, false);
-	auto const async = env::opt::get(arg.async, false);
-	auto const tools = env::opt::get(arg.tools, config);
-	auto const clean = std::empty(env::opt::arguments());
+	const auto host  = env::opt::get(arg.host, false);
+	const auto color = env::opt::get(arg.color, not host);
+	const auto quiet = env::opt::get(arg.quiet, false);
+	const auto async = env::opt::get(arg.async, false);
+	const auto tools = env::opt::get(arg.tools, config);
+	const auto clean = std::empty(env::opt::arguments());
 
 	// Initialize from tools
 	if (not std::empty(tools))
 	{
-		auto const path = fmt::to_string(tools);
+		const auto path = fmt::to_string(tools);
 		std::ifstream in { path };
 		if (in)
 		{
@@ -177,7 +176,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			std::cerr << "Failed to open " << path << fmt::eol;
+			std::cerr << "Failed to open " << path << fmt::tag::eol;
 		}
 	}
 
@@ -192,9 +191,9 @@ int main(int argc, char** argv)
 	}
 
 	// Map test names to error buffers' string stream
-	std::map<fmt::string, fmt::string::stream> context;
-	fmt::string::view const prefix = "test_";
-	auto const program = env::opt::program();
+	std::map<fmt::string, std::stringstream> context;
+	const auto program = env::opt::program();
+	constexpr fmt::view prefix = "test_";
 
 	if (std::empty(tests))
 	{
@@ -208,7 +207,7 @@ int main(int argc, char** argv)
 				if (name.starts_with(prefix))
 				{
 					// Symbol must exist
-					auto const call = sys::sym<void()>(name);
+					const auto call = sys::sym<void()>(name);
 					if (nullptr != call)
 					{
 						verify(context[name].str().empty());
@@ -224,7 +223,7 @@ int main(int argc, char** argv)
 			auto const call = sys::sym<void()>(name);
 			if (nullptr == call)
 			{
-				std::cout << "Cannot find " << name << " in " << program << fmt::eol;
+				std::cout << "Cannot find " << name << " in " << program << fmt::tag::eol;
 			}
 			else
 			{
@@ -236,14 +235,14 @@ int main(int argc, char** argv)
 	// Print the unit tests and quit
 	if (env::opt::get(arg.print, false))
 	{
-		for (auto const& [name, error] : context)
+		for (const auto& [name, error] : context)
 		{
-			std::cout << name << fmt::eol;
+			std::cout << name << fmt::tag::eol;
 		}
 		return EXIT_SUCCESS;
 	}
 
-	bool const missing = clean and std::empty(context);
+	const bool missing = clean and context.empty();
 	// Print the help menu and quit if missing
 	if (env::opt::get(arg.help, missing))
 	{
@@ -251,35 +250,35 @@ int main(int argc, char** argv)
 		{
 			if (color) std::cout << fmt::io::fg_yellow;
 
-			std::cout << "No tests were found" << fmt::eol;
+			std::cout << "No tests were found" << fmt::tag::eol;
 
 			if (color) std::cout << fmt::io::fg_off;
 		}
 
 		std::cout
 			<< "Unit tests are found in order:"
-			<< fmt::eol << fmt::tab
+			<< fmt::tag::eol << fmt::tag::tab
 			<< "1. Free command line arguments"
-			<< fmt::eol << fmt::tab
+			<< fmt::tag::eol << fmt::tag::tab
 			<< "2. The TESTS environment variable"
-			<< fmt::eol << fmt::tab
+			<< fmt::tag::eol << fmt::tag::tab
 			<< "3. The TESTS variable in " _TOOLS
-			<< fmt::eol << fmt::tab
+			<< fmt::tag::eol << fmt::tag::tab
 			<< "4. The dump symbols for " << prefix << "*"
-			<< fmt::eol
+			<< fmt::tag::eol
 			<< "Commands for unit test runner:"
-			<< fmt::eol;
+			<< fmt::tag::eol;
 
 		for (auto const & item : cmd)
 		{
 			std::cout
-				<< fmt::tab
-				<< env::opt::dash << item.dash
+				<< fmt::tag::tab
+				<< fmt::tag::dash << item.dash
 				<< ' '
-				<< env::opt::dual << item.name
-				<< fmt::tab
+				<< fmt::tag::dual << item.name
+				<< fmt::tag::tab
 				<< item.text
-				<< fmt::eol;
+				<< fmt::tag::eol;
 		}
 		return EXIT_SUCCESS;
 	}
@@ -326,11 +325,11 @@ int main(int argc, char** argv)
 			{
 				if (not quiet)
 				{
-					std::cout << name << fmt::tab << str << fmt::eol;
+					std::cout << name << fmt::tag::tab << str << fmt::tag::eol;
 				}
 				else
 				{
-					std::cout << str << fmt::eol;
+					std::cout << str << fmt::tag::eol;
 				}
 				++ counter;
 			}
@@ -344,7 +343,7 @@ int main(int argc, char** argv)
 
 			if (not quiet)
 			{
-				std::cout << name << fmt::tab << "ok" << fmt::eol;
+				std::cout << name << fmt::tag::tab << "ok" << fmt::tag::eol;
 			}
 		}
 	}
@@ -356,7 +355,7 @@ int main(int argc, char** argv)
 
 	if (not quiet)
 	{
-		std::cout << "There are " << counter << " errors" << fmt::eol;
+		std::cout << "There are " << counter << " errors" << fmt::tag::eol;
 	}
 
 	if (color)
@@ -369,14 +368,14 @@ int main(int argc, char** argv)
 	return 0 < counter ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-#ifndef _MSC_VER
 #ifdef test_unit
 test_unit(err)
 {
+	#ifndef _MSC_VER
 	assert(true == true);
 	assert(true != false);
 	assert(true and not false);
 	except(throw "Holy Cow!");
+	#endif
 }
-#endif
 #endif

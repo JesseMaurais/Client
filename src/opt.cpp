@@ -15,7 +15,7 @@ namespace
 	>
 	auto cast(Key key, Value value, Cast cast)
 	{
-		auto const u = env::opt::get(key);
+		const auto u = env::opt::get(key);
 		return empty(u) ? value : cast(u);
 	}
 
@@ -26,12 +26,12 @@ namespace
 
 	template <class Key> bool cast(Key key, bool value)
 	{
-		auto const check = { cast(false), "0", "no", "off", "disable" };
-		auto const u = env::opt::get(key);
-		if (not empty(u))
+		const auto check = { cast(false), "0", "no", "off", "disable" };
+		const auto u = env::opt::get(key);
+		if (not u.empty())
 		{
-			auto const s = fmt::to_lower(u);
-			for (auto const v : check)
+			const auto s = fmt::to_lower(u);
+			for (const auto v : check)
 			{
 				if (s.starts_with(v))
 				{
@@ -46,14 +46,14 @@ namespace
 
 namespace env::opt
 {
-	bool get(name key, bool value)
+	bool get(view key, bool value)
 	{
 		return cast(key, value);
 	}
 
-	bool set(name key, bool value)
+	bool set(view key, bool value)
 	{
-		fmt::string::view u = cast(value);
+		fmt::view u = cast(value);
 		return set(key, u);
 	}
 
@@ -68,7 +68,7 @@ namespace env::opt
 		return set(key, u);
 	}
 
-	view get(name key, view value)
+	view get(view key, view value)
 	{
 		return got(key) ? get(key) : value;
 	}
@@ -78,7 +78,7 @@ namespace env::opt
 		return got(key) ? get(key) : value;
 	}
 
-	long get(name key, long value, int base)
+	long get(view key, long value, int base)
 	{
 		return cast(key, value, [base](auto value)
 		{
@@ -86,7 +86,7 @@ namespace env::opt
 		});
 	}
 
-	bool set(name key, long value, int base)
+	bool set(view key, long value, int base)
 	{
 		return set(key, fmt::to_string(value, base));
 	}
@@ -104,7 +104,7 @@ namespace env::opt
 		return set(key, fmt::to_string(value, base));
 	}
 
-	float get(name key, float value)
+	float get(view key, float value)
 	{
 		return cast(key, value, [](auto value)
 		{
@@ -112,7 +112,7 @@ namespace env::opt
 		});
 	}
 
-	bool set(name key, float value, int digits)
+	bool set(view key, float value, int digits)
 	{
 		return set(key, fmt::to_string(value, digits));
 	}

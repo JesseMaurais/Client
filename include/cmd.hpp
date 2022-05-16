@@ -18,6 +18,7 @@ namespace env
 
 		string buffer;
 		vector cache;
+		int status;
 
 		page get(in, char = '\n', int = -1);
 		// Cache all lines in to end, return indices

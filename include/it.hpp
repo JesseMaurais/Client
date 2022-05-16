@@ -1,7 +1,7 @@
 #ifndef it_hpp
 #define it_hpp "Iterator Types"
 
-#include "fwd.hpp"
+#include "algo.hpp"
 
 namespace fwd
 {
@@ -18,41 +18,6 @@ namespace fwd
 		{
 			this->next();
 			return *this;
-		}
-	};
-
-	template <class Iterator> struct range : pair<Iterator>
-	{
-		using pair<Iterator>::pair;
-
-		auto size() const
-		{
-			return std::distance(this->first, this->second);
-		}
-
-		auto begin() const
-		{
-			return this->first;
-		}
-
-		auto end() const
-		{
-			return this->second;
-		}
-
-		template <class N> bool greater(N n) const
-		{
-			return this->second <= n;
-		}
-
-		template <class N> bool less(N n) const
-		{
-			return n < this->first;
-		}
-
-		template <class N> bool any(N n) const
-		{
-			return not greater(n) and not less(n);
 		}
 	};
 

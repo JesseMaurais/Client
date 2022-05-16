@@ -5,34 +5,29 @@
 
 namespace env::opt
 {
-	using name = fmt::diff::type;
-	using pair = fmt::diff::pair;
-	using view = fmt::string::view;
-	using span = view::span;
+	using view = fmt::view;
+	using pair = fmt::pair;
+	using span = fmt::span;
 
-	// String
-	view get(name, view);
-	bool set(name, view);
 	view get(pair, view);
 	bool set(pair, view);
+	view get(view, view);
+	bool set(view, view);
 
-	// Boolean
-	bool get(name, bool);
-	bool set(name, bool);
 	bool get(pair, bool);
 	bool set(pair, bool);
+	bool get(view, bool);
+	bool set(view, bool);
 
-	// Integer
-	long get(name, long, int base = 10);
-	bool set(name, long, int base = 10);
 	long get(pair, long, int base = 10);
 	bool set(pair, long, int base = 10);
+	long get(view, long, int base = 10);
+	bool set(view, long, int base = 10);
 
-	// Float
-	float get(name, float);
-	bool set(name, float, int digits = 6);
 	float get(pair, float);
 	bool set(pair, float, int digits = 6);
+	float get(view, float);
+	bool set(view, float, int digits = 6);
 };
 
 #endif // file

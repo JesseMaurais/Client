@@ -246,6 +246,41 @@ namespace fwd
 	// Ranges
 	//
 
+	template <class Iterator> struct range : pair<Iterator>
+	{
+		using pair<Iterator>::pair;
+
+		auto size() const
+		{
+			return std::distance(this->first, this->second);
+		}
+
+		auto begin() const
+		{
+			return this->first;
+		}
+
+		auto end() const
+		{
+			return this->second;
+		}
+
+		template <class N> bool greater(N n) const
+		{
+			return this->second <= n;
+		}
+
+		template <class N> bool less(N n) const
+		{
+			return n < this->first;
+		}
+
+		template <class N> bool any(N n) const
+		{
+			return not greater(n) and not less(n);
+		}
+	};
+
 	template
 	<
 		class Range, class Predicate

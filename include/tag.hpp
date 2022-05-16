@@ -5,17 +5,15 @@
 
 namespace fmt::tag
 {
-	bool got(long); // O (1)
-	bool got(view); // O log n
-	view get(long); // O (1)
-	view get(view); // O log n
-	long put(view); // O log n
-	long set(view); // O log n
+	bool got(view);
+	view get(view);
+	view put(view);
+	view set(view);
 
-	string::in::ref get(string::in::ref, char = eol);
+	input get(input, view = eol);
 	// Read all file lines to cache
 
-	string::out::ref put(string::out::ref, char = eol);
+	output put(output, view = eol);
 	// Write all cache lines to file
 }
 

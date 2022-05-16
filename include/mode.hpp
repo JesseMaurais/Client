@@ -8,7 +8,7 @@
 namespace env::file
 {
 	// Access modes
-	enum mode : int
+	enum mode
 	{
 		ex   = 1 << 000, // execute
 		wr   = 1 << 001, // write
@@ -26,6 +26,7 @@ namespace env::file
 		lnk  = 1 << 015, // symbolic link
 		reg  = 1 << 016, // regular file
 		sock = 1 << 017, // domain socket
+
 		rw   = rd | wr, // read/write
 		wo   = rw | ok, // read/write/exists
 		rwx  = rw | ex, // read/write/execute
@@ -50,7 +51,7 @@ namespace env::file
 	}
 
 	// Permissions
-	enum permit : int
+	enum permit
 	{
 		owner_r = owner(rd),
 		owner_w = owner(wr),
@@ -78,9 +79,9 @@ namespace env::file
 		return static_cast<permit>(other(static_cast<int>(mask)));
 	}
 
-	int to_flags(mode); // file open mode
-	int to_flags(permit); // file access permissions
-	fmt::string to_string(mode); // fopen style string
+	int to_mode(int); // file open mode
+	int to_permit(int); // file access permissions
+	fmt::string to_string(int); // fopen style string
 
 	// Check for access to the file at path
 	bool fail(fmt::string::view path, mode = ok);

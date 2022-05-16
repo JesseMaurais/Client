@@ -11,9 +11,9 @@ namespace env::opt
 	view program();
 	view config();
 
-	bool got(name);
-	view get(name);
-	bool put(name, view);
+	bool got(view);
+	view get(view);
+	bool put(view, view);
 
 	bool got(pair);
 	view get(pair);
@@ -21,7 +21,7 @@ namespace env::opt
 
 	inline auto arg(size_t argn = 0)
 	{
-		auto const argv = arguments();
+		const auto argv = arguments();
 		return argv[argn];
 	}
 
@@ -36,13 +36,13 @@ namespace env::opt
 		using span = fwd::span<command>;
 	};
 
-	view::vector put(int argc, char** argv, command::span);
+	fmt::vector put(int argc, char** argv, command::span);
 	// Put command line arguments into options
 
-	fmt::string::out::ref put(fmt::string::out::ref);
+	fmt::output put(fmt::output);
 	// Write options to output string
 
-	fmt::string::in::ref get(fmt::string::in::ref);
+	fmt::input get(fmt::input);
 	// Read options from input string
 };
 

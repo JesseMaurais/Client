@@ -3,6 +3,7 @@
 
 #include "file.hpp"
 #include "mode.hpp"
+#include "dir.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
 #include "sys.hpp"
@@ -346,7 +347,7 @@ namespace env::file
 				{
 					sys::err(here, "pclose");
 				}
-			})
+			});
 		}
 		else
 		if (mask & fifo)
@@ -359,14 +360,14 @@ namespace env::file
 			}
 			#else // UNIX
 			{
-				const auto flags = to_flags(mask & rw);
+				const auto flags = to_mode(mask & rw);
 				if (sys::fail(mkfifo(name.data(), flags)))
 				{
 					sys::err(here, "mkfifo", name);
 				}
 				else
 				{
-					return open(name, mask & ~fifo);
+					return open(name, mode(mask & ~fifo));
 				}
 			}
 			#endif // API
@@ -454,10 +455,14 @@ namespace env::file
 			}
 			else return fwd::make_unique<FILE>(f, [=](basic_ptr)
 			{
+				sys::uni::file::lock key;
 				key.l_type = F_UNLCK;
+				key.l_whence = SEEK_SET;
+				key.l_start = off;
+				key.l_len = sz;
 				if (key.set(fd))
 				{
-					sys::err(here, "FD_UNLCK", fd);
+					sys::err(here, "F_UNLCK", fd);
 				}
 			});
 		}
@@ -595,7 +600,7 @@ namespace env::file
 		fmt::string path;
 
 		#ifdef assert
-		assert(nullptr != f)
+		assert(nullptr != f);
 		#endif
 
 		const int fd = sys::fileno(f);
@@ -644,11 +649,12 @@ namespace env::file
 		}
 		#elif defined(__bsd__) || defined(__linux__)
 		{
+			using namespace std::literals;
 			static const auto pid = sys::getpid();
-			const auto link = "/proc/"s + pid + "/fd/" + fmt::to_string(fd);
+			const auto link = "/proc/"s +fmt::to_string(pid) + "/fd/" + fmt::to_string(fd);
 
-			path.resize(MAXLEN)
-			const auto n = readlink(link, path.data(), path.size());
+			path.resize(PATH_MAX);
+			const auto n = readlink(link.c_str(), path.data(), path.size());
 			if (sys::fail(n))
 			{
 				sys::err(here, "readlink", link);
@@ -677,9 +683,9 @@ test_unit(mode)
 test_unit(flags)
 {
 	using namespace env::file;
-	assert(to_flags(rw|un) == "w+");
-	assert(to_flags(rd) == "r");
-	assert(to_flags(rw|ok) == "x+");
+	assert(to_string(rw|un) == "w+");
+	assert(to_string(rd) == "r");
+	assert(to_string(rw|ok) == "x+");
 }
 test_unit(lock)
 {

@@ -6,6 +6,7 @@
 #include "meta.hpp"
 #include "tab.hpp"
 #include "err.hpp"
+#include <iomanip>
 
 #ifdef _WIN32
 #include "win/sync.hpp"
@@ -40,29 +41,24 @@ namespace env
 		}
 	}
 
-	fmt::string date::operator()(fmt::string::view format) const
+	fmt::output date::put(fmt::output out, fmt::view format) const
 	{
 		if (not fmt::terminated(format))
 		{
 			const auto buf = fmt::to_string(format);
-			return operator()(buf);
+			return put(out, buf);
 		}
+		return out << std::put_time(this, format.data());
+	}
 
-		fmt::string buf(8, 0);
-
-		for (int n = 2; n; --n)
+	fmt::input date::get(fmt::input in, fmt::view format)
+	{
+		if (not fmt::terminated(format))
 		{
-			auto sz = std::strftime(buf.data(), buf.size(), format.data(), this);
-			if (0 < sz)
-			{
-				buf.resize(sz);
-				break;
-			}
-			sz = buf.size() * 2;
-			buf.resize(sz, 0);
+			const auto buf = fmt::to_string(format);
+			return get(in, buf);
 		}
-
-		return buf;
+		return in >> std::get_time(this, format.data());
 	}
 
 	gmtime::gmtime(std::time_t t)
@@ -142,7 +138,7 @@ namespace env::clock
 		#endif
 	}
 
-	fwd::scope event(fmt::timer it, fwd::event f)
+	fwd::pop event(fmt::timer it, fwd::event f)
 	{
 		#ifdef _WIN32
 		{
@@ -173,17 +169,6 @@ namespace env::clock
 #ifdef test_unit
 test_unit(time)
 {
-	int n = 0;
-	{
-		auto scope = env::clock::event
-		(
-			{{ .tv_nsec = 1e8 }}, [&] { ++n; }
-		);
-
-		env::clock::wait({ .tv_sec = 1 });
-	}
-	assert(0 < n);
-
 	// Attempt to convert a number of common and standard time formats
 	const auto format = fmt::split("%n %t %c %x %X %D %F %R %T %Z %%");
 	// Check that the whitespace split works
@@ -192,7 +177,9 @@ test_unit(time)
 	env::localtime local;
 	for (auto f : format)
 	{
-		const auto s = local(f)
+		std::stringstream ss;
+		local.put(ss, f);
+		auto s = ss.str();
 		assert(not s.empty());
 	}
 }

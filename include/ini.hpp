@@ -9,15 +9,15 @@ namespace doc
 	{
 		fmt::view::vector values;
 		fmt::string::set cache;
-		fwd::group<int> keys;
+		fmt::view::group keys;
 
-		using pair = fwd::group<int>::key_type;
 		using string = fmt::string;
 		using view = fmt::view;
+		using pair = fmt::pair;
 
-		friend view::in::ref operator>>(view::in::ref, ref);
-		friend view::out::ref operator<<(view::out::ref, cref);
-		static view::in::ref getline(view::in::ref, string::ref);
+		friend fmt::input operator>>(fmt::input, ref);
+		friend fmt::output operator<<(fmt::output, cref);
+		static fmt::input getline(fmt::input, string::ref);
 
 		bool got(pair) const;
 		view get(pair) const;

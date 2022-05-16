@@ -166,7 +166,7 @@ namespace sys::uni::sig
 		sigval value;
 		value.sival_int = fd;
 		const auto error = fail(sigqueue(pid, n, value));
-		if (error) err(here);
+		if (error) sys::err(here);
 		return error;
 	}
 
@@ -200,7 +200,7 @@ namespace sys::uni::time
 		{
 			if (fail(timer_create(clock, this, &id)))
 			{
-				err(here, "timer_create");
+				sys::err(here, "timer_create");
 			}
 		}
 
@@ -208,7 +208,7 @@ namespace sys::uni::time
 		{
 			if (fail(timer_delete(id)))
 			{
-				err(here, "timer_delete");
+				sys::err(here, "timer_delete");
 			}
 		}
 	};
