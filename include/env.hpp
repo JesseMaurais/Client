@@ -1,33 +1,33 @@
 #ifndef env_hpp
 #define env_hpp "Environment Variables"
- 
+
 #include "fmt.hpp"
 
 namespace env
 {
-	bool got(fmt::string::view);
-	fmt::string::view get(fmt::string::view);
-	bool set(fmt::string::view);
-	bool put(fmt::string::view);
-	bool put(fmt::string::view, fmt::string::view);
-	fmt::string::view echo(fmt::string::view);
+	bool got(fmt::view);
+	fmt::view get(fmt::view);
+	bool set(fmt::view);
+	bool put(fmt::view);
+	bool put(fmt::view, fmt::view);
+	fmt::view echo(fmt::view);
 }
 
 namespace env::var
 {
-	fmt::string::view::span all();
-	fmt::string::view::span path();
-	fmt::string::view temp();
-	fmt::string::view pwd();
-	fmt::string::view base();
-	fmt::string::view root();
-	fmt::string::view home();
-	fmt::string::view user();
-	fmt::string::view host();
-	fmt::string::view lang();
-	fmt::string::view shell();
-	fmt::string::view domain();
-	fmt::string::view session();
+	fmt::span all();
+	fmt::span path();
+	fmt::view temp();
+	fmt::view pwd();
+	fmt::view base();
+	fmt::view root();
+	fmt::view home();
+	fmt::view user();
+	fmt::view host();
+	fmt::view lang();
+	fmt::view shell();
+	fmt::view domain();
+	fmt::view session();
 }
 
 #endif // file

@@ -5,17 +5,17 @@
 
 namespace env::usr
 {
-	fmt::string::view dir(fmt::string::view);
-	fmt::string::view::span dirs(fmt::string::view);
-	fmt::string::view current_desktop();
-	fmt::string::view menu_prefix();
-	fmt::string::view applications_menu();
-	fmt::string::view run_dir();
-	fmt::string::view data_home();
-	fmt::string::view config_home();
-	fmt::string::view cache_home();
-	fmt::string::view::span data_dirs();
-	fmt::string::view::span config_dirs();
+	fmt::view dir(fmt::view);
+	fmt::view::span dirs(fmt::view);
+	fmt::view current_desktop();
+	fmt::view menu_prefix();
+	fmt::view applications_menu();
+	fmt::view run_dir();
+	fmt::view data_home();
+	fmt::view config_home();
+	fmt::view cache_home();
+	fmt::span data_dirs();
+	fmt::span config_dirs();
 
 	inline auto desktop_dir()
 	{

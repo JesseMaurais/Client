@@ -8,31 +8,31 @@
 
 namespace fmt::path
 {
-	string::view::vector split(string::view);
-	string join(string::view::span);
-	string join(string::view::init);
+	vector split(view);
+	string join(span);
+	string join(init);
 }
 
 namespace fmt::dir
 {
-	string::view::vector split(string::view);
-	string join(string::view::span);
-	string join(string::view::init);
+	vector split(view);
+	string join(span);
+	string join(init);
 }
 
 namespace fmt::file
 {
-	string fifo(string::view);
+	string fifo(view);
 }
 
 namespace env::file
 {
 	using string = fmt::string;
-	using view = string::view;
+	using view = fmt::view;
+	using span = fmt::span;
+	using dirs = fwd::pair<view, span>;
 	using entry = fwd::predicate<view>;
 	using event = fwd::relation<view, mode>;
-	using edges = view::edges;
-	using span = view::span;
 
 	// Make path to directory, return extant root
 	view mkdir(view);
@@ -42,17 +42,17 @@ namespace env::file
 	constexpr auto stop = fwd::truth<view>;
 	constexpr auto next = fwd::falsity<view>;
 
-	edges paths(); // pwd, paths
-	edges config(); // config_home, config_dirs
-	edges data(); // data_home, data_dirs
+	dirs paths(); // pwd, path
+	dirs config(); // config_home, config_dirs
+	dirs data(); // data_home, data_dirs
 
 	// Iterate directory until predicate
 	bool find(view, entry);
 	bool find(span, entry);
-	bool find(edges, entry);
+	bool find(dirs, entry);
 
 	entry mask(mode);
-	entry regx(view);
+	entry regex(view);
 	entry to(string &);
 	entry to(string::vector &);
 	entry all(view, mode = ok, entry = next);

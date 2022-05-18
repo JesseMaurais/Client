@@ -1,6 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "err.hpp"
 #include "dir.hpp"
 #include "type.hpp"
 #include "env.hpp"
@@ -22,18 +23,18 @@
 
 namespace fmt::dir
 {
-	string join(string::view::span p)
+	string join(span p)
 	{
 		return fmt::join(p, sys::sep::dir);
 	}
 
-	string join(string::view::init p)
+	string join(init p)
 	{
-		string::view::vector v(p);
+		vector v(p);
 		return fmt::join(v, sys::sep::dir);
 	}
 
-	string::view::vector split(string::view u)
+	vector split(view u)
 	{
 		return fmt::split(u, sys::sep::dir);
 	}
@@ -41,18 +42,18 @@ namespace fmt::dir
 
 namespace fmt::path
 {
-	string join(string::view::span p)
+	string join(span p)
 	{
 		return fmt::join(p, sys::sep::path);
 	}
 
-	string join(string::view::init p)
+	string join(init p)
 	{
 		string::view::vector v(p);
 		return fmt::join(v, sys::sep::path);
 	}
 
-	string::view::vector split(string::view u)
+	vector split(view u)
 	{
 		return fmt::split(u, sys::sep::path);
 	}
@@ -60,7 +61,7 @@ namespace fmt::path
 
 namespace fmt::file
 {
-	string fifo(string::view name)
+	string fifo(view name)
 	{
 		#ifdef _WIN32
 		{
@@ -77,33 +78,31 @@ namespace fmt::file
 
 namespace env::file
 {
-	fmt::string::view::edges paths()
+	dirs paths()
 	{
 		return { env::var::pwd(), env::var::path() };
 	}
 
-	fmt::string::view::edges config()
+	dirs config()
 	{
 		return { env::usr::config_home(), env::usr::config_dirs() };
 	}
 
-	fmt::string::view::edges data()
+	dirs data()
 	{
 		return { env::usr::data_home(), env::usr::data_dirs() };
 	}
 
-	bool find(fmt::string::view path, entry check)
+	bool find(view path, entry check)
 	{
 		if (not fmt::terminated(path))
 		{
 			return find(fmt::to_string(path), check);
 		}
-		auto const c = path.data();
-
-		return fwd::any_of(sys::files(c), check);
+		return fwd::any_of(path.data(), check);
 	}
 
-	bool find(fmt::string::view::span paths, entry check)
+	bool find(span paths, entry check)
 	{
 		return fwd::any_of(paths, [check](auto path)
 		{
@@ -111,34 +110,34 @@ namespace env::file
 		});
 	}
 
-	bool find(fmt::string::view::edges paths, entry look)
+	bool find(dirs paths, entry check)
 	{
-		return find(paths.first, look) or find(paths.second, look);
+		return find(paths.first, check) or find(paths.second, check);
 	}
 
-	entry mask(mode am)
+	entry mask(mode mask)
 	{
-		return [am](fmt::string::view u)
+		return [mask](view u)
 		{
-			return not env::file::fail(u, am);
+			return not env::file::fail(u, mask);
 		};
 	}
 
-	entry regx(fmt::string::view u)
+	entry regex(view u)
 	{
-		auto const s = fmt::to_string(u);
-		auto const x = std::regex(s);
-		return [x](fmt::view u)
+		const auto s = fmt::to_string(u);
+		const auto x = std::regex(s);
+		return [x](view u)
 		{
-			std::cmatch cm;
-			auto const s = fmt::to_string(u);
-			return std::regex_search(s.data(), cm, x);
+			std::cmatch m;
+			const auto s = fmt::to_string(u);
+			return std::regex_search(s.data(), m, x);
 		};
 	}
 
-	entry to(fmt::string::vector& t)
+	entry to(string::vector& t)
 	{
-		return [&](fmt::string::view u)
+		return [&](view u)
 		{
 			auto s = fmt::to_string(u);
 			t.emplace_back(move(s));
@@ -146,29 +145,29 @@ namespace env::file
 		};
 	}
 
-	entry to(fmt::string& s)
+	entry to(string& s)
 	{
-		return [&](fmt::string::view u)
+		return [&](view u)
 		{
 			s = fmt::to_string(u);
 			return success;
 		};
 	}
 
-	entry all(fmt::string::view u, mode m, entry e)
+	entry all(view u, mode m, entry e)
 	{
-		return mask(m) || regx(u) || e;
+		return mask(m) || regex(u) || e;
 	}
 
-	entry any(fmt::string::view u, mode m, entry e)
+	entry any(view u, mode m, entry e)
 	{
 		return all(u, m, e);
 	}
 
-	fmt::string::view mkdir(fmt::string::view path)
+	view mkdir(view path)
 	{
-		std::stack<fmt::string::view> stack;
-		fmt::string buf;
+		std::stack<view> stack;
+		string buf;
 
 		auto folders = fmt::dir::split(path);
 		auto stem = path;
@@ -191,7 +190,7 @@ namespace env::file
 
 			buf = fmt::dir::join(folders);
 			auto const c = buf.data();
-			if (file::fail(sys::mkdir(c, S_IRWXU)))
+			if (sys::fail(sys::mkdir(c, S_IRWXU)))
 			{
 				sys::err(here, "mkdir", c);
 				stem = "";
@@ -202,19 +201,19 @@ namespace env::file
 		return stem;
 	}
 
-	bool rmdir(fmt::string::view dir)
+	bool rmdir(view dir)
 	{
-		std::deque<fmt::string> deque;
+		std::deque<string> deque;
 		deque.emplace_back(dir);
 
 		for (auto it = deque.begin(); it != deque.end(); ++it)
 		{
-			(void) find(*it, [&](fmt::string::view u)
+			(void) find(*it, [&](view u)
 			{
 				auto const path = fmt::dir::join({*it, u});
 				auto const c = path.data();
 				struct sys::stats st(c);
-				if (fail(st.ok))
+				if (sys::fail(st.ok))
 				{
 					sys::err(here, "stat", c);
 				}
@@ -239,7 +238,7 @@ namespace env::file
 		while (not empty(deque))
 		{
 			dir = deque.back();
-			auto const c = dir.data();
+			const auto c = dir.data();
 			if (sys::fail(sys::rmdir(c)))
 			{
 				sys::err(here, "rmdir", c);
@@ -259,11 +258,11 @@ test_unit(dir)
 	assert(not env::file::fail(env::var::home()));
 
 	auto const path = fmt::dir::split(__FILE__);
-	assert(not empty(path));
+	assert(not path.empty());
 	auto const name = path.back();
-	assert(not empty(name));
+	assert(not name.empty());
 	auto const program = env::opt::program();
-	assert(not empty(program));
+	assert(not program.empty());
 
 	assert(env::file::find(env::var::pwd(), [program](auto entry)
 	{

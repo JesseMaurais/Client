@@ -1,18 +1,16 @@
 #ifndef dig_hpp
 #define dig_hpp "Digital Format"
 
-#include <cmath>
-#include <limits>
-#include <type_traits>
 #include "fmt.hpp"
-#include "err.hpp"
+#include <limits>
+#include <cmath>
+#include <type_traits>
 
 namespace fmt
 {
 	template <class N> constexpr auto zero = N { };
-
-	template <class N> constexpr auto maxi = std::numeric_limits<N>::max();
-	template <class N> constexpr auto mini = std::numeric_limits<N>::lowest();
+	template <class N> constexpr auto greatest = std::numeric_limits<N>::max();
+	template <class N> constexpr auto least = std::numeric_limits<N>::lowest();
 
 	template <class N> constexpr bool is_integer = std::is_integral<N>::value;
 	template <class N> constexpr bool is_signed = std::is_signed<N>::value;
@@ -38,7 +36,7 @@ namespace fmt
 		static_assert(is_unsigned<N>);
 		using M = as_signed<N>;
 		#ifdef assert
-		assert(n <= static_cast<N>(maxi<M>));
+		assert(n <= static_cast<N>(greatest<M>));
 		#endif
 		return static_cast<M>(n);
 	}
@@ -49,8 +47,8 @@ namespace fmt
 		static_assert(is_integer<N> and is_integer<M>);
 		static_assert(is_signed<N> == is_signed<M>);
 		#ifdef assert
-		assert(n <= static_cast<M>(maxi<N>));
-		assert(static_cast<M>(mini<N>) <= n);
+		assert(n <= static_cast<M>(greatest<N>));
+		assert(static_cast<M>(least<N>) <= n);
 		#endif
 		return static_cast<N>(n);
 	}
@@ -123,25 +121,13 @@ namespace fmt
 	string to_string(double value, int precision);
 	string to_string(long double value, int precision);
 
-	long to_long(string::view, int base = 10);
-	long long to_llong(string::view, int base = 10);
-	unsigned long to_ulong(string::view, int base = 10);
-	unsigned long long to_ullong(string::view, int base = 10);
-	float to_float(string::view);
-	double to_double(string::view);
-	long double to_quad(string::view);
-
-	template <class N> bool fail(N n)
-	{
-		if constexpr (is_integer<N>)
-		{
-			return fail(static_cast<double>(n));
-		}
-		else
-		{
-			return std::isnan(n);
-		}
-	}
+	long to_long(view, int base = 10);
+	long long to_llong(view, int base = 10);
+	unsigned long to_ulong(view, int base = 10);
+	unsigned long long to_ullong(view, int base = 10);
+	float to_float(view);
+	double to_double(view);
+	long double to_quad(view);
 }
 
 #endif // file

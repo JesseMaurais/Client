@@ -111,7 +111,7 @@ namespace sys
 	constexpr auto unlink = ::_unlink;
 	constexpr auto write = ::_write;
 
-} // namespace sys
+}
 
 #else // POSIX
 
@@ -141,7 +141,7 @@ namespace sys
 
 	namespace uni
 	{
-		char const* strerr(int no);
+		const char* strerr(int no);
 	}
 
 	using size_t = ::size_t;
@@ -187,13 +187,9 @@ namespace sys
 	constexpr auto unlink = ::unlink;
 	constexpr auto write = ::write;
 
-} // namespace sys
+}
 
-#endif
-
-//
-// Common
-//
+#endif // OS
 
 using stat_t =
 #ifdef _WIN32
@@ -206,16 +202,21 @@ using stat_t =
 
 namespace sys
 {
-	char** environ();
-	pid_t exec(int fd[3], size_t argc, char const **argv);
-	bool kill(pid_t);
-	int wait(pid_t);
-
 	constexpr int invalid = -1;
 
 	inline bool fail(int value)
 	{
 		return invalid == value;
+	}
+
+	struct pipe : std::array<int, 2>
+	{
+		pipe(), ~pipe();
+	};
+
+	inline bool fail(const struct pipe &fd)
+	{
+		return fail(fd[0]) or fail(fd[1]);
 	}
 
 	struct stats : ::stat_t
@@ -232,15 +233,10 @@ namespace sys
 		mode_t um;
 	};
 
-	struct pipe : std::array<int, 2>
-	{
-		pipe(), ~pipe();
-	};
-
-	inline bool fail(const struct pipe &fd)
-	{
-		return fail(fd[0]) or fail(fd[1]);
-	}
+	char** environ();
+	pid_t exec(int fd[3], size_t argc, const char **argv);
+	bool kill(pid_t);
+	int wait(pid_t);
 }
 
 #endif // file

@@ -9,152 +9,13 @@
 
 namespace fwd
 {
-	//
-	// Data Matrix
-	//
-
-	template <class... Columns> class matrix
-	{
-		using tuple = std::tuple<vector<Columns>...>;
-		using index = std::make_index_sequence<std::tuple_size<tuple>::value>;
-
-		tuple table;
-
-		template <size_t... Count>
-		auto data(std::index_sequence<Count...>) const
-		{
-			return std::make_tuple(std::get<Count>(table).data()...);
-		}
-
-		template <size_t... Count>
-		auto size(std::index_sequence<Count...>) const
-		{
-			return std::make_tuple(std::get<Count>(table).size()...);
-		}
-
-		template <size_t... Count>
-		auto empty(std::index_sequence<Count...>) const
-		{
-			return std::make_tuple(std::get<Count>(table).empty()...);
-		}
-
-		template <size_t... Count>
-		auto at(size_t row, std::index_sequence<Count...>)
-		{
-			return std::forward_as_tuple(std::get<Count>(table).at(row)...);
-		}
-
-		template <size_t... Count>
-		auto back(std::index_sequence<Count...>)
-		{
-			return std::forward_as_tuple(std::get<Count>(table).back()...);
-		}
-
-		template <size_t... Count>
-		auto emplace_back(Columns... row, std::index_sequence<Count...>)
-		{
-			return std::forward_as_tuple(std::get<Count>(table).emplace_back(row)...);
-		}
-
-		template <size_t... Count>
-		void pop_back(std::index_sequence<Count...>)
-		{
-			(std::get<Count>(table).pop_back(), ...);
-		}
-
-		template <size_t... Count>
-		void swap(size_t i, size_t j, std::index_sequence<Count...>)
-		{
-			(std::swap(std::get<Count>(table).at(i), std::get<Count>(table).at(j)), ...);
-		}
-
-		template <size_t... Count>
-		void resize(size_t n, std::index_sequence<Count...>)
-		{
-			(std::get<Count>(table).resize(n), ...);
-		}
-
-	public:
-
-		auto size() const
-		{
-			auto const sizes = size(index());
-			return std::get<0>(sizes);
-		}
-
-		auto data() const
-		{
-			return data(index());
-		}
-
-		auto empty() const
-		{
-			return empty(index());
-		}
-
-		auto at(size_t row)
-		{
-			return at(row, index());
-		}
-
-		auto back()
-		{
-			return back(index());
-		}
-
-		auto emplace_back(Columns... row)
-		{
-			return emplace_back(row..., index());
-		}
-
-		void pop_back()
-		{
-			pop_back(index());
-		}
-
-		void swap(size_t i, size_t j)
-		{
-			swap(i, j, index());
-		}
-
-		void resize(size_t n)
-		{
-			resize(n, index());
-		}
-	};
-
-	//
-	// Graph Structure
-	//
-
-	template
-	<
-		class Node
-	>
-	using edges = std::pair<const Node, span<Node>>;
-
-	template
-	<
-		class Node, template <class> class Alloc = std::allocator
-	>
-	using graph = std::vector<pair<Node>, Alloc<Node>>;
-
-	template
-	<
-		class Node, template <class> class Alloc = std::allocator, template <class> class Sort = std::less
-	>
-	using group = std::map<pair<Node>, Node, Sort<pair<Node>>, Alloc<std::pair<const pair<Node>, Node>>>;
-
-	//
 	// Algorithms
-	//
 
 	template
 	<
 		class Type, class Iterator
 	>
 	auto split(span<Type> s, predicate<Type> p, Iterator out)
-	// Partition a span by predicate
 	{
 		auto begin = s.begin();
 		auto const end = s.end();
@@ -178,7 +39,6 @@ namespace fwd
 		template <class, template<class> class> class Vector = vector
 	>
 	auto split(span<Type> s, predicate<Type> p = std::empty<Type>)
-	// Partition a span by (empty) predicate
 	{
 		Vector<Type, Alloc> out;
 		auto const begin = std::back_inserter(out);
@@ -191,7 +51,6 @@ namespace fwd
 		class Type, class Iterator, template<class> class Identity = std::equal_to
 	>
 	auto split(span<Type> s, Type n, Iterator out)
-	// Partition a span by value
 	{
 		static Identity const q;
 		auto const p = std::bind(q, n);
@@ -203,7 +62,6 @@ namespace fwd
 		class Type, template <class> class Alloc = std::allocator
 	>
 	auto split(span<Type> s, Type n = { })
-	// Partition a span by value
 	{
 		vector<Type, Alloc> out;
 		auto const begin = std::back_inserter(out);
@@ -216,7 +74,6 @@ namespace fwd
 		class Type, class Iterator
 	>
 	auto join(span<span<Type>> s, Type n, Iterator out)
-	// Join spans with separator
 	{
 		for (auto i : s)
 		{
@@ -234,7 +91,6 @@ namespace fwd
 		class Type, template <class> class Alloc = std::allocator
 	>
 	auto join(span<span<Type>> s, Type n = { })
-	// Join spans with separator
 	{
 		vector<Type, Alloc> out;
 		auto const begin = std::back_inserter(out);
@@ -242,9 +98,7 @@ namespace fwd
 		return out;
 	}
 
-	//
-	// Ranges
-	//
+	// Range iterators
 
 	template <class Iterator> struct range : pair<Iterator>
 	{
@@ -320,17 +174,7 @@ namespace fwd
 		});
 	}
 
-	template <class Type> inline auto equal_to(Type right)
-	{
-		return [right](Type left)
-		{
-			return left == right;
-		};
-	}
-
-	//
-	// Container View
-	//
+	// Container view
 
 	template
 	<
@@ -342,7 +186,7 @@ namespace fwd
 		,
 		class Container = vector<Type, Alloc>
 		,
-		class Pointer = as_ptr<Container>
+		class Pointer = shared_ptr<Container>
 		,
 		class Size = typename Container::size_type
 		,

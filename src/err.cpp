@@ -1,14 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include "test.hpp"
+#include "err.hpp"
 #include "arg.hpp"
 #include "cmd.hpp"
 #include "tag.hpp"
 #include "type.hpp"
 #include "char.hpp"
 #include "sym.hpp"
-#include "err.hpp"
 #include "sync.hpp"
 #include <iostream>
 #include <fstream>

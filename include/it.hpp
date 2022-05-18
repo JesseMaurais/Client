@@ -21,20 +21,24 @@ namespace fwd
 		}
 	};
 
-	template <class Type> auto up_to(Type size, Type pos = 0, Type step = 1)
+	template
+	<
+		class Type, class Pair=pair<Type>
+	>
+	auto up_to(Type size, Type pos = 0, Type step = 1)
 	{
-		struct forward : pair<Type>
+		struct forward : Pair
 		{
-			using fwd::pair<Type>::pair;
+			using Pair::Pair;
 
 			auto value() const
 			{
-				return this->second;
+				return this->first;
 			}
 
 			void next()
 			{
-				this->second += this->first;
+				this->first += this->second;
 			}
 		};
 		#ifdef assert
@@ -42,11 +46,15 @@ namespace fwd
 		#endif
 		return range<iterate<forward>>
 		{
-			{ step, pos }, { step, size }
+			{ pos, step }, { size, step }
 		};
 	}
 
-	template <class Type> auto down_from(Type size, Type pos = 0, Type step = 1)
+	template
+	<
+		class Type, class Pair=pair<Type>
+	>
+	auto down_from(Type size, Type pos = 0, Type step = 1)
 	{
 		struct backward : pair<Type>
 		{
@@ -54,12 +62,12 @@ namespace fwd
 
 			auto value() const
 			{
-				return this->second - 1;
+				return this->first - 1;
 			}
 
 			void next()
 			{
-				this->second -= this->first;
+				this->first -= this->second;
 			}
 		};
 		#ifdef assert
@@ -67,7 +75,7 @@ namespace fwd
 		#endif
 		return range<iterate<backward>>
 		{
-			{ step, size }, { step, pos }
+			{ size, step }, { pos, step }
 		};
 	}
 

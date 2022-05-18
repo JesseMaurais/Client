@@ -20,13 +20,6 @@
 
 namespace fwd
 {
-	// Class union
-
-	template <class... Types> struct compose : Types...
-	{
-		using Types::Types...;
-	};
-
 	// Containers
 
 	template <class T, class S=T> using pair = std::pair<T, S>;
@@ -65,7 +58,7 @@ namespace fwd
 		,
 		template <class> class Alloc = std::allocator
 	>
-	using map = std::map<Key, Value, Order<Key>, Alloc<std::pair<Key, Value>>>;
+	using map = std::map<Key, Value, Order<Key>, Alloc<std::pair<const Key, Value>>>;
 
 	//
 	// Strings

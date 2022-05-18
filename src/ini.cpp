@@ -1,19 +1,11 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "err.hpp"
 #include "ini.hpp"
 #include "fmt.hpp"
 #include "tag.hpp"
-#include "err.hpp"
 #include "type.hpp"
-
-namespace
-{
-	bool header(fmt::view u)
-	{
-		return not u.empty() and u.front() == '[' and u.back() == ']';
-	}
-}
 
 namespace doc
 {
@@ -23,16 +15,18 @@ namespace doc
 		{
 			constexpr char omit = '#';
 			// Read past comment
-			view u = line;
+			auto u = fmt::view(line);
 			const auto begin = u.begin();
 			const auto end = u.end();
 			const auto it = fmt::skip(begin, end);
+			// Check line for content
 			if (it != end and omit != *it)
 			{
 				// Trim off whitespace
 				const auto t = u.find(omit);
 				u = u.substr(0, t);
 				u = fmt::trim(u);
+				// Has text?
 				if (not u.empty())
 				{
 					line = fmt::to_string(u);
@@ -41,6 +35,11 @@ namespace doc
 			}
 		}
 		return buf;
+	}
+
+	static bool header(fmt::view u)
+	{
+		return not u.empty() and u.front() == '[' and u.back() == ']';
 	}
 
 	fmt::input operator>>(fmt::input buf, ini::ref data)
@@ -56,12 +55,9 @@ namespace doc
 				group = fmt::tag::set(token);
 				continue;
 			}
-			// Create key pair for value entry
-			const auto pair = fmt::to_pair(token);
-			const auto key = fmt::tag::set(pair.first);
-			const auto value = pair.second;
-			if (value.empty())
-			// Create a new entry in the key table
+			// Extract key and value from pair
+			auto [key, value] = fmt::to_pair(token);
+			// Put entry into data table
 			data.set({ group, key }, value);
 		}
 		return buf;
@@ -69,12 +65,12 @@ namespace doc
 
 	fmt::output operator<<(fmt::output buf, ini::cref data)
 	{
-		auto last = fmt::tag::empty;
+		auto group = fmt::tag::empty;
 		for (auto [key, value] : data.keys)
 		{
-			if (key.first != last)
+			if (key.first != group)
 			{
-				last = key.first;
+				group = key.first;
 				buf << '[' << key.first << ']' << fmt::tag::eol;
 			}
 			buf << key.second << fmt::tag::assign << value << fmt::tag::eol;
@@ -96,20 +92,24 @@ namespace doc
 
 	bool ini::set(pair key, view value)
 	{
-		const auto it = cache.emplace(value).first;
+		const auto pos = cache.emplace(value);
 		#ifdef assert
-		assert(cache.end() != it);
+		assert(pos.second);
 		#endif
-		return put(key, *it);
+		return put(key, *pos.first) and pos.second;
 	}
 
 	bool ini::put(pair key, view value)
 	{
-		const auto it = keys.find(key);
+		auto it = keys.find(key);
 		if (keys.end() == it)
 		{
-			keys[key] = values.emplace_back(value);
-			return true;
+			auto pos = keys.emplace(key, value);
+			#ifdef assert
+			assert(pos.second);
+			#endif
+			it = pos.first;
+			return pos.second;
 		}
 		else
 		{

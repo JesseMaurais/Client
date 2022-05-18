@@ -1,5 +1,5 @@
 #ifndef fmt_hpp
-#define fmt_hpp "Standard Format"
+#define fmt_hpp "Data FormatS"
 
 #include "fwd.hpp"
 #include "algo.hpp"
@@ -84,15 +84,22 @@ namespace fmt
 	{
 		using type = Type;
 		using pair = fwd::pair<Type>;
-		using init = fwd::init<Type>;
 		using set = fwd::set<Type, Order, Alloc>;
 		using map = fwd::map<Type, Type, Order, Alloc>;
 		using span = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
-		using graph = fwd::graph<Type, Alloc>;
-		using group = fwd::group<Type, Alloc, Order>;
-		using edges = fwd::edges<Type>;
-		using page = fwd::page<Type, Alloc>;
+		using init = fwd::init<Type>;
+	};
+
+	template
+	<
+		class Type,
+		template <class> class Alloc = std::allocator,
+		template <class> class Order = std::less
+	>
+	struct extend : Type, layout<Type, Alloc, Order>
+	{
+		using Type::Type;
 	};
 
 	template
@@ -170,13 +177,16 @@ namespace fmt
 	using uint = ustring::view;
 
 	// alias
+	using pair = extend<view::pair>;
+	using vector = extend<view::vector>;
+	using span = extend<view::span>;
+	using map = view::map;
+	using init = view::init;
+	using set = view::set;
 	using input = view::input;
 	using output = view::output;
 	using read = view::read;
 	using write = view::write;
-	using span = view::span;
-	using vector = view::vector;
-	using pair = view::pair;
 
 	namespace tag
 	{

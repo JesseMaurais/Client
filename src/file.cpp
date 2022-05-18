@@ -1,11 +1,11 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "err.hpp"
 #include "file.hpp"
 #include "mode.hpp"
 #include "dir.hpp"
 #include "ptr.hpp"
-#include "err.hpp"
 #include "sys.hpp"
 #include "sync.hpp"
 #include "type.hpp"

@@ -25,18 +25,15 @@ namespace env::opt
 		return argv[argn];
 	}
 
-	struct command
+	struct cmd : fmt::layout<cmd>
 	{
 		long argn; // required arguments (or -1 for any number)
 		view dash; // short name with one dash (-c)
 		view name; // long name with dual dash (--config)
 		view text; // descriptive text for user help menu
-
-		using vector = fwd::vector<command>;
-		using span = fwd::span<command>;
 	};
 
-	fmt::vector put(int argc, char** argv, command::span);
+	fmt::vector put(int argc, char** argv, cmd::span);
 	// Put command line arguments into options
 
 	fmt::output put(fmt::output);

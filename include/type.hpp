@@ -51,9 +51,6 @@ namespace fmt
 		using size_type  = typename view::size_type;
 		using size_pair  = fwd::pair<size_type>;
 
-		static constexpr auto npos = string::npos;
-		static constexpr auto null = size_type{0};
-
 		static bool check(Char c, mask x = space);
 		// Check whether code $c is an $x
 
@@ -395,7 +392,7 @@ namespace fmt
 	inline string to_string(const wide& w)
 	{
 		string s;
-		for (auto c : type<char>::narrow(w)) s += c;
+		for (auto c : type<wchar_t>::narrow(w)) s += c;
 		return s;
 	}
 

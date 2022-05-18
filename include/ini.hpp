@@ -7,13 +7,12 @@ namespace doc
 {
 	struct ini : fmt::memory<ini>
 	{
-		fmt::view::vector values;
-		fmt::string::set cache;
-		fmt::view::group keys;
-
 		using string = fmt::string;
 		using view = fmt::view;
 		using pair = fmt::pair;
+
+		fwd::map<pair, view> keys;
+		string::set cache;
 
 		friend fmt::input operator>>(fmt::input, ref);
 		friend fmt::output operator<<(fmt::output, cref);

@@ -2,6 +2,8 @@
 #define err_hpp "Error Format"
 
 #include "fmt.hpp"
+#include "sym.hpp"
+#include <sstream>
 
 #ifdef assert
 #	undef assert
@@ -18,7 +20,16 @@
 #	define verify(...) (__VA_ARGS__)
 #endif
 
+#ifndef NDEBUG
+#	define test_unit(name) \
+		dynamic void test_##name([[maybe_unused]] fmt::span args)
+#	define except(expression) \
+		try { (void)(expression); assert(not #expression); } catch(...) { }
+#endif
+
 #define here fmt::where { __FILE__, __LINE__, __func__ }
+
+enum : bool { success = false, failure = true };
 
 namespace fmt
 {
@@ -36,13 +47,10 @@ namespace fmt
 namespace sys
 {
 	extern bool debug; // whether to write out errors
-	int perror(fmt::string::view, bool errn = true); // print out
+	int perror(fmt::view, bool errn = true); // print out
 
-	fmt::string::out::ref out(); // thread-local buffered output device
-	fmt::string::out::ref put(fmt::string::out::ref); // flush out error
-
-	class tracepoint;
-	tracepoint & trace(fmt::where);
+	fmt::output out(); // thread-local buffered output device
+	fmt::output put(fmt::output); // flush out error
 
 	template <typename... T> int warn(fmt::where at, T... va)
 	{
@@ -54,11 +62,5 @@ namespace sys
 		return debug ? perror(fmt::error(at, va...), true) : -1;
 	}
 }
-
-enum : bool { success = false, failure = true };
-
-#ifndef NDEBUG
-#	include "test.hpp"
-#endif
 
 #endif // file

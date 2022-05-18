@@ -1,20 +1,20 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+#include "err.hpp"
 #include "dig.hpp"
 #include <iomanip>
 #include <charconv>
 
 namespace
 {
-	std::errc const noerr { };
+	const std::errc noerr { };
 
-	template <typename T, typename C>
-	T to_fp(fmt::string::view u, T nan, C* cast)
+	template <class T, class C> T to_fp(fmt::view u, T nan, C* cast)
 	{
 		char *it;
 		auto ptr = u.data();
-		auto const value = cast(ptr, &it);
+		const auto value = cast(ptr, &it);
 		if (ptr == it)
 		{
 			sys::err(here, u);
@@ -23,8 +23,7 @@ namespace
 		return value;
 	}
 
-	template <typename T>
-	T to_base(fmt::string::view u, int base)
+	template <class T> T to_base(fmt::view u, int base)
 	{
 		auto begin = u.data();
 		auto end = begin + u.size();
@@ -39,8 +38,7 @@ namespace
 		return value;
 	}
 
-	template <typename T>
-	fmt::string from_base(T value, int base)
+	template <class T> fmt::string from_base(T value, int base)
 	{
 		fmt::string s(20, '\0');
 		do
@@ -55,8 +53,8 @@ namespace
 					s.resize(2*s.size(), '\0');
 					continue;
 				}
-				auto const error = std::make_error_code(code.ec);
-				auto const message = error.message();
+				const auto error = std::make_error_code(code.ec);
+				const auto message = error.message();
 				sys::warn(here, message);
 			}
 			s.resize(code.ptr - begin);
@@ -66,8 +64,7 @@ namespace
 		return s;
 	}
 
-	template <typename T>
-	fmt::string from_fp(T value, int precision)
+	template <class T> fmt::string from_fp(T value, int precision)
 	{
 		/* we somehow still have no compiler support
 		fmt::string s(20, '\0');

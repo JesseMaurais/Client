@@ -38,7 +38,7 @@ namespace sys::uni
 	{
 		~join()
 		{
-			auto that = fwd::voidptr;
+			auto that = fwd::null<void>;
 			const int no = pthread_join(id, &that);
 			if (no) err(no, here);
 

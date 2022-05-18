@@ -14,7 +14,7 @@
 namespace sys::net
 {
 	typedef char *pointer;
-	typedef char const *const_pointer;
+	typedef const char *const_pointer;
 	typedef ::SOCKET fd;
 	typedef int size;
 	typedef ::WSAPOLLFD pollfd;
@@ -130,7 +130,7 @@ namespace sys::net
 
 	constexpr auto invalid = -1;
 
-	inline bool fail(fd value) 
+	inline bool fail(fd value)
 	{
 		return invalid == value;
 	}
