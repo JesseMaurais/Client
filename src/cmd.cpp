@@ -7,12 +7,11 @@
 #include "opt.hpp"
 #include "dir.hpp"
 #include "type.hpp"
-#include "tag.hpp"
 #include "io.hpp"
 
 namespace env
 {
-	shell::page shell::get(in feed, char end, int count)
+	fmt::page shell::get(fmt::input in, char end, int count)
 	{
 		// Result in span at cache end
 		const auto first = cache.size();
@@ -20,7 +19,7 @@ namespace env
 		try // process can crash
 		{
 			std::string line;
-			while (count-- and std::getline(feed, line, end))
+			while (count-- and std::getline(in, line, end))
 			{
 				buffer.append(line);
 				buffer.push_back(end);
@@ -39,14 +38,14 @@ namespace env
 		{
 			buffer = error.what();
 		}
-		page result(first, second, &cache);
+		fmt::page result(first, second, &cache);
 		return result;
 	}
 
-	shell::page shell::run(span args)
+	fmt::page shell::run(fmt::span args)
 	{
-		string line;
-		for (view arg : args)
+		fmt::string line;
+		for (auto arg : args)
 		{
 			const bool spaces = fmt::any_of(arg);
 			constexpr auto quote = "\"";
@@ -60,18 +59,18 @@ namespace env
 		return lines;
 	}
 
-	shell::page shell::run(init args)
+	fmt::page shell::run(fmt::init args)
 	{
-		vector vec { args };
+		fmt::vector vec { args };
 		return run(vec);
 	}
 
-	shell::page shell::echo(view line)
+	fmt::page shell::echo(fmt::view line)
 	{
 		return run({ "echo", line });
 	}
 
-	shell::page shell::list(view name)
+	fmt::page shell::list(fmt::view name)
 	{
 		return run
 		(
@@ -83,7 +82,7 @@ namespace env
 		);
 	}
 
-	shell::page shell::copy(view path)
+	fmt::page shell::copy(fmt::view path)
 	{
 		return run
 		(
@@ -95,7 +94,7 @@ namespace env
 		);
 	}
 
-	shell::page shell::find(view pattern, view directory)
+	fmt::page shell::find(fmt::view pattern, fmt::view directory)
 	{
 		#ifdef _WIN32
 		{
@@ -108,7 +107,7 @@ namespace env
 		#endif
 	}
 
-	shell::page shell::which(view name)
+	fmt::page shell::which(fmt::view name)
 	{
 		return run
 		(
@@ -120,7 +119,7 @@ namespace env
 		);
 	}
 
-	shell::page shell::start(view path)
+	fmt::page shell::start(fmt::view path)
 	{
 		#ifdef _WIN32
 		{
@@ -128,7 +127,7 @@ namespace env
 		}
 		#else
 		{
-			string::view::pair const test [] =
+			const fmt::pair test [] =
 			{
 				{ "xfce", "exo-open" },
 				{ "gnome", "gnome-open" },
@@ -153,7 +152,7 @@ namespace env
 		#endif
 	}
 
-	shell::page shell::imports(view path)
+	fmt::page shell::imports(fmt::view path)
 	{
 		return run
 		(
@@ -165,7 +164,7 @@ namespace env
 		);
 	}
 
-	shell::page shell::exports(view path)
+	fmt::page shell::exports(fmt::view path)
 	{
 		return run
 		(
@@ -177,14 +176,14 @@ namespace env
 		);
 	}
 
-	bool shell::desktop(fmt::string::view name)
+	bool shell::desktop(fmt::view name)
 	{
 		auto const lower = fmt::to_lower(name);
 		auto const current = fmt::to_lower(env::usr::current_desktop());
 		return current.find(lower) != fmt::npos;
 	}
 
-	static fmt::string::view::vector envpick()
+	static fmt::vector envpick()
 	{
 		constexpr auto zenity = "zenity", qarma = "qarma";
 
@@ -205,10 +204,10 @@ namespace env
 		return env::opt::get(entry, value);
 	}
 
-	shell::page shell::dialog(span args)
+	fmt::page shell::dialog(fmt::span args)
 	{
 		// Look for any desktop utility program
-		view program;
+		fmt::view program;
 		static auto const session = envpick();
 		for (auto test : session)
 		{
@@ -220,7 +219,7 @@ namespace env
 		}
 		program = optpick(program);
 		// Append the command line
-		vector command;
+		fmt::vector command;
 		command.push_back(program);
 		for (auto arg : args)
 		{
@@ -235,9 +234,9 @@ namespace env
 		return fmt::join(pair, "=");
 	}
 
-	shell::page shell::select(view path, mode mask)
+	fmt::page shell::select(fmt::view path, mode mask)
 	{
-		vector command { "--file-selection" };
+		fmt::vector command { "--file-selection" };
 
 		if (not empty(path))
 		{
@@ -275,9 +274,9 @@ namespace env
 		}
 	};
 
-	shell::page shell::message(view text, msg type)
+	fmt::page shell::message(fmt::view text, msg type)
 	{
-		vector command { message_type(type) };
+		fmt::vector command { message_type(type) };
 
 		if (not empty(text))
 		{
@@ -287,9 +286,9 @@ namespace env
 		return dialog(command);
 	}
 
-	shell::page shell::enter(view start, view label, bool hide)
+	fmt::page shell::enter(fmt::view start, fmt::view label, bool hide)
 	{
-		vector command { param("--entry-text", start) };
+		fmt::vector command { param("--entry-text", start) };
 
 		if (not empty(label))
 		{
@@ -303,9 +302,9 @@ namespace env
 		return dialog(command);
 	}
 
-	shell::page shell::text(view path, view check, view font, txt type)
+	fmt::page shell::text(fmt::view path, fmt::view check, fmt::view font, txt type)
 	{
-		vector command { "--text-info" };
+		fmt::vector command { "--text-info" };
 
 		if (type == txt::html)
 		{
@@ -332,9 +331,9 @@ namespace env
 
 	}
 
-	shell::page shell::form(controls add, view text, view title)
+	fmt::page shell::form(controls add, fmt::view text, fmt::view title)
 	{
-		vector command { "--forms" };
+		fmt::vector command { "--forms" };
 
 		if (not empty(text))
 		{
@@ -355,9 +354,9 @@ namespace env
 		return dialog(command);
 	}
 
-	shell::page shell::notify(view text, view icon)
+	fmt::page shell::notify(fmt::view text, fmt::view icon)
 	{
-		vector command { "--notification" };
+		fmt::vector command { "--notification" };
 
 		if (not empty(text))
 		{
@@ -371,9 +370,9 @@ namespace env
 		return dialog(command);
 	}
 
-	shell::page shell::calendar(view text, view format, int day, int month, int year)
+	fmt::page shell::calendar(fmt::view text, fmt::view format, int day, int month, int year)
 	{
-		vector command { "--calendar" };
+		fmt::vector command { "--calendar" };
 
 		if (not empty(text))
 		{
@@ -399,9 +398,9 @@ namespace env
 		return dialog(command);
 	}
 
-	shell::page shell::color(view start, bool palette)
+	fmt::page shell::color(fmt::view start, bool palette)
 	{
-		vector command { "--color-selection" };
+		fmt::vector command { "--color-selection" };
 
 		if (not empty(start))
 		{
@@ -419,10 +418,11 @@ namespace env
 #ifdef test_unit
 test_unit(cmd)
 {
-	auto const list = env::shell().list(env::var::pwd());
-	assert(not empty(list));
-	auto const copy = env::shell().copy(__FILE__);
-	assert(not empty(copy));
+	env::shell sh;
+	const auto list = sh.list(env::var::pwd());
+	assert(not list.empty());
+	const auto copy = sh.copy(__FILE__);
+	assert(not copy.empty());
 	// Copy range starts at 0, file numbering at 1
 	assert(copy[__LINE__-1].find("Recursive find me text") != fmt::npos);
 }

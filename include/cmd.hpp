@@ -7,84 +7,75 @@ namespace env
 {
 	struct shell
 	{
-		using string   = fmt::string;
-		using view     = fmt::view;
-		using vector   = view::vector;
-		using span     = view::span;
-		using init     = view::init;
-		using page     = view::page;
-		using out      = view::out::ref;
-		using in       = view::in::ref;
-
-		string buffer;
-		vector cache;
+		fmt::string buffer;
+		fmt::vector cache;
 		int status;
 
-		page get(in, char = '\n', int = -1);
+		fmt::page get(fmt::input, char = '\n', int = -1);
 		// Cache all lines in to end, return indices
 
-		page run(span args);
-		// Run using vector view
+		fmt::page run(fmt::span args);
+		// Run using vector fmt::view
 
-		page run(init args);
-		// Run using initializers
+		fmt::page run(fmt::init args);
+		// Run using fmt::initializers
 
-		page echo(view line);
+		fmt::page echo(fmt::view line);
 		// Expand macros in line
 
-		page list(view directory = ".");
+		fmt::page list(fmt::view directory = ".");
 		// List files in directory
 
-		page copy(view path);
+		fmt::page copy(fmt::view path);
 		// Lines in file given by path
 
-		page find(view pattern, view directory = ".");
+		fmt::page find(fmt::view pattern, fmt::view directory = ".");
 		// Paths to matching files in directory
 
-		page which(view name);
+		fmt::page which(fmt::view name);
 		// Paths to executables with program name
 
-		page start(view path);
+		fmt::page start(fmt::view path);
 		// Preferred application for file type at path
 
-		page imports(view path);
+		fmt::page imports(fmt::view path);
 		// Dump imports in binary at path
 
-		page exports(view path);
+		fmt::page exports(fmt::view path);
 		// Dump exports in binary at path
 
-		static bool desktop(view name);
+		static bool desktop(fmt::view name);
 		// Whether name matches current session
 
-		page dialog(span command);
+		fmt::page dialog(fmt::span command);
 		// Open dialog with command
 
-		page notify(view text, view icon = "info");
+		fmt::page notify(fmt::view text, fmt::view icon = "info");
 		// Show the user a desktop notification
 
-		page calendar(view text = "", view format = "", int day = 0, int month = 0, int year = 0);
+		fmt::page calendar(fmt::view text = "", fmt::view format = "", int day = 0, int month = 0, int year = 0);
 		// User selects a calendar data
 
-		page color(view start = "", bool palette = true);
+		fmt::page color(fmt::view start = "", bool palette = true);
 		// User selects a color value
 
-		page enter(view start, view label = "", bool hide = false);
+		fmt::page enter(fmt::view start, fmt::view label = "", bool hide = false);
 		// User enters text into an edit box
 
-		using controls = fwd::span<fwd::pair<view>>;
-		page form(controls, view text = "", view title = "");
+		using controls = fwd::span<fwd::pair<fmt::view>>;
+		fmt::page form(controls, fmt::view text = "", fmt::view title = "");
 		// User enters data into a form
 
 		enum class msg { info, query, warn, error };
-		page message(view text, msg = msg::info);
+		fmt::page message(fmt::view text, msg = msg::info);
 		// Show a message box with buttons
 
 		enum class txt { none, edit, html };
-		page text(view path, view check = "", view font = "", txt = txt::none);
+		fmt::page text(fmt::view path, fmt::view check = "", fmt::view font = "", txt = txt::none);
 		// Show text file contents (like a EULA with checkbox)
 
 		enum class mode { none, many, dir, save };
-		page select(view start = "", mode = mode::none);
+		fmt::page select(fmt::view start = "", mode = mode::none);
 		// User selects file(s) from the system
 	};
 }

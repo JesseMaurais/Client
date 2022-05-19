@@ -97,9 +97,11 @@ namespace env::file
 	{
 		if (not fmt::terminated(path))
 		{
-			return find(fmt::to_string(path), check);
+			const auto buf = fmt::to_string(path);
+			return find(buf, check);
 		}
-		return fwd::any_of(path.data(), check);
+		const auto c = path.data();
+		return fwd::any_of(sys::files(c), check);
 	}
 
 	bool find(span paths, entry check)
