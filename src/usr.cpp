@@ -18,7 +18,7 @@
 
 namespace env::usr
 {
-	fmt::string::view dir(fmt::string::view name)
+	fmt::view dir(fmt::view name)
 	{
 		auto u = fmt::tag::empty;
 
@@ -108,9 +108,7 @@ namespace env::usr
 
 	#else // POSIX
 
-		using entry = fwd::pair<fmt::string::view>;
-
-		static std::map<fmt::string::view, entry> const map =
+		static std::map<fmt::view, fmt::pair> const map =
 		{
 			{"Cache-Home", {"XDG_CACHE_HOME", "$HOME/.cache"}},
 			{"Config-Dirs", {"XDG_CONFIG_DIRS", "/etc/xdg"}},
@@ -134,7 +132,7 @@ namespace env::usr
 			auto [xdg, path] = it->second;
 
 			u = env::get(xdg);
-			if (empty(u))
+			if (u.empty())
 			{
 				u = path;
 			}
@@ -142,7 +140,7 @@ namespace env::usr
 
 	#endif
 
-		if (empty(u))
+		if (u.empty())
 		{
 			u = env::get(name);
 		}
@@ -150,12 +148,12 @@ namespace env::usr
 		return env::echo(u);
 	}
 
-	fmt::string::view::span dirs(fmt::string::view name)
+	fmt::span dirs(fmt::view name)
 	{
-		thread_local fmt::string::view::vector buf;
+		thread_local fmt::vector buf;
 		buf.clear();
 
-		if (auto paths = dir(name); not empty(paths))
+		if (auto paths = dir(name); not paths.empty())
 		{
 			buf = fmt::path::split(paths);
 		}
@@ -170,20 +168,20 @@ namespace env::usr
 		return buf;
 	}
 
-	fmt::string::view current_desktop()
+	fmt::view current_desktop()
 	{
 		auto u = env::get("XDG_CURRENT_DESKTOP");
-		if (empty(u))
+		if (u.empty())
 		{
 			u = env::var::session();
 		}
 		return u;
 	}
 
-	fmt::string::view menu_prefix()
+	fmt::view menu_prefix()
 	{
 		auto u = env::get("XDG_MENU_PREFIX");
-		if (empty(u))
+		if (u.empty())
 		{
 			u = current_desktop();
 		}
@@ -195,14 +193,14 @@ namespace env::usr
 		return u;
 	}
 
-	fmt::string::view applications_menu()
+	fmt::view applications_menu()
 	{
 		thread_local fmt::string path;
 		if (path.empty())
 		{
 			const fmt::view prefix = menu_prefix();
 			const fmt::view basename = "applications.menu";
-			fmt::view::vector parts { prefix, basename };
+			fmt::vector parts { prefix, basename };
 			const auto file = fmt::join(parts, "-");
 			const auto found = env::file::find(env::file::config(), [&](auto dir)
 			{
@@ -218,29 +216,29 @@ namespace env::usr
 		return path;
 	}
 
-	fmt::string::view run_dir()
+	fmt::view run_dir()
 	{
 		thread_local fmt::string path;
 		auto u = dir("Runtime");
-		if (empty(u))
+		if (u.empty())
 		{
-			auto const temp = env::var::temp();
-			auto const user = env::var::user();
+			const auto temp = env::var::temp();
+			const auto user = env::var::user();
 			static auto const path = fmt::dir::join({temp, "run", user});
 			u = path;
 		}
 		return u;
 	}
 
-	fmt::string::view data_home()
+	fmt::view data_home()
 	{
 		auto u = env::get("XDG_DATA_HOME");
-		if (empty(u))
+		if (u.empty())
 		{
 			static fmt::string s;
-			if (empty(s))
+			if (s.empty())
 			{
-				auto const home = env::var::home();
+				const auto home = env::var::home();
 				s = fmt::dir::join({home, ".local", "share"});
 			}
 			u = s;
@@ -248,13 +246,13 @@ namespace env::usr
 		return u;
 	}
 
-	fmt::string::view config_home()
+	fmt::view config_home()
 	{
 		auto u = env::get("XDG_CONFIG_HOME");
-		if (empty(u))
+		if (u.empty())
 		{
 			static fmt::string s;
-			if (empty(s))
+			if (s.empty())
 			{
 				s = fmt::dir::join({env::var::home(), ".config"});
 			}
@@ -263,13 +261,13 @@ namespace env::usr
 		return u;
 	}
 
-	fmt::string::view cache_home()
+	fmt::view cache_home()
 	{
 		auto u = env::get("XDG_CACHE_HOME");
-		if (empty(u))
+		if (u.empty())
 		{
 			static fmt::string s;
-			if (empty(s))
+			if (s.empty())
 			{
 				s = fmt::dir::join({env::var::home(), ".cache"});
 			}
@@ -278,11 +276,11 @@ namespace env::usr
 		return u;
 	}
 
-	fmt::string::view::span data_dirs()
+	fmt::span data_dirs()
 	{
-		static fmt::string::view::vector t;
+		static fmt::vector t;
 		auto u = env::get("XDG_DATA_DIRS");
-		if (empty(u))
+		if (u.empty())
 		{
 			#ifdef _WIN32
 			{
@@ -298,18 +296,18 @@ namespace env::usr
 		return t;
 	}
 
-	fmt::string::view::span config_dirs()
+	fmt::span config_dirs()
 	{
 		auto u = env::get("XDG_CONFIG_DIRS");
-		if (empty(u))
+		if (u.empty())
 		{
 			#ifdef _WIN32
 			{
 				static fmt::string s;
-				if (empty(s))
+				if (s.empty())
 				{
-					auto const appdata = dir("AppData");
-					auto const local = dir("LocalAppData");
+					const auto appdata = dir("AppData");
+					const auto local = dir("LocalAppData");
 					s = fmt::path::join({appdata, local});
 				}
 				u = s;
@@ -321,7 +319,7 @@ namespace env::usr
 			#endif
 		}
 
-		static fmt::string::view::vector buf;
+		static fmt::vector buf;
 		buf = fmt::path::split(u);
 		return buf;
 	}
@@ -341,7 +339,7 @@ namespace env::usr
 		{ }
 	};
 
-	fmt::string::out::ref operator<<(fmt::string::out::ref out, head::cref obj)
+	fmt::output operator<<(fmt::output out, head::cref obj)
 	{
 		return out << '[' << obj.group << ']' << fmt::tag::eol;
 	}
@@ -354,7 +352,7 @@ namespace env::usr
 		{ }
 	};
 
-	fmt::string::out::ref operator<<(fmt::string::out::ref out, key::cref obj)
+	fmt::output operator<<(fmt::output out, key::cref obj)
 	{
 		return out << obj.entry.first << '=' << obj.entry.second << fmt::tag::eol;
 	}

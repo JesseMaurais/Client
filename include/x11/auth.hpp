@@ -7,12 +7,12 @@
 
 namespace x11
 {
-	fmt::string::view authority();
+	fmt::view authority();
 }
 
 namespace x11::auth
 {
-	struct info : fmt::struct_brief<info>
+	struct info : fmt::memory<info>
 	{
 		unsigned short family;
 		fmt::string address;

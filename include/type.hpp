@@ -155,6 +155,11 @@ namespace fmt
 			return fwd::range<iterator>(begin, end);
 		}
 
+		static auto widen(fmt::wide w)
+		{
+			return w;
+		}
+
 		static auto narrow(view w)
 		{
 			struct iterator
@@ -266,7 +271,7 @@ namespace fmt
 		return type<char>::count(u, v);
 	}
 
-	inline auto join(view::span t, view u = tag::empty)
+	inline string join(span t, view u = tag::empty)
 	{
 		return type<char>::join(t, u);
 	}

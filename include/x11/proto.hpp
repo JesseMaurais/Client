@@ -7,17 +7,17 @@ namespace x11
 {
 	using CreateWindow = Request
 	<
-		X_CreateWindow, xCreateWidowReq, sz_xCreateWindow
+		X_CreateWindow, xCreateWindowReq, sz_xCreateWindowReq
 	>;
 
 	using ChangeWindowAttributes = Request
 	<
-		X_ChangeWindowAttributes, xChangeWindowAttributesReq, sz_xChangeWindowAttributes
+		X_ChangeWindowAttributes, xChangeWindowAttributesReq, sz_xChangeWindowAttributesReq
 	>;
 
 	using GetWindowAttributes = Request
 	<
-		X_GetWindowAttributes, xGetWindowAttributesReq, sz_xGetWindowAttributes, xGetWindowAttributesReply, sz_xGetWindowAttributesReply
+		X_GetWindowAttributes, xGetWindowAttributesReq, sz_xGetWindowAttributesReq, xGetWindowAttributesReply, sz_xGetWindowAttributesReply
 	>;
 
 	using DestroyWindow = Request
@@ -52,7 +52,7 @@ namespace x11
 
 	using UnmapWindow = Request
 	<
-		X_UnmmapWindow
+		X_UnmapWindow
 	>;
 
 	using UnmapSubwindows = Request
@@ -72,12 +72,12 @@ namespace x11
 
 	using GetGeometry = Request
 	<
-		X_GetGeometry, xGetGeometryReq, sz_xGetGeometry, xGetGeometryReply, sz_GetGeometryReply
+		X_GetGeometry, xReq, sz_xReq, xGetGeometryReply, sz_xGetGeometryReply
 	>;
 
 	using QueryTree = Request
 	<
-		X_QueryTree, xQueryTreeReq, sz_xQueryTreeReq, xQueryTreeReply, sz_QueryTreeReply
+		X_QueryTree, xReq, sz_xReq, xQueryTreeReply, sz_xQueryTreeReply
 	>;
 
 	using InternAtom = Request
@@ -112,7 +112,7 @@ namespace x11
 
 	using SetSelectionOwner = Request
 	<
-		X_SetSelectionOwner, xSetSelectionOwnerReq, sz_xSetSelectionOwner
+		X_SetSelectionOwner, xSetSelectionOwnerReq, sz_xSetSelectionOwnerReq
 	>;
 
 	using GetSelectionOwner = Reply
@@ -147,7 +147,7 @@ namespace x11
 
 	using UngrabButton = Request
 	<
-		X_UngrabButton, xUgrabButtonReq, sz_xUngrabButtonReq
+		X_UngrabButton, xUngrabButtonReq, sz_xUngrabButtonReq
 	>;
 
 	using ChangeActivePointerGrab = Request
@@ -167,7 +167,7 @@ namespace x11
 
 	using GrabKey = Request
 	<
-		X_GrabKey, xGrabKeyReq, sz_xGrabKeyReq, xGrabKeyReply, xGrabKeyReply
+		X_GrabKey, xGrabKeyReq, sz_xGrabKeyReq
 	>;
 
 	using UngrabKey = Request
@@ -177,7 +177,7 @@ namespace x11
 
 	using AllowEvents = Request
 	<
-		X_AllowEvents, xAllowEvents, sz_xAllowEvents
+		X_AllowEvents, xAllowEventsReq, sz_xAllowEventsReq
 	>;
 
 	using GrabServer = Request
@@ -207,12 +207,12 @@ namespace x11
 
 	using WarpPointer = Request
 	<
-		X_WarpPointer, xWarpPointer, sz_xWarpPointer
+		X_WarpPointer, xWarpPointerReq, sz_xWarpPointerReq
 	>;
 
 	using SetInputFocus = Request
 	<
-		X_SetInputFocus, xSetInputFocus, sz_xSetInputFocus
+		X_SetInputFocus, xSetInputFocusReq, sz_xSetInputFocusReq
 	>;
 
 	using GetInputFocus = Reply
@@ -237,7 +237,7 @@ namespace x11
 
 	using QueryFont = Reply
 	<
-		X_QueryFont, xQueryFontReply, sz_xQueryfontReply
+		X_QueryFont, xQueryFontReply, sz_xQueryFontReply
 	>;
 
 	using QueryTextExtents = Request
@@ -307,7 +307,7 @@ namespace x11
 
 	using ClearArea = Request
 	<
-		X_ClearArea, xCleareAreaReq, sz_xCleareAreaReq
+		X_ClearArea, xClearAreaReq, sz_xClearAreaReq
 	>;
 
 	using CopyArea = Request
@@ -322,7 +322,7 @@ namespace x11
 
 	using PolyPoint = Request
 	<
-		X_PolyPoint, xPolyPointReq, sz_xPolyPointReq, 
+		X_PolyPoint, xPolyPointReq, sz_xPolyPointReq
 	>;
 
 	using PolyLine = Request
@@ -407,17 +407,17 @@ namespace x11
 
 	using InstallColormap = Request
 	<
-		X_InstallColormap, xInstallColormapReq, sz_xInstallColormapReq
+		X_InstallColormap
 	>;
 
 	using UninstallColormap = Request
 	<
-		X_UninstallColormap, xUninstallColormapReq, sz_xUninstallColormapReq
+		X_UninstallColormap
 	>;
 
-	using ListInstalledColormap = Request
+	using ListInstalledColormap = Reply
 	<
-		X_ListInstalledColormap, xListInstalledColormapReq, sz_xListInstalledColormapReq
+		X_ListInstalledColormaps, xListInstalledColormapsReply, sz_xListInstalledColormapsReply
 	>;
 
 	using AllocColor = Reply
@@ -450,9 +450,9 @@ namespace x11
 		X_StoreColors, xStoreColorsReq, sz_xStoreColorsReq
 	>;
 
-	using StoreNamedColors = Request
+	using StoreNamedColor = Request
 	<
-		X_StoreNamedColors, xStoreNamedColorsReq, sz_xStoreNamedColorsReq
+		X_StoreNamedColor, xStoreNamedColorReq, sz_xStoreNamedColorReq
 	>;
 
 	using QueryColors = Request
@@ -462,7 +462,7 @@ namespace x11
 
 	using LookupColor = Request
 	<
-		X_LookupColor, xLookupColorsReq, sz_xLookupColorsReq, xLookupColorReply, sz_xLookupColorReply
+		X_LookupColor, xLookupColorReq, sz_xLookupColorReq, xLookupColorReply, sz_xLookupColorReply
 	>;
 
 	using CreateCursor = Request
@@ -470,7 +470,7 @@ namespace x11
 		X_CreateCursor, xCreateCursorReq, sz_xCreateCursorReq
 	>;
 
-	using CreateCursor = Request
+	using CreateGlyphCursor = Request
 	<
 		X_CreateGlyphCursor, xCreateGlyphCursorReq, sz_xCreateGlyphCursorReq
 	>;
@@ -507,7 +507,7 @@ namespace x11
 
 	using GetKeyboardMapping = Request
 	<
-		X_GetKeyboardMapping, xGetKeyboardMappingReq, sz_xGetKeyboardMappingReq, xGetKeyboardMappingReply, sz_GetKeyboardMappingReply
+		X_GetKeyboardMapping, xGetKeyboardMappingReq, sz_xGetKeyboardMappingReq, xGetKeyboardMappingReply, sz_xGetKeyboardMappingReply
 	>;
 
 	using ChangeKeyboardControl = Request
@@ -517,7 +517,7 @@ namespace x11
 
 	using GetKeyboardControl = Reply
 	<
-		X_GetKeyboardControl, xGetKeyboardControlReply, sz_GetKeyboardControlReply
+		X_GetKeyboardControl, xGetKeyboardControlReply, sz_xGetKeyboardControlReply
 	>;
 
 	using Bell = Request
@@ -532,7 +532,7 @@ namespace x11
 
 	using GetPointerControl = Reply
 	<
-		X_GetPointerControl, xGetPointerControlReply, sz_GetPoniterControlReply
+		X_GetPointerControl, xGetPointerControlReply, sz_xGetPointerControlReply
 	>;
 
 	using SetScreenSaver = Request
@@ -557,12 +557,12 @@ namespace x11
 
 	using SetAccessControl = Request
 	<
-		X_SetAccessControl, xSetAccessControlRep, sz_xSetAccessControlRep
+		X_SetAccessControl, xSetAccessControlReq, sz_xSetAccessControlReq
 	>;
 
 	using SetCloseDownMode = Request
 	<
-		X_SetCloseDownMode, xSetCloseDownModeRep, sz_xSetCloseDownModeRep
+		X_SetCloseDownMode, xSetCloseDownModeReq, sz_xSetCloseDownModeReq
 	>;
 
 	using KillClient = Request

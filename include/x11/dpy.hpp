@@ -7,9 +7,9 @@ namespace x11
 {
 	fmt::string setup
 	(
-		fmt::string::io::ref io, 
-		fmt::string::view proto, 
-		fmt::string::view string
+		fmt::input io,
+		fmt::view proto,
+		fmt::view string
 	);
 }
 

@@ -7,23 +7,21 @@
 #	ifdef _WIN32
 #		define dynamic extern "C" __declspec(dllexport)
 #	else
-#		define dynamic extern "C" 
+#		define dynamic extern "C"
 #	endif
-#else
-#	warning Using linkage dynamic // permitted
 #endif
 
 namespace sys
 {
-	struct dll
+	struct lib
 	{
-		dll() = default;
-		dll(fmt::string::view);
-		~dll();
+		lib() = default;
+		lib(fmt::view);
+		~lib();
 
-		static dll find(fmt::string::view);
-	
-		template <class Type> auto sym(fmt::string::view name) const
+		static lib find(fmt::view);
+
+		template <class Type> auto sym(fmt::view name) const
 		{
 			Type *addr = nullptr;
 			// see pubs.opengroup.org
@@ -39,12 +37,12 @@ namespace sys
 	private:
 
 		void *ptr = nullptr;
-		void *sym(fmt::string::view) const;
+		void *sym(fmt::view) const;
 	};
 
-	dll & bin();
+	lib & bin();
 
-	template <class T> auto sym(fmt::string::view name)
+	template <class T> auto sym(fmt::view name)
 	{
 		return bin().sym<T>(name);
 	}

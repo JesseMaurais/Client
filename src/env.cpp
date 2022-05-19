@@ -23,61 +23,62 @@ namespace env
 {
 	static sys::rwlock lock;
 
-	bool got(fmt::string::view u)
+	bool got(fmt::view u)
 	{
 		if (not fmt::terminated(u))
 		{
-			auto const s = fmt::to_string(u);
+			const auto s = fmt::to_string(u);
 			return env::got(s);
 		}
-		auto const c = u.data();
-		auto const unlock = lock.reader();
-		auto const ptr = std::getenv(c);
+		const auto c = u.data();
+		const auto unlock = lock.reader();
+		const auto ptr = std::getenv(c);
 		return nullptr == ptr;
 	}
 
-	fmt::string::view get(fmt::string::view u)
+	fmt::view get(fmt::view u)
 	{
 		if (not fmt::terminated(u))
 		{
-			auto const s = fmt::to_string(u);
+			const auto s = fmt::to_string(u);
 			return env::get(s);
 		}
-		auto const c = u.data();
-		auto const unlock = lock.reader();
-		auto const ptr = std::getenv(c);
+		const auto c = u.data();
+		const auto unlock = lock.reader();
+		const auto ptr = std::getenv(c);
 		return nullptr == ptr ? "" : ptr;
 	}
 
-	bool set(fmt::string::view u)
+	bool set(fmt::view u)
 	{
 		if (not fmt::terminated(u))
 		{
 			return env::put(u);
 		}
-		auto const unlock = lock.writer();
-		auto const d = u.data();
-		auto c = const_cast<char*>(d);
+		const auto unlock = lock.writer();
+		const auto d = u.data();
+		const auto c = fwd::non_const(d);
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::string::view u)
+	bool put(fmt::view u)
 	{
 		static fmt::string::set buf;
-		auto const unlock = lock.writer();
-		auto it = buf.emplace(u).first;
-		auto d = it->data();
-		auto c = const_cast<char*>(d);
+		const auto unlock = lock.writer();
+		const auto it = buf.emplace(u).first;
+		const auto d = it->data();
+		const auto c = fwd::non_const(d);
 		return 0 != sys::putenv(c);
 	}
 
-	bool put(fmt::string::view u, fmt::string::view v)
+	bool put(fmt::view u, fmt::view v)
 	{
-		fmt::string::view::vector w { u, v };
-		return env::put(fmt::join(w, "="));
+		fmt::vector w { u, v };
+		const auto s = fmt::join(w, fmt::tag::assign);
+		return env::put(s);
 	}
 
-	fmt::string::view echo(fmt::string::view u)
+	fmt::view echo(fmt::view u)
 	{
 		static env::shell sh;
 		auto const p = sh.echo(u);
@@ -87,33 +88,33 @@ namespace env
 
 namespace env::var
 {
-	fmt::string::view::span all()
+	fmt::span all()
 	{
-		static thread_local fmt::string::view::vector local;
+		static thread_local fmt::vector local;
 		local.clear();
-		for (char** c = ::sys::environ(); *c; ++c) local.emplace_back(*c);
+		for (auto c = sys::environ(); *c; ++c) local.emplace_back(*c);
 		return local;
 	}
 
-	fmt::string::view::span path()
+	fmt::span path()
 	{
-		static thread_local fmt::string::view::vector t;
+		static thread_local fmt::vector t;
 		auto u = env::get("PATH");
 		t = fmt::path::split(u);
 		return t;
 	}
 
-	fmt::string::view temp()
+	fmt::view temp()
 	{
 		for (auto u : { "TMPDIR", "TEMP", "TMP" })
 		{
-			if (auto v = env::get(u); not empty(v))
+			if (auto v = env::get(u); not v.empty())
 			{
 				return v;
 			}
 		}
 		static fmt::string s;
-		if (empty(s))
+		if (s.empty())
 		{
 			#ifdef _WIN32
 			{
@@ -128,7 +129,7 @@ namespace env::var
 		return s;
 	}
 
-	fmt::string::view pwd()
+	fmt::view pwd()
 	{
 		#ifdef _WIN32
 		{
@@ -142,7 +143,7 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view home()
+	fmt::view home()
 	{
 		#ifdef _WIN32
 		{
@@ -155,7 +156,7 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view user()
+	fmt::view user()
 	{
 		#ifdef _WIN32
 		{
@@ -168,7 +169,7 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view host()
+	fmt::view host()
 	{
 		#ifdef _WIN32
 		{
@@ -187,7 +188,7 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view domain()
+	fmt::view domain()
 	{
 		#ifdef _WIN32
 		{
@@ -206,7 +207,7 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view base()
+	fmt::view base()
 	{
 		#ifdef _WIN32
 		{
@@ -219,7 +220,7 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view root()
+	fmt::view root()
 	{
 		#ifdef _WIN32
 		{
@@ -232,11 +233,11 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view lang()
+	fmt::view lang()
 	{
 		for (auto u : { "LC_ALL", "LC_MESSAGES", "LANG" })
 		{
-			if (auto v = env::get(u); not empty(v))
+			if (auto v = env::get(u); not v.empty())
 			{
 				return v;
 			}
@@ -244,7 +245,7 @@ namespace env::var
 		return fmt::tag::empty;
 	}
 
-	fmt::string::view shell()
+	fmt::view shell()
 	{
 		#ifdef _WIN32
 		{
@@ -257,7 +258,7 @@ namespace env::var
 		#endif
 	}
 
-	fmt::string::view session()
+	fmt::view session()
 	{
 		#ifdef _WIN32
 		{

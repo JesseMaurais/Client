@@ -16,16 +16,16 @@
 
 namespace sys
 {
-	dll & bin()
+	lib & bin()
 	{
-		static dll local;
+		static lib local;
 		return local;
 	}
 
-	dll::dll(fmt::string::view path)
+	lib::lib(fmt::view path)
 	{
-		auto const buf = fmt::to_string(path);
-		auto const s = buf.data();
+		const auto buf = fmt::to_string(path);
+		const auto s = buf.data();
 
 		#ifdef _WIN32
 		{
@@ -41,18 +41,18 @@ namespace sys
 			ptr = dlopen(s, RTLD_LAZY);
 			if (nullptr == ptr)
 			{
-				auto const e = dlerror();
+				const auto e = dlerror();
 				sys::warn(here, "dlopen", path, e);
 			}
 		}
 		#endif
 	}
 
-	dll::~dll()
+	lib::~lib()
 	{
 		#ifdef _WIN32
 		{
-			auto const h = static_cast<HMODULE>(ptr);
+			const auto h = static_cast<HMODULE>(ptr);
 			if (nullptr != h and not FreeLibrary(h))
 			{
 				sys::win::err(here, "FreeLibrary");
@@ -62,17 +62,17 @@ namespace sys
 		{
 			if (nullptr != ptr and dlclose(ptr))
 			{
-				auto const e = dlerror();
+				const auto e = dlerror();
 				sys::warn(here, "dlclose", e);
 			}
 		}
 		#endif
 	}
 
-	void *dll::sym(fmt::string::view name) const
+	void *lib::sym(fmt::string::view name) const
 	{
-		auto const buf = fmt::to_string(name);
-		auto const s = buf.data();
+		const auto buf = fmt::to_string(name);
+		const auto s = buf.data();
 
 		#ifdef _WIN32
 		{
@@ -87,7 +87,7 @@ namespace sys
 				}
 			}
 
-			auto const f = GetProcAddress(h, s);
+			const auto f = GetProcAddress(h, s);
 			if (nullptr == f)
 			{
 				sys::win::err(here, "GetProcAddress", name);
@@ -98,7 +98,7 @@ namespace sys
 		{
 			(void) dlerror();
 			auto f = dlsym(ptr, s);
-			auto const e = dlerror();
+			const auto e = dlerror();
 			if (nullptr != e)
 			{
 				sys::warn(here, "dlsym", name, e);
@@ -108,12 +108,12 @@ namespace sys
 		#endif
 	}
 
-	dll dll::find(fmt::string::view basename)
+	lib lib::find(fmt::view basename)
 	{
 		using namespace env::file;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
-		env::file::find(env::var::path(), regx(name) || to(name) || stop);
-		return fmt::string::view(name);
+		env::file::find(env::var::path(), regex(name) || to(name) || stop);
+		return fmt::view(name);
 	}
 }
 
@@ -127,8 +127,8 @@ test_unit(sym)
 	auto f = sys::sym<int()>("visible");
 	assert(nullptr != f);
 	// Cannot see static
-//	auto g = sys::sym<int()>("hidden");
-//	assert(nullptr == g);
+	auto g = sys::sym<int()>("hidden");
+	assert(nullptr == g);
 	// Callable object
 	assert(f() == hidden());
 }

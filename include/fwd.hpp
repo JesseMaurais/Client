@@ -20,8 +20,6 @@
 
 namespace fwd
 {
-	// Containers
-
 	template <class T, class S=T> using pair = std::pair<T, S>;
 	template <class Type> using init = std::initializer_list<Type>;
 	template <class Type> using span = std::span<Type, ~std::size_t{}>;
@@ -60,10 +58,6 @@ namespace fwd
 	>
 	using map = std::map<Key, Value, Order<Key>, Alloc<std::pair<const Key, Value>>>;
 
-	//
-	// Strings
-	//
-
 	template
 	<
 		class Char, template <class> class Traits = std::char_traits
@@ -79,10 +73,6 @@ namespace fwd
 		template <class> class Alloc = std::allocator
 	>
 	using basic_string = std::basic_string<Char, Traits<Char>, Alloc<Char>>;
-
-	//
-	// Input/Output
-	//
 
 	template
 	<

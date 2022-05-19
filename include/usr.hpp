@@ -6,7 +6,7 @@
 namespace env::usr
 {
 	fmt::view dir(fmt::view);
-	fmt::view::span dirs(fmt::view);
+	fmt::span dirs(fmt::view);
 	fmt::view current_desktop();
 	fmt::view menu_prefix();
 	fmt::view applications_menu();

@@ -4,12 +4,43 @@
 #include "fwd.hpp"
 #include "tmp.hpp"
 #include "ptr.hpp"
-#include <utility>
-#include <tuple>
 
 namespace fwd
 {
-	// Algorithms
+	template <class Iterator> struct range : pair<Iterator>
+	{
+		using pair<Iterator>::pair;
+
+		auto size() const
+		{
+			return std::distance(this->first, this->second);
+		}
+
+		auto begin() const
+		{
+			return this->first;
+		}
+
+		auto end() const
+		{
+			return this->second;
+		}
+
+		template <class N> bool greater(N n) const
+		{
+			return this->second <= n;
+		}
+
+		template <class N> bool less(N n) const
+		{
+			return n < this->first;
+		}
+
+		template <class N> bool any(N n) const
+		{
+			return not greater(n) and not less(n);
+		}
+	};
 
 	template
 	<
@@ -18,7 +49,7 @@ namespace fwd
 	auto split(span<Type> s, predicate<Type> p, Iterator out)
 	{
 		auto begin = s.begin();
-		auto const end = s.end();
+		const auto end = s.end();
 		for (auto it = begin; it != end; ++it)
 		{
 			if (p(*it))
@@ -98,43 +129,6 @@ namespace fwd
 		return out;
 	}
 
-	// Range iterators
-
-	template <class Iterator> struct range : pair<Iterator>
-	{
-		using pair<Iterator>::pair;
-
-		auto size() const
-		{
-			return std::distance(this->first, this->second);
-		}
-
-		auto begin() const
-		{
-			return this->first;
-		}
-
-		auto end() const
-		{
-			return this->second;
-		}
-
-		template <class N> bool greater(N n) const
-		{
-			return this->second <= n;
-		}
-
-		template <class N> bool less(N n) const
-		{
-			return n < this->first;
-		}
-
-		template <class N> bool any(N n) const
-		{
-			return not greater(n) and not less(n);
-		}
-	};
-
 	template
 	<
 		class Range, class Predicate
@@ -174,8 +168,6 @@ namespace fwd
 		});
 	}
 
-	// Container view
-
 	template
 	<
 		class Type
@@ -186,7 +178,7 @@ namespace fwd
 		,
 		class Container = vector<Type, Alloc>
 		,
-		class Pointer = shared_ptr<Container>
+		class Pointer = as_ptr<Container>
 		,
 		class Size = typename Container::size_type
 		,

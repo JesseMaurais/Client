@@ -233,7 +233,7 @@ namespace env::file
 		}
 
 		struct sys::stats state(path.data());
-		if (fail(state.ok))
+		if (sys::fail(state.ok))
 		{
 			return failure;
 		}
@@ -393,7 +393,7 @@ namespace env::file
 
 		const auto fd = sys::fileno(f);
 		#ifdef alert
-		alert(fail(fd));
+		alert(sys::fail(fd));
 		#endif
 
 		#ifdef _WIN32
@@ -480,7 +480,7 @@ namespace env::file
 
 		const auto fd = sys::fileno(f);
 		#ifdef alert
-		alert(fail(fd));
+		alert(sys::fail(fd));
 		#endif
 
 		if (0 == sz)

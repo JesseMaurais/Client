@@ -130,9 +130,9 @@ namespace doc
 	{
 		auto reader = global<Type>.reader();
 
-		if (auto const pos = fmt::to_size(id); fwd::in_range(reader->index, pos))
+		if (auto const pos = fmt::to_size(id); fmt::in_range(reader->index, pos))
 		{
-			if (auto const off = reader->index.at(pos); fwd::in_range(reader->item, off))
+			if (auto const off = reader->index.at(pos); fmt::in_range(reader->item, off))
 			{
 				#ifdef assert
 				assert(pos == reader->cross.at(off));

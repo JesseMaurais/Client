@@ -1,13 +1,10 @@
 #ifndef mode_hpp
 #define mode_hpp "Access Mode"
 
-#include <cstddef>
 #include "fmt.hpp"
-#include "tmp.hpp"
 
 namespace env::file
 {
-	// Access modes
 	enum mode
 	{
 		ex   = 1 << 000, // execute
@@ -50,7 +47,6 @@ namespace env::file
 		return (mask & rwx) << 0;
 	}
 
-	// Permissions
 	enum permit
 	{
 		owner_r = owner(rd),
@@ -80,14 +76,11 @@ namespace env::file
 	}
 
 	int to_mode(int); // file open mode
-	int to_permit(int); // file access permissions
+	int to_permit(int); // file permissions
 	fmt::string to_string(int); // fopen style string
 
 	// Check for access to the file at path
-	bool fail(fmt::string::view path, mode = ok);
-
-	// Adjustable file buffer size
-	fwd::variable<size_t>& width();
+	bool fail(fmt::view path, mode = ok);
 }
 
 #endif // file

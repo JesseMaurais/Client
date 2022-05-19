@@ -49,7 +49,7 @@ namespace fmt::path
 
 	string join(init p)
 	{
-		string::view::vector v(p);
+		vector v(p);
 		return fmt::join(v, sys::sep::path);
 	}
 
@@ -235,7 +235,7 @@ namespace env::file
 		}
 
 		bool ok = success;
-		while (not empty(deque))
+		while (not deque.empty())
 		{
 			dir = deque.back();
 			const auto c = dir.data();

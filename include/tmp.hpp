@@ -6,9 +6,9 @@
 
 namespace fwd
 {
-	template <class Type> auto equal_to(Type right)
+	template <class T> auto equal_to(T right)
 	{
-		return [right](Type left)
+		return [right](T left)
 		{
 			return left == right;
 		};

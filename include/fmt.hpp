@@ -17,8 +17,6 @@ namespace fmt
 
 		// access traits
 		using put = fwd::function<ref>;
-		using read = fwd::defer<cref>;
-		using write = fwd::defer<ref>;
 		using test = fwd::predicate<cref>;
 		using cache = fwd::predicate<ref>;
 		using order = fwd::relation<cref>;
@@ -93,34 +91,19 @@ namespace fmt
 
 	template
 	<
-		class Type,
-		template <class> class Alloc = std::allocator,
-		template <class> class Order = std::less
-	>
-	struct extend : Type, layout<Type, Alloc, Order>
-	{
-		using Type::Type;
-	};
-
-	template
-	<
 		class String,
 		class Char,
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator,
 		template <class> class Order = std::less,
-
 		class Memory = memory<String>,
 		class Stream = stream<Char, Traits>,
 		class Layout = layout<String, Alloc, Order>
 	>
 	struct basic_string_type : String, Memory, Stream, Layout
 	{
-		using input = typename Stream::input;
-		using output = typename Stream::output;
-		using order = typename Memory::order;
-		using read = typename Stream::read;
-		using write = typename Stream::write;
+		using line = fwd::line<Char, Traits, Alloc>;
+		using page = fwd::page<String, Alloc>;
 
 		using String::String;
 		basic_string_type(const String& s)
@@ -177,9 +160,9 @@ namespace fmt
 	using uint = ustring::view;
 
 	// alias
-	using pair = extend<view::pair>;
-	using vector = extend<view::vector>;
-	using span = extend<view::span>;
+	using pair = view::pair;
+	using vector = view::vector;
+	using span = view::span;
 	using map = view::map;
 	using init = view::init;
 	using set = view::set;
@@ -187,6 +170,8 @@ namespace fmt
 	using output = view::output;
 	using read = view::read;
 	using write = view::write;
+	using page = view::page;
+	using line = view::line;
 
 	namespace tag
 	{
