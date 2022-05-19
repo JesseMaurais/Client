@@ -62,7 +62,7 @@ namespace env
 		fmt::page enter(fmt::view start, fmt::view label = "", bool hide = false);
 		// User enters text into an edit box
 
-		using controls = fwd::span<fwd::pair<fmt::view>>;
+		using controls = fwd::span<fmt::pair>;
 		fmt::page form(controls, fmt::view text = "", fmt::view title = "");
 		// User enters data into a form
 

@@ -13,7 +13,7 @@ namespace doc
 	{
 		virtual std::type_index type() const = 0;
 		virtual std::ptrdiff_t size() const = 0;
-		virtual std::span<int> link(int n) const = 0;
+		virtual std::span<const int> link(int n) const = 0;
 		virtual bool contains(int n) const = 0;
 		virtual void destroy(int n) = 0;
 	};
@@ -27,12 +27,12 @@ namespace doc
 
 		std::type_index type() const override;
 		std::ptrdiff_t size() const override;
-		std::span<int> link(int n) const override;
+		std::span<const int> link(int n) const override;
 		bool contains(int n) const override;
 		void destroy(int n) override;
 
-		write_ptr writer(int n);
-		read_ptr reader(int n);
+		write_ptr writer(int n) const;
+		read_ptr reader(int n) const;
 		int emplace(Type &&);
 
 		static instance& self();

@@ -1,7 +1,7 @@
 #ifndef meta_hpp
 #define meta_hpp "Document Templates"
 #else // Do not include this header from another header!
-#error Included more than once. Did you include it from a header?
+#error Included more than once. Did you include it from a header? Do not!
 #endif
 
 #include "doc.hpp"
@@ -16,16 +16,16 @@ namespace doc
 
 	template <class Type> struct element : Type
 	{
-		fwd::vector<int> link;
-		/// Links to child elements
+		std::vector<int> link;
+		// Links to child elements
 		using Type::Type;
 	};
 
 	template <class Type> struct store
 	{
-		fwd::vector<element<Type>> item;
-		fwd::vector<std::ptrdiff_t> index;
-		fwd::vector<std::size_t> cross;
+		std::vector<element<Type>> item;
+		std::vector<std::ptrdiff_t> index;
+		std::vector<std::size_t> cross;
 	};
 
 	template <class Type> static sys::exclusive<store<Type>> global;
@@ -35,7 +35,7 @@ namespace doc
 
 	template <class Type> instance<Type>::instance()
 	{
-		registry.writer()->insert(typeid(Type), this);
+		registry.writer()->emplace(typeid(Type), this);
 	}
 
 	template <class Type> instance<Type>& instance<Type>::self()
@@ -54,9 +54,9 @@ namespace doc
 		return global<Type>.reader()->item.size();
 	}
 
-	template <class Type> std::span<int> instance<Type>::link(int n) const
+	template <class Type> std::span<const int> instance<Type>::link(int n) const
 	{
-		return reader(n)->link;
+		return global<Type>.reader()->item.at(n).link;
 	}
 
 	template <class Type> int instance<Type>::emplace(Type&& type)
@@ -100,13 +100,13 @@ namespace doc
 
 	template <class Type> void instance<Type>::destroy(int id)
 	{
-		auto data = global<Type>.writer();
-
-		auto const pos = fmt::to_size(id);
 		#ifdef assert
-		assert(data->contains(pos));
+		assert(contains(id));
 		#endif
 
+		auto data = global<Type>.writer();
+
+		const auto pos = fmt::to_size(id);
 		auto const off = data->index.at(pos);
 		data->item.at(off) = std::move(data->item.back());
 		data->cross.at(off) = data->cross.back();
@@ -130,9 +130,9 @@ namespace doc
 	{
 		auto reader = global<Type>.reader();
 
-		if (auto const pos = fmt::to_size(id); fmt::in_range(reader->index, pos))
+		if (auto pos = fmt::to_size(id); fmt::in_range(reader->index, pos))
 		{
-			if (auto const off = reader->index.at(pos); fmt::in_range(reader->item, off))
+			if (auto off = reader->index.at(pos); fmt::in_range(reader->item, off))
 			{
 				#ifdef assert
 				assert(pos == reader->cross.at(off));

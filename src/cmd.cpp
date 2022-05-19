@@ -335,20 +335,20 @@ namespace env
 	{
 		fmt::vector command { "--forms" };
 
-		if (not empty(text))
+		if (not text.empty())
 		{
 			command.emplace_back(param("--text", text));
 		}
-		if (not empty(title))
+		if (not title.empty())
 		{
 			command.emplace_back(param("--text", title));
 		}
 
-		std::string const prefix("--add-");
-		for (auto const& ctl : add)
+		fmt::string prefix("--add-");
+		for (auto ctl : add)
 		{
-			auto const key = prefix + fmt::to_string(ctl.second);
-			command.emplace_back(param(key, ctl.first));
+			//auto key = prefix + fmt::to_string(ctl.second);
+			//command.emplace_back(param(key, ctl.first));
 		}
 
 		return dialog(command);
