@@ -31,7 +31,7 @@ namespace doc
 		bool contains(int n) const override;
 		void destroy(int n) override;
 
-		write_ptr writer(int n) const;
+		write_ptr writer(int n);
 		read_ptr reader(int n) const;
 		int emplace(Type &&);
 

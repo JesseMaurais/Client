@@ -17,8 +17,10 @@ namespace doc
 	template <class Type> struct element : Type
 	{
 		std::vector<int> link;
-		// Links to child elements
 		using Type::Type;
+		element(Type && base)
+		: Type(base)
+		{ }
 	};
 
 	template <class Type> struct store
@@ -57,6 +59,22 @@ namespace doc
 	template <class Type> std::span<const int> instance<Type>::link(int n) const
 	{
 		return global<Type>.reader()->item.at(n).link;
+	}
+
+	template <class Type> typename instance<Type>::read_ptr instance<Type>::reader(int n) const
+	{
+		auto store = global<Type>.reader();
+		auto ptr = store->item.data() + store->index.at(n);
+		auto free = [s=global<Type>.reader()](fwd::as_ptr<const Type>){};
+		return fwd::make_shared(fwd::cast_as<const Type>(ptr), free);
+	}
+
+	template <class Type> typename instance<Type>::write_ptr instance<Type>::writer(int n)
+	{
+		auto store = global<Type>.reader();
+		auto ptr = store->item.data() + store->index.at(n);
+		auto free = [s=global<Type>.reader()](fwd::as_ptr<Type>){};
+		return fwd::make_shared(fwd::non_const<Type>(ptr), free);
 	}
 
 	template <class Type> int instance<Type>::emplace(Type&& type)
