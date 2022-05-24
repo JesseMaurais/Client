@@ -93,16 +93,6 @@ namespace
 				{
 					sys::out() << line << fmt::tag::eol;
 				}
-
-				if (0 < sh.status)
-				{
-					sys::out() << "Signal: " << sh.status << fmt::tag::eol;
-				}
-				else
-				if (sh.status < 0)
-				{
-					sys::out() << "Failed: " << sh.status << fmt::tag::eol;
-				}
 			}
 		}
 		catch (std::exception const& error)
@@ -129,7 +119,7 @@ int main(int argc, char** argv)
 	// Command line words
 	struct
 	{
-		const fmt::view
+		fmt::view
 			tests = "TESTS",
 			color = "color",
 			async = "async",
@@ -141,15 +131,15 @@ int main(int argc, char** argv)
 	} arg;
 
 	// Command line details
-	env::opt::cmd::vector parse
+	env::opt::cmd::vector parse =
 	{
-		{ 0, "h", arg.help, "Print command line usage then quit" },
-		{ 0, "p", arg.print, "Print all source tests then quit" },
-		{ 0, "q", arg.quiet, "Only print error messages" },
-		{ 0, "c", arg.color, "Print using color codes" },
-		{ 0, "a", arg.async, "Run tests asynchronously" },
-		{ 1, "t", arg.tools, _TOOLS " is replaced with argument" },
-		{ 0, "o", arg.host, "Host tests in this process" },
+		{ {}, 0, "h", arg.help, "Print command line usage then quit" },
+		{ {}, 0, "p", arg.print, "Print all source tests then quit" },
+		{ {}, 0, "q", arg.quiet, "Only print error messages" },
+		{ {}, 0, "c", arg.color, "Print using color codes" },
+		{ {}, 0, "a", arg.async, "Run tests asynchronously" },
+		{ {}, 1, "t", arg.tools, _TOOLS " is replaced with argument" },
+		{ {}, 0, "o", arg.host, "Host tests in this process" },
 	};
 
 	// Command line parsing
