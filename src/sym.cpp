@@ -7,6 +7,7 @@
 #include "fmt.hpp"
 #include "dir.hpp"
 #include "type.hpp"
+
 #ifdef _WIN32
 #include "win.hpp"
 #else
@@ -112,7 +113,7 @@ namespace sys
 	{
 		using namespace env::file;
 		fmt::string name = fmt::to_string(basename) + sys::ext::share;
-		env::file::find(env::var::path(), regex(name) || to(name) || stop);
+		env::file::find(env::path(), regex(name) || to(name) || stop);
 		return fmt::view(name);
 	}
 }

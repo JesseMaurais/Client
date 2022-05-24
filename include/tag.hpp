@@ -10,10 +10,10 @@ namespace fmt::tag
 	view put(view);
 	view set(view);
 
-	input get(input, view = eol);
+	input get(input, view = "\n");
 	// Read all file lines to cache
 
-	output put(output, view = eol);
+	output put(output, view = "\n");
 	// Write all cache lines to file
 }
 

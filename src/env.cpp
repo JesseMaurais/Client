@@ -6,7 +6,7 @@
 #include "usr.hpp"
 #include "opt.hpp"
 #include "arg.hpp"
-#include "cmd.hpp"
+#include "exe.hpp"
 #include "ini.hpp"
 #include "dir.hpp"
 #include "fmt.hpp"
@@ -80,15 +80,11 @@ namespace env
 
 	fmt::view echo(fmt::view u)
 	{
-		static env::shell sh;
-		auto const p = sh.echo(u);
-		return p.empty() ? fmt::tag::empty : p[0];
+		const auto p = env::exe::echo(u);
+		return p.empty() ? "" : p.front();
 	}
-}
 
-namespace env::var
-{
-	fmt::span all()
+	fmt::span vars()
 	{
 		static thread_local fmt::vector local;
 		local.clear();
@@ -118,11 +114,11 @@ namespace env::var
 		{
 			#ifdef _WIN32
 			{
-				s = fmt::dir::join({env::var::root(), "Temp"});
+				s = fmt::dir::join({env::root(), "Temp"});
 			}
 			#else
 			{
-				s = fmt::dir::join({env::var::base(), "tmp"});
+				s = fmt::dir::join({env::base(), "tmp"});
 			}
 			#endif
 		}
@@ -147,7 +143,7 @@ namespace env::var
 	{
 		#ifdef _WIN32
 		{
-			return env::get("USERPROFILE");
+			return env::get("UserHome");
 		}
 		#else
 		{
@@ -160,7 +156,7 @@ namespace env::var
 	{
 		#ifdef _WIN32
 		{
-			return env::get("USERHOME");
+			return env::get("UserProfile");
 		}
 		#else
 		{
@@ -173,7 +169,7 @@ namespace env::var
 	{
 		#ifdef _WIN32
 		{
-			return env::get("COMPUTERNAME");
+			return env::get("ComputerName");
 		}
 		#else
 		{
@@ -192,7 +188,7 @@ namespace env::var
 	{
 		#ifdef _WIN32
 		{
-			return env::get("USERDOMAIN");
+			return env::get("UserDomain");
 		}
 		#else
 		{
@@ -211,7 +207,7 @@ namespace env::var
 	{
 		#ifdef _WIN32
 		{
-			return env::get("SYSTEMDRIVE");
+			return env::get("SystemDrive");
 		}
 		#else
 		{
@@ -224,7 +220,7 @@ namespace env::var
 	{
 		#ifdef _WIN32
 		{
-			return env::get("SYSTEMROOT");
+			return env::get("SystemRoot");
 		}
 		#else
 		{
@@ -275,7 +271,7 @@ namespace env::var
 #ifdef test_unit
 test_unit(env)
 {
-	assert(env::get("PATH") == fmt::path::join(env::var::path()));
+	assert(env::get("PATH") == fmt::path::join(env::path()));
 	assert(env::get("PATH") == env::echo("PATH"));
 }
 #endif

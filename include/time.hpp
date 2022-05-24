@@ -1,7 +1,6 @@
 #ifndef time_hpp
 #define time_hpp "Time & Date Format"
 
-#include "fwd.hpp"
 #include "fmt.hpp"
 #include "tmp.hpp"
 #include "ptr.hpp"
@@ -13,8 +12,8 @@ namespace fmt
 {
 	struct date : fwd::zero<std::tm>
 	{
-		static inline auto table = std::tuple
-		(
+		static inline std::tuple table
+		{
 			&std::tm::tm_year,
 			&std::tm::tm_mon,
 			&std::tm::tm_mday,
@@ -24,16 +23,16 @@ namespace fmt
 			&std::tm::tm_min,
 			&std::tm::tm_sec,
 			&std::tm::tm_isdst
-		);
+		};
 	};
 
 	struct time : fwd::zero<std::timespec>
 	{
-		static inline auto table = std::tuple
-		(
+		static inline std::tuple table
+		{
 			&std::timespec::tv_sec,
 			&std::timespec::tv_nsec
-		);
+		};
 	};
 
 	struct timer
@@ -41,11 +40,11 @@ namespace fmt
 		time it_interval;
 		time it_value;
 
-		static inline auto table = std::tuple
-		(
+		static inline std::tuple table
+		{
 			&timer::it_interval,
 			&timer::it_value
-		);
+		};
 	};
 }
 
@@ -60,12 +59,8 @@ namespace env
 
 	struct date : fmt::date
 	{
-		fmt::output put(fmt::output, fmt::view) const;
-		// Convert to string using format
-
-		fmt::input get(fmt::input, fmt::view);
-		// Convert from string using format
-
+		fmt::access operator()(fmt::view);
+		// Stream format accessor
 		using fmt::date::date;
 	};
 
@@ -82,15 +77,12 @@ namespace env
 		// Convert to local from time point
 		using date::date;
 	};
-}
 
-namespace env::clock
-{
 	void wait(fmt::time);
-	// Suspend execution for an amount of time
+	// Suspend execution for some time
 
 	fwd::pop event(fmt::timer, fwd::event);
-	// Invoke function on a periodic timer
+	// Invoke an event on a periodic timer
 }
 
 #endif // file

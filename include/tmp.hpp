@@ -6,14 +6,6 @@
 
 namespace fwd
 {
-	template <class T> auto equal_to(T right)
-	{
-		return [right](T left)
-		{
-			return left == right;
-		};
-	}
-
 	template <class T> struct type_of
 	{
 		using type = T;

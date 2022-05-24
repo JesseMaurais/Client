@@ -10,7 +10,7 @@
 
 #ifdef _WIN32
 #include "win/sync.hpp"
-#else // UNIX
+#else
 #include "uni/signal.hpp"
 #include "uni/time.hpp"
 #endif
@@ -41,24 +41,22 @@ namespace env
 		}
 	}
 
-	fmt::output date::put(fmt::output out, fmt::view format) const
+	fmt::access date::operator()(fmt::view format)
 	{
-		if (not fmt::terminated(format))
+		return
 		{
-			const auto buf = fmt::to_string(format);
-			return put(out, buf);
-		}
-		return out << std::put_time(this, format.data());
-	}
-
-	fmt::input date::get(fmt::input in, fmt::view format)
-	{
-		if (not fmt::terminated(format))
-		{
-			const auto buf = fmt::to_string(format);
-			return get(in, buf);
-		}
-		return in >> std::get_time(this, format.data());
+			[=](fmt::input in)->fmt::input
+			{
+				const auto s = fmt::to_string(format);
+				return in >> std::get_time(this, s.data());
+			}
+			,
+			[=](fmt::output out)->fmt::output
+			{
+				const auto s = fmt::to_string(format);
+				return out << std::put_time(this, s.data());
+			}
+		};
 	}
 
 	gmtime::gmtime(std::time_t t)
@@ -71,7 +69,7 @@ namespace env
 				sys::err(here, "gmtime_s");
 			}
 		}
-		#else // STDC
+		#else
 		{
 			#ifdef __STDC_LIB_EXT1__
 			if (gmtime_s(&t, this))
@@ -95,7 +93,7 @@ namespace env
 				sys::err(here, "localtime_s");
 			}
 		}
-		#else // STDC
+		#else
 		{
 			#ifdef __STDC_LIB_EXT1__
 			if (localtime_s(&t, this))
@@ -108,10 +106,7 @@ namespace env
 		}
 		#endif
 	}
-}
 
-namespace env::clock
-{
 	void wait(fmt::time tv)
 	{
 		#ifdef _WIN32
@@ -123,7 +118,7 @@ namespace env::clock
 			#endif
 			Sleep(msec);
 		}
-		#else // UNIX
+		#else
 		{
 			const auto div = std::div(tv.tv_nsec, 1e3L);
 			const auto usec = std::fma(tv.tv_sec, 1e6L, div.quot);
@@ -151,7 +146,7 @@ namespace env::clock
 			const auto h = sys::sync().reader()->timer();
 			return [t=sys::win::timer(h, f, t.quot, p.quot)] { };
 		}
-		#else // UNIX
+		#else
 		{
 			struct intern : sys::uni::time::event
 			{
@@ -178,7 +173,7 @@ test_unit(time)
 	for (auto f : format)
 	{
 		std::stringstream ss;
-		local.put(ss, f);
+		ss << local(f);
 		auto s = ss.str();
 		assert(not s.empty());
 	}

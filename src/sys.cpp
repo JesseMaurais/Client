@@ -4,9 +4,10 @@
 #include "err.hpp"
 #include "sys.hpp"
 #include "ptr.hpp"
+
 #ifdef _WIN32
 #include "win.hpp"
-#else // UNIX
+#else
 #include "uni.hpp"
 #endif
 

@@ -110,7 +110,6 @@ namespace sys
 	constexpr auto umask = ::_umask;
 	constexpr auto unlink = ::_unlink;
 	constexpr auto write = ::_write;
-
 }
 
 #else // POSIX
@@ -186,7 +185,6 @@ namespace sys
 	constexpr auto umask = ::umask;
 	constexpr auto unlink = ::unlink;
 	constexpr auto write = ::write;
-
 }
 
 #endif // OS

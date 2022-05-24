@@ -28,7 +28,7 @@ namespace env::usr
 
 		static std::map<fmt::string::view, entry> const map =
 		{
-			{ "AccountPictures", entry{FOLDERID_AccountPictures, "%AppData%\\Microsoft\\Winodws\\AccountPictures"}},
+			{ "AccountPictures", entry{FOLDERID_AccountPictures, "%AppData%\\Microsoft\\Windows\\AccountPictures"}},
 			{ "AdminTools", entry{FOLDERID_AdminTools, "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools"}},
 			{ "AppDataDesktop", entry{FOLDERID_AppDataDesktop, "%LocalAppData%\\Desktop"}},
 			{ "AppDataDocuments", entry{FOLDERID_AppDataDocuments, "%LocalAppData%\\Documents"}},
@@ -173,7 +173,7 @@ namespace env::usr
 		auto u = env::get("XDG_CURRENT_DESKTOP");
 		if (u.empty())
 		{
-			u = env::var::session();
+			u = env::session();
 		}
 		return u;
 	}
@@ -222,8 +222,8 @@ namespace env::usr
 		auto u = dir("Runtime");
 		if (u.empty())
 		{
-			const auto temp = env::var::temp();
-			const auto user = env::var::user();
+			const auto temp = env::temp();
+			const auto user = env::user();
 			static auto const path = fmt::dir::join({temp, "run", user});
 			u = path;
 		}
@@ -238,7 +238,7 @@ namespace env::usr
 			static fmt::string s;
 			if (s.empty())
 			{
-				const auto home = env::var::home();
+				const auto home = env::home();
 				s = fmt::dir::join({home, ".local", "share"});
 			}
 			u = s;
@@ -254,7 +254,7 @@ namespace env::usr
 			static fmt::string s;
 			if (s.empty())
 			{
-				s = fmt::dir::join({env::var::home(), ".config"});
+				s = fmt::dir::join({env::home(), ".config"});
 			}
 			u = s;
 		}
@@ -269,7 +269,7 @@ namespace env::usr
 			static fmt::string s;
 			if (s.empty())
 			{
-				s = fmt::dir::join({env::var::home(), ".cache"});
+				s = fmt::dir::join({env::home(), ".cache"});
 			}
 			u = s;
 		}
@@ -284,7 +284,7 @@ namespace env::usr
 		{
 			#ifdef _WIN32
 			{
-				u = env::get("ALLUSERSPROFILE");
+				u = env::get("AllUsersProfile");
 			}
 			#else
 			{
@@ -363,17 +363,17 @@ test_unit(usr)
 	std::ofstream out { ".ini" };
 
 	out	<< head("Fake Environment")
-		<< key("home", env::var::home())
-		<< key("user", env::var::user())
-		<< key("root", env::var::root())
-		<< key("domain", env::var::domain())
-		<< key("host", env::var::host())
-		<< key("pwd", env::var::pwd())
-		<< key("lang", env::var::lang())
-		<< key("shell", env::var::shell())
-		<< key("tmpdir", env::var::temp())
-		<< key("rootdir", env::var::base())
-		<< key("session", env::var::session())
+		<< key("home", env::home())
+		<< key("user", env::user())
+		<< key("root", env::root())
+		<< key("domain", env::domain())
+		<< key("host", env::host())
+		<< key("pwd", env::pwd())
+		<< key("lang", env::lang())
+		<< key("shell", env::shell())
+		<< key("tmpdir", env::temp())
+		<< key("rootdir", env::base())
+		<< key("session", env::session())
 		<< std::endl;
 
 	out	<< head("Desktop")

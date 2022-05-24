@@ -4,6 +4,7 @@
 #include <memory>
 #include <functional>
 #include <type_traits>
+#include <span>
 
 namespace fwd
 {
@@ -29,6 +30,11 @@ namespace fwd
 		assert(nullptr != ptr);
 		#endif
 		return const_cast<as_ptr<Type>>(ptr);
+	}
+
+	template <class Type> std::span<Type> to_span(std::initializer_list<Type> in)
+	{
+		return { non_const(in.begin()), non_const(in.end()) };
 	}
 
 	template <class Type, int Byte = 0> struct zero : Type

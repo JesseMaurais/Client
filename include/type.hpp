@@ -109,10 +109,13 @@ namespace fmt
 		// Split strings in $u delimited by $v
 
 		static string replace(view u, view v, view w);
-		// Replace in $u all occurrances of $v with $w
+		// Replace in $u all occurrences of $v with $w
 
 		static size_pair embrace(view u, view v);
 		// Position in $u with front and back braces in $v
+
+		static Char getline(input in, string& line, view delims);
+		// Read characters into buffer until a delimiter
 
 		static size_type length(Char headbyte);
 		// Find the multibyte length from first
@@ -294,6 +297,11 @@ namespace fmt
 	inline auto embrace(view u, view v)
 	{
 		return type<char>::embrace(u, v);
+	}
+
+	inline char getline(input in, string& line, view delims)
+	{
+		return type<char>::getline(in, line, delims);
 	}
 
 	inline auto to_pair(view u, view v = tag::assign)

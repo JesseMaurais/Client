@@ -554,7 +554,7 @@ namespace fmt
 
 	namespace io
 	{
-		template <int... Char> auto& set(string::out::ref out)
+		template <int... Char> output set(output out)
 		{
 			return ((out << C0::ESC << C1::CSI) << ... << Char) << CSI::SGR;
 		}

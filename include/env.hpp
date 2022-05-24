@@ -11,11 +11,7 @@ namespace env
 	bool put(fmt::view);
 	bool put(fmt::view, fmt::view);
 	fmt::view echo(fmt::view);
-}
-
-namespace env::var
-{
-	fmt::span all();
+	fmt::span vars();
 	fmt::span path();
 	fmt::view temp();
 	fmt::view pwd();

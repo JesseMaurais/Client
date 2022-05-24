@@ -24,7 +24,7 @@ namespace sys
 		template <class Type> auto sym(fmt::view name) const
 		{
 			Type *addr = nullptr;
-			// see pubs.opengroup.org
+			// see pubs.OpenGroup.org
 			*(void**)(&addr) = sym(name);
 			return addr;
 		}

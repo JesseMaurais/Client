@@ -4,49 +4,81 @@
 #include "fwd.hpp"
 #include "tmp.hpp"
 #include "ptr.hpp"
+#include <iterator>
 
 namespace fwd
 {
-	template <class Iterator> struct range : pair<Iterator>
+	template <class It> struct range : pair<It>
 	{
-		using pair<Iterator>::pair;
+		using pair = pair<It>;
+		using pair::pair;
 
-		auto size() const
+		bool less(It it) const
 		{
-			return std::distance(this->first, this->second);
+			return it < pair::first;
+		}
+
+		bool greater(It it) const
+		{
+			return pair::second < it;
+		}
+
+		bool excludes(It it) const
+		{
+			return greater(it) or less(it);
+		}
+
+		bool contains(It it) const
+		{
+			return not excludes(it);
+		}
+
+		auto empty() const
+		{
+			return pair::first == pair::second;
+		}
+
+		auto diff() const
+		{
+			return std::distance(pair::first, pair::second);
 		}
 
 		auto begin() const
 		{
-			return this->first;
+			return pair::first;
 		}
 
 		auto end() const
 		{
-			return this->second;
+			return pair::second;
 		}
 
-		template <class N> bool greater(N n) const
+		auto rbegin() const
 		{
-			return this->second <= n;
+			return std::reverse_iterator(begin());
 		}
 
-		template <class N> bool less(N n) const
+		auto rend() const
 		{
-			return n < this->first;
+			return std::reverse_iterator(rend());
 		}
 
-		template <class N> bool any(N n) const
+		auto reverse() const
 		{
-			return not greater(n) and not less(n);
+			return range(rbegin(), rend());
 		}
 	};
 
+	template <class Type> auto reverse(span<Type> s)
+	{
+		return range(s.rbegin(), s.rend());
+	}
+
 	template
 	<
-		class Type, class Iterator
+		class Type, class It
 	>
-	auto split(span<Type> s, predicate<Type> p, Iterator out)
+	auto split(span<Type> s, predicate<Type> p, It out)
 	{
 		auto begin = s.begin();
 		const auto end = s.end();
@@ -54,12 +86,14 @@ namespace fwd
 		{
 			if (p(*it))
 			{
-				++out = Type(begin, it);
+				++ out = Type(begin, it);
 				begin = std::next(it);
 			}
 		}
 		return out;
 	}
+
+	template <class Type> auto empty(Type it) { return std::empty(it); }
 
 	template
 	<
@@ -69,63 +103,63 @@ namespace fwd
 		,
 		template <class, template<class> class> class Vector = vector
 	>
-	auto split(span<Type> s, predicate<Type> p = std::empty<Type>)
+	auto split(span<Type> s, predicate<Type> p = empty<Type>)
 	{
 		Vector<Type, Alloc> out;
-		auto const begin = std::back_inserter(out);
-		auto const end = split(s, p, begin);
+		auto it = std::back_inserter(out);
+		(void) split(s, p, it);
 		return out;
 	}
 
 	template
 	<
-		class Type, class Iterator, template<class> class Identity = std::equal_to
+		class Type, class It, template<class> class Id = std::equal_to
 	>
-	auto split(span<Type> s, Type n, Iterator out)
+	auto split(span<Type> s, Type tok, It it)
 	{
-		static Identity const q;
-		auto const p = std::bind(q, n);
-		return split(s, p, out);
+		constexpr Id id;
+		auto p = std::bind(id, tok);
+		return split(s, p, it);
 	}
 
 	template
 	<
 		class Type, template <class> class Alloc = std::allocator
 	>
-	auto split(span<Type> s, Type n = { })
+	auto split(span<Type> s, Type tok = { })
 	{
 		vector<Type, Alloc> out;
-		auto const begin = std::back_inserter(out);
-		auto const end = split(s, n, begin);
+		auto it = std::back_inserter(out);
+		(void) split(s, tok, it);
 		return out;
 	}
 
 	template
 	<
-		class Type, class Iterator
+		class Type, class It
 	>
-	auto join(span<span<Type>> s, Type n, Iterator out)
+	auto join(span<span<Type>> s, Type tok, It it)
 	{
 		for (auto i : s)
 		{
 			for (auto j : i)
 			{
-				++out = j;
+				++it = j;
 			}
-			++out = n;
+			++it = tok;
 		}
-		return out;
+		return it;
 	}
 
 	template
 	<
 		class Type, template <class> class Alloc = std::allocator
 	>
-	auto join(span<span<Type>> s, Type n = { })
+	auto join(span<span<Type>> s, Type tok = { })
 	{
 		vector<Type, Alloc> out;
-		auto const begin = std::back_inserter(out);
-		auto const end = join(s, n, begin);
+		auto it = std::back_inserter(out);
+		(void) join(s, tok, it);
 		return out;
 	}
 
@@ -167,75 +201,6 @@ namespace fwd
 			return p(obj.*off);
 		});
 	}
-
-	template
-	<
-		class Type
-		,
-		template <class> class Alloc = std::allocator
-		,
-		class View = span<Type>
-		,
-		class Container = vector<Type, Alloc>
-		,
-		class Pointer = as_ptr<Container>
-		,
-		class Size = typename Container::size_type
-		,
-		class Base = pair<Size>
-	>
-	class page : Base
-	{
-		Pointer that;
-
-	public:
-
-		page(Size begin, Size end, Pointer ptr)
-		: Base(begin, end), that(ptr)
-		{ }
-
-		bool empty() const { return this->second == this->first; }
-
-		auto size() const { return this->second - this->first; }
-
-		auto begin() const { return that->data() + this->first; }
-
-		auto end() const { return that->data() + this->second; }
-
-		operator View() const
-		{
-			return { begin(), end() };
-		}
-
-		auto operator[](std::ptrdiff_t index) const
-		{
-			#ifdef assert
-			assert(size() > index)
-			assert(index > -1);
-			#endif
-			return that->at(this->first + index);
-		}
-	};
-
-	template
-	<
-		class Char
-		,
-		template <class> class Traits = std::char_traits
-		,
-		template <class> class Alloc = std::allocator
-		,
-		class View = basic_string_view<Char, Traits>
-		,
-		class Container = basic_string<Char, Traits, Alloc>
-		,
-		class Pointer = as_ptr<Container>
-		,
-		class Size = typename Container::size_type
-		,
-		class Base = pair<Size>
-	>
-	using line = page<Char, Alloc, View, Container, Pointer, Size, Base>;
 }
 
 #endif // file

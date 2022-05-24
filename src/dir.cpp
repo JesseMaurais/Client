@@ -12,11 +12,8 @@
 #include "sync.hpp"
 #ifdef _WIN32
 #include "win/file.hpp"
-#else
+#else //POSIX
 #include "uni/dirent.hpp"
-#ifdef __linux__
-#include "uni/notify.hpp"
-#endif
 #endif
 #include <regex>
 #include <stack>
@@ -28,10 +25,9 @@ namespace fmt::dir
 		return fmt::join(p, sys::sep::dir);
 	}
 
-	string join(init p)
+	string join(init n)
 	{
-		vector v(p);
-		return fmt::join(v, sys::sep::dir);
+		return join(fwd::to_span(n));
 	}
 
 	vector split(view u)
@@ -47,10 +43,9 @@ namespace fmt::path
 		return fmt::join(p, sys::sep::path);
 	}
 
-	string join(init p)
+	string join(init n)
 	{
-		vector v(p);
-		return fmt::join(v, sys::sep::path);
+		return join(fwd::to_span(n));
 	}
 
 	vector split(view u)
@@ -80,7 +75,7 @@ namespace env::file
 {
 	dirs paths()
 	{
-		return { env::var::pwd(), env::var::path() };
+		return { env::pwd(), env::path() };
 	}
 
 	dirs config()
@@ -100,8 +95,7 @@ namespace env::file
 			const auto buf = fmt::to_string(path);
 			return find(buf, check);
 		}
-		const auto c = path.data();
-		return fwd::any_of(sys::files(c), check);
+		return fwd::any_of(sys::files(path.data()), check);
 	}
 
 	bool find(span paths, entry check)
@@ -255,25 +249,25 @@ namespace env::file
 #ifdef test_unit
 test_unit(dir)
 {
-	assert(not env::file::fail(env::var::temp()));
-	assert(not env::file::fail(env::var::pwd()));
-	assert(not env::file::fail(env::var::home()));
+	assert(not env::file::fail(env::temp()));
+	assert(not env::file::fail(env::pwd()));
+	assert(not env::file::fail(env::home()));
 
-	auto const path = fmt::dir::split(__FILE__);
+	const auto path = fmt::dir::split(__FILE__);
 	assert(not path.empty());
-	auto const name = path.back();
+	const auto name = path.back();
 	assert(not name.empty());
-	auto const program = env::opt::program();
+	const auto program = env::opt::program();
 	assert(not program.empty());
 
-	assert(env::file::find(env::var::pwd(), [program](auto entry)
+	assert(env::file::find(env::pwd(), [program](auto entry)
 	{
 		return fmt::dir::split(entry).back() == program;
 	}));
 
-	auto const temp = fmt::dir::join({env::var::temp(), "my", "test", "dir"});
-	if (std::empty(temp)) return;
-	auto const stem = env::file::mkdir(temp);
+	const auto temp = fmt::dir::join({env::temp(), "my", "test", "dir"});
+	if (temp.empty()) return;
+	const auto stem = env::file::mkdir(temp);
 //	assert(not empty(stem.first));
 //	assert(not empty(stem.second));
 	assert(not env::file::rmdir(stem));

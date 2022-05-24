@@ -1,8 +1,7 @@
 #ifndef fmt_hpp
-#define fmt_hpp "Data FormatS"
+#define fmt_hpp "Data Formats"
 
 #include "fwd.hpp"
-#include "algo.hpp"
 #include "tmp.hpp"
 
 namespace fmt
@@ -16,7 +15,7 @@ namespace fmt
 		using cref = typename std::add_lvalue_reference<typename std::add_const<Type>::type>::type;
 
 		// access traits
-		using put = fwd::function<ref>;
+		using access = fwd::function<ref>;
 		using test = fwd::predicate<cref>;
 		using cache = fwd::predicate<ref>;
 		using order = fwd::relation<cref>;
@@ -40,24 +39,23 @@ namespace fmt
 		using str = memory<fwd::basic_stringstream<Char, Traits>>;
 
 		// access traits
+		using address = typename addr::cptr;
 		using input = typename in::ref;
 		using output = typename out::ref;
-		using read = typename in::put;
-		using write = typename out::put;
-		using address = typename addr::cptr;
+		using read = typename in::access;
+		using write = typename out::access;
+		using access = fwd::pair<read, write>;
 
 		template <class Iterator>
-		static output put(output buf, Iterator begin, Iterator end, address tok)
-		// Put $tok from $begin to $end in $buf
+		static output put(output out, Iterator begin, Iterator end, address tok)
 		{
-			auto it = std::ostream_iterator(buf, tok);
+			auto it = std::ostream_iterator(out, tok);
 			std::copy(begin, end, it);
-			return buf;
+			return out;
 		}
 
 		template <class Iterator>
 		static output put(output out, Iterator begin, Iterator end, write tok)
-		// Put $tok from $begin to $end in $buf
 		{
 			for (auto it = begin; it != end; ++it)
 				(it == begin ? out : out << tok) << *it;
@@ -65,10 +63,9 @@ namespace fmt
 		}
 
 		template <class Range, class Delimiter>
-		static output put(output buf, Range pair, Delimiter tok)
-		// Put $tok between all in range of $pair
+		static output put(output out, Range pair, Delimiter tok)
 		{
-			return put(buf, pair.begin(), pair.end(), tok);
+			return put(out, pair.begin(), pair.end(), tok);
 		}
 	};
 
@@ -102,9 +99,6 @@ namespace fmt
 	>
 	struct basic_string_type : String, Memory, Stream, Layout
 	{
-		using line = fwd::line<Char, Traits, Alloc>;
-		using page = fwd::page<String, Alloc>;
-
 		using String::String;
 		basic_string_type(const String& s)
 		 : String(s)
@@ -116,10 +110,10 @@ namespace fmt
 		class Char,
 		template <class> class Traits = std::char_traits,
 		template <class> class Alloc = std::allocator,
-		template <class> class Sort = std::less,
+		template <class> class Order = std::less,
 		class String = fwd::basic_string<Char, Traits, Alloc>,
 		class View = fwd::basic_string_view<Char, Traits>,
-		class Base = basic_string_type<View , Char, Traits, Alloc, Sort>
+		class Base = basic_string_type<View , Char, Traits, Alloc, Order>
 	>
 	struct basic_string_view : Base
 	{
@@ -159,8 +153,9 @@ namespace fmt
 	using ustring = basic_string<char32_t>;
 	using uint = ustring::view;
 
-	// alias
+	// everything is a string view in UTF
 	using pair = view::pair;
+	using iterator = view::iterator;
 	using vector = view::vector;
 	using span = view::span;
 	using map = view::map;
@@ -170,8 +165,7 @@ namespace fmt
 	using output = view::output;
 	using read = view::read;
 	using write = view::write;
-	using page = view::page;
-	using line = view::line;
+	using access = fwd::pair<read, write>;
 
 	namespace tag
 	{
@@ -187,6 +181,26 @@ namespace fmt
 	using diff = layout<std::ptrdiff_t>;
 	constexpr auto npos = view::npos;
 	constexpr size::type null = 0;
+}
+
+inline fmt::input operator>>(fmt::input in, fmt::read scan)
+{
+	return scan(in);
+}
+
+inline fmt::output operator<<(fmt::output out, fmt::write print)
+{
+	return print(out);
+}
+
+inline fmt::input operator>>(fmt::input in, fmt::access ops)
+{
+	return ops.first(in);
+}
+
+inline fmt::output operator<<(fmt::output out, fmt::access ops)
+{
+	return ops.second(out);
 }
 
 #endif // file

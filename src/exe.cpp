@@ -2,75 +2,67 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "err.hpp"
-#include "cmd.hpp"
+#include "exe.hpp"
 #include "usr.hpp"
 #include "opt.hpp"
 #include "dir.hpp"
 #include "type.hpp"
 #include "io.hpp"
 
-namespace env
+namespace env::exe
 {
-	fmt::page shell::get(fmt::input in, char end, int count)
+	fmt::string::set& cache()
 	{
-		// Result in span at cache end
-		const auto first = cache.size();
-		auto second = first;
-		try // process can crash
+		thread_local fmt::string::set buf;
+		return buf;
+	}
+
+	fmt::vector get(fmt::input in, char end, int count)
+	{
+		fmt::vector lines;
+		try
 		{
 			std::string line;
 			while (count-- and std::getline(in, line, end))
 			{
-				buffer.append(line);
-				buffer.push_back(end);
+				lines.emplace_back(cache().emplace(std::move(line)));
 			}
-			// Cache lines partition the buffer
-			auto it = std::back_inserter(cache);
-			for (auto part : fmt::split(buffer, end))
-			{
-				++it = part;
-			}
-			// One past the end
-			second = cache.size();
 		}
-		// Put exception message into line
-		catch (std::exception const& error)
+		catch (std::exception &error)
 		{
-			buffer = error.what();
+			sys::err(here, error.what());
 		}
-		fmt::page result(first, second, &cache);
-		return result;
+		return lines;
 	}
 
-	fmt::page shell::run(fmt::span args)
+	fmt::vector run(fmt::span args)
 	{
-		fmt::string line;
+		fmt::string command;
 		for (auto arg : args)
 		{
 			const bool spaces = fmt::any_of(arg);
 			constexpr auto quote = "\"";
-			if (spaces) line += quote;
-			line += arg;
-			if (spaces) line += quote;
+			if (spaces) command += quote;
+			command += arg;
+			if (spaces) command += quote;
 		}
-		fmt::istream in = env::file::open(line, env::file::ex);
+		fmt::istream in = env::file::open(command, env::file::ex);
 		const auto lines = get(in);
 		in.file.reset();
 		return lines;
 	}
 
-	fmt::page shell::run(fmt::init args)
+	fmt::vector run(fmt::init args)
 	{
-		fmt::vector vec { args };
-		return run(vec);
+		return run(fwd::to_span(args));
 	}
 
-	fmt::page shell::echo(fmt::view line)
+	fmt::vector echo(fmt::view line)
 	{
 		return run({ "echo", line });
 	}
 
-	fmt::page shell::list(fmt::view name)
+	fmt::vector list(fmt::view name)
 	{
 		return run
 		(
@@ -82,7 +74,7 @@ namespace env
 		);
 	}
 
-	fmt::page shell::copy(fmt::view path)
+	fmt::vector copy(fmt::view path)
 	{
 		return run
 		(
@@ -94,7 +86,7 @@ namespace env
 		);
 	}
 
-	fmt::page shell::find(fmt::view pattern, fmt::view directory)
+	fmt::vector find(fmt::view pattern, fmt::view directory)
 	{
 		#ifdef _WIN32
 		{
@@ -107,7 +99,7 @@ namespace env
 		#endif
 	}
 
-	fmt::page shell::which(fmt::view name)
+	fmt::vector which(fmt::view name)
 	{
 		return run
 		(
@@ -119,7 +111,7 @@ namespace env
 		);
 	}
 
-	fmt::page shell::start(fmt::view path)
+	fmt::vector start(fmt::view path)
 	{
 		#ifdef _WIN32
 		{
@@ -147,12 +139,12 @@ namespace env
 					return run({ program, path });
 				}
 			}
-			return { 0, 0, &cache };
+			return { 0, 0, nullptr };
 		}
 		#endif
 	}
 
-	fmt::page shell::imports(fmt::view path)
+	fmt::vector imports(fmt::view path)
 	{
 		return run
 		(
@@ -164,7 +156,7 @@ namespace env
 		);
 	}
 
-	fmt::page shell::exports(fmt::view path)
+	fmt::vector exports(fmt::view path)
 	{
 		return run
 		(
@@ -176,18 +168,19 @@ namespace env
 		);
 	}
 
-	bool shell::desktop(fmt::view name)
+	bool desktop(fmt::view name)
 	{
-		auto const lower = fmt::to_lower(name);
-		auto const current = fmt::to_lower(env::usr::current_desktop());
-		return current.find(lower) != fmt::npos;
+		const auto current = env::usr::current_desktop();
+		const auto lower = fmt::to_lower(current);
+		const auto find = fmt::to_lower(name);
+		return lower.find(name) != fmt::npos;
 	}
 
 	static fmt::vector envpick()
 	{
 		constexpr auto zenity = "zenity", qarma = "qarma";
 
-		if (shell::desktop("KDE") or shell::desktop("LXQT"))
+		if (desktop("KDE") or desktop("LXQT"))
 		{
 			return { qarma, zenity };
 		}
@@ -204,7 +197,7 @@ namespace env
 		return env::opt::get(entry, value);
 	}
 
-	fmt::page shell::dialog(fmt::span args)
+	fmt::vector dialog(fmt::span args)
 	{
 		// Look for any desktop utility program
 		fmt::view program;
@@ -228,19 +221,14 @@ namespace env
 		return run(command);
 	}
 
-	static auto param(fmt::view key, fmt::view value)
-	{
-		fmt::view::vector pair { key, value };
-		return fmt::join(pair, "=");
-	}
 
-	fmt::page shell::select(fmt::view path, mode mask)
+	fmt::vector select(fmt::view path, mode mask)
 	{
 		fmt::vector command { "--file-selection" };
 
-		if (not empty(path))
+		if (not path.empty())
 		{
-			command.emplace_back(param("--filename", path));
+			command.emplace_back("--filename", path);
 		}
 		if (mask == mode::many)
 		{
@@ -258,58 +246,53 @@ namespace env
 		return dialog(command);
 	}
 
-	static auto message_type(shell::msg type)
+	static auto message(msg type)
 	{
 		switch (type)
 		{
 		default:
-		case shell::msg::error:
+		case msg::error:
 			return "--error";
-		case shell::msg::info:
+		case msg::info:
 			return "--info";
-		case shell::msg::query:
+		case msg::query:
 			return "--question";
-		case shell::msg::warn:
+		case msg::warn:
 			return "--warn";
 		}
 	};
 
-	fmt::page shell::message(fmt::view text, msg type)
+	fmt::vector show(fmt::view text, msg type)
 	{
-		fmt::vector command { message_type(type) };
-
-		if (not empty(text))
+		fmt::vector command { message(type) };
+		if (not text.empty())
 		{
-			command.emplace_back(param("--text", text));
+			command.emplace_back("--text", text);
 		}
-
 		return dialog(command);
 	}
 
-	fmt::page shell::enter(fmt::view start, fmt::view label, bool hide)
+	fmt::vector enter(fmt::view start, fmt::view label, bool hide)
 	{
-		fmt::vector command { param("--entry-text", start) };
-
-		if (not empty(label))
+		fmt::vector command {{ "--entry-text", start }};
+		if (not label.empty())
 		{
-			command.emplace_back(param("--text", label));
+			command.emplace_back("--text", label);
 		}
 		if (hide)
 		{
 			command.emplace_back("--hide-text");
 		}
-
 		return dialog(command);
 	}
 
-	fmt::page shell::text(fmt::view path, fmt::view check, fmt::view font, txt type)
+	fmt::vector text(fmt::view path, fmt::view check, fmt::view font, txt type)
 	{
 		fmt::vector command { "--text-info" };
-
 		if (type == txt::html)
 		{
 			command.emplace_back("--html");
-			command.emplace_back(param("--url", path));
+			command.emplace_back("--url", path);
 		}
 		else
 		{
@@ -317,100 +300,91 @@ namespace env
 			{
 				command.emplace_back("--editable");
 			}
-			command.emplace_back(param("--filename", path));
+			command.emplace_back("--filename", path);
 		}
-		if (not empty(font))
+		if (not font.empty())
 		{
-			command.emplace_back(param("--font", font));
+			command.emplace_back("--font", font);
 		}
 		if (not empty(check))
 		{
-			command.emplace_back(param("--checkbox", check));
+			command.emplace_back("--checkbox", check);
 		}
 		return dialog(command);
 
 	}
 
-	fmt::page shell::form(controls add, fmt::view text, fmt::view title)
+	fmt::vector form(controls add, fmt::view text, fmt::view title)
 	{
 		fmt::vector command { "--forms" };
-
 		if (not text.empty())
 		{
-			command.emplace_back(param("--text", text));
+			command.emplace_back("--text", text);
 		}
 		if (not title.empty())
 		{
-			command.emplace_back(param("--text", title));
+			command.emplace_back("--text", title);
 		}
-
-		fmt::string prefix("--add-");
+		fmt::string prefix { "--add-" };
 		for (auto ctl : add)
 		{
-			//auto key = prefix + fmt::to_string(ctl.second);
-			//command.emplace_back(param(key, ctl.first));
+			auto key = prefix + fmt::to_string(ctl.second);
+			command.emplace_back(key, ctl.first);
 		}
-
 		return dialog(command);
 	}
 
-	fmt::page shell::notify(fmt::view text, fmt::view icon)
+	fmt::vector notify(fmt::view text, fmt::view icon)
 	{
 		fmt::vector command { "--notification" };
-
-		if (not empty(text))
+		if (not text.empty())
 		{
-			command.emplace_back(param("--text", text));
+			command.emplace_back("--text", text);
 		}
-		if (not empty(icon))
+		if (not icon.empty())
 		{
-			command.emplace_back(param("--icon", icon));
+			command.emplace_back("--icon", icon);
 		}
-
 		return dialog(command);
 	}
 
-	fmt::page shell::calendar(fmt::view text, fmt::view format, int day, int month, int year)
+	fmt::vector calendar(fmt::view text, fmt::view format, int day, int month, int year)
 	{
 		fmt::vector command { "--calendar" };
-
-		if (not empty(text))
+		if (not text.empty())
 		{
-			command.emplace_back(param("--text", text));
+			command.emplace_back("--text", text);
 		}
-		if (not empty(format))
+		if (not format.empty())
 		{
-			command.emplace_back(param("--format", format));
+			command.emplace_back("--format", format);
 		}
 		if (0 < day)
 		{
-			command.emplace_back(param("--day", fmt::to_string(day)));
+			command.emplace_back("--day", fmt::to_string(day));
 		}
 		if (0 < month)
 		{
-			command.emplace_back(param("--month", fmt::to_string(month)));
+			command.emplace_back("--month", fmt::to_string(month));
 		}
 		if (0 < year)
 		{
-			command.emplace_back(param("--year", fmt::to_string(year)));
+			command.emplace_back("--year", fmt::to_string(year));
 		}
-
 		return dialog(command);
 	}
 
-	fmt::page shell::color(fmt::view start, bool palette)
+	fmt::vector color(fmt::view start, bool palette)
 	{
 		fmt::vector command { "--color-selection" };
-
-		if (not empty(start))
+		if (not start.empty())
 		{
-			command.emplace_back(param("--color", start));
+			command.emplace_back("--color", start);
 		}
 		if (palette)
 		{
 			command.emplace_back("--show-palette");
 		}
-
 		return dialog(command);
 	}
 }
@@ -418,12 +392,21 @@ namespace env
 #ifdef test_unit
 test_unit(cmd)
 {
-	env::shell sh;
-	const auto list = sh.list(env::var::pwd());
+	const auto list = env::exe::list(env::pwd());
 	assert(not list.empty());
-	const auto copy = sh.copy(__FILE__);
+	const auto copy = env::exe::copy(__FILE__);
 	assert(not copy.empty());
 	// Copy range starts at 0, file numbering at 1
 	assert(copy[__LINE__-1].find("Recursive find me text") != fmt::npos);
+}
+test_unit(echo)
+{
+	fmt::view user = env::got("ComSpec")
+		? "%UserName%" : "$USER";
+
+	const auto echo = env::exe::echo(user);
+	assert(not echo.empty());
+	const auto name = echo.front();
+	assert(user != name);
 }
 #endif

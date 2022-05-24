@@ -3,7 +3,7 @@
 
 #include "err.hpp"
 #include "arg.hpp"
-#include "cmd.hpp"
+#include "exe.hpp"
 #include "tag.hpp"
 #include "type.hpp"
 #include "char.hpp"
@@ -87,10 +87,9 @@ namespace
 			}
 			else
 			{
-				struct env::shell sh;
-				auto const image = env::opt::arg();
-				fmt::string::view::vector args { image, "-o", "-q", name };
-				for (auto line : sh.run(args))
+				const auto image = env::opt::arg();
+				fmt::vector args { image, "-o", "-q", name };
+				for (auto line : env::exe::run(args))
 				{
 					sys::out() << line << fmt::tag::eol;
 				}
@@ -197,7 +196,7 @@ int main(int argc, char** argv)
 	if (std::empty(tests))
 	{
 		// Parse this programs symbol table
-		for (auto const& line : env::shell().exports(argv[0]))
+		for (auto const& line : env::exe::exports(argv[0]))
 		{
 			// Separate lines by white space
 			for (auto const name : fmt::split(line))

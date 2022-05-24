@@ -25,7 +25,6 @@ namespace doc
 namespace
 {
 	template <class Face> const Face& use_facet()
-	// The character facet using a default locale
 	{
 		return std::use_facet<Face>(std::cout.getloc());
 	}
@@ -308,6 +307,16 @@ namespace fmt
 		return { i, j };
 	}
 
+	template <class C> C type<C>::getline(input in, string& line, view delims)
+	{
+		C byte;
+		while (in.get(byte) and delims.find(byte) < fmt::npos)
+		{
+			line += byte;
+		}
+		return byte;
+	}
+
 	template struct type<char>;
 	template struct type<wchar_t>;
 }
@@ -391,7 +400,7 @@ test_unit(type)
 		assert('!' == *fmt::last(Filled));
 	}
 
-	// Triming whitespace
+	// Trimming whitespace
 	{
 		assert(fmt::trim(Space).empty());
 		assert(not fmt::trim(Filled).empty());
@@ -446,15 +455,25 @@ test_unit(type)
 	}
 }
 
-test_unit(char)
+test_unit(sgr)
 {
-	// Set graphics rendition
+	std::stringstream ss;
+	ss << fmt::io::fg_green << "GREEN" << fmt::io::fg_off;
+	auto green = ss.str();
+	assert(green == "\x1b[32mGREEN\x1b[39m");
+}
+
+test_unit(fmt)
+{
+	constexpr auto msg = "Hello, World!";
+	fmt::write write = [=](fmt::output out)->fmt::output
 	{
-		std::stringstream ss;
-		ss << fmt::io::fg_green << "GREEN" << fmt::io::fg_off;
-		auto green = ss.str();
-		assert(green == "\x1b[32mGREEN\x1b[39m");
-	}
+		return out << msg;
+	};
+	std::stringstream ss;
+	ss << write;
+	const auto s = ss.str();
+	assert(s == msg);
 }
 
 #endif
