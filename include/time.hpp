@@ -12,7 +12,7 @@ namespace fmt
 {
 	struct date : fwd::zero<std::tm>
 	{
-		static inline std::tuple table
+		static constexpr std::tuple table
 		{
 			&std::tm::tm_year,
 			&std::tm::tm_mon,
@@ -28,7 +28,7 @@ namespace fmt
 
 	struct time : fwd::zero<std::timespec>
 	{
-		static inline std::tuple table
+		static constexpr std::tuple table
 		{
 			&std::timespec::tv_sec,
 			&std::timespec::tv_nsec
@@ -40,7 +40,7 @@ namespace fmt
 		time it_interval;
 		time it_value;
 
-		static inline std::tuple table
+		static constexpr std::tuple table
 		{
 			&timer::it_interval,
 			&timer::it_value

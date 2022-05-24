@@ -147,15 +147,12 @@ namespace
 		double d = 0.0;
 		fmt::string s = "Hello World";
 
-		static constexpr auto table()
+		static constexpr std::tuple table
 		{
-			return std::tuple
-			{
-				&dumb::i,
-				&dumb::f,
-				&dumb::s,
-			};
-		}
+			&dumb::i,
+			&dumb::f,
+			&dumb::s,
+		};
 	};
 }
 
