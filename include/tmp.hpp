@@ -43,6 +43,10 @@ namespace fwd
 		}
 	};
 
+	#ifndef lazy
+	#define lazy(...) lazy<decltype(__VA_ARGS__)>([&]{ return __VA_ARGS__; })
+	#endif
+
 	using event = defer<void>;
 
 	inline auto raise(event signal)

@@ -151,7 +151,7 @@ namespace fmt
 	using wide = wstring::view;
 	// at least a UTF-32 code point
 	using ustring = basic_string<char32_t>;
-	using uint = ustring::view;
+	using page = ustring::view;
 
 	// everything is a string view in UTF
 	using pair = view::pair;
