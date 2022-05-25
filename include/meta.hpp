@@ -30,7 +30,7 @@ namespace doc
 		std::vector<std::size_t> cross;
 	};
 
-	template <class Type> static sys::exclusive<store<Type>> global;
+	template <class Type> static sys::exclusive<store<Type>> local;
 	extern sys::exclusive<std::map<std::type_index, interface*>> registry;
 
 	// public
@@ -53,33 +53,31 @@ namespace doc
 
 	template <class Type> std::ptrdiff_t instance<Type>::size() const
 	{
-		return global<Type>.reader()->item.size();
+		return local<Type>.reader()->item.size();
 	}
 
 	template <class Type> std::span<const int> instance<Type>::link(int n) const
 	{
-		return global<Type>.reader()->item.at(n).link;
+		return local<Type>.reader()->item.at(n).link;
 	}
 
 	template <class Type> typename instance<Type>::read_ptr instance<Type>::reader(int n) const
 	{
-		auto store = global<Type>.reader();
-		auto ptr = store->item.data() + store->index.at(n);
-		auto free = [s=global<Type>.reader()](fwd::as_ptr<const Type>){};
-		return fwd::make_shared(fwd::cast_as<const Type>(ptr), free);
+		auto key = local<Type>.shared();
+		auto ptr = fwd::cast_as<Type>(key->item.data() + key->index.at(n));
+		return fwd::make_shared(ptr, [s=std::move(key)](decltype(ptr)){});
 	}
 
 	template <class Type> typename instance<Type>::write_ptr instance<Type>::writer(int n)
 	{
-		auto store = global<Type>.reader();
-		auto ptr = store->item.data() + store->index.at(n);
-		auto free = [s=global<Type>.reader()](fwd::as_ptr<Type>){};
-		return fwd::make_shared(fwd::non_const<Type>(ptr), free);
+		auto key = local<Type>.shared();
+		auto ptr = fwd::cast_as<Type>(key->item.data() + key->index.at(n));
+		return fwd::make_shared(ptr, [s=std::move(key)](decltype(ptr)){});
 	}
 
 	template <class Type> int instance<Type>::emplace(Type&& type)
 	{
-		auto data = global<Type>.writer();
+		auto data = local<Type>.writer();
 
 		// find lowest free index
 		auto pos = data->index.size();
@@ -122,7 +120,7 @@ namespace doc
 		assert(contains(id));
 		#endif
 
-		auto data = global<Type>.writer();
+		auto data = local<Type>.writer();
 
 		const auto pos = fmt::to_size(id);
 		auto const off = data->index.at(pos);
@@ -146,7 +144,7 @@ namespace doc
 
 	template <class Type> bool instance<Type>::contains(int id) const
 	{
-		auto reader = global<Type>.reader();
+		auto reader = local<Type>.reader();
 
 		if (auto pos = fmt::to_size(id); fmt::in_range(reader->index, pos))
 		{

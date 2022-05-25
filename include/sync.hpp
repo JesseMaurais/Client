@@ -12,28 +12,31 @@
 
 namespace sys
 {
-	template <class object> struct exclusive_ptr : fwd::no_copy
+	template <class object> class exclusive_ptr : fwd::no_copy
 	// Allow one writer but many readers
 	{
-		rwlock lock;
-		object *that;
+		using pointer = fwd::as_ptr<object>;
+		mutable rwlock lock;
+		pointer that;
 
-		exclusive_ptr(object *ptr) : that(ptr)
+	public:
+
+		exclusive_ptr(pointer ptr) : that(ptr)
 		{
 			#ifdef assert
 			assert(nullptr != that);
 			#endif
 		}
 
-		auto reader()
+		auto reader() const
 		{
 			using reader = decltype(lock.reader());
 			struct unlock : fwd::no_copy
 			{
-				reader const key;
-				object const *that;
+				const reader key;
+				const object *that;
 
-				unlock(exclusive_ptr* ptr)
+				unlock(const exclusive_ptr* ptr)
 				: key(ptr->lock.reader())
 				, that(ptr->that)
 				{
@@ -42,7 +45,7 @@ namespace sys
 					#endif
 				}
 
-				operator object const*() const
+				operator const pointer() const
 				{
 					return that;
 				}
@@ -65,8 +68,8 @@ namespace sys
 			using writer = decltype(lock.writer());
 			struct unlock : fwd::no_copy
 			{
-				writer const key;
-				object *that;
+				const writer key;
+				pointer that;
 
 				unlock(exclusive_ptr *ptr)
 				: key(ptr->lock.writer())
@@ -77,12 +80,12 @@ namespace sys
 					#endif
 				}
 
-				operator object const*() const
+				operator const pointer() const
 				{
 					return that;
 				}
 
-				operator object*()
+				operator pointer()
 				{
 					return that;
 				}
