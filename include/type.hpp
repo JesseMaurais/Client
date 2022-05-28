@@ -37,19 +37,16 @@ namespace fmt
 		using money_put  = std::money_put<Char>;
 		using numpunct   = std::numpunct<Char>;
 		using moneypunct = std::moneypunct<Char>;
-
-		using string     = basic_string<Char>;
+		using string     = fmt::basic_string<Char>;
 		using view       = typename string::view;
 		using init       = typename view::init;
 		using span       = typename view::span;
 		using pair       = typename view::pair;
 		using vector     = typename view::vector;
-		using input      = typename view::in::ref;
-		using output     = typename view::out::ref;
+		using input      = typename view::input;
+		using output     = typename view::output;
 		using iterator   = typename view::iterator;
 		using pointer    = typename view::const_pointer;
-		using size_type  = typename view::size_type;
-		using size_pair  = fwd::pair<size_type>;
 
 		static bool check(Char c, mask x = space);
 		// Check whether code $c is an $x
@@ -80,6 +77,9 @@ namespace fmt
 
 		static view trim(view u, mask x = space);
 		// Trim $x off the front and back of $u
+
+		static view trim(view u, view v);
+		// Trim any $v off the front and back of $u
 
 		static bool all_of(view u, mask x = space);
 		// All decoded characters in $u are $x
@@ -239,19 +239,24 @@ namespace fmt
 		return type<char>::last(u);
 	}
 
-	inline auto trim(view u)
+	inline auto trim(view u, mask x = space)
 	{
-		return type<char>::trim(u);
+		return type<char>::trim(u, x);
 	}
 
-	inline auto all_of(view u, mask m = space)
+	inline auto trim(view u, view v)
 	{
-		return type<char>::all_of(u, m);
+		return type<char>::trim(u, v);
 	}
 
-	inline auto any_of(view u, mask m = space)
+	inline auto all_of(view u, mask x = space)
 	{
-		return type<char>::any_of(u, m);
+		return type<char>::all_of(u, x);
+	}
+
+	inline auto any_of(view u, mask x = space)
+	{
+		return type<char>::any_of(u, x);
 	}
 
 	inline auto to_upper(view u)
@@ -279,9 +284,9 @@ namespace fmt
 		return type<char>::join(t, u);
 	}
 
-	inline auto split(view u, mask m = space)
+	inline auto split(view u, mask x = space)
 	{
-		return type<char>::split(u, m);
+		return type<char>::split(u, x);
 	}
 
 	inline auto split(view u, view v)

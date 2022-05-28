@@ -35,12 +35,6 @@ namespace env::opt
 
 	fmt::vector put(int argc, char** argv, cmd::span);
 	// Put command line arguments into options
-
-	fmt::output put(fmt::output);
-	// Write options to output string
-
-	fmt::input get(fmt::input);
-	// Read options from input string
 };
 
 #endif // file

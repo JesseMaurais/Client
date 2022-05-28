@@ -1,6 +1,7 @@
 #ifndef tmp_hpp
 #define tmp_hpp "Template Functions"
 
+#include <string_view>
 #include <functional>
 #include <utility>
 
@@ -63,6 +64,9 @@ namespace fwd
 			event::operator()();
 		}
 	};
+
+	template <class... Q> constexpr auto always = [](Q...) { return true; };
+	template <class... Q> constexpr auto never = [](Q...) { return false; };
 
 	template <class... T> struct formula : std::function<bool(T...)>
 	{
@@ -127,12 +131,6 @@ namespace fwd
 			};
 		}
 	};
-
-	template <class... Q> using always = proposition<true, Q...>;
-	template <class... Q> using never = proposition<false, Q...>;
-
-	template <class... Q> constexpr auto falsity = [](Q...) { return false; };
-	template <class... Q> constexpr auto truth = [](Q...) { return true; };
 }
 
 #endif // file

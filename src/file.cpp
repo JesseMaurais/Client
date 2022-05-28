@@ -19,12 +19,6 @@
 
 namespace env::file
 {
-	fwd::variable<size_t>& width()
-	{
-		static sys::atomic<size_t> safe = BUFSIZ;
-		return safe;
-	}
-
 	int to_flags(mode mask)
 	{
 		#ifdef assert

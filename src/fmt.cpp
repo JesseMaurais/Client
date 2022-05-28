@@ -4,7 +4,6 @@
 #include "err.hpp"
 #include "fmt.hpp"
 #include "dig.hpp"
-#include "tag.hpp"
 #include "type.hpp"
 #include "char.hpp"
 #include "meta.hpp"
@@ -49,7 +48,7 @@ namespace fmt
 		return & use_facet<ctype>();
 	}
 
-	template <class C> typename type<C>::size_type type<C>::length(C u)
+	template <class C> size_type type<C>::length(C u)
 	// Size of UTF encoded data from first item
 	{
 		size_type n = 1;
@@ -162,6 +161,13 @@ namespace fmt
 		const auto pos = std::distance(u.begin(), after);
 		const auto size = std::distance(after, before);
 		return u.substr(pos, size);
+	}
+
+	template <class C> typename type<C>::view type<C>::trim(view u, view v)
+	{
+		const auto before = u.find_first_not_of(v);
+		const auto after = u.find_last_of(v);
+		return u.substr(before, after);
 	}
 
 	template <class C> bool type<C>::all_of(view u, mask x)

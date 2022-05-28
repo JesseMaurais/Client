@@ -4,8 +4,6 @@
 #include "err.hpp"
 #include "doc.hpp"
 #include "ini.hpp"
-#include "tag.hpp"
-#include "tab.hpp"
 #include "type.hpp"
 #include "meta.hpp"
 

@@ -6,7 +6,6 @@
 
 #include "doc.hpp"
 #include "sync.hpp"
-#include "algo.hpp"
 #include "dig.hpp"
 #include "it.hpp"
 

@@ -11,7 +11,6 @@
 #include "dir.hpp"
 #include "fmt.hpp"
 #include "type.hpp"
-#include "tag.hpp"
 #include "sys.hpp"
 #include "sync.hpp"
 #include <exception>

@@ -87,7 +87,7 @@ namespace fwd
 	<
 		class Type, class Free = deleter<Type>
 	>
-	auto make_shared(as_ptr<Type> ptr, Free del = std::default_delete<Type>())
+	auto make_shared(Type* ptr, Free del = std::default_delete<Type>())
 	{
 		return std::shared_ptr<Type>(ptr, del);
 	}
@@ -96,7 +96,7 @@ namespace fwd
 	<
 		class Type, class Free = deleter<Type>
 	>
-	auto make_unique(as_ptr<Type> ptr, Free del = std::default_delete<Type>())
+	auto make_unique(Type* ptr, Free del = std::default_delete<Type>())
 	{
 		return std::unique_ptr<Type, Free>(ptr, del);
 	}

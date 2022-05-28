@@ -8,13 +8,27 @@
 #include "arg.hpp"
 #include "dir.hpp"
 #include "type.hpp"
-#include "mode.hpp"
 #include <fstream>
-#include <iostream>
 
 #ifdef _WIN32
 #include <shlobj.h>
 #endif
+
+namespace
+{
+	bool user_dirs()
+	{
+		fmt::string path;
+		using namespace env::file;
+		if (find(config(), regex("user-dirs.dirs") || to(path) || stop))
+		{
+			std::ifstream in(path);
+			while (in >> env::opt::get);
+			return in.good();
+		}
+		return failure;
+	}
+}
 
 namespace env::usr
 {
@@ -26,7 +40,7 @@ namespace env::usr
 
 		using entry = std::pair<KNOWNFOLDERID, fmt::string::view>;
 
-		static std::map<fmt::string::view, entry> const map =
+		static const std::map<fmt::string::view, entry> map =
 		{
 			{ "AccountPictures", entry{FOLDERID_AccountPictures, "%AppData%\\Microsoft\\Windows\\AccountPictures"}},
 			{ "AdminTools", entry{FOLDERID_AdminTools, "%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools"}},
@@ -83,7 +97,7 @@ namespace env::usr
 			auto [id, path] = it->second;
 
 			PWSTR pws = nullptr;
-			auto const ok = SHGetKnownFolderPath
+			const auto ok = SHGetKnownFolderPath
 			(
 				id, KF_FLAG_DEFAULT, nullptr, &pws
 			);
@@ -100,15 +114,15 @@ namespace env::usr
 				CoTaskMemFree(pws);
 			}
 
-			if (empty(u))
+			if (u.empty())
 			{
 				u = path;
 			}
 		}
 
-	#else // POSIX
+	#else
 
-		static std::map<fmt::view, fmt::pair> const map =
+		static const std::map<fmt::view, fmt::pair> map =
 		{
 			{"Cache-Home", {"XDG_CACHE_HOME", "$HOME/.cache"}},
 			{"Config-Dirs", {"XDG_CONFIG_DIRS", "/etc/xdg"}},
@@ -127,11 +141,13 @@ namespace env::usr
 			{"Videos", {"XDG_VIDEOS_DIR", "$HOME/Videos"}},
 		};
 
+		static const auto dirs [[maybe_unused]] =  user_dirs();
+
 		if (auto it = map.find(name); map.end() != it)
 		{
 			auto [xdg, path] = it->second;
 
-			u = env::get(xdg);
+			u = env::opt::get(xdg);
 			if (u.empty())
 			{
 				u = path;
@@ -145,27 +161,8 @@ namespace env::usr
 			u = env::get(name);
 		}
 
+		u = fmt::trim(u, fmt::tag::quote);
 		return env::echo(u);
-	}
-
-	fmt::span dirs(fmt::view name)
-	{
-		thread_local fmt::vector buf;
-		buf.clear();
-
-		if (auto paths = dir(name); not paths.empty())
-		{
-			buf = fmt::path::split(paths);
-		}
-
-		for (auto it = buf.begin(); it != buf.end(); ++it)
-		{
-			if (auto path = *it; env::file::fail(path))
-			{
-				it = buf.erase(it);
-			}
-		}
-		return buf;
 	}
 
 	fmt::view current_desktop()
@@ -323,13 +320,10 @@ namespace env::usr
 		buf = fmt::path::split(u);
 		return buf;
 	}
-
-	using namespace std::literals;
-
 }
 
 #ifdef test_unit
- namespace
+namespace
 {
 	struct head : fmt::memory<head>
 	{

@@ -28,6 +28,12 @@ namespace env::opt
 	bool set(pair, float, int digits = 6);
 	float get(view, float);
 	bool set(view, float, int digits = 6);
+
+	fmt::output put(fmt::output);
+	// Write options to output string
+
+	fmt::input get(fmt::input);
+	// Read options from input string
 };
 
 #endif // file

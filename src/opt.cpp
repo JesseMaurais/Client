@@ -5,7 +5,6 @@
 #include "opt.hpp"
 #include "arg.hpp"
 #include "fmt.hpp"
-#include "tag.hpp"
 #include "dig.hpp"
 #include "ini.hpp"
 #include "dir.hpp"
@@ -59,7 +58,7 @@ namespace env::opt
 
 	bool set(view key, bool value)
 	{
-		fmt::view u = cast(value);
+		view u = cast(value);
 		return set(key, u);
 	}
 
@@ -70,7 +69,7 @@ namespace env::opt
 
 	bool set(pair key, bool value)
 	{
-		fmt::string::view u = cast(value);
+		view u = cast(value);
 		return set(key, u);
 	}
 

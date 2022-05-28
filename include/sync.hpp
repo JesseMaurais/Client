@@ -15,13 +15,12 @@ namespace sys
 	template <class object> class exclusive_ptr : fwd::no_copy
 	// Allow one writer but many readers
 	{
-		using pointer = fwd::as_ptr<object>;
 		mutable rwlock lock;
-		pointer that;
+		object* that;
 
 	public:
 
-		exclusive_ptr(pointer ptr) : that(ptr)
+		exclusive_ptr(object* ptr) : that(ptr)
 		{
 			#ifdef assert
 			assert(nullptr != that);
@@ -45,17 +44,17 @@ namespace sys
 					#endif
 				}
 
-				operator const pointer() const
+				operator const object*() const
 				{
 					return that;
 				}
 
-				auto const& operator*() const
+				const object& operator*() const
 				{
 					return *that;
 				}
 
-				auto operator->() const
+				const object* operator->() const
 				{
 					return that;
 				}
@@ -69,7 +68,7 @@ namespace sys
 			struct unlock : fwd::no_copy
 			{
 				const writer key;
-				pointer that;
+				object* that;
 
 				unlock(exclusive_ptr *ptr)
 				: key(ptr->lock.writer())
@@ -80,32 +79,32 @@ namespace sys
 					#endif
 				}
 
-				operator const pointer() const
+				operator const object*() const
 				{
 					return that;
 				}
 
-				operator pointer()
+				operator object*()
 				{
 					return that;
 				}
 
-				auto const& operator*() const
+				const object& operator*() const
 				{
 					return *that;
 				}
 
-				auto& operator*()
+				object& operator*()
 				{
 					return *that;
 				}
 
-				auto operator->() const
+				const object* operator->() const
 				{
 					return that;
 				}
 
-				auto operator->()
+				object* operator->()
 				{
 					return that;
 				}
@@ -166,7 +165,7 @@ namespace sys
 		exclusive() : that(this)
 		{ }
 
-		auto reader()
+		auto reader() const
 		{
 			return that.reader();
 		}
@@ -198,29 +197,6 @@ namespace sys
 	};
 
 	template <class Type> extern sys::exclusive<Type> extern_ptr;
-
-	template <class Type> class atomic : public fwd::variable<Type>
-	{
-		mutable sys::rwlock lock;
-		Type value;
-
-	public:
-
-		atomic(Type x = {}) : value(x)
-		{ }
-
-		operator Type() const final
-		{
-			auto const unlock = lock.reader();
-			return value;
-		}
-
-		Type operator=(Type n) final
-		{
-			auto const unlock = lock.writer();
-			return value = n;
-		}
-	};
 
 	#ifdef _WIN32
 	namespace win

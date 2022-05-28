@@ -4,7 +4,6 @@
 #include "err.hpp"
 #include "arg.hpp"
 #include "exe.hpp"
-#include "tag.hpp"
 #include "type.hpp"
 #include "char.hpp"
 #include "sym.hpp"

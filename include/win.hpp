@@ -11,7 +11,6 @@
 #include "mode.hpp"
 #include "ptr.hpp"
 #include "err.hpp"
-#include "tag.hpp"
 #include "sys.hpp"
 
 namespace sys::win
@@ -52,7 +51,7 @@ namespace sys::win
 
 	inline auto fdopen(HANLDE h, const char* mode)
 	{
-		const auto 
+		const auto
 			r = std::strchr(mode, "r"),
 			w = std::strchr(mode, "w"),
 			a = std::strchr(mode, "a"),

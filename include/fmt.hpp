@@ -99,6 +99,8 @@ namespace fmt
 	>
 	struct basic_string_type : String, Memory, Stream, Layout
 	{
+		using access = typename Stream::access;
+
 		using String::String;
 		basic_string_type(const String& s)
 		 : String(s)
@@ -152,7 +154,6 @@ namespace fmt
 	// at least a UTF-32 code point
 	using ustring = basic_string<char32_t>;
 	using page = ustring::view;
-
 	// everything is a string view in UTF
 	using pair = view::pair;
 	using iterator = view::iterator;
@@ -165,7 +166,18 @@ namespace fmt
 	using output = view::output;
 	using read = view::read;
 	using write = view::write;
-	using access = fwd::pair<read, write>;
+	using access = view::access;
+	// position
+	using size_type = view::size_type;
+	using size = fmt::layout<size_type>;
+	using size_pair = size::pair;
+	// offset
+	using diff_type = view::difference_type;
+	using diff = fmt::layout<diff_type>;
+	using diff_pair = diff::pair;
+
+	constexpr auto npos = view::npos;
+	constexpr size_type null = 0;
 
 	namespace tag
 	{
@@ -175,12 +187,19 @@ namespace fmt
 		inline view dash = "-";
 		inline view dual = "--";
 		inline view assign = "=";
-	}
+		inline view quote = "\"";
 
-	using size = layout<std::size_t>;
-	using diff = layout<std::ptrdiff_t>;
-	constexpr auto npos = view::npos;
-	constexpr size::type null = 0;
+		bool got(view);
+		view get(view);
+		view put(view);
+		view set(view);
+
+		input get(input, view = eol);
+		// Read all file lines to cache
+
+		output put(output, view = eol);
+		// Write all cache lines to file
+	}
 }
 
 inline fmt::input operator>>(fmt::input in, fmt::read scan)

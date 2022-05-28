@@ -14,7 +14,7 @@ namespace sys::win
 	{
 		unsigned id;
 
-		start(fwd::function f, LPSECURITY_ATTRIBUTES attr = nullptr) : work(f)
+		start(fwd::event f, LPSECURITY_ATTRIBUTES attr = nullptr) : work(f)
 		{
 			auto const ptr = _beginthreadex(attr, 0, thread, this, 0, &id);
 			h = reinterpret_cast<HANDLE>(ptr);
@@ -26,7 +26,7 @@ namespace sys::win
 
 	private:
 
-		function work;
+		event work;
 
 		static unsigned WINAPI thread(void *ptr)
 		{

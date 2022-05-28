@@ -2,7 +2,6 @@
 #define dir_hpp "File Directory"
 
 #include "fmt.hpp"
-#include "env.hpp"
 #include "tmp.hpp"
 #include "mode.hpp"
 
@@ -39,8 +38,6 @@ namespace env::file
 	// Remove directory and all contents
 	bool rmdir(view);
 
-	constexpr auto stop = fwd::truth<view>;
-	constexpr auto next = fwd::falsity<view>;
 
 	dirs paths(); // pwd, path
 	dirs config(); // config_home, config_dirs
@@ -50,6 +47,9 @@ namespace env::file
 	bool find(view, entry);
 	bool find(span, entry);
 	bool find(dirs, entry);
+
+	constexpr auto stop = fwd::always<view>;
+	constexpr auto next = fwd::never<view>;
 
 	entry mask(mode);
 	entry regex(view);
