@@ -22,6 +22,8 @@ namespace fwd
 {
 	template <class T, class S=T> using pair = std::pair<T, S>;
 	template <class Type> using init = std::initializer_list<Type>;
+	template <class Type, size_t Size = std::dynamic_extent>
+	using span = std::span<Type, Size>;
 
 	template
 	<

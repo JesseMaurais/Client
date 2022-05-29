@@ -9,7 +9,7 @@ namespace fwd
 {
 	template
 	<
-		class Type, size_t Size = std::dynamic_extent, template <class> class Alloc = std::allocator
+		class Type, template <class> class Alloc = std::allocator, size_t Size = std::dynamic_extent
 	>
 	using matrix = vector<std::span<Type, Size>, Alloc>;
 }
@@ -91,10 +91,10 @@ namespace fmt
 		using pair = fwd::pair<Type>;
 		using set = fwd::set<Type, Order, Alloc>;
 		using map = fwd::map<Type, Type, Order, Alloc>;
-		using span = fwd::span<Type>;
+		using span = std::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
 		using init = fwd::init<Type>;
-		using matrix = fwd::vector<span, Alloc>;
+		using matrix = fwd::matrix<span, Alloc>;
 	};
 
 	template
@@ -166,6 +166,7 @@ namespace fmt
 	using ustring = basic_string<char32_t>;
 	using page = ustring::view;
 	// everything is a string view in UTF
+	using matrix = view::matrix;
 	using iterator = view::iterator;
 	using pointer = view::const_pointer;
 	using vector = view::vector;
@@ -205,10 +206,7 @@ namespace fmt
 		inline view assign = "=";
 		inline view quote = "\"";
 
-		bool got(view);
-		view get(view);
 		view put(view);
-		view set(view);
 
 		write_ptr write(); // copy to local on write
 		read_ptr read(); // either local or main thread
@@ -217,7 +215,7 @@ namespace fmt
 		input get(input, view = eol);
 		// Read all file lines to cache
 
-		output put(output, view = eol);
+		output set(output, view = eol);
 		// Write all cache lines to file
 	}
 }

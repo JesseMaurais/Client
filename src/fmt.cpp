@@ -23,26 +23,14 @@ namespace doc
 
 namespace fmt::tag
 {
-	static sys::exclusive<fmt::cache> share;
+	static sys::exclusive<fmt::cache> cache;
 
-	bool got(view u)
+	view put(view u)
 	{
-		auto key = share.reader();
+		auto key = cache.writer();
 		const auto begin = key->begin();
 		const auto end = key->end();
-		return end != std::find_if(begin, end, fwd::equal_to(u));
-	}
-
-	view get(view u)
-	{
-		auto key = share.writer();
-		const auto begin = key->begin();
-		const auto end = key->end();
-		auto it = std::find_if(begin, end, [u](view v)
-		{
-			return u == v;
-		});
-
+		auto it = std::find_if(begin, end, fwd::equal_to(u));
 		if (end == it)
 		{
 			auto pair = key->emplace(u);
@@ -54,30 +42,19 @@ namespace fmt::tag
 		return it->substr();
 	}
 
-	view put(view u)
-	{
-		doc::view::self().emplace(std::move(u));
-		return u;
-	}
-
-	view set(view u)
-	{
-		return put(get(u));
-	}
-
 	input get(input in, char eol)
 	{
 		fmt::string line;
 		while (std::getline(in, line, eol))
 		{
-			set(line);
+			(void) put(line);
 		}
 		return in;
 	}
 
-	output put(output out, char eol)
+	output set(output out, char eol)
 	{
-		auto key = share.reader();
+		auto key = cache.reader();
 		const auto begin = key->begin();
 		const auto end = key->end();
 		for (auto it = begin; it != end; ++it)

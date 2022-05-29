@@ -7,6 +7,11 @@
 
 namespace fwd
 {
+	template <class T> auto equal_to(T v)
+	{
+		return [v](T u) { return u==v; };
+	}
+
 	template <class T> struct type_of
 	{
 		using type = T;
