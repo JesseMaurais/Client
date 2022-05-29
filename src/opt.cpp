@@ -21,7 +21,7 @@ namespace
 	auto cast(Key key, Value value, Cast cast)
 	{
 		const auto u = env::opt::get(key);
-		return empty(u) ? value : cast(u);
+		return u.empty() ? value : cast(u);
 	}
 
 	auto cast(bool value)
@@ -161,15 +161,13 @@ namespace
 
 	auto find_next(fmt::view argu, env::opt::cmd::span cmd)
 	{
-		const auto begin = cmd.begin();
-		const auto end = cmd.end();
-		auto next = end;
+		auto next = cmd.end();
 
 		if (auto entry = argu.substr(2); argu.starts_with(fmt::tag::dual))
 		{
-			next = std::find_if
+			next = fwd::find_if
 			(
-				begin, end, [entry](auto const& d)
+				cmd, [entry](auto const& d)
 				{
 					return d.name == entry;
 				}
@@ -178,9 +176,9 @@ namespace
 		else
 		if (auto entry = argu.substr(1); argu.starts_with(fmt::tag::dash))
 		{
-			next = std::find_if
+			next = fwd::find_if
 			(
-				begin, end, [entry](auto const& d)
+				cmd, [entry](auto const& d)
 				{
 					return d.dash == entry;
 				}
@@ -351,12 +349,12 @@ namespace env::opt
 		// Skip the program image path
 		for (int argn = 1; argn < argc; ++argn)
 		{
-			fmt::string::view argu(argv[argn]);
+			fmt::view argu(argv[argn]);
 			// Check whether it is a new command
 			if (auto next = find_next(argu, cmd); end != next)
 			{
 				// Set as option
-				auto const key = fmt::tag::set(next->name);
+				const auto key = fmt::tag::set(next->name);
 				current = 0 < next->argn ? next : end;
 				env::opt::set(key, true);
 				args.clear();
@@ -364,13 +362,13 @@ namespace env::opt
 			else
 			if (end != current)
 			{
-				auto const size = static_cast<size_t>(current->argn);
+				const auto size = fmt::to_size(current->argn);
 				if (args.size() < size)
 				{
 					// Set as option
 					args.emplace_back(argu);
-					auto const value = fmt::join(args, ";");
-					auto const key = fmt::tag::set(current->name);
+					const auto value = fmt::join(args, ";");
+					const auto key = fmt::tag::set(current->name);
 					(void) set(key, value);
 				}
 				else

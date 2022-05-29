@@ -50,7 +50,7 @@ namespace sys
 	{
 		if (fail(ok = sys::stat(path, this)))
 		{
-			err(here, "state");
+			err(here, "stat");
 		}
 	}
 
@@ -68,12 +68,12 @@ namespace sys
 	{
 		#ifdef _WIN32
 		return _environ;
-		#else // UNIX
+		#else
 		return ::environ;
 		#endif
 	}
 
-	pid_t exec(int fd[3], size_t argc, const char** argv)
+	pid_t exec(int fd[3], int argc, char** argv)
 	{
 		#ifdef assert
 		assert(nullptr != argv);
@@ -127,16 +127,16 @@ namespace sys
 
 			const bool ok = CreateProcess
 			(
-			 nullptr,          // application
-			 cmd,              // command line
-			 nullptr,          // process attributes
-			 nullptr,          // thread attributes
-			 true,             // inherit handles
-			 DETACHED_PROCESS, // creation flags
-			 nullptr,          // environment
-			 nullptr,          // current directory
-			 &si,              // start-up info
-			 &pi               // process info
+				nullptr,          // application
+				cmd,              // command line
+				nullptr,          // process attributes
+				nullptr,          // thread attributes
+				true,             // inherit handles
+				DETACHED_PROCESS, // creation flags
+				nullptr,          // environment
+				nullptr,          // current directory
+				&si,              // start-up info
+				&pi               // process info
 			);
 
 			if (not ok)
@@ -205,16 +205,9 @@ namespace sys
 				std::abort();
 			}
 
-			std::vector<char*> args;
-			for (size_t argn = 0; argn < argc; ++argn)
-			{
-				args.push_back(fwd::non_const(argv[argn]));
-			}
-			args.push_back(nullptr);
-
-			const int res = execvp(args.front(), args.data());
-			sys::err(here, "execvp", res, args.front());
-			std::exit(res);
+			const int code = execvp(argv[0], argv);
+			sys::err(here, "execvp", code, argv[0]);
+			std::exit(code);
 		}
 		#endif
 	}
@@ -353,7 +346,7 @@ namespace sys
 			return str;
 		}
 	}
-	#else //POSIX
+	#else
 	namespace uni
 	{
 		char const* strerr(int no)

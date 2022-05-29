@@ -11,12 +11,12 @@
 #include <fstream>
 
 #ifdef _WIN32
-#include <shlobj.h>
+# include <shlobj.h>
 #endif
 
 namespace
 {
-	bool user_dirs()
+	fmt::string user_dirs()
 	{
 		fmt::string path;
 		using namespace env::file;
@@ -24,9 +24,8 @@ namespace
 		{
 			std::ifstream in(path);
 			while (in >> env::opt::get);
-			return in.good();
 		}
-		return failure;
+		return path;
 	}
 }
 
@@ -54,7 +53,7 @@ namespace env::usr
 			{ "CommonPrograms", entry{FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu\\Programs"}},
 			{ "CommonStartMenu", entry{FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu"}},
 			{ "CommonStartup", entry{FOLDERID_CommonStartup, "%AllUsersProfile%\\Start Menu\\StartUp"}},
-//			{ "CommonTemplates" {FOLDERID_CommonTemplates, "%AllUsersProfile%\\Templates"}},
+			{ "CommonTemplates" {FOLDERID_CommonTemplates, "%AllUsersProfile%\\Templates"}},
 			{ "LocalAppData", entry{FOLDERID_LocalAppData, "%UserProfile%\\AppData\\Local"}},
 			{ "Camera", entry{FOLDERID_CameraRoll, "%UserProfile%\\Pictures\\Camera Roll"}},
 			{ "Contacts", entry{FOLDERID_Contacts, "%UserProfile%\\Contacts"}},
@@ -145,13 +144,8 @@ namespace env::usr
 
 		if (auto it = map.find(name); map.end() != it)
 		{
-			auto [xdg, path] = it->second;
-
-			u = env::opt::get(xdg);
-			if (u.empty())
-			{
-				u = path;
-			}
+			auto [id, path] = it->second;
+			u = env::opt::get(id, path);
 		}
 
 	#endif
@@ -160,8 +154,6 @@ namespace env::usr
 		{
 			u = env::get(name);
 		}
-
-		u = fmt::trim(u, fmt::tag::quote);
 		return env::echo(u);
 	}
 
@@ -198,7 +190,7 @@ namespace env::usr
 			const fmt::view prefix = menu_prefix();
 			const fmt::view basename = "applications.menu";
 			fmt::vector parts { prefix, basename };
-			const auto file = fmt::join(parts, "-");
+			const auto file = fmt::join(parts, fmt::tag::dash);
 			const auto found = env::file::find(env::file::config(), [&](auto dir)
 			{
 				path = fmt::dir::join({dir, "menus", file});
@@ -356,46 +348,46 @@ test_unit(usr)
 {
 	std::ofstream out { ".ini" };
 
-	out	<< head("Fake Environment")
-		<< key("home", env::home())
-		<< key("user", env::user())
-		<< key("root", env::root())
-		<< key("domain", env::domain())
-		<< key("host", env::host())
-		<< key("pwd", env::pwd())
-		<< key("lang", env::lang())
-		<< key("shell", env::shell())
-		<< key("tmpdir", env::temp())
-		<< key("rootdir", env::base())
-		<< key("session", env::session())
-		<< std::endl;
+	out << head("Fake Environment")
+	    << key("home", env::home())
+	    << key("user", env::user())
+	    << key("root", env::root())
+	    << key("domain", env::domain())
+	    << key("host", env::host())
+	    << key("pwd", env::pwd())
+	    << key("lang", env::lang())
+	    << key("shell", env::shell())
+	    << key("tmpdir", env::temp())
+	    << key("rootdir", env::base())
+	    << key("session", env::session())
+	    << std::endl;
 
-	out	<< head("Desktop")
-		<< key("runtime-dir", env::usr::run_dir())
-		<< key("data-home", env::usr::data_home())
-		<< key("config-home", env::usr::config_home())
-		<< key("cache-home", env::usr::cache_home())
-		<< key("data-dirs", fmt::path::join(env::usr::data_dirs()))
-		<< key("config-dirs", fmt::path::join(env::usr::config_dirs()))
-		<< std::endl;
+	out << head("Desktop")
+	    << key("runtime-dir", env::usr::run_dir())
+	    << key("data-home", env::usr::data_home())
+	    << key("config-home", env::usr::config_home())
+	    << key("cache-home", env::usr::cache_home())
+	    << key("data-dirs", fmt::path::join(env::usr::data_dirs()))
+	    << key("config-dirs", fmt::path::join(env::usr::config_dirs()))
+	    << std::endl;
 
-	out	<< head("User Directories")
-		<< key("desktop-dir", env::usr::desktop_dir())
-		<< key("documents-dir", env::usr::documents_dir())
-		<< key("download-dir", env::usr::download_dir())
-		<< key("music-dir", env::usr::music_dir())
-		<< key("pictures-dir", env::usr::pictures_dir())
-		<< key("publicshare-dir", env::usr::public_dir())
-		<< key("template-dir", env::usr::templates_dir())
-		<< key("videos-dir", env::usr::videos_dir())
-		<< std::endl;
+	out << head("User Directories")
+	    << key("desktop-dir", env::usr::desktop_dir())
+	    << key("documents-dir", env::usr::documents_dir())
+	    << key("download-dir", env::usr::download_dir())
+	    << key("music-dir", env::usr::music_dir())
+	    << key("pictures-dir", env::usr::pictures_dir())
+	    << key("publicshare-dir", env::usr::public_dir())
+	    << key("template-dir", env::usr::templates_dir())
+	    << key("videos-dir", env::usr::videos_dir())
+	    << std::endl;
 
-	out	<< head("Application Options")
-		<< key("name", env::opt::application())
-		<< key("program", env::opt::program())
-		<< key("command-line", fmt::join(env::opt::arguments(), " "))
-		<< key("config", env::opt::config())
-		<< std::endl;
+	out << head("Application Options")
+	    << key("name", env::opt::application())
+	    << key("program", env::opt::program())
+	    << key("command-line", fmt::join(env::opt::arguments(), " "))
+	    << key("config", env::opt::config())
+	    << std::endl;
 
 	out << env::opt::put << std::endl;
 }

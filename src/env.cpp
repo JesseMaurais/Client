@@ -3,20 +3,12 @@
 
 #include "err.hpp"
 #include "env.hpp"
-#include "usr.hpp"
-#include "opt.hpp"
-#include "arg.hpp"
 #include "exe.hpp"
-#include "ini.hpp"
 #include "dir.hpp"
 #include "fmt.hpp"
-#include "type.hpp"
 #include "sys.hpp"
+#include "type.hpp"
 #include "sync.hpp"
-#include <exception>
-#include <fstream>
-#include <vector>
-#include <regex>
 
 namespace env
 {

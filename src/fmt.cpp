@@ -21,6 +21,73 @@ namespace doc
 	using view = instance<fmt::view>;
 }
 
+namespace fmt::tag
+{
+	static sys::exclusive<fmt::cache> share;
+
+	bool got(view u)
+	{
+		auto key = share.reader();
+		const auto begin = key->begin();
+		const auto end = key->end();
+		return end != std::find_if(begin, end, fwd::equal_to(u));
+	}
+
+	view get(view u)
+	{
+		auto key = share.writer();
+		const auto begin = key->begin();
+		const auto end = key->end();
+		auto it = std::find_if(begin, end, [u](view v)
+		{
+			return u == v;
+		});
+
+		if (end == it)
+		{
+			auto pair = key->emplace(u);
+			#ifdef assert
+			assert(pair.second);
+			#endif
+			it = pair.first;
+		}
+		return it->substr();
+	}
+
+	view put(view u)
+	{
+		doc::view::self().emplace(std::move(u));
+		return u;
+	}
+
+	view set(view u)
+	{
+		return put(get(u));
+	}
+
+	input get(input in, char eol)
+	{
+		fmt::string line;
+		while (std::getline(in, line, eol))
+		{
+			set(line);
+		}
+		return in;
+	}
+
+	output put(output out, char eol)
+	{
+		auto key = share.reader();
+		const auto begin = key->begin();
+		const auto end = key->end();
+		for (auto it = begin; it != end; ++it)
+		{
+			out << *it << eol;
+		}
+		return out;
+	}
+}
+
 namespace
 {
 	template <class Face> const Face& use_facet()
@@ -224,7 +291,7 @@ namespace fmt
 		return not u.empty() and (u.back() == null or u[u.size()] == null);
 	}
 
-	template <class C> typename type<C>::size_type type<C>::count(view u, view v)
+	template <class C> size_type type<C>::count(view u, view v)
 	{
 		auto n = null;
 		const auto z = v.size();
@@ -280,7 +347,7 @@ namespace fmt
 		return s;
 	}
 
-	template <class C> typename type<C>::size_pair type<C>::embrace(view u, view v)
+	template <class C> size_pair type<C>::embrace(view u, view v)
 	{
 		auto i = u.find_first_of(v.front()), j = i;
 		if (i < npos)
@@ -327,76 +394,17 @@ namespace fmt
 	template struct type<wchar_t>;
 }
 
-namespace fmt::tag
-{
-	static sys::exclusive<std::set<string>> cache;
-
-	bool got(view u)
-	{
-		auto reader = cache.reader();
-		return reader->find(u) != reader->end();
-	}
-
-	view get(view u)
-	{
-		auto writer = cache.writer();
-		auto it = writer->find(u);
-		if (writer->end() == it)
-		{
-			auto pair = writer->emplace(u);
-			#ifdef assert
-			assert(pair.second);
-			#endif
-			it = pair.first;
-		}
-		return it->substr();
-	}
-
-	view put(view u)
-	{
-		doc::view::self().emplace(std::move(u));
-		return u;
-	}
-
-	view set(view u)
-	{
-		return put(get(u));
-	}
-
-	string::in::ref get(string::in::ref in, char eol)
-	{
-		fmt::string line;
-		while (std::getline(in, line, eol))
-		{
-			set(line);
-		}
-		return in;
-	}
-
-	string::out::ref put(string::out::ref out, char eol)
-	{
-		auto reader = cache.reader();
-		auto begin = reader->begin();
-		auto end = reader->end();
-		for (auto it = begin; it != end; ++it)
-		{
-			out << *it << eol;
-		}
-		return out;
-	}
-}
-
 
 #ifdef test_unit
 
 test_unit(type)
 {
-	fmt::string::view const Space = " \t\v\r\n\f";
-	fmt::string::view const Hello = "Hello, World!";
-	fmt::string::view const Upper = "HELLO, WORLD!";
-	fmt::string::view const Lower = "hello, world!";
-	fmt::wstring::view const Wide = L"Hello, World!";
-	auto const Filled = fmt::to_string(Space) + fmt::to_string(Hello) + fmt::to_string(Space);
+	const fmt::view Space = " \t\v\r\n\f";
+	const fmt::view Hello = "Hello, World!";
+	const fmt::view Upper = "HELLO, WORLD!";
+	const fmt::view Lower = "hello, world!";
+	const fmt::wide Wide = L"Hello, World!";
+	const auto Filled = fmt::to_string(Space) + fmt::to_string(Hello) + fmt::to_string(Space);
 
 	// Character class/whitespace iteration
 	{

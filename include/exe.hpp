@@ -5,9 +5,6 @@
 
 namespace env::exe
 {
-	fmt::string::set& cache();
-	// Access to thread local string cache
-
 	fmt::vector get(fmt::input in, char end = '\n', int count = -1);
 	// Cache an amount of delimited input lines
 

@@ -33,6 +33,18 @@ namespace fwd
 
 	template <class T> using defer = std::function<T(void)>;
 
+	using event = defer<void>;
+
+	struct pop : event
+	{
+		using event::event;
+
+		~pop()
+		{
+			event::operator()();
+		}
+	};
+
 	template <class T> struct lazy : defer<T>, constant<T>
 	{
 		using defer = defer<T>;
@@ -45,25 +57,8 @@ namespace fwd
 	};
 
 	#ifndef lazy
-	#define lazy(...) lazy<decltype(__VA_ARGS__)>([&]{ return __VA_ARGS__; })
+	#define lazy(...) lazy<decltype(__VA_ARGS__)>([&]{ return (__VA_ARGS__); })
 	#endif
-
-	using event = defer<void>;
-
-	inline auto raise(event signal)
-	{
-		return std::invoke(signal);
-	}
-
-	struct pop : event
-	{
-		using event::event;
-
-		~pop()
-		{
-			event::operator()();
-		}
-	};
 
 	template <class... Q> constexpr auto always = [](Q...) { return true; };
 	template <class... Q> constexpr auto never = [](Q...) { return false; };

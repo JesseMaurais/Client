@@ -3,6 +3,7 @@
 
 #include "err.hpp"
 #include "exe.hpp"
+#include "env.hpp"
 #include "usr.hpp"
 #include "opt.hpp"
 #include "dir.hpp"

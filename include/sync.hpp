@@ -196,19 +196,7 @@ namespace sys
 		}
 	};
 
-	template <class Type> extern sys::exclusive<Type> extern_ptr;
-
-	#ifdef _WIN32
-	namespace win
-	{
-		exclusive<security>& sync();
-	}
-	#else //POSIX
-	namespace uni
-	{
-		exclusive<thread>& sync();
-	}
-	#endif
+	template <class Type> extern exclusive<Type> extern_ptr;
 }
 
 #endif

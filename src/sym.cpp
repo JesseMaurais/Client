@@ -30,7 +30,7 @@ namespace sys
 
 		#ifdef _WIN32
 		{
-			auto const h = LoadLibrary(s);
+			const auto h = LoadLibrary(s);
 			if (nullptr == h)
 			{
 				sys::win::err(here, "LoadLibrary", path);

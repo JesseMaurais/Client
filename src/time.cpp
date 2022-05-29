@@ -26,7 +26,6 @@ namespace doc
 	template <> std::string_view name<&std::tm::tm_min> = "minute";
 	template <> std::string_view name<&std::tm::tm_sec> = "seconds";
 	template <> std::string_view name<&std::tm::tm_isdst> = "daylight-saving-time";
-
 	template <> std::string_view name<&std::timespec::tv_sec> = "seconds";
 	template <> std::string_view name<&std::timespec::tv_nsec> = "nanoseconds";
 }
@@ -37,7 +36,7 @@ namespace env
 	{
 		if (std::timespec_get(this, base))
 		{
-			sys::warn(here, "timespec_get");
+			sys::warn(here, "timespec_get", base);
 		}
 	}
 
@@ -63,9 +62,9 @@ namespace env
 	{
 		#ifdef _MSC_VER
 		{
-			std::errno = std::gmtime_s(this, &t);
-			if (std::errno)
+			if (auto n = std::gmtime_s(this, &t); n)
 			{
+				_set_errno(n);
 				sys::err(here, "gmtime_s");
 			}
 		}
@@ -87,9 +86,9 @@ namespace env
 	{
 		#ifdef _MSC_VER
 		{
-			std::errno = std::localtime_s(this, &t);
-			if (std::errno)
+			if (auto n == std::localtime_s(this, &t); n)
 			{
+				_set_errno(n);
 				sys::err(here, "localtime_s");
 			}
 		}

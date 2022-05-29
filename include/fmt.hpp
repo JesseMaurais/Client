@@ -3,6 +3,16 @@
 
 #include "fwd.hpp"
 #include "tmp.hpp"
+#include "ptr.hpp"
+
+namespace fwd
+{
+	template
+	<
+		class Type, size_t Size = std::dynamic_extent, template <class> class Alloc = std::allocator
+	>
+	using matrix = vector<std::span<Type, Size>, Alloc>;
+}
 
 namespace fmt
 {
@@ -84,6 +94,7 @@ namespace fmt
 		using span = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
 		using init = fwd::init<Type>;
+		using matrix = fwd::vector<span, Alloc>;
 	};
 
 	template
@@ -155,13 +166,14 @@ namespace fmt
 	using ustring = basic_string<char32_t>;
 	using page = ustring::view;
 	// everything is a string view in UTF
-	using pair = view::pair;
 	using iterator = view::iterator;
+	using pointer = view::const_pointer;
 	using vector = view::vector;
 	using span = view::span;
 	using map = view::map;
-	using init = view::init;
+	using pair = view::pair;
 	using set = view::set;
+	using init = view::init;
 	using input = view::input;
 	using output = view::output;
 	using read = view::read;
@@ -175,6 +187,10 @@ namespace fmt
 	using diff_type = view::difference_type;
 	using diff = fmt::layout<diff_type>;
 	using diff_pair = diff::pair;
+	// storage
+	using cache = string::set;
+	using write_ptr = std::shared_ptr<cache>;
+	using read_ptr = std::shared_ptr<const cache>;
 
 	constexpr auto npos = view::npos;
 	constexpr size_type null = 0;
@@ -193,6 +209,10 @@ namespace fmt
 		view get(view);
 		view put(view);
 		view set(view);
+
+		write_ptr write(); // copy to local on write
+		read_ptr read(); // either local or main thread
+		void sync(); // copy local back to main thread
 
 		input get(input, view = eol);
 		// Read all file lines to cache

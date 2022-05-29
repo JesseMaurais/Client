@@ -8,7 +8,7 @@
 #include <time.h>
 #include <fcntl.h>
 
-#ifdef _UCRT
+#if __has_include(<vcruntine.h>)
 
 #include <process.h>
 #include <direct.h>
@@ -232,7 +232,7 @@ namespace sys
 	};
 
 	char** environ();
-	pid_t exec(int fd[3], size_t argc, const char **argv);
+	pid_t exec(int fd[3], int argc, char **argv);
 	bool kill(pid_t);
 	int wait(pid_t);
 }
