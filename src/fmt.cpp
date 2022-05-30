@@ -15,17 +15,11 @@
 #include <cstdlib>
 #include <cmath>
 
-namespace doc
-{
-	template struct instance<fmt::view>;
-	using view = instance<fmt::view>;
-}
-
 namespace fmt::tag
 {
-	static sys::exclusive<fmt::cache> cache;
+	static sys::exclusive<fmt::string::set> cache;
 
-	view put(view u)
+	view emplace(view u)
 	{
 		auto key = cache.writer();
 		const auto begin = key->begin();
@@ -42,17 +36,18 @@ namespace fmt::tag
 		return it->substr();
 	}
 
-	input get(input in, char eol)
+	input read(input in, char eol)
 	{
 		fmt::string line;
+		auto key = cache.writer();
 		while (std::getline(in, line, eol))
 		{
-			(void) put(line);
+			key->emplace(std::move(key));
 		}
 		return in;
 	}
 
-	output set(output out, char eol)
+	output write(output out, char eol)
 	{
 		auto key = cache.reader();
 		const auto begin = key->begin();
@@ -65,13 +60,40 @@ namespace fmt::tag
 	}
 }
 
-namespace
+namespace fmt::lang
 {
-	template <class Face> const Face& use_facet()
+	thread_local auto local = std::cout.getloc();
+
+	const std::locale& get()
 	{
-		return std::use_facet<Face>(std::cout.getloc());
+		return local;
 	}
 
+	void set(std::locale&& to)
+	{
+		local = to;
+	}
+
+	template <class C, class V> auto open(V name)
+	{
+		using type = type<C>;
+		using messages = typename type::messages;
+		auto& facet = type::template use<messages>();
+		const auto s = fmt::to_string(name);
+		return facet.open(s, get());
+	}
+
+	template <class C> void close(std::messages_base::catalog cat)
+	{
+		using type = type<C>;
+		using messages = typename type::messages;
+		auto& facet = type::template use<messages>();
+		facet.close(cat);
+	}
+}
+
+namespace fmt
+{
 	template <class Char, class Type> auto as_string(const Type& p)
 	{
 		if constexpr (std::is_same<Char, char>::value)
@@ -83,76 +105,38 @@ namespace
 			return fmt::to_wstring(p);
 		}
 	}
-}
 
-namespace fmt
-{
-	template <class C> const typename type<C>::ctype* type<C>::use_ctype()
+	template <class C> type<C>::catalog::catalog(view n)
+	: resource(lang::open<C, view>(n), lang::close<C>)
+	{ }
+
+	template <class C> type<C>::catalog::operator bool() const
 	{
-		return & use_facet<ctype>();
+		return 0 < resource::get();
 	}
 
-	template <class C> size_type type<C>::length(C u)
-	// Size of UTF encoded data from first item
+	template <class C> typename type<C>::view type<C>::catalog::operator()(view u, int set, int msgid)
 	{
-		size_type n = 1;
-		if (std::signbit(u))
+		auto it = fwd::find_if(cache, fwd::equal_to(u));
+		if (cache.end() == it)
 		{
-			for (n = 0; std::signbit(u << n); ++n);
+			string s { u.begin(), u.end() };
+			s = use<messages>().get(resource::get(), set, msgid, s);
+			std::tie(it, std::ignore) = cache.emplace(std::move(s));
 		}
-		return n;
+		return it->substr();
 	}
 
 	template <class C> bool type<C>::check(C c, mask x)
 	{
-		return use_facet<ctype>().is(x, c);
+		return use<ctype>().is(x, c);
 	}
 
 	template <class C> mark type<C>::check(view u)
 	{
 		mark x(u.size());
-		use_facet<ctype>().is(u.data(), u.data() + u.size(), x.data());
+		use<ctype>().is(u.data(), u.data() + u.size(), x.data());
 		return x;
-	}
-
-	template <class C> template <class It> It type<C>::scan_is(It it, It end, mask x)
-	{
-		if constexpr (std::is_same<It, pointer>::value)
-		{
-			return use_facet<ctype>().scan_is(x, it, end);
-		}
-		else
-		{
-			while (it != end)
-			{
-				if (check(*it, x))
-				{
-					break;
-				}
-				else ++it;
-			}
-			return it;
-		}
-	}
-
-	template <class C> template <class It> It type<C>::scan_not(It it, It end, mask x)
-	{
-		if constexpr (std::is_same<It, pointer>::value)
-		{
-			return use_ctype()->scan_not(x, it, end);
-		}
-		else
-		{
-			while (it != end)
-			{
-				if (check(*it, x))
-				{
-					++it;
-				}
-				else break;
-			}
-			return it;
-		}
 	}
 
 	template <class C> typename type<C>::iterator type<C>::next(iterator it, iterator end, mask x)
@@ -210,7 +194,7 @@ namespace fmt
 	template <class C> typename type<C>::view type<C>::trim(view u, view v)
 	{
 		const auto before = u.find_first_not_of(v);
-		const auto after = u.find_last_of(v);
+		const auto after = u.find_last_not_of(v) + 1;
 		return u.substr(before, after);
 	}
 
@@ -233,10 +217,10 @@ namespace fmt
 	template <class C> typename type<C>::string type<C>::to_upper(view u)
 	{
 		string s;
-		const auto use = use_ctype();
+		const auto& facet = use<ctype>();
 		for (const auto w : widen(u))
 		{
-			const auto p = use->toupper(w);
+			const auto p = facet.toupper(w);
 			s += as_string<C>(p);
 		}
 		return s;
@@ -245,10 +229,10 @@ namespace fmt
 	template <class C> typename type<C>::string type<C>::to_lower(view u)
 	{
 		string s;
-		const auto use = use_ctype();
+		const auto& facet = use<ctype>();
 		for (const auto w : widen(u))
 		{
-			const auto p = use->tolower(w);
+			const auto p = facet.tolower(w);
 			s += as_string<C>(p);
 		}
 		return s;
@@ -362,9 +346,73 @@ namespace fmt
 		C byte;
 		while (in.get(byte) and delims.find(byte) < fmt::npos)
 		{
-			line += byte;
+			line.push_back(byte);
 		}
 		return byte;
+	}
+
+	template <class C> size_type type<C>::length(C u)
+	// Size of UTF encoded data from first item
+	{
+		size_type n = 1;
+		if (std::signbit(u))
+		{
+			for (n = 0; std::signbit(u << n); ++n);
+		}
+		return n;
+	}
+
+	template <class C> size_type type<C>::length(view u)
+	{
+		size_type n = 0;
+		while (not u.empty())
+		{
+			const auto c = u.front();
+			const auto m = length(c);
+			u = u.substr(m);
+			n += m;
+		}
+		return n;
+	}
+
+	template <class C> template <class It> It type<C>::scan_is(It it, It end, mask x)
+	{
+		if constexpr (std::is_same<It, pointer>::value)
+		{
+			return use<ctype>().scan_is(x, it, end);
+		}
+		else
+		{
+			while (it != end)
+			{
+				if (check(*it, x))
+				{
+					break;
+				}
+				else ++it;
+			}
+			return it;
+		}
+	}
+
+	template <class C> template <class It> It type<C>::scan_not(It it, It end, mask x)
+	{
+		if constexpr (std::is_same<It, pointer>::value)
+		{
+			return use<ctype>().scan_not(x, it, end);
+		}
+		else
+		{
+			while (it != end)
+			{
+				if (check(*it, x))
+				{
+					++it;
+				}
+				else break;
+			}
+			return it;
+		}
 	}
 
 	template struct type<char>;
@@ -465,6 +513,17 @@ test_unit(fmt)
 	ss << write;
 	const auto s = ss.str();
 	assert(s == msg);
+}
+
+test_unit(lang)
+{
+	fmt::lang::set(std::locale("de_DE.utf8"));
+	auto cat = fmt::catalog("sed");
+	assert(cat and "German catalog");
+	const auto txt = cat("No match");
+	assert(txt == "Keine Übereinstimmung");
+	const auto txt2 = cat("Memory exhausted");
+	assert(txt2 == "Speicher erschöpft");
 }
 
 #endif

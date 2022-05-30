@@ -4,6 +4,7 @@
 #include "err.hpp"
 #include "env.hpp"
 #include "exe.hpp"
+#include "arg.hpp"
 #include "dir.hpp"
 #include "fmt.hpp"
 #include "sys.hpp"

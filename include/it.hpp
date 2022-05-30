@@ -230,45 +230,6 @@ namespace fwd
 		return out;
 	}
 
-	template
-	<
-		class Range, class Predicate
-	>
-	bool all_of(Range &&r, Predicate p)
-	{
-		return std::all_of(r.begin(), r.end(), p);
-	}
-
-	template
-	<
-		class Range, class Predicate
-	>
-	bool any_of(Range &&r, Predicate p)
-	{
-		return std::any_of(r.begin(), r.end(), p);
-	}
-
-	template
-	<
-		class Range, class Predicate
-	>
-	auto find_if(Range &&r, Predicate p)
-	{
-		return std::find_if(r.begin(), r.end(), p);
-	}
-
-	template
-	<
-		class Range, class Offset, class Predicate
-	>
-	auto find_if(Range &&r, Offset off, Predicate p)
-	{
-		return find_if(r, [=](auto const &obj)
-		{
-			return p(obj.*off);
-		});
-	}
-
 	template <auto First, auto Last> struct interval
 	{
 		constexpr auto begin() const

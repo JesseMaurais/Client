@@ -2,11 +2,18 @@
 #define type_hpp "Character Types"
 
 #include "fmt.hpp"
+#include "tmp.hpp"
 #include "it.hpp"
 #include <locale>
 
 namespace fmt
 {
+	namespace lang
+	{
+		const std::locale& get();
+		void set(std::locale&&);
+	}
+
 	inline auto
 		space  = std::ctype_base::space,
 		print  = std::ctype_base::print,
@@ -38,15 +45,29 @@ namespace fmt
 		using numpunct   = std::numpunct<Char>;
 		using moneypunct = std::moneypunct<Char>;
 		using string     = fmt::basic_string<Char>;
+
 		using view       = typename string::view;
+		using set        = typename string::set;
 		using init       = typename view::init;
 		using span       = typename view::span;
 		using pair       = typename view::pair;
 		using vector     = typename view::vector;
+		using matrix     = typename view::matrix;
 		using input      = typename view::input;
 		using output     = typename view::output;
 		using iterator   = typename view::iterator;
 		using pointer    = typename view::const_pointer;
+		using test       = typename view::test;
+		using compare    = typename view::compare;
+
+		struct catalog : fwd::resource<std::messages_base::catalog>
+		{
+			view operator()(view u, int=0, int=0);
+			operator bool() const;
+			catalog(view);
+		private:
+			set cache;
+		};
 
 		static bool check(Char c, mask x = space);
 		// Check whether code $c is an $x
@@ -117,16 +138,22 @@ namespace fmt
 		static Char getline(input in, string& line, view delims);
 		// Read characters into buffer until a delimiter
 
-		static size_type length(Char headbyte);
+		static size_type length(Char first);
 		// Find the multibyte length from first
 
-		static const ctype* use_ctype();
+		static size_type length(view u);
+		// Number of multibyte characters
+
+		template <class Face> static const Face& use()
+		{
+			return std::use_facet<Face>(lang::get());
+		}
 
 		static auto widen(fmt::view u)
 		{
 			struct iterator
 			{
-				const ctype* that = use_ctype();
+				const ctype* that = &use<ctype>();
 				const char* pos;
 				size_type size;
 
@@ -167,7 +194,7 @@ namespace fmt
 		{
 			struct iterator
 			{
-				const ctype* that = use_ctype();
+				const ctype* that = &use<ctype>();
 				const Char* pos;
 
 				iterator(const Char* it)
@@ -209,34 +236,44 @@ namespace fmt
 	// UTF-8 shims
 	//
 
-	inline auto next(view::iterator it, view::iterator end)
+	inline auto catalog(view name)
 	{
-		return type<char>::next(it, end);
+		return type<char>::catalog(name);
 	}
 
-	inline auto next(view u)
+	inline auto catalog(wide name)
 	{
-		return type<char>::next(u);
+		return type<wchar_t>::catalog(name);
 	}
 
-	inline auto skip(view::iterator it, view::iterator end)
+	inline auto next(iterator it, iterator end, mask x = space)
 	{
-		return type<char>::skip(it, end);
+		return type<char>::next(it, end, x);
 	}
 
-	inline auto skip(view u)
+	inline auto next(view u, mask x = space)
 	{
-		return type<char>::skip(u);
+		return type<char>::next(u, x);
 	}
 
-	inline auto first(view u)
+	inline auto skip(iterator it, iterator end, mask x = space)
 	{
-		return type<char>::first(u);
+		return type<char>::skip(it, end, x);
 	}
 
-	inline auto last(view u)
+	inline auto skip(view u, mask x = space)
 	{
-		return type<char>::last(u);
+		return type<char>::skip(u, x);
+	}
+
+	inline auto first(view u, mask x = space)
+	{
+		return type<char>::first(u, x);
+	}
+
+	inline auto last(view u, mask x = space)
+	{
+		return type<char>::last(u, x);
 	}
 
 	inline auto trim(view u, mask x = space)
@@ -314,9 +351,9 @@ namespace fmt
 		return type<char>::to_pair(u, v);
 	}
 
-	inline auto to_pair(view::pair p, view u = tag::assign)
+	inline auto to_pair(pair p, view u = tag::assign)
 	{
-		view::vector x { p.first, p.second };
+		vector x { p.first, p.second };
 		return fmt::join(x, u);
 	}
 

@@ -6,6 +6,7 @@
 #include "sys.hpp"
 #include "fmt.hpp"
 #include "dir.hpp"
+#include "env.hpp"
 #include "type.hpp"
 
 #ifdef _WIN32

@@ -10,6 +10,7 @@ namespace env
 	bool set(fmt::view);
 	bool put(fmt::view);
 	bool put(fmt::view, fmt::view);
+	fmt::view cat(fmt::view);
 	fmt::view echo(fmt::view);
 	fmt::span vars();
 	fmt::span path();

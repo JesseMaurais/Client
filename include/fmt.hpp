@@ -5,15 +5,6 @@
 #include "tmp.hpp"
 #include "ptr.hpp"
 
-namespace fwd
-{
-	template
-	<
-		class Type, template <class> class Alloc = std::allocator, size_t Size = std::dynamic_extent
-	>
-	using matrix = vector<std::span<Type, Size>, Alloc>;
-}
-
 namespace fmt
 {
 	template <class Type> struct memory
@@ -28,7 +19,7 @@ namespace fmt
 		using access = fwd::function<ref>;
 		using test = fwd::predicate<cref>;
 		using cache = fwd::predicate<ref>;
-		using order = fwd::relation<cref>;
+		using compare = fwd::relation<cref>;
 		using swap = fwd::relation<ref>;
 	};
 
@@ -46,10 +37,13 @@ namespace fmt
 		using io = memory<fwd::basic_iostream<Char, Traits>>;
 		using buf = memory<fwd::basic_buf<Char, Traits>>;
 		using file = memory<fwd::basic_file<Char, Traits>>;
-		using str = memory<fwd::basic_stringstream<Char, Traits>>;
+		using ss = memory<fwd::basic_stringstream<Char, Traits>>;
+		using str = memory<fwd::basic_string_view<Char, Traits>>;
 
 		// access traits
 		using address = typename addr::cptr;
+		using test = typename str::test;
+		using compare = typename str::compare;
 		using input = typename in::ref;
 		using output = typename out::ref;
 		using read = typename in::access;
@@ -88,10 +82,11 @@ namespace fmt
 	struct layout
 	{
 		using type = Type;
+		using shared = fwd::shared<Type>;
 		using pair = fwd::pair<Type>;
 		using set = fwd::set<Type, Order, Alloc>;
 		using map = fwd::map<Type, Type, Order, Alloc>;
-		using span = std::span<Type>;
+		using span = fwd::span<Type>;
 		using vector = fwd::vector<Type, Alloc>;
 		using init = fwd::init<Type>;
 		using matrix = fwd::matrix<span, Alloc>;
@@ -111,6 +106,8 @@ namespace fmt
 	struct basic_string_type : String, Memory, Stream, Layout
 	{
 		using access = typename Stream::access;
+		using test = typename Stream::test;
+		using compare = typename Stream::compare;
 
 		using String::String;
 		basic_string_type(const String& s)
@@ -180,6 +177,8 @@ namespace fmt
 	using read = view::read;
 	using write = view::write;
 	using access = view::access;
+	using test = view::test;
+	using compare = view::compare;
 	// position
 	using size_type = view::size_type;
 	using size = fmt::layout<size_type>;
@@ -189,9 +188,8 @@ namespace fmt
 	using diff = fmt::layout<diff_type>;
 	using diff_pair = diff::pair;
 	// storage
+	using shared = string::shared;
 	using cache = string::set;
-	using write_ptr = std::shared_ptr<cache>;
-	using read_ptr = std::shared_ptr<const cache>;
 
 	constexpr auto npos = view::npos;
 	constexpr size_type null = 0;
@@ -206,38 +204,31 @@ namespace fmt
 		inline view assign = "=";
 		inline view quote = "\"";
 
-		view put(view);
+		view emplace(view);
 
-		write_ptr write(); // copy to local on write
-		read_ptr read(); // either local or main thread
-		void sync(); // copy local back to main thread
-
-		input get(input, view = eol);
-		// Read all file lines to cache
-
-		output set(output, view = eol);
-		// Write all cache lines to file
+		input read(input, view = eol);
+		output write(output, view = eol);
 	}
 }
 
-inline fmt::input operator>>(fmt::input in, fmt::read scan)
+inline fmt::input operator>>(fmt::input in, fmt::read read)
 {
-	return scan(in);
+	return read(in);
 }
 
-inline fmt::output operator<<(fmt::output out, fmt::write print)
+inline fmt::output operator<<(fmt::output out, fmt::write write)
 {
-	return print(out);
+	return write(out);
 }
 
-inline fmt::input operator>>(fmt::input in, fmt::access ops)
+inline fmt::input operator>>(fmt::input in, fmt::access access)
 {
-	return ops.first(in);
+	return access.first(in);
 }
 
-inline fmt::output operator<<(fmt::output out, fmt::access ops)
+inline fmt::output operator<<(fmt::output out, fmt::access access)
 {
-	return ops.second(out);
+	return access.second(out);
 }
 
 #endif // file

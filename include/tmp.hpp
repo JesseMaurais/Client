@@ -7,11 +7,6 @@
 
 namespace fwd
 {
-	template <class T> auto equal_to(T v)
-	{
-		return [v](T u) { return u==v; };
-	}
-
 	template <class T> struct type_of
 	{
 		using type = T;
@@ -48,6 +43,15 @@ namespace fwd
 		{
 			event::operator()();
 		}
+	};
+
+	template <class T> struct resource
+	{
+		std::pair<T, pop> pair;
+		auto get() const { return pair.first; }
+		auto get_deleter() const { return pair.second; }
+		resource(T u, notify<T> n) : pair(u, std::bind(n, u))
+		{ }
 	};
 
 	template <class T> struct lazy : defer<T>, constant<T>
@@ -131,6 +135,21 @@ namespace fwd
 			};
 		}
 	};
+
+	template <class T> predicate<T> equal_to(T v)
+	{
+		return [v](T u) { return u == v; };
+	}
+
+	template <class T> predicate<T> less_than(T v)
+	{
+		return [v](T u) { return u < v; };
+	}
+
+	template <class T> predicate<T> greater_than(T v)
+	{
+		return [v](T u) { return u > v; };
+	}
 }
 
 #endif // file
