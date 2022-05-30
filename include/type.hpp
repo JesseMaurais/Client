@@ -60,12 +60,13 @@ namespace fmt
 		using test       = typename view::test;
 		using compare    = typename view::compare;
 
-		struct catalog : fwd::resource<std::messages_base::catalog>
+		struct catalog
 		{
+			catalog(view), ~catalog();
 			view operator()(view u, int=0, int=0);
 			operator bool() const;
-			catalog(view);
 		private:
+			std::messages_base::catalog id;
 			set cache;
 		};
 
@@ -233,7 +234,7 @@ namespace fmt
 	};
 
 	//
-	// UTF-8 shims
+	// Shims
 	//
 
 	inline auto catalog(view name)
@@ -341,7 +342,7 @@ namespace fmt
 		return type<char>::embrace(u, v);
 	}
 
-	inline char getline(input in, string& line, view delims)
+	inline auto getline(input in, string& line, view delims)
 	{
 		return type<char>::getline(in, line, delims);
 	}
@@ -351,13 +352,7 @@ namespace fmt
 		return type<char>::to_pair(u, v);
 	}
 
-	inline auto to_pair(pair p, view u = tag::assign)
-	{
-		vector x { p.first, p.second };
-		return fmt::join(x, u);
-	}
-
-	inline bool same(view u, view v)
+	inline auto same(view u, view v)
 	{
 		return u.empty() ? v.empty() :
 			u.data() == v.data() and u.size() == v.size();
@@ -462,37 +457,37 @@ namespace fmt
 	template <>
 	inline string to_string(const wstring& w)
 	{
-		return to_string(wstring::view(w));
+		return to_string(wide(w));
 	}
 
 	template <>
 	inline wstring to_wstring(const string& s)
 	{
-		return to_wstring(string::view(s));
+		return to_wstring(view(s));
 	}
 
 	template <>
 	inline string to_string(wchar_t const*const& w)
 	{
-		return to_string(wstring::view(w));
+		return to_string(wide(w));
 	}
 
 	template <>
 	inline wstring to_wstring(char const*const& s)
 	{
-		return to_wstring(string::view(s));
+		return to_wstring(view(s));
 	}
 
 	template <>
 	inline string to_string(wchar_t *const& w)
 	{
-		return to_string(wstring::view(w));
+		return to_string(wide(w));
 	}
 
 	template <>
 	inline wstring to_wstring(char *const& s)
 	{
-		return to_wstring(string::view(s));
+		return to_wstring(view(s));
 	}
 
 	template <>

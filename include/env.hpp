@@ -5,13 +5,13 @@
 
 namespace env
 {
+	// accessors
 	bool got(fmt::view);
 	fmt::view get(fmt::view);
 	bool set(fmt::view);
 	bool put(fmt::view);
 	bool put(fmt::view, fmt::view);
-	fmt::view cat(fmt::view);
-	fmt::view echo(fmt::view);
+	// common
 	fmt::span vars();
 	fmt::span path();
 	fmt::view temp();
@@ -25,6 +25,19 @@ namespace env
 	fmt::view shell();
 	fmt::view domain();
 	fmt::view session();
+
+	fmt::view echo(fmt::view);
+	// Expand string using shell
+
+	fmt::view text(fmt::view);
+	// Localize using program catalog
+
+	fmt::output print(fmt::output, fmt::view, fmt::span);
+	// Localize text and replace tags with arguments or environment variables
+
+	fmt::output print(fmt::output, fmt::view, fmt::init);
+	fmt::output print(fmt::view, fmt::span);
+	fmt::output print(fmt::view, fmt::init);
 }
 
 #endif // file

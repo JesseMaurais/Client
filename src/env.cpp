@@ -8,8 +8,11 @@
 #include "dir.hpp"
 #include "fmt.hpp"
 #include "sys.hpp"
+#include "dig.hpp"
 #include "type.hpp"
+#include "time.hpp"
 #include "sync.hpp"
+#include <iostream>
 
 namespace env
 {
@@ -68,12 +71,6 @@ namespace env
 		fmt::vector w { u, v };
 		const auto s = fmt::join(w, fmt::tag::assign);
 		return env::put(s);
-	}
-
-	fmt::view echo(fmt::view u)
-	{
-		const auto p = env::exe::echo(u);
-		return p.empty() ? "" : p.front();
 	}
 
 	fmt::span vars()
@@ -258,12 +255,94 @@ namespace env
 		}
 		#endif
 	}
+
+	fmt::view echo(fmt::view u)
+	{
+		const auto p = env::exe::echo(u);
+		return p.empty() ? "" : p.front();
+	}
+
+	fmt::view text(fmt::view u)
+	{
+		static auto cat = fmt::catalog(env::opt::application());
+		return cat(u);
+	}
+
+	fmt::output print(fmt::output out, fmt::view format, fmt::init params)
+	{
+		return print(out, format, fwd::to_span(params));
+	}
+
+	fmt::output print(fmt::view format, fmt::span params)
+	{
+		return print(std::cout, format, params);
+	}
+
+	fmt::output print(fmt::view format, fmt::init params)
+	{
+		return print(std::cout, format, params);
+	}
+
+	fmt::output print(fmt::output out, fmt::view format, fmt::span params)
+	{
+		constexpr auto chars = "~$#0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		constexpr auto delim = '%';
+
+		format = text(format);
+		while (not format.empty())
+		{
+			auto pos = format.find(delim);
+			out << format.substr(0, pos);
+
+			auto end = format.find_first_not_of(chars, pos);
+			if (auto tag = format.substr(pos, end); tag.empty())
+			{
+				if (end < format.size() and format[end] == delim)
+				{
+					out << delim;
+					++ end;
+				}
+			}
+			else switch (tag[1])
+			{
+				case '$':
+				break;
+
+				case '#':
+				break;
+
+				default:
+				if (auto u = tag.substr(1); fmt::all_of(u, fmt::digit))
+				{
+					const auto n = fmt::to_long(u);
+					out << params[n];
+				}
+				else
+				{
+					out << env::opt::get(u);
+				}
+				break;
+			}
+
+			format = format.substr(end);
+		}
+		return out;
+	}
 }
 
 #ifdef test_unit
-test_unit(env)
+
+test_unit(path)
 {
 	assert(env::get("PATH") == fmt::path::join(env::path()));
 	assert(env::get("PATH") == env::echo("PATH"));
 }
+
+test_unit(print)
+{
+	std::stringstream ss;
+	env::print(ss, "The text \"%~1, %2!\" is an example.", {"Hello", "World"});
+	assert(ss.str() == "The text \"Hello, World!\" is an example.");
+}
+
 #endif

@@ -69,26 +69,9 @@ namespace fmt::lang
 		return local;
 	}
 
-	void set(std::locale&& to)
+	void set(std::locale& to)
 	{
 		local = to;
-	}
-
-	template <class C, class V> auto open(V name)
-	{
-		using type = type<C>;
-		using messages = typename type::messages;
-		auto& facet = type::template use<messages>();
-		const auto s = fmt::to_string(name);
-		return facet.open(s, get());
-	}
-
-	template <class C> void close(std::messages_base::catalog cat)
-	{
-		using type = type<C>;
-		using messages = typename type::messages;
-		auto& facet = type::template use<messages>();
-		facet.close(cat);
 	}
 }
 
@@ -107,12 +90,19 @@ namespace fmt
 	}
 
 	template <class C> type<C>::catalog::catalog(view n)
-	: resource(lang::open<C, view>(n), lang::close<C>)
-	{ }
+	{
+		const auto s = fmt::to_string(n);
+		id = use<messages>().open(s, lang::get());
+	}
+
+	template <class C> type<C>::catalog::~catalog()
+	{
+		if (0 < id) use<messages>().close(id);
+	}
 
 	template <class C> type<C>::catalog::operator bool() const
 	{
-		return 0 < resource::get();
+		return 0 < id;
 	}
 
 	template <class C> typename type<C>::view type<C>::catalog::operator()(view u, int set, int msgid)
@@ -121,7 +111,7 @@ namespace fmt
 		if (cache.end() == it)
 		{
 			string s { u.begin(), u.end() };
-			s = use<messages>().get(resource::get(), set, msgid, s);
+			s = use<messages>().get(id, set, msgid, s);
 			std::tie(it, std::ignore) = cache.emplace(std::move(s));
 		}
 		return it->substr();

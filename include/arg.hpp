@@ -5,19 +5,20 @@
 
 namespace env::opt
 {
-	view application();
-	span arguments();
-	view initials();
-	view program();
-	view config();
+	fmt::view application();
+	fmt::span arguments();
+	fmt::view initials();
+	fmt::view program();
+	fmt::view config();
+	fmt::view catalog();
 
-	bool got(view);
-	view get(view);
-	bool put(view, view);
+	bool got(fmt::view);
+	fmt::view get(fmt::view);
+	bool put(fmt::view, fmt::view);
 
-	bool got(pair);
-	view get(pair);
-	bool put(pair, view);
+	bool got(fmt::pair);
+	fmt::view get(fmt::pair);
+	bool put(fmt::pair, fmt::view);
 
 	inline auto arg(size_t argn = 0)
 	{
@@ -28,9 +29,9 @@ namespace env::opt
 	struct cmd : fmt::layout<cmd>
 	{
 		long argn; // required arguments (or -1 for any number)
-		view dash; // short name with one dash (-c)
-		view name; // long name with dual dash (--config)
-		view text; // descriptive text for user help menu
+		fmt::view dash; // short name with one dash (-c)
+		fmt::view name; // long name with dual dash (--config)
+		fmt::view text; // descriptive text for user help menu
 	};
 
 	fmt::vector put(int argc, char** argv, cmd::span);

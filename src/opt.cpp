@@ -51,39 +51,39 @@ namespace
 
 namespace env::opt
 {
-	bool get(view key, bool value)
+	bool get(fmt::view key, bool value)
 	{
 		return cast(key, value);
 	}
 
-	bool set(view key, bool value)
+	bool set(fmt::view key, bool value)
 	{
-		view u = cast(value);
+		fmt::view u = cast(value);
 		return set(key, u);
 	}
 
-	bool get(pair key, bool value)
+	bool get(fmt::pair key, bool value)
 	{
 		return cast(key, value);
 	}
 
-	bool set(pair key, bool value)
+	bool set(fmt::pair key, bool value)
 	{
-		view u = cast(value);
+		fmt::view u = cast(value);
 		return set(key, u);
 	}
 
-	view get(view key, view value)
+	fmt::view get(fmt::view key, fmt::view value)
 	{
 		return got(key) ? get(key) : value;
 	}
 
-	view get(pair key, view value)
+	fmt::view get(fmt::pair key, fmt::view value)
 	{
 		return got(key) ? get(key) : value;
 	}
 
-	long get(view key, long value, int base)
+	long get(fmt::view key, long value, int base)
 	{
 		return cast(key, value, [base](auto value)
 		{
@@ -91,12 +91,12 @@ namespace env::opt
 		});
 	}
 
-	bool set(view key, long value, int base)
+	bool set(fmt::view key, long value, int base)
 	{
 		return set(key, fmt::to_string(value, base));
 	}
 
-	long get(pair key, long value, int base)
+	long get(fmt::pair key, long value, int base)
 	{
 		return cast(key, value, [base](auto value)
 		{
@@ -104,12 +104,12 @@ namespace env::opt
 		});
 	}
 
-	bool set(pair key, long value, int base)
+	bool set(fmt::pair key, long value, int base)
 	{
 		return set(key, fmt::to_string(value, base));
 	}
 
-	float get(view key, float value)
+	float get(fmt::view key, float value)
 	{
 		return cast(key, value, [](auto value)
 		{
@@ -117,12 +117,12 @@ namespace env::opt
 		});
 	}
 
-	bool set(view key, float value, int digits)
+	bool set(fmt::view key, float value, int digits)
 	{
 		return set(key, fmt::to_string(value, digits));
 	}
 
-	float get(pair key, float value)
+	float get(fmt::pair key, float value)
 	{
 		return cast(key, value, [](auto value)
 		{
@@ -130,7 +130,7 @@ namespace env::opt
 		});
 	}
 
-	bool set(pair key, float value)
+	bool set(fmt::pair key, float value)
 	{
 		return set(key, fmt::to_string(value));
 	}
@@ -141,17 +141,8 @@ namespace
 {
 	fmt::vector list;
 
-	fmt::view make_key()
-	{
-		static auto app = "Application";
-		return app;
-	}
-
-	fmt::pair make_pair(fmt::view key = make_key())
-	{
-		static auto cmd = "Command Line";
-		return std::make_pair(cmd, key);
-	}
+	constexpr fmt::view Application = "Application";
+	constexpr fmt::pair CommandLine { Application, "Command Line" };
 
 	fmt::string make_ini()
 	{
@@ -205,7 +196,7 @@ namespace
 			auto const path = env::opt::initials();
 			auto const s = fmt::to_string(path);
 			doc::ini::ref slice = *writer;
-			slice.set(make_pair(), env::opt::program());
+			slice.set(CommandLine, env::opt::program());
 			std::ifstream input(s);
 			while (input >> slice);
 			return ini;
@@ -215,29 +206,29 @@ namespace
 
 namespace env::opt
 {
-	view application()
+	fmt::view application()
 	{
-		return env::opt::get(make_key());
+		return env::opt::get(CommandLine);
 	}
 
-	span arguments()
+	fmt::span arguments()
 	{
 		return { list.data(), list.size() };
 	}
 
-	view initials()
+	fmt::view initials()
 	{
 		static fmt::string s;
-		if (empty(s))
+		if (s.empty())
 		{
 			s = fmt::dir::join({config(), make_ini()});
 		}
 		return s;
 	}
 
-	view program()
+	fmt::view program()
 	{
-		static fmt::string::view u;
+		static fmt::view u;
 		if (u.empty())
 		{
 			auto const args = env::opt::arguments();
@@ -255,7 +246,7 @@ namespace env::opt
 		return u;
 	}
 
-	view config()
+	fmt::view config()
 	{
 		static fmt::string s;
 		if (s.empty())
@@ -273,41 +264,51 @@ namespace env::opt
 		return s;
 	}
 
-	fmt::string::in::ref get(fmt::string::in::ref in)
+	fmt::view catalog()
+	{
+		auto u = get("catalog");
+		if (u.empty())
+		{
+			u = program();
+		}
+		return u;
+	}
+
+	fmt::input get(fmt::input in)
 	{
 		auto writer = registry().writer();
 		doc::ini::ref slice = *writer;
 		return in >> slice;
 	}
 
-	fmt::string::out::ref put(fmt::string::out::ref out)
+	fmt::output put(fmt::output out)
 	{
 		auto reader = registry().reader();
 		doc::ini::cref slice = *reader;
 		return out << slice;
 	}
 
-	bool got(pair key)
+	bool got(fmt::pair key)
 	{
 		return registry().reader()->got(key);
 	}
 
-	view get(pair key)
+	fmt::view get(fmt::pair key)
 	{
 		return registry().reader()->get(key);
 	}
 
-	bool set(pair key, view value)
+	bool set(fmt::pair key, fmt::view value)
 	{
 		return registry().writer()->set(key, value);
 	}
 
-	bool got(view key)
+	bool got(fmt::view key)
 	{
 		return not get(key).empty();
 	}
 
-	view get(view key)
+	fmt::view get(fmt::view key)
 	{
 		const auto u = fmt::tag::get(key);
 		// First look for argument
@@ -325,14 +326,14 @@ namespace env::opt
 		if (value.empty())
 		{
 			// Finally look in options table
-			value = env::opt::get(make_pair(key));
+			value = env::opt::get({Application, key});
 		}
 		return value;
 	}
 
 	bool set(fmt::view key, fmt::view value)
 	{
-		return set(make_pair(key), value);
+		return set({Application, key}, value);
 	}
 
 	fmt::vector put(int argc, char** argv, cmd::span cmd)
