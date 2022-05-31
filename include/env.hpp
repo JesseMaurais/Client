@@ -32,12 +32,9 @@ namespace env
 	fmt::view text(fmt::view);
 	// Localize using program catalog
 
-	fmt::output print(fmt::output, fmt::view, fmt::span);
+	fmt::output print(fmt::output, fmt::view, fmt::init, std::tm* = nullptr);
+	fmt::output print(fmt::output, fmt::view, fmt::span, std::tm* = nullptr);
 	// Localize text and replace tags with arguments or environment variables
-
-	fmt::output print(fmt::output, fmt::view, fmt::init);
-	fmt::output print(fmt::view, fmt::span);
-	fmt::output print(fmt::view, fmt::init);
 }
 
 #endif // file

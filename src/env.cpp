@@ -12,7 +12,7 @@
 #include "type.hpp"
 #include "time.hpp"
 #include "sync.hpp"
-#include <iostream>
+#include <iomanip>
 
 namespace env
 {
@@ -268,63 +268,56 @@ namespace env
 		return cat(u);
 	}
 
-	fmt::output print(fmt::output out, fmt::view format, fmt::init params)
+	fmt::output print(fmt::output out, fmt::view format, fmt::init params, std::tm *tm)
 	{
-		return print(out, format, fwd::to_span(params));
+		return print(out, format, fwd::to_span(params), tm);
 	}
 
-	fmt::output print(fmt::view format, fmt::span params)
+	fmt::output print(fmt::output out, fmt::view format, fmt::span params, std::tm *tm)
 	{
-		return print(std::cout, format, params);
-	}
+		constexpr auto token = '%';
+		auto suffix = text(format);
 
-	fmt::output print(fmt::view format, fmt::init params)
-	{
-		return print(std::cout, format, params);
-	}
-
-	fmt::output print(fmt::output out, fmt::view format, fmt::span params)
-	{
-		constexpr auto chars = "~$#0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-		constexpr auto delim = '%';
-
-		format = text(format);
-		while (not format.empty())
+		while (not suffix.empty())
 		{
-			auto pos = format.find(delim);
-			out << format.substr(0, pos);
+			auto it = fwd::find(suffix, token);
+			auto before = suffix.before(it);
+			auto after = suffix.after(it);
+			auto end = fmt::skip(after, fmt::alnum);
+			suffix = suffix.substr(end);
 
-			auto end = format.find_first_not_of(chars, pos);
-			if (auto tag = format.substr(pos, end); tag.empty())
+			out << before;
+
+			if (auto next = after.before(end); next.empty())
 			{
-				if (end < format.size() and format[end] == delim)
+				if (after.end() == end or *end == token)
 				{
-					out << delim;
+					out << token;
 					++ end;
 				}
 			}
-			else switch (tag[1])
+			else
+			if (fmt::all_of(next, fmt::digit))
 			{
-				case '$':
-				break;
-
-				case '#':
-				break;
-
-				default:
-				if (auto u = tag.substr(1); fmt::all_of(u, fmt::digit))
-				{
-					const auto n = fmt::to_long(u);
-					out << params[n];
-				}
-				else
-				{
-					out << env::opt::get(u);
-				}
-				break;
+				const auto index = fmt::to_long(next);
+				out << params[index];
 			}
-
-			format = format.substr(end);
+			else
+			if (next == ".")
+			{
+				continue; // no op
+			}
+			else
+			if (auto value = env::opt::get(next); not value.empty())
+			{
+				out << value;
+			}
+			else
+			if (tm)
+			{
+				const auto buf = fmt::to_string(next);
+				out << std::put_time(tm, buf.data());
+			}
 		}
 		return out;
 	}
@@ -341,7 +334,7 @@ test_unit(path)
 test_unit(print)
 {
 	std::stringstream ss;
-	env::print(ss, "The text \"%~1, %2!\" is an example.", {"Hello", "World"});
+	env::print(ss, "The text \"%~2, %1!\" is an example.", {"World", "Hello"});
 	assert(ss.str() == "The text \"Hello, World!\" is an example.");
 }
 

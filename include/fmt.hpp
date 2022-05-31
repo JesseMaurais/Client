@@ -108,6 +108,31 @@ namespace fmt
 		using access = typename Stream::access;
 		using test = typename Stream::test;
 		using compare = typename Stream::compare;
+		using iterator = typename String::iterator;
+		using size_type = typename String::size_type;
+
+		auto substr(size_type it, size_type end = String::npos)
+		{
+			return String::substr(it, end);
+		}
+
+		auto substr(iterator it, iterator end = String::end())
+		{
+			const auto pos = std::distance(String::begin(), it);
+			const auto size = std::distance(it, end);
+			return basic_string_type(String::data() + pos, size);
+		}
+
+		auto before(iterator it)
+		{
+			return substr(String::begin(), it);
+		}
+
+		auto after(iterator it)
+		{
+			const auto end = String::end();
+			return substr(end == it ? end : std::next(it));
+		}
 
 		using String::String;
 		basic_string_type(const String& s)

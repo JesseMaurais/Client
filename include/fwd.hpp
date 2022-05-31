@@ -141,6 +141,15 @@ namespace fwd
 
 	template
 	<
+		class Range, class Value
+	>
+	auto find(Range &&r, Value p)
+	{
+		return std::find(r.begin(), r.end(), p);
+	}
+
+	template
+	<
 		class Range, class Predicate
 	>
 	auto find_if(Range &&r, Predicate p)
