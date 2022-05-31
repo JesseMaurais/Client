@@ -507,7 +507,8 @@ test_unit(fmt)
 
 test_unit(lang)
 {
-	fmt::lang::set(std::locale("de_DE.utf8"));
+	auto de = std::locale("de_DE.utf8");
+	fmt::lang::set(de);
 	auto cat = fmt::catalog("sed");
 	assert(cat and "German catalog");
 	const auto txt = cat("No match");

@@ -310,7 +310,7 @@ namespace env::opt
 
 	fmt::view get(fmt::view key)
 	{
-		const auto u = fmt::tag::get(key);
+		const auto u = fmt::tag::emplace(key);
 		// First look for argument
 		const auto args = arguments();
 		for (const auto a : args)
@@ -355,7 +355,7 @@ namespace env::opt
 			if (auto next = find_next(argu, cmd); end != next)
 			{
 				// Set as option
-				const auto key = fmt::tag::set(next->name);
+				const auto key = fmt::tag::emplace(next->name);
 				current = 0 < next->argn ? next : end;
 				env::opt::set(key, true);
 				args.clear();
@@ -369,7 +369,7 @@ namespace env::opt
 					// Set as option
 					args.emplace_back(argu);
 					const auto value = fmt::join(args, ";");
-					const auto key = fmt::tag::set(current->name);
+					const auto key = fmt::tag::emplace(current->name);
 					(void) set(key, value);
 				}
 				else

@@ -11,7 +11,7 @@ namespace fmt
 	namespace lang
 	{
 		const std::locale& get();
-		void set(std::locale&&);
+		void set(std::locale&);
 	}
 
 	inline auto

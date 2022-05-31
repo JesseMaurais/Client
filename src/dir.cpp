@@ -54,23 +54,6 @@ namespace fmt::path
 	}
 }
 
-namespace fmt::file
-{
-	string fifo(view name)
-	{
-		#ifdef _WIN32
-		{
-			return fmt::join({ R"(\\.\pipe\)", name });
-		}
-		#else // UNIX
-		{
-			const auto run = env::usr::run_dir();
-			return fmt::dir::join({ run, name });
-		}
-		#endif // API
-	}
-}
-
 namespace env::file
 {
 	dirs paths()
@@ -93,7 +76,7 @@ namespace env::file
 		if (not fmt::terminated(path))
 		{
 			const auto buf = fmt::to_string(path);
-			return find(buf, check);
+			return find(view(buf), check);
 		}
 		return fwd::any_of(sys::files(path.data()), check);
 	}

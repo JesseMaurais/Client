@@ -111,27 +111,24 @@ namespace fmt
 		using iterator = typename String::iterator;
 		using size_type = typename String::size_type;
 
-		auto substr(size_type it, size_type end = String::npos)
-		{
-			return String::substr(it, end);
-		}
-
-		auto substr(iterator it, iterator end = String::end())
+		auto sub(iterator it, iterator end = String::end())
 		{
 			const auto pos = std::distance(String::begin(), it);
 			const auto size = std::distance(it, end);
-			return basic_string_type(String::data() + pos, size);
+			const auto ptr = String::data() + pos;
+			return basic_string_type(ptr, size);
 		}
 
 		auto before(iterator it)
 		{
-			return substr(String::begin(), it);
+			return sub(String::begin(), it);
 		}
 
 		auto after(iterator it)
 		{
 			const auto end = String::end();
-			return substr(end == it ? end : std::next(it));
+			const auto next = std::next(it);
+			return sub(it == end ? end : next);
 		}
 
 		using String::String;

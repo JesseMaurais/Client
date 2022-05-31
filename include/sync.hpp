@@ -114,17 +114,7 @@ namespace sys
 
 		auto unique() const
 		{
-			return fwd::make_unique(that, [this, key=reader()](auto ptr)
-			{
-				#ifdef assert
-				assert(that == ptr);
-				#endif
-			});
-		}
-
-		auto shared() const
-		{
-			return fwd::make_shared(that, [this, key=reader()](auto ptr)
+			return std::unique_ptr<object>(that, [this, key=reader()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -134,7 +124,17 @@ namespace sys
 
 		auto unique()
 		{
-			return fwd::make_unique(that, [this, key=writer()](auto ptr)
+			return std::unique_ptr<object>(that, [this, key=writer()](auto ptr)
+			{
+				#ifdef assert
+				assert(that == ptr);
+				#endif
+			});
+		}
+
+		auto shared() const
+		{
+			return std::shared_ptr<object>(that, [this, key=reader()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -144,7 +144,7 @@ namespace sys
 
 		auto shared()
 		{
-			return fwd::make_shared(that, [this, key=writer()](auto ptr)
+			return std::shared_ptr<object>(that, [this, key=writer()](auto ptr)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -180,14 +180,14 @@ namespace sys
 			return that.unique();
 		}
 
-		auto shared() const
-		{
-			return that.shared();
-		}
-
 		auto unique()
 		{
 			return that.unique();
+		}
+
+		auto shared() const
+		{
+			return that.shared();
 		}
 
 		auto shared()

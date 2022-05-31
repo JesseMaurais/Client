@@ -12,7 +12,6 @@
 #include "type.hpp"
 #include "time.hpp"
 #include "sync.hpp"
-#include <iomanip>
 
 namespace env
 {
@@ -267,13 +266,13 @@ namespace env
 		static auto cat = fmt::catalog(env::opt::application());
 		return cat(u);
 	}
-
-	fmt::output print(fmt::output out, fmt::view format, fmt::init params, std::tm *tm)
+/*
+	fmt::output print(fmt::output out, fmt::view format, fmt::init params)
 	{
-		return print(out, format, fwd::to_span(params), tm);
+		return print(out, format, fwd::to_span(params));
 	}
 
-	fmt::output print(fmt::output out, fmt::view format, fmt::span params, std::tm *tm)
+	fmt::output print(fmt::output out, fmt::view format, fmt::span params)
 	{
 		constexpr auto token = '%';
 		auto suffix = text(format);
@@ -284,7 +283,7 @@ namespace env
 			auto before = suffix.before(it);
 			auto after = suffix.after(it);
 			auto end = fmt::skip(after, fmt::alnum);
-			suffix = suffix.substr(end);
+			suffix = suffix.sub(end);
 
 			out << before;
 
@@ -303,24 +302,14 @@ namespace env
 				out << params[index];
 			}
 			else
-			if (next == ".")
-			{
-				continue; // no op
-			}
-			else
 			if (auto value = env::opt::get(next); not value.empty())
 			{
 				out << value;
 			}
-			else
-			if (tm)
-			{
-				const auto buf = fmt::to_string(next);
-				out << std::put_time(tm, buf.data());
-			}
 		}
 		return out;
 	}
+*/
 }
 
 #ifdef test_unit
@@ -334,8 +323,14 @@ test_unit(path)
 test_unit(print)
 {
 	std::stringstream ss;
-	env::print(ss, "The text \"%~2, %1!\" is an example.", {"World", "Hello"});
+
+	env::print(ss, "The text \"%~1, %0!\" is an example.", {"World", "Hello"});
 	assert(ss.str() == "The text \"Hello, World!\" is an example.");
+	ss.str("");
+
+	env::print(ss, "The variable %UNKNOWN should be filtered.", {});
+	assert(ss.str() == "The variable should be filtered.");
+	ss.str("");
 }
 
 #endif

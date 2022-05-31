@@ -19,11 +19,6 @@ namespace fmt::dir
 	string join(init);
 }
 
-namespace fmt::file
-{
-	string fifo(view);
-}
-
 namespace env::file
 {
 	using string = fmt::string;
