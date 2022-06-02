@@ -88,7 +88,7 @@ namespace
 			{
 				const auto image = env::opt::arg();
 				fmt::vector args { image, "-o", "-q", name };
-				for (auto line : env::exe::run(args))
+				for (auto line : env::exe::get(args))
 				{
 					sys::out() << line << fmt::tag::eol;
 				}

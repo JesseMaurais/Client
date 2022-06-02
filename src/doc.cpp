@@ -64,7 +64,7 @@ namespace doc
 			if (header(token))
 			{
 				token = token.substr(1, token.size() - 2);
-				group = fmt::tag::set(token);
+				group = fmt::tag::emplace(token);
 				continue;
 			}
 			// Extract key and value from pair
@@ -214,8 +214,8 @@ test_unit(ini)
 
 	// Data at runtime
 	{
-		auto const group = fmt::tag::set("Group");
-		auto const key = fmt::tag::set("Key");
+		constexpr auto group = "Group";
+		constexpr auto key = "Key";
 		constexpr auto value = "Value";
 		// Cache value with set
 		{

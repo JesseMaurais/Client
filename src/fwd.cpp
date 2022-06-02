@@ -17,12 +17,6 @@ test_unit(tmp)
 		}
 		assert(ok and "Run event at end of scope");
 	}
-
-	{
-		fwd::source<int> src { 2, [](int n) { assert(2 == n); }};
-		assert(src.get_deleter());
-		assert(src.get() == 2);
-	}
 }
 
 #endif

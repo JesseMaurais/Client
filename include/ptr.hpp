@@ -10,7 +10,7 @@ namespace fwd
 {
 	template <class Type> using as_ptr = typename std::add_pointer<Type>::type;
 	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
-	template <class Type> using deleter = std::function<void(as_ptr<const Type>)>;
+	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using unique_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> using shared_ptr = std::shared_ptr<Type>;
 	template <class Type> using weak_ptr = std::weak_ptr<Type>;

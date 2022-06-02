@@ -8,10 +8,10 @@ namespace env::exe
 	fmt::vector get(fmt::input in, char end = '\n', int count = -1);
 	// Cache an amount of delimited input lines
 
-	fmt::vector run(fmt::span args);
+	fmt::vector get(fmt::span args);
 	// Run using vector view
 
-	fmt::vector run(fmt::init args);
+	fmt::vector get(fmt::init args);
 	// Run using initializers
 
 	fmt::vector echo(fmt::view line);

@@ -42,7 +42,7 @@ namespace fmt::tag
 		auto key = cache.writer();
 		while (std::getline(in, line, eol))
 		{
-			key->emplace(std::move(key));
+			key->emplace(std::move(line));
 		}
 		return in;
 	}

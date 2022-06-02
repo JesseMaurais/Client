@@ -170,7 +170,7 @@ namespace sys::uni::sig
 		return error;
 	}
 
-	struct event : fwd::no_copy, sigevent
+	struct event : sigevent
 	{
 		event(fwd::event f, pthread_attr_t* attr = nullptr)
 		{

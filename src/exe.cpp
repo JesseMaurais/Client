@@ -26,7 +26,8 @@ namespace env::exe
 			std::string line;
 			while (count-- and std::getline(in, line, end))
 			{
-				lines.emplace_back(cache().emplace(std::move(line)));
+				auto pair = cache().emplace(std::move(line));
+				lines.emplace_back(*pair.first);
 			}
 		}
 		catch (std::exception &error)
@@ -36,7 +37,7 @@ namespace env::exe
 		return lines;
 	}
 
-	fmt::vector run(fmt::span args)
+	fmt::vector get(fmt::span args)
 	{
 		fmt::string command;
 		for (auto arg : args)
@@ -53,19 +54,19 @@ namespace env::exe
 		return lines;
 	}
 
-	fmt::vector run(fmt::init args)
+	fmt::vector get(fmt::init args)
 	{
-		return run(fwd::to_span(args));
+		return get(fwd::to_span(args));
 	}
 
 	fmt::vector echo(fmt::view line)
 	{
-		return run({ "echo", line });
+		return get({ "echo", line });
 	}
 
 	fmt::vector list(fmt::view name)
 	{
-		return run
+		return get
 		(
 		#ifdef _WIN32
 			{ "dir", "/b", name }
@@ -77,7 +78,7 @@ namespace env::exe
 
 	fmt::vector copy(fmt::view path)
 	{
-		return run
+		return get
 		(
 		#ifdef _WIN32
 			{ "type", path }
@@ -95,14 +96,14 @@ namespace env::exe
 		}
 		#else
 		{
-			return run({ "find", directory, "-type", "f", "-name", pattern });
+			return get({ "find", directory, "-type", "f", "-name", pattern });
 		}
 		#endif
 	}
 
 	fmt::vector which(fmt::view name)
 	{
-		return run
+		return get
 		(
 		#ifdef _WIN32
 			{ "where", name }
@@ -116,7 +117,7 @@ namespace env::exe
 	{
 		#ifdef _WIN32
 		{
-			return run({ "start", "/d", path });
+			return get({ "start", "/d", path });
 		}
 		#else
 		{
@@ -137,7 +138,7 @@ namespace env::exe
 						continue;
 					}
 
-					return run({ program, path });
+					return get({ program, path });
 				}
 			}
 			return { 0, 0, nullptr };
@@ -147,7 +148,7 @@ namespace env::exe
 
 	fmt::vector imports(fmt::view path)
 	{
-		return run
+		return get
 		(
 		#ifdef _WIN32
 			{ "dumpbin", "-nologo", "-imports", path }
@@ -159,7 +160,7 @@ namespace env::exe
 
 	fmt::vector exports(fmt::view path)
 	{
-		return run
+		return get
 		(
 		#ifdef _WIN32
 			{ "dumpbin", "-nologo", "-exports", path }
@@ -177,7 +178,7 @@ namespace env::exe
 		return lower.find(name) != fmt::npos;
 	}
 
-	static fmt::vector envpick()
+	static fmt::vector pick()
 	{
 		constexpr auto zenity = "zenity", qarma = "qarma";
 
@@ -191,27 +192,33 @@ namespace env::exe
 		}
 	}
 
-	static fmt::view optpick(fmt::view value)
+	static fmt::view pick(fmt::view value)
 	{
 		using namespace std::literals;
-		static auto entry = std::make_pair("Runtime Options"sv, "DIALOG"sv);
+		static auto entry = std::make_pair("Program Options"sv, "DIALOG"sv);
 		return env::opt::get(entry, value);
+	}
+
+	static auto pair(fmt::view param, fmt::view value)
+	{
+		fmt::vector array { param, value };
+		return fmt::join(array, fmt::tag::assign);
 	}
 
 	fmt::vector dialog(fmt::span args)
 	{
 		// Look for any desktop utility program
 		fmt::view program;
-		static auto const session = envpick();
+		static const auto session = pick();
 		for (auto test : session)
 		{
 			if (auto path = which(test); not path.empty())
 			{
-				//program = path;
+				program = path.front();
 				break;
 			}
 		}
-		program = optpick(program);
+		program = pick(program);
 		// Append the command line
 		fmt::vector command;
 		command.push_back(program);
@@ -219,7 +226,7 @@ namespace env::exe
 		{
 			command.push_back(arg);
 		}
-		return run(command);
+		return get(command);
 	}
 
 
@@ -229,7 +236,7 @@ namespace env::exe
 
 		if (not path.empty())
 		{
-			command.emplace_back("--filename", path);
+			command.emplace_back(pair("--filename", path));
 		}
 		if (mask == mode::many)
 		{
@@ -268,7 +275,7 @@ namespace env::exe
 		fmt::vector command { message(type) };
 		if (not text.empty())
 		{
-			command.emplace_back("--text", text);
+			command.emplace_back(pair("--text", text));
 		}
 		return dialog(command);
 	}
@@ -278,7 +285,7 @@ namespace env::exe
 		fmt::vector command {{ "--entry-text", start }};
 		if (not label.empty())
 		{
-			command.emplace_back("--text", label);
+			command.emplace_back(pair("--text", label));
 		}
 		if (hide)
 		{
@@ -293,7 +300,7 @@ namespace env::exe
 		if (type == txt::html)
 		{
 			command.emplace_back("--html");
-			command.emplace_back("--url", path);
+			command.emplace_back(pair("--url", path));
 		}
 		else
 		{
@@ -301,15 +308,15 @@ namespace env::exe
 			{
 				command.emplace_back("--editable");
 			}
-			command.emplace_back("--filename", path);
+			command.emplace_back(pair("--filename", path));
 		}
 		if (not font.empty())
 		{
-			command.emplace_back("--font", font);
+			command.emplace_back(pair("--font", font));
 		}
 		if (not empty(check))
 		{
-			command.emplace_back("--checkbox", check);
+			command.emplace_back(pair("--checkbox", check));
 		}
 		return dialog(command);
 
@@ -320,17 +327,18 @@ namespace env::exe
 		fmt::vector command { "--forms" };
 		if (not text.empty())
 		{
-			command.emplace_back("--text", text);
+			command.emplace_back(pair("--text", text));
 		}
 		if (not title.empty())
 		{
-			command.emplace_back("--text", title);
+			command.emplace_back(pair("--text", title));
 		}
 		fmt::string prefix { "--add-" };
 		for (auto ctl : add)
 		{
-			auto key = prefix + fmt::to_string(ctl.second);
-			command.emplace_back(key, ctl.first);
+			fmt::string copy = ctl.second;
+			auto key = prefix + copy;
+			command.emplace_back(pair(key, ctl.first));
 		}
 		return dialog(command);
 	}
@@ -340,11 +348,11 @@ namespace env::exe
 		fmt::vector command { "--notification" };
 		if (not text.empty())
 		{
-			command.emplace_back("--text", text);
+			command.emplace_back(pair("--text", text));
 		}
 		if (not icon.empty())
 		{
-			command.emplace_back("--icon", icon);
+			command.emplace_back(pair("--icon", icon));
 		}
 		return dialog(command);
 	}
@@ -354,23 +362,23 @@ namespace env::exe
 		fmt::vector command { "--calendar" };
 		if (not text.empty())
 		{
-			command.emplace_back("--text", text);
+			command.emplace_back(pair("--text", text));
 		}
 		if (not format.empty())
 		{
-			command.emplace_back("--format", format);
+			command.emplace_back(pair("--format", format));
 		}
 		if (0 < day)
 		{
-			command.emplace_back("--day", fmt::to_string(day));
+			command.emplace_back(pair("--day", fmt::to_string(day)));
 		}
 		if (0 < month)
 		{
-			command.emplace_back("--month", fmt::to_string(month));
+			command.emplace_back(pair("--month", fmt::to_string(month)));
 		}
 		if (0 < year)
 		{
-			command.emplace_back("--year", fmt::to_string(year));
+			command.emplace_back(pair("--year", fmt::to_string(year)));
 		}
 		return dialog(command);
 	}
@@ -380,7 +388,7 @@ namespace env::exe
 		fmt::vector command { "--color-selection" };
 		if (not start.empty())
 		{
-			command.emplace_back("--color", start);
+			command.emplace_back(pair("--color", start));
 		}
 		if (palette)
 		{

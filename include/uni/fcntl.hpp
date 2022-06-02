@@ -21,9 +21,9 @@ namespace sys::uni::file
 
 		bool wait(int fd)
 		{
-			return fail(fctrl(fd, F_SETLKW, this));
+			return fail(fcntl(fd, F_SETLKW, this));
 		}
 	};
 }
 
-#endif // file 
+#endif // file

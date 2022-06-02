@@ -119,7 +119,7 @@ namespace env::file
 		return flags;
 	}
 
-	fmt::string to_string(mode mask)
+	fmt::string to_string(int mask)
 	{
 		#ifdef assert
 		assert((mask & (rw|un|ok|app|bin|txt)) == mask);
@@ -346,25 +346,7 @@ namespace env::file
 		else
 		if (mask & fifo)
 		{
-			const auto name = fmt::file::fifo(path);
 
-			#ifdef _WIN32
-			{
-
-			}
-			#else // UNIX
-			{
-				const auto flags = to_mode(mask & rw);
-				if (sys::fail(mkfifo(name.data(), flags)))
-				{
-					sys::err(here, "mkfifo", name);
-				}
-				else
-				{
-					return open(name, mode(mask & ~fifo));
-				}
-			}
-			#endif // API
 		}
 		else
 		{
@@ -376,9 +358,11 @@ namespace env::file
 			}
 			return enclose(f);
 		}
+
+		return fwd::make_unique<FILE>(nullptr, [](auto){});
 	}
 
-	unique_ptr lock(basic_ptr f, mode mask, size_t off, size_t sz)
+	unique_ptr lock(basic_ptr f, mode mask, off_t off, size_t sz)
 	{
 		#ifdef assert
 		assert(nullptr != f);
