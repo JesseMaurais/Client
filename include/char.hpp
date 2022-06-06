@@ -548,7 +548,7 @@ namespace fmt
 	//
 
 	using inter = plane<'\x20', '\x2F'>;
-	using param = plane<'\x30', '\x3F'>;
+	using value = plane<'\x30', '\x3F'>;
 	using close = plane<'\x40', '\x7E'>;
 	using privy = plane<'\x70', '\x7E'>;
 

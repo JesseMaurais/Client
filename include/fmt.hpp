@@ -7,7 +7,7 @@
 
 namespace fmt
 {
-	template <class Type> struct memory
+	template <class Type> struct memory : fwd::type_of<Type>
 	{
 		// address traits
 		using ptr = typename std::add_pointer<Type>::type;
@@ -37,13 +37,14 @@ namespace fmt
 		using io = memory<fwd::basic_iostream<Char, Traits>>;
 		using buf = memory<fwd::basic_buf<Char, Traits>>;
 		using file = memory<fwd::basic_file<Char, Traits>>;
-		using ss = memory<fwd::basic_stringstream<Char, Traits>>;
-		using str = memory<fwd::basic_string_view<Char, Traits>>;
+		using str = memory<fwd::basic_stringstream<Char, Traits>>;
+		using view = memory<fwd::basic_string_view<Char, Traits>>;
 
 		// access traits
 		using address = typename addr::cptr;
-		using test = typename str::test;
-		using compare = typename str::compare;
+		using buffer = typename str::type;
+		using test = typename view::test;
+		using compare = typename view::compare;
 		using binary = typename io::ref;
 		using input = typename in::ref;
 		using output = typename out::ref;
@@ -68,9 +69,9 @@ namespace fmt
 		}
 
 		template <class Range, class Delimiter>
-		static output put(output out, Range pair, Delimiter tok)
+		static output put(output out, Range pair, Delimiter token)
 		{
-			return put(out, pair.begin(), pair.end(), tok);
+			return put(out, pair.begin(), pair.end(), token);
 		}
 	};
 
@@ -91,9 +92,9 @@ namespace fmt
 		using vector = fwd::vector<Type, Alloc>;
 		using span = fwd::span<Type>;
 		using matrix = fwd::matrix<Type, Alloc>;
-		using spans = fwd::spans<Type>;
-		using params = fwd::params<Type, Alloc>;
-		using pairs = fwd::pairs<Type>;
+		using base = fwd::base<Type>;
+		using param = fwd::param<Type>;
+		using edges = fwd::edges<Type, Alloc>;
 	};
 
 	template
@@ -111,6 +112,7 @@ namespace fmt
 	{
 		using access = typename Stream::access;
 		using test = typename Stream::test;
+		using stream = typename Stream::str;
 		using compare = typename Stream::compare;
 		using iterator = typename String::iterator;
 		using size_type = typename String::size_type;
@@ -189,18 +191,20 @@ namespace fmt
 	using ustring = basic_string<char32_t>;
 	using page = ustring::view;
 	// everything is a string view in UTF
+	using buffer = view::buffer;
+	using address = view::address;
 	using iterator = view::iterator;
 	using pointer = view::const_pointer;
 	using vector = view::vector;
 	using span = view::span;
 	using matrix = view::matrix;
-	using spans = view::spans;
-	using params = view::params;
-	using pairs = view::pairs;
+	using base = view::base;
+	using edges = view::edges;
 	using map = view::map;
 	using pair = view::pair;
 	using set = view::set;
 	using init = view::init;
+	using param = view::param;
 	using binary = view::binary;
 	using input = view::input;
 	using output = view::output;
@@ -209,6 +213,7 @@ namespace fmt
 	using access = view::access;
 	using test = view::test;
 	using compare = view::compare;
+	using cache = string::set;
 	// position
 	using size_type = view::size_type;
 	using size = fmt::layout<size_type>;

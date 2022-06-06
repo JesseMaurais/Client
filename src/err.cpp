@@ -24,7 +24,7 @@ namespace sys
 		true;
 	#endif
 
-	thread_local std::stringstream thread_buf;
+	thread_local fmt::buffer thread_buf;
 
 	fmt::output out()
 	{

@@ -169,19 +169,19 @@ namespace fwd
 	<
 		class Type, size_t Columns = std::dynamic_extent, size_t Rows = std::dynamic_extent
 	>
-	using spans = span<span<Type, Columns>, Rows>;
+	using base = span<span<Type, Columns>, Rows>;
 
 	template
 	<
 		class Type, template <class> class Alloc = std::allocator
 	>
-	using params = vector<pair<Type>, Alloc>;
+	using edges = vector<pair<Type>, Alloc>;
 
 	template
 	<
 		class Type, size_t Size = std::dynamic_extent
 	>
-	using pairs = span<pair<Type>, Size>;
+	using param = span<pair<Type>, Size>;
 }
 
 #endif // file

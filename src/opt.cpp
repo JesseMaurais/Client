@@ -49,6 +49,28 @@ namespace
 	}
 }
 
+namespace fmt::opt
+{
+	string to_string(pair param, pair style)
+	{
+		auto key = trim(param.first, tag::quote);
+		auto value = trim(param.second, tag::quote);
+
+		buffer buf;
+		buf << style.first << key;
+		if (not value.empty())
+		{
+			buf << style.second;
+			if (any_of(value, space))
+			{
+				buf << tag::quote << value << tag::quote;
+			}
+			else buf << value;
+		}
+		return buf.str();
+	}
+}
+
 namespace env::opt
 {
 	bool get(fmt::view key, bool value)

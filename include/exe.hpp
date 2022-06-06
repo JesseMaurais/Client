@@ -41,7 +41,7 @@ namespace env::exe
 	bool desktop(fmt::view name);
 	// Whether name matches current session
 
-	fmt::vector dialog(fmt::span command);
+	fmt::vector dialog(fmt::param);
 	// Open dialog with command
 
 	fmt::vector notify(fmt::view text, fmt::view icon = "info");
@@ -56,11 +56,10 @@ namespace env::exe
 	fmt::vector enter(fmt::view start, fmt::view label = "", bool hide = false);
 	// User enters text into an edit box
 
-	fmt::vector form(fmt::pairs args, fmt::view text = "", fmt::view title = "");
+	fmt::vector form(fmt::param, fmt::view text = "", fmt::view title = "");
 	// User enters data into a form
 
-	enum class msg { info, query, warn, error };
-	fmt::vector show(fmt::view text, msg = msg::info);
+	fmt::vector show(fmt::view text, fmt::view = "error");
 	// Show a message box with buttons
 
 	enum class txt { none, edit, html };

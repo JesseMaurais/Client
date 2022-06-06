@@ -3,9 +3,10 @@
 
 #include "err.hpp"
 #include "exe.hpp"
+#include "opt.hpp"
+#include "arg.hpp"
 #include "env.hpp"
 #include "usr.hpp"
-#include "opt.hpp"
 #include "dir.hpp"
 #include "type.hpp"
 #include "io.hpp"
@@ -199,13 +200,7 @@ namespace env::exe
 		return env::opt::get(entry, value);
 	}
 
-	static auto pair(fmt::view param, fmt::view value)
-	{
-		fmt::vector array { param, value };
-		return fmt::join(array, fmt::tag::assign);
-	}
-
-	fmt::vector dialog(fmt::span args)
+	fmt::vector dialog(fmt::param par)
 	{
 		// Look for any desktop utility program
 		fmt::view program;
@@ -221,10 +216,15 @@ namespace env::exe
 		program = pick(program);
 		// Append the command line
 		fmt::vector command;
+		fmt::cache cache;
 		command.push_back(program);
-		for (auto arg : args)
+		for (auto pair : par)
 		{
-			command.push_back(arg);
+			auto [it, unique] = cache.emplace(fmt::opt::to_string(pair));
+			#ifdef assert
+			assert(unique);
+			#endif
+			command.emplace_back(it->data(), it->size());
 		}
 		return get(command);
 	}
@@ -232,167 +232,149 @@ namespace env::exe
 
 	fmt::vector select(fmt::view path, mode mask)
 	{
-		fmt::vector command { "--file-selection" };
-
+		fmt::edges command {{ "file-selection", fmt::tag::empty }};
 		if (not path.empty())
 		{
-			command.emplace_back(pair("--filename", path));
+			command.emplace_back("filename", path);
 		}
 		if (mask == mode::many)
 		{
-			command.emplace_back("--multiple");
+			command.emplace_back("multiple", fmt::tag::empty);
 		}
 		if (mask == mode::dir)
 		{
-			command.emplace_back("--directory");
+			command.emplace_back("directory", fmt::tag::empty);
 		}
 		if (mask == mode::save)
 		{
-			command.emplace_back("--save");
+			command.emplace_back("save", fmt::tag::empty);
 		}
-
 		return dialog(command);
 	}
 
-	static auto message(msg type)
+	fmt::vector show(fmt::view text, fmt::view type)
 	{
-		switch (type)
-		{
-		default:
-		case msg::error:
-			return "--error";
-		case msg::info:
-			return "--info";
-		case msg::query:
-			return "--question";
-		case msg::warn:
-			return "--warn";
-		}
-	};
-
-	fmt::vector show(fmt::view text, msg type)
-	{
-		fmt::vector command { message(type) };
+		fmt::edges command {{ type, fmt::tag::empty }};
 		if (not text.empty())
 		{
-			command.emplace_back(pair("--text", text));
+			command.emplace_back("text", text);
 		}
 		return dialog(command);
 	}
 
 	fmt::vector enter(fmt::view start, fmt::view label, bool hide)
 	{
-		fmt::vector command {{ "--entry-text", start }};
+		fmt::edges command {{ "entry-text", start }};
 		if (not label.empty())
 		{
-			command.emplace_back(pair("--text", label));
+			command.emplace_back("text", label);
 		}
 		if (hide)
 		{
-			command.emplace_back("--hide-text");
+			command.emplace_back("hide-text", fmt::tag::empty);
 		}
 		return dialog(command);
 	}
 
 	fmt::vector text(fmt::view path, fmt::view check, fmt::view font, txt type)
 	{
-		fmt::vector command { "--text-info" };
+		fmt::edges command {{ "text-info", fmt::tag::empty }};
 		if (type == txt::html)
 		{
-			command.emplace_back("--html");
-			command.emplace_back(pair("--url", path));
+			command.emplace_back("html", fmt::tag::empty);
+			command.emplace_back("url", path);
 		}
 		else
 		{
 			if (type == txt::edit)
 			{
-				command.emplace_back("--editable");
+				command.emplace_back("editable");
 			}
-			command.emplace_back(pair("--filename", path));
+			command.emplace_back("filename", path);
 		}
 		if (not font.empty())
 		{
-			command.emplace_back(pair("--font", font));
+			command.emplace_back("font", font);
 		}
-		if (not empty(check))
+		if (not check.empty())
 		{
-			command.emplace_back(pair("--checkbox", check));
+			command.emplace_back("checkbox", check);
 		}
 		return dialog(command);
 
 	}
 
-	fmt::vector form(fmt::pairs add, fmt::view text, fmt::view title)
+	fmt::vector form(fmt::param add, fmt::view text, fmt::view title)
 	{
-		fmt::vector command { "--forms" };
+		fmt::edges command {{ "forms", fmt::tag::empty }};
 		if (not text.empty())
 		{
-			command.emplace_back(pair("--text", text));
+			command.emplace_back("text", text);
 		}
 		if (not title.empty())
 		{
-			command.emplace_back(pair("--text", title));
+			command.emplace_back("title", title);
 		}
-		fmt::string prefix { "--add-" };
+		fmt::string prefix { "add-" };
 		for (auto ctl : add)
 		{
 			fmt::string copy = ctl.second;
 			auto key = prefix + copy;
-			command.emplace_back(pair(key, ctl.first));
+			command.emplace_back(key, ctl.first);
 		}
 		return dialog(command);
 	}
 
 	fmt::vector notify(fmt::view text, fmt::view icon)
 	{
-		fmt::vector command { "--notification" };
+		fmt::edges command {{ "notification", fmt::tag::empty }};
 		if (not text.empty())
 		{
-			command.emplace_back(pair("--text", text));
+			command.emplace_back("text", text);
 		}
 		if (not icon.empty())
 		{
-			command.emplace_back(pair("--icon", icon));
+			command.emplace_back("icon", icon);
 		}
 		return dialog(command);
 	}
 
 	fmt::vector calendar(fmt::view text, fmt::view format, int day, int month, int year)
 	{
-		fmt::vector command { "--calendar" };
+		fmt::edges command {{ "calendar", fmt::tag::empty }};
 		if (not text.empty())
 		{
-			command.emplace_back(pair("--text", text));
+			command.emplace_back("text", text);
 		}
 		if (not format.empty())
 		{
-			command.emplace_back(pair("--format", format));
+			command.emplace_back("format", format);
 		}
-		if (0 < day)
+		if (auto s = fmt::to_string(day); 0 < day)
 		{
-			command.emplace_back(pair("--day", fmt::to_string(day)));
+			command.emplace_back("day", s);
 		}
-		if (0 < month)
+		if (auto s = fmt::to_string(month);0 < month)
 		{
-			command.emplace_back(pair("--month", fmt::to_string(month)));
+			command.emplace_back("month", s);
 		}
-		if (0 < year)
+		if (auto s = fmt::to_string(year); 0 < year)
 		{
-			command.emplace_back(pair("--year", fmt::to_string(year)));
+			command.emplace_back("year", s);
 		}
 		return dialog(command);
 	}
 
 	fmt::vector color(fmt::view start, bool palette)
 	{
-		fmt::vector command { "--color-selection" };
+		fmt::edges command {{"color-selection", fmt::tag::empty }};
 		if (not start.empty())
 		{
-			command.emplace_back(pair("--color", start));
+			command.emplace_back("color", start);
 		}
 		if (palette)
 		{
-			command.emplace_back("--show-palette");
+			command.emplace_back("show-palette", fmt::tag::empty);
 		}
 		return dialog(command);
 	}

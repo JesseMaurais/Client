@@ -3,6 +3,13 @@
 
 #include "opt.hpp"
 
+namespace fmt::opt
+{
+	constexpr pair posix { "--", "=" }, win32 { "/", ":" };
+
+	string to_string(pair, pair=posix);
+}
+
 namespace env::opt
 {
 	fmt::view application();
