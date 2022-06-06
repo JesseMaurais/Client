@@ -1,5 +1,5 @@
-#ifndef uni_mman_hpp
-#define uni_mman_hpp "POSIX Shared Memory"
+#ifndef mman_hpp
+#define mman_hpp "POSIX Shared Memory"
 
 #include "uni.hpp"
 #include "ptr.hpp"

@@ -90,19 +90,19 @@ namespace doc
 		return buf;
 	}
 
-	bool ini::got(pair key) const
+	bool ini::got(fmt::pair key) const
 	{
 		return keys.find(key) != keys.end();
 	}
 
-	ini::view ini::get(pair key) const
+	fmt::view ini::get(fmt::pair key) const
 	{
 		const auto it = keys.find(key);
 		return keys.end() == it
 			? fmt::tag::empty : it->second;
 	}
 
-	bool ini::set(pair key, view value)
+	bool ini::set(fmt::pair key, fmt::view value)
 	{
 		const auto pos = cache.emplace(value);
 		#ifdef assert
@@ -111,7 +111,7 @@ namespace doc
 		return put(key, *pos.first) and pos.second;
 	}
 
-	bool ini::put(pair key, view value)
+	bool ini::put(fmt::pair key, fmt::view value)
 	{
 		auto it = keys.find(key);
 		if (keys.end() == it)

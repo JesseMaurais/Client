@@ -22,23 +22,23 @@ namespace x11
 		using cref = typename span::const_reference;
 		using ref = typename span::reference;
 
-		friend bytes::out::ref operator<<(bytes::out::ref out, cref obj)
+		friend fmt::output operator<<(fmt::output out, cref obj)
 		{
 			auto const ptr = reinterpret_cast<bytes::const_pointer>(&obj);
 			return out.write(ptr, Size);
 		}
 
-		friend bytes::in::ref operator>>(bytes::in::ref in, ref obj)
+		friend fmt::input operator>>(fmt::input in, ref obj)
 		{
 			auto const ptr = reinterpret_cast<bytes::pointer>(&obj);
 			return in.read(ptr, Size);
 		}
 	};
 
-	template 
+	template
 	<
-		char ReqType, 
-		class Req = xReq, unsigned short ReqSize = sz_xReq, 
+		char ReqType,
+		class Req = xReq, unsigned short ReqSize = sz_xReq,
 		class Reply = xGenericReply, unsigned short ReplySize = sz_xReply
 	>
 	struct Request : Protocol<Req, ReqSize>
@@ -52,8 +52,8 @@ namespace x11
 		static_assert(sizeof (Req) == requestSize);
 		static_assert(sizeof (Reply) == replySize);
 
-		Request() 
-		: Req::reqType(requestType), Req::length(requestSize) 
+		Request()
+		: Req::reqType(requestType), Req::length(requestSize)
 		{ }
 	};
 

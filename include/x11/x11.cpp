@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include "fmt.hpp"
+#include "env.hpp"
 #include "dig.hpp"
 #include "dir.hpp"
 #include "file.hpp"
@@ -18,10 +19,10 @@ namespace
 {
 	char byte_order()
 	{
-		union 
+		union
 		{
 			char c[2];
-			short s; 
+			short s;
 		};
 		s = 1;
 		return *c ? 'l' : 'B';
@@ -30,7 +31,7 @@ namespace
 
 namespace x11::auth
 {
-	bytes::in::ref operator>>(bytes::in::ref in, info::ref out)
+	fmt::input operator>>(fmt::input in, info::ref out)
 	{
 		union {
 			char b[2];
@@ -40,10 +41,10 @@ namespace x11::auth
 		if (in.get(b, 2))
 		{
 			out.family = sz;
-		
-			auto ptr = 
-			{ 
-				&out.address, 
+
+			auto ptr =
+			{
+				&out.address,
 				&out.number,
 				&out.name,
 				&out.data
@@ -68,24 +69,24 @@ namespace x11::auth
 
 namespace x11
 {
-	fmt::string::view authority()
+	fmt::view authority()
 	{
-		auto u = env::var::get("XAUTHORITY");
-		/*if (empty(u))
+		auto u = env::get("XAUTHORITY");
+		if (u.empty())
 		{
 			static fmt::string s;
-			if (empty(s))
+			if (s.empty())
 			{
 				constexpr auto author = ".Xauthority";
-				fmt::string::view const home = env::home;
+				const auto home = env::home();
 				s = fmt::dir::join({ home, author });
 			}
 			u = s;
-		}*/
+		}
 		return u;
 	}
 
-	fmt::string setup(bytes::io::ref io, fmt::string::view proto, fmt::string::view data)
+	fmt::string setup(fmt::binary io, fmt::view proto, fmt::view data)
 	{
 		fmt::string reason;
 
@@ -98,9 +99,9 @@ namespace x11
 			client.nbytesAuthProto = fmt::to<CARD16>(proto.size());
 			client.nbytesAuthString = fmt::to<CARD16>(data.size());
 
-			verify(io << client);
-			verify(io.write(proto.data(), client.nbytesAuthProto));
-			verify(io.write(data.data(), client.nbytesAuthString));
+			io << client;
+			io.write(proto.data(), client.nbytesAuthProto);
+			io.write(data.data(), client.nbytesAuthString);
 		}
 
 		if (io) // read
@@ -109,7 +110,7 @@ namespace x11
 			if (io >> prefix and not prefix.success)
 			{
 				reason.resize(prefix.lengthReason);
-				verify(io.read(reason.data(), prefix.lengthReason));
+				io.read(reason.data(), prefix.lengthReason);
 			}
 		}
 

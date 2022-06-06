@@ -1,5 +1,5 @@
-#ifndef uni_fcntl_hpp
-#define uni_fcntl_hpp "POSIX File Control"
+#ifndef fcntl_hpp
+#define fcntl_hpp "POSIX File Control"
 
 #include "uni.hpp"
 #include "ptr.hpp"

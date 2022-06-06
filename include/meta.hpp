@@ -36,7 +36,7 @@ namespace doc
 
 	template <class Type> instance<Type>::instance()
 	{
-		registry.writer()->emplace(typeid(Type), this);
+		registry.writer()->emplace(type(), this);
 	}
 
 	template <class Type> instance<Type>& instance<Type>::self()
@@ -60,9 +60,9 @@ namespace doc
 		return local<Type>.reader()->item.at(n).link;
 	}
 
-	template <class Type> typename instance<Type>::read_ptr instance<Type>::reader(int n) const
+	template <class Type> typename instance<Type>::read_ptr instance<Type>::reader(int n)
 	{
-		auto key = local<Type>.shared();
+		const auto key = local<Type>.shared();
 		auto ptr = fwd::cast_as<Type>(key->item.data() + key->index.at(n));
 		return fwd::make_shared(ptr, [s=std::move(key)](decltype(ptr)){});
 	}

@@ -44,6 +44,7 @@ namespace fmt
 		using address = typename addr::cptr;
 		using test = typename str::test;
 		using compare = typename str::compare;
+		using binary = typename io::ref;
 		using input = typename in::ref;
 		using output = typename out::ref;
 		using read = typename in::access;
@@ -86,10 +87,13 @@ namespace fmt
 		using pair = fwd::pair<Type>;
 		using set = fwd::set<Type, Order, Alloc>;
 		using map = fwd::map<Type, Type, Order, Alloc>;
-		using span = fwd::span<Type>;
-		using vector = fwd::vector<Type, Alloc>;
 		using init = fwd::init<Type>;
-		using matrix = fwd::matrix<span, Alloc>;
+		using vector = fwd::vector<Type, Alloc>;
+		using span = fwd::span<Type>;
+		using matrix = fwd::matrix<Type, Alloc>;
+		using spans = fwd::spans<Type>;
+		using params = fwd::params<Type, Alloc>;
+		using pairs = fwd::pairs<Type>;
 	};
 
 	template
@@ -185,15 +189,19 @@ namespace fmt
 	using ustring = basic_string<char32_t>;
 	using page = ustring::view;
 	// everything is a string view in UTF
-	using matrix = view::matrix;
 	using iterator = view::iterator;
 	using pointer = view::const_pointer;
 	using vector = view::vector;
 	using span = view::span;
+	using matrix = view::matrix;
+	using spans = view::spans;
+	using params = view::params;
+	using pairs = view::pairs;
 	using map = view::map;
 	using pair = view::pair;
 	using set = view::set;
 	using init = view::init;
+	using binary = view::binary;
 	using input = view::input;
 	using output = view::output;
 	using read = view::read;
@@ -209,9 +217,6 @@ namespace fmt
 	using diff_type = view::difference_type;
 	using diff = fmt::layout<diff_type>;
 	using diff_pair = diff::pair;
-	// storage
-	using shared = string::shared;
-	using cache = string::set;
 
 	constexpr auto npos = view::npos;
 	constexpr size_type null = 0;

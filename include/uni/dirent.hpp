@@ -1,9 +1,9 @@
-#ifndef uni_dirent_hpp
-#define uni_dirent_hpp "POSIX Directory Entry"
+#ifndef dirent_hpp
+#define dirent_hpp "POSIX Directory Entry"
 
+#include "err.hpp"
 #include "uni.hpp"
 #include "ptr.hpp"
-#include "err.hpp"
 #include <dirent.h>
 
 namespace sys::uni

@@ -22,8 +22,7 @@ namespace fwd
 {
 	template <class T, class S=T> using pair = std::pair<T, S>;
 	template <class Type> using init = std::initializer_list<Type>;
-	template <class Type, size_t Size = std::dynamic_extent>
-	using span = std::span<Type, Size>;
+	template <class Type, size_t Size = std::dynamic_extent> using span = std::span<Type, Size>;
 
 	template
 	<
@@ -164,7 +163,25 @@ namespace fwd
 	<
 		class Type, template <class> class Alloc = std::allocator, size_t Size = std::dynamic_extent
 	>
-	using matrix = vector<std::span<Type, Size>, Alloc>;
+	using matrix = vector<span<Type, Size>, Alloc>;
+
+	template
+	<
+		class Type, size_t Columns = std::dynamic_extent, size_t Rows = std::dynamic_extent
+	>
+	using spans = span<span<Type, Columns>, Rows>;
+
+	template
+	<
+		class Type, template <class> class Alloc = std::allocator
+	>
+	using params = vector<pair<Type>, Alloc>;
+
+	template
+	<
+		class Type, size_t Size = std::dynamic_extent
+	>
+	using pairs = span<pair<Type>, Size>;
 }
 
 #endif // file

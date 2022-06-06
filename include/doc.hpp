@@ -5,6 +5,7 @@
 #include "tmp.hpp"
 #include "ptr.hpp"
 #include <typeindex>
+#include <type_traits>
 #include <string_view>
 
 namespace doc
@@ -32,7 +33,7 @@ namespace doc
 		void destroy(int n) override;
 
 		write_ptr writer(int n);
-		read_ptr reader(int n) const;
+		read_ptr reader(int n);
 		int emplace(Type &&);
 
 		static instance& self();

@@ -7,21 +7,17 @@ namespace doc
 {
 	struct ini : fmt::memory<ini>
 	{
-		using string = fmt::string;
-		using view = fmt::view;
-		using pair = fmt::pair;
-
-		fwd::map<pair, view> keys;
-		string::set cache;
+		fwd::map<fmt::pair, fmt::view> keys;
+		fmt::string::set cache;
 
 		friend fmt::input operator>>(fmt::input, ref);
 		friend fmt::output operator<<(fmt::output, cref);
-		static fmt::input getline(fmt::input, string::ref);
+		static fmt::input getline(fmt::input, fmt::string::ref);
 
-		bool got(pair) const;
-		view get(pair) const;
-		bool set(pair, view);
-		bool put(pair, view);
+		bool got(fmt::pair) const;
+		fmt::view get(fmt::pair) const;
+		bool set(fmt::pair, fmt::view);
+		bool put(fmt::pair, fmt::view);
 	};
 }
 

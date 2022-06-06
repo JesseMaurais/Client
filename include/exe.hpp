@@ -56,8 +56,7 @@ namespace env::exe
 	fmt::vector enter(fmt::view start, fmt::view label = "", bool hide = false);
 	// User enters text into an edit box
 
-	using controls = fwd::span<fmt::pair>;
-	fmt::vector form(controls, fmt::view text = "", fmt::view title = "");
+	fmt::vector form(fmt::pairs args, fmt::view text = "", fmt::view title = "");
 	// User enters data into a form
 
 	enum class msg { info, query, warn, error };

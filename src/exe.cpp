@@ -322,7 +322,7 @@ namespace env::exe
 
 	}
 
-	fmt::vector form(controls add, fmt::view text, fmt::view title)
+	fmt::vector form(fmt::pairs add, fmt::view text, fmt::view title)
 	{
 		fmt::vector command { "--forms" };
 		if (not text.empty())

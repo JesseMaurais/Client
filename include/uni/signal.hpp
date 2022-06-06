@@ -1,8 +1,8 @@
 #ifndef uni_signal_hpp
 #define uni_signal_hpp "POSIX Signals"
 
-#include "uni.hpp"
 #include "err.hpp"
+#include "uni.hpp"
 #include "ptr.hpp"
 #include "doc.hpp"
 #include <time.h>

@@ -1,9 +1,7 @@
 #ifndef xauth_hpp
 #define xauth_hpp
 
-#include <iosfwd>
-#include "env.hpp"
-#include "x11.hpp"
+#include "fmt.hpp"
 
 namespace x11
 {
@@ -21,7 +19,7 @@ namespace x11::auth
 		fmt::string data;
 	};
 
-	bytes::in::ref operator>>(bytes::in::ref, info::ref);
+	fmt::input operator>>(fmt::input, info::ref);
 };
 
 #endif

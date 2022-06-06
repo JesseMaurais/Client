@@ -136,7 +136,7 @@ namespace fmt
 		static size_pair embrace(view u, view v);
 		// Position in $u with front and back braces in $v
 
-		static Char getline(input in, string& line, view delims);
+		static Char getline(input in, string& line, view tokens);
 		// Read characters into buffer until a delimiter
 
 		static size_type length(Char first);
@@ -240,11 +240,6 @@ namespace fmt
 	inline auto catalog(view name)
 	{
 		return type<char>::catalog(name);
-	}
-
-	inline auto catalog(wide name)
-	{
-		return type<wchar_t>::catalog(name);
 	}
 
 	inline auto next(iterator it, iterator end, mask x = space)

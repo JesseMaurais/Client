@@ -1,14 +1,12 @@
-#ifndef uni_pthread_hpp
-#define uni_pthread_hpp "POSIX Threads"
+#ifndef pthread_hpp
+#define pthread_hpp "POSIX Threads"
 
+#include "err.hpp"
 #include "uni.hpp"
 #include "sys.hpp"
 #include "ptr.hpp"
-#include "err.hpp"
 #include "tmp.hpp"
-#include "aio.hpp"
 #include "signal.hpp"
-#include "mqueue.hpp"
 
 namespace sys::uni
 {
@@ -43,7 +41,7 @@ namespace sys::uni
 			if (no) err(no, here);
 
 			#ifdef assert
-			assert(no or this == that);
+			assert(this == that);
 			#endif
 		}
 	};
@@ -70,11 +68,6 @@ namespace sys::uni
 		auto timer(fwd::event f, clockid_t clock = CLOCK_REALTIME)
 		{
 			return time::event(f, buf, clock);
-		}
-
-		auto file(fwd::event f)
-		{
-			return aio::event(f, buf);
 		}
 
 		thread()

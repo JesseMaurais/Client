@@ -15,9 +15,9 @@ namespace x11
 		X_ChangeWindowAttributes, xChangeWindowAttributesReq, sz_xChangeWindowAttributesReq
 	>;
 
-	using GetWindowAttributes = Request
+	using GetWindowAttributes = Reply
 	<
-		X_GetWindowAttributes, xGetWindowAttributesReq, sz_xGetWindowAttributesReq, xGetWindowAttributesReply, sz_xGetWindowAttributesReply
+		X_GetWindowAttributes, xGetWindowAttributesReply, sz_xGetWindowAttributesReply
 	>;
 
 	using DestroyWindow = Request
