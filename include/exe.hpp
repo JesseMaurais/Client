@@ -59,7 +59,7 @@ namespace env::exe
 	fmt::vector form(fmt::param, fmt::view text = "", fmt::view title = "");
 	// User enters data into a form
 
-	fmt::vector show(fmt::view text, fmt::view = "error");
+	fmt::vector show(fmt::view text, fmt::view type = "info");
 	// Show a message box with buttons
 
 	enum class txt { none, edit, html };

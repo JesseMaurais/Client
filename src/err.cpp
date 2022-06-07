@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 	} arg;
 
 	// Command line details
-	env::opt::cmd::vector parse =
+	env::opt::cmd::vector cmd =
 	{
 		{ {}, 0, "h", arg.help, "Print command line usage then quit" },
 		{ {}, 0, "p", arg.print, "Print all source tests then quit" },
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
 	};
 
 	// Command line parsing
-	auto tests = env::opt::put(argc, argv, parse);
+	auto tests = env::opt::parse(argc, argv, cmd);
 
 	// Command line options
 	const auto host  = env::opt::get(arg.host, false);
@@ -256,7 +256,7 @@ int main(int argc, char** argv)
 			<< "Commands for unit test runner:"
 			<< fmt::tag::eol;
 
-		for (auto const & item : parse)
+		for (const auto& item : cmd)
 		{
 			std::cout
 				<< fmt::tag::tab
@@ -264,7 +264,7 @@ int main(int argc, char** argv)
 				<< ' '
 				<< fmt::tag::dual << item.name
 				<< fmt::tag::tab
-				<< item.text
+				<< env::text(item.text)
 				<< fmt::tag::eol;
 		}
 		return EXIT_SUCCESS;

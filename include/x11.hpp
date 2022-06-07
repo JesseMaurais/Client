@@ -7,8 +7,6 @@
 
 namespace x11
 {
-	using bytes = fmt::string;
-
 	template
 	<
 		class Structure, unsigned short Size
@@ -24,13 +22,13 @@ namespace x11
 
 		friend fmt::output operator<<(fmt::output out, cref obj)
 		{
-			auto const ptr = reinterpret_cast<bytes::const_pointer>(&obj);
+			auto ptr = fwd::cast_as<const char>>(&obj);
 			return out.write(ptr, Size);
 		}
 
 		friend fmt::input operator>>(fmt::input in, ref obj)
 		{
-			auto const ptr = reinterpret_cast<bytes::pointer>(&obj);
+			auto ptr = fwd::cast_as<char>(&obj);
 			return in.read(ptr, Size);
 		}
 	};

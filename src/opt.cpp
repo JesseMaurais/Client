@@ -51,12 +51,23 @@ namespace
 
 namespace fmt::opt
 {
-	string to_string(pair param, pair style)
+	pair split(view param, pair style)
 	{
+		auto [key, value] = to_pair(param, style.second);
+		if (key.starts_with(style.first))
+		{
+			const auto pos = style.first.size();
+			key = key.substr(pos);
+		}
+		value = trim(value, tag::quote);
+		return { key, value };
+	}
+
+	string join(pair param, pair style)
+	{
+		buffer buf;
 		auto key = trim(param.first, tag::quote);
 		auto value = trim(param.second, tag::quote);
-
-		buffer buf;
 		buf << style.first << key;
 		if (not value.empty())
 		{
@@ -299,14 +310,14 @@ namespace env::opt
 	fmt::input get(fmt::input in)
 	{
 		auto writer = registry().writer();
-		doc::ini::ref slice = *writer;
+		auto &slice = *writer;
 		return in >> slice;
 	}
 
 	fmt::output put(fmt::output out)
 	{
 		auto reader = registry().reader();
-		doc::ini::cref slice = *reader;
+		auto &slice = *reader;
 		return out << slice;
 	}
 
@@ -358,14 +369,15 @@ namespace env::opt
 		return set({Application, key}, value);
 	}
 
-	fmt::vector put(int argc, char** argv, cmd::span cmd)
+	fmt::vector parse(int argc, char** argv, cmd::span cmd)
 	{
+		#ifdef assert
 		assert(nullptr == argv[argc]);
+		#endif
 		// Push a view to command line arguments
 		std::copy(argv, argv + argc, std::back_inserter(list));
 		// Arguments not part of a command
-		fmt::vector extra;
-		fmt::vector args;
+		fmt::vector extra, args;
 		// Command line range
 		const auto end = cmd.end();
 		auto current = end;
@@ -417,13 +429,13 @@ test_unit(arg)
 	{
 		const auto app = env::opt::application();
 		assert(not app.empty() and "Application is not named");
-		assert(env::opt::arg().find(app) != fmt::npos);
+		assert(env::opt::arg(0).find(app) != fmt::npos);
 	}
 	// Dump options into stream
 	{
-		std::stringstream ss;
-		ss << env::opt::put;
-		const auto s = ss.str();
+		fmt::buffer buf;
+		buf << env::opt::put;
+		const auto s = buf.str();
 		assert(not s.empty() and "Cannot dump options");
 	}
 }

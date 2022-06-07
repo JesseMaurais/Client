@@ -27,8 +27,8 @@ namespace env::exe
 			std::string line;
 			while (count-- and std::getline(in, line, end))
 			{
-				auto pair = cache().emplace(std::move(line));
-				lines.emplace_back(*pair.first);
+				auto [it, unique] = cache().emplace(std::move(line));
+				lines.emplace_back(it->data(), it->size());
 			}
 		}
 		catch (std::exception &error)
@@ -44,10 +44,10 @@ namespace env::exe
 		for (auto arg : args)
 		{
 			const bool spaces = fmt::any_of(arg);
-			constexpr auto quote = "\"";
-			if (spaces) command += quote;
+			if (spaces) command += fmt::tag::quote;
 			command += arg;
-			if (spaces) command += quote;
+			if (spaces) command += fmt::tag::quote;
+			command += " ";
 		}
 		fmt::istream in = env::file::open(command, env::file::ex);
 		const auto lines = get(in);

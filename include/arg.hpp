@@ -7,7 +7,8 @@ namespace fmt::opt
 {
 	constexpr pair posix { "--", "=" }, win32 { "/", ":" };
 
-	string to_string(pair, pair=posix);
+	string join(pair, pair = posix);
+	pair split(view, pair = posix);
 }
 
 namespace env::opt
@@ -41,7 +42,7 @@ namespace env::opt
 		fmt::view text; // descriptive text for user help menu
 	};
 
-	fmt::vector put(int argc, char** argv, cmd::span);
+	fmt::vector parse(int argc, char** argv, cmd::span);
 	// Put command line arguments into options
 };
 

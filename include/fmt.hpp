@@ -139,7 +139,7 @@ namespace fmt
 
 		using String::String;
 		basic_string_type(const String& s)
-		 : String(s)
+		: String(s)
 		{ }
 	};
 
