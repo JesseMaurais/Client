@@ -282,7 +282,7 @@ namespace env::exe
 		{
 			if (type == "editable")
 			{
-				command.emplace_back(type);
+				command.emplace_back(type, fmt::tag::empty);
 			}
 			command.emplace_back("filename", path);
 		}

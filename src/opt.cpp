@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "err.hpp"
+#include "env.hpp"
 #include "opt.hpp"
 #include "arg.hpp"
 #include "fmt.hpp"
@@ -217,7 +218,7 @@ namespace
 		static sys::exclusive<doc::ini> ini;
 		// try read
 		{
-			auto const reader = ini.reader();
+			auto const reader = ini.unique_reader();
 			if (not reader->keys.empty())
 			{
 				return ini;
@@ -225,7 +226,7 @@ namespace
 		}
 		// next write
 		{
-			auto writer = ini.writer();
+			auto writer = ini.unique_writer();
 			auto const path = env::opt::initials();
 			auto const s = fmt::to_string(path);
 			doc::ini::ref slice = *writer;
@@ -309,31 +310,31 @@ namespace env::opt
 
 	fmt::input get(fmt::input in)
 	{
-		auto writer = registry().writer();
+		auto writer = registry().unique_writer();
 		auto &slice = *writer;
 		return in >> slice;
 	}
 
 	fmt::output put(fmt::output out)
 	{
-		auto reader = registry().reader();
+		auto reader = registry().unique_reader();
 		auto &slice = *reader;
 		return out << slice;
 	}
 
 	bool got(fmt::pair key)
 	{
-		return registry().reader()->got(key);
+		return registry().unique_reader()->got(key);
 	}
 
 	fmt::view get(fmt::pair key)
 	{
-		return registry().reader()->get(key);
+		return registry().unique_reader()->get(key);
 	}
 
 	bool set(fmt::pair key, fmt::view value)
 	{
-		return registry().writer()->set(key, value);
+		return registry().unique_writer()->set(key, value);
 	}
 
 	bool got(fmt::view key)

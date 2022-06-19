@@ -21,7 +21,7 @@ namespace fmt::tag
 
 	view emplace(view u)
 	{
-		auto key = cache.writer();
+		auto key = cache.unique_writer();
 		const auto begin = key->begin();
 		const auto end = key->end();
 		auto it = std::find_if(begin, end, fwd::equal_to(u));
@@ -39,7 +39,7 @@ namespace fmt::tag
 	input read(input in, char eol)
 	{
 		fmt::string line;
-		auto key = cache.writer();
+		auto key = cache.unique_writer();
 		while (std::getline(in, line, eol))
 		{
 			key->emplace(std::move(line));
@@ -49,7 +49,7 @@ namespace fmt::tag
 
 	output write(output out, char eol)
 	{
-		auto key = cache.reader();
+		auto key = cache.unique_reader();
 		const auto begin = key->begin();
 		const auto end = key->end();
 		for (auto it = begin; it != end; ++it)
