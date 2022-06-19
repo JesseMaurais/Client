@@ -170,8 +170,8 @@ namespace fmt
 				auto operator*() const
 				{
 					Char c[1];
-					const auto size = length(*pos);
-					(void) that->widen(pos, pos + size, c);
+					const auto n = length(*pos);
+					(void) that->widen(pos, pos + n, c);
 					return *c;
 				}
 

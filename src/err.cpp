@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "err.hpp"
+#include "env.hpp"
 #include "arg.hpp"
 #include "exe.hpp"
 #include "type.hpp"

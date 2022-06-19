@@ -23,7 +23,7 @@ namespace env::file
 	using shared_buf = fwd::shared_ptr<char>;
 	using weak_buf = std::weak_ptr<char>;
 
-	unique_ptr enclose(basic_ptr);
+	unique_ptr enclose(basic_ptr=nullptr);
 	unique_ptr open(view, mode=rw);
 
 	unique_ptr lock(basic_ptr, mode=rw, off_t=0, size_t=0);

@@ -5,6 +5,8 @@
 
 namespace env::exe
 {
+	void clear(); // empty the string cache
+
 	fmt::vector get(fmt::input in, char end = '\n', int count = -1);
 	// Cache an amount of delimited input lines
 
@@ -62,12 +64,10 @@ namespace env::exe
 	fmt::vector show(fmt::view text, fmt::view type = "info");
 	// Show a message box with buttons
 
-	enum class txt { none, edit, html };
-	fmt::vector text(fmt::view path, fmt::view check = "", fmt::view font = "", txt = txt::none);
+	fmt::vector text(fmt::view path, fmt::view check = "", fmt::view font = "", fmt::view type = "");
 	// Show text file contents (like a EULA with checkbox)
 
-	enum class mode { none, many, dir, save };
-	fmt::vector select(fmt::view start = "", mode = mode::none);
+	fmt::vector select(fmt::view start = "", fmt::view mode = "");
 	// User selects file(s) from the system
 }
 

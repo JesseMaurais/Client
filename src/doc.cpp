@@ -15,7 +15,7 @@ namespace doc
 
 	interface* find(std::type_index index)
 	{
-		auto data = registry.reader();
+		auto data = registry.unique_reader();
 		auto it = data->find(index);
 		return data->end() == it
 			? nullptr : it->second;

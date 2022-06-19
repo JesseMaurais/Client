@@ -4,7 +4,6 @@
 #include "win.hpp"
 #include "ptr.hpp"
 #include "sys.hpp"
-#include "msg.hpp"
 #include "profile.hpp"
 #include <winbase.h>
 
@@ -26,7 +25,7 @@ namespace sys::win
 
 	private:
 
-		event work;
+		fwd::event work;
 
 		static unsigned WINAPI thread(void *ptr)
 		{
@@ -58,7 +57,7 @@ namespace sys::win
 			bInheritHandle = inherit ? TRUE : FALSE;
 		}
 
-		auto thread(start::function f)
+		auto thread(fwd::event f)
 		{
 			return start(f, this);
 		}
@@ -177,7 +176,7 @@ namespace sys::win
 
 	struct timer : handle
 	{
-		timer(HANDLE h, fwd::function f, long long t, long p = 0, bool resume = true) : work(f), handle(h)
+		timer(HANDLE h, fwd::event f, long long t, long p = 0, bool resume = true) : work(f), handle(h)
 		{
 			const large_int large = t;
 			if (not SetWaitableTimer(h, large.buf, p, thread, this, resume))
@@ -199,16 +198,16 @@ namespace sys::win
 
 		static auto convert(std::timespec tv)
 		{
-			const auto div = std::div(tv.tv_nsec, 1e2L);
+			const auto div = std::div(tv.tv_nsec, 100L);
 			std::lldiv_t ll;
-			ll.quot = std::fma(tv.tv_sec, 1e7L, div.quot);
+			ll.quot = std::fma(tv.tv_sec, 10000000L, div.quot);
 			ll.rem = div.rem;
 			return ll;
 		}
 
 	private:
 
-		function work;
+		fwd::event work;
 
 		static void CALLBACK thread(LPVOID lp, DWORD low, DWORD high)
 		{
@@ -216,82 +215,6 @@ namespace sys::win
 			{
 				that->work();
 			}
-		}
-	};
-}
-
-namespace sys
-{
-	using thread = win::start;
-	using join = win::join;
-
-	struct mutex : win::critical_section
-	{
-		auto lock()
-		{
-			class unlock : fwd::no_copy
-			{
-				critical_section* that;
-
-			public:
-
-				unlock(critical_section* ptr) : that(ptr)
-				{
-					that->enter();
-				}
-
-				~unlock()
-				{
-					that->leave();
-				}
-
-			};
-			return unlock(this);
-		}
-	};
-
-	struct rwlock : win::srwlock
-	{
-		auto reader()
-		{
-			class unlock : fwd::no_copy
-			{
-				srwlock* that;
-
-			public:
-
-				unlock(srwlock* ptr) : that(ptr)
-				{
-					that->lock();
-				}
-
-				~unlock()
-				{
-					that->unlock();
-				}
-			};
-			return unlock(this);
-		}
-
-		auto writer()
-		{
-			class unlock : fwd::no_copy
-			{
-				srwlock* that;
-
-			public:
-
-				unlock(srwlock* ptr) : that(ptr)
-				{
-					that->xlock();
-				}
-
-				~unlock()
-				{
-					that->xunlock();
-				}
-			};
-			return unlock(this);
 		}
 	};
 }

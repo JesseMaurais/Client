@@ -49,41 +49,6 @@ namespace sys::win
 		return _open_osfhandle(iptr, flags);
 	}
 
-	inline auto fdopen(HANLDE h, const char* mode)
-	{
-		const auto
-			r = std::strchr(mode, "r"),
-			w = std::strchr(mode, "w"),
-			a = std::strchr(mode, "a"),
-			x = std::strchr(mode, "+");
-
-		int flags = 0;
-		if ((r and x) or (w and x) or (a and x) or (r and w))
-		{
-			flags |= O_RDWR;
-		}
-		else if (a or w)
-		{
-			flags |= O_WRONLY;
-		}
-		else if (r)
-		{
-			flags |= O_RDONLY;
-		}
-		if (a)
-		{
-			flags |= O_APPEND;
-		}
-
-		const int fd = open(h, flags);
-		if (fail(fd))
-		{
-			return nullptr;
-		}
-
-		return sys::fdopen(fd, mode);
-	}
-
 	inline DWORD wait(HANDLE h, DWORD ms = INFINITE)
 	{
 		auto const dw = WaitForSingleObject(h, ms);
@@ -161,9 +126,8 @@ namespace sys::win
 		handle read;
 		handle write;
 
-		pipe(LPSECURITY_ATTRIBUTES lp = nullptr)
+		pipe(LPSECURITY_ATTRIBUTES lp = nullptr, DWORD sz = 0)
 		{
-			env::file::size_t const sz = env::file::width();
 			if (not CreatePipe(&read.h, &write.h, lp, sz))
 			{
 				sys::win::err(here, "CreatePipe");

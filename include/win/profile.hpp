@@ -48,7 +48,7 @@ namespace sys::win
 
 	struct counter : large_int
 	{
-		counter()
+		counter() : large_int(0)
 		{
 			if (not QueryPerformanceCounter(buf))
 			{
@@ -59,7 +59,7 @@ namespace sys::win
 
 	struct frequency : large_int
 	{
-		frequency()
+		frequency() : large_int(0)
 		{
 			if (not QueryPerformanceFrequency(buf))
 			{

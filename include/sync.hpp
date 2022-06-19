@@ -2,7 +2,6 @@
 #define sync_hpp "Synchronize Threads"
 
 #include "err.hpp"
-#include "env.hpp"
 #include "ptr.hpp"
 #ifdef _WIN32
 #include "win/sync.hpp"
@@ -12,109 +11,121 @@
 
 namespace sys
 {
-	template <class object> class exclusive_ptr : fwd::no_copy
-	// Allow one writer but many readers
+
+#ifdef _WIN32
+
+	using thread = win::start;
+	using join = win::join;
+
+	struct mutex : private fwd::traits<win::critical_section, fwd::shared>
 	{
-		mutable rwlock lock;
-		object* that;
-
-	public:
-
-		exclusive_ptr(object* ptr) : that(ptr)
+		auto key()
 		{
-			#ifdef assert
-			assert(nullptr != that);
-			#endif
-		}
-
-		auto reader() const
-		{
-			using reader = decltype(lock.reader());
-			struct unlock : fwd::no_copy
+			enter();
+			return share_this([this](auto that)
 			{
-				const reader key;
-				const object *that;
+				#ifdef assert
+				assert(this == that);
+				#endif
+				leave();
+			});
+		}
+	};
 
-				unlock(const exclusive_ptr* ptr)
-				: key(ptr->lock.reader())
-				, that(ptr->that)
-				{
-					#ifdef assert
-					assert(that);
-					#endif
-				}
-
-				operator const object*() const
-				{
-					return that;
-				}
-
-				const object& operator*() const
-				{
-					return *that;
-				}
-
-				const object* operator->() const
-				{
-					return that;
-				}
-			};
-			return unlock(this);
+	struct rwlock : private fwd::traits<win::srwlock, fwd::shared>
+	{
+		auto reader()
+		{
+			lock();
+			return share_this([this](auto that)
+			{
+				#ifdef assert
+				assert(this == that);
+				#endif
+				unlock();
+			});
 		}
 
 		auto writer()
 		{
-			using writer = decltype(lock.writer());
-			struct unlock : fwd::no_copy
+			xlock();
+			return share_this([this](auto that)
 			{
-				const writer key;
-				object* that;
+				#ifdef assert
+				assert(this == that);
+				#endif
+				xunlock();
+			});
+		}
+	};
 
-				unlock(exclusive_ptr *ptr)
-				: key(ptr->lock.writer())
-				, that(ptr->that)
-				{
-					#ifdef assert
-					assert(that);
-					#endif
-				}
+#else // POSIX
 
-				operator const object*() const
-				{
-					return that;
-				}
+	using thread = uni::start;
+	using join = uni::join;
 
-				operator object*()
-				{
-					return that;
-				}
+	struct mutex : private fwd::traits<uni::mutex, fwd::shared>
+	{
+		auto key()
+		{
+			lock();
+			return share_this([this](auto that)
+			{
+				#ifdef assert
+				assert(this == that);
+				#endif
+				unlock();
+			});
+		}
+	};
 
-				const object& operator*() const
-				{
-					return *that;
-				}
-
-				object& operator*()
-				{
-					return *that;
-				}
-
-				const object* operator->() const
-				{
-					return that;
-				}
-
-				object* operator->()
-				{
-					return that;
-				}
-			};
-			return unlock(this);
+	struct rwlock : private fwd::traits<uni::rwlock, fwd::shared>
+	{
+		auto reader()
+		{
+			rdlock();
+			return share_this([this](auto that)
+			{
+				#ifdef assert
+				assert(this == that);
+				#endif
+				unlock();
+			});
 		}
 
-		auto unique() const
+		auto writer()
 		{
-			return std::unique_ptr<object>(that, [this, key=reader()](auto ptr)
+			wrlock();
+			return share_this([this](auto that)
+			{
+				#ifdef assert
+				assert(this == that);
+				#endif
+				unlock();
+			});
+		}
+	};
+
+#endif
+
+	template <class object> class exclusive_ptr : fwd::no_copy
+	// Allow one writer but many readers
+	{
+		mutable rwlock lock;
+		object* ptr;
+
+	public:
+
+		exclusive_ptr(object* that) : ptr(that)
+		{
+			#ifdef assert
+			assert(nullptr != ptr);
+			#endif
+		}
+
+		auto unique_reader() const
+		{
+			return fwd::make_unique(ptr, [this, key=lock.reader()](auto that)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -122,9 +133,9 @@ namespace sys
 			});
 		}
 
-		auto unique()
+		auto unique_writer()
 		{
-			return std::unique_ptr<object>(that, [this, key=writer()](auto ptr)
+			return fwd::make_unique(ptr, [this, key=lock.writer()](auto that)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -132,9 +143,9 @@ namespace sys
 			});
 		}
 
-		auto shared() const
+		auto shared_reader() const
 		{
-			return std::shared_ptr<object>(that, [this, key=reader()](auto ptr)
+			return fwd::make_shared(ptr, [this, key=lock.reader()](auto that)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -142,9 +153,9 @@ namespace sys
 			});
 		}
 
-		auto shared()
+		auto shared_writer()
 		{
-			return std::shared_ptr<object>(that, [this, key=writer()](auto ptr)
+			return fwd::make_shared(ptr, [this, key=lock.writer()](auto that)
 			{
 				#ifdef assert
 				assert(that == ptr);
@@ -165,34 +176,24 @@ namespace sys
 		exclusive() : that(this)
 		{ }
 
-		auto reader() const
+		auto unique_reader() const
 		{
-			return that.reader();
+			return that.unique_reader();
 		}
 
-		auto writer()
+		auto unique_writer()
 		{
-			return that.writer();
+			return that.unique_writer();
 		}
 
-		auto unique() const
+		auto shared_reader() const
 		{
-			return that.unique();
+			return that.shared_reader();
 		}
 
-		auto unique()
+		auto shared_writer()
 		{
-			return that.unique();
-		}
-
-		auto shared() const
-		{
-			return that.shared();
-		}
-
-		auto shared()
-		{
-			return that.shared();
+			return that.shared_writer();
 		}
 	};
 

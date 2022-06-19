@@ -85,20 +85,20 @@ namespace fwd
 
 	template
 	<
-		class Type, class Free = deleter<Type>
+		class Type
 	>
-	auto make_shared(Type* ptr, Free del = std::default_delete<Type>())
+	auto make_shared(Type* ptr, deleter<Type> free = std::default_delete<Type>())
 	{
-		return std::shared_ptr<Type>(ptr, del);
+		return shared_ptr<Type>(ptr, free);
 	}
 
 	template
 	<
-		class Type, class Free = deleter<Type>
+		class Type
 	>
-	auto make_unique(Type* ptr, Free del = std::default_delete<Type>())
+	auto make_unique(Type* ptr, deleter<Type> free = std::default_delete<Type>())
 	{
-		return std::unique_ptr<Type, Free>(ptr, del);
+		return unique_ptr<Type>(ptr, free);
 	}
 
 	template
@@ -133,13 +133,11 @@ namespace fwd
 
 	template
 	<
-		class Type, class Remove = deleter<Type>
+		class Type
 	>
 	struct shared : no_copy, no_make, std::enable_shared_from_this<Type>
 	{
-		using Type::Type;
-
-		auto share_this(Remove free = std::default_delete<Type>())
+		auto share_this(deleter<Type> free = std::default_delete<Type>())
 		{
 			return share_ptr(this, free);
 		}

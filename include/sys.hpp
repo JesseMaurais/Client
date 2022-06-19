@@ -8,7 +8,7 @@
 #include <time.h>
 #include <fcntl.h>
 
-#if __has_include(<vcruntine.h>)
+#ifdef _MSC_VER
 
 #include <process.h>
 #include <direct.h>
@@ -99,7 +99,7 @@ namespace sys
 	constexpr auto mkdir = [](char const *dir, mode_t) { return ::_mkdir(dir); };
 	constexpr auto open = ::_open;
 	constexpr auto pclose = ::_pclose;
-	constexpr auto pipe = [](int fd[1]) { return ::_pipe(fd, BUFSIZ, 0); };
+	constexpr auto pipe = [](int fd[2]) { return ::_pipe(fd, BUFSIZ, 0); };
 	constexpr auto popen = ::_popen;
 	constexpr auto putenv = ::_putenv;
 	constexpr auto read = ::_read;

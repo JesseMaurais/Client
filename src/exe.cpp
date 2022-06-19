@@ -13,10 +13,11 @@
 
 namespace env::exe
 {
-	fmt::string::set& cache()
+	static thread_local fmt::string::set buf;
+
+	void clear()
 	{
-		thread_local fmt::string::set buf;
-		return buf;
+		buf.clear();
 	}
 
 	fmt::vector get(fmt::input in, char end, int count)
@@ -27,7 +28,8 @@ namespace env::exe
 			std::string line;
 			while (count-- and std::getline(in, line, end))
 			{
-				auto [it, unique] = cache().emplace(std::move(line));
+				auto [it, unique] = buf.emplace(std::move(line));
+				(void) unique; // duplicates are okay
 				lines.emplace_back(it->data(), it->size());
 			}
 		}
@@ -142,7 +144,7 @@ namespace env::exe
 					return get({ program, path });
 				}
 			}
-			return { 0, 0, nullptr };
+			return fmt::vector();
 		}
 		#endif
 	}
@@ -196,7 +198,7 @@ namespace env::exe
 	static fmt::view pick(fmt::view value)
 	{
 		using namespace std::literals;
-		static auto entry = std::make_pair("Program Options"sv, "DIALOG"sv);
+		static fmt::pair entry { "Program Options", "DIALOG" };
 		return env::opt::get(entry, value);
 	}
 
@@ -220,7 +222,7 @@ namespace env::exe
 		command.push_back(program);
 		for (auto pair : par)
 		{
-			auto [it, unique] = cache.emplace(fmt::opt::to_string(pair));
+			auto [it, unique] = cache.emplace(fmt::opt::join(pair));
 			#ifdef assert
 			assert(unique);
 			#endif
@@ -230,24 +232,16 @@ namespace env::exe
 	}
 
 
-	fmt::vector select(fmt::view path, mode mask)
+	fmt::vector select(fmt::view path, fmt::view mode)
 	{
 		fmt::edges command {{ "file-selection", fmt::tag::empty }};
 		if (not path.empty())
 		{
 			command.emplace_back("filename", path);
 		}
-		if (mask == mode::many)
+		if (fwd::any_of(fmt::init{"multiple", "directory", "save"}, fwd::equal_to(mode)))
 		{
-			command.emplace_back("multiple", fmt::tag::empty);
-		}
-		if (mask == mode::dir)
-		{
-			command.emplace_back("directory", fmt::tag::empty);
-		}
-		if (mask == mode::save)
-		{
-			command.emplace_back("save", fmt::tag::empty);
+			command.emplace_back(mode, fmt::tag::empty);
 		}
 		return dialog(command);
 	}
@@ -276,19 +270,19 @@ namespace env::exe
 		return dialog(command);
 	}
 
-	fmt::vector text(fmt::view path, fmt::view check, fmt::view font, txt type)
+	fmt::vector text(fmt::view path, fmt::view check, fmt::view font, fmt::view type)
 	{
 		fmt::edges command {{ "text-info", fmt::tag::empty }};
-		if (type == txt::html)
+		if (type == "html")
 		{
-			command.emplace_back("html", fmt::tag::empty);
+			command.emplace_back(type, fmt::tag::empty);
 			command.emplace_back("url", path);
 		}
 		else
 		{
-			if (type == txt::edit)
+			if (type == "editable")
 			{
-				command.emplace_back("editable");
+				command.emplace_back(type);
 			}
 			command.emplace_back("filename", path);
 		}

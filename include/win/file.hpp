@@ -25,7 +25,7 @@ namespace sys::win
 	{
 		HANDLE h;
 
-		find_file(char const *path)
+		find_file(const char *path)
 		{
 			h = FindFirstFile(path, this);
 			if (sys::win::fail(h))
@@ -45,7 +45,7 @@ namespace sys::win
 			}
 		}
 
-		bool next() const
+		bool next()
 		{
 			if (not FindNextFile(h, this))
 			{
@@ -61,11 +61,11 @@ namespace sys::win
 
 	struct find_notify
 	{
-		enum : bool { tree = true, root = false }
+		enum : bool { tree = true, root = false };
 
 		HANDLE h;
 
-		find_notify(char const *path, DWORD dw = 0 bool dir = root)
+		find_notify(const char* path, DWORD dw = 0, bool dir = root)
 		{
 			h = FindFirstChangeNotification(path, dir, dw);
 			if (sys::win::fail(h))
@@ -97,15 +97,17 @@ namespace sys::win
 	{
 		using zero::zero;
 
-		overlapped(std::ptrdiff_t off, HANDLE h=invalid) : hEvent(h)
+		overlapped(std::ptrdiff_t off, HANDLE h=invalid)
 		{
+			hEvent = h;
 			large_int large = off;
 			DUMMYUNIONNAME.DUMMYSTRUCTNAME.Offset = large.low_part();
 			DUMMYUNIONNAME.DUMMYSTRUCTNAME.OffsetHigh = large.high_part();
 		}
 
-		overlapped(void* ptr, HANDLE h=invalid) : hEvent(h)
+		overlapped(void* ptr, HANDLE h=invalid)
 		{
+			hEvent = h;
 			DUMMYUNIONNAME.Pointer = ptr;
 		}
 	};
@@ -122,7 +124,7 @@ namespace sys
 
 		public:
 
-			iterator(sys::win::find_data* ptr, bool end)
+			iterator(sys::win::find_file* ptr, bool end)
 			: that(ptr), flag(end)
 			{ }
 
@@ -156,7 +158,7 @@ namespace sys
 
 	public:
 
-		files(char const *path) : find_data(data(sub(path)))
+		files(const char *path) : find_file(sub(path).c_str())
 		{ }
 
 		auto begin()

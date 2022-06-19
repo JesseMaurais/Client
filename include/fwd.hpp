@@ -182,6 +182,15 @@ namespace fwd
 		class Type, size_t Size = std::dynamic_extent
 	>
 	using param = span<pair<Type>, Size>;
+
+	template
+	<
+		class Type, template <class> class... Traits
+	>
+	struct traits : Type, Traits<Type>...
+	{
+		using Type::Type;
+	};
 }
 
 #endif // file
