@@ -3,6 +3,7 @@
 
 #include "err.hpp"
 #include "ptr.hpp"
+
 #ifdef _WIN32
 #include "win/sync.hpp"
 #else
@@ -24,10 +25,10 @@ namespace sys
 			enter();
 			return share_this([this](auto that)
 			{
+				leave();
 				#ifdef assert
 				assert(this == that);
 				#endif
-				leave();
 			});
 		}
 	};
@@ -39,10 +40,10 @@ namespace sys
 			lock();
 			return share_this([this](auto that)
 			{
+				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
-				unlock();
 			});
 		}
 
@@ -51,10 +52,10 @@ namespace sys
 			xlock();
 			return share_this([this](auto that)
 			{
+				xunlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
-				xunlock();
 			});
 		}
 	};
@@ -71,10 +72,10 @@ namespace sys
 			lock();
 			return share_this([this](auto that)
 			{
+				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
-				unlock();
 			});
 		}
 	};
@@ -86,10 +87,10 @@ namespace sys
 			rdlock();
 			return share_this([this](auto that)
 			{
+				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
-				unlock();
 			});
 		}
 
@@ -98,10 +99,10 @@ namespace sys
 			wrlock();
 			return share_this([this](auto that)
 			{
+				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
-				unlock();
 			});
 		}
 	};
@@ -112,53 +113,33 @@ namespace sys
 	// Allow one writer but many readers
 	{
 		mutable rwlock lock;
-		object* ptr;
+		object* that;
 
 	public:
 
-		exclusive_ptr(object* that) : ptr(that)
+		exclusive_ptr(object* ptr) : that(ptr)
 		{
 			#ifdef assert
 			assert(nullptr != ptr);
 			#endif
 		}
 
-		auto unique_reader() const
+		auto reader() const
 		{
-			return fwd::make_unique(ptr, [this, key=lock.reader()](auto that)
+			return fwd::make_unique(that, [this, key=lock.reader()](auto that)
 			{
 				#ifdef assert
-				assert(that == ptr);
+				assert(this->that == that);
 				#endif
 			});
 		}
 
-		auto unique_writer()
+		auto writer()
 		{
-			return fwd::make_unique(ptr, [this, key=lock.writer()](auto that)
+			return fwd::make_unique(that, [this, key=lock.writer()](auto that)
 			{
 				#ifdef assert
-				assert(that == ptr);
-				#endif
-			});
-		}
-
-		auto shared_reader() const
-		{
-			return fwd::make_shared(ptr, [this, key=lock.reader()](auto that)
-			{
-				#ifdef assert
-				assert(that == ptr);
-				#endif
-			});
-		}
-
-		auto shared_writer()
-		{
-			return fwd::make_shared(ptr, [this, key=lock.writer()](auto that)
-			{
-				#ifdef assert
-				assert(that == ptr);
+				assert(this->that == that);
 				#endif
 			});
 		}
@@ -176,24 +157,14 @@ namespace sys
 		exclusive() : that(this)
 		{ }
 
-		auto unique_reader() const
+		auto reader() const
 		{
-			return that.unique_reader();
+			return that.reader();
 		}
 
-		auto unique_writer()
+		auto writer()
 		{
-			return that.unique_writer();
-		}
-
-		auto shared_reader() const
-		{
-			return that.shared_reader();
-		}
-
-		auto shared_writer()
-		{
-			return that.shared_writer();
+			return that.writer();
 		}
 	};
 

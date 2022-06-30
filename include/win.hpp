@@ -64,6 +64,32 @@ namespace sys::win
 		return WAIT_TIMEOUT == wait(h, 0);
 	}
 
+	inline auto close(HANDLE h)
+	{
+		return fwd::make_unique(h, [](auto h)
+		{
+			if (not fail(h))
+			{
+				if (not CloseHandle(h))
+				{
+					win::err(here, "CloseHandle");
+				}
+			}
+		});
+	}
+
+	struct handle : decltype(close(nullptr))
+	{
+		handle(HANDLE h = nullptr)
+		: decltype(close(nullptr))(h, close)
+		{ }
+
+		operator HANDLE() const
+		{
+			return get();
+		}
+	};
+
 	template <class T> struct zero : T
 	{
 		static_assert(std::is_trivially_copyable<T>::value);
@@ -93,34 +119,6 @@ namespace sys::win
 		info() { GetSystemInfo(this); }
 	};
 
-	struct handle : fwd::no_copy
-	{
-		HANDLE h;
-
-		operator HANDLE() const { return h; }
-
-		handle(HANDLE p = sys::win::invalid) : h(p)
-		{ }
-
-		~handle()
-		{
-			if (not sys::win::fail(h))
-			{
-				if (not CloseHandle(h))
-				{
-					sys::win::err(here, "CloseHandle");
-				}
-			}
-		}
-
-		int open(int flags)
-		{
-			int const fd = sys::win::open(h, flags);
-			h = sys::win::invalid;
-			return fd;
-		}
-	};
-
 	struct pipe
 	{
 		handle read;
@@ -128,7 +126,11 @@ namespace sys::win
 
 		pipe(LPSECURITY_ATTRIBUTES lp = nullptr, DWORD sz = 0)
 		{
-			if (not CreatePipe(&read.h, &write.h, lp, sz))
+			if (HANDLE h[2]; CreatePipe(h + 0, h + 1, lp, sz))
+			{
+				read.reset(h + 0), write.reset(h + 1);
+			}
+			else
 			{
 				sys::win::err(here, "CreatePipe");
 			}

@@ -101,14 +101,14 @@ namespace sys::win
 		{
 			hEvent = h;
 			large_int large = off;
-			DUMMYUNIONNAME.DUMMYSTRUCTNAME.Offset = large.low_part();
-			DUMMYUNIONNAME.DUMMYSTRUCTNAME.OffsetHigh = large.high_part();
+			Offset = large.low_part();
+			OffsetHigh = large.high_part();
 		}
 
 		overlapped(void* ptr, HANDLE h=invalid)
 		{
 			hEvent = h;
-			DUMMYUNIONNAME.Pointer = ptr;
+			Pointer = ptr;
 		}
 	};
 }

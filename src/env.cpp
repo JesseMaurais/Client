@@ -76,7 +76,10 @@ namespace env
 	{
 		static thread_local fmt::vector local;
 		local.clear();
-		for (auto c = sys::environ(); *c; ++c) local.emplace_back(*c);
+		for (auto c = sys::environment(); *c; ++c)
+		{
+			local.emplace_back(*c);
+		}
 		return local;
 	}
 

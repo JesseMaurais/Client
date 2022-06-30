@@ -239,7 +239,7 @@ namespace env::exe
 		{
 			command.emplace_back("filename", path);
 		}
-		if (fwd::any_of(fmt::init{"multiple", "directory", "save"}, fwd::equal_to(mode)))
+		if (not mode.empty())
 		{
 			command.emplace_back(mode, fmt::tag::empty);
 		}

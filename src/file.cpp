@@ -11,6 +11,7 @@
 #include "type.hpp"
 #ifdef _WIN32
 #include "win/file.hpp"
+#include "win/memory.hpp"
 #else
 #include "uni/fcntl.hpp"
 #include "uni/mman.hpp"
@@ -378,7 +379,7 @@ namespace env::file
 		{
 			const auto h = sys::win::get(fd);
 			#ifdef assert
-			assert(not sys::win::fail(h))
+			assert(not sys::win::fail(h));
 			#endif
 
 			if (0 == sz)
@@ -403,8 +404,9 @@ namespace env::file
 			{
 				sys::win::err(here, "LockFileEx");
 			}
-			else return fwd::make_ptr(f, [=](basic_ptr)
+			else return fwd::make_unique(f, [=](basic_ptr)
 			{
+				sys::win::overlapped over = off;
 				if (not UnlockFileEx(h, 0, large.low_part(), large.high_part(), &over))
 				{
 					sys::win::err(here, "UnlockFileEx");
@@ -475,7 +477,7 @@ namespace env::file
 		{
 			const auto h = sys::win::get(fd);
 			#ifdef assert
-			assert(not sys::win::fail(h))
+			assert(not sys::win::fail(h));
 			#endif
 
 			DWORD flags = 0;

@@ -64,7 +64,7 @@ namespace sys
 		(void) sys::umask(um);
 	}
 
-	char** environ()
+	char** environment()
 	{
 		#ifdef _WIN32
 		return _environ;
@@ -316,17 +316,17 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 			}
 
-			thread_local auto tls = fwd::null_ptr<HLOCAL>(LocalFree);
+			thread_local auto tls = fwd::null_unique<HLOCAL>(LocalFree);
 
 			LPSTR str = nullptr;
-			auto addr = (LPSTR) &str;
-			auto const size = FormatMessage
+			auto data = (LPSTR) &str;
+			const auto size = FormatMessage
 			(
 				flag,   // style
 				h,      // module
 				id,     // message
 				0,      // language
-				addr,   // buffer
+				data,   // buffer
 				0,      // size
 				nullptr // arguments
 			);

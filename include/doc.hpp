@@ -8,6 +8,10 @@
 #include <type_traits>
 #include <string_view>
 
+#ifdef interface
+#undef interface // struct in combaseapi.h
+#endif
+
 namespace doc
 {
 	struct interface : fwd::no_copy

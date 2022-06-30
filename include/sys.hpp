@@ -231,7 +231,7 @@ namespace sys
 		mode_t um;
 	};
 
-	char** environ();
+	char** environment();
 	pid_t exec(int fd[3], int argc, char **argv);
 	bool kill(pid_t);
 	int wait(pid_t);

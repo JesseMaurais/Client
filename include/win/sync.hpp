@@ -16,8 +16,8 @@ namespace sys::win
 		start(fwd::event f, LPSECURITY_ATTRIBUTES attr = nullptr) : work(f)
 		{
 			auto const ptr = _beginthreadex(attr, 0, thread, this, 0, &id);
-			h = reinterpret_cast<HANDLE>(ptr);
-			if (fail(h))
+			reset(reinterpret_cast<HANDLE>(ptr));
+			if (auto h = get(); fail(h))
 			{
 				win::err(here, "_beginthreadex");
 			}
@@ -43,7 +43,7 @@ namespace sys::win
 	{
 		~join()
 		{
-			if (wait(h))
+			if (auto h = get(); wait(h))
 			{
 				warn(here, id);
 			}
@@ -67,32 +67,32 @@ namespace sys::win
 			return pipe(this);
 		}
 
-		handle mutex(LPCSTR name, bool owner = false)
+		auto mutex(bool owner = false, LPCSTR name = nullptr)
 		{
 			return CreateMutex(this, owner, name);
 		}
 
-		handle semaphore(LPCSTR name, long size = 8, long init = 0)
+		auto semaphore(long init = 0, long size = 8, LPCSTR name = nullptr)
 		{
 			return CreateSemaphore(this, init, size, name);
 		}
 
-		handle event(LPCSTR name, bool init = false, bool manual = false)
+		auto event(bool manual = false, bool init = false, LPCSTR name = nullptr)
 		{
 			return CreateEvent(this, manual, init, name);
 		}
 
-		handle job(LPCSTR name)
+		auto job(LPCSTR name = nullptr)
 		{
 			return CreateJobObject(this, name);
 		}
 
-		handle timer(LPCSTR name = nullptr, bool manual = false)
+		auto timer(bool manual = false, LPCSTR name = nullptr)
 		{
 			return CreateWaitableTimer(this, manual, name);
 		}
 
-		handle map(LPCSTR name, HANDLE h, int prot, size_t sz)
+		auto map(HANDLE h, int prot, size_t sz, LPCSTR name = nullptr)
 		{
 			return CreateFileMapping(h, this, prot, HIWORD(sz), LOWORD(sz), name);
 		}
@@ -187,7 +187,7 @@ namespace sys::win
 
 		~timer()
 		{
-			if (not sys::win::fail(h))
+			if (auto h = get(); not sys::win::fail(h))
 			{
 				if (not CancelWaitableTimer(h))
 				{
@@ -200,7 +200,7 @@ namespace sys::win
 		{
 			const auto div = std::div(tv.tv_nsec, 100L);
 			std::lldiv_t ll;
-			ll.quot = std::fma(tv.tv_sec, 10000000L, div.quot);
+			ll.quot = tv.tv_sec * 10000000L + div.quot;
 			ll.rem = div.rem;
 			return ll;
 		}
@@ -209,7 +209,7 @@ namespace sys::win
 
 		fwd::event work;
 
-		static void CALLBACK thread(LPVOID lp, DWORD low, DWORD high)
+		static void CALLBACK thread(LPVOID lp, [[maybe_unused]] DWORD low, [[maybe_unused]] DWORD high)
 		{
 			if (auto that = fwd::cast_as<timer>(lp); that)
 			{
