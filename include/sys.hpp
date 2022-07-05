@@ -57,16 +57,12 @@
 
 namespace sys
 {
-	namespace sep
+	namespace tag
 	{
 		constexpr auto dir = "\\";
 		constexpr auto path = ";";
-	}
-
-	namespace ext
-	{
 		constexpr auto share = ".dll";
-		constexpr auto image = ".exe";
+		constexpr auto ext = ".exe";
 	}
 
 	using size_t = unsigned int;
@@ -126,16 +122,12 @@ namespace sys
 
 namespace sys
 {
-	namespace sep
+	namespace tag
 	{
 		constexpr auto dir = "/";
 		constexpr auto path = ":";
-	}
-
-	namespace ext
-	{
 		constexpr auto share = ".so";
-		constexpr auto image = "";
+		constexpr auto ext = "";
 	}
 
 	namespace uni

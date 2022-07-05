@@ -188,17 +188,18 @@ namespace env::file
 		return buf;
 	}
 
-	bool fail(view path, mode mask)
+	bool fail(view u, mode mask)
 	{
-		if (not fmt::terminated(path))
+		if (not fmt::terminated(u))
 		{
-			return fail(fmt::to_string(path), mask);
+			auto buf = fmt::to_string(u);
+			return fail(buf, mask);
 		}
 
 		#ifdef _WIN32
 		if (DWORD dw; mask & ex)
 		{
-			return GetBinaryType(path.data(), &dw)
+			return GetBinaryType(u.data(), &dw)
 				? success : failure;
 		}
 		#endif
@@ -224,10 +225,10 @@ namespace env::file
 				flags |= W_OK;
 			}
 
-			return sys::access(path.data(), flags);
+			return sys::access(u.data(), flags);
 		}
 
-		struct sys::stats state(path.data());
+		struct sys::stats state(u.data());
 		if (sys::fail(state.ok))
 		{
 			return failure;
@@ -307,11 +308,12 @@ namespace env::file
 		});
 	}
 
-	unique_ptr open(view path, mode mask)
+	unique_ptr open(view u, mode mask)
 	{
-		if (not fmt::terminated(path))
+		if (not fmt::terminated(u))
 		{
-			return open(fmt::to_string(path), mask);
+			auto buf = fmt::to_string(u);
+			return open(u, mask);
 		}
 
 		#ifdef assert
@@ -324,16 +326,16 @@ namespace env::file
 
 			if (mask & wr)
 			{
-				f = sys::popen(path.data(), "w");
+				f = sys::popen(u.data(), "w");
 			}
 			else
 			{
-				f = sys::popen(path.data(), "r");
+				f = sys::popen(u.data(), "r");
 			}
 
 			if (nullptr == f)
 			{
-				sys::err(here, "popen", path);
+				sys::err(here, "popen", u);
 			}
 
 			return fwd::make_unique<FILE>(f, [](auto f)
@@ -352,10 +354,10 @@ namespace env::file
 		else
 		{
 			const auto mode = to_string(mask);
-			auto f = std::fopen(path.data(), mode.data());
+			auto f = std::fopen(u.data(), mode.data());
 			if (nullptr == f)
 			{
-				sys::err(here, "fopen", mode, path);
+				sys::err(here, "fopen", mode, u);
 			}
 			return enclose(f);
 		}
@@ -575,9 +577,9 @@ namespace env::file
 		#endif
 	}
 
-	fmt::string name(basic_ptr f)
+	fmt::string path(basic_ptr f)
 	{
-		fmt::string path;
+		fmt::string buf;
 
 		#ifdef assert
 		assert(nullptr != f);
@@ -610,46 +612,46 @@ namespace env::file
 			else
 			{
 				fmt::wide w(info.FileName, info.FileNameLength);
-				path = fmt::to_string(w);
+				buf = fmt::to_string(w);
 			}
 		}
 		#elif defined(F_GETPATH)
 		{
-			path.resize(MAXPATHLEN);
-			if (sys::fail(fcntl(fd, F_GETPATH, path.data())))
+			buf.resize(MAXPATHLEN);
+			if (sys::fail(fcntl(fd, F_GETPATH, buf.data())))
 			{
 				sys::err(here, "F_GETPATH", fd);
-				path.clear();
+				buf.clear();
 			}
 			else
 			{
-				const auto pos = path.find_last_of("\0");
-				if (fmt::npos != pos) path.resize(pos);
+				const auto pos = buf.find_last_of("\0");
+				if (fmt::npos != pos) buf.resize(pos);
 			}
 		}
-		#elif defined(__bsd__) || defined(__linux__)
+		#elif defined(__bsdi__) || defined(__linux__)
 		{
 			using namespace std::literals;
 			static const auto pid = sys::getpid();
 			const auto link = "/proc/"s +fmt::to_string(pid) + "/fd/" + fmt::to_string(fd);
 
-			path.resize(PATH_MAX);
-			const auto n = readlink(link.c_str(), path.data(), path.size());
+			buf.resize(PATH_MAX);
+			const auto n = readlink(link.c_str(), buf.data(), buf.size());
 			if (sys::fail(n))
 			{
 				sys::err(here, "readlink", link);
-				path.clear();
+				buf.clear();
 			}
 			else
 			{
-				path.resize(n);
+				buf.resize(n);
 			}
 		}
 		#else
 		#error Cannot implement function
 		#endif
 
-		return path;
+		return buf;
 	}
 }
 

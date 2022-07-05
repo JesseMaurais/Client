@@ -159,6 +159,15 @@ namespace fwd
 		});
 	}
 
+	template 
+	<
+		class Range, class It
+	>
+	void copy(Range&& r, It it)
+	{
+		std::copy(r.begin(), r.end(), it);
+	}
+
 	template
 	<
 		class Type, template <class> class Alloc = std::allocator, size_t Size = std::dynamic_extent

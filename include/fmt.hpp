@@ -95,6 +95,7 @@ namespace fmt
 		using base = fwd::base<Type>;
 		using param = fwd::param<Type>;
 		using edges = fwd::edges<Type, Alloc>;
+		using div = fwd::pair<vector>;
 	};
 
 	template
@@ -133,8 +134,18 @@ namespace fmt
 		auto after(iterator it)
 		{
 			const auto end = String::end();
-			const auto next = std::next(it);
-			return sub(it == end ? end : next);
+			return sub(it == end ? end : std::next(it));
+		}
+
+		pair split(iterator it)
+		{
+			return { before(it), after(it) };
+		}
+
+		pair split(size_type pos)
+		{
+			const auto it = npos == pos ? end() : std::next(begin(), pos);
+			return split(it);
 		}
 
 		using String::String;
@@ -200,6 +211,7 @@ namespace fmt
 	using matrix = view::matrix;
 	using base = view::base;
 	using edges = view::edges;
+	using div = view::div;
 	using map = view::map;
 	using pair = view::pair;
 	using set = view::set;
@@ -229,17 +241,21 @@ namespace fmt
 	namespace tag
 	{
 		inline view empty = "";
-		inline view eol = "\n";
+		inline view dot = ".";
+		inline view dots = "..";
 		inline view tab = "\t";
+		inline view line = "\n";
+		inline view slash = "/"; 
+		inline view pass = "//";
 		inline view dash = "-";
 		inline view dual = "--";
-		inline view assign = "=";
 		inline view quote = "\"";
+		inline view assign = "=";
 
 		view emplace(view);
 
-		input read(input, view = eol);
-		output write(output, view = eol);
+		input read(input, view = line);
+		output write(output, view = line);
 	}
 }
 

@@ -35,6 +35,29 @@ namespace sys::win
 		return nullptr == h or invalid == h;
 	}
 
+	inline auto enclose(HANDLE h)
+	{
+		return fwd::make_shared<fwd::no_ptr<HANDLE>>(h, [](auto h)
+		{
+			if (not fail(h) and not CloseHandle(h))
+			{
+				win::err(here, "CloseHandle");
+			}
+		});
+	}
+
+	struct handle : decltype(enclose(nullptr))
+	{
+		handle(HANDLE h = nullptr)
+		: decltype(enclose(nullptr))(h, enclose)
+		{ }
+
+		operator HANDLE() const
+		{
+			return get();
+		}
+	};
+
 	inline HANDLE get(int fd)
 	{
 		if (sys::fail(fd)) return sys::win::invalid;
@@ -64,40 +87,15 @@ namespace sys::win
 		return WAIT_TIMEOUT == wait(h, 0);
 	}
 
-	inline auto close(HANDLE h)
-	{
-		return fwd::make_unique(h, [](auto h)
-		{
-			if (not fail(h))
-			{
-				if (not CloseHandle(h))
-				{
-					win::err(here, "CloseHandle");
-				}
-			}
-		});
-	}
-
-	struct handle : decltype(close(nullptr))
-	{
-		handle(HANDLE h = nullptr)
-		: decltype(close(nullptr))(h, close)
-		{ }
-
-		operator HANDLE() const
-		{
-			return get();
-		}
-	};
-
 	template <class T> struct zero : T
 	{
 		static_assert(std::is_trivially_copyable<T>::value);
 		static_assert(std::is_standard_layout<T>::value);
+		constexpr auto sizeof_self = sizeof(T);
 
 		zero()
 		{
-			ZeroMemory(this, sizeof(T));
+			ZeroMemory(this, sizeof_self);
 		}
 	};
 

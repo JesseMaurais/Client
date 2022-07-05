@@ -65,6 +65,11 @@ namespace sys::win
 
 		HANDLE h;
 
+		operator HANDLE() const
+		{
+			return h;
+		}
+
 		find_notify(const char* path, DWORD dw = 0, bool dir = root)
 		{
 			h = FindFirstChangeNotification(path, dir, dw);
@@ -93,6 +98,29 @@ namespace sys::win
 		}
 	};
 
+	struct notify_info : zero<FILE_NOTIFY_INFORMATION>
+	{
+		bool operator()(HANDLE h, BOOL sub, DWORD dw, LPOVERLAPPED lp=nullptr, LPOVERLAPPED_COMPLETION_ROUTINE fn=nullptr)
+		{
+			constexpr auto sz = sizeof(FILE_NOTIFY_INFORMATION) + FILENAME_MAX;
+			if (not ReadDirectoryChangesW(h, this, sz, sub, dw, nullptr, lp, fn))
+			{
+				win::err(here, "ReadDirectoryChangesExW");
+				return failure;
+			}
+			return success;
+		}
+
+		operator fmt::wide() const
+		{
+			return { FileName, FileNameLength / sizeof(WCHAR) };
+		}
+
+	private:
+
+		WCHAR buf[FILENAME_MAX];
+	};
+
 	struct overlapped : zero<OVERLAPPED>
 	{
 		using zero::zero;
@@ -105,10 +133,15 @@ namespace sys::win
 			OffsetHigh = large.high_part();
 		}
 
-		overlapped(void* ptr, HANDLE h=invalid)
+		overlapped(HANDLE h=invalid, auto ptr=nullptr)
 		{
 			hEvent = h;
 			Pointer = ptr;
+		}
+
+		operator LPOVERLAPPED() const
+		{
+			return this;
 		}
 	};
 }
@@ -153,7 +186,7 @@ namespace sys
 
 		static auto sub(std::string path)
 		{
-			return path.append(path.ends_with(sys::sep::dir) ? "*" : "\\*");
+			return path.append(path.ends_with(sys::tag::dir) ? "*" : "\\*");
 		}
 
 	public:

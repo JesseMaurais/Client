@@ -9,7 +9,9 @@
 namespace fwd
 {
 	template <class Type> using as_ptr = typename std::add_pointer<Type>::type;
+	template <class Type> using no_ptr = typename std::remove_pointer<Type>::type;
 	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
+	template <class Type> using no_ref = typename std::remove_lvalue_reference<Type>::type;
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using unique_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> using shared_ptr = std::shared_ptr<Type>;
@@ -87,7 +89,7 @@ namespace fwd
 	<
 		class Type
 	>
-	auto make_shared(Type* ptr, deleter<Type> free = std::default_delete<Type>())
+	auto make_shared(as_ptr<Type> ptr, deleter<Type> free = std::default_delete<Type>())
 	{
 		return shared_ptr<Type>(ptr, free);
 	}
@@ -96,27 +98,27 @@ namespace fwd
 	<
 		class Type
 	>
-	auto make_unique(Type* ptr, deleter<Type> free = std::default_delete<Type>())
+	auto make_unique(as_ptr<Type> ptr, deleter<Type> free = std::default_delete<Type>())
 	{
 		return unique_ptr<Type>(ptr, free);
 	}
 
 	template
 	<
-		class Pointer, class Free = deleter<Pointer>
+		class Type
 	>
-	auto null_shared(Free del = std::default_delete<Pointer>())
+	auto null_shared(deleter<Type> free = std::default_delete<Type>())
 	{
-		return make_shared((Pointer) nullptr, del);
+		return make_shared(null<Type>, free);
 	}
 
 	template
 	<
-		class Pointer, class Free = deleter<Pointer>
+		class Type
 	>
-	auto null_unique(Free del = std::default_delete<Pointer>())
+	auto null_unique(deleter<Type> free = std::default_delete<Type>())
 	{
-		return make_unique((Pointer) nullptr, del);
+		return make_unique(null<Type>, free);
 	}
 
 	template

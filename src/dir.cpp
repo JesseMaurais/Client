@@ -10,63 +10,95 @@
 #include "sys.hpp"
 #include "err.hpp"
 #include "sync.hpp"
-#ifdef _WIN32
-#include "win/file.hpp"
-#else //POSIX
-#include "uni/dirent.hpp"
-#endif
+#include "event.hpp"
 #include <regex>
 #include <stack>
 
-namespace fmt::dir
+namespace fmt::path
 {
+	vector split(view u)
+	{
+		return fmt::split(u, sys::tag::path);
+	}
+	
 	string join(span p)
 	{
-		return fmt::join(p, sys::sep::dir);
+		return fmt::join(p, sys::tag::path);
 	}
 
 	string join(init n)
 	{
-		return join(fwd::to_span(n));
-	}
-
-	vector split(view u)
-	{
-		return fmt::split(u, sys::sep::dir);
+		return fmt::join(fwd::to_span(n));
 	}
 }
 
-namespace fmt::path
+namespace fmt::dir
 {
+	vector split(view u)
+	{
+		return fmt::split(u, sys::tag::dir);
+	}
+
 	string join(span p)
 	{
-		return fmt::join(p, sys::sep::path);
+		return fmt::join(p, sys::tag::dir);
 	}
 
 	string join(init n)
 	{
-		return join(fwd::to_span(n));
+		return fmt::join(fwd::to_span(n));
 	}
+}
 
+namespace fmt::file
+{
 	vector split(view u)
 	{
-		return fmt::split(u, sys::sep::path);
+		return fmt::split(u, tag::dot);
+	}
+
+	string join(span p)
+	{
+		return fmt::join(p, tag::dot);
+	}
+
+	string join(init n)
+	{
+		return fmt::join(fwd::to_span(n));
+	}
+
+	string join(div p)
+	{
+		auto part = fmt::span(p.second);
+		auto last = fmt::path::join(part);
+		p.first.emplace_back(last);
+		part = fmt::span(p.first);
+		return fmt::dir::join(part);
+	}
+
+	div path(view u)
+	{
+		auto d = fmt::dir::split(u);
+		auto n = d.back();
+		auto b = fmt::file::split(n);
+		d.pop_back();
+		return { d, b };
 	}
 }
 
 namespace env::file
 {
-	dirs paths()
+	order paths()
 	{
 		return { env::pwd(), env::path() };
 	}
 
-	dirs config()
+	order config()
 	{
 		return { env::usr::config_home(), env::usr::config_dirs() };
 	}
 
-	dirs data()
+	order data()
 	{
 		return { env::usr::data_home(), env::usr::data_dirs() };
 	}
@@ -89,7 +121,7 @@ namespace env::file
 		});
 	}
 
-	bool find(dirs paths, entry check)
+	bool find(order paths, entry check)
 	{
 		return find(paths.first, check) or find(paths.second, check);
 	}
@@ -119,7 +151,7 @@ namespace env::file
 		return [&](view u)
 		{
 			auto s = fmt::to_string(u);
-			t.emplace_back(move(s));
+			t.emplace_back(std::move(s));
 			return success;
 		};
 	}
@@ -143,6 +175,38 @@ namespace env::file
 		return all(u, m, e);
 	}
 
+	string search(view name, entry check, order roots)
+	{
+		auto dirs = fmt::dir::split(name);
+		auto first = not fwd::equal_to(fmt::tag::dots);
+		auto it = fwd::find_if(dirs, first);
+		auto diff = std::distance(dirs.begin(), it);
+		auto sub =  fmt::span(dirs.data() + diff, dirs.size() - diff);
+		// Search predicate
+		string buf;
+		entry visit = [&](view root)
+		{
+			auto folders = fmt::dir::split(root);
+			if (ptrdiff_t size = folders.size(); size > diff)
+			 {
+				// Compound path parts
+				folders.resize(size - diff);
+				auto put = std::back_inserter(folders);
+				fwd::copy(sub, put);
+				// Compose a full string
+				buf = fmt::dir::join(folders);
+				return check(buf);
+			 }
+			return false;
+		};
+		// Clear if not found
+		if (not find(roots, visit))
+		{
+			buf.clear();
+		}
+		return buf;
+	}
+
 	view mkdir(view path)
 	{
 		std::stack<view> stack;
@@ -160,9 +224,9 @@ namespace env::file
 			stem = buf;
 		}
 
-		stem = path.substr(0, path.find(sys::sep::dir, stem.size() + 1));
+		stem = path.substr(0, path.find(sys::tag::dir, stem.size() + 1));
 
-		while (not empty(stack))
+		while (not stack.empty())
 		{
 			folders.push_back(stack.top());
 			stack.pop();
@@ -201,7 +265,7 @@ namespace env::file
 				{
 					if (u != "." and u != "..")
 					{
-						deque.emplace_back(move(path));
+						deque.emplace_back(std::move(path));
 					}
 				}
 				else
@@ -254,5 +318,20 @@ test_unit(dir)
 //	assert(not empty(stem.first));
 //	assert(not empty(stem.second));
 	assert(not env::file::rmdir(stem));
+}
+test_unit(dir)
+{
+	fmt::view dir, name, path = __FILE__;
+	auto pos = path.find_last_of(sys::tag::dir);
+	if (auto pair = path.split(pos); pair.second.empty()) 
+	{
+		dir = ".";
+		name = pair.frist;
+	}
+	else
+	{
+		dir = pair.first;
+		name = pair.second;
+	}
 }
 #endif

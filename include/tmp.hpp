@@ -28,9 +28,7 @@ namespace fwd
 	};
 
 	template <class T> using function = std::function<T(T)>;
-
 	template <class T> using notify = std::function<void(T)>;
-
 	template <class T> using defer = std::function<T(void)>;
 
 	using event = defer<void>;
@@ -43,15 +41,6 @@ namespace fwd
 		{
 			event::operator()();
 		}
-	};
-
-	template <class T> struct resource
-	{
-		std::pair<T, pop> pair;
-		auto get() const { return pair.first; }
-		auto get_deleter() const { return pair.second; }
-		resource(T u, notify<T> n) : pair(u, std::bind(n, u))
-		{ }
 	};
 
 	template <class T> struct lazy : defer<T>, constant<T>

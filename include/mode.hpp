@@ -23,6 +23,10 @@ namespace env::file
 		lnk  = 1 << 015, // symbolic link
 		reg  = 1 << 016, // regular file
 		sock = 1 << 017, // domain socket
+		add  = 1 << 020, // file added
+		rm   = 1 << 021, // file removed
+		move = 1 << 022, // file moved
+		chg  = 1 << 023, // changed attributes
 
 		rw   = rd | wr, // read/write
 		wo   = rw | ok, // read/write/exists
@@ -49,15 +53,15 @@ namespace env::file
 
 	enum permit
 	{
-		owner_r = owner(rd),
-		owner_w = owner(wr),
-		owner_x = owner(ex),
-		group_r = group(rd),
-		group_w = group(wr),
-		group_x = group(ex),
-		other_r = other(rd),
-		other_w = other(wr),
-		other_x = other(ex),
+		owner_r = owner(static_cast<int>(rd)),
+		owner_w = owner(static_cast<int>(wr)),
+		owner_x = owner(static_cast<int>(ex)),
+		group_r = group(static_cast<int>(rd)),
+		group_w = group(static_cast<int>(wr)),
+		group_x = group(static_cast<int>(ex)),
+		other_r = other(static_cast<int>(rd)),
+		other_w = other(static_cast<int>(wr)),
+		other_x = other(static_cast<int>(ex)),
 	};
 
 	inline permit owner(mode mask)
