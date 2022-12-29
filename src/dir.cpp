@@ -8,11 +8,17 @@
 #include "usr.hpp"
 #include "arg.hpp"
 #include "sys.hpp"
-#include "err.hpp"
+#include "dig.hpp"
 #include "sync.hpp"
-#include "event.hpp"
 #include <regex>
 #include <stack>
+
+#ifdef _WIN32
+#include "win/file.hpp"
+#else
+#include "uni/dirent.hpp"
+#include "uni/fcntl.hpp"
+#endif
 
 namespace fmt::path
 {
@@ -20,7 +26,7 @@ namespace fmt::path
 	{
 		return fmt::split(u, sys::tag::path);
 	}
-	
+
 	string join(span p)
 	{
 		return fmt::join(p, sys::tag::path);
@@ -175,6 +181,199 @@ namespace env::file
 		return all(u, m, e);
 	}
 
+/*
+	watch::watch(view path, mode mask)
+	{
+		string buf;
+		if (not fmt::terminated(path))
+		{
+			buf = fmt::to_string(path);
+			path = buf;
+		}
+
+	#ifdef _WIN32
+
+		thread_local struct : fwd::no_copy
+		{
+			FILE_NOTIFY_INFORMATION info[1];
+		private:
+			CHAR pad[MAX_PATH];
+		} local;
+
+		constexpr auto size = sizeof local;
+		auto that = std::addressof(local);
+
+		sys::win::handle file = CreateFile
+		(
+			path.data(),
+			FILE_LIST_DIRECTORY,
+			FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+			nullptr,
+			OPEN_EXISTING,
+			FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+			nullptr
+		);
+
+		if (sys::win::fail(file))
+		{
+			sys::win::err(here, "CreateFile");
+			return;
+		}
+
+		static auto check = [](DWORD dw, DWORD sz, LPOVERLAPPED lp)
+		{
+			auto err = sys::win::strerr(dw);
+			sys::warn(here, err, sz, lp);
+		};
+
+		next = [=]
+		{
+			DWORD dw = 0;
+			if (mask & mk) dw |= FILE_NOTIFY_CHANGE_CREATION;
+			if (mask & fl) dw |= FILE_NOTIFY_CHANGE_ATTRIBUTES;
+			if (mask & mv) dw |= FILE_NOTIFY_CHANGE_FILE_NAME;
+			if (mask & rd) dw |= FILE_NOTIFY_CHANGE_LAST_ACCESS;
+			if (mask & wr) dw |= FILE_NOTIFY_CHANGE_LAST_WRITE;
+			if (ReadDirectoryChangesW(file, that->info, fmt::to<DWORD>(size), true, dw, nullptr, nullptr, check))
+			{
+				ZeroMemory(that, sizeof(FILE_NOTIFY_INFORMATION));
+			}
+		};
+
+		value = [=]
+		{
+			mode m = 0;
+			if (that->info->Action & FILE_ACTION_ADDED) m |= mk;
+			if (that->info->Action & FILE_ACTION_REMOVED) m |= rm;
+			if (that->info->Action & FILE_ACTION_MODIFIED) m |= fl;
+			if (that->info->Action & FILE_ACTION_RENAMED_OLD_NAME) m |= mv;
+			if (that->info->Action & FILE_ACTION_RENAMED_NEW_NAME) m |= to;
+			fmt::wide wide { that->info->FileName, that->info->FileNameLength / sizeof(WCHAR) };
+			if (wide.empty()) utf.clear(); else buf = fmt::to_string(wide);
+			return { buf, m };
+		};
+
+	#elif defined(SYS_INOTIFY)
+
+		thread_local struct : fwd::no_copy
+		{
+			inotify_event ev[1];
+		private:
+			char pad[PATH_MAX];
+		} local;
+
+		constexpr auto size = sizeof local;
+		auto that = std::addressof(local);
+
+		uint32_t in = 0;
+		if (mask & mk) in |= IN_CREATE | IN_DELETE;
+		if (mask & fl) in |= IN_ATTRIB;
+		if (mask & mv) in |= IN_MOVED_FROM | IN_MOVED_TO;
+		if (mask & rd) in |= IN_ACCESS;
+		if (mask & wr) in |= IN_MODIFY;
+
+		sys::uni::filed wd = inotify_init();
+		if (sys::fail(wd))
+		{
+			sys::err(here, "inotify_init");
+			return;
+		}
+
+		sys::uni::filed fd = inotify_add_watch(wd, path.data(), mask);
+		if (sys::fail(fd))
+		{
+			sys::err(here, "inotify_add_watch");
+			return;
+		}
+
+		next = [=]
+		{
+			if (sys::fail(sys::read(wd, that->ev, size)))
+			{
+				sys::err(here, "inotify_event");
+				std::memset(that->ev, 0, size);
+			}
+		};
+
+		value = [=]
+		{
+			mode m = 0;
+			if (this->ev->mask & IN_CREATE) m |= mk;
+			if (this->ev->mask & IN_DELETE) m |= rm;
+			if (this->ev->mask & IN_ATTRIB) m |= fl;
+			if (this->ev->mask & IN_ACCESS) m |= rd;
+			if (this->ev->mask & IN_MODIFY) m |= wr;
+			if (this->ev->mask & IN_MOVED_FROM) m |= mv;
+			if (this->ev->mask & IN_MOVED_TO) m |= to;
+			fmt::view u { that->ev->name, that->ev->len };
+			return { u , m };
+		};
+
+	#elif defined(SYS_EVENT)
+
+		thread_local struct : fwd::no_copy
+		{
+			struct kevent change[1], event[1];
+		} local;
+
+		constexpr auto size = sizeof local;
+		auto that = std::addressof(local);
+
+		sys::uni::filed kq = kqueue();
+		if (sys::fail(kq))
+		{
+			sys::err(here, "kqueue");
+			return;
+		}
+
+		sys::uni::filed fd = sys::open(path.data(), convert(mask));
+		if (sys::fail(fd))
+		{
+			sys::err(here, "open");
+			return;
+		}
+
+		next = [=]
+		{
+			if (sys::fail(kevent(kq, that->change, 1, that->event, 1, nullptr)))
+			{
+				sys::err(here, "kevent");
+			}
+		};
+
+		value = [=]
+		{
+	 		mode m = 0;
+			if (that->event->fflags & NOTE_OPEN) m |= mk;
+			if (that->event->fflags & NOTE_DELETE) m |= rm;
+			if (that->event->fflags & NOTE_ATTRIB) m |= at;
+			if (that->event->fflags & NOTE_READ) m |= rd;
+			if (that->event->fflags & NOTE_WRITE) m |= wr;
+			if (that->event->fflags & NOTE_RENAME) m |= mv;
+			buf.resize(FILENAME_MAX);
+			if (sys::fail(fcntl(that->event->ident, F_GETPATH, buf.data())))
+			{
+				sys::err(here, "F_GETPATH", that->event->ident);
+				buf.clear();
+			}
+			return { buf, m };
+		};
+
+		uint32_t m = 0;
+		if (mask & mk) m |= NOTE_OPEN;
+		if (mask & rm) m |= NOTE_DELETE;
+		if (mask & at) m |= NOTE_ATTRIB;
+		if (mask & rd) m |= NOTE_READ;
+		if (mask & wr) m |= NOTE_WRITE;
+		if (mask & mv) m |= NOTE_RENAME;
+		EV_SET(that->change, fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, m, 0, this);
+
+	#else
+	#error No events
+	#endif
+	}
+*/
+
 	string search(view name, entry check, order roots)
 	{
 		auto dirs = fmt::dir::split(name);
@@ -235,7 +434,7 @@ namespace env::file
 			auto const c = buf.data();
 			if (sys::fail(sys::mkdir(c, S_IRWXU)))
 			{
-				sys::err(here, "mkdir", c);
+				perror("mkdir");
 				stem = "";
 				break;
 			}
@@ -258,7 +457,7 @@ namespace env::file
 				struct sys::stats st(c);
 				if (sys::fail(st.ok))
 				{
-					sys::err(here, "stat", c);
+					perror("stat");
 				}
 				else
 				if (S_ISDIR(st.st_mode))
@@ -271,7 +470,7 @@ namespace env::file
 				else
 				if (sys::fail(sys::unlink(c)))
 				{
-					sys::err(here, "unlink", c);
+					perror("unlink");
 				}
 				return success;
 			});
@@ -284,7 +483,7 @@ namespace env::file
 			const auto c = dir.data();
 			if (sys::fail(sys::rmdir(c)))
 			{
-				sys::err(here, "rmdir", c);
+				perror("rmdir");
 				ok = failure;
 			}
 			deque.pop_back();
@@ -323,7 +522,7 @@ test_unit(dir)
 {
 	fmt::view dir, name, path = __FILE__;
 	auto pos = path.find_last_of(sys::tag::dir);
-	if (auto pair = path.split(pos); pair.second.empty()) 
+	if (auto pair = path.split(pos); pair.second.empty())
 	{
 		dir = ".";
 		name = pair.frist;

@@ -218,7 +218,7 @@ namespace
 		static sys::exclusive<doc::ini> ini;
 		// try read
 		{
-			auto const reader = ini.unique_reader();
+			auto const reader = ini.reader();
 			if (not reader->keys.empty())
 			{
 				return ini;
@@ -226,7 +226,7 @@ namespace
 		}
 		// next write
 		{
-			auto writer = ini.unique_writer();
+			auto writer = ini.writer();
 			auto const path = env::opt::initials();
 			auto const s = fmt::to_string(path);
 			doc::ini::ref slice = *writer;
@@ -274,7 +274,7 @@ namespace env::opt
 			auto const name = dirs.back();
 			assert(not name.empty());
 			auto const first = name.find_first_not_of("./");
-			auto const last = name.rfind(sys::ext::image);
+			auto const last = name.rfind(sys::tag::image);
 			u = name.substr(first, last);
 		}
 		return u;
@@ -310,31 +310,31 @@ namespace env::opt
 
 	fmt::input get(fmt::input in)
 	{
-		auto writer = registry().unique_writer();
+		auto writer = registry().writer();
 		auto &slice = *writer;
 		return in >> slice;
 	}
 
 	fmt::output put(fmt::output out)
 	{
-		auto reader = registry().unique_reader();
+		auto reader = registry().reader();
 		auto &slice = *reader;
 		return out << slice;
 	}
 
 	bool got(fmt::pair key)
 	{
-		return registry().unique_reader()->got(key);
+		return registry().reader()->got(key);
 	}
 
 	fmt::view get(fmt::pair key)
 	{
-		return registry().unique_reader()->get(key);
+		return registry().reader()->get(key);
 	}
 
 	bool set(fmt::pair key, fmt::view value)
 	{
-		return registry().unique_writer()->set(key, value);
+		return registry().writer()->set(key, value);
 	}
 
 	bool got(fmt::view key)

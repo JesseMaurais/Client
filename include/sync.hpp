@@ -126,7 +126,7 @@ namespace sys
 
 		auto reader() const
 		{
-			return fwd::make_unique(that, [this, key=lock.reader()](auto that)
+			return fwd::make_shared<object>(that, [this, key=lock.reader()](auto that)
 			{
 				#ifdef assert
 				assert(this->that == that);
@@ -136,12 +136,22 @@ namespace sys
 
 		auto writer()
 		{
-			return fwd::make_unique(that, [this, key=lock.writer()](auto that)
+			return fwd::make_shared<object>(that, [this, key=lock.writer()](auto that)
 			{
 				#ifdef assert
 				assert(this->that == that);
 				#endif
 			});
+		}
+
+		auto get() const
+		{
+			return that;
+		}
+
+		auto get()
+		{
+			return that;
 		}
 	};
 
@@ -165,6 +175,16 @@ namespace sys
 		auto writer()
 		{
 			return that.writer();
+		}
+
+		auto get() const
+		{
+			return that.get();
+		}
+
+		auto get()
+		{
+			return that.get();
 		}
 	};
 

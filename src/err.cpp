@@ -16,7 +16,7 @@
 #include <set>
 #include <map>
 
-namespace sys
+namespace fmt
 {
 	bool debug =
 	#ifdef NDEBUG
@@ -25,43 +25,21 @@ namespace sys
 		true;
 	#endif
 
-	thread_local fmt::buffer thread_buf;
+	thread_local buffer local_buf;
 
-	fmt::output out()
+	os& out()
 	{
-		return thread_buf;
+		return local_buf;
 	}
 
-	fmt::output put(fmt::output buf)
+	os& put(os& buf)
 	{
-		fmt::string line;
-		while (std::getline(thread_buf, line))
+		string line;
+		while (std::getline(local_buf, line))
 		{
 			buf << line << std::endl;
 		}
 		return buf;
-	}
-
-	int perror(fmt::view message, bool errn)
-	{
-		thread_local struct
-		{
-			fmt::string last;
-			int counter = -1;
-
-		} local;
-
-		if (message != local.last)
-		{
-			thread_buf << message;
-			if (errn) thread_buf << ':' << ' ' << std::strerror(errno);
-			thread_buf << fmt::tag::eol;
-
-			local.last = fmt::to_string(message);
-			local.counter = 0;
-		}
-		else ++local.counter;
-		return local.counter;
 	}
 }
 
@@ -69,16 +47,16 @@ namespace
 {
 	void runner(fmt::view name, fmt::string::buf::ptr buf, bool host)
 	{
-		auto back = sys::out().rdbuf();
+		auto back = fmt::out().rdbuf();
 		try
 		{
-			sys::out().rdbuf(buf);
+			fmt::out().rdbuf(buf);
 			if (host)
 			{
 				auto call = sys::sym<void()>(name);
 				if (nullptr == call)
 				{
-					sys::out() << name << " is missing";
+					fmt::out() << name << " is missing";
 				}
 				else
 				{
@@ -91,19 +69,19 @@ namespace
 				fmt::vector args { image, "-o", "-q", name };
 				for (auto line : env::exe::get(args))
 				{
-					sys::out() << line << fmt::tag::eol;
+					fmt::out() << line << fmt::tag:: eol;
 				}
 			}
 		}
 		catch (std::exception const& error)
 		{
-			sys::out() << error.what() << fmt::tag::eol;
+			fmt::out() << error.what() << fmt::tag::eol;
 		}
 		catch (...)
 		{
-			sys::out() << "Unknown" << fmt::tag::eol;
+			fmt::out() << "Unknown" << fmt::tag::eol;
 		}
-		sys::out().rdbuf(back);
+		fmt::out().rdbuf(back);
 	}
 }
 
@@ -198,7 +176,7 @@ int main(int argc, char** argv)
 					const auto call = sys::sym<void()>(name);
 					if (nullptr != call)
 					{
-						verify(context[name].str().empty());
+						assert(context[name].str().empty());
 					}
 				}
 			}
@@ -215,7 +193,7 @@ int main(int argc, char** argv)
 			}
 			else
 			{
-				verify(context[name].str().empty());
+				assert(context[name].str().empty());
 			}
 		}
 	}

@@ -43,8 +43,8 @@ namespace sys
 			ptr = dlopen(s, RTLD_LAZY);
 			if (nullptr == ptr)
 			{
-				const auto e = dlerror();
-				sys::warn(here, "dlopen", path, e);
+				const auto errstr = dlerror();
+				perror(errstr);
 			}
 		}
 		#endif
@@ -64,8 +64,8 @@ namespace sys
 		{
 			if (nullptr != ptr and dlclose(ptr))
 			{
-				const auto e = dlerror();
-				sys::warn(here, "dlclose", e);
+				const auto errstr = dlerror();
+				perror(errstr);
 			}
 		}
 		#endif
@@ -103,7 +103,7 @@ namespace sys
 			const auto e = dlerror();
 			if (nullptr != e)
 			{
-				sys::warn(here, "dlsym", name, e);
+				perror("dlsym");
 			}
 			return f;
 		}
@@ -113,7 +113,7 @@ namespace sys
 	lib lib::find(fmt::view basename)
 	{
 		using namespace env::file;
-		fmt::string name = fmt::to_string(basename) + sys::ext::share;
+		fmt::string name = fmt::to_string(basename) + sys::tag::share;
 		env::file::find(env::path(), regex(name) || to(name) || stop);
 		return fmt::view(name);
 	}

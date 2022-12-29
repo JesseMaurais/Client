@@ -302,7 +302,7 @@ namespace env::file
 			{
 				if (EOF == std::fclose(f))
 				{
-					sys::err(here, "fclose");
+					perror("fclose");
 				}
 			}
 		});
@@ -335,14 +335,14 @@ namespace env::file
 
 			if (nullptr == f)
 			{
-				sys::err(here, "popen", u);
+				perror("popen");
 			}
 
 			return fwd::make_unique<FILE>(f, [](auto f)
 			{
 				if (f and sys::fail(sys::pclose(f)))
 				{
-					sys::err(here, "pclose");
+					perror("pclose");
 				}
 			});
 		}
@@ -357,7 +357,7 @@ namespace env::file
 			auto f = std::fopen(u.data(), mode.data());
 			if (nullptr == f)
 			{
-				sys::err(here, "fopen", mode, u);
+				perror("fopen");
 			}
 			return enclose(f);
 		}
@@ -417,7 +417,7 @@ namespace env::file
 		}
 		#else // UNIX
 		{
-			sys::uni::file::lock key;
+			sys::uni::lock key;
 			key.l_whence = SEEK_SET;
 			key.l_start = off;
 			key.l_len = sz;
@@ -433,18 +433,18 @@ namespace env::file
 
 			if ((mask & ok) ? key.set(fd) : key.wait(fd))
 			{
-				sys::err(here, (mask & wr) ? "F_WRLCK" : "F_RDLCK", fd);
+				perror((mask & wr) ? "F_WRLCK" : "F_RDLCK");
 			}
 			else return fwd::make_unique<FILE>(f, [=](basic_ptr)
 			{
-				sys::uni::file::lock key;
+				sys::uni::lock key;
 				key.l_type = F_UNLCK;
 				key.l_whence = SEEK_SET;
 				key.l_start = off;
 				key.l_len = sz;
 				if (key.set(fd))
 				{
-					sys::err(here, "F_UNLCK", fd);
+					perror("F_UNLCK");
 				}
 			});
 		}
@@ -470,7 +470,7 @@ namespace env::file
 			struct sys::stats st(fd);
 			if (sys::fail(st.ok))
 			{
-				sys::err(here, "stat");
+				perror("stat");
 			}
 			else sz = st.st_size;
 		}
@@ -620,7 +620,7 @@ namespace env::file
 			buf.resize(MAXPATHLEN);
 			if (sys::fail(fcntl(fd, F_GETPATH, buf.data())))
 			{
-				sys::err(here, "F_GETPATH", fd);
+				perror("F_GETPATH");
 				buf.clear();
 			}
 			else
@@ -639,7 +639,7 @@ namespace env::file
 			const auto n = readlink(link.c_str(), buf.data(), buf.size());
 			if (sys::fail(n))
 			{
-				sys::err(here, "readlink", link);
+				perror("readlink");
 				buf.clear();
 			}
 			else

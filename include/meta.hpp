@@ -68,14 +68,14 @@ namespace doc
 	{
 		auto key = local<Type>.reader();
 		auto ptr = fwd::cast_as<Type>(key->item.data() + key->index.at(n));
-		return fwd::make_shared(ptr, [s=std::move(key)](decltype(ptr)){});
+		return fwd::shared_ptr<Type>(ptr, [key](decltype(ptr)) { });
 	}
 
 	template <class Type> typename instance<Type>::write_ptr instance<Type>::writer(int n)
 	{
 		auto key = local<Type>.writer();
 		auto ptr = fwd::cast_as<Type>(key->item.data() + key->index.at(n));
-		return fwd::make_shared(ptr, [s=std::move(key)](decltype(ptr)){});
+		return fwd::shared_ptr<Type>(ptr, [key](decltype(ptr)) { });
 	}
 
 	template <class Type> int instance<Type>::emplace(Type&& type)

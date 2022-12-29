@@ -17,7 +17,6 @@ namespace
 		const auto value = cast(ptr, &it);
 		if (ptr == it)
 		{
-			sys::err(here, u);
 			return nan;
 		}
 		return value;
@@ -33,7 +32,7 @@ namespace
 		{
 			auto const error = std::make_error_code(code.ec);
 			auto const message = error.message();
-			sys::warn(here, message);
+			fmt::out() << message;
 		}
 		return value;
 	}
@@ -55,7 +54,7 @@ namespace
 				}
 				const auto error = std::make_error_code(code.ec);
 				const auto message = error.message();
-				sys::warn(here, message);
+				fmt::out() << message;
 			}
 			s.resize(code.ptr - begin);
 		}

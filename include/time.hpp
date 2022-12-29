@@ -81,7 +81,7 @@ namespace env
 	void wait(fmt::time);
 	// Suspend execution for some time
 
-	fwd::pop event(fmt::timer, fwd::event);
+	fwd::end event(fmt::timer, fwd::event);
 	// Invoke an event on a periodic timer
 }
 

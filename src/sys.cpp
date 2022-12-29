@@ -22,7 +22,7 @@ namespace sys
 			{
 				fd[n] = invalid;
 			}
-			err(here, "pipe");
+			perror("pipe");
 		}
 	}
 
@@ -33,35 +33,35 @@ namespace sys
 		{
 			if (not fail(fd[n]) and fail(close(fd[n])))
 			{
-				err(here, "close", fd[n]);
+				perror("close");
 			}
 		}
 	}
 
 	stats::stats(int fd)
 	{
-		if (fail(ok = sys::fstat(fd, this)))
+		if (fail(ok = fstat(fd, this)))
 		{
-			err(here, "fstat");
+			perror("fstat");
 		}
 	}
 
 	stats::stats(const char* path)
 	{
-		if (fail(ok = sys::stat(path, this)))
+		if (fail(ok = lstat(path, this)))
 		{
-			err(here, "stat");
+			perror("lstat");
 		}
 	}
 
 	mode::mode(mode_t mask)
 	{
-		um = sys::umask(mask);
+		um = umask(mask);
 	}
 
 	mode::~mode()
 	{
-		(void) sys::umask(um);
+		(void) umask(um);
 	}
 
 	char** environment()
@@ -162,7 +162,7 @@ namespace sys
 			{
 				if (fail(pair[n]))
 				{
-					err(here, "pipe");
+					perror("pipe");
 					return invalid;
 				}
 			}
@@ -171,7 +171,7 @@ namespace sys
 			{
 				if (fail(pid))
 				{
-					err(here, "fork");
+					perror("fork");
 				}
 				else for (int n : { 0, 1, 2 })
 				{
@@ -180,33 +180,29 @@ namespace sys
 				return pid;
 			}
 
-			for (int n : { 0, 1, 2 }) try
+			for (int n : { 0, 1, 2 })
 			{
 				if (fail(close(n)))
 				{
-					throw err(here, "close", n);
+					perror("close");
 				}
 
 				if (fail(dup2(pair[n][not n], n)))
 				{
-					throw err(here, "dup2", n);
+					perror("dup2");
 				}
 
 				for (int fd : pair[n])
 				{
 					if (fail(close(fd)))
 					{
-						throw err(here, "close", fd);
+						perror("close");
 					}
 				}
 			}
-			catch (int)
-			{
-				std::abort();
-			}
 
 			const int code = execvp(argv[0], argv);
-			sys::err(here, "execvp", code, argv[0]);
+			perror("execvp");
 			std::exit(code);
 		}
 		#endif
@@ -235,7 +231,7 @@ namespace sys
 		{
 			if (fail(::kill(pid, SIGTERM)))
 			{
-				err(here, "SIGTERM", pid);
+				perror("SIGTERM");
 				return failure;
 			}
 			return success;
@@ -275,7 +271,7 @@ namespace sys
 				pid = waitpid(parent, &status, 0);
 				if (fail(pid))
 				{
-					err(here, "waitpid", parent);
+					perror("waitpid");
 				}
 			}
 			while (pid != parent);
@@ -299,63 +295,63 @@ namespace sys
 		}
 		#endif
 	}
+}
 
-	#ifdef _WIN32
-	namespace win
+#ifdef _WIN32
+namespace sys::win
+{
+	char const* strerr(unsigned long id, void* ptr)
 	{
-		char const* strerr(unsigned long id, void* ptr)
+		constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
+		                    | FORMAT_MESSAGE_IGNORE_INSERTS
+		                    | FORMAT_MESSAGE_FROM_HMODULE
+		                    | FORMAT_MESSAGE_FROM_SYSTEM;
+
+		auto h = static_cast<HANDLE>(ptr);
+		if (sys::win::fail(h))
 		{
-			constexpr auto flag = FORMAT_MESSAGE_ALLOCATE_BUFFER
-			                    | FORMAT_MESSAGE_IGNORE_INSERTS
-			                    | FORMAT_MESSAGE_FROM_HMODULE
-			                    | FORMAT_MESSAGE_FROM_SYSTEM;
-
-			auto h = static_cast<HANDLE>(ptr);
-			if (sys::win::fail(h))
-			{
-				h = GetModuleHandle(nullptr);
-			}
-
-			thread_local auto tls = fwd::null_unique<HLOCAL>(LocalFree);
-
-			LPSTR str = nullptr;
-			auto data = (LPSTR) &str;
-			const auto size = FormatMessage
-			(
-				flag,   // style
-				h,      // module
-				id,     // message
-				0,      // language
-				data,   // buffer
-				0,      // size
-				nullptr // arguments
-			);
-
-			if (0 < size) // replace
-			{
-				tls.reset(reinterpret_cast<HLOCAL>(str));
-			}
-
-			if (nullptr == str)
-			{
-				thread_local char buf[128] = { '\0' };
-				std::sprintf(buf, "Unknown error %lu", id);
-				str = buf;
-			}
-
-			return str;
+			h = GetModuleHandle(nullptr);
 		}
-	}
-	#else
-	namespace uni
-	{
-		char const* strerr(int no)
+
+		thread_local auto tls = fwd::null_unique<HLOCAL>(LocalFree);
+
+		LPSTR str = nullptr;
+		auto data = (LPSTR) &str;
+		const auto size = FormatMessage
+		(
+			flag,   // style
+			h,      // module
+			id,     // message
+			0,      // language
+			data,   // buffer
+			0,      // size
+			nullptr // arguments
+		);
+
+		if (0 < size) // replace
+		{
+			tls.reset(reinterpret_cast<HLOCAL>(str));
+		}
+
+		if (nullptr == str)
 		{
 			thread_local char buf[128] = { '\0' };
-			// POSIX and GNU differ on return type
-			(void) strerror_r(no, buf, sizeof buf);
-			return buf;
+			std::sprintf(buf, "Unknown error %lu", id);
+			str = buf;
 		}
+
+		return str;
 	}
-	#endif
 }
+#else
+namespace sys::uni
+{
+	char const* strerr(int no)
+	{
+		thread_local char buf[128] = { '\0' };
+		// POSIX and GNU differ on return type
+		(void) strerror_r(no, buf, sizeof buf);
+		return buf;
+	}
+}
+#endif

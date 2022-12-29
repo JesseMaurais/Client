@@ -23,10 +23,11 @@ namespace env::file
 		lnk  = 1 << 015, // symbolic link
 		reg  = 1 << 016, // regular file
 		sock = 1 << 017, // domain socket
-		add  = 1 << 020, // file added
+		mk   = 1 << 020, // file added
 		rm   = 1 << 021, // file removed
-		move = 1 << 022, // file moved
-		chg  = 1 << 023, // changed attributes
+		mv   = 1 << 022, // file moved from
+		at   = 1 << 024, // file attribute change
+		fl   = 1 << 025, // flag change
 
 		rw   = rd | wr, // read/write
 		wo   = rw | ok, // read/write/exists

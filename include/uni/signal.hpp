@@ -1,7 +1,6 @@
 #ifndef uni_signal_hpp
 #define uni_signal_hpp "POSIX Signals"
 
-#include "err.hpp"
 #include "uni.hpp"
 #include "ptr.hpp"
 #include "doc.hpp"
@@ -16,6 +15,116 @@ namespace sys::uni::sig
 	struct set
 	{
 		sigset_t buf[1];
+
+		auto ismember(int n) const
+		{
+			auto err = sigismember(buf, n);
+			if (fail(err))
+			{
+				perror("sigismember");
+			}
+			return err;
+		}
+
+		auto add(int n)
+		{
+			auto err = sigaddset(buf, n);
+			if (fail(err))
+			{
+				perror("sigaddset");
+			}
+			return err;
+		}
+
+		auto del(int n)
+		{
+			auto err = sigdelset(buf, n);
+			if (fail(err))
+			{
+				perror("sigdelset");
+			}
+			return err;
+		}
+
+		auto empty()
+		{
+			auto err = sigemptyset(buf);
+			if (fail(err))
+			{
+				perror("sigemptyset");
+			}
+			return err;
+		}
+
+		auto fill()
+		{
+			auto err = sigfillset(buf);
+			if (fail(err))
+			{
+				perror("sigfillset");
+			}
+			return err;
+		}
+
+		auto pending()
+		{
+			auto err = sigpending(buf);
+			if (fail(err))
+			{
+				perror("sigpending");
+			}
+			return err;
+		}
+
+		auto suspend() const
+		{
+			auto err = sigsuspend(buf);
+			if (fail(err))
+			{
+				perror("sigsuspend");
+			}
+			return err;
+		}
+
+		auto wait(int* n) const
+		{
+			auto err = sigwait(buf, n);
+			if (fail(err))
+			{
+				perror("sigwait");
+			}
+			return err;
+		}
+
+		auto wait(siginfo_t* info = nullptr) const
+		{
+			auto err = sigwaitinfo(buf, info);
+			if (fail(err))
+			{
+				perror("sigwaitinfo");
+			}
+			return err;
+		}
+
+		auto procmask(int how, sigset_t* old = nullptr) const
+		{
+			auto err = sigprocmask(how, buf, old);
+			if (fail(err))
+			{
+				perror("sigprocmask");
+			}
+			return err;
+		}
+
+		auto threadmask(int how, sigset_t* old = nullptr) const
+		{
+			auto err = pthread_sigmask(how, buf, old);
+			if (fail(err))
+			{
+				perror("pthread_sigmask");
+			}
+			return err;
+		}
 
 		set()
 		{
@@ -33,80 +142,33 @@ namespace sys::uni::sig
 			empty();
 			for (int n : list) add(n);
 		}
-
-		bool member(int n) const
-		{
-			const int no = sigismember(buf, n);
-			if (fail(no)) sys::err(here);
-			return no;
-		}
-
-		bool add(int n)
-		{
-			return fail(sigaddset(buf, n)) and sys::err(here);
-		}
-
-		bool del(int n)
-		{
-			return fail(sigdelset(buf, n)) and sys::err(here);
-		}
-
-		bool empty()
-		{
-			return fail(sigemptyset(buf)) and sys::err(here);
-		}
-
-		bool fill()
-		{
-			return fail(sigfillset(buf)) and sys::err(here);
-		}
-
-		bool pending()
-		{
-			return fail(sigpending(buf)) and sys::err(here);
-		}
-
-		bool suspend() const
-		{
-			return fail(sigsuspend(buf)) and sys::err(here);
-		}
-
-		bool wait(int* n) const
-		{
-			return fail(sigwait(buf, n)) and sys::err(here);
-		}
-
-		bool wait(siginfo_t* info = nullptr) const
-		{
-			return fail(sigwaitinfo(buf, info)) and sys::err(here);
-		}
-
-		bool procmask(int how, sigset_t* old = nullptr) const
-		{
-			return fail(sigprocmask(how, buf, old)) and sys::err(here);
-		}
-
-		bool threadmask(int how, sigset_t* old = nullptr) const
-		{
-			return fail(pthread_sigmask(how, buf, old)) and sys::err(here);
-		}
 	};
 
 	struct stack : fwd::zero<stack_t>
 	{
-		bool set(stack_t* prev = nullptr) const
+		auto set(stack_t* prev = nullptr) const
 		{
-			return fail(sigaltstack(this, prev)) and sys::err(here);
+			auto err = sigaltstack(this, prev);
+			if (fail(err))
+			{ 
+				perror("sigaltstack");
+			}
+			return err;
 		}
 
-		bool get(const stack_t* next = nullptr)
+		auto get(const stack_t* next = nullptr)
 		{
-			return fail(sigaltstack(next, this)) and sys::err(here);
+			auto err = sigaltstack(next, this);
+			if (fail(err))
+			{
+				perror("sigaltstack");
+			}
+			return err;
 		}
 
 		auto alloc(size_t size)
 		{
-			constexpr size_t limit = SIGSTKSZ;
+			const size_t limit = SIGSTKSZ;
 			ss_size = std::max(size, limit);
 			ss_sp = std::realloc(ss_sp, ss_size);
 			return ss_size;
@@ -123,14 +185,24 @@ namespace sys::uni::sig
 			sa_handler = nullptr;
 		}
 
-		bool set(int n, struct sigaction* prev = nullptr) const
+		auto set(int n, struct sigaction* prev = nullptr) const
 		{
-			return fail(::sigaction(n, this, prev)) and sys::err(here);
+			auto err = ::sigaction(n, this, prev);
+			if (fail(err))
+			{
+				perror("sigaction");
+			}
+			return err;
 		}
 
-		bool get(int n, const struct sigaction* next = nullptr)
+		auto get(int n, const struct sigaction* next = nullptr)
 		{
-			return fail(::sigaction(n, next, this)) and sys::err(here);
+			auto err = ::sigaction(n, next, this);
+			if (fail(err))
+			{
+				perror("sigaction");
+			}
+			return err;
 		}
 	};
 
@@ -161,13 +233,16 @@ namespace sys::uni::sig
 		}
 	};
 
-	inline bool queue(pid_t pid, int n, int fd = STDERR_FILENO)
+	inline auto queue(pid_t pid, int n, int fd = STDERR_FILENO)
 	{
 		sigval value;
 		value.sival_int = fd;
-		const auto error = fail(sigqueue(pid, n, value));
-		if (error) sys::err(here);
-		return error;
+		auto err = sigqueue(pid, n, value);
+		if (fail(err))
+		{
+			perror("sigqueue");
+		}
+		return err;
 	}
 
 	struct event : sigevent
@@ -200,7 +275,7 @@ namespace sys::uni::time
 		{
 			if (fail(timer_create(clock, this, &id)))
 			{
-				sys::err(here, "timer_create");
+				perror("timer_create");
 			}
 		}
 
@@ -208,7 +283,7 @@ namespace sys::uni::time
 		{
 			if (fail(timer_delete(id)))
 			{
-				sys::err(here, "timer_delete");
+				perror("timer_delete");
 			}
 		}
 	};
@@ -223,7 +298,7 @@ namespace sys::uni::msg
 		{
 			if (fail(mq_notify(mqd, this)))
 			{
-				sys::err(here, "mq_notify");
+				perror("mq_notify");
 			}
 		}
 	};

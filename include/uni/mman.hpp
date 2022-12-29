@@ -18,7 +18,7 @@ namespace sys::uni::shm
 			{
 				if (fail(munmap(ptr, sz)))
 				{
-					sys::err(here, "munmap", ptr, sz);
+					perror("munmap");
 				}
 			}
 		});
@@ -29,7 +29,7 @@ namespace sys::uni::shm
 		ptr = fwd::as_ptr<Type>(mmap(ptr, sz, prot, flags, fd, off));
 		if (MAP_FAILED == ptr)
 		{
-			sys::err(here, "mmap", sz, prot, flags, fd, off);
+			perror("mmap");
 		}
 		return make_unique(ptr, sz);
 	}
@@ -37,9 +37,9 @@ namespace sys::uni::shm
 	inline auto open(const char* name, int flag, mode_t mode)
 	{
 		const auto fd = shm_open(name, flag, mode);
-		if (sys::fail(fd))
+		if (fail(fd))
 		{
-			sys::err(here, "shm_open");
+			perror("shm_open");
 		}
 		return fd;
 	}

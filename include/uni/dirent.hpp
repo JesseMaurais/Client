@@ -1,7 +1,6 @@
 #ifndef dirent_hpp
 #define dirent_hpp "POSIX Directory Entry"
 
-#include "err.hpp"
 #include "uni.hpp"
 #include "ptr.hpp"
 #include <dirent.h>
@@ -19,7 +18,7 @@ namespace sys::uni
 			ptr = opendir(path);
 			if (nullptr == ptr)
 			{
-				sys::err(here, "opendir", path);
+				perror("opendir");
 			}
 		}
 
@@ -28,7 +27,7 @@ namespace sys::uni
 			ptr = fdopendir(fd);
 			if (nullptr == ptr)
 			{
-				sys::err(here, "fdopendir", fd);
+				perror("fdopendir");
 			}
 		}
 
@@ -38,7 +37,7 @@ namespace sys::uni
 			{
 				if (fail(closedir(ptr)))
 				{
-					sys::err(here, "closedir");
+					perror("closedir");
 				}
 			}
 		}

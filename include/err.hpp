@@ -1,66 +1,73 @@
 #ifndef err_hpp
 #define err_hpp "Error Format"
 
-#include "fmt.hpp"
-#include "sym.hpp"
-#include <sstream>
+#include <cstring>
+#include <ostream>
 
 #ifdef assert
 #	undef assert
-#	warning You should not include assert
+#	warning You should not include assert. Force __FILE__ to be included first.
+#else // redefine using standard access
+#	include <assert.h>
+#	undef assert
 #endif
 
+#define HERE(X) ::fmt::where { __FILE__, __func__, __LINE__, #X }
+
 #ifndef NDEBUG
-#	define assert(...) if (not(__VA_ARGS__)) sys::warn(here, #__VA_ARGS__)
-#	define alert(...) if (bool(__VA_ARGS__)) sys::err(here, #__VA_ARGS__)
-#	define verify(...) assert(__VA_ARGS__)
+#	define assert(X) if (not(X))::fmt::warning(HERE(X))
+#	define alert(X) if (int x=X)::fmt::error(x, HERE(X))
+#	define perror(X) alert(errno) << X
 #else
-#	define assert(...)
-#	define alert(...) (__VA_ARGS__)
-#	define verify(...) (__VA_ARGS__)
+#	define assert(X)
+#	define alert(X)
+#	define perror(X)
 #endif
-
-#ifndef NDEBUG
-#	define test_unit(name) \
-		dynamic void test_##name([[maybe_unused]] fmt::span args)
-#	define except(expression) \
-		try { (void)(expression); assert(not #expression); } catch(...) { }
-#endif
-
-#define here fmt::where { __FILE__, __LINE__, __func__ }
-
-enum : bool { success = false, failure = true };
 
 namespace fmt
 {
-	struct where { view file; int line; view func; };
-
-	template <typename... T> auto error(where at, T&&... va)
+	struct where
 	{
-		std::stringstream ss;
-		ss << at.file << "(" << at.line << ")" << at.func << ":";
-		if constexpr (0 < sizeof...(T)) ((ss << ' ' << va), ...);
-		return ss.str();
+		const char * file;
+		const char * func;
+		unsigned int line;
+		const char * code;
+	};
+
+	using os = std::ostream;
+
+	os& out(); os& put(os&);
+
+	template <class... Type> os& printer(os& out, where const& at, Type const&... args)
+	{
+		out << at.file << "(" << at.line << ")" << at.func << ":" << at.code << ";";
+		if constexpr (0 < sizeof...(Type)) ((out << ' ' << args), ...);
+		return out;
+	}
+
+	extern bool debug;
+
+	template <class... Type> os& warning(where const& at, Type const&... args)
+	{
+		return printer(out(), at, args...);
+	}
+
+	template <class... Type> os& error(int no, where const& at, Type const&... args)
+	{
+		return warning(at, std::strerror(no), args...);
 	}
 }
 
-namespace sys
+#include "sym.hpp" // dynamic
+
+#define STR(str) #str
+#define CAT(left, right) left##right
+#define UNIT(name) CAT(name, _UNIT_TEST_SUFFIX)
+#define TEST(name) dynamic void UNIT(name) ()
+
+namespace env::test
 {
-	extern bool debug; // whether to write out errors
-	int perror(fmt::view, bool errn = true); // print out
-
-	fmt::output out(); // thread-local buffered output device
-	fmt::output put(fmt::output); // flush out error
-
-	template <typename... T> int warn(fmt::where at, T... va)
-	{
-		return debug ? perror(fmt::error(at, va...), false) : -1;
-	}
-
-	template <typename... T> int err(fmt::where at, T... va)
-	{
-		return debug ? perror(fmt::error(at, va...), true) : -1;
-	}
-}
+	constexpr auto suffix = STR(_UNIT_TEST_SUFFIX);
+};
 
 #endif // file

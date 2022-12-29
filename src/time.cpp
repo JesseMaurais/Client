@@ -5,6 +5,7 @@
 #include "time.hpp"
 #include "type.hpp"
 #include "meta.hpp"
+#include "tmp.hpp"
 #include "doc.hpp"
 #include <iomanip>
 
@@ -36,7 +37,7 @@ namespace env
 	{
 		if (std::timespec_get(this, base))
 		{
-			sys::warn(here, "timespec_get", base);
+			perror("timespec_get");
 		}
 	}
 
@@ -62,10 +63,10 @@ namespace env
 	{
 		#ifdef _MSC_VER
 		{
-			if (auto n = std::gmtime_s(this, &t); n)
+			if (auto n = gmtime_s(this, &t))
 			{
 				_set_errno(n);
-				sys::err(here, "gmtime_s");
+				perror("gmtime_s");
 			}
 		}
 		#else
@@ -76,7 +77,7 @@ namespace env
 			if (gmtime_r(&t, this))
 			#endif
 			{
-				sys::err(here, "gmtime_s");
+				perror("gmtime_s");
 			}
 		}
 		#endif
@@ -86,10 +87,10 @@ namespace env
 	{
 		#ifdef _MSC_VER
 		{
-			if (auto n == std::localtime_s(this, &t); n)
+			if (auto n = localtime_s(this, &t))
 			{
 				_set_errno(n);
-				sys::err(here, "localtime_s");
+				perror("localtime_s");
 			}
 		}
 		#else
@@ -100,7 +101,7 @@ namespace env
 			if (localtime_r(&t, this))
 			#endif
 			{
-				sys::err(here, "localtime_s");
+				perror("localtime_s");
 			}
 		}
 		#endif
@@ -126,13 +127,13 @@ namespace env
 			#endif
 			if (sys::fail(usleep(usec)))
 			{
-				sys::err(here, "usleep");
+				perror("usleep");
 			}
 		}
 		#endif
 	}
 
-	fwd::pop event(fmt::timer it, fwd::event f)
+	fwd::end event(fmt::timer it, fwd::event f)
 	{
 		#ifdef _WIN32
 		{

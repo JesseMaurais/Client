@@ -35,7 +35,7 @@ namespace env::exe
 		}
 		catch (std::exception &error)
 		{
-			sys::err(here, error.what());
+			perror(error.what());
 		}
 		return lines;
 	}

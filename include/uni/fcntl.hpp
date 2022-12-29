@@ -5,82 +5,121 @@
 #include "fmt.hpp"
 #include "ptr.hpp"
 #include <fcntl.h>
+#include <aio.h>
 
-namespace sys::uni::file
+namespace sys::uni
 {
 	struct lock : fwd::zero<flock>
 	{
-		bool get(int fd)
+		auto get(int fd)
 		{
-			return fail(fcntl(fd, F_GETLK, this));
+			return fcntl(fd, F_GETLK, this);
 		}
 
-		bool set(int fd)
+		auto set(int fd)
 		{
-			return fail(fcntl(fd, F_SETLK, this));
+			return fcntl(fd, F_SETLK, this);
 		}
 
-		bool wait(int fd)
+		auto wait(int fd)
 		{
-			return fail(fcntl(fd, F_SETLKW, this));
+			return fcntl(fd, F_SETLKW, this);
+		}
+	};
+
+	struct aio : fwd::zero<aiocb>
+	{
+		auto read()
+		{
+			return aio_read(this);
+		}
+
+		auto write()
+		{
+			return aio_write(this);
+		}
+
+		auto fsync(int op)
+		{
+			return aio_fsync(op, this);
+		}
+
+		auto error() const
+		{
+			return aio_error(this);
+		}
+
+		auto result()
+		{
+			return aio_return(this);
+		}
+
+		auto suspend(auto to=nullptr)
+		{
+			return aio_suspend(this, 1, to);
+		}
+
+		auto cancel(int fd)
+		{
+			return aio_cancel(fd, this);
 		}
 	};
 }
 
 #if __has_include(<sys/inotify.h>)
+#define SYS_INOTIFY
 #include <sys/inotify.h>
-#define SYS_INOTIFY_H
-namespace sys::kernel
+namespace sys::uni
 {
 	struct inotify
 	{
-		sys::uni::filed wd;
+		sys::uni::filed fd;
 
-		watch(int flags=0) : wd(inotify_init1(flags))
+		inotify(int flags=0) : fd(inotify_init1(flags))
 		{
-			if (sys::fail(wd))
+			if (sys::fail(fd))
 			{
-				sys::err(here, "inotify_init", flags);
+				perror("inotify_init");
 			}
 		}
 
 		auto add(const char* path, uint32_t mask)
 		{
-			int fd = inotify_add_watch(wd, path, mask);
-			if (sys::fail(fd))
+			int wd = inotify_add_watch(fd, path, mask);
+			if (sys::fail(wd))
 			{
-				sys::err(here, "inotify_add_watch", path, mask);
+				perror("inotify_add_watch");
 			}
-			return fd;
+			return wd;
 		}
 
-		auto rm(int fd)
+		auto rm(int wd)
 		{
 			int no = inotify_rm_watch(fd, wd);
 			if (sys::fail(no))
 			{
-				sys::err(here, "inotify_rm_watch", fd);
+				perror("inotify_rm_watch");
 			}
 			return no;
 		}
 
 		auto read(inotify_event* buf, size_t sz)
 		{
-			 ssize_t ssz = sys::read(wd, buf, sz);
-			 if (sys::fail(ssz))
+			 ssize_t n = sys::read(fd, buf, sz);
+			 if (sys::fail(n))
 			 {
-				sys::err(here, "inotify_event");
+				perror("inotify_event");
 			 }
-			 return ssz;
+			 return n;
 		}
 	};
 }
 #endif
 
 #if __has_include(<sys/event.h>)
+#define SYS_EVENT
 #include <sys/event.h>
-#define SYS_EVENT_H
-namespace sys::kernel
+namespace sys::uni
 {
 	struct event : fwd::zero<kevent>
 	{
@@ -100,9 +139,7 @@ namespace sys::kernel
 
 		queue() : fd(kqueue())
 		{
-			#ifdef warn
-			warn(fail(fd));
-			#endif
+			if (fail(fd)) perror("kqueue");
 		}
 
 		ssize_t operator()(view in, view out, const timespec* to=nullptr) const
@@ -110,13 +147,12 @@ namespace sys::kernel
 			int nev = kevent(fd, in.data(), in.size(), out.data(), out.size(), to);
 			if (sys::fail(nev))
 			{
-				sys::err(here, "kevent");
+				perror("kevent");
 			}
 			return nev
 		}
 	};
 }
 #endif
-
 
 #endif // file

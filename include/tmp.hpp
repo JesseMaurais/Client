@@ -33,11 +33,11 @@ namespace fwd
 
 	using event = defer<void>;
 
-	struct pop : event
+	struct end : event
 	{
 		using event::event;
 
-		~pop()
+		~end()
 		{
 			event::operator()();
 		}
@@ -45,12 +45,12 @@ namespace fwd
 
 	template <class T> struct lazy : defer<T>, constant<T>
 	{
-		using defer = defer<T>;
-		using defer::defer;
+		using base = defer<T>;
+		using base::base;
 
 		operator T() const override
 		{
-			return defer::operator()();
+			return base::operator()();
 		}
 	};
 
@@ -107,11 +107,11 @@ namespace fwd
 
 	template <bool P, class... Q> struct proposition : formula<Q...>
 	{
-		using formula = formula<Q...>;
-		using formula::formula;
+		using base = formula<Q...>;
+		using base::base;
 		using closure = std::function<void(Q...)>;
 
-		proposition(closure go) : formula(enclose(go)) { };
+		proposition(closure go) : base(enclose(go)) { };
 
 	private:
 

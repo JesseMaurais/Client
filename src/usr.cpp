@@ -314,7 +314,7 @@ namespace env::usr
 	}
 }
 
-#ifdef test_unit
+#ifdef TEST
 namespace
 {
 	struct head : fmt::memory<head>
@@ -344,7 +344,7 @@ namespace
 	}
 }
 
-test_unit(usr)
+TEST(usr)
 {
 	std::ofstream out { ".ini" };
 

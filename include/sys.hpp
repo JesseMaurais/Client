@@ -62,7 +62,7 @@ namespace sys
 		constexpr auto dir = "\\";
 		constexpr auto path = ";";
 		constexpr auto share = ".dll";
-		constexpr auto ext = ".exe";
+		constexpr auto image = ".exe";
 	}
 
 	using size_t = unsigned int;
@@ -127,7 +127,7 @@ namespace sys
 		constexpr auto dir = "/";
 		constexpr auto path = ":";
 		constexpr auto share = ".so";
-		constexpr auto ext = "";
+		constexpr auto image = "";
 	}
 
 	namespace uni

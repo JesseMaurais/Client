@@ -16,16 +16,16 @@ namespace sys::uni
 
 	template <typename... Args> int err(int no, Args... args)
 	{
-		return debug ? sys::warn(args..., strerr(no)) : -1;
+		return fmt::debug ? fmt::warning(args..., strerr(no)) : -1;
 	}
 
 	inline auto enclose(int fd)
 	{
-		return fwd::null_shared<int>([fd](auto ptr)
+		return fwd::shared_ptr<int>(nullptr, [fd](auto ptr) noexcept
 		{
 			if (not fail(fd) and fail(close(fd)))
 			{
-				sys::err(here, "close");
+				perror("close");
 			}
 			#ifdef assert
 			assert(nullptr == ptr);
@@ -33,15 +33,9 @@ namespace sys::uni
 		});
 	}
 
-	struct filed : fwd::pair<int, fwd::shared_ptr<int>>
+	struct filed : fwd::source<int>
 	{
-		filed(int fd) : pair(fd, enclose(fd))
-		{ }
-
-		operator int() const
-		{
-			return first;
-		}
+		filed(int fd) : source(fd, enclose(fd)) { }
 	};
 }
 

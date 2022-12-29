@@ -1,6 +1,7 @@
 #ifndef ptr_hpp
 #define ptr_hpp "Memory & Pointers"
 
+#include "fwd.hpp"
 #include <memory>
 #include <functional>
 #include <type_traits>
@@ -8,10 +9,6 @@
 
 namespace fwd
 {
-	template <class Type> using as_ptr = typename std::add_pointer<Type>::type;
-	template <class Type> using no_ptr = typename std::remove_pointer<Type>::type;
-	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
-	template <class Type> using no_ref = typename std::remove_lvalue_reference<Type>::type;
 	template <class Type> using deleter = std::function<void(as_ptr<Type>)>;
 	template <class Type> using unique_ptr = std::unique_ptr<Type, deleter<Type>>;
 	template <class Type> using shared_ptr = std::shared_ptr<Type>;
@@ -130,7 +127,7 @@ namespace fwd
 		auto ptr = that->shared_from_this();
 		auto raw = ptr.get();
 		ptr.reset();
-		return make_shared(raw, free);
+		return shared_ptr<Type>(raw, free);
 	}
 
 	template
@@ -142,6 +139,16 @@ namespace fwd
 		auto share_this(deleter<Type> free = std::default_delete<Type>())
 		{
 			return share_ptr(this, free);
+		}
+	};
+
+	template <class Type> struct source : std::pair<Type, shared_ptr<Type>>
+	{
+		using pair = std::pair<Type, shared_ptr<Type>>;
+		using pair::pair;
+		operator Type() const
+		{
+			return pair::first;
 		}
 	};
 }

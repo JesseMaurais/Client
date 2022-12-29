@@ -100,9 +100,21 @@ namespace sys::win
 
 	struct notify_info : zero<FILE_NOTIFY_INFORMATION>
 	{
-		bool operator()(HANDLE h, BOOL sub, DWORD dw, LPOVERLAPPED lp=nullptr, LPOVERLAPPED_COMPLETION_ROUTINE fn=nullptr)
+		WCHAR buf[FILENAME_MAX];
+
+		static void check(DWORD dw, DWORD sz, LPOVERLAPPED lp)
 		{
-			constexpr auto sz = sizeof(FILE_NOTIFY_INFORMATION) + FILENAME_MAX;
+			auto that = fwd::as_ptr<watch>(lp->Pointer)
+			if (dw)
+			{
+				auto err = sys::win::strerr(dw);
+				sys::warn(here, that, sz, err);
+			}
+		};
+
+		bool read(HANDLE h, BOOL sub, DWORD dw, LPOVERLAPPED lp=nullptr, LPOVERLAPPED_COMPLETION_ROUTINE fn=nullptr)
+		{
+			constexpr auto sz = sizeof(FILE_NOTIFY_INFORMATION) + sizeof(WCHAR) * FILENAME_MAX;
 			if (not ReadDirectoryChangesW(h, this, sz, sub, dw, nullptr, lp, fn))
 			{
 				win::err(here, "ReadDirectoryChangesExW");
@@ -111,14 +123,10 @@ namespace sys::win
 			return success;
 		}
 
-		operator fmt::wide() const
+		fmt::wide value() const
 		{
 			return { FileName, FileNameLength / sizeof(WCHAR) };
 		}
-
-	private:
-
-		WCHAR buf[FILENAME_MAX];
 	};
 
 	struct overlapped : zero<OVERLAPPED>

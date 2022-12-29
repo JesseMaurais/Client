@@ -18,8 +18,13 @@
 #include <string_view>
 #include <locale>
 
+enum : bool { success = false, failure = true };
+
 namespace fwd
 {
+	template <class Type> using as_ptr = typename std::add_pointer<Type>::type;
+	template <class Type> using no_ptr = typename std::remove_pointer<Type>::type;
+	template <class Type> using as_ref = typename std::add_lvalue_reference<Type>::type;
 	template <class T, class S=T> using pair = std::pair<T, S>;
 	template <class Type> using init = std::initializer_list<Type>;
 	template <class Type, size_t Size = std::dynamic_extent> using span = std::span<Type, Size>;

@@ -167,7 +167,7 @@ namespace env
 			static thread_local char buf[64];
 			if (sys::fail(gethostname(buf, sizeof buf)))
 			{
-				sys::err(here, "gethostname");
+				perror("gethostname");
 				std::memset(buf, 0, sizeof buf);
 			}
 			return buf;
@@ -186,7 +186,7 @@ namespace env
 			static thread_local char buf[64];
 			if (sys::fail(getdomainname(buf, sizeof buf)))
 			{
-				sys::err(here, "getdomainname");
+				perror("getdomainname");
 				std::memset(buf, 0, sizeof buf);
 			}
 			return buf;

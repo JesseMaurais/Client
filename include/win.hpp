@@ -74,7 +74,7 @@ namespace sys::win
 
 	inline DWORD wait(HANDLE h, DWORD ms = INFINITE)
 	{
-		auto const dw = WaitForSingleObject(h, ms);
+		auto dw = WaitForSingleObject(h, ms);
 		if (WAIT_FAILED == dw)
 		{
 			sys::win::err(here, ms);
@@ -82,20 +82,36 @@ namespace sys::win
 		return dw;
 	}
 
-	inline bool ready(HANDLE h)
+	inline DWORD wait(std::span<HANDLE> h, BOOL a = FALSE, DWORD ms = INFINITE)
 	{
-		return WAIT_TIMEOUT == wait(h, 0);
+		auto sz = h.size();
+		auto dw = WaitForMultipleObjects(static_cast<DWORD>(sz), h.data(), a, ms);
+		if (WAIT_FAILED == dw)
+		{
+			sys::win::err(here, ms);
+		}
+		return dw;
+	}
+
+	inline bool got(HANDLE h)
+	{
+		return WAIT_TIMEOUT != wait(h, 0);
 	}
 
 	template <class T> struct zero : T
 	{
 		static_assert(std::is_trivially_copyable<T>::value);
 		static_assert(std::is_standard_layout<T>::value);
-		constexpr auto sizeof_self = sizeof(T);
+		constexpr auto sizeof_zero = sizeof(T);
 
 		zero()
 		{
-			ZeroMemory(this, sizeof_self);
+			ZeroMemory(this, sizeof_zero);
+		}
+
+		operator T*() const
+		{
+			return this;
 		}
 	};
 
@@ -111,7 +127,20 @@ namespace sys::win
 			this->*S = static_cast<typename T::value_type>(s);
 		}
 	};
-
+	
+	struct wndclass : size<&WNDCLASSEX::cbSize>
+	{
+		auto set() const
+		{
+			return RegisterClassEx(this);
+		}
+		
+		auto get(LPSTR s, HINSTANCE h = nullptr)
+		{
+			return GetClassInfoEx(h, s, this);
+		}
+	};
+		
 	struct info : SYSTEM_INFO
 	{
 		info() { GetSystemInfo(this); }
@@ -130,7 +159,7 @@ namespace sys::win
 			}
 			else
 			{
-				sys::win::err(here, "CreatePipe");
+				err("CreatePipe");
 			}
 		}
 	};

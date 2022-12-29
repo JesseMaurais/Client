@@ -137,14 +137,14 @@ namespace fmt
 			return sub(it == end ? end : std::next(it));
 		}
 
-		pair split(iterator it)
+		auto split(iterator it)
 		{
-			return { before(it), after(it) };
+			return std::pair { before(it), after(it) };
 		}
 
-		pair split(size_type pos)
+		auto split(size_type pos)
 		{
-			const auto it = npos == pos ? end() : std::next(begin(), pos);
+			const auto it = String::npos == pos ? String::end() : std::next(String::begin(), pos);
 			return split(it);
 		}
 
@@ -244,7 +244,7 @@ namespace fmt
 		inline view dot = ".";
 		inline view dots = "..";
 		inline view tab = "\t";
-		inline view line = "\n";
+		inline view eol = "\n";
 		inline view slash = "/"; 
 		inline view pass = "//";
 		inline view dash = "-";
@@ -254,8 +254,8 @@ namespace fmt
 
 		view emplace(view);
 
-		input read(input, view = line);
-		output write(output, view = line);
+		input read(input, view = eol);
+		output write(output, view = eol);
 	}
 }
 

@@ -1,7 +1,6 @@
 #ifndef pthread_hpp
 #define pthread_hpp "POSIX Threads"
 
-#include "err.hpp"
 #include "uni.hpp"
 #include "sys.hpp"
 #include "ptr.hpp"
@@ -16,8 +15,10 @@ namespace sys::uni
 
 		start(fwd::event f, pthread_attr_t* attr = nullptr) : work(f)
 		{
-			const int no = pthread_create(&id, attr, thread, this);
-			if (no) err(no, here);
+			if ((errno = pthread_create(&id, attr, thread, this)))
+			{
+				perror("pthread_create");
+			}
 		}
 
 	private:
@@ -37,9 +38,10 @@ namespace sys::uni
 		~join()
 		{
 			auto that = fwd::null<void>;
-			const int no = pthread_join(id, &that);
-			if (no) err(no, here);
-
+			if ((errno = pthread_join(id, &that)))
+			{
+				perror("pthread_join");
+			}
 			#ifdef assert
 			assert(this == that);
 			#endif
@@ -49,6 +51,11 @@ namespace sys::uni
 	struct thread : fwd::no_copy
 	{
 		pthread_attr_t buf[1];
+
+		operator pthread_attr_t*()
+		{
+			return buf;
+		}
 
 		auto start(fwd::event f)
 		{
@@ -72,68 +79,90 @@ namespace sys::uni
 
 		thread()
 		{
-			if (const int no = pthread_attr_init(buf); no) err(no, here);
+			if ((errno = pthread_attr_init(buf)))
+			{
+				perror("pthread_attr_init");
+			}
 		}
 
 		~thread()
 		{
-			if (const int no = pthread_attr_destroy(buf); no) err(no, here);
+			if ((errno = pthread_attr_destroy(buf)))
+			{
+				perror("pthread_attr_destroy");
+			}
 		}
 
-		int getdetachstate(int* state) const
+		auto getdetachstate(int* state) const
 		{
-			const int no = pthread_attr_getdetachstate(buf, state);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_getdetachstate(buf, state)))
+			{
+				perror("pthread_attr_getdetachstate");
+			}
+			return errno;
 		}
 
-		int setdetachstate(int state)
+		auto setdetachstate(int state)
 		{
-			const int no = pthread_attr_setdetachstate(buf, state);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_setdetachstate(buf, state)))
+			{
+				perror("pthread_attr_setdetachstate");
+			}
+			return errno;
 		}
 
-		int getguardsize(size_t* size) const
+		auto getguardsize(size_t* size) const
 		{
-			const int no = pthread_attr_getguardsize(buf, size);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_getguardsize(buf, size)))
+			{
+				perror("pthread_attr_getguardsize");
+			}
+			return errno;
 		}
 
-		int setguardsize(size_t size)
+		auto setguardsize(size_t size)
 		{
-			const int no = pthread_attr_setguardsize(buf, size);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_setguardsize(buf, size)))
+			{
+				perror("pthread_attr_setguardsize");
+			}
+			return errno;
 		}
 
-		int getscope(int* scope) const
+		auto getscope(int* scope) const
 		{
-			const int no = pthread_attr_getscope(buf, scope);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_getscope(buf, scope)))
+			{
+				perror("pthread_attr_getscope");
+			}
+			return errno;
 		}
 
-		int setscope(int scope)
+		auto setscope(int scope)
 		{
-			const int no = pthread_attr_setscope(buf, scope);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_setscope(buf, scope)))
+			{
+				perror("pthread_attr_setscope");
+			}
+			return errno;
 		}
 
-		int getstacksize(size_t* size) const
+		auto getstacksize(size_t* size) const
 		{
-			const int no = pthread_attr_getstacksize(buf, size);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_getstacksize(buf, size)))
+			{
+				perror("pthread_attr_getstacksize");
+			}
+			return errno;
 		}
 
 		int setstacksize(size_t size)
 		{
-			const int no = pthread_attr_setstacksize(buf, size);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_attr_setstacksize(buf, size)))
+			{
+				perror("pthread_attr_setstacksize");
+			}
+			return errno;
 		}
 	};
 
@@ -141,42 +170,62 @@ namespace sys::uni
 	{
 		pthread_cond_t buf[1];
 
-		int wait(pthread_mutex_t* mutex)
+		operator pthread_cond_t*()
 		{
-			const int no = pthread_cond_wait(buf, mutex);
-			if (no) err(no, here);
-			return no;
+			return buf;
 		}
 
-		int signal()
+		auto wait(pthread_mutex_t* mutex)
 		{
-			const int no = pthread_cond_signal(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_cond_wait(buf, mutex)))
+			{
+				perror("pthread_cond_wait");
+			}
+			return errno;
 		}
 
-		int broadcast()
+		auto signal()
 		{
-			const int no = pthread_cond_broadcast(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_cond_signal(buf)))
+			{
+				perror("pthread_cond_signal");
+			}
+			return errno;
+		}
+
+		auto broadcast()
+		{
+			if ((errno = pthread_cond_broadcast(buf)))
+			{
+				perror("pthread_cond_broadcast");
+			}
+			return errno;
 		}
 
 		cond(pthread_condattr_t const* attr = nullptr)
 		{
-			const int no = pthread_cond_init(buf, attr);
-			if (no) err(no, here);
+			if ((errno = pthread_cond_init(buf, attr)))
+			{
+				perror("pthread_cond_init");
+			}
 		}
 
 		~cond()
 		{
-			const int no = pthread_cond_destroy(buf);
-			if (no) err(no, here);
+			if ((errno = pthread_cond_destroy(buf)))
+			{
+				perror("pthread_cond_destroy");
+			}
 		}
 
 		struct attr
 		{
 			pthread_condattr_t buf[1];
+
+			operator pthread_condattr_t*()
+			{
+				return buf;
+			}
 
 			operator cond() const
 			{
@@ -185,28 +234,36 @@ namespace sys::uni
 
 			attr()
 			{
-				const int no = pthread_condattr_init(buf);
-				if (no) err(no, here);
+				if ((errno = pthread_condattr_init(buf)))
+				{
+					perror("pthread_condattr_init");
+				}
 			}
 
 			~attr()
 			{
-				const int no = pthread_condattr_destroy(buf);
-				if (no) err(no, here);
+				if ((errno = pthread_condattr_destroy(buf)))
+				{
+					perror("pthread_condattr_destroy");
+				}
 			}
 
-			int getpshared(int* pshared) const
+			auto getpshared(int* pshared) const
 			{
-				const int no = pthread_condattr_getpshared(buf, pshared);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_condattr_getpshared(buf, pshared)))
+				{
+					perror("pthread_condattr_getpshared");
+				}
+				return errno; 
 			}
 
-			int setpshared(int pshared)
+			auto setpshared(int pshared)
 			{
-				const int no = pthread_condattr_setpshared(buf, pshared);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_condattr_setpshared(buf, pshared)))
+				{
+					perror("pthread_condattr_setpshared");
+				}
+				return errno;
 			}
 		};
 	};
@@ -215,40 +272,58 @@ namespace sys::uni
 	{
 		pthread_mutex_t buf[1];
 
-		int getprioceiling(int* prio) const
+		operator pthread_mutex_t*()
 		{
-			const int no = pthread_mutex_getprioceiling(buf, prio);
-			if (no) err(no, here);
-			return no;
+			return buf;
 		}
 
-		int setprioceiling(int prio, int* old = nullptr)
+		auto getprioceiling(int* prio) const
 		{
-			if (nullptr == old) old = &prio;
-			const int no = pthread_mutex_setprioceiling(buf, prio, old);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_mutex_getprioceiling(buf, prio)))
+			{
+				perror("pthread_mutex_getprioceiling");
+			}
+			return errno;
 		}
 
-		int lock()
+		auto setprioceiling(int prio, int* old = nullptr)
 		{
-			const int no = pthread_mutex_lock(buf);
-			if (no) err(no, here);
-			return no;
+			if (nullptr == old)
+			{
+				old = &prio;
+			}
+			if ((errno = pthread_mutex_setprioceiling(buf, prio, old)))
+			{
+				perror("pthread_mutex_setprioceiling");
+			}
+			return errno;
 		}
 
-		int unlock()
+		auto lock()
 		{
-			const int no = pthread_mutex_unlock(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_mutex_lock(buf)))
+			{
+				perror("pthread_mutex_lock");
+			}
+			return errno;
 		}
 
-		int trylock()
+		auto unlock()
 		{
-			const int no = pthread_mutex_trylock(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_mutex_unlock(buf)))
+			{
+				perror("pthread_mutex_unlock");
+			}
+			return errno;
+		}
+
+		auto trylock()
+		{
+			if ((errno = pthread_mutex_trylock(buf)))
+			{
+				perror("pthread_mutex_trylock");
+			}
+			return errno;
 		}
 
 		int wait(cond& var)
@@ -258,19 +333,28 @@ namespace sys::uni
 
 		mutex(pthread_mutexattr_t const* attr = nullptr)
 		{
-			const int no = pthread_mutex_init(buf, attr);
-			if (no) err(no, here);
+			if ((errno = pthread_mutex_init(buf, attr)))
+			{
+				perror("pthread_mutex_init");
+			}
 		}
 
 		~mutex()
 		{
-			const int no = pthread_mutex_destroy(buf);
-			if (no) err(no, here);
+			if ((errno = pthread_mutex_destroy(buf)))
+			{
+				perror("pthread_mutex_destroy");
+			}
 		}
 
 		struct attr
 		{
 			pthread_mutexattr_t buf[1];
+
+			operator pthread_mutexattr_t*()
+			{
+				return buf;
+			}
 
 			operator mutex() const
 			{
@@ -279,70 +363,90 @@ namespace sys::uni
 
 			attr()
 			{
-				const int no = pthread_mutexattr_init(buf);
-				if (no) err(no, here);
+				if ((errno = pthread_mutexattr_init(buf)))
+				{
+					perror("pthread_mutexattr_init");
+				}
 			}
 
 			~attr()
 			{
-				const int no = pthread_mutexattr_destroy(buf);
-				if (no) err(no, here);
+				if ((errno = pthread_mutexattr_destroy(buf)))
+				{
+					perror("pthread_mutexattr_destroy");
+				}
 			}
 
-			int getprioceiling(int* prio) const
+			auto getprioceiling(int* prio) const
 			{
-				const int no = pthread_mutexattr_getprioceiling(buf, prio);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_getprioceiling(buf, prio)))
+				{
+					perror("pthread_mutexattr_getprioceiling");
+				}
+				return errno;
 			}
 
-			int setprioceiling(int prio)
+			auto setprioceiling(int prio)
 			{
-				const int no = pthread_mutexattr_setprioceiling(buf, prio);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_setprioceiling(buf, prio)))
+				{
+					perror("pthread_mutexattr_setprioceiling");
+				}
+				return errno;
 			}
 
-			int getprotocol(int* proto) const
+			auto getprotocol(int* proto) const
 			{
-				const int no = pthread_mutexattr_getprotocol(buf, proto);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_getprotocol(buf, proto)))
+				{
+					perror("pthread_mutexattr_getprotocol");
+				}
+				return errno;
 			}
 
-			int setprotocol(int proto)
+			auto setprotocol(int proto)
 			{
-				const int no = pthread_mutexattr_setprotocol(buf, proto);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_setprotocol(buf, proto)))
+				{
+					perror("pthread_mutexattr_setprotocol");
+				}
+				return errno;
 			}
 
-			int getpshared(int* pshared) const
+			auto getpshared(int* pshared) const
 			{
-				const int no = pthread_mutexattr_getpshared(buf, pshared);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_getpshared(buf, pshared)))
+				{
+					perror("pthread_mutexattr_getpshared");
+				}
+				return errno;
 			}
 
-			int setpshared(int pshared)
+			auto setpshared(int pshared)
 			{
-				const int no = pthread_mutexattr_setpshared(buf, pshared);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_setpshared(buf, pshared)))
+				{
+					perror("pthread_mutexattr_setpshared");
+				}
+				return errno;
 			}
 
-			int gettype(int* type) const
+			auto gettype(int* type) const
 			{
-				const int no = pthread_mutexattr_gettype(buf, type);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_gettype(buf, type)))
+				{
+					perror("pthread_mutexattr_gettype");
+				}
+				return errno;
 			}
 
-			int settype(int type)
+			auto settype(int type)
 			{
-				const int no = pthread_mutexattr_settype(buf, type);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_mutexattr_settype(buf, type)))
+				{
+					perror("pthread_mutexattr_settype");
+				}
+				return errno;
 			}
 		};
 	};
@@ -351,56 +455,80 @@ namespace sys::uni
 	{
 		pthread_rwlock_t buf[1];
 
-		int rdlock()
+		operator pthread_rwlock_t*()
 		{
-			const int no = pthread_rwlock_rdlock(buf);
-			if (no) err(no, here);
-			return no;
+			return buf;
 		}
 
-		int wrlock()
+		auto rdlock()
 		{
-			const int no = pthread_rwlock_wrlock(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_rwlock_rdlock(buf)))
+			{
+				perror("pthread_rwlock_rdlock");
+			}
+			return errno;
 		}
 
-		int tryrdlock()
+		auto wrlock()
 		{
-			const int no = pthread_rwlock_tryrdlock(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_rwlock_wrlock(buf)))
+			{
+				perror("pthread_rwlock_wrlock");
+			}
+			return errno;
 		}
 
-		int trywrlock()
+		auto tryrdlock()
 		{
-			const int no = pthread_rwlock_trywrlock(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_rwlock_tryrdlock(buf)))
+			{
+				perror("pthread_rwlock_tryrdlock");
+			}
+			return errno;
 		}
 
-		int unlock()
+		auto trywrlock()
 		{
-			const int no = pthread_rwlock_unlock(buf);
-			if (no) err(no, here);
-			return no;
+			if ((errno = pthread_rwlock_trywrlock(buf)))
+			{
+				perror("pthread_rwlock_trywrlock");
+			}
+			return errno;
+		}
+
+		auto unlock()
+		{
+			if ((errno = pthread_rwlock_unlock(buf)))
+			{
+				perror("pthread_rwlock_unlock");
+			}
+			return errno;
 		}
 
 		rwlock(pthread_rwlockattr_t const* attr = nullptr)
 		{
-			const int no = pthread_rwlock_init(buf, attr);
-			if (no) err(no, here);
+			if ((errno = pthread_rwlock_init(buf, attr)))
+			{
+				perror("pthread_rwlock_init");
+			}
 		}
 
 		~rwlock()
 		{
-			const int no = pthread_rwlock_destroy(buf);
-			if (no) err(no, here);
+			if ((errno = pthread_rwlock_destroy(buf)))
+			{
+				perror("pthread_rwlock_destroy");
+			}
 		}
 
 		struct attr
 		{
 			pthread_rwlockattr_t buf[1];
+
+			operator pthread_rwlockattr_t*()
+			{
+				return buf;
+			}
 
 			operator rwlock() const
 			{
@@ -409,28 +537,36 @@ namespace sys::uni
 
 			attr()
 			{
-				const int no = pthread_rwlockattr_init(buf);
-				if (no) err(no, here);
+				if ((errno = pthread_rwlockattr_init(buf)))
+				{
+					perror("pthread_rwlockattr_init");
+				}
 			}
 
 			~attr()
 			{
-				const int no = pthread_rwlockattr_destroy(buf);
-				if (no) err(no, here);
+				if ((errno = pthread_rwlockattr_destroy(buf)))
+				{
+					perror("pthread_rwlockattr_destroy");
+				}
 			}
 
-			int getpshared(int* pshared) const
+			auto getpshared(int* pshared) const
 			{
-				const int no = pthread_rwlockattr_getpshared(buf, pshared);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_rwlockattr_getpshared(buf, pshared)))
+				{
+					perror("pthread_rwlockattr_getpshared");
+				}
+				return errno;
 			}
 
-			int setpshared(int pshared)
+			auto setpshared(int pshared)
 			{
-				const int no = pthread_rwlockattr_setpshared(buf, pshared);
-				if (no) err(no, here);
-				return no;
+				if ((errno = pthread_rwlockattr_setpshared(buf, pshared)))
+				{
+					perror("pthread_rwlockattr_setpshared");
+				}
+				return errno;
 			}
 		};
 	};
