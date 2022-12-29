@@ -655,21 +655,21 @@ namespace env::file
 	}
 }
 
-#ifdef test_unit
+#ifdef TEST
 #include "arg.hpp"
-test_unit(mode)
+TEST(mode)
 {
 	assert(not env::file::fail(__FILE__) and "Source file exists");
 	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
 }
-test_unit(flags)
+TEST(flags)
 {
 	using namespace env::file;
 	assert(to_string(rw|un) == "w+");
 	assert(to_string(rd) == "r");
 	assert(to_string(rw|ok) == "x+");
 }
-test_unit(lock)
+TEST(lock)
 {
 	auto f = env::file::open(__FILE__);
 	assert(f and "Open file");

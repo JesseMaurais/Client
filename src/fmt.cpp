@@ -410,9 +410,9 @@ namespace fmt
 }
 
 
-#ifdef test_unit
+#ifdef TEST
 
-test_unit(type)
+TEST(type)
 {
 	const fmt::view Space = " \t\v\r\n\f";
 	const fmt::view Hello = "Hello, World!";
@@ -475,16 +475,16 @@ test_unit(type)
 	{
 		using pos = fmt::size::pair;
 
-		assert(fmt::embrace("<A<B>C>", "<>") == pos { 0, 6 });
-		assert(fmt::embrace("<A<B>C>", "<B>") == pos { 0, 3 });
-		assert(fmt::embrace("A[B]C[D]", "[D]") == pos { 1, 3 });
-		assert(fmt::embrace("{A<B}C}", "<>") == pos { 2, -1 });
-		assert(fmt::embrace("{A{B>C}", "<>") == pos { -1, -1 });
-		assert(fmt::embrace("&amp;", "&;") == pos { 0, 4 });
+		assert((fmt::embrace("<A<B>C>", "<>") == pos { 0, 6 }));
+		assert((fmt::embrace("<A<B>C>", "<B>") == pos { 0, 3 }));
+		assert((fmt::embrace("A[B]C[D]", "[D]") == pos { 1, 3 }));
+		assert((fmt::embrace("{A<B}C}", "<>") == pos { 2, -1 }));
+		assert((fmt::embrace("{A{B>C}", "<>") == pos { -1, -1 }));
+		assert((fmt::embrace("&amp;", "&;") == pos { 0, 4 }));
 	}
 }
 
-test_unit(sgr)
+TEST(sgr)
 {
 	std::stringstream ss;
 	ss << fmt::io::fg_green << "GREEN" << fmt::io::fg_off;
@@ -492,7 +492,7 @@ test_unit(sgr)
 	assert(green == "\x1b[32mGREEN\x1b[39m");
 }
 
-test_unit(fmt)
+TEST(fmt)
 {
 	constexpr auto msg = "Hello, World!";
 	fmt::write write = [=](fmt::output out)->fmt::output
@@ -505,7 +505,7 @@ test_unit(fmt)
 	assert(s == msg);
 }
 
-test_unit(lang)
+TEST(lang)
 {
 	auto de = std::locale("de_DE.utf8");
 	fmt::lang::set(de);

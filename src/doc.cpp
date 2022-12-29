@@ -131,7 +131,7 @@ namespace doc
 	}
 }
 
-#ifdef test_unit
+#ifdef TEST
 
 namespace
 {
@@ -160,7 +160,7 @@ template <> fmt::view doc::name<&dumb::i> = "i";
 template <> fmt::view doc::name<&dumb::f> = "f";
 template <> fmt::view doc::name<&dumb::s> = "s";
 
-test_unit(doc)
+TEST(doc)
 {
 	using parent_type = fwd::offset_of<&dumb::i>::parent_type;
 	static_assert(std::is_same<parent_type, dumb>::value);
@@ -208,7 +208,7 @@ test_unit(doc)
 	assert(0 == dummy.size());
 }
 
-test_unit(ini)
+TEST(ini)
 {
 	doc::ini init;
 

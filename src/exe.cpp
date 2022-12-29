@@ -374,8 +374,8 @@ namespace env::exe
 	}
 }
 
-#ifdef test_unit
-test_unit(cmd)
+#ifdef TEST
+TEST(cmd)
 {
 	const auto list = env::exe::list(env::pwd());
 	assert(not list.empty());
@@ -384,7 +384,7 @@ test_unit(cmd)
 	// Copy range starts at 0, file numbering at 1
 	assert(copy[__LINE__-1].find("Recursive find me text") != fmt::npos);
 }
-test_unit(echo)
+TEST(echo)
 {
 	fmt::view user = env::got("ComSpec")
 		? "%UserName%" : "$USER";

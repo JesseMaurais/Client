@@ -145,7 +145,7 @@ namespace sys::uni
 		ssize_t operator()(view in, view out, const timespec* to=nullptr) const
 		{
 			int nev = kevent(fd, in.data(), in.size(), out.data(), out.size(), to);
-			if (sys::fail(nev))
+			if (fail(nev))
 			{
 				perror("kevent");
 			}

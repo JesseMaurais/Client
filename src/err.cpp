@@ -334,8 +334,8 @@ int main(int argc, char** argv)
 	return 0 < counter ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-#ifdef test_unit
-test_unit(err)
+#ifdef TEST
+TEST(err)
 {
 	#ifndef _MSC_VER
 	assert(true == true);

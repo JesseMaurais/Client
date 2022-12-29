@@ -12,12 +12,13 @@
 #	undef assert
 #endif
 
-#define HERE(X) ::fmt::where { __FILE__, __func__, __LINE__, #X }
+#define HERE(X) ::fmt::where { __FILE__, __func__, __LINE__, X }
 
 #ifndef NDEBUG
-#	define assert(X) if (not(X))::fmt::warning(HERE(X))
-#	define alert(X) if (int x=X)::fmt::error(x, HERE(X))
+#	define assert(X) if (not(X))::fmt::warning(HERE(#X))
+#	define alert(X) if (int x=X)::fmt::error(x, HERE(#X))
 #	define perror(X) alert(errno) << X
+#	define except(X)
 #else
 #	define assert(X)
 #	define alert(X)

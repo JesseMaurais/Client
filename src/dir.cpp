@@ -492,8 +492,8 @@ namespace env::file
 	}
 }
 
-#ifdef test_unit
-test_unit(dir)
+#ifdef TEST
+TEST(dir)
 {
 	assert(not env::file::fail(env::temp()));
 	assert(not env::file::fail(env::pwd()));
@@ -518,14 +518,14 @@ test_unit(dir)
 //	assert(not empty(stem.second));
 	assert(not env::file::rmdir(stem));
 }
-test_unit(dir)
+TEST(ext)
 {
 	fmt::view dir, name, path = __FILE__;
 	auto pos = path.find_last_of(sys::tag::dir);
 	if (auto pair = path.split(pos); pair.second.empty())
 	{
 		dir = ".";
-		name = pair.frist;
+		name = pair.first;
 	}
 	else
 	{

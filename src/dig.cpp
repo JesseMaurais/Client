@@ -128,47 +128,47 @@ namespace fmt
 		return from_fp<long double>(value, precision);
 	}
 
-	long to_long(string::view u, int base)
+	long to_long(view u, int base)
 	{
 		return to_base<long>(u, base);
 	}
 
-	long long to_llong(string::view u, int base)
+	long long to_llong(view u, int base)
 	{
 		return to_base<long long>(u, base);
 	}
 
-	unsigned long to_ulong(string::view u, int base)
+	unsigned long to_ulong(view u, int base)
 	{
 		return to_base<unsigned long>(u, base);
 	}
 
-	unsigned long long to_ullong(string::view u, int base)
+	unsigned long long to_ullong(view u, int base)
 	{
 		return to_base<unsigned long long>(u, base);
 	}
 
-	float to_float(string::view u)
+	float to_float(view u)
 	{
 		auto const nan = std::nanf("");
 		return to_fp(u, nan, std::strtof);
 	}
 
-	double to_double(string::view u)
+	double to_double(view u)
 	{
 		auto const nan = std::nan("");
 		return to_fp(u, nan, std::strtod);
 	}
 
-	long double to_quad(string::view u)
+	long double to_quad(view u)
 	{
 		auto const nan = std::nanl("");
 		return to_fp(u, nan, std::strtold);
 	}
 }
 
-#ifdef test_unit
-test_unit(dig)
+#ifdef TEST
+TEST(dig)
 {
 	assert('*' == fmt::to_narrow<char>(42));
 	assert(42u == fmt::to_unsigned(42));

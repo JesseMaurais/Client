@@ -161,8 +161,8 @@ namespace env
 	}
 }
 
-#ifdef test_unit
-test_unit(time)
+#ifdef TEST
+TEST(time)
 {
 	// Attempt to convert a number of common and standard time formats
 	const auto format = fmt::split("%n %t %c %x %X %D %F %R %T %Z %%");

@@ -315,15 +315,15 @@ namespace env
 */
 }
 
-#ifdef test_unit
+#ifdef TEST
 
-test_unit(path)
+TEST(path)
 {
 	assert(env::get("PATH") == fmt::path::join(env::path()));
 	assert(env::get("PATH") == env::echo("PATH"));
 }
 /*
-test_unit(print)
+TEST(print)
 {
 	std::stringstream ss;
 

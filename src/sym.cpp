@@ -43,8 +43,13 @@ namespace sys
 			ptr = dlopen(s, RTLD_LAZY);
 			if (nullptr == ptr)
 			{
-				const auto errstr = dlerror();
-				perror(errstr);
+				const auto e = dlerror();
+				if (nullptr != e)
+				{
+					#ifndef NDEBUG
+					fmt::warning(HERE(e));
+					#endif
+				}
 			}
 		}
 		#endif
@@ -64,8 +69,13 @@ namespace sys
 		{
 			if (nullptr != ptr and dlclose(ptr))
 			{
-				const auto errstr = dlerror();
-				perror(errstr);
+				const auto e = dlerror();
+				if (nullptr != e)
+				{
+					#ifndef NDEBUG
+					fmt::warning(HERE(e));
+					#endif
+				}
 			}
 		}
 		#endif
@@ -103,7 +113,9 @@ namespace sys
 			const auto e = dlerror();
 			if (nullptr != e)
 			{
-				perror("dlsym");
+				#ifndef NDEBUG
+				fmt::warning(HERE(e));
+				#endif
 			}
 			return f;
 		}
@@ -119,11 +131,11 @@ namespace sys
 	}
 }
 
-#ifdef test_unit
+#ifdef TEST
 static int hidden() { return 42; }
 dynamic int visible() { return hidden(); }
 
-test_unit(sym)
+TEST(sym)
 {
 	// Can see dynamic
 	auto f = sys::sym<int()>("visible");

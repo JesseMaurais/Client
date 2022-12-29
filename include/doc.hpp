@@ -9,7 +9,7 @@
 #include <string_view>
 
 #ifdef interface
-#undef interface // struct in combaseapi.h
+#undef interface // struct in "combaseapi.h"
 #endif
 
 namespace doc
@@ -46,6 +46,24 @@ namespace doc
 
 		instance();
 	};
+	
+	extern template struct instance<fwd::event>;
+	using event = instance<fwd::event>;
+
+	inline auto signal(fwd::event f)
+	{
+		return event::self().emplace(std::move(f));
+	}
+
+	inline auto raise(int n)
+	{
+		return event::self().reader(n)->operator()();
+	}
+
+	inline auto cancel(int n)
+	{
+		return event::self().destroy(n);
+	}
 
 	template <class C> constexpr auto table(const C *that = nullptr)
 	{
@@ -72,24 +90,6 @@ namespace doc
 	template <size_t N, class C> inline auto key(const C* = nullptr)
 	{
 		return name<index<N, C>()>; // name of the N'th member of C's table
-	}
-
-	extern template struct instance<fwd::event>;
-	using event = instance<fwd::event>;
-
-	inline auto signal(fwd::event f)
-	{
-		return event::self().emplace(std::move(f));
-	}
-
-	inline auto raise(int n)
-	{
-		return event::self().reader(n)->operator()();
-	}
-
-	inline auto cancel(int n)
-	{
-		return event::self().destroy(n);
 	}
 }
 

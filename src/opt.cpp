@@ -423,8 +423,8 @@ namespace env::opt
 	}
 }
 
-#ifdef test_unit
-test_unit(arg)
+#ifdef TEST
+TEST(arg)
 {
 	// Application name exists
 	{
