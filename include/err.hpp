@@ -18,7 +18,7 @@
 #	define assert(X) if (not(X))::fmt::warning(HERE(#X))
 #	define alert(X) if (int x=X)::fmt::error(x, HERE(#X))
 #	define perror(X) alert(errno) << X
-#	define except(X)
+#	define except(X) try { X; assert(!#X); } catch (...) { }
 #else
 #	define assert(X)
 #	define alert(X)

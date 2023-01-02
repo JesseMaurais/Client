@@ -21,7 +21,7 @@ namespace sys::uni
 
 	inline auto enclose(int fd)
 	{
-		return fwd::shared_ptr<int>(nullptr, [fd](auto ptr) noexcept
+		return fwd::shared_ptr<void>(nullptr, [fd](auto ptr) noexcept
 		{
 			if (not fail(fd) and fail(close(fd)))
 			{
