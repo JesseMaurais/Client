@@ -404,14 +404,18 @@ namespace env::file
 
 			if (not LockFileEx(h, dw, 0, large.low_part(), large.high_part(), &over))
 			{
-				sys::win::err(here, "LockFileEx");
+				#ifdef WINERR
+				WINERR("LockFileEx");
+				#endif
 			}
-			else return fwd::make_unique(f, [=](basic_ptr)
+			else return fwd::make_unique<FILE>(f, [=](basic_ptr)
 			{
 				sys::win::overlapped over = off;
 				if (not UnlockFileEx(h, 0, large.low_part(), large.high_part(), &over))
 				{
-					sys::win::err(here, "UnlockFileEx");
+					#ifdef WINERR
+					WINERR("UnlockFileEx");
+					#endif
 				}
 			});
 		}
@@ -540,10 +544,12 @@ namespace env::file
 
 			if (sys::win::fail(hm))
 			{
-				sys::win::err(here, "CreateFileMapping");
+				#ifdef WINERR
+				WINERR("CreateFileMapping");
+				#endif
 			}
 
-			return sys::win::mem::map(hm, flags, off, sz, buf);
+			return sys::win::mem::map<char>(hm, flags, off, sz, buf);
 		}
 		#else
 		{
@@ -586,10 +592,10 @@ namespace env::file
 		#endif
 
 		const int fd = sys::fileno(f);
-
-		#ifdef alert
-		alert(sys::fail(fd));
-		#endif
+		if (sys::fail(fd))
+		{
+			perror("fileno");
+		}
 
 		#ifdef _WIN32
 		{
@@ -602,12 +608,14 @@ namespace env::file
 			union
 			{
 				FILE_NAME_INFO info;
-				char buf[sizeof info + MAX_PATH];
+				char data[sizeof info + MAX_PATH];
 			};
 
-			if (not GetFileInformationByHandleEx(h, FileNameInfo, buf, sizeof buf))
+			if (not GetFileInformationByHandleEx(h, FileNameInfo, data, sizeof data))
 			{
-				sys::win::err(here, "GetFileInformationByHandleEx FileNameInfo", fd);
+				#ifdef WINERR
+				WINERR("GetFileInformationByHandleEx FileNameInfo", fd);
+				#endif
 			}
 			else
 			{

@@ -6,23 +6,10 @@
 
 #ifdef assert
 #	undef assert
-#	warning You should not include assert. Force __FILE__ to be included first.
-#else // redefine using standard access
-#	include <assert.h>
-#	undef assert
-#endif
-
-#define HERE(X) ::fmt::where { __FILE__, __func__, __LINE__, X }
-
-#ifndef NDEBUG
-#	define assert(X) if (not(X))::fmt::warning(HERE(#X))
-#	define alert(X) if (int x=X)::fmt::error(x, HERE(#X))
-#	define perror(X) alert(errno) << X
-#	define except(X) try { X; assert(!#X); } catch (...) { }
+#	warning You should not include assert. Include __FILE__ instead.
 #else
-#	define assert(X)
-#	define alert(X)
-#	define perror(X)
+#	include <cassert>
+#	undef assert
 #endif
 
 namespace fmt
@@ -35,11 +22,9 @@ namespace fmt
 		const char * code;
 	};
 
-	using os = std::ostream;
+	std::ostream& out(); std::ostream& put(std::ostream&);
 
-	os& out(); os& put(os&);
-
-	template <class... Type> os& printer(os& out, where const& at, Type const&... args)
+	template <class... Type> auto& printer(std::ostream& out, const where& at, const Type&... args)
 	{
 		out << at.file << "(" << at.line << ")" << at.func << ":" << at.code << ";";
 		if constexpr (0 < sizeof...(Type)) ((out << ' ' << args), ...);
@@ -48,27 +33,37 @@ namespace fmt
 
 	extern bool debug;
 
-	template <class... Type> os& warning(where const& at, Type const&... args)
+	template <class... Type> auto& warn(const where& at, const Type&... args)
 	{
 		return printer(out(), at, args...);
 	}
 
-	template <class... Type> os& error(int no, where const& at, Type const&... args)
+	template <class... Type> auto& err(int no, const where& at, const Type&... args)
 	{
-		return warning(at, std::strerror(no), args...);
+		return warn(at, std::strerror(no), args...);
 	}
 }
 
+#ifndef NDEBUG
+#	define HERE(X) ::fmt::where { __FILE__, __func__, __LINE__, X }
+#	define ERR(n, X, ...) ::fmt::err(n, HERE(X), ## __VA_ARGS__);
+#	define WARN(X, ...) ::fmt::warn(HERE(X), ## __VA_ARGS__)
+#	define ALERT(X, ...) if (int n_=(X)) ERR(n_, #X, ## __VA_ARGS__)
+#	define ASSERT(X, ...) if (not(X)) WARN(#X, ## __VA_ARGS__)
+#	define EXCEPT(X, ...) try { (X); ASSERT(!#X, ## __VA_ARGS__); } catch (...) { }
+#endif
+
+#define assert(X, ...) ASSERT(X, ## __VA_ARGS__)
+#define perror(...) ALERT(errno, ## __VA_ARGS__)
+#define except(X, ...) EXCEPT(X, ## __VA_ARGS__)
+
 #include "sym.hpp" // dynamic
 
-#define STR(str) #str
-#define CAT(left, right) left##right
-#define UNIT(name) CAT(name, _UNIT_TEST_SUFFIX)
-#define TEST(name) dynamic void UNIT(name) ()
+#define TEST(name) dynamic void name##_UNIT_TEST_SUFFIX ()
 
 namespace env::test
 {
-	constexpr auto suffix = STR(_UNIT_TEST_SUFFIX);
+	constexpr auto suffix = "_UNIT_TEST_SUFFIX";
 };
 
 #endif // file

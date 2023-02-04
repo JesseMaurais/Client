@@ -36,25 +36,25 @@ namespace fmt::tag
 		return it->substr();
 	}
 
-	input read(input in, char eol)
+	input read(input in, char delim)
 	{
 		fmt::string line;
 		auto key = cache.writer();
-		while (std::getline(in, line, eol))
+		while (std::getline(in, line, delim))
 		{
 			key->emplace(std::move(line));
 		}
 		return in;
 	}
 
-	output write(output out, char eol)
+	output write(output out, char delim)
 	{
 		auto key = cache.reader();
 		const auto begin = key->begin();
 		const auto end = key->end();
 		for (auto it = begin; it != end; ++it)
 		{
-			out << *it << eol;
+			out << *it << delim;
 		}
 		return out;
 	}
@@ -152,12 +152,13 @@ namespace fmt
 	template <class C> typename type<C>::vector type<C>::split(view u, mask x)
 	{
 		vector t;
-		const auto begin = u.data(), end = begin + u.size();
+		const auto begin = u.begin(), end = u.end();
 		for (auto i = skip(begin, end, x), j = end; i != end; i = skip(j, end, x))
 		{
 			j = next(i, end, x);
+			const auto m = std::distance(begin, i);
 			const auto n = std::distance(i, j);
-			t.emplace_back(i, n);
+			t.emplace_back(u.data() + m, n);
 		}
 		return t;
 	}
@@ -344,10 +345,11 @@ namespace fmt
 	template <class C> size_type type<C>::length(C u)
 	// Size of UTF encoded data from first item
 	{
+		constexpr auto m = 1 << (CHAR_BIT - 1);
 		size_type n = 1;
-		if (std::signbit(u))
+		if (u & m)
 		{
-			for (n = 0; std::signbit(u << n); ++n);
+			for (n = 0; (u << n) & m; ++n);
 		}
 		return n;
 	}

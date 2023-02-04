@@ -37,7 +37,7 @@ namespace env::usr
 
 	#ifdef _WIN32
 
-		using entry = std::pair<KNOWNFOLDERID, fmt::string::view>;
+		using entry = std::pair<KNOWNFOLDERID, fmt::view>;
 
 		static const std::map<fmt::string::view, entry> map =
 		{
@@ -53,7 +53,7 @@ namespace env::usr
 			{ "CommonPrograms", entry{FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu\\Programs"}},
 			{ "CommonStartMenu", entry{FOLDERID_CommonStartMenu, "%AllUsersProfile%\\Start Menu"}},
 			{ "CommonStartup", entry{FOLDERID_CommonStartup, "%AllUsersProfile%\\Start Menu\\StartUp"}},
-			{ "CommonTemplates" {FOLDERID_CommonTemplates, "%AllUsersProfile%\\Templates"}},
+//			{ "CommonTemplates" {FOLDERID_CommonTemplates, "%AllUsersProfile%\\Templates"}},
 			{ "LocalAppData", entry{FOLDERID_LocalAppData, "%UserProfile%\\AppData\\Local"}},
 			{ "Camera", entry{FOLDERID_CameraRoll, "%UserProfile%\\Pictures\\Camera Roll"}},
 			{ "Contacts", entry{FOLDERID_Contacts, "%UserProfile%\\Contacts"}},
@@ -213,7 +213,7 @@ namespace env::usr
 		{
 			const auto temp = env::temp();
 			const auto user = env::user();
-			static auto const path = fmt::dir::join({temp, "run", user});
+			path = fmt::dir::join({temp, "run", user});
 			u = path;
 		}
 		return u;

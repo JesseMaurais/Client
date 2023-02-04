@@ -52,7 +52,9 @@ namespace sys::win
 		{
 			if (not QueryPerformanceCounter(buf))
 			{
-				sys::win::err(here, "QueryPerformanceCounter");
+				#ifdef WINERR
+				WINERR("QueryPerformanceCounter");
+				#endif
 			}
 		}
 	};
@@ -63,7 +65,9 @@ namespace sys::win
 		{
 			if (not QueryPerformanceFrequency(buf))
 			{
-				sys::win::err(here, "QueryPerformanceFrequency");
+				#ifdef WINERR
+				WINERR("QueryPerformanceFrequency");
+				#endif
 			}
 		}
 	};

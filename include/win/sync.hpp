@@ -19,7 +19,9 @@ namespace sys::win
 			reset(reinterpret_cast<HANDLE>(ptr));
 			if (auto h = get(); fail(h))
 			{
-				win::err(here, "_beginthreadex");
+				#ifdef WINERR
+				WINERR("_beginthreadex");
+				#endif
 			}
 		}
 
@@ -45,18 +47,20 @@ namespace sys::win
 		{
 			if (auto h = get(); wait(h))
 			{
-				warn(here, id);
+				#ifdef trace
+				trace("join", id);
+				#endif
 			}
 		}
 	};
 
-	struct security : size<&SECURITY_ATTRIBUTES::nLength>
+	struct security_attributes : size<&SECURITY_ATTRIBUTES::nLength>
 	{
-		security(bool inherit = true)
+		security_attributes(bool inherit = true)
 		{
 			bInheritHandle = inherit ? TRUE : FALSE;
 		}
-
+ 
 		auto thread(fwd::event f)
 		{
 			return start(f, this);
@@ -67,17 +71,17 @@ namespace sys::win
 			return pipe(this);
 		}
 
-		auto mutex(bool owner = false, LPCSTR name = nullptr)
+		auto mutex(LPCSTR name = nullptr, bool owner = false)
 		{
 			return CreateMutex(this, owner, name);
 		}
 
-		auto semaphore(long init = 0, long size = 8, LPCSTR name = nullptr)
+		auto semaphore(LPCSTR name = nullptr, long init = 0, long size = 8)
 		{
 			return CreateSemaphore(this, init, size, name);
 		}
 
-		auto event(bool manual = false, bool init = false, LPCSTR name = nullptr)
+		auto event(LPCSTR name = nullptr, bool manual = false, bool init = false)
 		{
 			return CreateEvent(this, manual, init, name);
 		}
@@ -87,12 +91,12 @@ namespace sys::win
 			return CreateJobObject(this, name);
 		}
 
-		auto timer(bool manual = false, LPCSTR name = nullptr)
+		auto timer(LPCSTR name = nullptr, bool manual = false)
 		{
 			return CreateWaitableTimer(this, manual, name);
 		}
 
-		auto map(HANDLE h, int prot, size_t sz, LPCSTR name = nullptr)
+		auto map(HANDLE h, LPCSTR name = nullptr, int prot = 0, size_t sz = 0)
 		{
 			return CreateFileMapping(h, this, prot, HIWORD(sz), LOWORD(sz), name);
 		}
@@ -181,7 +185,9 @@ namespace sys::win
 			const large_int large = t;
 			if (not SetWaitableTimer(h, large.buf, p, thread, this, resume))
 			{
-				sys::win::err(here, "SetWaitableTimer");
+				#ifdef WINERR
+				WINERR("SetWaitableTimer", t, p, resume);
+				#endif
 			}
 		}
 
@@ -191,7 +197,9 @@ namespace sys::win
 			{
 				if (not CancelWaitableTimer(h))
 				{
-					sys::win::err(here, "CancelWaitableTimer");
+					#ifdef WINERR
+					WINERR("CancelWaitableTimer");
+					#endif
 				}
 			}
 		}

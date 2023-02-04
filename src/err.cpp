@@ -27,12 +27,12 @@ namespace fmt
 
 	thread_local buffer local_buf;
 
-	os& out()
+	std::ostream& out()
 	{
 		return local_buf;
 	}
 
-	os& put(os& buf)
+	std::ostream& put(std::ostream& buf)
 	{
 		string line;
 		while (std::getline(local_buf, line))

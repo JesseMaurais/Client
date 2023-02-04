@@ -111,21 +111,21 @@ namespace env
 	{
 		#ifdef _WIN32
 		{
-			const auto div = std::div(tv.tv_nsec, 1e6L);
-			const auto msec = std::fma(tv.tv_sec, 1e3L, div.quot);
+			const auto div = std::div(tv.tv_nsec, 1'000'000L);
+			const auto msec = std::fma(tv.tv_sec, 1'000L, div.quot);
 			#ifdef assert
 			assert(0 == div.rem);
 			#endif
-			Sleep(msec);
+			Sleep(static_cast<DWORD>(msec));
 		}
 		#else
 		{
-			const auto div = std::div(tv.tv_nsec, 1e3L);
-			const auto usec = std::fma(tv.tv_sec, 1e6L, div.quot);
+			const auto div = std::div(tv.tv_nsec, 1'000L);
+			const auto usec = std::fma(tv.tv_sec, 1'000'000L, div.quot);
 			#ifdef assert
 			assert(0 == div.rem);
 			#endif
-			if (sys::fail(usleep(usec)))
+			if (sys::fail(usleep(static_cast<useconds_t>(usec))))
 			{
 				perror("usleep");
 			}
@@ -143,7 +143,7 @@ namespace env
 			assert(0 == t.rem);
 			assert(0 == p.rem);
 			#endif
-			const auto h = sys::sync().reader()->timer();
+			const auto h = sys::win::security_attributes().timer();
 			return [t=sys::win::timer(h, f, t.quot, p.quot)] { };
 		}
 		#else

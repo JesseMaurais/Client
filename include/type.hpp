@@ -14,7 +14,10 @@ namespace fmt
 		void set(std::locale&);
 	}
 
-	inline auto
+	using mask = std::ctype_base::mask;
+	using mark = fwd::vector<mask>;
+
+	inline mask
 		space  = std::ctype_base::space,
 		print  = std::ctype_base::print,
 		cntrl  = std::ctype_base::cntrl,
@@ -27,9 +30,6 @@ namespace fmt
 		alnum  = std::ctype_base::alnum,
 		graph  = std::ctype_base::graph,
 		xdigit = std::ctype_base::xdigit;
-
-	using mask = decltype(space);
-	using mark = fwd::vector<mask>;
 
 	template <class Char> struct type
 	{

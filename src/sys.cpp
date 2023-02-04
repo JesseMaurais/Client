@@ -97,11 +97,13 @@ namespace sys
 					return -1;
 				}
 
-				auto const h = n ? pair[n].read.h : pair[n].write.h;
+				auto const h = n ? pair[n].read.get() : pair[n].write.get();
 
 				if (not SetHandleInformation(h, HANDLE_FLAG_INHERIT, false))
 				{
-					win::err(here, "SetHandleInformation");
+					#ifdef WINERR
+					WINERR("SetHandleInformation");
+					#endif
 					return invalid;
 				}
 			}
@@ -121,9 +123,9 @@ namespace sys
 			win::size<&STARTUPINFO::cb> si;
 
 			si.dwFlags = STARTF_USESTDHANDLES;
-			si.hStdInput = pair[0].read.h;
-			si.hStdOutput = pair[1].write.h;
-			si.hStdError = pair[2].write.h;
+			si.hStdInput = pair[0].read.get();
+			si.hStdOutput = pair[1].write.get();
+			si.hStdError = pair[2].write.get();
 
 			const bool ok = CreateProcess
 			(
@@ -141,7 +143,9 @@ namespace sys
 
 			if (not ok)
 			{
-				win::err(here, "CreateProcess", cmd);
+				#ifdef WINERR
+				WINERR("CreateProcess", cmd);
+				#endif
 				return invalid;
 			}
 
@@ -149,7 +153,9 @@ namespace sys
 
 			for (int n : { 0, 1, 2 })
 			{
-				fd[n] = n ? pair[n].read.open(O_RDONLY) : pair[n].write.open(O_WRONLY);
+				fd[n] = n
+					? sys::win::open(pair[n].read.get(), O_RDONLY)
+					: sys::win::open(pair[n].write.get(), O_WRONLY);
 			}
 
 			return pi.dwProcessId;
@@ -216,13 +222,17 @@ namespace sys
 			const win::handle h = OpenProcess(dw, false, pid);
 			if (fail(h))
 			{
-				win::err(here, "OpenProcess", pid);
+				#ifdef WINERR
+				WINERR("OpenProcess");
+				#endif
 				return failure;
 			}
 			else
 			if (not TerminateProcess(h, 0))
 			{
-				win::err(here, "TerminateProcess", pid);
+				#ifdef WINERR
+				WINERR("TerminateProcess");
+				#endif
 				return failure;
 			}
 			return success;
@@ -248,7 +258,9 @@ namespace sys
 			const win::handle h = OpenProcess(dw, false, pid);
 			if (fail(h))
 			{
-				win::err(here, "OpenProcess", pid);
+				#ifdef WINERR
+				WINERR("OpenProcess");
+				#endif
 			}
 			else
 			{
@@ -256,7 +268,9 @@ namespace sys
 				{
 					if (not GetExitCodeProcess(h, &code))
 					{
-						win::err(here, "GetExitCodeProcess", pid);
+						#ifdef WINERR
+						WINERR("GetExitCodeProcess");
+						#endif
 					}
 				}
 			}
@@ -313,7 +327,7 @@ namespace sys::win
 			h = GetModuleHandle(nullptr);
 		}
 
-		thread_local auto tls = fwd::null_unique<HLOCAL>(LocalFree);
+		thread_local auto tls = fwd::null_unique<fwd::no_ptr<HLOCAL>>(LocalFree);
 
 		LPSTR str = nullptr;
 		auto data = (LPSTR) &str;

@@ -16,7 +16,9 @@ namespace sys::win
 		{
 			if (not GetFileInformationByHandle(h, this))
 			{
-				sys::win::err(here);
+				#ifdef WINERR
+				WINERR("GetFileInformationByHandle");
+				#endif
 			}
 		}
 	};
@@ -30,7 +32,9 @@ namespace sys::win
 			h = FindFirstFile(path, this);
 			if (sys::win::fail(h))
 			{
-				sys::win::err(here, path);
+				#ifdef WINERR
+				WINERR("FindFirstFile", path);
+				#endif
 			}
 		}
 
@@ -40,7 +44,9 @@ namespace sys::win
 			{
 				if (not FindClose(h))
 				{
-					sys::win::err(here);
+					#ifdef WINERR
+					WINERR("FindClose");
+					#endif
 				}
 			}
 		}
@@ -51,7 +57,9 @@ namespace sys::win
 			{
 				if (GetLastError() != ERROR_NO_MORE_FILES)
 				{
-					sys::win::err(here, "FindNextFile");
+					#ifdef WINERR
+					WINERR("FindNextFile");
+					#endif
 				}
 				return failure;
 			}
@@ -75,7 +83,9 @@ namespace sys::win
 			h = FindFirstChangeNotification(path, dir, dw);
 			if (sys::win::fail(h))
 			{
-				sys::win::err(here, "FindFirstChangeNotification", path, dir, dw);
+				#ifdef WINERR
+				WINERR("FindFirstChangeNotification", path, dir, dw);
+				#endif
 			}
 		}
 
@@ -83,7 +93,9 @@ namespace sys::win
 		{
 			if (not FindCloseChangeNotification(h))
 			{
-				sys::win::err(here, "FindCloseChangeNotification");
+				#ifdef WINERR
+				WINERR("FindCloseChangeNotification");
+				#endif
 			}
 		}
 
@@ -91,7 +103,9 @@ namespace sys::win
 		{
 			if (not FindNextChangeNotification(h))
 			{
-				sys::win::err(here, "FindNextChangeNotification");
+				#ifdef WINERR
+				WINERR("FindNextChangeNotification");
+				#endif
 				return failure;
 			}
 			return success;
@@ -102,22 +116,14 @@ namespace sys::win
 	{
 		WCHAR buf[FILENAME_MAX];
 
-		static void check(DWORD dw, DWORD sz, LPOVERLAPPED lp)
-		{
-			auto that = fwd::as_ptr<watch>(lp->Pointer)
-			if (dw)
-			{
-				auto err = sys::win::strerr(dw);
-				sys::warn(here, that, sz, err);
-			}
-		};
-
 		bool read(HANDLE h, BOOL sub, DWORD dw, LPOVERLAPPED lp=nullptr, LPOVERLAPPED_COMPLETION_ROUTINE fn=nullptr)
 		{
 			constexpr auto sz = sizeof(FILE_NOTIFY_INFORMATION) + sizeof(WCHAR) * FILENAME_MAX;
 			if (not ReadDirectoryChangesW(h, this, sz, sub, dw, nullptr, lp, fn))
 			{
-				win::err(here, "ReadDirectoryChangesExW");
+				#ifdef WINERR
+				WINERR("ReadDirectoryChangesW");
+				#endif
 				return failure;
 			}
 			return success;
@@ -145,11 +151,6 @@ namespace sys::win
 		{
 			hEvent = h;
 			Pointer = ptr;
-		}
-
-		operator LPOVERLAPPED() const
-		{
-			return this;
 		}
 	};
 }

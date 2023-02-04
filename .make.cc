@@ -52,7 +52,7 @@
 # define ifexists(x) !if exists(x)
 # define error(x) !error x
 # define message(x) !message x
-# define add(x, y) x=$(x) y
+# define append(x, y) x=$(x) y
 #else // GNU
 # define if(x) ifeq(0, $(shell x 1>$(NULL); echo $$?))
 # define ifeq(x,y) ifeq (x,y)
@@ -60,7 +60,7 @@
 # define ifexists(x) ifneq ($(wildcard x),)
 # define error(x) $(error x)
 # define message(x) $(message x)
-# define add(x, y) x+=y
+# define append(x, y) x+=y
 #endif
 
 //
@@ -68,20 +68,20 @@
 //
 
 ifeq($(OS), Windows_NT)
-add(CFLAGS, -D_WIN32)
+append(CFLAGS, -D_WIN32)
 ifdef WINVER
-add(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
+append(CFLAGS, "-D_WIN32_WINNT=$(WINVER)")
 endif
-add(LOAD, ole32 shell32 Ws2_32)
+append(LOAD, ole32 shell32 Ws2_32)
 EXEEXT=.exe
 DIR=\ //
 ENT=;
 else // POSIX
-add(CFLAGS, -D_POSIX_SOURCE)
+append(CFLAGS, -D_POSIX_SOURCE)
 ifdef UNIVER
-add(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
+append(CFLAGS, "-D_XOPEN_SOURCE=$(UNIVER)")
 endif
-add(LOAD, m rt dl pthread)
+append(LOAD, m rt dl pthread)
 EXEEXT=.out
 DIR=/
 ENT=:
@@ -176,7 +176,7 @@ LIBPATH=$(OBJDIR)
 endif
 
 ifexists($(HDRDIR))
-add(CFLAGS, -I$(HDRDIR))
+append(CFLAGS, -I$(HDRDIR))
 endif
 
 //
@@ -231,13 +231,26 @@ LIB=$(addprefix -L, "$(LIBPATH:$(ENT)=" ")")
 
 #ifdef _NMAKE
 MAKLNK=$(MAKDIR)ldflags$(MAKEXT)
-if((echo LNK=\>$(MAKLNK)) && for %i in ("%LOAD%") do @echo -l"%~i"\>>$(MAKLNK))
-inlude $(MAKLIB)
+if((echo LINK=\>$(MAKLNK)) && for %i in ($(LOAD)) do @echo -l"%~i"\>>$(MAKLNK))
+include $(MAKLNK)
 else
 error(Cannot parse link libraries)
 endif
 #else
-LINK=$(addprefix -l, $(LOAD))
+LINK=$(addprefix $(LIBEXT), $(LOAD))
+#endif
+
+#else
+
+#ifdef _NMAKE
+MAKLNK=$(MAKDIR)ldflags$(MAKEXT)
+if((echo LINK=\>$(MAKLNK)) && for %i in ($(LOAD)) do @echo "%~i".lib\>>$(MAKLNK))
+include $(MAKLNK)
+else
+error(Cannot parse link libraries)
+endif
+#else
+LINK=$(addsuffix -l, $(LOAD))
 #endif
 
 #endif//_MSC_VER
@@ -256,14 +269,14 @@ PCHEXT=.pch
 DBGEXT=.pdb
 
 ifdef STD
-add(CFLAGS, -std:$(STD))
+append(CFLAGS, -std:$(STD))
 endif
 
-add(CFLAGS, -nologo -EHsc -permissive- -DNOMINMAX)
+append(CFLAGS, -nologo -EHsc -permissive- -DNOMINMAX)
 
 ifndef NDEBUG
-add(CFLAGS, -Z7)
-add(WARN, -W4 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
+append(CFLAGS, -Z7)
+append(WARN, -W4 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 endif
 
 ifdef PCH
@@ -271,8 +284,8 @@ PCHHDR=$(SRCDIR)$(PCH)$(HDREXT)
 PCHSRC=$(SRCDIR)$(PCH)$(SRCEXT)
 PCHOBJ=$(OBJDIR)$(PCH)$(OBJEXT)
 PCHOUT=$(OBJDIR)$(PCH)$(PCHEXT)
-add(HEAD, -Yu$(PCH)$(HDREXT) -FI$(PCH)$(HDREXT) -Fp$(PCHOUT))
-add(LINK, -Yu$(PCH)$(HDREXT))
+append(HEAD, -Yu$(PCH)$(HDREXT) -FI$(PCH)$(HDREXT) -Fp$(PCHOUT))
+append(LINK, -Yu$(PCH)$(HDREXT))
 $(PCHOBJ): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) -Yc$(PCH)$(HDREXT) -c $(PCHSRC) -Fo$(PCHOBJ) -Fp$(PCHOUT)
 endif
 
@@ -301,25 +314,25 @@ EXPEXT=.exp
 ILKEXT=.ilk
 
 ifdef STD
-add(CFLAGS, -std=$(STD))
+append(CFLAGS, -std=$(STD))
 endif
 
-add(CFLAGS, -MP -MMD)
-add(LINK, -rdynamic)
+append(CFLAGS, -MP -MMD)
+append(LINK, -rdynamic)
 
 #if defined(__llvm__) || defined(__clang__)
-add(CFLAGS, -stdlib=libc++)
-add(LINK, -lc++ -lc++abi)
+append(CFLAGS, -stdlib=libc++)
+append(LINK, -lc++ -lc++abi)
 #endif
 
 ifndef NDEBUG
-add(WARN, -Wall -Wextra -Wpedantic -g)
+append(WARN, -Wall -Wextra -Wpedantic -g)
 endif
 
 ifdef PCH
 PCHHDR=$(SRCDIR)$(PCH)$(HDREXT)
 PCHOUT=$(OBJDIR)$(PCH)$(PCHEXT)
-add(HEAD, -include $(PCHHDR))
+append(HEAD, -include $(PCHHDR))
 $(PCHOUT): $(PCHHDR); $(CXX) $(CFLAGS) $(WARN) $(INC) -c $< -o $@
 endif
 

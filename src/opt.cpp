@@ -73,7 +73,7 @@ namespace fmt::opt
 		if (not value.empty())
 		{
 			buf << style.second;
-			if (any_of(value, space))
+			if (fmt::any_of(value, space))
 			{
 				buf << tag::quote << value << tag::quote;
 			}
@@ -188,24 +188,24 @@ namespace
 	{
 		auto next = cmd.end();
 
-		if (auto entry = argu.substr(2); argu.starts_with(fmt::tag::dual))
+		if (auto dual = argu.substr(2); argu.starts_with(fmt::tag::dual))
 		{
 			next = fwd::find_if
 			(
-				cmd, [entry](auto const& d)
+				cmd, [dual](auto const& d)
 				{
-					return d.name == entry;
+					return d.name == dual;
 				}
 			);
 		}
 		else
-		if (auto entry = argu.substr(1); argu.starts_with(fmt::tag::dash))
+		if (auto dash = argu.substr(1); argu.starts_with(fmt::tag::dash))
 		{
 			next = fwd::find_if
 			(
-				cmd, [entry](auto const& d)
+				cmd, [dash](auto const& d)
 				{
-					return d.dash == entry;
+					return d.dash == dash;
 				}
 			);
 		}

@@ -17,7 +17,9 @@ namespace sys::win
 			h = CreateToolhelp32Snapshot(dw, 0);
 			if (sys::win::fail(h))
 			{
-				sys::win::err(here, dw);
+				#ifdef WINERR
+				WINERR("CreateToolhelp32Snapshot");
+				#endif
 			}
 		}
 	};
@@ -32,7 +34,9 @@ namespace sys::win
 			{
 				if (not Process32First(snap.h, this))
 				{
-					sys::win::err(here);
+					#ifdef WINERR
+					WINERR("Process32First");
+					#endif
 				}
 			}
 		}
@@ -53,7 +57,9 @@ namespace sys::win
 			{
 				if (not Module32First(snap.h, this))
 				{
-					sys::win::err(here);
+					#ifdef WINERR
+					WINERR("Module32First");
+					#endif
 				}
 			}
 		}
@@ -74,7 +80,9 @@ namespace sys::win
 			{
 				if (not Thread32First(snap.h, this))
 				{
-					sys::win::err(here);
+					#ifdef WINERR
+					WINERR("Thread32First");
+					#endif
 				}
 			}
 		}

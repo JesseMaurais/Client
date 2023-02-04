@@ -155,14 +155,10 @@ namespace sys
 		}
 	};
 
-	template <class object> class exclusive : object
+	template <class object> struct exclusive final : private object
 	// Self exclusion object
 	{
 		exclusive_ptr<object> that;
-
-	public:
-
-		using object::object;
 
 		exclusive() : that(this)
 		{ }
@@ -187,8 +183,6 @@ namespace sys
 			return that.get();
 		}
 	};
-
-	template <class Type> extern exclusive<Type> extern_ptr;
 }
 
 #endif

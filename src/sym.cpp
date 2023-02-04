@@ -34,7 +34,9 @@ namespace sys
 			const auto h = LoadLibrary(s);
 			if (nullptr == h)
 			{
-				sys::win::err(here, "LoadLibrary", path);
+				#ifdef WINERR
+				WINERR("LoadLibrary", path);
+				#endif
 			}
 			else ptr = h;
 		}
@@ -46,8 +48,8 @@ namespace sys
 				const auto e = dlerror();
 				if (nullptr != e)
 				{
-					#ifndef NDEBUG
-					fmt::warning(HERE(e));
+					#ifdef trace
+					trace(e);
 					#endif
 				}
 			}
@@ -62,7 +64,9 @@ namespace sys
 			const auto h = static_cast<HMODULE>(ptr);
 			if (nullptr != h and not FreeLibrary(h))
 			{
-				sys::win::err(here, "FreeLibrary");
+				#ifdef WINERR
+				WINERR("FreeLibrary");
+				#endif
 			}
 		}
 		#else
@@ -72,8 +76,8 @@ namespace sys
 				const auto e = dlerror();
 				if (nullptr != e)
 				{
-					#ifndef NDEBUG
-					fmt::warning(HERE(e));
+					#ifdef trace
+					trace(e);
 					#endif
 				}
 			}
@@ -94,7 +98,9 @@ namespace sys
 				h = GetModuleHandle(nullptr);
 				if (nullptr == h)
 				{
-					sys::win::err(here, "GetModuleHandle");
+					#ifdef WINERR
+					WINERR("GetModuleHandle");
+					#endif
 					return nullptr;
 				}
 			}
@@ -102,7 +108,9 @@ namespace sys
 			const auto f = GetProcAddress(h, s);
 			if (nullptr == f)
 			{
-				sys::win::err(here, "GetProcAddress", name);
+				#ifdef WINERR
+				WINERR("GetProcAddress");
+				#endif
 			}
 			return f;
 		}
@@ -113,8 +121,8 @@ namespace sys
 			const auto e = dlerror();
 			if (nullptr != e)
 			{
-				#ifndef NDEBUG
-				fmt::warning(HERE(e));
+				#ifdef trace
+				trace(e);
 				#endif
 			}
 			return f;

@@ -22,7 +22,9 @@ namespace sys::win
 			auto const result = GetMessage(this, hw, min, max);
 			if (sys::fail(result))
 			{
-				sys::win::err(here, "GetMessage");
+				#ifdef WINERR
+				WINERR("GetMessage");
+				#endif
 				return failure;
 			}
 			return success;
@@ -32,10 +34,9 @@ namespace sys::win
 		{
 			if (not PostThreadMessage(dw, msg, wp, lp))
 			{
-				sys::win::err
-				(
-					here, "PostThreadMessage", dw, msg, wp, lp
-				);
+				#ifdef WINERR
+				WINERR("PostThreadMessage");
+				#endif
 				return failure;
 			}
 			return success;

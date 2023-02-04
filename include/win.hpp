@@ -13,19 +13,19 @@
 #include "err.hpp"
 #include "sys.hpp"
 
+#ifndef WINERR
+# define WINERR(X, ...) ::sys::win::err(HERE(X), __VA_ARGS__)
+#endif
+
 namespace sys::win
 {
 	const char* strerr(DWORD dw, void* h = nullptr);
 
-	template <typename... Args> int err(fmt::where at, Args... args)
+	template <typename... Args> auto& err(fmt::where at, Args... args)
 	{
-		if (debug)
-		{
-			auto const no = GetLastError();
-			auto const s = strerr(no);
-			return warn(at, args..., s);
-		}
-		return -1;
+		auto const no = GetLastError();
+		auto const s = strerr(no);
+		return fmt::warn(at, args..., s);
 	}
 
 	inline auto invalid = INVALID_HANDLE_VALUE;
@@ -35,21 +35,25 @@ namespace sys::win
 		return nullptr == h or invalid == h;
 	}
 
+	using handless = fwd::no_ptr<HANDLE>;
+
 	inline auto enclose(HANDLE h)
 	{
-		return fwd::make_shared<fwd::no_ptr<HANDLE>>(h, [](auto h)
+		return fwd::make_shared<handless>(h, [](auto h)
 		{
 			if (not fail(h) and not CloseHandle(h))
 			{
-				win::err(here, "CloseHandle");
+				WINERR("CloseHandle");
 			}
 		});
 	}
 
-	struct handle : decltype(enclose(nullptr))
+	struct handle : fwd::shared_ptr<handless>
 	{
+		using basic = fwd::shared_ptr<handless>;
+
 		handle(HANDLE h = nullptr)
-		: decltype(enclose(nullptr))(h, enclose)
+		: basic(h, enclose)
 		{ }
 
 		operator HANDLE() const
@@ -77,7 +81,7 @@ namespace sys::win
 		auto dw = WaitForSingleObject(h, ms);
 		if (WAIT_FAILED == dw)
 		{
-			sys::win::err(here, ms);
+			WINERR("WaitForSingleObject", ms);
 		}
 		return dw;
 	}
@@ -88,7 +92,7 @@ namespace sys::win
 		auto dw = WaitForMultipleObjects(static_cast<DWORD>(sz), h.data(), a, ms);
 		if (WAIT_FAILED == dw)
 		{
-			sys::win::err(here, ms);
+			WINERR("WaitForMultipleObjects", ms);
 		}
 		return dw;
 	}
@@ -102,7 +106,7 @@ namespace sys::win
 	{
 		static_assert(std::is_trivially_copyable<T>::value);
 		static_assert(std::is_standard_layout<T>::value);
-		constexpr auto sizeof_zero = sizeof(T);
+		static constexpr auto sizeof_zero = sizeof(T);
 
 		zero()
 		{
@@ -159,7 +163,9 @@ namespace sys::win
 			}
 			else
 			{
-				err("CreatePipe");
+				#ifdef WINERR
+				WINERR("CreatePipe");
+				#endif
 			}
 		}
 	};

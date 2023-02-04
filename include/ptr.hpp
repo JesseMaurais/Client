@@ -106,7 +106,7 @@ namespace fwd
 	>
 	auto null_shared(deleter<Type> free = std::default_delete<Type>())
 	{
-		return make_shared(null<Type>, free);
+		return make_shared<Type>(null<Type>, free);
 	}
 
 	template
@@ -115,7 +115,7 @@ namespace fwd
 	>
 	auto null_unique(deleter<Type> free = std::default_delete<Type>())
 	{
-		return make_unique(null<Type>, free);
+		return make_unique<Type>(null<Type>, free);
 	}
 
 	template

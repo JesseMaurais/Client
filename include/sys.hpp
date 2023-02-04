@@ -92,6 +92,7 @@ namespace sys
 	constexpr auto getpid = ::_getpid;
 	constexpr auto isatty = ::_isatty;
 	constexpr auto lseek = ::_lseek;
+	constexpr auto lstat = ::_stat;
 	constexpr auto mkdir = [](char const *dir, mode_t) { return ::_mkdir(dir); };
 	constexpr auto open = ::_open;
 	constexpr auto pclose = ::_pclose;
@@ -163,6 +164,7 @@ namespace sys
 	constexpr auto getppid = ::getppid;
 	constexpr auto isatty = ::isatty;
 	constexpr auto lseek = ::lseek;
+	constexpr auto lstat = ::lstat;
 	constexpr auto mkdir = ::mkdir;
 	constexpr auto open = ::open;
 	constexpr auto pclose = ::pclose;
@@ -212,14 +214,12 @@ namespace sys
 	struct stats : ::stat_t
 	{
 		stats(int), stats(const char* path);
-
 		int ok;
 	};
 
 	struct mode
 	{
 		mode(mode_t mask = 0777), ~mode();
-
 		mode_t um;
 	};
 
