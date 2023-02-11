@@ -667,23 +667,23 @@ namespace env::file
 #include "arg.hpp"
 TEST(mode)
 {
-	assert(not env::file::fail(__FILE__) and "Source file exists");
-	assert(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
+	ASSERT(not env::file::fail(__FILE__) and "Source file exists");
+	ASSERT(not env::file::fail(env::opt::arg(), env::file::ex) and "Program is executable");
 }
 TEST(flags)
 {
 	using namespace env::file;
-	assert(to_string(rw|un) == "w+");
-	assert(to_string(rd) == "r");
-	assert(to_string(rw|ok) == "x+");
+	ASSERT(to_string(rw|un) == "w+");
+	ASSERT(to_string(rd) == "r");
+	ASSERT(to_string(rw|ok) == "x+");
 }
 TEST(lock)
 {
 	auto f = env::file::open(__FILE__);
-	assert(f and "Open file");
+	ASSERT(f and "Open file");
 	auto rdk = env::file::lock(f.get(), env::file::rd);
-	assert(rdk and "Lock file to read");
+	ASSERT(rdk and "Lock file to read");
 	auto wrk = env::file::lock(f.get(), env::file::wo);
-	assert(not wrk and "Lock file to write");
+	ASSERT(not wrk and "Lock file to write");
 }
 #endif

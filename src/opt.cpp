@@ -429,15 +429,15 @@ TEST(arg)
 	// Application name exists
 	{
 		const auto app = env::opt::application();
-		assert(not app.empty() and "Application is not named");
-		assert(env::opt::arg(0).find(app) != fmt::npos);
+		ASSERT(not app.empty() and "Application is not named");
+		ASSERT(env::opt::arg(0).find(app) != fmt::npos);
 	}
 	// Dump options into stream
 	{
 		fmt::buffer buf;
 		buf << env::opt::put;
 		const auto s = buf.str();
-		assert(not s.empty() and "Cannot dump options");
+		ASSERT(not s.empty() and "Cannot dump options");
 	}
 }
 #endif

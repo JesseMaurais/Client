@@ -118,30 +118,6 @@ namespace fwd
 		return make_unique<Type>(null<Type>, free);
 	}
 
-	template
-	<
-		class Type, class Free = deleter<Type>
-	>
-	auto share_ptr(std::enable_shared_from_this<Type>* that, Free free = std::default_delete<Type>())
-	{
-		auto ptr = that->shared_from_this();
-		auto raw = ptr.get();
-		ptr.reset();
-		return shared_ptr<Type>(raw, free);
-	}
-
-	template
-	<
-		class Type
-	>
-	struct shared : no_copy, no_make, std::enable_shared_from_this<Type>
-	{
-		auto share_this(deleter<Type> free = std::default_delete<Type>())
-		{
-			return share_ptr(this, free);
-		}
-	};
-
 	template <class Type> struct source : std::pair<Type, shared_ptr<Type>>
 	{
 		using pair = std::pair<Type, shared_ptr<Type>>;

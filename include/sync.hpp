@@ -18,44 +18,44 @@ namespace sys
 	using thread = win::start;
 	using join = win::join;
 
-	struct mutex : private fwd::traits<win::critical_section, fwd::shared>
+	struct mutex : private win::critical_section
 	{
 		auto key()
 		{
 			enter();
-			return share_this([this](auto that)
+			return fwd::make_shared<mutex>(this, [this](auto that)
 			{
-				leave();
 				#ifdef assert
 				assert(this == that);
 				#endif
+				leave();
 			});
 		}
 	};
 
-	struct rwlock : private fwd::traits<win::srwlock, fwd::shared>
+	struct rwlock : private win::srwlock
 	{
 		auto reader()
 		{
 			lock();
-			return share_this([this](auto that)
+			return fwd::make_shared<rwlock>(this, [this](auto that)
 			{
-				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
+				unlock();
 			});
 		}
 
 		auto writer()
 		{
 			xlock();
-			return share_this([this](auto that)
+			return fwd::make_shared<rwlock>(this, [this](auto that)
 			{
-				xunlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
+				xunlock();
 			});
 		}
 	};
@@ -65,44 +65,44 @@ namespace sys
 	using thread = uni::start;
 	using join = uni::join;
 
-	struct mutex : private fwd::traits<uni::mutex, fwd::shared>
+	struct mutex : private uni::mutex
 	{
 		auto key()
 		{
 			lock();
-			return share_this([this](auto that)
+			return fwd::make_shared<mutex>(this, [this](auto that)
 			{
-				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
+				unlock();
 			});
 		}
 	};
 
-	struct rwlock : private fwd::traits<uni::rwlock, fwd::shared>
+	struct rwlock : private uni::rwlock
 	{
 		auto reader()
 		{
 			rdlock();
-			return share_this([this](auto that)
+			return fwd::make_shared<rwlock>(this, [this](auto that)
 			{
-				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
+				unlock();
 			});
 		}
 
 		auto writer()
 		{
 			wrlock();
-			return share_this([this](auto that)
+			return fwd::make_shared<rwlock>(this, [this](auto that)
 			{
-				unlock();
 				#ifdef assert
 				assert(this == that);
 				#endif
+				unlock();
 			});
 		}
 	};

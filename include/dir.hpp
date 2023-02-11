@@ -24,8 +24,6 @@ namespace fmt::file
 	vector split(view);
 	string join(span);
 	string join(init);
-	string join(div);
-	div path(view);
 }
 
 namespace env::file

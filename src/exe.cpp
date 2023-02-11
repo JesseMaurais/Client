@@ -378,11 +378,11 @@ namespace env::exe
 TEST(cmd)
 {
 	const auto list = env::exe::list(env::pwd());
-	assert(not list.empty());
+	ASSERT(not list.empty());
 	const auto copy = env::exe::copy(__FILE__);
-	assert(not copy.empty());
+	ASSERT(not copy.empty());
 	// Copy range starts at 0, file numbering at 1
-	assert(copy[__LINE__-1].find("Recursive find me text") != fmt::npos);
+	ASSERT(copy[__LINE__-1].find("Recursive find me text") != fmt::npos);
 }
 TEST(echo)
 {
@@ -390,8 +390,8 @@ TEST(echo)
 		? "%UserName%" : "$USER";
 
 	const auto echo = env::exe::echo(user);
-	assert(not echo.empty());
+	ASSERT(not echo.empty());
 	const auto name = echo.front();
-	assert(user != name);
+	ASSERT(user != name);
 }
 #endif

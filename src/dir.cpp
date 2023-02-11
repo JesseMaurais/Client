@@ -495,18 +495,18 @@ namespace env::file
 #ifdef TEST
 TEST(dir)
 {
-	assert(not env::file::fail(env::temp()));
-	assert(not env::file::fail(env::pwd()));
-	assert(not env::file::fail(env::home()));
+	ASSERT(not env::file::fail(env::temp()));
+	ASSERT(not env::file::fail(env::pwd()));
+	ASSERT(not env::file::fail(env::home()));
 
 	const auto path = fmt::dir::split(__FILE__);
-	assert(not path.empty());
+	ASSERT(not path.empty());
 	const auto name = path.back();
-	assert(not name.empty());
+	ASSERT(not name.empty());
 	const auto program = env::opt::program();
-	assert(not program.empty());
+	ASSERT(not program.empty());
 
-	assert(env::file::find(env::pwd(), [program](auto entry)
+	ASSERT(env::file::find(env::pwd(), [program](auto entry)
 	{
 		return fmt::dir::split(entry).back() == program;
 	}));
@@ -514,9 +514,9 @@ TEST(dir)
 	const auto temp = fmt::dir::join({env::temp(), "my", "test", "dir"});
 	if (temp.empty()) return;
 	const auto stem = env::file::mkdir(temp);
-//	assert(not empty(stem.first));
-//	assert(not empty(stem.second));
-	assert(not env::file::rmdir(stem));
+//	ASSERT(not empty(stem.first));
+//	ASSERT(not empty(stem.second));
+	ASSERT(not env::file::rmdir(stem));
 }
 TEST(ext)
 {

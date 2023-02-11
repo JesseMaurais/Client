@@ -147,11 +147,11 @@ TEST(sym)
 {
 	// Can see dynamic
 	auto f = sys::sym<int()>("visible");
-	assert(nullptr != f);
+	ASSERT(nullptr != f);
 	// Cannot see static
 	auto g = sys::sym<int()>("hidden");
-	assert(nullptr == g);
+	ASSERT(nullptr == g);
 	// Callable object
-	assert(f() == hidden());
+	ASSERT(f() == hidden());
 }
 #endif

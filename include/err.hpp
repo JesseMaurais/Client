@@ -55,7 +55,6 @@ namespace fmt
 
 #define assert(X, ...) ASSERT(X, ## __VA_ARGS__)
 #define perror(...) ALERT(errno, ## __VA_ARGS__)
-#define except(X, ...) EXCEPT(X, ## __VA_ARGS__)
 
 #include "sym.hpp" // dynamic
 

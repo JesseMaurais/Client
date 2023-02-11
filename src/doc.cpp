@@ -221,27 +221,27 @@ TEST(ini)
 		{
 			auto s = fmt::to_string(value);
 			bool unique = init.set({group, key}, s);
-			assert(unique);
+			ASSERT(unique);
 			s.clear();
 		}
 		// Check persistence
 		{
 			auto u = init.get({group, key});
-			assert(not empty(u));
-			assert(u == value);
+			ASSERT(not empty(u));
+			ASSERT(u == value);
 		}
 		// Reference with put
 		{
 			fmt::view u = value;
 			bool unique = init.put({group, key}, u);
-			assert(not unique);
+			ASSERT(not unique);
 		}
 		// Check persistence
 		{
 			auto u = init.get({group, key});
-			assert(not empty(u));
-			assert(u == value);
-			assert(u.data() == value);
+			ASSERT(not empty(u));
+			ASSERT(u == value);
+			ASSERT(u.data() == value);
 		}
 	}
 }

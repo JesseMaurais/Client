@@ -425,17 +425,17 @@ TEST(type)
 
 	// Character class/whitespace iteration
 	{
-		assert(fmt::next(Space) == Space.begin());
-		assert(fmt::skip(Space) == Space.end());
-		assert('H' == *fmt::first(Filled));
-		assert('!' == *fmt::last(Filled));
+		ASSERT(fmt::next(Space) == Space.begin());
+		ASSERT(fmt::skip(Space) == Space.end());
+		ASSERT('H' == *fmt::first(Filled));
+		ASSERT('!' == *fmt::last(Filled));
 	}
 
 	// Trimming whitespace
 	{
-		assert(fmt::trim(Space).empty());
-		assert(not fmt::trim(Filled).empty());
-		assert(Hello == fmt::trim(Filled));
+		ASSERT(fmt::trim(Space).empty());
+		ASSERT(not fmt::trim(Filled).empty());
+		ASSERT(Hello == fmt::trim(Filled));
 	}
 
 	// Split by whitespace/characters
@@ -448,41 +448,41 @@ TEST(type)
 		for (auto u : v)
 		{
 			auto const t = fmt::split(u);
-			assert(t.size() == 3);
-			assert(t.front() == "1");
-			assert(t.back() == "3");
+			ASSERT(t.size() == 3);
+			ASSERT(t.front() == "1");
+			ASSERT(t.back() == "3");
 		}
 	}
 
 	// String view null terminator
 	{
-		assert(fmt::terminated(Hello));
+		ASSERT(fmt::terminated(Hello));
 		auto substr = Hello.substr(0, 5);
-		assert(not fmt::terminated(substr));
+		ASSERT(not fmt::terminated(substr));
 	}
 
 	// Character case conversion
 	{
-		assert(fmt::to_upper(Hello) == Upper);
-		assert(fmt::to_lower(Hello) == Lower);
+		ASSERT(fmt::to_upper(Hello) == Upper);
+		ASSERT(fmt::to_lower(Hello) == Lower);
 	}
 
 	// Character encoding conversion
 	{
-		assert(fmt::to_wstring(Hello) == Wide);
-		assert(fmt::to_string(Wide) == Hello);
+		ASSERT(fmt::to_wstring(Hello) == Wide);
+		ASSERT(fmt::to_string(Wide) == Hello);
 	}
 
 	// Search matching braces
 	{
 		using pos = fmt::size::pair;
 
-		assert((fmt::embrace("<A<B>C>", "<>") == pos { 0, 6 }));
-		assert((fmt::embrace("<A<B>C>", "<B>") == pos { 0, 3 }));
-		assert((fmt::embrace("A[B]C[D]", "[D]") == pos { 1, 3 }));
-		assert((fmt::embrace("{A<B}C}", "<>") == pos { 2, -1 }));
-		assert((fmt::embrace("{A{B>C}", "<>") == pos { -1, -1 }));
-		assert((fmt::embrace("&amp;", "&;") == pos { 0, 4 }));
+		ASSERT((fmt::embrace("<A<B>C>", "<>") == pos { 0, 6 }));
+		ASSERT((fmt::embrace("<A<B>C>", "<B>") == pos { 0, 3 }));
+		ASSERT((fmt::embrace("A[B]C[D]", "[D]") == pos { 1, 3 }));
+		ASSERT((fmt::embrace("{A<B}C}", "<>") == pos { 2, -1 }));
+		ASSERT((fmt::embrace("{A{B>C}", "<>") == pos { -1, -1 }));
+		ASSERT((fmt::embrace("&amp;", "&;") == pos { 0, 4 }));
 	}
 }
 
@@ -491,7 +491,7 @@ TEST(sgr)
 	std::stringstream ss;
 	ss << fmt::io::fg_green << "GREEN" << fmt::io::fg_off;
 	auto green = ss.str();
-	assert(green == "\x1b[32mGREEN\x1b[39m");
+	ASSERT(green == "\x1b[32mGREEN\x1b[39m");
 }
 
 TEST(fmt)
@@ -504,7 +504,7 @@ TEST(fmt)
 	std::stringstream ss;
 	ss << write;
 	const auto s = ss.str();
-	assert(s == msg);
+	ASSERT(s == msg);
 }
 
 TEST(lang)
@@ -512,11 +512,11 @@ TEST(lang)
 	auto de = std::locale("de_DE.utf8");
 	fmt::lang::set(de);
 	auto cat = fmt::catalog("sed");
-	assert(cat and "German catalog");
+	ASSERT(cat and "German catalog");
 	const auto txt = cat("No match");
-	assert(txt == "Keine Übereinstimmung");
+	ASSERT(txt == "Keine Übereinstimmung");
 	const auto txt2 = cat("Memory exhausted");
-	assert(txt2 == "Speicher erschöpft");
+	ASSERT(txt2 == "Speicher erschöpft");
 }
 
 #endif

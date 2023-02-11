@@ -6,6 +6,11 @@
 namespace env::usr
 {
 	fmt::view dir(fmt::view);
+	// Directory by special name
+
+	fmt::view path(fmt::view);
+	// Path under user and job group
+
 	fmt::view current_desktop();
 	fmt::view menu_prefix();
 	fmt::view applications_menu();

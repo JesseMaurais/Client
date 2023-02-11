@@ -170,18 +170,18 @@ namespace fmt
 #ifdef TEST
 TEST(dig)
 {
-	assert('*' == fmt::to_narrow<char>(42));
-	assert(42u == fmt::to_unsigned(42));
-	assert(42 == fmt::to_signed(42u));
-	assert(42 == fmt::to_long("42"));
-	assert(42 == fmt::to_long("52", 8));
-	assert(42 == fmt::to_long("2A", 16));
-	assert(0.42f == fmt::to_float("0.42f"));
-	assert(std::isnan(fmt::to_float("nan")));
-	assert(std::isinf(fmt::to_double("inf")));
+	ASSERT('*' == fmt::to_narrow<char>(42));
+	ASSERT(42u == fmt::to_unsigned(42));
+	ASSERT(42 == fmt::to_signed(42u));
+	ASSERT(42 == fmt::to_long("42"));
+	ASSERT(42 == fmt::to_long("52", 8));
+	ASSERT(42 == fmt::to_long("2A", 16));
+	ASSERT(0.42f == fmt::to_float("0.42f"));
+	ASSERT(std::isnan(fmt::to_float("nan")));
+	ASSERT(std::isinf(fmt::to_double("inf")));
 	// catch
-	//except(256 == (int) fmt::to_narrow<char>(256));
-	//except(-1 == (signed) fmt::to_unsigned(-1));
-	//except(0L == fmt::to_long("$"));
+	EXCEPT(256 == (int) fmt::to_narrow<char>(256));
+	EXCEPT(-1 == (signed) fmt::to_unsigned(-1));
+	EXCEPT(0L == fmt::to_long("$"));
 }
 #endif

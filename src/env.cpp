@@ -147,7 +147,7 @@ namespace env
 	{
 		#ifdef _WIN32
 		{
-			return env::get("UserProfile");
+			return env::get("UserName");
 		}
 		#else
 		{
@@ -269,71 +269,12 @@ namespace env
 		static auto cat = fmt::catalog(env::opt::application());
 		return cat(u);
 	}
-/*
-	fmt::output print(fmt::output out, fmt::view format, fmt::init params)
-	{
-		return print(out, format, fwd::to_span(params));
-	}
-
-	fmt::output print(fmt::output out, fmt::view format, fmt::span params)
-	{
-		constexpr auto token = '%';
-		auto suffix = text(format);
-
-		while (not suffix.empty())
-		{
-			auto it = fwd::find(suffix, token);
-			auto before = suffix.before(it);
-			auto after = suffix.after(it);
-			auto end = fmt::skip(after, fmt::alnum);
-			suffix = suffix.sub(end);
-
-			out << before;
-
-			if (auto next = after.before(end); next.empty())
-			{
-				if (after.end() == end or *end == token)
-				{
-					out << token;
-					++ end;
-				}
-			}
-			else
-			if (fmt::all_of(next, fmt::digit))
-			{
-				const auto index = fmt::to_long(next);
-				out << params[index];
-			}
-			else
-			if (auto value = env::opt::get(next); not value.empty())
-			{
-				out << value;
-			}
-		}
-		return out;
-	}
-*/
 }
 
 #ifdef TEST
-
 TEST(path)
 {
-	assert(env::get("PATH") == fmt::path::join(env::path()));
-	assert(env::get("PATH") == env::echo("PATH"));
+	ASSERT(env::get("PATH") == fmt::path::join(env::path()));
+	ASSERT(env::get("PATH") == env::echo("PATH"));
 }
-/*
-TEST(print)
-{
-	std::stringstream ss;
-
-	env::print(ss, "The text \"%~1, %0!\" is an example.", {"World", "Hello"});
-	assert(ss.str() == "The text \"Hello, World!\" is an example.");
-	ss.str("");
-
-	env::print(ss, "The variable %UNKNOWN should be filtered.", {});
-	assert(ss.str() == "The variable should be filtered.");
-	ss.str("");
-}
-*/
 #endif

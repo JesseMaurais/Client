@@ -93,6 +93,10 @@ namespace env::usr
 
 		if (auto it = map.find(name); map.end() != it)
 		{
+			#ifdef assert
+			assert(name == it->first);
+			#endif
+
 			auto [id, path] = it->second;
 
 			PWSTR pws = nullptr;
@@ -144,6 +148,10 @@ namespace env::usr
 
 		if (auto it = map.find(name); map.end() != it)
 		{
+			#ifdef assert
+			assert(name == it->first);
+			#endif
+
 			auto [id, path] = it->second;
 			u = env::opt::get(id, path);
 		}
@@ -155,6 +163,11 @@ namespace env::usr
 			u = env::get(name);
 		}
 		return env::echo(u);
+	}
+
+	fmt::view path(fmt::view file)
+	{
+		return fmt::path::join({ run_dir(), file });
 	}
 
 	fmt::view current_desktop()

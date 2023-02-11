@@ -144,7 +144,7 @@ namespace env
 			assert(0 == p.rem);
 			#endif
 			const auto h = sys::win::security_attributes().timer();
-			return [t=sys::win::timer(h, f, t.quot, p.quot)] { };
+			return [t=sys::win::timer(h, f, (LONGLONG)t.quot, (LONG)p.quot)] { };
 		}
 		#else
 		{
@@ -175,7 +175,7 @@ TEST(time)
 		std::stringstream ss;
 		ss << local(f);
 		auto s = ss.str();
-		assert(not s.empty());
+		ASSERT(not s.empty());
 	}
 }
 #endif

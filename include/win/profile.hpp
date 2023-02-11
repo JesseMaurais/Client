@@ -10,9 +10,9 @@
 
 namespace sys::win
 {
-	struct large_int : fwd::variable<long long>
+	struct large_int : fwd::variable<LONGLONG>
 	{
-		large_int(long long value)
+		large_int(LONGLONG value = 0)
 		{
 			buf->QuadPart = value;
 		}
@@ -23,12 +23,12 @@ namespace sys::win
 			buf->u.HighPart = high;
 		}
 
-		long long operator=(long long value) override
+		LONGLONG operator=(LONGLONG value) override
 		{
 			return buf->QuadPart = value;
 		}
 
-		operator long long() const override
+		operator LONGLONG() const override
 		{
 			return buf->QuadPart;
 		}
@@ -48,7 +48,7 @@ namespace sys::win
 
 	struct counter : large_int
 	{
-		counter() : large_int(0)
+		counter()
 		{
 			if (not QueryPerformanceCounter(buf))
 			{
@@ -61,7 +61,7 @@ namespace sys::win
 
 	struct frequency : large_int
 	{
-		frequency() : large_int(0)
+		frequency()
 		{
 			if (not QueryPerformanceFrequency(buf))
 			{

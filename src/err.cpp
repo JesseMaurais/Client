@@ -338,10 +338,10 @@ int main(int argc, char** argv)
 TEST(err)
 {
 	#ifndef _MSC_VER
-	assert(true == true);
-	assert(true != false);
-	assert(true and not false);
-	except(throw "Holy Cow!");
+	ASSERT(true == true);
+	ASSERT(true != false);
+	ASSERT(true and not false);
+	EXCEPT(throw "Holy Cow!");
 	#endif
 }
 #endif

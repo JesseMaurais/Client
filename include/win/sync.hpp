@@ -96,7 +96,7 @@ namespace sys::win
 			return CreateWaitableTimer(this, manual, name);
 		}
 
-		auto map(HANDLE h, LPCSTR name = nullptr, int prot = 0, size_t sz = 0)
+		auto mapping(HANDLE h, LPCSTR name = nullptr, DWORD prot = 0, SIZE_T sz = 0)
 		{
 			return CreateFileMapping(h, this, prot, HIWORD(sz), LOWORD(sz), name);
 		}
@@ -219,7 +219,7 @@ namespace sys::win
 
 		static void CALLBACK thread(LPVOID lp, [[maybe_unused]] DWORD low, [[maybe_unused]] DWORD high)
 		{
-			if (auto that = fwd::cast_as<timer>(lp); that)
+			if (auto that = fwd::cast_as<timer>(lp))
 			{
 				that->work();
 			}

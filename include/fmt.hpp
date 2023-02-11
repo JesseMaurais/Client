@@ -84,7 +84,6 @@ namespace fmt
 	struct layout
 	{
 		using type = Type;
-		using shared = fwd::shared<Type>;
 		using pair = fwd::pair<Type>;
 		using set = fwd::set<Type, Order, Alloc>;
 		using map = fwd::map<Type, Type, Order, Alloc>;
