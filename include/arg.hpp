@@ -13,20 +13,25 @@ namespace fmt::opt
 
 namespace env::opt
 {
-	fmt::view application();
-	fmt::span arguments();
-	fmt::view initials();
-	fmt::view program();
-	fmt::view config();
-	fmt::view catalog();
+	using namespace fmt;
+	// Application name
+	view application();
+	// Command line arguments
+	span arguments();
+	// Configuration file
+	view initials();
+	// Program image
+	view program();
+	view config();
+	view catalog();
 
-	bool got(fmt::view);
-	fmt::view get(fmt::view);
-	bool put(fmt::view, fmt::view);
+	bool got(view);
+	view get(view);
+	bool put(view, view);
 
-	bool got(fmt::pair);
-	fmt::view get(fmt::pair);
-	bool put(fmt::pair, fmt::view);
+	bool got(pair);
+	view get(pair);
+	bool put(pair, view);
 
 	inline auto arg(size_t argn = 0)
 	{
